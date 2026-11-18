@@ -212,6 +212,7 @@ ARB type for every Select placeholder is String (gen-l10n requirement).
 | `backup_settings_stale` | the reminder shows only when the backup is older than 30 days |
 | `exports_import_found`, `exports_import_duplicates`, `exports_import_untracked`, `exports_import_importButton`, `exports_import_done` | an empty file has its own state; the duplicate and untracked rows are hidden at 0; the button and the done line need at least one new row |
 | `settings_prefs_lockAfterMinutes` | menu choices are 1, 5 and 15 minutes; "immediately" is its own key |
+| `notifications_alert_overdue`, `notifications_alert_overdueHidden` | sent only on day 1 and day 3 after the due date (PO OVERDUE-REMINDERS), so the count is never 0 |
 
 - Every plural row's note states `count:int, n` plus its other placeholders.
 - Egyptian noun forms used throughout:
@@ -325,8 +326,8 @@ A mascot line names its **Rive state** (`ZaghlolAvatar` input: `tourGuide`, `pro
 | `common_action_send` | ابعت | Send | B |
 | `common_action_link` | اربط | Link | B |
 | `common_action_unlink` | فك الربط | Unlink | B |
-| `common_action_more` | المزيد | More | C |
-| `common_action_show` | اظهر | Show | C · passphrase reveal |
+| `common_action_more` | أكتر | More | C |
+| `common_action_show` | اعرض | Show | C · passphrase reveal |
 | `common_action_hide` | اخفي | Hide | C |
 | `common_action_learnMore` | اعرف أكتر | Learn more | B |
 | `common_action_searchA11y` | دوّر | Search | A |
@@ -457,7 +458,7 @@ A mascot line names its **Rive state** (`ZaghlolAvatar` input: `tourGuide`, `pro
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `common_error_loadFailed` | مقدرتش أفتح ده دلوقتي. بياناتك في أمان على موبايلك. | Couldn't load this right now. Your data is safe on this phone. | S · C-29, DB read failure; uses `common_action_tryAgain` |
-| `common_error_saveFailed` | محصلش حفظ. جرّب تاني، واللي كتبته لسه موجود. | Couldn't save. Try again — what you entered is still here. | S · the form is kept |
+| `common_error_saveFailed` | مقدرتش أحفظ. جرّب تاني، واللي كتبته لسه موجود. | Couldn't save. Try again — what you entered is still here. | S · the form is kept |
 | `common_error_network` | مش قادر أوصل للسيرفر دلوقتي. فلوسك في أمان على موبايلك، جرّب تاني كمان شوية. | Can't reach the server right now. Your money data is safe on this phone — try again in a bit. | S · `06-voice-and-tone.md` §2 |
 
 ### Gold lock (C-16 / C-13 locked, `04-design-system.md` §5.4)
@@ -936,7 +937,7 @@ States: Mode A editing · suggestion · Mode B assigning · no candidate expense
 | `transfers_assign_empty` | `{count, plural, =1{مفيش مصاريف من امبارح} =2{مفيش مصاريف في آخر يومين} few{مفيش مصاريف في آخر {n} أيام} many{مفيش مصاريف في آخر {n} يوم} other{مفيش مصاريف في آخر {n} يوم}}` | `{count, plural, =1{No expenses since yesterday} other{No expenses in the last {n} days}}` | S · count:int = 60, n |
 | `transfers_assign_searchAll` | دوّر في كل المصاريف | Search all expenses | B |
 | `transfers_assign_saved` | اتوزعت ✓ | Assigned ✓ | N |
-| `transfers_split_errorShareZero` | النصيب لازم يكون أكبر من صفر | Each share must be more than zero | S |
+| `transfers_split_errorShareZero` | كل نصيب لازم يكون أكبر من صفر | Each share must be more than zero | S |
 | `transfers_split_errorSharesExceed` | مجموع الأنصبة أكبر من المصروف | Shares add up to more than the expense | S |
 | `transfers_assign_errorExceedsIncoming` | وزعت أكتر من المبلغ اللي جالك | You've assigned more than you received | S |
 | `transfers_assign_errorExceedsExpense` | الفلوس الراجعة أكتر من المصروف نفسه | Money back can't be more than the expense | S · BR-XFR-06 |
@@ -981,7 +982,7 @@ States: loading (skeleton) · empty · populated · multi-currency · ≈ view �
 | `accounts_overview_asOf` | آخر تحديث {when} | as of {when} | C · when = `common_date_minutesAgo` or a date (FR-ACC-02) |
 | `accounts_overview_creditAvailable` | متاح من {limit} | available of {limit} | C |
 | `accounts_overview_moreCurrencies` | `{count, plural, =1{وكمان عملة واحدة} =2{وكمان عملتين} few{وكمان {n} عملات} many{وكمان {n} عملة} other{وكمان {n} عملة}}` | `{count, plural, =1{+1 more currency} other{+{n} more currencies}}` | L · count:int, n · multi-currency row (FR-ACC-06) |
-| `accounts_overview_cashSub` | يدوي وصوت | Manual & voice | C |
+| `accounts_overview_cashSub` | بإيدك وبصوتك | Manual & voice | C |
 | `accounts_overview_notTracked` | مش متتبع | Not tracked | C · ignored card (C-07) |
 | `accounts_overview_hiddenEntry` | الحسابات المخفية | Hidden accounts | L · row at the end of the list, only when at least one account is hidden. Opens the hidden list (S-40 spec, `accounts_hidden_*`, §2.12), where each account can be unhidden or opened in S-43 (D-69). Trailing count: `accounts_overview_hiddenCount` |
 | `accounts_overview_assetsTitle` | دهبك وشهاداتك | Your assets | L · glossary, + `common_gold_badge` |
@@ -1376,7 +1377,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_charts_context` | {cards} · {currency} · {period} | {cards} · {currency} · {period} | L · filter context line under each chart title (C-13). period = `common_period_*` or `common_date_range` |
 | `insights_charts_explain` | اشرحلي يا زغلول | Explain this | B · the FR-CHT-03 name. Also the S-21 button |
 | `insights_charts_lockedSub` | شوف الشارت كله مع جولد | See the full chart with Gold | S · C-13 locked, blurred preview + `common_gold_unlock` |
-| `insights_charts_emptyCycle` | بيحيا بعد أول دورة كاملة | Comes alive after your first full cycle | S · C-13 empty (EC-23) |
+| `insights_charts_emptyCycle` | هيشتغل بعد أول دورة كاملة | Comes alive after your first full cycle | S · C-13 empty (EC-23) |
 | `insights_charts_emptyNetWorth` | ضيف حسابات أو أصول علشان الشارت ده يشتغل | Add accounts or assets to bring this chart to life | S · charts 8 and 11 when they have nothing to show |
 | `insights_charts_emptyNetWorthAction` | افتح فلوسي | Open Money | B · opens S-40 |
 | `insights_charts_emptyFilter` | مفيش بيانات للفلتر ده في الفترة دي | No data for this filter in this period | S · plus `common_action_clearFilter` |
@@ -1389,7 +1390,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_chartTitle_rule503020` | ميزان خمسين تلاتين عشرين | 50/30/20 balance | T · chart 4 (Gold) |
 | `insights_chartTitle_weekPattern` | إمتى بتصرف؟ | When you spend | T · chart 5 (Gold), day of week and hour |
 | `insights_chartTitle_merchants` | أكتر الأماكن اللي بتاخد فلوسك | Top merchants | T · chart 6 (Free, top five) |
-| `insights_chartTitle_vsAverage` | الدورة دي ضد متوسط تلات دورات | This cycle vs your 3-cycle average | T · chart 7 (Gold) |
+| `insights_chartTitle_vsAverage` | الدورة دي قصاد متوسط تلات دورات | This cycle vs your 3-cycle average | T · chart 7 (Gold) |
 | `insights_chartTitle_installments` | أقساطك في الستة شهور الجايين | Installments, next 6 months | T · chart 8 (Gold) |
 | `insights_chartTitle_subscriptions` | الاشتراكات في السنة كلها | Subscriptions over a year | T · chart 9 (Gold) |
 | `insights_chartTitle_cards` | الصرف على كروتك ومحافظك | Cards & wallets | T · chart 10 (Gold) |
@@ -1420,7 +1421,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_chartA11y_rule503020` | ميزان خمسين تلاتين عشرين: {needsPct} أساسيات، {wantsPct} رفاهيات، {savingsPct} تحويش | 50/30/20: {needsPct} needs, {wantsPct} wants, {savingsPct} savings | A |
 | `insights_chartA11y_weekPattern` | إمتى بتصرف: أعلى يوم {peakDay} بمتوسط {amount} | When you spend: busiest day is {peakDay}, averaging {amount} | A |
 | `insights_chartA11y_merchants` | أكتر الأماكن: {merchant} الأول بـ {amount} | Top merchants: {merchant} first with {amount} | A |
-| `insights_chartA11y_vsAverage` | الدورة دي ضد متوسطك: أكبر زيادة في {category} بـ {percent} | This cycle vs average: biggest rise is {category} at {percent} | A |
+| `insights_chartA11y_vsAverage` | الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent} | This cycle vs average: biggest rise is {category} at {percent} | A |
 | `insights_chartA11y_installments` | الأقساط: الشهر ده {sum} | Installments: {sum} due this month | A |
 | `insights_chartA11y_subscriptions` | الاشتراكات: {monthly} في الشهر، يعني {yearly} في السنة | Subscriptions: {monthly} a month, {yearly} a year | A |
 | `insights_chartA11y_cards` | الكروت: {card} الأكبر بـ {percent} من الصرف | Cards: {card} is the largest at {percent} of spending | A |
@@ -1452,7 +1453,7 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `insights_explainCashFlow_basic` | `{state, select, short{الدورة دي دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{الدورة دي دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}` | `{state, select, short{This cycle you earned {income} and spent {spent}, so you're {gap} over your income. Let's sort it out together.} other{This cycle you earned {income} and spent {spent}, so you saved {saved}. That's {percent} of your income. Well done!}}` | E · `state:select(short/other)`: short = spent more than earned. No emoji in the short branch |
-| `insights_explainCashFlow_tip` | `{state, select, short{قلل {category} بـ {target} الدورة الجاية وهتقفل بفايض.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}` | `{state, select, short{Trim {category} by {target} next cycle and you'll finish in the black.} other{Move at least {target} of this surplus into savings before it gets spent.}}` | S · `state`, category = largest category, target |
+| `insights_explainCashFlow_tip` | `{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}` | `{state, select, short{Trimming {category} by {target} next cycle would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}` | S · `state`, category = largest category, target |
 | `insights_explainCashFlow_deep` | `{trend, select, up{صافي الدورة دي أحسن من الدورة اللي فاتت بـ {delta}.} down{صافي الدورة دي أقل من الدورة اللي فاتت بـ {delta}.} other{صافي الدورة دي زي الدورة اللي فاتت تقريباً.}}` | `{trend, select, up{This cycle's net is {delta} better than last cycle.} down{This cycle's net is {delta} lower than last cycle.} other{This cycle's net is about the same as last cycle.}}` | E · Gold · `trend` (up = better) |
 | `insights_explainCashFlow_deepTip` | ثبّت هدف تحوّش {target} كل دورة، يعني {yearly} في السنة. | Set a goal of saving {target} every cycle. That's {yearly} a year. | S · Gold |
 
@@ -1462,7 +1463,7 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 | `insights_explainCategories_basic` | {category} واخد {percent} من صرفك، يعني {amount}. وبعده {category2} بـ {percent2}. | {category} takes {percent} of your spending, that's {amount}. {category2} is next at {percent2}. | E |
 | `insights_explainCategories_tip` | حط سقف لـ{category} أقل بـ {target} من الدورة دي، وهتوفر الفرق. | Cap {category} {target} below this cycle and keep the difference. | S |
 | `insights_explainCategories_deep` | `{trend, select, up{{category} زاد عن الدورة اللي فاتت بـ {delta}.} down{{category} قل عن الدورة اللي فاتت بـ {delta}.} other{{category} تقريباً زي الدورة اللي فاتت.}}` | `{trend, select, up{{category} is up {delta} on last cycle.} down{{category} is down {delta} on last cycle.} other{{category} is about the same as last cycle.}}` | E · Gold |
-| `insights_explainCategories_deepTip` | خفّض {category} بـ {target} كل دورة، يعني {yearly} في السنة. | Bring {category} down by {target} each cycle. That's {yearly} a year. | S · Gold |
+| `insights_explainCategories_deepTip` | قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة. | Bring {category} down by {target} each cycle. That's {yearly} a year. | S · Gold |
 
 ### Chart 3 — Burn rate to payday
 | Key | AR | EN | Notes |
@@ -1470,7 +1471,7 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 | `insights_explainBurnRate_basic` | `{state, select, over{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}` | `{state, select, over{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, above the ideal pace. What's left covers {perDay} a day.} other{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, under the ideal pace. You can spend {perDay} a day.}}` | E · `state:select(over/other)`. perDay = BR-BUD-03 |
 | `insights_explainBurnRate_tip` | `{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف {perDay} في اليوم.}}` | `{state, select, over{Bring your daily spending down to {perDay} until payday so the budget lasts.} other{Keep this pace and the gap becomes surplus at the end of the cycle. You can spend {perDay} a day.}}` | S |
 | `insights_explainBurnRate_deep` | `{trend, select, up{في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ {delta}.} down{في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.}}` | `{trend, select, up{At this point last cycle you had spent {delta} less.} down{At this point last cycle you had spent {delta} more.} other{Your spending is about the same as this point last cycle.}}` | E · Gold · `trend` (up = spending more than last cycle) |
-| `insights_explainBurnRate_deepTip` | لو خفضت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض. | Cut {target} from your daily spending and you'll stay under the line until payday. | S · Gold |
+| `insights_explainBurnRate_deepTip` | لو قللت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض. | Cut {target} from your daily spending and you'll stay under the line until payday. | S · Gold |
 
 ### Chart 4 — 50/30/20 balance
 | Key | AR | EN | Notes |
@@ -1516,7 +1517,7 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `insights_explainSubscriptions_basic` | الاشتراكات {monthly} في الشهر، يعني {yearly} في السنة. الصغير بيبان فكة، بس لما بيتجمع بيفرق. | Subscriptions cost {monthly} a month, {yearly} a year. Small ones look like loose change until they add up. | E |
-| `insights_explainSubscriptions_tip` | راجع {item}، ولو مش بتستخدمه إلغاؤه بيوفر {target} في السنة. | Check {item}. If you don't use it, cancelling saves {target} a year. | S |
+| `insights_explainSubscriptions_tip` | راجع {item}، ولو مش بتستخدمه الغيه وهتوفر {target} في السنة. | Check {item}. If you don't use it, cancelling saves {target} a year. | S |
 | `insights_explainSubscriptions_deep` | `{trend, select, up{الاشتراكات زادت {delta} في الشهر عن تلات شهور فاتت.} down{الاشتراكات قلت {delta} في الشهر عن تلات شهور فاتت.} other{الاشتراكات ثابتة عن تلات شهور فاتت.}}` | `{trend, select, up{Subscriptions are up {delta} a month on three months ago.} down{Subscriptions are down {delta} a month on three months ago.} other{Subscriptions are unchanged from three months ago.}}` | E · Gold |
 | `insights_explainSubscriptions_deepTip` | لو ألغيت أغلى اتنين مش بتستخدمهم هتوفر {target} في السنة. | Cancel the two priciest ones you don't use and you'll save {target} a year. | S · Gold |
 
@@ -1533,7 +1534,7 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 |---|---|---|---|
 | `insights_explainNetWorth_basic` | `{trend, select, up{اللي حيلتك زاد من {startAmount} في {month} لـ {endAmount} في {month2}.} down{اللي حيلتك نزل من {startAmount} في {month} لـ {endAmount} في {month2}.} other{اللي حيلتك ثابت تقريباً حوالين {endAmount}.}}` | `{trend, select, up{Your net worth grew from {startAmount} in {month} to {endAmount} in {month2}.} down{Your net worth dropped from {startAmount} in {month} to {endAmount} in {month2}.} other{Your net worth is steady at about {endAmount}.}}` | E · one currency or unit at a time, no cross-currency sum |
 | `insights_explainNetWorth_tip` | {assetType} هو أكبر جزء من اللي حيلتك بـ {percent}. خد بالك لو كله في حاجة واحدة. | {assetType} is your biggest slice at {percent}. Keep an eye on it if it's all in one place. | S · assetType = `common_assetType_*` |
-| `insights_explainNetWorth_deep` | `{trend, select, up{نموك الإجمالي {percent}، وأكتر حاجة زوّدته {assetType2}.} down{اللي حيلتك نزل {percent}، وأكتر حاجة أثرت فيه {assetType2}.} other{مفيش تغيير كبير في الفترة دي.}}` | `{trend, select, up{You're up {percent} overall, mostly thanks to {assetType2}.} down{You're down {percent} overall, mostly because of {assetType2}.} other{No big change over this period.}}` | E · Gold |
+| `insights_explainNetWorth_deep` | `{trend, select, up{اللي حيلتك زاد {percent}، وأكتر حاجة زوّدته {assetType2}.} down{اللي حيلتك نزل {percent}، وأكتر حاجة أثرت فيه {assetType2}.} other{مفيش تغيير كبير في الفترة دي.}}` | `{trend, select, up{You're up {percent} overall, mostly thanks to {assetType2}.} down{You're down {percent} overall, mostly because of {assetType2}.} other{No big change over this period.}}` | E · Gold |
 | `insights_explainNetWorth_deepTip` | بنفس المعدل ده ممكن توصل لـ {projected} بعد سنة. ده تقدير بس. | At this rate you could reach {projected} in a year. That's an estimate only. | S · Gold |
 
 ### Chart 12 — Your personal inflation
@@ -1675,7 +1676,7 @@ States: Free (voice counter and Gold badge on Asset) · Gold (no counter). A sta
 | `home_quickAdd_typeA11y` | اكتب حركة | Type a transaction | A |
 | `home_quickAdd_scanA11y` | اقرا سكرين شوت | Scan a screenshot | A |
 | `home_quickAdd_assetA11y` | ضيف أصل | Add an asset | A |
-| `home_quickAdd_voiceLeft` | فاضل {remaining} من {max} تسجيل صوتي الشهر ده | {remaining} of {max} voice logs left this month | S · Free only (FR-VOI-04) |
+| `home_quickAdd_voiceLeft` | فاضلك {remaining} من {max} تسجيل صوتي الشهر ده | {remaining} of {max} voice logs left this month | S · Free only (FR-VOI-04) |
 
 ## 2.10 S-31 Voice logger — `voice_logger_*`
 States: listening · understanding · parsed · empty (nothing recognised) · Arabic recognition unavailable (EC-32) · online-recognition consent (D-42, OQ-06) · microphone denied · Free limit reached. Rive `listening` while recording. Nothing is saved before the user confirms (FR-VOI-03). Money confirmations carry no emoji beyond the success tick.
@@ -1717,7 +1718,7 @@ States: choose image · reading · found · duplicate · empty (nothing found) �
 
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `capture_scan_title` | قراءة سكرين شوت | Scan a screenshot | T |
+| `capture_scan_title` | اقرا سكرين شوت | Scan a screenshot | T |
 | `capture_scan_choose` | اختار صورة | Choose an image | B |
 | `capture_scan_chooseAnother` | اختار صورة تانية | Choose another image | B |
 | `capture_scan_reading` | بقرا الصورة… | Reading the image… | L · Rive `scanning` |
@@ -1880,7 +1881,7 @@ States: first-time (greeting plus three chips) · typing · answer (text, option
 | `chat_main_sendA11y` | ابعت السؤال | Send question | A |
 | `chat_main_tooLong` | `{count, plural, =1{السؤال ميزيدش عن حرف واحد} =2{السؤال ميزيدش عن حرفين} few{السؤال ميزيدش عن {n} حروف} many{السؤال ميزيدش عن {n} حرف} other{السؤال ميزيدش عن {n} حرف}}` | `{count, plural, =1{Keep the question to 1 character} other{Keep the question to {n} characters}}` | S · count:int = 300, n |
 | `chat_main_filterNote` | الإجابات على {cards} | Answers cover {cards} | L · the card filter applies to answers |
-| `chat_main_roast` | إقصف جبهتي | Roast me | L · toggle. The 🔥 is an icon, not text |
+| `chat_main_roast` | اقصف جبهتي | Roast me | L · toggle. The 🔥 is an icon, not text |
 | `chat_main_roastHint` | بيغيّر الأسلوب بس، والأرقام زي ما هي. | Changes the style only. The numbers stay the same. | S · R9 |
 | `chat_main_clear` | امسح المحادثة | Clear chat | L · overflow menu |
 | `chat_main_cleared` | المحادثة اتمسحت | Chat cleared | N |
@@ -1934,7 +1935,7 @@ Tapping a chip sends its text as the question. The default period is the current
 | `chat_answer_compare` | `صرفت {amount} {span}، {trend, select, up{أكتر من {spanB} بـ {delta}} down{أقل من {spanB} بـ {delta}} other{زي {spanB} تقريباً}}.` | `You spent {amount} {span}, {trend, select, up{{delta} more than {spanB}} down{{delta} less than {spanB}} other{about the same as {spanB}}}.` | E · `trend:select(up/down/other)` |
 | `chat_answer_topMerchants` | أكتر الأماكن {span}: {list}. | Your top merchants {span}: {list}. | E |
 | `chat_answer_balance` | رصيد {account} {amount}، آخر تحديث {when}. | {account} has {amount}, as of {when}. | E |
-| `chat_answer_balanceCredit` | المتاح في {account} {available} من {limit}. | {account} has {available} available of {limit}. | E |
+| `chat_answer_balanceCredit` | فاضل في {account} {available} من {limit}. | {account} has {available} available of {limit}. | E |
 | `chat_answer_balanceUnknown` | لسه معرفش رصيد {account}. هيظهر مع أول رسالة فيها الرصيد. | I don't know the balance of {account} yet. It'll show up with the first message that includes it. | E |
 | `chat_answer_budgetLeft` | فاضلك {left} من ميزانية {subject}. | You have {left} left in your {subject} budget. | E · budget_remaining |
 | `chat_answer_budgetLeftPerDay` | فاضلك {left} من الميزانية، يعني {perDay} في اليوم لحد القبض. | You have {left} left in your budget, that's {perDay} a day until payday. | E · overall budget |
@@ -1989,11 +1990,11 @@ D-38 and FR-ROI-05: **general advice only**. Every rule names a kind of product 
 | `roi_tips_emptyBody` | هقولك أول ما ألاقي حاجة تفيدك. | I'll tell you when I spot something useful. | S |
 | `roi_tips_lockedBody` | نصايح مبنية على صرفك إنت، مع جولد | Tips built on your own spending, with Gold | S · plus `common_gold_unlock` |
 | `roi_ruleCoffee_title` | ماكينة قهوة بدل الكافيهات | A coffee machine instead of cafés | T |
-| `roi_ruleCoffee_body` | بتصرف {monthly} في الشهر في الكافيهات. ماكينة بالتقسيط مع البن والحليب تقريباً {alt} في الشهر. | You spend {monthly} a month at cafés. A machine on installments plus beans and milk comes to about {alt} a month. | E · alt = installment + running cost |
+| `roi_ruleCoffee_body` | بتصرف {monthly} في الشهر في الكافيهات. ماكينة بالتقسيط مع البن واللبن تقريباً {alt} في الشهر. | You spend {monthly} a month at cafés. A machine on installments plus beans and milk comes to about {alt} a month. | E · alt = installment + running cost |
 | `roi_ruleDelivery_title` | أكل البيت بدل الدليفري كل يوم | Home cooking instead of daily delivery | T |
 | `roi_ruleDelivery_body` | الدليفري واخد {monthly} في الشهر. جهاز طبخ صغير بالتقسيط وأكل البيت تقريباً {alt} في الشهر. | Delivery takes {monthly} a month. A small cooking appliance on installments plus home groceries comes to about {alt} a month. | E |
-| `roi_ruleWater_title` | فلتر مياه بدل القوارير | A water filter instead of bottles | T |
-| `roi_ruleWater_body` | القوارير والجراكن بـ {monthly} في الشهر. فلتر مياه بالتقسيط مع تغيير الشمعات تقريباً {alt} في الشهر. | Bottled water costs {monthly} a month. A filter on installments plus new cartridges comes to about {alt} a month. | E |
+| `roi_ruleWater_title` | فلتر مية بدل الإزايز | A water filter instead of bottles | T |
+| `roi_ruleWater_body` | إزايز المية والجراكن بـ {monthly} في الشهر. فلتر مية بالتقسيط مع تغيير الشمعات تقريباً {alt} في الشهر. | Bottled water costs {monthly} a month. A filter on installments plus new cartridges comes to about {alt} a month. | E |
 | `roi_ruleIdleCash_title` | فلوسك واقفة من غير عائد | Your cash is sitting idle | T |
 | `roi_ruleIdleCash_body` | في حسابك {idle} زيادة عن ميزانيتك بقالهم أكتر من عشرين يوم من غير عائد. صندوق نقدي أو شهادة ممكن يشغّلوهم. معدل مثال للتوضيح: {exampleRate}. | {idle} in your account above your budget has sat there for over twenty days earning nothing. A money-market fund or a savings certificate could put it to work. Example rate, for illustration only: {exampleRate}. | E · the rate is an example, not an offer and not guaranteed |
 | `roi_ruleCommute_title` | مشاويرك المتكررة بالتطبيقات | Your regular app rides | T |
@@ -2148,15 +2149,15 @@ Category and subcategory **names** are catalog data (FR-CAT-01) and are not in t
 | `categories_list_ruleDeleted` | القاعدة اتمسحت | Rule deleted | N · + `common_action_undo` |
 | `categories_list_noResults` | مفيش قاعدة بالاسم ده | No rule matches that | S |
 | `categories_edit_titleNew` | تصنيف جديد | New category | T |
-| `categories_edit_titleEdit` | تعديل التصنيف | Edit category | T |
+| `categories_edit_titleEdit` | عدّل التصنيف | Edit category | T |
 | `categories_edit_name` | اسم التصنيف | Category name | L · 1 to 30 characters, unique (`common_validation_nameRequired`, `…nameLength`, `…nameTaken`) |
 | `categories_edit_parent` | تحت تصنيف | Inside | L · parent picker |
 | `categories_edit_parentNone` | مفيش (تصنيف رئيسي) | None (top level) | L |
 | `categories_edit_bucket` | النوع | Type | L · bucket picker (BR-CAT-02) |
-| `categories_edit_bucketNeeds` | ضروريات | Needs | C |
-| `categories_edit_bucketWants` | رغبات | Wants | C |
+| `categories_edit_bucketNeeds` | أساسيات | Needs | C |
+| `categories_edit_bucketWants` | رفاهيات | Wants | C |
 | `categories_edit_bucketObligations` | التزامات | Obligations | C |
-| `categories_edit_bucketSavings` | ادخار | Savings | C |
+| `categories_edit_bucketSavings` | تحويش | Savings | C |
 | `categories_edit_bucketIncome` | دخل | Income | C |
 | `categories_edit_bucketGiving` | عطاء | Giving | C |
 | `categories_edit_bucketRequired` | اختار النوع | Choose a type | S |
@@ -2222,7 +2223,7 @@ Restore is Part 1 (`backup_restore_*`). States: never backed up (Free nudge) · 
 | `backup_settings_freeNudge` | النسخة الأولى ببلاش، وبتحمي بياناتك لو الموبايل ضاع. | Your first backup is free, and it protects your data if the phone is lost. | S · Free, never backed up |
 | `backup_settings_now` | اعمل نسخة دلوقتي | Back up now | B |
 | `backup_settings_freeReplaces` | النسخة الجديدة بتحل محل القديمة. | The new backup replaces the current one. | S · Free (FR-BAK-08) |
-| `backup_settings_auto` | نسخة تلقائي | Automatic backup | L · + `common_gold_badge` |
+| `backup_settings_auto` | نسخ تلقائي | Automatic backup | L · + `common_gold_badge` |
 | `backup_settings_autoOff` | مقفول | Off | C |
 | `backup_settings_autoDaily` | كل يوم | Daily | C |
 | `backup_settings_autoWeekly` | كل أسبوع | Weekly | C |
@@ -2254,7 +2255,7 @@ Restore is Part 1 (`backup_restore_*`). States: never backed up (Free nudge) · 
 | `backup_passphrase_warning` | لو نسيت كلمة السر، محدش يقدر يفتح نسختك، ولا حتى إحنا. | If you forget this passphrase, nobody can open your backup, not even us. | S · FR-BAK-01 |
 | `backup_passphrase_understand` | فاهم إنها مش بتترجّع | I know it can't be recovered | L · checkbox, required |
 | `backup_passphrase_tooShort` | استخدم عشرة حروف على الأقل | Use at least 10 characters | S · UX-A-01, fixed length |
-| `backup_passphrase_mismatch` | كلمتين السر مش زي بعض | The passphrases don't match | S |
+| `backup_passphrase_mismatch` | كلمة السر في الخانتين مش زي بعض | The passphrases don't match | S |
 | `backup_passphrase_ackRequired` | علّم إنك فاهم الأول | Tick that you understand first | S |
 | `backup_passphrase_save` | احفظ وابدأ النسخة | Save and back up | B |
 | `backup_passphrase_changeTitle` | غيّر كلمة سر النسخة | Change backup passphrase | T |
@@ -2302,7 +2303,7 @@ Export and import are Gold; Free sees the preview and a locked import. Exported 
 | `exports_import_passwordWrong` | كلمة السر دي غلط | That password is wrong | S |
 | `exports_import_found` | `{count, plural, =1{لقيت حركة واحدة} =2{لقيت حركتين} few{لقيت {n} حركات} many{لقيت {n} حركة} other{لقيت {n} حركة}}` | `{count, plural, =1{1 transaction found} other{{n} transactions found}}` | L · count:int, n · summary line; the empty file has its own state |
 | `exports_import_duplicates` | `{count, plural, =1{حركة واحدة موجودة عندك (هتتخطى)} =2{حركتين موجودين عندك (هيتخطوا)} few{{n} حركات موجودة عندك (هتتخطى)} many{{n} حركة موجودة عندك (هتتخطى)} other{{n} حركة موجودة عندك (هتتخطى)}}` | `{count, plural, =1{1 already in Zaghlol (skipped)} other{{n} already in Zaghlol (skipped)}}` | S · count:int, n · row hidden when 0 |
-| `exports_import_untracked` | `{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعة (هتتخطى)} other{{n} كارت مش متتبعة (هتتخطى)}}` | `{count, plural, =1{1 card not tracked (skipped)} other{{n} cards not tracked (skipped)}}` | L · count:int, n · expandable; row hidden when 0 (FR-CAP-06) |
+| `exports_import_untracked` | `{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعين (هيتخطوا)} other{{n} كارت مش متتبعين (هيتخطوا)}}` | `{count, plural, =1{1 card not tracked (skipped)} other{{n} cards not tracked (skipped)}}` | L · count:int, n · expandable; row hidden when 0 (FR-CAP-06) |
 | `exports_import_importButton` | `{count, plural, =1{استورد حركة} =2{استورد حركتين} few{استورد {n} حركات} many{استورد {n} حركة} other{استورد {n} حركة}}` | `{count, plural, =1{Import 1 transaction} other{Import {n} transactions}}` | B · count:int, n · shown only when at least one is new |
 | `exports_import_nothingNew` | كل الحركات دي موجودة عندك قبل كده | Everything in this file is already in Zaghlol | S · replaces the button |
 | `exports_import_importing` | بضيف الحركات… | Adding the transactions… | L · C-27 |
@@ -2312,7 +2313,7 @@ Export and import are Gold; Free sees the preview and a locked import. Exported 
 | `exports_import_unsupportedBody` | دي الجهات المدعومة: {banks} | Supported: {banks} | S · banks = both lists, joined |
 | `exports_import_wrongType` | نوع الملف مش اللي اخترته | The file type isn't the one you chose | S |
 | `exports_import_failed` | معرفتش أقرا الملف. جرّب ملف تاني. | Couldn't read the file. Try another one. | S |
-| `exports_import_lockedBody` | ضيف شهور فاتتة وكشوف البنوك مع جولد | Add past months and bank statements with Gold | S · locked state + `common_gold_unlock` |
+| `exports_import_lockedBody` | ضيف شهور فاتت وكشوف البنوك مع جولد | Add past months and bank statements with Gold | S · locked state + `common_gold_unlock` |
 
 ---
 
@@ -2334,7 +2335,7 @@ Calm and exact: this is a payment screen (tone gate 1). The mascot appears as a 
 | `gold_paywall_planPrice` | `{plan, select, monthly{{storePrice} في الشهر} yearly{{storePrice} في السنة} lifetime{{storePrice} مرة واحدة} other{{storePrice}}}` | `{plan, select, monthly{{storePrice} per month} yearly{{storePrice} per year} lifetime{{storePrice} one time} other{{storePrice}}}` | L · storePrice = the store's own formatted price |
 | `gold_paywall_bestValue` | الأوفر | Best value | C · yearly card |
 | `gold_paywall_continue` | يلا نشترك | Continue | B · Gold button, glossary. No emoji (payment) |
-| `gold_paywall_planRequired` | اختار خطة الأول | Choose a plan first | S |
+| `gold_paywall_planRequired` | اختار باقة الأول | Choose a plan first | S |
 | `gold_paywall_restore` | استرجع مشترياتي | Restore purchases | L · text button |
 | `gold_paywall_terms` | الشروط | Terms | L |
 | `gold_paywall_privacy` | الخصوصية | Privacy | L |
@@ -2409,7 +2410,7 @@ Gold sits on one phone at a time and can move once a month. These strings explai
 | `gold_seat_attestPlayServices` | حدّث خدمات Google Play من المتجر وجرّب تاني. | Update Google Play services from the store and try again. | S · `ATTEST_PLAY_SERVICES_OUTDATED` (Android) |
 | `gold_seat_attestUnavailable` | التأكد من الموبايل مش متاح دلوقتي. سجّل دخول بالحساب اللي اشتريت بيه، أو كلّم الدعم. | Phone verification isn't available right now. Sign in with the account you bought with, or contact support. | S · `ATTEST_UNAVAILABLE`, `ATTEST_TRANSIENT` after retries; with support |
 | `gold_seat_accountRequiredTitle` | سجّل دخول الأول | Sign in first | T · restore item `account_required` (EC-65) |
-| `gold_seat_accountRequiredBody` | اعمل تسجيل دخول بالحساب اللي اشتريت بيه. | Sign in with the account you bought with. | S · reveals nothing about the account; action `common_action_signIn` |
+| `gold_seat_accountRequiredBody` | سجّل دخول بالحساب اللي اشتريت بيه. | Sign in with the account you bought with. | S · reveals nothing about the account; action `common_action_signIn` |
 
 ### Moved, paused, time check
 | Key | AR | EN | Notes |
@@ -2419,7 +2420,7 @@ Gold sits on one phone at a time and can move once a month. These strings explai
 | `gold_seat_movedSupportTitle` | الدعم نقل الجولد لموبايل تاني | Support moved Gold to another phone | T · `movedBy: support` (D-57(f)) |
 | `gold_seat_movedSupportBody` | لو ده مش اللي طلبته، كلّم الدعم وادّيهم كود الدعم. | If that isn't what you asked for, contact support and give them your support code. | S · with support |
 | `gold_seat_pausedTitle` | الجولد واقف مؤقتاً | Gold is paused | T · entitlement `paused` (D-61(c)) |
-| `gold_seat_pausedBody` | اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة. | Sign in to use Gold on this phone. Your place is kept and it won't count as a move. | S · action `common_action_signIn` |
+| `gold_seat_pausedBody` | سجّل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة. | Sign in to use Gold on this phone. Your place is kept and it won't count as a move. | S · action `common_action_signIn` |
 | `gold_seat_tamperedTitle` | اتصل بالنت عشان نتأكد من الجولد | Go online so we can check your Gold | T · `tampered` (D-60, EC-70) |
 | `gold_seat_tamperedBody` | ساعة الموبايل اتغيّرت. أول ما النت يشتغل هنتأكد، وبياناتك كلها لسه موجودة. | The phone's clock changed. We'll check as soon as you're online, and all your data is still here. | S · local data stays readable |
 
@@ -2427,7 +2428,7 @@ Gold sits on one phone at a time and can move once a month. These strings explai
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `gold_seat_heldElsewhere` | الدفع تم. الجولد لسه على الموبايل التاني، وتقدر تنقله يوم {date}. | Payment went through. Gold is still on your other phone, and you can move it on {date}. | S · verify `seatHeldElsewhere` (D-61(a), EC-71) |
-| `gold_seat_heldElsewhereAccount` | الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد. | Payment went through. To bring Gold here, sign in with the account that holds it. | S · `seatHeldElsewhere` + `accountRequired` (R4-4); action `common_action_signIn` |
+| `gold_seat_heldElsewhereAccount` | الدفع تم. عشان الجولد ييجي هنا، سجّل دخول بالحساب اللي عليه الجولد. | Payment went through. To bring Gold here, sign in with the account that holds it. | S · `seatHeldElsewhere` + `accountRequired` (R4-4); action `common_action_signIn` |
 | `gold_seat_supportNoticeTitle` | الدعم ربط الجولد بحساب | Support linked your Gold to an account | T · `supportNotice: gold_linked_by_support` |
 | `gold_seat_supportNoticeBody` | الدعم ربط الجولد بتاعك بحساب. لو ده مش إنت، كلّم الدعم. | Support linked your Gold to an account. If that wasn't you, contact support. | S · shown once, on the buying phone; with support (R4-7(2), R5-7) |
 
@@ -2459,7 +2460,7 @@ Zaghlol's own local alerts (FR-NTF-01). Reimbursement suggestions are in-app onl
 | `notifications_settings_budget` | تنبيهات الميزانية | Budget alerts | L |
 | `notifications_settings_spikes` | لما الصرف يزيد | Spending spikes | L |
 | `notifications_settings_dues` | الأقساط والفواتير | Bills & installments | L |
-| `notifications_settings_dueDays` | `{count, plural, =0{يوم الاستحقاق نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}` | `{count, plural, =0{On the due day} =1{1 day before} other{{n} days before}}` | L · count:int, n · FR-SUB-04, 0 to 30 |
+| `notifications_settings_dueDays` | `{count, plural, =0{يوم الميعاد نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}` | `{count, plural, =0{On the due day} =1{1 day before} other{{n} days before}}` | L · count:int, n · FR-SUB-04, 0 to 30 |
 | `notifications_settings_duplicates` | حركة اتسجلت مرتين | Duplicate charges | L |
 | `notifications_settings_renewals` | تجديد الاشتراكات | Subscription renewals | L |
 | `notifications_settings_backup` | مشاكل النسخة الاحتياطية | Backup problems | L |
@@ -2469,7 +2470,7 @@ Zaghlol's own local alerts (FR-NTF-01). Reimbursement suggestions are in-app onl
 | `notifications_settings_quietRange` | من {start} لحد {end} | From {start} to {end} | L · start, end = times, default 23:00 to 08:00 |
 | `notifications_settings_hideAmounts` | اخفي المبالغ على شاشة القفل | Hide amounts on lock screen | L · FR-NTF-03 |
 | `notifications_settings_hideAmountsHint` | التنبيه بيوصل من غير مبلغ ولا اسم تاجر. | Alerts arrive without amounts or merchant names. | S |
-| `notifications_settings_daysRange` | اختار من يوم الاستحقاق لحد تلاتين يوم قبله | Choose from the due day up to thirty days before | S · validation, 0 to 30 |
+| `notifications_settings_daysRange` | اختار من يوم الميعاد لحد تلاتين يوم قبله | Choose from the due day up to thirty days before | S · validation, 0 to 30 |
 | `notifications_settings_quietSame` | بداية ونهاية ساعات الهدوء لازم يختلفوا | The start and end of quiet hours must differ | S · validation |
 | `notifications_settings_osOffTitle` | التنبيهات مقفولة لزغلول | Notifications are off for Zaghlol | T · banner |
 | `notifications_settings_osOffBody` | شغّلها من إعدادات الموبايل عشان توصلك. | Turn them on in your phone's settings so they reach you. | S · + `common_action_openSettings` |
@@ -2493,10 +2494,10 @@ Each money alert has a full text and a `…Hidden` text used when "hide amounts"
 | `notifications_alert_overdueHidden` | `{count, plural, =1{كان المفروض يتدفع من يوم. دفعته؟} =2{كان المفروض يتدفع من يومين. دفعته؟} few{كان المفروض يتدفع من {n} أيام. دفعته؟} many{كان المفروض يتدفع من {n} يوم. دفعته؟} other{كان المفروض يتدفع من {n} يوم. دفعته؟}}` | `{count, plural, =1{It was due 1 day ago. Did you pay it?} other{It was due {n} days ago. Did you pay it?}}` | N · hidden-amount variant |
 | `notifications_alert_overdueActionPaid` | أيوه دفعته | Mark as paid | B · notification action; marks the item paid |
 | `notifications_alert_dueTitle` | قسط أو فاتورة قربت | A bill or installment is coming up | T |
-| `notifications_alert_due` | `{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكره: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}` | `{count, plural, =0{{item} is due today: {amount}} =1{{item} is due tomorrow: {amount}} other{{item} is due in {n} days: {amount}}}` | N · count:int, n, item, amount · days until the due date |
+| `notifications_alert_due` | `{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكرة: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}` | `{count, plural, =0{{item} is due today: {amount}} =1{{item} is due tomorrow: {amount}} other{{item} is due in {n} days: {amount}}}` | N · count:int, n, item, amount · days until the due date |
 | `notifications_alert_dueHidden` | عندك قسط أو فاتورة بتستحق قريب. | You have a bill or installment due soon. | N |
 | `notifications_alert_duplicateTitle` | ممكن حركة تكون اتسجلت مرتين | A charge may have been logged twice | T |
-| `notifications_alert_duplicate` | {merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بُص عليها. | {merchant}: {amount} appears twice around the same time. Take a look. | N |
+| `notifications_alert_duplicate` | {merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بص عليها. | {merchant}: {amount} appears twice around the same time. Take a look. | N |
 | `notifications_alert_duplicateHidden` | في حركة ممكن تكون مكررة. افتح زغلول وراجعها. | A transaction may be a duplicate. Open Zaghlol to check. | N |
 | `notifications_alert_renewalTitle` | اشتراك هيتجدد | A subscription is about to renew | T |
 | `notifications_alert_renewal` | {merchant} هيتجدد يوم {date} بـ {amount}. | {merchant} renews on {date} for {amount}. | N |
@@ -2643,7 +2644,7 @@ The image text is part of the share card (C-34, 1080 by 1350). Amounts are hidde
 | `share_studio_templateSavings` | التحويش | Savings | C · shown only if the data exists |
 | `share_studio_templateDelivery` | تقليل الدليفري | Delivery cut | C |
 | `share_studio_templateBudget` | تحت الميزانية | Under budget | C |
-| `share_studio_showAmounts` | اظهر المبالغ | Show amounts | L · off by default |
+| `share_studio_showAmounts` | اعرض المبالغ | Show amounts | L · off by default |
 | `share_studio_showAmountsHint` | وإنت مقفلها بتظهر النسب بس. | While it's off, only percentages show. | S |
 | `share_studio_certificate` | شهادة تقدير من الكابتن زغلول | A certificate of thanks from Captain Zaghlol | T · card header |
 | `share_studio_cardSavings` | وفرت {percent} من مرتبي الشهر ده! | I saved {percent} of my salary this month! | T · card, percentage version |
@@ -2736,7 +2737,7 @@ Every `Failure` the docs name has copy here or points at a screen key that alrea
 | `errors_storage_full` | المساحة على الموبايل خلصت. فضّي مساحة وجرّب تاني. الرسايل اللي وصلت متحفظة. | Your phone is out of space. Free some up and try again. Messages that arrived are kept. | S · `DbFailure` write (EC-28); banner |
 | `errors_storage_migrationTitle` | التحديث ماكملش | The update didn't finish | T · migration failed; Rive `oops` |
 | `errors_storage_migrationBody` | رجّعنا بياناتك زي ما كانت. جرّب تاني. | We put your data back as it was. Try again. | S · + `common_action_tryAgain` |
-| `errors_storage_io` | حصلت مشكلة في قراءة أو حفظ ملف. جرّب تاني. | There was a problem reading or saving a file. Try again. | S · `IO_ERROR` |
+| `errors_storage_io` | حصلت مشكلة في قراية أو حفظ ملف. جرّب تاني. | There was a problem reading or saving a file. Try again. | S · `IO_ERROR` |
 
 ### Capture and on-device processing
 | Key | AR | EN | Notes |
@@ -2878,3 +2879,6 @@ Nothing here blocks T-058 or T-087. Drafts are used where a question is open.
   - **Part 1 and Part 2 rows touched:** none. The header status line only.
   - **Spec edited:** none.
   - **Review round 1 (MAJOR):** `privacy_server_*` now lists everything in BR-SYNC-03 that the app sends: added `privacy_server_itemAttest` (device attestation, D-45) and `privacy_server_itemBankRequest` (FR-PAR-14). The seat keys and time nonce are covered by the §2a disclosures. 473 became 475 keys. **T-137 (store forms) must use this updated list.** The "28 problem codes" wording in §3.K was corrected.
+
+## T-058 pass 1 (2026-11-18)
+- First expert pass before the native-speaker review. Clear fixes were applied to `app_ar.arb` and to the matching AR cells here (keys unchanged). Judgement calls, and the drift between this deck and the ARB files, are listed in `copy-review-pass1.md` for the human reviewer. Reviewer sign-off is still pending.

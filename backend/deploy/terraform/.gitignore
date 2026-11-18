@@ -1,0 +1,9 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+# Local variable files may hold project ids and hostnames; the committed per-environment file is settings.auto.tfvars.
+terraform.tfvars
+*.tfvars.json

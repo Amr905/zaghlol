@@ -8,7 +8,7 @@ namespace Zaghlol.Infrastructure.Tests.Prices;
 
 public class PriceProviderTests
 {
-    private sealed class Env(string name) : IHostEnvironment
+    internal sealed class EnvFor(string name) : IHostEnvironment
     {
         public string EnvironmentName { get; set; } = name;
 
@@ -29,14 +29,14 @@ public class PriceProviderTests
     [Fact]
     public void NoProvidersConfiguredIsAnEmptyList()
     {
-        Assert.Empty(PriceProviderFactory.Create(Config(null), new Env("Production"), TimeProvider.System));
-        Assert.Empty(PriceProviderFactory.Create(Config(" "), new Env("Production"), TimeProvider.System));
+        Assert.Empty(PriceProviderFactory.Create(Config(null), new EnvFor("Production"), TimeProvider.System));
+        Assert.Empty(PriceProviderFactory.Create(Config(" "), new EnvFor("Production"), TimeProvider.System));
     }
 
     [Fact]
     public void FakeIsAllowedOutsideProduction()
     {
-        var providers = PriceProviderFactory.Create(Config("fake"), new Env("Staging"), TimeProvider.System);
+        var providers = PriceProviderFactory.Create(Config("fake"), new EnvFor("Staging"), TimeProvider.System);
 
         Assert.Equal("fake", Assert.Single(providers).Name);
     }
@@ -44,7 +44,7 @@ public class PriceProviderTests
     [Fact]
     public void FakeIsRefusedInProduction()
     {
-        Assert.Throws<InvalidOperationException>(() => PriceProviderFactory.Create(Config("fake"), new Env("Production"), TimeProvider.System));
+        Assert.Throws<InvalidOperationException>(() => PriceProviderFactory.Create(Config("fake"), new EnvFor("Production"), TimeProvider.System));
     }
 
     [Theory]
@@ -54,7 +54,7 @@ public class PriceProviderTests
     [InlineData("whatever")]
     public void ANameWithoutAnAdapterStopsStartup(string name)
     {
-        Assert.Throws<InvalidOperationException>(() => PriceProviderFactory.Create(Config(name), new Env("Development"), TimeProvider.System));
+        Assert.Throws<InvalidOperationException>(() => PriceProviderFactory.Create(Config(name), new EnvFor("Development"), TimeProvider.System));
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class PriceProviderTests
     {
         var provider = PriceProviderFactory.Create(
             Config("fake", ("Prices:Fake:Gold24Egp", "4895"), ("Prices:Fake:UsdEgp", "48.95")),
-            new Env("Development"),
+            new EnvFor("Development"),
             TimeProvider.System).Single();
 
         var snapshot = await provider.FetchAsync(CancellationToken.None);

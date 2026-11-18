@@ -1,0 +1,105 @@
+# T-176 / T-177: store uploads, called only by the release workflows after the
+# build. No metadata or screenshots are pushed from here (store copy is
+# managed by hand in the consoles, docs/06-release/store-listing.md), and
+# nothing here talks to any analytics or crash service.
+default_platform(:android)
+
+platform :android do
+  desc "Upload the prod App Bundle to the Play internal testing track (draft release)"
+  lane :internal do
+    aab = ENV.fetch("AAB") { UI.user_error!("AAB is not set") }
+    key = ENV.fetch("PLAY_JSON_KEY_FILE") { UI.user_error!("PLAY_JSON_KEY_FILE is not set") }
+    upload_to_play_store(
+      package_name: "app.zaghlol",
+      json_key: key,
+      aab: aab,
+      track: "internal",
+      # A draft is required until the app has a published release; promotion
+      # to closed / production stays a manual step in Play Console.
+      release_status: "draft",
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+end
+
+platform :ios do
+  desc "Archive and sign the prod app with the distribution certificate and profiles from the environment"
+  lane :archive_signed do
+    team = ENV.fetch("APPLE_TEAM_ID") { UI.user_error!("APPLE_TEAM_ID is not set") }
+    cert_path = ENV.fetch("IOS_CERT_P12_PATH") { UI.user_error!("IOS_CERT_P12_PATH is not set") }
+    cert_pw = ENV.fetch("IOS_CERT_PASSWORD") { UI.user_error!("IOS_CERT_PASSWORD is not set") }
+    profiles = {
+      "app.zaghlol" => ENV.fetch("PROFILE_APP"),
+      "app.zaghlol.ShareExtension" => ENV.fetch("PROFILE_SHARE"),
+      "app.zaghlol.widget" => ENV.fetch("PROFILE_WIDGET"),
+    }
+
+    setup_ci # temporary keychain, removed with the runner
+    import_certificate(
+      certificate_path: cert_path,
+      certificate_password: cert_pw,
+      keychain_name: ENV["MATCH_KEYCHAIN_NAME"] || "fastlane_tmp_keychain",
+      keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"] || "",
+      log_output: false,
+    )
+
+    # Manual signing for the Release-prod configuration only; the committed
+    # project keeps automatic signing for local work.
+    targets = {
+      "Runner" => "app.zaghlol",
+      "ShareExtension" => "app.zaghlol.ShareExtension",
+      "ZaghlolWidget" => "app.zaghlol.widget",
+    }
+    targets.each do |target, bundle_id|
+      update_code_signing_settings(
+        use_automatic_signing: false,
+        path: "ios/Runner.xcodeproj",
+        targets: [target],
+        build_configurations: ["Release-prod"],
+        team_id: team,
+        code_sign_identity: "Apple Distribution",
+        profile_name: profiles.fetch(bundle_id),
+        bundle_identifier: bundle_id,
+        sdk: "iphoneos*",
+      )
+    end
+
+    build_app(
+      workspace: "ios/Runner.xcworkspace",
+      scheme: "prod",
+      configuration: "Release-prod",
+      export_method: "app-store",
+      export_options: {
+        method: "app-store",
+        teamID: team,
+        signingStyle: "manual",
+        provisioningProfiles: profiles,
+        uploadSymbols: true, # dSYMs go to App Store Connect, not a third party
+      },
+      output_directory: "build/ios/ipa",
+      output_name: "Zaghlol.ipa",
+      archive_path: "build/ios/archive/Zaghlol.xcarchive",
+      skip_profile_detection: true,
+    )
+  end
+
+  desc "Upload the signed IPA to TestFlight (internal testers only; no review submission)"
+  lane :testflight_internal do
+    key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_PATH"),
+    )
+    upload_to_testflight(
+      api_key: key,
+      ipa: ENV.fetch("IPA"),
+      skip_waiting_for_build_processing: true,
+      skip_submission: true,
+      distribute_external: false,
+    )
+  end
+end

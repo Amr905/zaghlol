@@ -168,11 +168,11 @@
   "@commonActionUnlink": {
     "description": "B"
   },
-  "commonActionMore": "المزيد",
+  "commonActionMore": "أكتر",
   "@commonActionMore": {
     "description": "C"
   },
-  "commonActionShow": "اظهر",
+  "commonActionShow": "اعرض",
   "@commonActionShow": {
     "description": "C · passphrase reveal"
   },
@@ -652,7 +652,7 @@
   "@commonErrorLoadFailed": {
     "description": "S · C-29, DB read failure; uses common_action_tryAgain"
   },
-  "commonErrorSaveFailed": "محصلش حفظ. جرّب تاني، واللي كتبته لسه موجود.",
+  "commonErrorSaveFailed": "مقدرتش أحفظ. جرّب تاني، واللي كتبته لسه موجود.",
   "@commonErrorSaveFailed": {
     "description": "S · the form is kept"
   },
@@ -788,7 +788,7 @@
   "@onboardingAndroidSetupSmsSubtitle": {
     "description": "S"
   },
-  "onboardingAndroidSetupSmsPointSenders": "بنقرا رسايل البنوك والمحافظ وإنستاباي بس",
+  "onboardingAndroidSetupSmsPointSenders": "بقرا رسايل البنوك والمحافظ وإنستاباي بس",
   "@onboardingAndroidSetupSmsPointSenders": {
     "description": "S · what is read (FR-ING-A-02)"
   },
@@ -796,11 +796,11 @@
   "@onboardingAndroidSetupSmsPointPersonal": {
     "description": "S"
   },
-  "onboardingAndroidSetupSmsPointOnPhone": "كل حاجة بتفضل على الموبايل ده",
+  "onboardingAndroidSetupSmsPointOnPhone": "بيانات فلوسك بتفضل على الموبايل ده",
   "@onboardingAndroidSetupSmsPointOnPhone": {
     "description": "S · claim limited to financial data (tone gate 4, R-11, BR-SYNC-03)"
   },
-  "onboardingAndroidSetupSmsAllow": "اسمح بقراءة رسايل البنك",
+  "onboardingAndroidSetupSmsAllow": "اسمح بقراية الرسايل",
   "@onboardingAndroidSetupSmsAllow": {
     "description": "B · primary, opens the system SMS dialog"
   },
@@ -917,7 +917,7 @@
       }
     }
   },
-  "onboardingIosSetupShortcutTitle": "الآيفون مش بيسمح للتطبيقات تقرا الرسايل… فهنستخدم الاختصارات",
+  "onboardingIosSetupShortcutTitle": "هنستخدم الاختصارات",
   "@onboardingIosSetupShortcutTitle": {
     "description": "T · M · Rive tourGuide"
   },
@@ -953,7 +953,7 @@
   "@onboardingIosSetupShortcutAdd": {
     "description": "B · primary, opens the Shortcuts import"
   },
-  "onboardingIosSetupHowItWorks": "إزاي بيشتغل؟ (٣٠ ثانية)",
+  "onboardingIosSetupHowItWorks": "إزاي بيشتغل؟ (نص دقيقة)",
   "@onboardingIosSetupHowItWorks": {
     "description": "L · text button, expands the steps below"
   },
@@ -1028,7 +1028,7 @@
   "@onboardingIosSetupFixTitle": {
     "description": "L"
   },
-  "onboardingIosSetupFixStep1": "افتح Shortcuts ← Automation",
+  "onboardingIosSetupFixStep1": "افتح Shortcuts وبعدين Automation",
   "@onboardingIosSetupFixStep1": {
     "description": "S"
   },
@@ -1069,7 +1069,7 @@
   "@onboardingIosSetupFirstSay": {
     "description": "B · opens S-31"
   },
-  "onboardingIosSetupFirstSayHint": "«دفعت ٤٥ قهوة»",
+  "onboardingIosSetupFirstSayHint": "«دفعت خمسة وأربعين قهوة»",
   "@onboardingIosSetupFirstSayHint": {
     "description": "L · spoken example. AR uses number words (§0.3)"
   },
@@ -1077,7 +1077,7 @@
   "@onboardingIosSetupFirstType": {
     "description": "B · opens S-13"
   },
-  "onboardingIosSetupFirstTypeHint": "المبلغ والفئة",
+  "onboardingIosSetupFirstTypeHint": "المبلغ والتصنيف",
   "@onboardingIosSetupFirstTypeHint": {
     "description": "L"
   },
@@ -1085,7 +1085,7 @@
   "@onboardingIosSetupFirstOnlineBanks": {
     "description": "S · opens S-61 supported banks (FR-ING-I-08)"
   },
-  "onboardingIosSetupFirstOnlineBanksSub": "شوف إزاي تسجلهم على الآيفون",
+  "onboardingIosSetupFirstOnlineBanksSub": "شوف إزاي تتابعهم على الآيفون",
   "@onboardingIosSetupFirstOnlineBanksSub": {
     "description": "S"
   },
@@ -1093,7 +1093,7 @@
   "@onboardingIosSetupFirstStatement": {
     "description": "L · the common_gold_badge must show on this row (FR-EXP-04/06); Free opens S-68"
   },
-  "onboardingIosSetupFirstStatementSub": "ضيف شهور فاتت مرة واحدة",
+  "onboardingIosSetupFirstStatementSub": "ضيف شهور فاتت مرة واحدة مع جولد",
   "@onboardingIosSetupFirstStatementSub": {
     "description": "S · says Gold in the text too, so Free users aren't promised it (F-8)"
   },
@@ -1403,7 +1403,7 @@
   "@homeHeroPerDay": {
     "description": "C · suffix after the display amount"
   },
-  "homeHeroDaysToPayday": "{count, plural, =0{القبض النهارده} =1{يوم على القبض} =2{يومين على القبض} few{{n} أيام على القبض} many{{n} يوم على القبض} other{{n} يوم على القبض}}",
+  "homeHeroDaysToPayday": "{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}",
   "@homeHeroDaysToPayday": {
     "description": "L · count:int, n · followed by  ·  and common_date_range",
     "placeholders": {
@@ -2801,7 +2801,7 @@
   "@transfersAssignSaved": {
     "description": "N"
   },
-  "transfersSplitErrorShareZero": "النصيب لازم يكون أكبر من صفر",
+  "transfersSplitErrorShareZero": "كل نصيب لازم يكون أكبر من صفر",
   "@transfersSplitErrorShareZero": {
     "description": "S"
   },
@@ -3018,7 +3018,7 @@
       }
     }
   },
-  "accountsOverviewCashSub": "يدوي وصوت",
+  "accountsOverviewCashSub": "بإيدك وبصوتك",
   "@accountsOverviewCashSub": {
     "description": "C"
   },
@@ -4000,7 +4000,7 @@
   "@insightsChartsLockedSub": {
     "description": "S · C-13 locked, blurred preview + common_gold_unlock"
   },
-  "insightsChartsEmptyCycle": "بيحيا بعد أول دورة كاملة",
+  "insightsChartsEmptyCycle": "هيشتغل بعد أول دورة كاملة",
   "@insightsChartsEmptyCycle": {
     "description": "S · C-13 empty (EC-23)"
   },
@@ -4057,7 +4057,7 @@
   "@insightsChartTitleMerchants": {
     "description": "T · chart 6 (Free, top five)"
   },
-  "insightsChartTitleVsAverage": "الدورة دي ضد متوسط تلات دورات",
+  "insightsChartTitleVsAverage": "الدورة دي قصاد متوسط تلات دورات",
   "@insightsChartTitleVsAverage": {
     "description": "T · chart 7 (Gold)"
   },
@@ -4241,7 +4241,7 @@
       }
     }
   },
-  "insightsChartA11yVsAverage": "الدورة دي ضد متوسطك: أكبر زيادة في {category} بـ {percent}",
+  "insightsChartA11yVsAverage": "الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent}",
   "@insightsChartA11yVsAverage": {
     "description": "A",
     "placeholders": {
@@ -4425,7 +4425,7 @@
       }
     }
   },
-  "insightsExplainCashFlowTip": "{state, select, short{لو قللت {category} بـ {target} الدورة الجاية هيساعدك ده تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للادخار قبل ما يتصرف.}}",
+  "insightsExplainCashFlowTip": "{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}",
   "@insightsExplainCashFlowTip": {
     "description": "S · state, category = largest category, target",
     "placeholders": {
@@ -4512,7 +4512,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeepTip": "خفّض {category} بـ {target} كل دورة، يعني {yearly} في السنة.",
+  "insightsExplainCategoriesDeepTip": "قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة.",
   "@insightsExplainCategoriesDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4572,7 +4572,7 @@
       }
     }
   },
-  "insightsExplainBurnRateDeepTip": "لو خفضت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض.",
+  "insightsExplainBurnRateDeepTip": "لو قللت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض.",
   "@insightsExplainBurnRateDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4881,7 +4881,7 @@
       }
     }
   },
-  "insightsExplainSubscriptionsTip": "راجع {item}، ولو مش بتستخدمه إلغاؤه بيوفر {target} في السنة.",
+  "insightsExplainSubscriptionsTip": "راجع {item}، ولو مش بتستخدمه الغيه وهتوفر {target} في السنة.",
   "@insightsExplainSubscriptionsTip": {
     "description": "S",
     "placeholders": {
@@ -5007,7 +5007,7 @@
       }
     }
   },
-  "insightsExplainNetWorthDeep": "{trend, select, up{نموك الإجمالي {percent}، وأكتر حاجة زوّدته {assetType2}.} down{اللي حيلتك نزل {percent}، وأكتر حاجة أثرت فيه {assetType2}.} other{مفيش تغيير كبير في الفترة دي.}}",
+  "insightsExplainNetWorthDeep": "{trend, select, up{اللي حيلتك زاد {percent}، وأكتر حاجة زوّدته {assetType2}.} down{اللي حيلتك نزل {percent}، وأكتر حاجة أثرت فيه {assetType2}.} other{مفيش تغيير كبير في الفترة دي.}}",
   "@insightsExplainNetWorthDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -5647,7 +5647,7 @@
   "@homeQuickAddAssetA11y": {
     "description": "A"
   },
-  "homeQuickAddVoiceLeft": "باقيلك {remaining} من {max} تسجيل صوتي الشهر ده",
+  "homeQuickAddVoiceLeft": "فاضلك {remaining} من {max} تسجيل صوتي الشهر ده",
   "@homeQuickAddVoiceLeft": {
     "description": "S · Free only (FR-VOI-04)",
     "placeholders": {
@@ -5814,7 +5814,7 @@
       }
     }
   },
-  "captureScanTitle": "قراءة سكرين شوت",
+  "captureScanTitle": "اقرا سكرين شوت",
   "@captureScanTitle": {
     "description": "T"
   },
@@ -5898,7 +5898,7 @@
   "@captureScanUnavailableTitle": {
     "description": "S"
   },
-  "captureScanUnavailableBody": "شغال عليها. دلوقتي اكتب العملية بإيدك وأنا هسجلها.",
+  "captureScanUnavailableBody": "شغال عليها. دلوقتي اكتب الحركة بإيدك وأنا هسجلها.",
   "@captureScanUnavailableBody": {
     "description": "S"
   },
@@ -6610,7 +6610,7 @@
       }
     }
   },
-  "chatMainRoast": "إقصف جبهتي",
+  "chatMainRoast": "اقصف جبهتي",
   "@chatMainRoast": {
     "description": "L · toggle. The 🔥 is an icon, not text"
   },
@@ -6867,7 +6867,7 @@
       }
     }
   },
-  "chatAnswerBalanceCredit": "المتاح في {account} {available} من {limit}.",
+  "chatAnswerBalanceCredit": "فاضل في {account} {available} من {limit}.",
   "@chatAnswerBalanceCredit": {
     "description": "E",
     "placeholders": {
@@ -7285,7 +7285,7 @@
   "@roiRuleCoffeeTitle": {
     "description": "T"
   },
-  "roiRuleCoffeeBody": "بتصرف {monthly} في الشهر في الكافيهات. ماكينة بالتقسيط مع البن والحليب تقريباً {alt} في الشهر.",
+  "roiRuleCoffeeBody": "بتصرف {monthly} في الشهر في الكافيهات. ماكينة بالتقسيط مع البن واللبن تقريباً {alt} في الشهر.",
   "@roiRuleCoffeeBody": {
     "description": "E · alt = installment + running cost",
     "placeholders": {
@@ -7313,11 +7313,11 @@
       }
     }
   },
-  "roiRuleWaterTitle": "فلتر مياه بدل القوارير",
+  "roiRuleWaterTitle": "فلتر مية بدل الإزايز",
   "@roiRuleWaterTitle": {
     "description": "T"
   },
-  "roiRuleWaterBody": "القوارير والجراكن بـ {monthly} في الشهر. فلتر مياه بالتقسيط مع تغيير الشمعات تقريباً {alt} في الشهر.",
+  "roiRuleWaterBody": "إزايز المية والجراكن بـ {monthly} في الشهر. فلتر مية بالتقسيط مع تغيير الشمعات تقريباً {alt} في الشهر.",
   "@roiRuleWaterBody": {
     "description": "E",
     "placeholders": {
@@ -7649,7 +7649,7 @@
   "@categoriesEditTitleNew": {
     "description": "T"
   },
-  "categoriesEditTitleEdit": "تعديل التصنيف",
+  "categoriesEditTitleEdit": "عدّل التصنيف",
   "@categoriesEditTitleEdit": {
     "description": "T"
   },
@@ -7669,11 +7669,11 @@
   "@categoriesEditBucket": {
     "description": "L · bucket picker (BR-CAT-02)"
   },
-  "categoriesEditBucketNeeds": "ضروريات",
+  "categoriesEditBucketNeeds": "أساسيات",
   "@categoriesEditBucketNeeds": {
     "description": "C"
   },
-  "categoriesEditBucketWants": "رغبات",
+  "categoriesEditBucketWants": "رفاهيات",
   "@categoriesEditBucketWants": {
     "description": "C"
   },
@@ -7681,7 +7681,7 @@
   "@categoriesEditBucketObligations": {
     "description": "C"
   },
-  "categoriesEditBucketSavings": "ادخار",
+  "categoriesEditBucketSavings": "تحويش",
   "@categoriesEditBucketSavings": {
     "description": "C"
   },
@@ -7907,7 +7907,7 @@
   "@backupSettingsFreeReplaces": {
     "description": "S · Free (FR-BAK-08)"
   },
-  "backupSettingsAuto": "نسخة تلقائي",
+  "backupSettingsAuto": "نسخ تلقائي",
   "@backupSettingsAuto": {
     "description": "L · + common_gold_badge"
   },
@@ -8053,7 +8053,7 @@
   "@backupPassphraseTooShort": {
     "description": "S · UX-A-01, fixed length"
   },
-  "backupPassphraseMismatch": "كلمتين السر مش زي بعض",
+  "backupPassphraseMismatch": "كلمة السر في الخانتين مش زي بعض",
   "@backupPassphraseMismatch": {
     "description": "S"
   },
@@ -8239,7 +8239,7 @@
       }
     }
   },
-  "exportsImportUntracked": "{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعة (هتتخطى)} other{{n} كارت مش متتبعة (هتتخطى)}}",
+  "exportsImportUntracked": "{count, plural, =1{كارت واحد مش متتبع (هيتخطى)} =2{كارتين مش متتبعين (هيتخطوا)} few{{n} كروت مش متتبعة (هتتخطى)} many{{n} كارت مش متتبعين (هيتخطوا)} other{{n} كارت مش متتبعين (هيتخطوا)}}",
   "@exportsImportUntracked": {
     "description": "L · count:int, n · expandable; row hidden when 0 (FR-CAP-06)",
     "placeholders": {
@@ -8308,7 +8308,7 @@
   "@exportsImportFailed": {
     "description": "S"
   },
-  "exportsImportLockedBody": "ضيف شهور فاتتة وكشوف البنوك مع جولد",
+  "exportsImportLockedBody": "ضيف شهور فاتت وكشوف البنوك مع جولد",
   "@exportsImportLockedBody": {
     "description": "S · locked state + common_gold_unlock"
   },
@@ -8377,7 +8377,7 @@
   "@goldPaywallContinue": {
     "description": "B · Gold button, glossary. No emoji (payment)"
   },
-  "goldPaywallPlanRequired": "اختار خطة الأول",
+  "goldPaywallPlanRequired": "اختار باقة الأول",
   "@goldPaywallPlanRequired": {
     "description": "S"
   },
@@ -8647,7 +8647,7 @@
   "@goldSeatAccountRequiredTitle": {
     "description": "T · restore item account_required (EC-65)"
   },
-  "goldSeatAccountRequiredBody": "اعمل تسجيل دخول بالحساب اللي اشتريت بيه.",
+  "goldSeatAccountRequiredBody": "سجّل دخول بالحساب اللي اشتريت بيه.",
   "@goldSeatAccountRequiredBody": {
     "description": "S · reveals nothing about the account; action common_action_signIn"
   },
@@ -8671,7 +8671,7 @@
   "@goldSeatPausedTitle": {
     "description": "T · entitlement paused (D-61(c))"
   },
-  "goldSeatPausedBody": "اعمل تسجيل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة.",
+  "goldSeatPausedBody": "سجّل دخول عشان تستخدم الجولد على الموبايل ده. مكانك محفوظ ومش هيتحسب نقلة.",
   "@goldSeatPausedBody": {
     "description": "S · action common_action_signIn"
   },
@@ -8692,7 +8692,7 @@
       }
     }
   },
-  "goldSeatHeldElsewhereAccount": "الدفع تم. عشان الجولد ييجي هنا، اعمل تسجيل دخول بالحساب اللي عليه الجولد.",
+  "goldSeatHeldElsewhereAccount": "الدفع تم. عشان الجولد ييجي هنا، سجّل دخول بالحساب اللي عليه الجولد.",
   "@goldSeatHeldElsewhereAccount": {
     "description": "S · seatHeldElsewhere + accountRequired (R4-4); action common_action_signIn"
   },
@@ -8765,7 +8765,7 @@
   "@notificationsSettingsDues": {
     "description": "L"
   },
-  "notificationsSettingsDueDays": "{count, plural, =0{يوم الاستحقاق نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}",
+  "notificationsSettingsDueDays": "{count, plural, =0{يوم الميعاد نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}",
   "@notificationsSettingsDueDays": {
     "description": "L · count:int, n · FR-SUB-04, 0 to 30",
     "placeholders": {
@@ -8821,7 +8821,7 @@
   "@notificationsSettingsHideAmountsHint": {
     "description": "S"
   },
-  "notificationsSettingsDaysRange": "اختار من يوم الاستحقاق لحد تلاتين يوم قبله",
+  "notificationsSettingsDaysRange": "اختار من يوم الميعاد لحد تلاتين يوم قبله",
   "@notificationsSettingsDaysRange": {
     "description": "S · validation, 0 to 30"
   },
@@ -8917,7 +8917,7 @@
   "@notificationsAlertDueTitle": {
     "description": "T"
   },
-  "notificationsAlertDue": "{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكره: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}",
+  "notificationsAlertDue": "{count, plural, =0{{item} بيستحق النهارده: {amount}} =1{{item} بيستحق بكرة: {amount}} =2{{item} بيستحق بعد يومين: {amount}} few{{item} بيستحق بعد {n} أيام: {amount}} many{{item} بيستحق بعد {n} يوم: {amount}} other{{item} بيستحق بعد {n} يوم: {amount}}}",
   "@notificationsAlertDue": {
     "description": "N · count:int, n, item, amount · days until the due date",
     "placeholders": {
@@ -8983,7 +8983,7 @@
   "@notificationsAlertDuplicateTitle": {
     "description": "T"
   },
-  "notificationsAlertDuplicate": "{merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بُص عليها.",
+  "notificationsAlertDuplicate": "{merchant}: {amount} ظهرت مرتين تقريباً في نفس الوقت. بص عليها.",
   "@notificationsAlertDuplicate": {
     "description": "N",
     "placeholders": {
@@ -9264,7 +9264,7 @@
   "@privacyDeleteStoreAccountKept": {
     "description": "N · delete-everything confirm: the store purchase and the account are not affected"
   },
-  "privacyDeleteFailed": "مقدرناش نمسح كل حاجة. افتح الأبلكيشن تاني وهنكمّل.",
+  "privacyDeleteFailed": "مقدرناش نمسح كل حاجة. افتح زغلول تاني وهنكمّل.",
   "@privacyDeleteFailed": {
     "description": "N · shown when the local wipe did not finish; the next launch resumes it"
   },
@@ -9422,7 +9422,7 @@
   "@shareStudioTemplateBudget": {
     "description": "C"
   },
-  "shareStudioShowAmounts": "اظهر المبالغ",
+  "shareStudioShowAmounts": "اعرض المبالغ",
   "@shareStudioShowAmounts": {
     "description": "L · off by default"
   },
@@ -9727,7 +9727,7 @@
   "@errorsStorageMigrationBody": {
     "description": "S · + common_action_tryAgain"
   },
-  "errorsStorageIo": "حصلت مشكلة في قراءة أو حفظ ملف. جرّب تاني.",
+  "errorsStorageIo": "حصلت مشكلة في قراية أو حفظ ملف. جرّب تاني.",
   "@errorsStorageIo": {
     "description": "S · IO_ERROR"
   },
@@ -9788,7 +9788,7 @@
   "@goldSeatTamperedClockBody": {
     "description": "S · tampered clock persists after a fresh server echo (FU-138)"
   },
-  "transactionsEditLinksRemoved": "المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالمعاملة دي اتفكّوا.",
+  "transactionsEditLinksRemoved": "المبلغ اتغيّر، فالروابط اتشالت: الفلوس الراجعة والتقسيم المرتبطين بالحركة دي اتفكّوا.",
   "@transactionsEditLinksRemoved": {
     "description": "N · EC-40 after an amount edit"
   },
@@ -9805,7 +9805,7 @@
       }
     }
   },
-  "homeFeedExcludedFromSpending": "مش محسوبة في المصروفات",
+  "homeFeedExcludedFromSpending": "مش محسوبة في المصاريف",
   "@homeFeedExcludedFromSpending": {
     "description": "L · muted feed-row label"
   },
@@ -9817,7 +9817,7 @@
   "@notificationsAlertBackupReminderBody": {
     "description": "N · backup reminder"
   },
-  "transactionsReimbUnassigned": "{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} other{{count} مبالغ اتفكّت لأن المصروف قلّ}}",
+  "transactionsReimbUnassigned": "{count, plural, =1{مبلغ واحد اتفكّ لأن المصروف قلّ} =2{مبلغين اتفكّوا لأن المصروف قلّ} few{{count} مبالغ اتفكّت لأن المصروف قلّ} many{{count} مبلغ اتفكّ لأن المصروف قلّ} other{{count} مبلغ اتفكّ لأن المصروف قلّ}}",
   "@transactionsReimbUnassigned": {
     "description": "N · EC-40 (T-091)",
     "placeholders": {
