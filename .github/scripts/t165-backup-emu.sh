@@ -102,7 +102,10 @@ sz=$(stat -c %s "$OUT/z.ab" 2> /dev/null || echo 0)
 echo "  archive bytes: $sz"
 tapped=no; [ -s "$OUT/confirm-tapped" ] && tapped=yes
 echo "  confirm tapped: $tapped"
-python3 -I - "$OUT/z.ab" "$tapped" << 'PY' | tee "$OUT/adb-backup.txt"
+# API 31+: the OS still lets adb back up a DEBUGGABLE app (allowBackup=false is not
+# honoured for it), so leaked entries from this debug build say nothing about release.
+exempt=no; [ "$API" -ge 31 ] && case "$flags" in *DEBUGGABLE*) exempt=yes ;; esac
+python3 -I - "$OUT/z.ab" "$tapped" "$exempt" << 'PY' | tee "$OUT/adb-backup.txt"
 import io, sys, tarfile, zlib
 try:
     data = open(sys.argv[1], "rb").read()
@@ -126,6 +129,8 @@ names = tarfile.open(fileobj=io.BytesIO(tar)).getnames()
 leaks = [n for n in names if n.startswith("apps/") and not n.endswith("/_manifest")]
 for n in leaks[:30]:
     print("  entry: " + n)
+if leaks and sys.argv[3] == "yes":
+    print("RESULT UNKNOWN %d app data entries, but this is a debuggable build on API 31+ (debuggable apps are exempt from the adb backup restriction); not evidence for release, verify on a release build" % len(leaks)); sys.exit(0)
 print("RESULT %s %d entries, %d app data entries" % ("FAIL" if leaks else "PASS", len(names), len(leaks)))
 PY
 grep '^  entry:' "$OUT/adb-backup.txt" | head -30
