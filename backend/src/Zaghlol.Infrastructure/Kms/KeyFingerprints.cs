@@ -56,7 +56,7 @@ internal static class KnownTestKeys
 
     /// <summary>
     /// Fewer than 16 distinct byte values: all-zero, repeated or counting patterns. A random 32-byte key has about 30, and the
-    /// chance that one has 16 or fewer is far below 2^-100.
+    /// chance that one has fewer than 16 is about 3e-17 (2^-54.8, computed exactly).
     /// </summary>
     public static bool IsDegenerate(ReadOnlySpan<byte> secret)
     {
