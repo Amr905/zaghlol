@@ -5,6 +5,15 @@ using System.Text;
 
 namespace Zaghlol.Ops.Auth;
 
+/// <summary>The Credential Manager blob limits, kept apart from the Windows-only store so that every platform can test them.</summary>
+internal static class CredentialBlobLimits
+{
+    /// <summary>One credential blob holds at most 2560 bytes (CRED_MAX_CREDENTIAL_BLOB_SIZE); a chunk stays well under it.</summary>
+    public const int ChunkBytes = 2000;
+
+    public const int MaxChunks = 4;
+}
+
 /// <summary>
 /// Windows Credential Manager (T-137 design note section 2): a generic credential per chunk, persisted for this user and
 /// protected by DPAPI. A credential blob holds at most 2560 bytes, so a token is split over up to <see cref="MaxChunks"/>
@@ -13,10 +22,8 @@ namespace Zaghlol.Ops.Auth;
 [SupportedOSPlatform("windows")]
 internal sealed partial class WindowsCredentialStore : ITokenStore
 {
-    public const int ChunkBytes = 2000;
-
-    public const int MaxChunks = 4;
-
+    private const int ChunkBytes = CredentialBlobLimits.ChunkBytes;
+    private const int MaxChunks = CredentialBlobLimits.MaxChunks;
     private const uint CredTypeGeneric = 1;
     private const uint PersistLocalMachine = 2;
     private const int ErrorNotFound = 1168;
