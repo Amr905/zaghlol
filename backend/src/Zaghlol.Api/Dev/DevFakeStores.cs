@@ -58,8 +58,8 @@ internal static partial class DevFakeStores
         }
 
         LogFakeStoresOn(app.Logger);
-        app.MapPost("/dev/v1/grant-gold", GrantGoldAsync);
-        app.MapGet("/dev/v1/app-keys", (IConfiguration configuration) => Results.Text(AppKeys(configuration) + "\n", "text/plain"));
+        app.MapPost("/dev/v1/grant-gold", GrantGoldAsync).AllowAnonymous();
+        app.MapGet("/dev/v1/app-keys", (IConfiguration configuration) => Results.Text(AppKeys(configuration) + "\n", "text/plain")).AllowAnonymous();
         return app;
     }
 

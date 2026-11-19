@@ -23,6 +23,7 @@ internal static class CatalogEndpoints
 
         endpoints.MapGet("/v1/catalog/{version:int}/full", GetFullAsync)
             .WithName("getFullCatalog")
+            .AllowAnonymous()
             .RequireResponseSignature(CatalogLimits.MaxSnapshotBytes);
         return endpoints;
     }

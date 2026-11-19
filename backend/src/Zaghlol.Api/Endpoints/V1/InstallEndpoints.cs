@@ -34,6 +34,7 @@ internal static partial class InstallEndpoints
 
         endpoints.MapPost("/v1/installs", RegisterAsync)
             .WithName("registerInstall")
+            .AllowAnonymous()
             .RequireAppHeader()
             .WithMetadata(RegistrationRateLimitMetadata.Instance);
 

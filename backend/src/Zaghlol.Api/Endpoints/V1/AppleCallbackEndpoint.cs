@@ -22,7 +22,7 @@ internal static partial class AppleCallbackEndpoint
 
     public static IEndpointRouteBuilder MapAppleCallback(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/v1/apple/android-callback", HandleAsync).WithName("appleAndroidCallback");
+        endpoints.MapPost("/v1/apple/android-callback", HandleAsync).WithName("appleAndroidCallback").AllowAnonymous();
         return endpoints;
     }
 

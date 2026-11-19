@@ -30,7 +30,7 @@ internal static class HealthEndpoints
                 }
 
                 return TypedResults.Ok(new HealthResponse(GetHealthHandler.OkStatus, TruncateToSecondUtc(result.ServerTime)));
-            });
+            }).AllowAnonymous();
 
         return endpoints;
     }
