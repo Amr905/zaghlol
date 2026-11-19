@@ -13,6 +13,7 @@ import app.zaghlol.platform.diag.SmsDiagChannel
 import app.zaghlol.platform.device.DeviceSecurityRegistration
 import app.zaghlol.platform.device.SecureWindowState
 import app.zaghlol.platform.keys.SecretStoreRegistration
+import app.zaghlol.platform.notifications.NotificationHandOff
 import app.zaghlol.platform.notifications.NotificationPresenter
 import app.zaghlol.platform.notifications.NotificationRoutes
 import app.zaghlol.platform.notifications.NotificationsEventsApi
@@ -87,8 +88,11 @@ class MainActivity : FlutterFragmentActivity() {
         notificationsHost = notifHost
         notificationEvents = NotificationsEventsApi(messenger)
         NotificationsRegistration.register(messenger, notifHost)
-        NotificationRoutes.setLaunchRoute(intent?.getStringExtra(NotificationRoutes.EXTRA_ROUTE))
-        intent?.let { dismissActionNotification(it) }
+        // L-1: route and cancel id only from our own trampoline.
+        intent?.let { acceptedNotification(it) }?.let { a ->
+            NotificationRoutes.setLaunchRoute(a.route)
+            dismissActionNotification(a)
+        }
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -148,10 +152,23 @@ class MainActivity : FlutterFragmentActivity() {
         super.cleanUpFlutterEngine(flutterEngine)
     }
 
+    /** L-1: the route and cancel id of [intent], or null unless it carries our hand-off token. */
+    private fun acceptedNotification(intent: Intent): NotificationRoutes.Accepted? =
+        try {
+            val cancel = intent.getIntExtra(NotificationRoutes.EXTRA_CANCEL_ID, Int.MIN_VALUE)
+            NotificationRoutes.accept(
+                intent.action,
+                intent.getStringExtra(NotificationHandOff.EXTRA_TOKEN),
+                intent.getStringExtra(NotificationRoutes.EXTRA_ROUTE),
+                if (cancel == Int.MIN_VALUE) null else cancel,
+            )
+        } catch (_: RuntimeException) {
+            null
+        }
+
     /** An action button does not auto-cancel: dismiss the notification it came from. */
-    private fun dismissActionNotification(intent: Intent) {
-        val id = intent.getIntExtra(NotificationRoutes.EXTRA_CANCEL_ID, Int.MIN_VALUE)
-        if (id == Int.MIN_VALUE) return
+    private fun dismissActionNotification(accepted: NotificationRoutes.Accepted) {
+        val id = accepted.cancelId ?: return
         (getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id)
     }
 
@@ -164,9 +181,9 @@ class MainActivity : FlutterFragmentActivity() {
         super.onNewIntent(intent)
         // NOTIF-GW: a tap while running goes to Dart; the route is validated
         // here and again in Dart (allow-list).
-        dismissActionNotification(intent)
-        NotificationRoutes.clean(intent.getStringExtra(NotificationRoutes.EXTRA_ROUTE))?.let { r ->
-            notificationEvents?.onTap(r) { }
+        acceptedNotification(intent)?.let { a ->
+            dismissActionNotification(a)
+            a.route?.let { r -> notificationEvents?.onTap(r) { } }
         }
         val presented = try {
             intent.getStringExtra(ShareHandOff.EXTRA_TOKEN)

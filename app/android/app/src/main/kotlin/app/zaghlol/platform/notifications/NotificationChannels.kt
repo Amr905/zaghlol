@@ -54,6 +54,18 @@ object NotificationRoutes {
     return t to r
   }
 
+  /**
+   * What the app may act on from a launching intent (L-1): the route and the
+   * cancel id are honoured only when [NotificationHandOff] vouches for the
+   * intent. `MainActivity` is exported, so any app can send it these extras.
+   */
+  data class Accepted(val route: String?, val cancelId: Int?)
+
+  fun accept(action: String?, presentedToken: String?, route: String?, cancelId: Int?): Accepted? {
+    if (!NotificationHandOff.token.matches(action, presentedToken)) return null
+    return Accepted(clean(route), cancelId)
+  }
+
   @Volatile private var launchRoute: String? = null
 
   fun setLaunchRoute(route: String?) {

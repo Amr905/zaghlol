@@ -2294,6 +2294,10 @@
   "@recurringBillsMarkPaid": {
     "description": "B · glossary «اتدفع»"
   },
+  "notificationMarkPaidConfirmTitle": "Mark this bill as paid?",
+  "@notificationMarkPaidConfirmTitle": {
+    "description": "L-1 · confirm before a notification action marks a bill paid"
+  },
   "recurringBillsPaid": "Paid ✓",
   "@recurringBillsPaid": {
     "description": "C"

@@ -5704,6 +5704,12 @@ abstract class AppLocalizations {
   /// **'اتدفع'**
   String get recurringBillsMarkPaid;
 
+  /// L-1 · confirm before a notification action marks a bill paid
+  ///
+  /// In ar, this message translates to:
+  /// **'تعلّم الفاتورة دي إنها اتدفعت؟'**
+  String get notificationMarkPaidConfirmTitle;
+
   /// C
   ///
   /// In ar, this message translates to:
