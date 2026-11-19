@@ -264,8 +264,10 @@ public abstract class ObservabilityHostFixture : IAsyncLifetime, IDisposable
             ? Results.StatusCode(StatusCodes.Status503ServiceUnavailable)
             : Results.Ok();
 
-    private void MapTestEndpoints(WebApplication host)
+    private void MapTestEndpoints(WebApplication webApp)
     {
+        // Test-only routes are anonymous: the API's fallback policy authenticates every route by default (T-175 L-6).
+        var host = webApp.MapGroup(string.Empty).AllowAnonymous();
         var sentinel = Sentinel;
 
         host.MapGet("/test/items/{key}", (string key) => TypedResults.Ok(new Zaghlol.Api.Tests.Signing.PlainBody("item", key.Length)));

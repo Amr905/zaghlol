@@ -339,7 +339,8 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
             .WithIdempotency(IdempotentOperation.VerifyPurchase)
             .RequireResponseSignature();
 
-        application.MapGet("/t/ping", () => TypedResults.Ok(new Dictionary<string, string> { ["ok"] = "yes" }));
+        // Anonymous like a real public route: the API's fallback policy authenticates every route by default (T-175 L-6).
+        application.MapGet("/t/ping", () => TypedResults.Ok(new Dictionary<string, string> { ["ok"] = "yes" })).AllowAnonymous();
     }
 }
 

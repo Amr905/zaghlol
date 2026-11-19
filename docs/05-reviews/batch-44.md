@@ -136,3 +136,7 @@ Required change: add `.AllowAnonymous()` to those test routes (or to the groups 
 ### Verdict
 
 **CHANGES_REQUESTED** - one major (F1): add `AllowAnonymous()` to the test-host routes so the 39 regressed tests pass again. No blocker; the production authorization design is correct.
+
+### Lead delta check: infra lane F1 (2026-11-19)
+
+Test-only routes in `SigningHostFixture`, `ObservabilityHostFixture` (an anonymous route group) and `InstallsHostFixture` (`/t/ping`) now carry `AllowAnonymous()`. Production code unchanged. Api.Tests: 331 passed, 354 failed, all 354 Docker-unavailable (0 others). Contract.Tests: 88 passed, 91 failed, all Docker-unavailable. **Infra lane: APPROVED after delta.** Minors (gitleaks allowlisting whole test trees, L-5 digests, dev routes outside the anonymous-route test) go to FU-264.
