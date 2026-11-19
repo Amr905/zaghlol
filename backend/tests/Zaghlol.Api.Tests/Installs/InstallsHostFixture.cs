@@ -180,7 +180,7 @@ public class InstallsHostFixture : IAsyncLifetime, IDisposable
         MapEndpoints(app);
         MapTestEndpoints(app);
         await app.StartAsync();
-        Client = app.GetTestClient();
+        Client = new HttpClient(new AppHeaderHandler { InnerHandler = app.GetTestServer().CreateHandler() }) { BaseAddress = new Uri("http://localhost/") };
     }
 
     public async Task DisposeAsync()

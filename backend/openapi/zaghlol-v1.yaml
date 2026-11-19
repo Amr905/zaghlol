@@ -157,6 +157,8 @@ paths:
       responses:
         '202':
           description: Accepted. No body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/InstallTokenInvalid'
         '429':
@@ -175,7 +177,10 @@ paths:
         `null` so an up-to-date response stays under 2 KB. `mode: full` is returned when `catalogVersion` is 0,
         ahead of the server, more than 20 versions behind, or the delta is too large. Every 200 is signed.
         `contributions` are sent only if the user opted in (D-16) and the server silently drops any that fail
-        BR-SYNC-04; `accepted` counts the rows actually stored. A catalog, flags or entitlement read failure is
+        BR-SYNC-04; `accepted` counts the rows actually stored. A `bankRequests` item whose `country` or `channel`
+        does not match its schema is dropped the same way (the call is still `200` and counts as the install's one
+        effective sync for the window); more than 10 items, like more than 50 `contributions`, is `400` for the
+        whole call. A catalog, flags or entitlement read failure is
         503 with nothing written (the window is not consumed). No `Idempotency-Key`: the throttle makes a repeat safe.
       security:
         - installToken: []
@@ -329,9 +334,9 @@ paths:
         `backend/tests/Zaghlol.Contract.Tests/vectors/store-binding-v1.json`), upserts keyed by purchase token
         (Android) or originalTransactionId (iOS), acknowledges Android purchases, and grants Gold only for a
         purchased and active state (a cancelled subscription keeps Gold until its expiry). A pending purchase
-        returns `status: pending` and grants nothing. A `purchaseToken` that isn't 1-512 characters of
-        `[A-Za-z0-9._-]` (with at least one letter or digit) is answered `422 PURCHASE_TOKEN_INVALID` without a
-        Play call. On iOS a `signedTransaction` that fails the JWS checks (shape, `alg`, the x5c chain to the pinned
+        returns `status: pending` and grants nothing. A `purchaseToken` longer than 512 characters (or empty) is
+        `400 VALIDATION_FAILED`; one of 1-512 characters that isn't `[A-Za-z0-9._-]` (with at least one letter or digit)
+        is answered `422 PURCHASE_TOKEN_INVALID` without a Play call. On iOS a `signedTransaction` that fails the JWS checks (shape, `alg`, the x5c chain to the pinned
         Apple Root CA - G3, Apple's marker OIDs, the signature) is `422 PURCHASE_TOKEN_INVALID` without an Apple call;
         Apple's API is called on the signed `environment` only, and the state comes from Apple's answers, never the
         app's JWS (backend-api §4.3). A store failure is `502 STORE_UNAVAILABLE` and an exhausted server-side store budget
@@ -677,6 +682,8 @@ paths:
       responses:
         '204':
           description: Deleted. No body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
         '429':
@@ -1609,7 +1616,12 @@ paths:
       tags: [Admin]
       operationId: adminListBankRequests
       summary: Ranked list of "request my bank" submissions
-      description: Role `catalog_editor`. Aggregated counts per institution.
+      description: |
+        Role `catalog_editor`. Aggregated counts per institution: submissions are grouped by normalized
+        institution name, country and channel, and `count` is the number of distinct installs that asked (never
+        a repeat from one install). Ordered by `count` descending, then `lastRequestedAt` descending (ties
+        beyond that by name and country). At most 500 entries are returned, so the least requested institutions
+        are cut off when more exist. No query parameters; `Cache-Control: no-store`.
       x-required-roles: [catalog_editor]
       security:
         - operatorOidc: []
@@ -1634,7 +1646,12 @@ paths:
       tags: [Admin]
       operationId: adminDailyActive
       summary: Daily active install counters
-      description: 'Any authenticated operator role (`x-required-roles: [any]`). Aggregate counters only.'
+      description: |
+        Any authenticated operator role (`x-required-roles: [any]`). Aggregate counters only: the anonymous
+        daily-active counts summed over platform and app version, one entry per UTC day, oldest first, ending
+        today, with `activeInstalls: 0` for a day that has no counts. `days` outside 1 to 90, repeated, not an
+        integer written in ASCII digits, or any other query parameter is `400 VALIDATION_FAILED`.
+        `Cache-Control: no-store`.
       x-required-roles: [any]
       security:
         - operatorOidc: []
@@ -1642,7 +1659,7 @@ paths:
         - name: days
           in: query
           required: false
-          description: Number of days to return, ending today (UTC).
+          description: Number of days to return, ending today (UTC). Default 14.
           schema:
             type: integer
             format: int32
@@ -2176,7 +2193,10 @@ components:
           $ref: '#/components/schemas/CategoryCode'
     BankRequestInput:
       type: object
-      description: A "request my bank" submission (FR-PAR-14). Never carries a message.
+      description: |
+        A "request my bank" submission (FR-PAR-14). Never carries a message. An item whose `institutionName`
+        (after normalization), `country` or `channel` does not match this schema is silently dropped by
+        `POST /v1/sync`, as an invalid contribution is (BUG-005); it never fails the call.
       additionalProperties: false
       required: [institutionName, country, channel]
       properties:

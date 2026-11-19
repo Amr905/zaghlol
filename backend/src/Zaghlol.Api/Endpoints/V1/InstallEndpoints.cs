@@ -34,6 +34,7 @@ internal static partial class InstallEndpoints
 
         endpoints.MapPost("/v1/installs", RegisterAsync)
             .WithName("registerInstall")
+            .RequireAppHeader()
             .WithMetadata(RegistrationRateLimitMetadata.Instance);
 
         endpoints.MapInstallScoped().MapDelete("/installs/me", DeleteAsync).WithName("deleteInstall");
@@ -42,7 +43,7 @@ internal static partial class InstallEndpoints
 
     /// <summary>The <c>/v1</c> group whose every endpoint requires the install token (T-128+ map theirs here too).</summary>
     public static RouteGroupBuilder MapInstallScoped(this IEndpointRouteBuilder endpoints) =>
-        endpoints.MapGroup("/v1").RequireInstallToken();
+        endpoints.MapGroup("/v1").RequireInstallToken().RequireAppHeader();
 
     private static async Task<IResult> RegisterAsync(
         HttpContext context,

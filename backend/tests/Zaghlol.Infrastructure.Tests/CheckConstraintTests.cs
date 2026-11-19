@@ -16,6 +16,7 @@ public class CheckConstraintTests(SchemaFixture fixture)
         {
             // installs
             ["installs: unknown platform"] = ("installs", Set("platform", "windows"), "ck_installs_platform"),
+            ["installs: negative catalog_version"] = ("installs", Set("catalog_version", -1), "ck_installs_catalog_version"),
             ["installs: token_hash not 32 bytes"] = ("installs", Set("token_hash", Rows.Bytes(31)), "ck_installs_token_hash_length"),
             ["installs: registration_key_hash not 32 bytes"] = ("installs", Set("registration_key_hash", Rows.Bytes(33)), "ck_installs_registration_key_hash_length"),
             ["installs: registration_body_sha256 not 32 bytes"] = ("installs", Set("registration_body_sha256", Rows.Bytes(16)), "ck_installs_registration_body_sha256_length"),
@@ -226,8 +227,8 @@ public class CheckConstraintTests(SchemaFixture fixture)
 
         // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
         // + 2 idempotency_records claim checks (T-130) + ck_store_notifications_google_shape (T-133)
-        // + 2 pending_apple_revocations (T-135).
-        Assert.Equal(57, inSchema.Count);
+        // + 2 pending_apple_revocations (T-135) + ck_installs_catalog_version (BUG-009).
+        Assert.Equal(58, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }

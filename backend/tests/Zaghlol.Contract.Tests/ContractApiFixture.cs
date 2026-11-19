@@ -39,7 +39,7 @@ public sealed class ContractApiFixture : IDisposable
                 services.AddSingleton<IDatabaseReadiness>(Readiness);
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public HttpClient Client { get; }

@@ -69,7 +69,7 @@ public sealed class FlagsContractFixture : IAsyncLifetime
                 services.AddSingleton<IOpsNotifier>(new SilentOpsNotifier());
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()

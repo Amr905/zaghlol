@@ -847,6 +847,8 @@ namespace Zaghlol.Infrastructure.Persistence.Migrations
                         {
                             t.HasCheckConstraint("ck_installs_app_version", "app_version ~ '^[0-9]{1,4}(\\.[0-9]{1,4}){1,3}([+-][0-9A-Za-z.-]{1,32})?$'");
 
+                            t.HasCheckConstraint("ck_installs_catalog_version", "catalog_version >= 0");
+
                             t.HasCheckConstraint("ck_installs_platform", "platform IN ('android','ios')");
 
                             t.HasCheckConstraint("ck_installs_registration_body_sha256_length", "octet_length(registration_body_sha256) = 32");

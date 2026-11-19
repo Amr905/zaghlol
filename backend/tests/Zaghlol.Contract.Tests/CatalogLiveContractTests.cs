@@ -95,7 +95,7 @@ public sealed class CatalogContractFixture : IAsyncLifetime
                 services.AddSingleton<IOperatorTokenValidator, CatalogTestOperatorValidator>();
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()

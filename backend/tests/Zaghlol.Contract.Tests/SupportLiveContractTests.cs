@@ -57,7 +57,7 @@ public sealed class SupportContractFixture : IAsyncLifetime
                 services.AddSingleton<ISupportOwnershipCheck>(Ownership);
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()

@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
+    <Compile Include="..\Shared\AppHeaderHandler.cs" Link="Shared\AppHeaderHandler.cs" />
     <Compile Include="..\Shared\PlayWireMock.cs" Link="Shared\PlayWireMock.cs" />
     <Compile Include="..\Shared\AppleTestPki.cs" Link="Shared\AppleTestPki.cs" />
     <Compile Include="..\Shared\AppleWireMock.cs" Link="Shared\AppleWireMock.cs" />
