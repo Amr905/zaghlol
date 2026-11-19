@@ -47,6 +47,9 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     internal const string DevKeysMarker = "kms.env";
 
     private const string P256Oid = "1.2.840.10045.3.1.7";
+
+    private static readonly SearchValues<byte> Base64Alphabet =
+        SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="u8);
     private const int WrappedSize = EnvelopeCipher.NonceSize + DataKey.Size + EnvelopeCipher.TagSize;
 
     private readonly Dictionary<string, SigningEntry> signing;
@@ -452,7 +455,9 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
                 text = text[..^1];
             }
 
-            if (Base64.DecodeFromUtf8(text, secret, out var consumed, out var written) != OperationStatus.Done
+            // Base64.DecodeFromUtf8 skips white space; the format allows none (only one trailing newline, removed above).
+            if (text.ContainsAnyExcept(Base64Alphabet)
+                || Base64.DecodeFromUtf8(text, secret, out var consumed, out var written) != OperationStatus.Done
                 || consumed != text.Length
                 || written != DataKey.Size)
             {
