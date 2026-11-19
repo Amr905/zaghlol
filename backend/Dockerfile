@@ -2,6 +2,10 @@
 # One image, two processes: the API (default) and the worker (override the entrypoint).
 # Build context: the backend/ directory.
 
+# TODO(PO/Lead) T-175 L-5: pin by digest. Not resolvable from the cloud workspace (mcr.microsoft.com blocked). Run
+#   docker buildx imagetools inspect mcr.microsoft.com/dotnet/sdk:10.0 --format '{{.Manifest.Digest}}'
+# and change the line below to `FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:<digest> AS build # 10.0`.
+# Dependabot (docker ecosystem, .github/dependabot.yml) then bumps the digest weekly.
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -19,6 +23,7 @@ RUN dotnet publish src/Zaghlol.Api/Zaghlol.Api.csproj -c Release --no-restore -p
  && dotnet publish src/Zaghlol.Workers/Zaghlol.Workers.csproj -c Release --no-restore -p:UseAppHost=false -o /app/worker
 
 # Chiseled (distroless-style) runtime: no shell, no package manager, non-root by default.
+# TODO(PO/Lead) T-175 L-5: pin by digest, same command as above for aspnet:10.0-noble-chiseled.
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS final
 WORKDIR /app
 COPY --from=build /app/api ./api
