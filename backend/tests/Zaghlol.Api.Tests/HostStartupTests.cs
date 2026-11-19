@@ -72,7 +72,7 @@ public class HostStartupTests
         Assert.Empty(outside);
     }
 
-    private static IEnumerable<Exception> Chain(Exception error)
+    internal static IEnumerable<Exception> Chain(Exception error)
     {
         var pending = new Stack<Exception>([error]);
         while (pending.TryPop(out var current))
