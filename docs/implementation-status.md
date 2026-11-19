@@ -838,6 +838,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-262** (batch 42): see the batch-42 Lead delta check.
 
+- **FU-263** (batch 43, QA fixes): review minors and nits in [batch-43](05-reviews/batch-43.md): F1 the app-header contract theory sends `{}`, so body validation may answer 400 first on sync/purchases/sign-in; F3 backend-api.md §5 lacks the new report endpoints' limits; F4–F9 (exact timestamp for single-install institutions, `AddCheckConstraint` lock at scale, channel tie-break, no Workers SIGTERM test, dev passwords in `docs/qa/tools`). Also: (a) **confirm riverpod_lint runs in CI**: `app-ci` was green on main while a clean local `flutter analyze` reported the BUG-007 warning; (b) BUG-001 guard: once T-140 lands the production keys, add a CI check that fails a `prod` build while `releaseResponseKeys` or `releaseEntitlementKeys` is empty; (c) DB-backed tests of batch 43 ran only on local PostgreSQL 16 (Docker Hub is blocked in the cloud workspace); CI on PostgreSQL 17 is the gate.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -933,3 +935,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-18 | Batch 39 (`batch/2026-11-18-39`): T-136 OIDC, T-059 merchants, T-099 mascot moments, T-159 Android OCR, T-165 emulator evidence. FU-260. |
 | 2026-11-18 | Batch 41 (`batch/2026-11-18-41`): T-156 PDF import (bank-agnostic), share→OCR, T-165 script, alias lint, FU-259, T-031 search. FU-261. |
 | 2026-11-18 | Batch 42 (`batch/2026-11-18-42`): SMS-po42 (CIB promo fix, Arab Bank EG template-only, Mashreq, Vodafone Cash), T-156b (3 layouts + scanned OCR, review/year confirmation). FU-262. |
+| 2026-11-19 | Batch 43 (`batch/2026-11-19-43-qa-fixes`): QA audit fixes BUG-002…BUG-009 (SIGTERM exit 0, operator bank-requests and daily-active reports, Zaghlol-App required on /v1, purchaseToken 400, catalog_version CHECK, analyzer ignore, SRS/status/README sync). BUG-001 waits for T-140. Review [batch-43](05-reviews/batch-43.md) APPROVED. FU-263. Progress 167/186. |
