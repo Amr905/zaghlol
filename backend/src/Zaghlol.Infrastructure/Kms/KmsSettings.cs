@@ -118,7 +118,15 @@ public sealed partial class KmsSettings
         {
             if (entry.Value is { } value)
             {
-                fingerprints[entry.Key] = value.Trim();
+                // Review C7: shell-safe variable names spell '-' as '_' (Kms__File__Fingerprints__install_pepper); key names
+                // never contain '_', so both spellings name the same key. Two different pins for one key are refused.
+                var name = entry.Key.Replace('_', '-');
+                if (fingerprints.TryGetValue(name, out var existing) && !string.Equals(existing, value.Trim(), StringComparison.Ordinal))
+                {
+                    throw new KmsConfigurationException("Kms:File:Fingerprints names one key twice with different values.");
+                }
+
+                fingerprints[name] = value.Trim();
             }
         }
 

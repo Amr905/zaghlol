@@ -133,7 +133,7 @@ public static class FileKeyTool
                 lines.Add(prefix + "PublicJwk__Crv=" + jwk.Crv);
                 lines.Add(prefix + "PublicJwk__X=" + jwk.X);
                 lines.Add(prefix + "PublicJwk__Y=" + jwk.Y);
-                lines.Add("Kms__File__Fingerprints__" + kid + "=" + KeyFingerprints.OfSigningKey(key));
+                lines.Add("Kms__File__Fingerprints__" + ShellName(kid) + "=" + KeyFingerprints.OfSigningKey(key));
             }
 
             foreach (var name in request.Secrets)
@@ -143,7 +143,7 @@ public static class FileKeyTool
                 {
                     RandomNumberGenerator.Fill(secret);
                     WriteSecret(Path.Combine(request.Output, name + ".key"), secret, written);
-                    lines.Add("Kms__File__Fingerprints__" + name + "=" + KeyFingerprints.OfSecret(secret));
+                    lines.Add("Kms__File__Fingerprints__" + ShellName(name) + "=" + KeyFingerprints.OfSecret(secret));
                     if (name == "seat" || name.StartsWith("seat-", StringComparison.Ordinal))
                     {
                         lines.Add("Kms__HmacKeys__SeatCheck=" + Convert.ToHexStringLower(HMACSHA256.HashData(secret, "zaghlol-kseat-check-v1"u8)));
@@ -257,6 +257,9 @@ public static class FileKeyTool
         // UnixCreateMode is masked by the umask; set it explicitly.
         File.SetUnixFileMode(path, KeyFile);
     }
+
+    /// <summary>Review C7: environment variable names a POSIX shell accepts ('-' becomes '_'; the settings read both).</summary>
+    private static string ShellName(string name) => name.Replace('-', '_');
 
     private static byte[] PublicPoint(ECDsa key)
     {

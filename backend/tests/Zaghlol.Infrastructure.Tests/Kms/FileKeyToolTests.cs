@@ -75,6 +75,31 @@ public sealed class FileKeyToolTests : IDisposable
     }
 
     [LinuxFact]
+    public async Task ThePrintedLinesAreSafeToSourceInAShell()
+    {
+        // Review C7: every line is a comment or NAME=value with a POSIX variable name and no shell metacharacters.
+        var output = Path.Combine(root, "kms-shell");
+        var (code, stdout, stderr) = Run(FullSet, output, workingDirectory: root);
+        Assert.True(code == FileKeyTool.Ok, stderr);
+
+        var lines = stdout.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        Assert.All(lines.Where(l => !l.StartsWith('#')), l => Assert.Matches("^[A-Za-z_][A-Za-z0-9_]*=[A-Za-z0-9_:.-]*$", l));
+
+        var envFile = Path.Combine(root, "kms.sh");
+        await File.WriteAllTextAsync(envFile, stdout);
+        using var shell = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("sh", ["-ec", ". \"$1\"; printf %s \"$Kms__File__Fingerprints__install_pepper\"", "sh", envFile])
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+        })!;
+        var printed = await shell.StandardOutput.ReadToEndAsync();
+        await shell.WaitForExitAsync();
+        Assert.Equal(0, shell.ExitCode);
+        Assert.Matches("^[0-9a-f]{64}$", printed);
+    }
+
+    [LinuxFact]
     public void TheToolRefusesToRunInsideTheRepository()
     {
         var output = Path.Combine(root, "kms");

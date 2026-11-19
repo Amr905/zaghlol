@@ -41,6 +41,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     public const string OtherEnvironmentUnsetMessage = "Outside Development and Testing, Kms:File:OtherEnvironmentFingerprints must list the other environment's fingerprints, or Kms:File:NoOtherEnvironment must be true.";
     public const string OtherEnvironmentMalformedMessage = "Kms:File:OtherEnvironmentFingerprints entries must be 64 lower-case hex characters.";
     public const string NotDumpableMessage = "Outside Development and Testing, the File KMS could not mark the process non-dumpable (prctl PR_SET_DUMPABLE); keys would be exposed to core dumps.";
+    public const string SharedKeyMessage = "A File KMS key serves two roles: each HMAC key and each envelope key needs its own key reference and its own key bytes.";
     public const string DevKidMessage = "Outside Development and Testing, the File KMS refuses the development and test kids (year 0000).";
 
     internal const int MaxFileBytes = 8 * 1024;
@@ -99,13 +100,14 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
 
         var signingKeys = new Dictionary<string, SigningEntry>(StringComparer.Ordinal);
         var secretKeys = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
         try
         {
             foreach (var keyRef in ecRefs)
             {
                 var key = LoadEc(directory, keyRef, euid);
                 signingKeys[keyRef] = new SigningEntry(key);
-                CheckFingerprint(settings, keyRef, KeyFingerprints.OfSigningKey(key), KnownTestKeys.SigningKeys);
+                CheckFingerprint(settings, keyRef, KeyFingerprints.OfSigningKey(key), KnownTestKeys.SigningKeys, seen);
             }
 
             foreach (var keyRef in secretRefs)
@@ -117,7 +119,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
                     throw new KmsConfigurationException(KnownTestKeyMessage);
                 }
 
-                CheckFingerprint(settings, keyRef, KeyFingerprints.OfSecret(secret), KnownTestKeys.Secrets);
+                CheckFingerprint(settings, keyRef, KeyFingerprints.OfSecret(secret), KnownTestKeys.Secrets, seen);
             }
         }
         catch
@@ -390,11 +392,24 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
             throw new KmsConfigurationException(KeyRefMessage);
         }
 
+        // Review S3: one 32-byte key must not be both an HMAC key and a key-encryption key (or two HMAC keys).
+        var roles = settings.HmacKeyRefs.Values.Concat(settings.EnvelopeDecryptKeyRefs).ToList();
+        if (roles.Distinct(StringComparer.Ordinal).Count() != roles.Count)
+        {
+            throw new KmsConfigurationException(SharedKeyMessage);
+        }
+
         return (ec, symmetric);
     }
 
-    private static void CheckFingerprint(KmsSettings settings, string keyRef, string fingerprint, IReadOnlySet<string> denied)
+    private static void CheckFingerprint(KmsSettings settings, string keyRef, string fingerprint, IReadOnlySet<string> denied, HashSet<string> seen)
     {
+        // Review S3: the same key bytes under two names.
+        if (!seen.Add(fingerprint))
+        {
+            throw new KmsConfigurationException(SharedKeyMessage);
+        }
+
         if (denied.Contains(fingerprint))
         {
             throw new KmsConfigurationException(KnownTestKeyMessage);
@@ -428,9 +443,17 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
             }
 
             key.ImportFromPem(chars);
-            if (!string.Equals(key.ExportParameters(includePrivateParameters: false).Curve.Oid.Value, P256Oid, StringComparison.Ordinal))
+
+            // Review C2: a key with explicit curve parameters has no OID; it is refused like any non-P-256 key.
+            var curve = key.ExportParameters(includePrivateParameters: false).Curve;
+            if (!curve.IsNamed || !string.Equals(curve.Oid?.Value, P256Oid, StringComparison.Ordinal))
             {
                 throw new KmsConfigurationException(NotEcPemMessage);
+            }
+
+            if (HasTinyScalar(key))
+            {
+                throw new KmsConfigurationException(KnownTestKeyMessage);
             }
 
             return key;
@@ -449,6 +472,23 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         {
             CryptographicOperations.ZeroMemory(buffer);
             Array.Clear(chars);
+        }
+    }
+
+    /// <summary>
+    /// Review S4: a private scalar below 2^64 (d = 1 makes the public key the generator) is a crafted key, never a generated
+    /// one: the chance for a random scalar is 2^-192. The exported scalar is zeroed straight away.
+    /// </summary>
+    private static bool HasTinyScalar(ECDsa key)
+    {
+        var d = key.ExportParameters(includePrivateParameters: true).D!;
+        try
+        {
+            return d.Length <= 8 || !d.AsSpan(0, d.Length - 8).ContainsAnyExcept((byte)0);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(d);
         }
     }
 

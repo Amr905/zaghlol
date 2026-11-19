@@ -290,6 +290,7 @@ public sealed class FileKmsTests : IDisposable
     [InlineData("p384")]
     [InlineData("garbage")]
     [InlineData("rsa")]
+    [InlineData("explicit")]
     public async Task G7_ASigningKeyThatIsNotAP256PrivateKeyIsRefused(string kind)
     {
         string pem;
@@ -313,6 +314,15 @@ public sealed class FileKmsTests : IDisposable
                 using (var rsa = RSA.Create(2048))
                 {
                     pem = rsa.ExportPkcs8PrivateKeyPem();
+                }
+
+                break;
+            case "explicit":
+                // Review C2: P-256 written with explicit curve parameters (no OID).
+                using (var named = ECDsa.Create(ECCurve.NamedCurves.nistP256))
+                using (var explicitKey = ECDsa.Create(named.ExportExplicitParameters(includePrivateParameters: true)))
+                {
+                    pem = explicitKey.ExportPkcs8PrivateKeyPem();
                 }
 
                 break;
@@ -419,6 +429,55 @@ public sealed class FileKmsTests : IDisposable
         settings["Signing:Keys:0:PublicJwk:Y"] = System.Buffers.Text.Base64Url.EncodeToString(point.Y!);
 
         await RefusedAsync("Production", settings, FileKms.KnownTestKeyMessage);
+    }
+
+    [LinuxFact]
+    public async Task G10_ASigningKeyWithATinyScalarIsRefused()
+    {
+        // Review S4: d = 5, so the public key is 5G; the pin and JWK match, only the scalar check stops it.
+        var scalar = new byte[32];
+        scalar[31] = 5;
+        using var tiny = ECDsa.Create();
+        tiny.ImportParameters(new ECParameters { Curve = ECCurve.NamedCurves.nistP256, D = scalar });
+        keys.WriteSigningKey("s2026a", tiny);
+        var settings = keys.Settings();
+        var point = tiny.ExportParameters(false).Q;
+        settings["Signing:Keys:0:PublicJwk:X"] = System.Buffers.Text.Base64Url.EncodeToString(point.X!);
+        settings["Signing:Keys:0:PublicJwk:Y"] = System.Buffers.Text.Base64Url.EncodeToString(point.Y!);
+
+        await RefusedAsync("Production", settings, FileKms.KnownTestKeyMessage);
+    }
+
+    // ---- S3: one key, one role ------------------------------------------------------------------------------------------
+
+    [LinuxTheory]
+    [InlineData("Kms:Envelope:KeyRef")]
+    [InlineData("Kms:HmacKeys:Audit")]
+    public async Task S3_OneKeyReferenceInTwoRolesIsRefused(string setting)
+    {
+        var settings = keys.Settings();
+        settings[setting] = "file:seat";
+
+        await RefusedAsync("Production", settings, FileKms.SharedKeyMessage);
+    }
+
+    [LinuxFact]
+    public async Task S3_TheSameKeyBytesUnderTwoNamesAreRefused()
+    {
+        keys.WriteSecret("envelope", keys.ReadSecret("audit"));
+
+        await RefusedAsync("Production", keys.Settings(), FileKms.SharedKeyMessage);
+    }
+
+    [LinuxFact]
+    public async Task C7_AShellSafePinNameIsAccepted()
+    {
+        var settings = keys.Settings();
+        settings["Kms:File:Fingerprints:install_pepper"] = settings["Kms:File:Fingerprints:install-pepper"];
+        settings.Remove("Kms:File:Fingerprints:install-pepper");
+        await using var services = FileKmsHost.Services("Production", settings);
+
+        await FileKmsHost.StartAsync(services);
     }
 
     // ---- G11: fingerprint pins ------------------------------------------------------------------------------------------
