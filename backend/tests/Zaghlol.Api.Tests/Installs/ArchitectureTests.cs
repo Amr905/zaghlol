@@ -1,4 +1,3 @@
-using Zaghlol.Testing;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Zaghlol.Api.Json;
 using Zaghlol.Domain;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Api.Tests.Installs;
 

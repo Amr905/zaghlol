@@ -77,7 +77,7 @@ public class PurchaseVerifyEndpointTests(PurchasesHostFixture fixture) : IClassF
     }
 
     [Fact]
-    public async Task AnUnknownProductOrAnOverlongTokenIs422WithoutAnyPlayCall()
+    public async Task AnUnknownProductOrABadCharacterTokenIs422AndAnOverlongOneIs400WithoutAnyPlayCall()
     {
         var (_, install) = await fixture.NewInstallAsync();
         var before = Play.Received().Count;
@@ -87,9 +87,21 @@ public class PurchaseVerifyEndpointTests(PurchasesHostFixture fixture) : IClassF
         using var dots = await fixture.VerifyAsync(install, PurchasesHostFixture.AndroidBody(PlayWireMock.Yearly, ".."));
 
         await ProblemAssert.AssertAsync(wrongApp, HttpStatusCode.UnprocessableEntity, "PURCHASE_WRONG_APP");
-        await ProblemAssert.AssertAsync(tooLong, HttpStatusCode.UnprocessableEntity, "PURCHASE_TOKEN_INVALID");
+        await ProblemAssert.AssertAsync(tooLong, HttpStatusCode.BadRequest, "VALIDATION_FAILED"); // BUG-005 (API-083): OpenAPI maxLength 512
         await ProblemAssert.AssertAsync(dots, HttpStatusCode.UnprocessableEntity, "PURCHASE_TOKEN_INVALID");
         Assert.Equal(before, Play.Received().Count);
+    }
+
+    [Fact]
+    public async Task AToken512CharactersLongIsStillVerifiedAndOneOf513IsRefusedBeforeAnyPlayCall()
+    {
+        var (_, install) = await fixture.NewInstallAsync();
+        using var atLimit = await fixture.VerifyAsync(install, PurchasesHostFixture.AndroidBody(PlayWireMock.Yearly, new string('a', 512)));
+        using var overLimit = await fixture.VerifyAsync(install, PurchasesHostFixture.AndroidBody(PlayWireMock.Yearly, new string('a', 513)));
+
+        Assert.NotEqual(HttpStatusCode.BadRequest, atLimit.StatusCode); // passes validation (Play knows nothing of it, so it is not granted)
+        await ProblemAssert.AssertAsync(overLimit, HttpStatusCode.BadRequest, "VALIDATION_FAILED");
+        Assert.Equal(0, Play.CountContaining("GET", new string('a', 513)));
     }
 
     // AC 2.
