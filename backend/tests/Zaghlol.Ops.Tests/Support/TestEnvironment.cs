@@ -7,7 +7,16 @@ namespace Zaghlol.Ops.Tests.Support;
 /// <summary>A scripted order-ID prompt: returns the given text through the real <see cref="SecretPrompt"/> logic, or refuses.</summary>
 internal sealed class ScriptedKeys(string? typed, bool interactive = true) : IKeySource
 {
-    private readonly Queue<ConsoleKeyInfo> keys = new(Keys(typed));
+    private readonly Queue<ConsoleKeyInfo> keys = typed is null ? new() : new(Keys(typed));
+
+    /// <summary>Queues what the operator types at the next prompt.</summary>
+    public void Enqueue(string text)
+    {
+        foreach (var key in Keys(text))
+        {
+            keys.Enqueue(key);
+        }
+    }
 
     public bool IsInteractive => interactive;
 
@@ -31,9 +40,10 @@ internal sealed class TestEnvironment : IDisposable
 {
     public const string ApiBase = "https://api.zaghlol.test";
 
-    public TestEnvironment(HttpMessageHandler? api, CliTestIdp? idp, string? typedOrderId = null, bool interactive = true)
+    public TestEnvironment(HttpMessageHandler? api, CliTestIdp? idp, string? typedOrderId = null, bool interactive = true, bool ownsIdp = true)
     {
         Idp = idp;
+        this.ownsIdp = ownsIdp;
         PromptText = new StringWriter();
         Variables = new Dictionary<string, string>(StringComparer.Ordinal)
         {
@@ -45,6 +55,8 @@ internal sealed class TestEnvironment : IDisposable
         Prompt = new SecretPrompt(Keys, PromptText);
         Api = api;
     }
+
+    private readonly bool ownsIdp;
 
     public CliTestIdp? Idp { get; }
 
@@ -67,6 +79,16 @@ internal sealed class TestEnvironment : IDisposable
     public HttpMessageHandler? Api { get; }
 
     public MemoryTokenStore Store { get; } = new();
+
+    /// <summary>Queues the next order ID the operator "types".</summary>
+    public void Type(string text) => Keys.Enqueue(text);
+
+    public void ClearOutput()
+    {
+        Output.GetStringBuilder().Clear();
+        Error.GetStringBuilder().Clear();
+        PromptText.GetStringBuilder().Clear();
+    }
 
     public string AllOutput => Output + "\n" + Error + "\n" + PromptText;
 
@@ -92,7 +114,13 @@ internal sealed class TestEnvironment : IDisposable
         return await OpsCli.RunAsync(args, Build(), cancellation.Token);
     }
 
-    public void Dispose() => Idp?.Dispose();
+    public void Dispose()
+    {
+        if (ownsIdp)
+        {
+            Idp?.Dispose();
+        }
+    }
 
     private sealed class RefusingBrowser : IBrowserLauncher
     {
