@@ -116,6 +116,58 @@ public sealed class FileKeyToolTests : IDisposable
     }
 
     [LinuxFact]
+    public void ASymlinkedParentPointingIntoTheRepositoryIsRefused()
+    {
+        // Review C1/S1 repro: a link outside the checkout whose target is inside it.
+        var target = Path.Combine(AppContext.BaseDirectory, "symlink-target-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(target);
+        try
+        {
+            var link = Path.Combine(root, "link");
+            Directory.CreateSymbolicLink(link, target);
+
+            var (code, stdout, stderr) = Run(FullSet, Path.Combine(link, "zz-keys"), workingDirectory: root);
+
+            Assert.Equal(FileKeyTool.Usage, code);
+            Assert.Empty(stdout);
+            Assert.Contains("symbolic link", stderr, StringComparison.Ordinal);
+            Assert.Empty(Directory.EnumerateFileSystemEntries(target));
+        }
+        finally
+        {
+            Directory.Delete(target, recursive: true);
+        }
+    }
+
+    [LinuxFact]
+    public void ASymlinkedAncestorOutsideTheRepositoryIsRefusedToo()
+    {
+        var real = Directory.CreateDirectory(Path.Combine(root, "real")).FullName;
+        var link = Path.Combine(root, "alias");
+        Directory.CreateSymbolicLink(link, real);
+        Directory.CreateDirectory(Path.Combine(real, "sub"));
+
+        var (code, _, _) = Run(FullSet, Path.Combine(link, "sub", "kms"), workingDirectory: root);
+
+        Assert.Equal(FileKeyTool.Usage, code);
+        Assert.False(Directory.Exists(Path.Combine(real, "sub", "kms")));
+    }
+
+    [LinuxFact]
+    public void ADanglingSymlinkAtOutIsRefused()
+    {
+        var output = Path.Combine(root, "dangling");
+        var target = Path.Combine(root, "nowhere");
+        File.CreateSymbolicLink(output, target);
+
+        var (code, _, stderr) = Run(FullSet, output, workingDirectory: root);
+
+        Assert.Equal(FileKeyTool.Usage, code);
+        Assert.Contains("must not exist", stderr, StringComparison.Ordinal);
+        Assert.False(Path.Exists(target));
+    }
+
+    [LinuxFact]
     public void AnExistingOutputDirectoryIsRefusedAndLeftAlone()
     {
         var output = Path.Combine(root, "existing");

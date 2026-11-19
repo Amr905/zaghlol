@@ -63,19 +63,49 @@ public static class FileKeyTool
             return Usage;
         }
 
+        // The source-tree checks below are lexical, so every component must be a real directory: a symbolic link anywhere
+        // in the parent chain could point into a checkout (review C1/S1).
+        if (!IsRealDirectoryChain(parent))
+        {
+            stderr.WriteLine("refused: --out must not pass through a symbolic link (give the real path).");
+            return Usage;
+        }
+
         if (FileKms.IsInSourceTree(parent) || FileKms.Overlaps(output, AppContext.BaseDirectory))
         {
             stderr.WriteLine("refused: --out is inside a source tree or the application directory; keys must never be written there.");
             return Usage;
         }
 
-        if (Directory.Exists(output) || File.Exists(output))
+        // lstat, not Exists: a dangling symbolic link at --out makes Exists false.
+        if (PosixFiles.LStat(output) is not null || Directory.Exists(output) || File.Exists(output))
         {
             stderr.WriteLine("refused: --out must not exist yet (the tool creates it with mode 0700).");
             return Usage;
         }
 
         return Generate(request, stdout, stderr);
+    }
+
+    /// <summary>True when every component from <c>/</c> down to <paramref name="directory"/> is a directory and none is a symlink.</summary>
+    private static bool IsRealDirectoryChain(string directory)
+    {
+        var current = "/";
+        if (PosixFiles.LStat(current) is not { IsDirectory: true })
+        {
+            return false;
+        }
+
+        foreach (var part in directory.Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            current = current.Length == 1 ? "/" + part : current + "/" + part;
+            if (PosixFiles.LStat(current) is not { IsDirectory: true, IsSymlink: false })
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     [SupportedOSPlatform("linux")]

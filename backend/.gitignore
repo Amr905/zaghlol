@@ -22,3 +22,7 @@ coverage/
 
 # Development KMS keys (tools/dev-keys.sh); never committed
 .dev-keys/
+
+# Key files (T-200): production keys must never be in the repository; the key tool also refuses to write here.
+*.key
+*.pem
