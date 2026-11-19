@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-264**.
+Next free follow-up number: **FU-265**.
 
 ## Batch 39 (2026-11-18)
 
@@ -195,6 +195,13 @@ An independent QA audit of `main` @ bc5b9d1d (`docs/qa/`) found the app NOT READ
 - BUG-009: `ck_installs_catalog_version`.
 
 This session had **no push access** (the push attach was refused), so the batch was handed to the PO as a git bundle in `C:\Projects\Zaghlol`. Cloud workspace notes: Docker Hub is blocked, so Testcontainers can't pull `postgres:17`; in-process HttpClient calls to 127.0.0.1 need `UseProxy = false`.
+
+## Batch 44 (2026-11-19): T-137 and T-175 pass 1
+
+`batch/2026-11-19-44` (on top of batch 43):
+- **T-137** zaghlol-ops CLI: OIDC auth-code + PKCE loopback (IdP-agnostic; Entra or Google by config), token only in the OS credential store or memory, order ID from a no-echo prompt (no flag/env), a command for every Admin operation (a test fails on a missing one), `docs/ops/support-runbook.md` (one action per alert, R6-1 server rule + break-glass), `docs/ops/privacy-disclosures.md`, `backend/deploy/db/break-glass-unfreeze.sql` (only the sole enabled support_lead; canonical UUID). Waits on the PO for the IdP and the helpdesk/PDPL/retention record.
+- **T-175 pass 1** (`docs/05-reviews/T-175-pass1.md`): 0 Critical, 1 High (= BUG-001), 1 Medium, 6 Low. Fixed here: M-1 (Dependabot, osv-scanner, gitleaks, CycloneDX SBOM in `security-scan.yml`), L-1 (notification taps only via the non-exported `NotificationTapActivity` with a per-process token; mark-paid waits for the lock and asks), L-2 (early error muting), L-3, L-6 (authenticated-by-default fallback policy, anonymous routes = spec `security: []`). Pass 2 needs signed builds, staging and devices.
+- Review: one Opus combined review + one Sonnet delta; two Lead deltas (break-glass F1/F2, test-host routes under the fallback policy).
 
 ## Ready next
 
