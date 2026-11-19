@@ -4,6 +4,8 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>zaghlol-ops</AssemblyName>
     <RootNamespace>Zaghlol.Ops</RootNamespace>
+    <!-- LibraryImport (Windows Credential Manager) generates marshalling code that uses unsafe blocks. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
