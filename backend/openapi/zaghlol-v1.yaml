@@ -66,6 +66,7 @@ paths:
     get:
       tags: [Health]
       operationId: getHealth
+      security: [] # anonymous by design (T-175 L-6: the API maps it with AllowAnonymous; a contract test compares)
       summary: Liveness and readiness
       description: |
         Unauthenticated. Never cached. Readiness: the server runs a trivial database query as the API's own
@@ -96,6 +97,7 @@ paths:
     post:
       tags: [Installs]
       operationId: registerInstall
+      security: [] # anonymous by design (T-175 L-6: the API maps it with AllowAnonymous; a contract test compares)
       summary: Register an install and get an install token
       description: |
         Called lazily on the first sync or first purchase. If `installId` already exists the server answers
@@ -288,6 +290,7 @@ paths:
     get:
       tags: [Catalog]
       operationId: getFullCatalog
+      security: [] # anonymous by design (T-175 L-6: the API maps it with AllowAnonymous; a contract test compares)
       summary: Full signed catalog snapshot
       description: |
         Served from the CDN. Used on first sync or when the client is far behind. The body is signed; the
@@ -695,6 +698,7 @@ paths:
     post:
       tags: [Accounts]
       operationId: appleAndroidCallback
+      security: [] # anonymous by design (T-175 L-6: the API maps it with AllowAnonymous; a contract test compares)
       summary: Sign in with Apple web-flow callback for Android
       description: |
         The Android web flow authorizes with `response_type=code id_token`, `response_mode=form_post`,
@@ -810,6 +814,7 @@ paths:
     post:
       tags: [Notifications]
       operationId: ingestAppleNotification
+      security: [] # anonymous by design (T-175 L-6: the API maps it with AllowAnonymous; a contract test compares)
       summary: App Store Server Notifications V2 ingest
       description: |
         Authenticated by the JWS signature inside `signedPayload` (x5c chain verified to Apple Root CA G3,

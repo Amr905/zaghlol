@@ -1,0 +1,26 @@
+# T-175 M-1: gitleaks configuration. Extends the default rules; allow-lists ONLY the dev-only
+# values documented in docs/05-reviews/T-175-pass1.md §1.2 (each is refused outside Development/Testing
+# or in release builds) and synthetic test vectors. Do not add production paths here.
+title = "zaghlol gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "dev-only values and synthetic test vectors (T-175 pass 1 §1.2)"
+paths = [
+  '''tools/catalog_build/dev/dev_signing_key\.json''',
+  '''backend/deploy/db/dev-passwords\.sql''',
+  '''backend/docker-compose(\.[a-z-]+)?\.yml''',
+  '''docs/qa/tools/run_backend_local\.sh''',
+  '''docs/qa/tools/api_db_followup\.py''',
+  '''backend/tests/.*''',
+  '''app/test/.*''',
+  '''packages/[^/]+/test/.*''',
+  '''.*/verification-metadata\.xml''',
+  '''.*pubspec\.lock''',
+  '''.*package-lock\.json''',
+]
+regexes = [
+  '''[A-Za-z_]*_dev_only''',
+]

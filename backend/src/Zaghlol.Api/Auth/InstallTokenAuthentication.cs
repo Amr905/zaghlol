@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 using Zaghlol.Api.Problems;
 using Zaghlol.Domain;
@@ -32,9 +34,25 @@ internal static class InstallTokenAuthentication
     {
         services.AddAuthentication(Scheme).AddScheme<AuthenticationSchemeOptions, InstallTokenAuthenticationHandler>(Scheme, _ => { });
         services.AddAuthorizationBuilder()
-            .AddPolicy(Policy, policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser());
+            .AddPolicy(Policy, policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser())
+            // T-175 L-6: authenticated by default. An endpoint without its own policy or [AllowAnonymous] is refused (the default
+            // scheme's handler authenticates only endpoints marked InstallTokenRequiredMetadata, so an unmarked one answers 401), so a
+            // new route can never be public by accident. The intended anonymous routes say so with AllowAnonymous(); a contract test
+            // compares them with the OpenAPI operations that declare `security: []`.
+            .SetFallbackPolicy(FallbackPolicy);
         return services;
     }
+
+    /// <summary>
+    /// The fallback: an authenticated user for every real route endpoint. Requests that matched no route (404) or matched a path with the wrong
+    /// method (405) carry no route endpoint, so they pass and keep their documented 404 NOT_FOUND / 405 METHOD_NOT_ALLOWED problem answers
+    /// instead of turning into 401 (the framework fallback would challenge them too).
+    /// </summary>
+    internal static AuthorizationPolicy FallbackPolicy { get; } = new AuthorizationPolicyBuilder()
+        .RequireAssertion(context =>
+            context.User.Identity?.IsAuthenticated == true
+            || (context.Resource is HttpContext http && http.GetEndpoint() is not RouteEndpoint))
+        .Build();
 
     /// <summary>
     /// Every endpoint of this builder needs <c>Authorization: Bearer &lt;installToken&gt;</c>: <c>401 INSTALL_TOKEN_INVALID</c>

@@ -53,6 +53,7 @@ internal static class AppleNotificationEndpoints
 
         endpoints.MapPost(Route, IngestAsync)
             .WithName("ingestAppleNotification")
+            .AllowAnonymous()
             .WithMetadata(AppleNotificationRateLimitMetadata.Instance);
         return endpoints;
     }
