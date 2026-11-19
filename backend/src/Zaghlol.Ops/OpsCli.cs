@@ -1,33 +1,84 @@
+using Zaghlol.Ops.Auth;
+using Zaghlol.Ops.Cli;
+using Zaghlol.Ops.Commands;
+
 namespace Zaghlol.Ops;
 
-/// <summary>
-/// Stub for the operator CLI (`zaghlol-ops`). Commands (catalog, flags, support lookup) and OIDC sign-in (authorization code
-/// + PKCE with a loopback redirect; the device-code grant is disabled, R3-9) are added in later tasks.
-/// </summary>
+/// <summary>The <c>zaghlol-ops</c> operator CLI: parse, run one command, map the outcome to an exit code.</summary>
 internal static class OpsCli
 {
-    public const int Success = 0;
-    public const int UsageError = 2;
+    public const int Success = ExitCode.Success;
+    public const int UsageError = ExitCode.Usage;
 
-    public static int Run(string[] args, TextWriter output, TextWriter error)
+    /// <summary>Runs against the real terminal, browser, network and credential store.</summary>
+    public static Task<int> RunAsync(string[] args, CancellationToken cancellationToken) => RunAsync(args, OpsEnvironment.ForProcess(), cancellationToken);
+
+    public static async Task<int> RunAsync(string[] args, OpsEnvironment environment, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(args);
-        ArgumentNullException.ThrowIfNull(output);
-        ArgumentNullException.ThrowIfNull(error);
+        ArgumentNullException.ThrowIfNull(environment);
 
-        if (args.Length == 0 || args[0] is "-h" or "--help" or "help")
+        var printer = new Printer(environment.Output, environment.Error);
+        if (args.Length == 1 && args[0] is "-v" or "--version" or "version")
         {
-            output.WriteLine("zaghlol-ops - Zaghlol operator CLI (stub). Usage: zaghlol-ops [--help | --version]");
+            printer.Out(typeof(OpsCli).Assembly.GetName().Version?.ToString() ?? "0.0.0");
             return Success;
         }
 
-        if (args[0] is "-v" or "--version" or "version")
+        var outcome = CommandLine.Parse(args, Registry.All);
+        if (outcome.Help)
         {
-            output.WriteLine(typeof(OpsCli).Assembly.GetName().Version?.ToString() ?? "0.0.0");
+            Help(printer, outcome.Spec);
             return Success;
         }
 
-        error.WriteLine("Unknown command. Run 'zaghlol-ops --help'.");
-        return UsageError;
+        if (outcome.Spec is null || outcome.Args is null)
+        {
+            printer.Err("error: " + outcome.Error);
+            return UsageError;
+        }
+
+        var context = new CommandContext(environment, outcome.Args, printer, cancellationToken);
+        try
+        {
+            return await outcome.Spec.Run(context).ConfigureAwait(false);
+        }
+        catch (OpsConfigException e)
+        {
+            printer.Err("error: " + e.Message);
+            return UsageError;
+        }
+        catch (LoginException e)
+        {
+            printer.Err("error: sign-in failed: " + e.Message);
+            return ExitCode.Auth;
+        }
+        catch (OperationCanceledException)
+        {
+            printer.Err("Cancelled.");
+            return ExitCode.Unreachable;
+        }
+    }
+
+    private static void Help(Printer printer, CommandSpec? spec)
+    {
+        if (spec is not null)
+        {
+            printer.Out("Usage: zaghlol-ops " + spec.Usage);
+            printer.Out(spec.Summary);
+            printer.Out("Global options: --config FILE, --no-browser, --help");
+            return;
+        }
+
+        printer.Out("zaghlol-ops - Zaghlol operator CLI. Usage: zaghlol-ops <command> [options]   (zaghlol-ops <command> --help)");
+        printer.Out(string.Empty);
+        foreach (var command in Registry.All)
+        {
+            printer.Out("  " + command.Usage);
+        }
+
+        printer.Out(string.Empty);
+        printer.Out("Settings: ZAGHLOL_OPS_API_URL, ZAGHLOL_OPS_ISSUER, ZAGHLOL_OPS_CLIENT_ID (or a JSON file, --config / ZAGHLOL_OPS_CONFIG).");
+        printer.Out("Exit codes: 0 ok, 1 refused by the API, 2 usage, 3 sign-in or role, 4 network.");
     }
 }

@@ -1,3 +1,10 @@
 using Zaghlol.Ops;
 
-return OpsCli.Run(args, Console.Out, Console.Error);
+using var cancellation = new CancellationTokenSource();
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cancellation.Cancel();
+};
+
+return await OpsCli.RunAsync(args, cancellation.Token).ConfigureAwait(false);
