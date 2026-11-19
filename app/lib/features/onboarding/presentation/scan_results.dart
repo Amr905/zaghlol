@@ -483,7 +483,6 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
                               ),
                             _CardRow(
                               item: i,
-                              tone: n,
                               subtitle: l.onboardingScanResultsCardSubtitle(
                                 i.txnCount,
                                 _digits(i.txnCount),
@@ -638,7 +637,6 @@ class _CardRow extends StatelessWidget {
     required this.subtitle,
     required this.confirmed,
     required this.onTap,
-    required this.tone,
     this.badge,
     this.badgeWarn = false,
   });
@@ -647,23 +645,11 @@ class _CardRow extends StatelessWidget {
   final String? badge;
   final bool badgeWarn;
   final bool confirmed;
-  final int tone;
   final VoidCallback onTap;
-
-  String get _initials {
-    final src = (item.institutionCode ?? item.label).trim();
-    final t = src.length <= 4 ? src : src.substring(0, 4);
-    return t.toUpperCase();
-  }
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final (tileBg, tileFg) = switch (tone % 3) {
-      0 => (c.primaryContainer, c.primary),
-      1 => (c.surfaceAlt, c.textMuted),
-      _ => (c.zaghlolBg, c.warningText),
-    };
     return Semantics(
       button: true,
       label: '${item.label}, $subtitle',
@@ -681,9 +667,7 @@ class _CardRow extends StatelessWidget {
               children: [
                 ZInstitutionAvatar(
                   institutionCode: item.institutionCode,
-                  initials: _initials,
-                  neutralBg: tileBg,
-                  neutralFg: tileFg,
+                  label: item.label,
                 ),
                 const SizedBox(width: ZSpacing.md),
                 Expanded(

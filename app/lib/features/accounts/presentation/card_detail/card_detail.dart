@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/ui/bank_name_text.dart';
+import '../../../../core/ui/institution_avatar.dart';
 import '../../../../core/l10n/card_number.dart';
 import '../../../../core/db/app_database.dart' show IgnoreRuleRow;
 import '../../../../core/db/daos/capture_controls_dao.dart' show IgnoreChannel;
@@ -916,21 +917,19 @@ class _BankTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final word = account.label.trim().split(RegExp(r'\s+')).first;
-    return Container(
-      width: 52,
-      height: 52,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
-      child: account.kind == AccountKind.cash
-          ? Icon(Icons.payments_rounded, color: c.primary)
-          : Text(
-              (word.length > 4 ? word.substring(0, 1) : word).toUpperCase(),
-              style: ZType.label.copyWith(
-                color: c.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+    if (account.kind == AccountKind.cash) {
+      return Container(
+        width: 52,
+        height: 52,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
+        child: Icon(Icons.payments_rounded, color: c.primary),
+      );
+    }
+    return ZInstitutionAvatar(
+      institutionCode: account.institutionCode,
+      label: account.label,
+      size: 52,
     );
   }
 }

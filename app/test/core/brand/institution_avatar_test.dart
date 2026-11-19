@@ -2,22 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/brand/institution_brand.dart';
+import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/core/ui/institution_avatar.dart';
 
 Widget _wrap(InstitutionBrand? b, TextDirection d, {double scale = 1}) =>
     ProviderScope(
       child: MaterialApp(
+        theme: ZaghlolTheme.light,
         home: Directionality(
           textDirection: d,
           child: MediaQuery(
             data: MediaQueryData(textScaler: TextScaler.linear(scale)),
             child: Center(
-              child: ZInstitutionAvatar(
-                initials: 'NBE',
-                neutralBg: const Color(0xFFD7F3E5),
-                neutralFg: const Color(0xFF0F7A55),
-                brand: b,
-              ),
+              child: ZInstitutionAvatar(label: 'Nile Bank', brand: b),
             ),
           ),
         ),
@@ -32,19 +29,27 @@ void main() {
           t.widget<Container>(find.byType(Container).first).decoration
               as BoxDecoration;
       expect(box.color, const Color(0xFFD7F3E5));
-      expect(find.text('NBE'), findsOneWidget);
+      expect(find.text('NILE'), findsOneWidget);
     });
   }
 
   testWidgets('initials on brand colour with readable contrast', (t) async {
     for (final v in [0xFF006A4E, 0xFFFFB86B, 0xFFFFFFFF, 0xFF000000]) {
       await t.pumpWidget(
-        _wrap(InstitutionBrand(colorValue: v), TextDirection.rtl),
+        _wrap(
+          InstitutionBrand(colorValue: v, acronym: 'NBE'),
+          TextDirection.rtl,
+        ),
       );
       final txt = t.widget<Text>(find.text('NBE'));
+      final bg =
+          (t.widget<Container>(find.byType(Container).first).decoration
+                  as BoxDecoration)
+              .color!;
       expect(
-        contrastRatio(Color(v), txt.style!.color!),
+        contrastRatio(bg, txt.style!.color!),
         greaterThanOrEqualTo(4.5),
+        reason: '$v',
       );
     }
   });
@@ -54,6 +59,7 @@ void main() {
       _wrap(
         const InstitutionBrand(
           colorValue: 0xFF006A4E,
+          acronym: 'NBE',
           logoAsset: 'assets/brand/logos/none.png',
         ),
         TextDirection.ltr,
