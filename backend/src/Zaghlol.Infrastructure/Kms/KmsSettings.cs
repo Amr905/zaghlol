@@ -7,8 +7,11 @@ namespace Zaghlol.Infrastructure.Kms;
 /// KMS and key-ring configuration, written by IaC (T-140) next to the KMS keys. The key ring is configuration, not a
 /// table: a database write can never change the signer.
 /// <code>
-/// Kms:Provider                    Local (Development/Testing only) | a cloud adapter (T-140)
+/// Kms:Provider                    Local (Development/Testing only) | File (T-200, Linux, any environment)
 /// Kms:Local:KeyDirectory          PEM P-256 keys and base64 32-byte keys, named by keyRef (local:&lt;name&gt;)
+/// Kms:File:KeyDirectory           the same formats, named by keyRef (file:&lt;name&gt;), behind the T-200 guards
+/// Kms:File:Fingerprints:&lt;name&gt;    the pinned fingerprint of each File key (KeyFingerprints)
+/// Kms:File:OtherEnvironmentFingerprints:n | Kms:File:NoOtherEnvironment   staging/production separation
 /// Kms:HmacKeys:Seat|Audit|InstallHashPepper   keyRef of each HMAC key
 /// Kms:Envelope:KeyRef             keyRef of the envelope key-encryption key (new records)
 /// Kms:Envelope:PreviousKeyRefs:n  older key-encryption keys that may still decrypt
@@ -20,6 +23,7 @@ public sealed partial class KmsSettings
     public const string ProviderKey = "Kms:Provider";
     public const string LocalKeyDirectoryKey = "Kms:Local:KeyDirectory";
     public const string LocalProvider = "Local";
+    public const string FileKeyDirectoryKey = "Kms:File:KeyDirectory";
 
     private KmsSettings(
         string? provider,
@@ -27,7 +31,8 @@ public sealed partial class KmsSettings
         IReadOnlyDictionary<KeyedHashKey, string> hmacKeyRefs,
         string envelopeKeyRef,
         IReadOnlyList<string> envelopeDecryptKeyRefs,
-        IReadOnlyList<SigningKey> signingKeys)
+        IReadOnlyList<SigningKey> signingKeys,
+        FileProviderSettings file)
     {
         Provider = provider;
         LocalKeyDirectory = localKeyDirectory;
@@ -35,6 +40,10 @@ public sealed partial class KmsSettings
         EnvelopeKeyRef = envelopeKeyRef;
         EnvelopeDecryptKeyRefs = envelopeDecryptKeyRefs;
         SigningKeys = signingKeys;
+        FileKeyDirectory = file.KeyDirectory;
+        FileFingerprints = file.Fingerprints;
+        FileOtherEnvironmentFingerprints = file.OtherEnvironmentFingerprints;
+        FileNoOtherEnvironment = file.NoOtherEnvironment;
     }
 
     public string? Provider { get; }
@@ -50,6 +59,18 @@ public sealed partial class KmsSettings
     public IReadOnlyList<string> EnvelopeDecryptKeyRefs { get; }
 
     public IReadOnlyList<SigningKey> SigningKeys { get; }
+
+    /// <summary><c>Kms:File:KeyDirectory</c> (T-200): the secrets mount the File provider reads.</summary>
+    public string? FileKeyDirectory { get; }
+
+    /// <summary><c>Kms:File:Fingerprints:&lt;name&gt;</c>: the pinned public fingerprint of each File key, by key name.</summary>
+    public IReadOnlyDictionary<string, string> FileFingerprints { get; }
+
+    /// <summary><c>Kms:File:OtherEnvironmentFingerprints:&lt;n&gt;</c>: the other environment's fingerprints, refused here.</summary>
+    public IReadOnlySet<string> FileOtherEnvironmentFingerprints { get; }
+
+    /// <summary><c>Kms:File:NoOtherEnvironment</c>: the explicit statement that no other environment exists yet.</summary>
+    public bool FileNoOtherEnvironment { get; }
 
     /// <summary>Reads and checks the configuration. Throws <see cref="KmsConfigurationException"/> naming the bad setting.</summary>
     public static KmsSettings Parse(IConfiguration configuration)
@@ -86,8 +107,46 @@ public sealed partial class KmsSettings
             hmac,
             envelope,
             decrypt.Distinct(StringComparer.Ordinal).ToList(),
-            signing);
+            signing,
+            ParseFile(configuration));
     }
+
+    private static FileProviderSettings ParseFile(IConfiguration configuration)
+    {
+        var fingerprints = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var entry in configuration.GetSection("Kms:File:Fingerprints").GetChildren())
+        {
+            if (entry.Value is { } value)
+            {
+                fingerprints[entry.Key] = value.Trim();
+            }
+        }
+
+        var others = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var entry in configuration.GetSection("Kms:File:OtherEnvironmentFingerprints").GetChildren())
+        {
+            if (!string.IsNullOrWhiteSpace(entry.Value))
+            {
+                others.Add(entry.Value.Trim());
+            }
+        }
+
+        var none = configuration["Kms:File:NoOtherEnvironment"];
+        var noOther = none switch
+        {
+            null or "" => false,
+            _ when bool.TryParse(none, out var flag) => flag,
+            _ => throw new KmsConfigurationException("Kms:File:NoOtherEnvironment must be true or false."),
+        };
+
+        return new FileProviderSettings(configuration[FileKeyDirectoryKey], fingerprints, others, noOther);
+    }
+
+    private sealed record FileProviderSettings(
+        string? KeyDirectory,
+        IReadOnlyDictionary<string, string> Fingerprints,
+        IReadOnlySet<string> OtherEnvironmentFingerprints,
+        bool NoOtherEnvironment);
 
     private static SigningKey ParseSigningKey(IConfigurationSection entry)
     {
