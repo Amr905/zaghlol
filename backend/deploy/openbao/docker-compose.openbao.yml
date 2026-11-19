@@ -1,0 +1,78 @@
+# OpenBao Transit KMS for a self-hosted server (T-201; deployment.md §3 "OpenBao Transit KMS").
+# Use with the production compose file: docker compose -f <stack>.yml -f deploy/openbao/docker-compose.openbao.yml up -d
+# Host folders (create them as in deployment.md §3; uid 1655 = OpenBao, uid 1654 = the api/worker image user):
+#   /etc/zaghlol/openbao/config   openbao.hcl                      root-owned, 0755 dir / 0644 file
+#   /etc/zaghlol/openbao/tls      server.pem, server-key.pem, ca.pem   1655, 0500 / 0400
+#   /etc/zaghlol/openbao/unseal   unseal.key (32 raw bytes)        1655, 0500 / 0400 (root controls the parent)
+#   /var/lib/zaghlol/openbao/data and .../audit                    1655, 0700
+#   /etc/zaghlol/openbao-api and /etc/zaghlol/openbao-worker       1654, 0500 / 0400: role-id, secret-id, ca.pem
+name: zaghlol-backend
+
+services:
+  openbao:
+    # TODO(Lead): pin the digest (ghcr.io/openbao/openbao:2.7.2@sha256:...); not resolvable from the build environment.
+    image: ghcr.io/openbao/openbao:2.7.2
+    user: "1655:1655"
+    entrypoint: ["bao", "server", "-config=/openbao/config/openbao.hcl"]
+    environment:
+      HOME: /tmp
+    volumes:
+      - /etc/zaghlol/openbao/config:/openbao/config:ro
+      - /etc/zaghlol/openbao/tls:/openbao/tls:ro
+      - /etc/zaghlol/openbao/unseal:/openbao/unseal:ro
+      - /var/lib/zaghlol/openbao/data:/openbao/data
+      - /var/lib/zaghlol/openbao/audit:/openbao/audit
+      - ./deploy/openbao:/setup:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ulimits:
+      core: 0
+    networks: [kms]
+    restart: unless-stopped
+    healthcheck:
+      # 200 = unsealed and active; anything else (sealed 503, uninitialised 501) is unhealthy.
+      test: ["CMD", "bao", "status", "-address=https://127.0.0.1:8200", "-ca-cert=/openbao/tls/ca.pem"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  api:
+    environment:
+      Kms__Provider: OpenBao
+      Kms__OpenBao__Address: https://openbao:8200
+      Kms__OpenBao__CredentialDirectory: /run/zaghlol-openbao
+    # Plus the env file with Kms__OpenBao__Fingerprints__*, Signing__Keys__*, Kms__HmacKeys__*, Kms__Envelope__* (key tool output).
+    volumes:
+      - /etc/zaghlol/openbao-api:/run/zaghlol-openbao:ro
+    ulimits:
+      core: 0
+    networks: [default, kms]
+    depends_on:
+      openbao:
+        condition: service_healthy
+
+  worker:
+    environment:
+      Kms__Provider: OpenBao
+      Kms__Scope: Envelope
+      Kms__OpenBao__Address: https://openbao:8200
+      Kms__OpenBao__CredentialDirectory: /run/zaghlol-openbao
+    volumes:
+      - /etc/zaghlol/openbao-worker:/run/zaghlol-openbao:ro
+    ulimits:
+      core: 0
+    networks: [default, kms]
+    depends_on:
+      openbao:
+        condition: service_healthy
+
+networks:
+  # The AppRole secret-ids and tokens are bound to this subnet (ZAGHLOL_BOUND_CIDRS=172.30.53.0/24 for setup.sh).
+  kms:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.53.0/24
