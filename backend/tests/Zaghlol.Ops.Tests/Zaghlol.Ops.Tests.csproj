@@ -2,11 +2,25 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Zaghlol.Ops\Zaghlol.Ops.csproj" />
+    <!-- T-137: the CLI integration tests run the real API (Program) over PostgreSQL with the fake operator IdP. -->
+    <ProjectReference Include="..\..\src\Zaghlol.Api\Zaghlol.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- T-182 design note section 8: no test support in production assemblies. -->
     <Compile Include="..\Shared\TestSupportExclusion.cs" Link="Shared\TestSupportExclusion.cs" />
+    <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
+    <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
+    <Compile Include="..\Shared\FakeOidcIssuer.cs" Link="Shared\FakeOidcIssuer.cs" />
+    <None Include="..\..\deploy\db\bootstrap-roles.sql" Link="db\bootstrap-roles.sql" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The spec: a test fails when an Admin operation has no CLI command. -->
+    <Content Include="..\..\openapi\zaghlol-v1.yaml" Link="openapi\zaghlol-v1.yaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
