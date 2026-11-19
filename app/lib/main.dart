@@ -64,7 +64,7 @@ Future<void> main() async {
   // T-047: the UI engine's capture module (drain, Guard config, health) runs
   // in every build; it starts once the database opens.
   // The ProviderScope is built inside the AppRestartScope builder below.
-  // ignore: missing_provider_scope
+  // ignore: riverpod_lint/missing_provider_scope
   runApp(
     AppRestartScope(
       beforeStart: () => _resumeWipe(dbDirectory),
