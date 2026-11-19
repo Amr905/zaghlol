@@ -93,3 +93,13 @@ L-1 and L-2 are closed as specified in T-175-pass1. N1-N3 are follow-ups. The `a
    - `am start -n app.zaghlol/.platform.notifications.NotificationTapActivity`: refused (not exported).
    - A real bill notification: content tap and the "Mark as paid" button, cold (process killed) and warm, with the lock on and off. The route opens, the action shows the dialog only after unlock, and the notification is dismissed.
 4. **Operator workstations (manual, runbook §2.2):** `login` / `status` / `logout` on Windows (Credential Manager) and macOS (Keychain), plus the prompt no-echo check (I2).
+
+## Lead delta check (2026-11-19)
+
+F1 and two of the three F2 checks fixed by the Lead in `backend/deploy/db/break-glass-unfreeze.sql` (15 lines):
+- The audit target is written as `(:'purchase'::uuid)::text`, the canonical lower-case form the API writes and looks up.
+- The operator must hold `support_lead`, and no other enabled `support_lead` may exist (otherwise the API route applies).
+
+Proof, local PostgreSQL 16 migrated with `Zaghlol.Workers --migrate`: an upper-case UUID run cleared the freeze and wrote target `aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee`; a `support_agent`-only operator was refused; with a second enabled lead the script refused and wrote no row. Not automated (the script runs under psql); recorded here. The third F2 check (24 h since the correction that started the freeze) is left as FU-264.
+
+**T-137: APPROVED after delta.**
