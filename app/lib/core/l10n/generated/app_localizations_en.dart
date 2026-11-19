@@ -6728,6 +6728,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPrefsThemeDark => 'Dark';
 
   @override
+  String get settingsPrefsThemeDarkQuip =>
+      'Dark mode? Your money and your mood, both in the dark?';
+
+  @override
   String get settingsPrefsCurrency => 'Primary currency';
 
   @override

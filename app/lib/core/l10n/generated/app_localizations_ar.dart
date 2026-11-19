@@ -6860,6 +6860,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsPrefsThemeDark => 'غامق';
 
   @override
+  String get settingsPrefsThemeDarkQuip => 'يعني تبقى فلوسك والمود؟';
+
+  @override
   String get settingsPrefsCurrency => 'العملة الأساسية';
 
   @override
