@@ -58,7 +58,7 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 - App Store Connect: production and sandbox notification URLs.
 
 **KMS and key-ring configuration (T-123).** The API reads its key ring from configuration that the IaC (T-140) writes next to the KMS keys; there is no `signing_keys` table, so a database write can never change the signer.
-- `Kms:Provider`: `Local` is allowed only in `Development`/`Testing` (throwaway keys from `backend/tools/dev-keys.sh`, read from `Kms:Local:KeyDirectory`); the cloud adapter arrives with T-140. Any other environment without an adapter refuses to start.
+- `Kms:Provider`: `Local` is allowed only in `Development`/`Testing` (throwaway keys from `backend/tools/dev-keys.sh`, read from `Kms:Local:KeyDirectory`). `File` (T-200, D-76, ADR-023) is the hardened key-file provider for Staging and Production on a self-hosted Linux server (see "File KMS on a self-hosted server" below); `OpenBao` follows with T-201. Any other value refuses to start.
 - `Signing:Keys:<n>:{Kid, Purpose (Sync|Entitlement), Status (Next|Active|Retired), KeyRef, PublicJwk:{Kty, Crv, X, Y}}`: exactly one `Active` key per purpose; kids match `^[se][0-9]{4}[a-z]$` (`s` = Sync: response headers and catalog `.sig`; `e` = Entitlement: JWS tokens); each key has its own KMS key. At startup every JWK must equal the KMS public key and each active key must pass a sign-then-verify probe, or the process exits non-zero and readiness never goes green.
 - `Kms:HmacKeys:{Seat, Audit, InstallHashPepper}`: key references of the three HMAC keys (`IKeyedHasher`). On Azure only Managed HSM offers HMAC. Each reference names an **immutable key version** (GCP `CryptoKeyVersion`, Azure versioned key URI, AWS key ARN; HMAC KMS keys there have no automatic rotation); provider auto-rotation stays off and the keys carry deletion protection / `prevent_destroy`, because a silently changed HMAC key orphans every stored keyed hash.
 - `Kms:HmacKeys:SeatCheck` (T-182): 64 lower-case hex of `HMAC-SHA256(K_seat, "zaghlol-kseat-check-v1")`, computed by IaC once when `K_seat` is created (`backend/tools/dev-keys.sh` writes it for the Local provider). The API recomputes it at startup (constant-time compare); outside Development/Testing a missing value, a mismatch or an unreachable KMS refuses the start; in Development/Testing it is checked when set, and a malformed or mismatching value refuses the start there too. Not a secret (a MAC of a public string).
@@ -66,6 +66,39 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 - `Kms:Envelope:KeyRef` (new envelopes) and `Kms:Envelope:PreviousKeyRefs:<n>` (older key-encryption keys that may still decrypt). Envelope format v1: `0x01 ‖ u8 len(keyRef) ‖ keyRef ‖ u16be len(wrappedDek) ‖ wrappedDek ‖ nonce(12) ‖ ciphertext ‖ tag(16)`, AES-256-GCM with a fresh data key per record and associated data `"zaghlol-env-v1" ‖ 0x00 ‖ context`.
 - KMS calls time out after 2 s with one retry; a signing outage answers `503 UPSTREAM_UNAVAILABLE` with `Retry-After: 5`.
 - Managed PostgreSQL: set `log_error_verbosity = terse` so a CHECK failure's DETAIL (row values) never reaches server logs, and never set `Include Error Detail` on a connection string (the API and migrator refuse it; FU-025).
+
+**File KMS on a self-hosted server (T-200, D-76; design note `design-notes/T-200.md`, ADR-023).** Until T-201 moves the keys into OpenBao, Staging and Production read their keys from files with `Kms:Provider = File`. Known weakness: a code-execution bug in the API or worker (or root on the server) can copy the keys, and copied signing keys forge entitlements until the kid is rotated and an app release drops it. T-201 must land before Gold is sold to real users.
+
+*Settings* (all public values; set them as environment variables, e.g. an env file next to the compose file, never in the repository):
+- `Kms:Provider=File`, `Kms:File:KeyDirectory=<absolute, canonical path inside the container>` (e.g. `/run/secrets/zaghlol-kms`).
+- Key references `file:<name>`: `Signing:Keys:<n>:KeyRef=file:<kid>` (`<kid>.pem`, a P-256 private key in PEM), `Kms:HmacKeys:Seat|Audit|InstallHashPepper=file:<name>` and `Kms:Envelope:KeyRef=file:<name>` (`<name>.key`, base64 of 32 random bytes with one optional trailing newline, nothing else).
+- `Kms:File:Fingerprints:<name>=<64 hex>` for **every** configured key (the key tool prints them). A replaced, recreated or swapped file refuses the start.
+- `Kms:File:OtherEnvironmentFingerprints:<n>`: the other environment's fingerprints (production lists staging's; staging lists production's once it exists). A key listed there refuses the start. Outside Development/Testing either this list or `Kms:File:NoOtherEnvironment=true` (only while no other environment exists) is required.
+- `Kms:HmacKeys:SeatCheck`: printed by the key tool for the `seat` key.
+
+*The process refuses to start* (constant message, no path, key name or key value in the log) when: the OS is not Linux; the directory setting is missing, relative, not canonical or passes through a symbolic link; the directory has any group/other permission or is owned by neither the process user nor root; a parent directory is owned by another user or is group/other-writable without the sticky bit; any entry in the directory is a symlink, a subdirectory, has any group/other or setuid/setgid/sticky bit, or is owned by another user; a configured key file is missing, over 8 KiB or not the right format; the directory is inside a source tree (`.git` or `Zaghlol.sln` above it), overlaps the content root or the application folder, or holds `kms.env` (written by `dev-keys.sh`); a key is one committed to the repository (test vectors, the catalog dev seed key) or a degenerate 32-byte key; a fingerprint pin is missing or wrong; a key belongs to the other environment; outside Development/Testing, a kid uses year `0000`. Then the T-123 ring check and the T-182 `SeatCheck` run as before.
+
+*Creating the keys* (once per environment, on the server, inside the release image, no network; the tool refuses to run in or write into a source tree and refuses an existing `--out`):
+```
+sudo install -d -m 0700 -o 1654 -g 1654 /etc/zaghlol/kms-production
+docker run --rm --network none --user 1654:1654 -v /etc/zaghlol/kms-production:/out \
+  --entrypoint dotnet zaghlol:<tag> /app/worker/Zaghlol.Workers.dll --generate-keys --environment Production \
+  --out /out/keys --kid s2026a --kid e2026a --secret seat --secret audit --secret install-pepper --secret envelope
+```
+It writes `/etc/zaghlol/kms-production/keys/` (mode 0500) with 0400 files owned by uid 1654 (the image's non-root user) and prints the ring entries (status `Next`; set `Active` for the first key of each purpose), the fingerprints and `SeatCheck`. Nothing secret is printed.
+
+*Mounting:* bind-mount the whole key directory read-only, e.g. `volumes: ["/etc/zaghlol/kms-production/keys:/run/zaghlol-kms:ro"]` on the `api` and `worker` services, with `Kms:File:KeyDirectory=/run/zaghlol-kms`. Keep `/etc/zaghlol` and `/etc/zaghlol/kms-production` owned by root or 1654 and not group/other-writable.
+- Why the files are owned by uid 1654 and not "root, 0400": the container runs as uid 1654 (the image's non-root user), and a root-owned 0400 file is unreadable to it. A root-owned file is accepted by the checks only for a process that runs as root, which the image doesn't.
+- Docker secrets (`secrets:` in compose or swarm) are not used for these keys: Docker puts each secret as a file in `/run/secrets`, a directory it creates itself (root, 0755), which the directory check refuses, and swarm's default file mode is 0444. The directory bind mount keeps the 0500/0400 modes from the host.
+- Keep the content root (`/app`) and the image free of keys; the API refuses a key directory under `/app`.
+
+*Backup:* right after creating the keys, copy the key directory to two offline encrypted media (for example an `age`- or GPG-encrypted archive on two USB drives kept in different places). Never into the repository, a cloud drive, chat, or the server's routine backup set. Record only the fingerprints in the runbook. Losing `seat`, `audit` or `install-pepper` orphans every stored keyed hash; losing `envelope` makes stored Apple refresh tokens unreadable.
+
+*Rotation:*
+- Signing keys (yearly or on suspicion): run the tool with `--kid s2027a` (and/or `e2027a`) into a new folder, move the `.pem` into the key directory (0400, owner 1654), add the ring entry with `Status=Next` and its fingerprint, restart. Ship an app release that pins both kids. Once that release is the minimum supported version, set the new kid `Active` and the old one `Retired`; drop the retired kid in a later release.
+- Envelope key: `--secret envelope-2027`, set it as `Kms:Envelope:KeyRef` with its fingerprint and move the old reference to `Kms:Envelope:PreviousKeyRefs:<n>` until no stored row uses it.
+- HMAC keys: no scheduled rotation (stored hashes can't be recomputed); `K_seat` has the emergency procedure above.
+- Each restart re-runs every check; a wrong file or pin stops the start rather than serving with the wrong key.
 
 **Forwarded headers and the client address (T-124).** The per-network rate limits (`RateLimits:*`) group clients by the /24 (IPv4) or /56 (IPv6) of the address that ASP.NET Core `ForwardedHeaders` resolves. `X-Forwarded-For` is trusted only from listed proxies; if none is listed behind a load balancer, every client looks like the load balancer and the whole service shares one bucket, so one client could block registration for everyone.
 - `ForwardedHeaders:KnownProxies:<n>` (IP addresses) and/or `ForwardedHeaders:KnownNetworks:<n>` (CIDR, e.g. `10.0.0.0/16`): the addresses of the hop directly in front of the API.
@@ -151,7 +184,7 @@ tag:  promote the same image digest to prod → migration job (expand/contract, 
 
 - [ ] Play SMS-permission declaration submitted; `prodNoSms` ready.
 - [ ] Signed `Zaghlol.shortcut` published; setup checker verified on iOS 17 and iOS 26.
-- [ ] ES256 production keys created in KMS; public keys embedded (JWKS from `EcPublicJwk.ToJwks`); key-rotation test passed; `log_error_verbosity = terse` on the managed PostgreSQL.
+- [ ] ES256 production keys created with the File KMS key tool (T-200) and moved into OpenBao Transit before Gold is sold (T-201, D-76); key directory backed up offline twice; public keys embedded (JWKS from `EcPublicJwk.ToJwks`); key-rotation test passed; `log_error_verbosity = terse` on the managed PostgreSQL.
 - [ ] `ForwardedHeaders:KnownProxies`/`KnownNetworks` set to the load balancer in front of the API (or `ForwardedHeaders:NoProxy=true` if there is none), matching the real hop count; the per-network limit checked from two client networks in staging.
 - [ ] RTDN + ASSN V2 configured for prod and sandbox; reconciliation jobs green.
 - [ ] Price provider contract signed (OQ-02); stale alerts tested.

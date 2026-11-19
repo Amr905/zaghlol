@@ -6,7 +6,8 @@
 #   backend/tools/dev-keys.sh --force  replace them (the app must re-embed the public JWKs)
 #
 # These keys are for local development only. The API refuses the Local provider outside the Development and
-# Testing environments; staging and production keys live in the cloud KMS (T-140) and never leave it.
+# Testing environments; the File provider refuses this folder (it holds kms.env and lies inside the repository) and,
+# outside Development/Testing, the kids s0000d/e0000d. Staging and production keys come from the production key tool (`Zaghlol.Workers.dll --generate-keys`, T-200, deployment.md section 3).
 set -eu
 
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
