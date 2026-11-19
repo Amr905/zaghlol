@@ -65,7 +65,7 @@ The repository is a mono-repo with a **Dart pub workspace** for the app and its 
 │  │  ├─ Zaghlol.Domain/            entitlement rules, flag targeting, contribution filters
 │  │  ├─ Zaghlol.Infrastructure/    EF Core DbContext + Migrations/, GooglePlay/, AppStore/, Kms/, Prices/
 │  │  ├─ Zaghlol.Workers/           PriceFetcher, NotificationProcessor, EntitlementSweeper, RetentionPurger, ContributionAggregator
-│  │  └─ Zaghlol.Ops/               `zaghlol-ops` CLI (operator, OIDC device flow)
+│  │  └─ Zaghlol.Ops/               `zaghlol-ops` CLI (operator, OIDC auth code + PKCE loopback sign-in)
 │  ├─ tests/                        Zaghlol.*.Tests (xUnit + Testcontainers PostgreSQL; Zaghlol.Contract.Tests checks the spec)
 │  ├─ openapi/                      zaghlol-v1.yaml (source of truth for the API) + .spectral.yaml
 │  ├─ Dockerfile                    one image for API and workers (ADR-022); build context = backend/
