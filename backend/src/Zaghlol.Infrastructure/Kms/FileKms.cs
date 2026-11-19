@@ -52,7 +52,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
 
     private static readonly SearchValues<byte> Base64Alphabet =
         SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="u8);
-    private const int WrappedSize = EnvelopeCipher.NonceSize + DataKey.Size + EnvelopeCipher.TagSize;
+    internal const int WrappedSize = EnvelopeCipher.NonceSize + DataKey.Size + EnvelopeCipher.TagSize;
 
     private readonly Dictionary<string, SigningEntry> signing;
     private readonly Dictionary<string, byte[]> secrets;
@@ -157,17 +157,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     {
         var kek = Secret(keyRef);
         var plaintext = RandomNumberGenerator.GetBytes(DataKey.Size);
-        var wrapped = new byte[WrappedSize];
-        var nonce = wrapped.AsSpan(0, EnvelopeCipher.NonceSize);
-        RandomNumberGenerator.Fill(nonce);
-        using var aes = new AesGcm(kek, EnvelopeCipher.TagSize);
-        aes.Encrypt(
-            nonce,
-            plaintext,
-            wrapped.AsSpan(EnvelopeCipher.NonceSize, DataKey.Size),
-            wrapped.AsSpan(EnvelopeCipher.NonceSize + DataKey.Size),
-            WrapAad(keyRef));
-        return ValueTask.FromResult(new DataKey(plaintext, wrapped));
+        return ValueTask.FromResult(new DataKey(plaintext, Wrap(kek, keyRef, plaintext)));
     }
 
     public ValueTask<DataKey> DecryptDataKeyAsync(string keyRef, ReadOnlyMemory<byte> wrapped, CancellationToken cancellationToken)
@@ -246,7 +236,26 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         static string Trim(string p) => p.TrimEnd('/');
     }
 
-    private static byte[] WrapAad(string keyRef) => [.. "zaghlol-file-wrap-v1"u8, 0x00, .. Encoding.ASCII.GetBytes(keyRef)];
+    /// <summary>
+    /// The File wrap of a data key: <c>nonce(12) ‖ AES-256-GCM(kek, dataKey) ‖ tag(16)</c>, associated data
+    /// <see cref="WrapAad"/>. Transit's AES-GCM ciphertext has the same layout, so an imported KEK opens it (T-201 note §5).
+    /// </summary>
+    internal static byte[] Wrap(ReadOnlySpan<byte> kek, string keyRef, ReadOnlySpan<byte> dataKey)
+    {
+        var wrapped = new byte[WrappedSize];
+        var nonce = wrapped.AsSpan(0, EnvelopeCipher.NonceSize);
+        RandomNumberGenerator.Fill(nonce);
+        using var aes = new AesGcm(kek, EnvelopeCipher.TagSize);
+        aes.Encrypt(
+            nonce,
+            dataKey,
+            wrapped.AsSpan(EnvelopeCipher.NonceSize, DataKey.Size),
+            wrapped.AsSpan(EnvelopeCipher.NonceSize + DataKey.Size),
+            WrapAad(keyRef));
+        return wrapped;
+    }
+
+    internal static byte[] WrapAad(string keyRef) => [.. "zaghlol-file-wrap-v1"u8, 0x00, .. Encoding.ASCII.GetBytes(keyRef)];
 
     private static void CheckOtherEnvironmentSettings(KmsSettings settings, bool strict)
     {
@@ -266,7 +275,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         }
     }
 
-    private static string CheckDirectory(string? configured, uint euid)
+    internal static string CheckDirectory(string? configured, uint euid)
     {
         if (string.IsNullOrWhiteSpace(configured))
         {
@@ -320,7 +329,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         }
     }
 
-    private static void CheckNotInSourceTree(string directory, IHostEnvironment environment)
+    internal static void CheckNotInSourceTree(string directory, IHostEnvironment environment)
     {
         if (IsInSourceTree(directory)
             || (!string.IsNullOrEmpty(environment.ContentRootPath) && Overlaps(directory, environment.ContentRootPath))
@@ -330,7 +339,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         }
     }
 
-    private static void CheckEntries(string directory, uint euid)
+    internal static void CheckEntries(string directory, uint euid)
     {
         var options = new EnumerationOptions
         {
@@ -492,7 +501,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         }
     }
 
-    private static byte[] LoadSecret(string directory, string keyRef, uint euid)
+    internal static byte[] LoadSecret(string directory, string keyRef, uint euid)
     {
         var (buffer, length) = ReadChecked(Path.Combine(directory, keyRef[Prefix.Length..] + ".key"), euid);
         var secret = GC.AllocateArray<byte>(DataKey.Size, pinned: true);
@@ -526,7 +535,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     /// Opens the file only after its name passes the entry checks, then checks the open descriptor again (same inode, same
     /// rules), and reads at most <see cref="MaxFileBytes"/> from it. The returned buffer is pinned; the caller zeroes it.
     /// </summary>
-    private static (byte[] Buffer, int Length) ReadChecked(string path, uint euid)
+    internal static (byte[] Buffer, int Length) ReadChecked(string path, uint euid)
     {
         var before = PosixFiles.LStat(path) ?? throw new KmsConfigurationException(MissingKeyMessage);
         CheckEntry(before, euid);
