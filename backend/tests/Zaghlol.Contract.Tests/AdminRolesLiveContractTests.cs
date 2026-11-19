@@ -65,6 +65,34 @@ public class AdminRolesLiveContractTests(ContractApiFixture fixture) : IClassFix
         Assert.Empty(failures);
     }
 
+    /// <summary>
+    /// BUG-003: the spec is the contract, so an operation it declares that no route answers is a failure (two admin operations
+    /// were declared for months with no <c>MapGet</c>). Every operation of the file must be mapped under the same method and
+    /// path template; the file's own operations are listed in the failure.
+    /// </summary>
+    [Fact]
+    public void EverySpecOperationHasAMappedRoute()
+    {
+        var source = fixture.Services.GetRequiredService<EndpointDataSource>();
+        var mapped = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var endpoint in source.Endpoints.OfType<RouteEndpoint>())
+        {
+            foreach (var method in endpoint.Metadata.GetMetadata<IHttpMethodMetadata>()?.HttpMethods ?? new[] { "*" })
+            {
+                mapped.Add(method.ToUpperInvariant() + " " + Template(endpoint.RoutePattern));
+            }
+        }
+
+        var operations = Spec.Operations();
+        Assert.True(operations.Count >= 30, $"only {operations.Count} spec operations were found");
+        var missing = operations
+            .Where(o => !mapped.Contains(o.Method.ToUpperInvariant() + " " + o.Path))
+            .Select(o => $"{o.Label} ({o.Id})")
+            .ToList();
+
+        Assert.True(missing.Count == 0, "declared in the OpenAPI file but not mapped by the API: " + string.Join("; ", missing));
+    }
+
     [Fact]
     public async Task EveryKnownRoleHasAPolicy()
     {

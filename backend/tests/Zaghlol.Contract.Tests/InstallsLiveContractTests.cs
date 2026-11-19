@@ -34,7 +34,7 @@ public sealed class InstallsContractFixture : IAsyncLifetime
 
             builder.ConfigureServices(kms.Use);
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()

@@ -87,7 +87,7 @@ public class AdminFlagFixture : IAsyncLifetime
                 services.AddSingleton<IOpsNotifier>(Notifier);
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()
