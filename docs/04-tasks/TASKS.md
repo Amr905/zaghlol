@@ -106,7 +106,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
 | [T-058](tasks/T-058.md) | Native Egyptian-speaker review of the copy deck | US-20-1 | Medium | — (human) | external | T-026, T-027, T-028 | C | 2 | TODO |
-| [T-059](tasks/T-059.md) | Compile the 600+ Egyptian merchant seed list (OQ-05) | US-20-1 | Medium | — (human) | external | T-030 | C | 7 | TODO |
+| [T-059](tasks/T-059.md) | Compile the 600+ Egyptian merchant seed list (OQ-05) | US-20-1 | Medium | — (human) | external | T-030 | C | 7 | IN_REVIEW (built, batch 39) |
 | [T-060](tasks/T-060.md) | Android share/paste intake (text, image, PDF, CSV) | US-03-4 | High* | Opus | native-platform-engineer | T-004 | D | 3 | DONE |
 | [T-061](tasks/T-061.md) | iOS Capture Guard (Swift) with config reader | US-04-1 | High* | Opus | native-platform-engineer | T-035, T-009 | E | 6 | DONE |
 | [T-062](tasks/T-062.md) | iOS encrypted spool, host API and background refresh | US-04-1 | High* | Opus | native-platform-engineer | T-004, T-009 | E | 4 | DONE |
@@ -151,7 +151,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-096](tasks/T-096.md) | Subscriptions detection, installments, gameya, card dues and reminders | US-09-2 | High | Sonnet | flutter-core-engineer | T-050, T-094 | A | 8 | DONE |
 | [T-097](tasks/T-097.md) | Contextual setup suggestions (payday, budgets, backup) | US-10-1 | Medium | Sonnet | flutter-core-engineer | T-051, T-049 | A | 9 | DONE |
 | [T-098](tasks/T-098.md) | Mascot trigger policy (shocked, detective, proud, tour guide) | US-10-3 | Medium | Sonnet | flutter-core-engineer | T-051, T-089, T-095 | A | 9 | DONE |
-| [T-099](tasks/T-099.md) | Wire motion-only mascot moments to UI events | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-053, T-088 | G | 4 | TODO |
+| [T-099](tasks/T-099.md) | Wire motion-only mascot moments to UI events | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-053, T-088 | G | 4 | IN_REVIEW (built, batch 39) |
 | [T-100](tasks/T-100.md) | Duplicate-charge and weekly-summary notifications | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | A | 8 | DONE |
 | [T-101](tasks/T-101.md) | Insights shell and Budget S-22 (+ edit budgets) | US-09-1 | Medium | Sonnet | flutter-ui-engineer | T-095, T-087, T-024 | G | 10 | DONE |
 | [T-102](tasks/T-102.md) | Bills & installments S-24 and add/edit recurring item | US-09-2 | Medium | Sonnet | flutter-ui-engineer | T-096, T-087 | G | 10 | DONE |
@@ -235,7 +235,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-156](tasks/T-156.md) | Bank PDF statement import (CIB, NBE, QNB, Banque Misr) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-033, T-031 | F | 6 | BLOCKED |
 | [T-157](tasks/T-157.md) | Online-bank statement import (Wise, Revolut, Monzo, bunq, N26) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-155, T-071 | F | 10 | BLOCKED |
 | [T-158](tasks/T-158.md) | Import flow S-67 (source, summary, done) | US-17-1 | Medium | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | G | 11 | DONE |
-| [T-159](tasks/T-159.md) | Android OCR host (ML Kit Latin + Tesseract Arabic) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | D | 3 | TODO |
+| [T-159](tasks/T-159.md) | Android OCR host (ML Kit Latin + Tesseract Arabic) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | D | 3 | IN_REVIEW (built, batch 39) |
 | [T-160](tasks/T-160.md) | iOS OCR host (Vision) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | E | 3 | DONE |
 | [T-161](tasks/T-161.md) | Receipt/screen OCR templates and confirmation screen S-32 | US-17-2 | Medium | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | F | 6 | DONE |
 | [T-162](tasks/T-162.md) | Settings S-60 incl. privacy info and About | US-18-1 | Medium | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | G | 10 | DONE |

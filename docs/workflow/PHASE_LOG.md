@@ -32,6 +32,8 @@ The Lead updates this file at every gate. Newest entry at the bottom.
 | 2026-11-06 | 5 — Implementation | Gold design approved (FU-api-decisions, SRS v1.8 D-45…D-66). Task plan v1.1 APPROVED by the product owner: 186 tasks, T-178…T-186 added. Repo made public; CI on GitHub Actions incl. iOS. | Implementation continues on plan v1.1. |
 | 2026-11-08 | 5 — Implementation | Process change approved by the PO: fewer reviewers on routine work, only blockers and majors trigger another round, Sonnet by default for C2 and C3, a fresh Lead session (see `LEAD_HANDOFF.md`), and local CI v2 on the PO's PC. | CLAUDE.md §6 and §10 updated. |
 | 2026-11-08 | 5 — Implementation | PO chose "Balanced" lighter rules: C3 one Sonnet reviewer (incl. tests); C4 Opus code (incl. tests) + Opus security, no separate test-engineer; re-reviews on Sonnet; C4 design notes on Sonnet except crypto/billing/ingestion; at most 2 tasks at once. Local runner fixed (LF line endings); agents read local-ci results first. | CLAUDE.md §6, model-routing.md, run-task.md, local-ci.md updated. |
+| 2026-11-11 → 2026-11-18 | 5 — Implementation | Batch review, cost rules and sprint mode (`SPRINT.md`); batches 9–42 merged (PRs #28–#76); 167 of 186 tasks DONE. Detail per batch in `LEAD_HANDOFF.md`, decisions in `PO_DECISIONS.md`. | Every remaining board task waits on PO inputs, devices or hosting. |
+| 2026-11-19 | 5 — Implementation | Independent QA audit of `main` @ bc5b9d1d (`docs/qa/`): NOT READY for release; 9 bugs (1 high, 2 medium, 6 low), no critical. | BUG-001 waits for T-140 keys; the others fixed in batch 43. |
 
 ## Current phase
 **Phase 5 — Implementation: RUNNING (CI on GitHub Actions)**

@@ -172,12 +172,12 @@ Feature flags (D-07, D-10) are controlled remotely by R-05 through the backend (
 |------------|------|------|
 | Automatic capture, all supported institutions | ✔ unlimited | ✔ unlimited |
 | Custom SMS regex builder for unsupported senders | — | ✔ |
-| 14 system categories, manual re-categorization | ✔ | ✔ |
+| 16 system categories (14 from spec §4 + InstaPay and Cash, PO CAT-INSTAPAY / CAT-CASH), manual re-categorization | ✔ | ✔ |
 | Save "always apply" merchant rules | ✔ (A-05) | ✔ |
 | Custom categories & subcategories | — | ✔ unlimited |
 | Voice cash entry | 15 / month | Unlimited |
 | Manual cash entry | ✔ unlimited | ✔ unlimited |
-| Charts | 4 core (A-06) | All 12 |
+| Charts | All 12 for now (PO CHARTS-FREE, 2026-11-16; switch `GoldGate.chartsOpenToFree`). If the gate returns: 4 core (A-06) | All 12 |
 | Captain Zaghlol chart explanations | Basic tips | Deep coaching |
 | Net worth: bank, wallet, cash balances | ✔ | ✔ |
 | Net worth: gold, CDs, real estate, stocks, multi-currency | — | ✔ |
@@ -340,7 +340,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 ### 7.7 Categorization & merchant rules (CAT)
 | ID | Requirement | Pri | Tier | Acceptance criteria |
 |----|-------------|-----|------|---------------------|
-| FR-CAT-01 | Ship the 14 system categories with subcategories, budget bucket and colour from spec §4. | M | F | Names in AR and EN exactly as spec. |
+| FR-CAT-01 | Ship the 14 system categories with subcategories, budget bucket and colour from spec §4, plus the seeded InstaPay and Cash categories (16 in all; PO decisions CAT-INSTAPAY and CAT-CASH, 2026-11-17, `docs/workflow/PO_DECISIONS.md`). | M | F | Names in AR and EN exactly as spec; InstaPay «إنستاباي», Cash «كاش». |
 | FR-CAT-02 | Ship 600+ seeded Egyptian merchant mappings **bundled in the app** (works on first launch offline) and kept current through catalog sync (FR-SYNC). | M | F | Spec lists ~150 examples; the full 600+ list must be compiled (OQ-05). |
 | FR-CAT-03 | Categorize using precedence: user rule → seeded map → keyword heuristics → "needs classification" (BR-CAT-01). | M | F | — |
 | FR-CAT-04 | "Needs classification" queue with one-tap category chips (swipe). | M | F | Spec Screen 5. |
@@ -404,7 +404,7 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 | ID | Requirement | Pri | Tier | Acceptance criteria |
 |----|-------------|-----|------|---------------------|
 | FR-CHT-01 | 12 charts as in spec §7: 1 Cash flow, 2 Category donut, 3 Payday burn-rate curve, 4 50/30/20 balance, 5 Day-of-week (and hour) pattern, 6 Top merchants, 7 Month vs 3-month average, 8 6-month installment timeline, 9 Subscriptions ×12, 10 Cards & wallets split, 11 Net worth growth, 12 Personal inflation tracker. | M | F/G | Each chart has empty state and works RTL/LTR. |
-| FR-CHT-02 | Free users get 4 core charts: Cash flow (1), Category donut (2), Top merchants (6, top 5), Budget progress bars (A-06). Others show a Gold-locked preview. | M | F/G | — |
+| FR-CHT-02 | All 12 charts are open to Free users for now (PO decision CHARTS-FREE, 2026-11-16), behind one switch `GoldGate.chartsOpenToFree`. If the switch is turned off, Free users get 4 core charts: Cash flow (1), Category donut (2), Top merchants (6, top 5), Budget progress bars (A-06), and the others show a Gold-locked preview. | M | F/G | — |
 | FR-CHT-03 | "Explain this chart" (اشرحلي يا زغلول): a dynamic Egyptian Arabic / English explanation and one actionable tip computed from the user's data. | M | F/G | Text is generated from templates with real values; Free = basic tip, Gold = deep coaching (definition in Phase 2, OQ-07). |
 | FR-CHT-04 | Charts filter by cycle / month / custom range. | S | F | — |
 | FR-CHT-05 | Every chart filters by **card/account** (FR-CARD-01) and by **currency**; a chart never mixes currencies unless the ≈EGP view is on, in which case it is labelled "approximate". | M | F | — |
