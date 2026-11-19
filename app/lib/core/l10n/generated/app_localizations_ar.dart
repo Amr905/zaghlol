@@ -4008,6 +4008,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillsMarkPaid => 'اتدفع';
 
   @override
+  String get notificationMarkPaidConfirmTitle =>
+      'تعلّم الفاتورة دي إنها اتدفعت؟';
+
+  @override
   String get recurringBillsPaid => 'اتدفع ✓';
 
   @override

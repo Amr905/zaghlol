@@ -3920,6 +3920,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringBillsMarkPaid => 'Mark paid';
 
   @override
+  String get notificationMarkPaidConfirmTitle => 'Mark this bill as paid?';
+
+  @override
   String get recurringBillsPaid => 'Paid ✓';
 
   @override
