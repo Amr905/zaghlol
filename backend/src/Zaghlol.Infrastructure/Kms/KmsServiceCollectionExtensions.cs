@@ -6,6 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Zaghlol.Infrastructure.Kms;
 
+/// <summary>One KMS adapter: the three provider ports in one object (T-200 design note §1).</summary>
+internal interface IKmsBackend : ISigningKeyProvider, IHmacProvider, IDataKeyProvider;
+
 public static class KmsServiceCollectionExtensions
 {
     /// <summary>
@@ -22,10 +25,10 @@ public static class KmsServiceCollectionExtensions
         services.TryAddSingleton(provider => KmsSettings.Parse(provider.GetRequiredService<IConfiguration>()));
         services.TryAddSingleton(provider => new SigningKeyRing(provider.GetRequiredService<KmsSettings>().SigningKeys));
 
-        services.TryAddSingleton<LocalKms>(SelectLocal);
-        services.TryAddSingleton<ISigningKeyProvider>(provider => provider.GetRequiredService<LocalKms>());
-        services.TryAddSingleton<IHmacProvider>(provider => provider.GetRequiredService<LocalKms>());
-        services.TryAddSingleton<IDataKeyProvider>(provider => provider.GetRequiredService<LocalKms>());
+        services.TryAddSingleton<IKmsBackend>(SelectProvider);
+        services.TryAddSingleton<ISigningKeyProvider>(provider => provider.GetRequiredService<IKmsBackend>());
+        services.TryAddSingleton<IHmacProvider>(provider => provider.GetRequiredService<IKmsBackend>());
+        services.TryAddSingleton<IDataKeyProvider>(provider => provider.GetRequiredService<IKmsBackend>());
 
         services.TryAddSingleton<ISigner, Signer>();
         services.TryAddSingleton<IKeyedHasher, KeyedHasher>();
@@ -34,15 +37,26 @@ public static class KmsServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>The only provider so far. Fails closed outside Development/Testing; cloud adapters arrive with T-140.</summary>
+    /// <summary>
+    /// The provider named by <c>Kms:Provider</c> (T-200 design note §1): <c>Local</c> (Development/Testing only) or <c>File</c>
+    /// (hardened key files, Linux). T-201 adds <c>OpenBao</c> here. Any other name refuses the start.
+    /// </summary>
+    internal static IKmsBackend SelectProvider(IServiceProvider provider)
+    {
+        var settings = provider.GetRequiredService<KmsSettings>();
+        return settings.Provider switch
+        {
+            KmsSettings.LocalProvider => SelectLocal(provider),
+            FileKms.ProviderName => FileKms.Load(settings, provider.GetRequiredService<IHostEnvironment>()),
+            _ => throw new KmsConfigurationException("Kms:Provider names no available adapter (Local for development, File)."),
+        };
+    }
+
+    /// <summary>The development provider. Fails closed outside Development/Testing.</summary>
     internal static LocalKms SelectLocal(IServiceProvider provider)
     {
         var settings = provider.GetRequiredService<KmsSettings>();
         var environment = provider.GetRequiredService<IHostEnvironment>();
-        if (!string.Equals(settings.Provider, KmsSettings.LocalProvider, StringComparison.Ordinal))
-        {
-            throw new KmsConfigurationException("Kms:Provider names no available adapter (Local only; cloud adapters arrive with T-140).");
-        }
 
         if (!environment.IsDevelopment() && !environment.IsEnvironment("Testing"))
         {

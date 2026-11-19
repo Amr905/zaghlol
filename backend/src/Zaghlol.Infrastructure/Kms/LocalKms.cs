@@ -10,7 +10,7 @@ namespace Zaghlol.Infrastructure.Kms;
 /// <c>&lt;name&gt;.key</c> (32 random bytes, base64). Allowed only in Development and Testing (fail closed). Keys are read
 /// per call and never cached.
 /// </summary>
-internal sealed partial class LocalKms(string keyDirectory) : ISigningKeyProvider, IHmacProvider, IDataKeyProvider
+internal sealed partial class LocalKms(string keyDirectory) : IKmsBackend
 {
     public const string Prefix = "local:";
 

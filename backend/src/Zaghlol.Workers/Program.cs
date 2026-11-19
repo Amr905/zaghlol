@@ -23,6 +23,13 @@ if (args.Contains(MigrateCommand.Flag, StringComparer.Ordinal))
     return await MigrateCommand.RunAsync(args);
 }
 
+// `dotnet Zaghlol.Workers.dll --generate-keys ...` is the production key tool of the File KMS (T-200): run it once on the server,
+// inside this image, with no network. It writes key files and prints public values only.
+if (args.Contains(FileKeyTool.Flag, StringComparer.Ordinal))
+{
+    return FileKeyTool.Run(args, Console.Out, Console.Error, Environment.CurrentDirectory);
+}
+
 Log.Logger = new LoggerConfiguration().ConfigureZaghlol("worker").CreateLogger();
 
 var builder = Host.CreateApplicationBuilder(args);
