@@ -40,6 +40,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     public const string OtherEnvironmentMessage = "A File KMS key is listed in Kms:File:OtherEnvironmentFingerprints: keys of another environment are refused.";
     public const string OtherEnvironmentUnsetMessage = "Outside Development and Testing, Kms:File:OtherEnvironmentFingerprints must list the other environment's fingerprints, or Kms:File:NoOtherEnvironment must be true.";
     public const string OtherEnvironmentMalformedMessage = "Kms:File:OtherEnvironmentFingerprints entries must be 64 lower-case hex characters.";
+    public const string NotDumpableMessage = "Outside Development and Testing, the File KMS could not mark the process non-dumpable (prctl PR_SET_DUMPABLE); keys would be exposed to core dumps.";
     public const string DevKidMessage = "Outside Development and Testing, the File KMS refuses the development and test kids (year 0000).";
 
     internal const int MaxFileBytes = 8 * 1024;
@@ -88,6 +89,14 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         CheckEntries(directory, euid);
 
         var (ecRefs, secretRefs) = KeyRefs(settings);
+
+        // Review S2: keys live in process memory from here on; keep them out of core files and same-uid ptrace/proc reads.
+        // Set before the first key byte is read, so the load itself is covered too.
+        if (strict && !PosixFiles.SetNotDumpable())
+        {
+            throw new KmsConfigurationException(NotDumpableMessage);
+        }
+
         var signingKeys = new Dictionary<string, SigningEntry>(StringComparer.Ordinal);
         var secretKeys = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         try

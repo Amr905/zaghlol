@@ -45,6 +45,8 @@ internal static class PosixFiles
     // STATX_TYPE | STATX_MODE | STATX_UID | STATX_INO | STATX_SIZE: the fields this file reads.
     private const uint NeededMask = 0x1 | 0x2 | 0x8 | 0x100 | 0x200;
     private const int StatxSize = 256;
+    private const int PrGetDumpable = 3;
+    private const int PrSetDumpable = 4;
 
     /// <summary>The effective uid, or <c>null</c> when it can't be read.</summary>
     public static uint? EffectiveUid()
@@ -57,6 +59,46 @@ internal static class PosixFiles
         try
         {
             return NativeMethods.geteuid();
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// <c>prctl(PR_SET_DUMPABLE, 0)</c> (review S2): no core file of this process, and no same-uid <c>ptrace</c> or
+    /// <c>/proc/&lt;pid&gt;/mem</c> read by another process. False when the call is unavailable or fails.
+    /// </summary>
+    public static bool SetNotDumpable()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return false;
+        }
+
+        try
+        {
+            return NativeMethods.prctl(PrSetDumpable, 0, 0, 0, 0) == 0 && Dumpable() == 0;
+        }
+        catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary><c>prctl(PR_GET_DUMPABLE)</c>, or <c>null</c> when it can't be read.</summary>
+    public static int? Dumpable()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return null;
+        }
+
+        try
+        {
+            var result = NativeMethods.prctl(PrGetDumpable, 0, 0, 0, 0);
+            return result < 0 ? null : result;
         }
         catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
         {
@@ -135,6 +177,11 @@ internal static class PosixFiles
         [DllImport(LibC)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint geteuid();
+
+        // prctl is variadic in C; on the Linux x64 and arm64 ABIs integer varargs pass like fixed arguments.
+        [DllImport(LibC, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern int prctl(int option, nuint arg2, nuint arg3, nuint arg4, nuint arg5);
 #pragma warning restore SYSLIB1054
     }
 }
