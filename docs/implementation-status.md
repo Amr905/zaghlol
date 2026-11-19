@@ -216,6 +216,13 @@
 | T-184 | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | M5 | C4 | Opus | backend-engineer | T-122, T-182 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; backend-ci incl. Testcontainers green | Plan v1.1 (new, from T-132) Batch 9. FU-112 |
 | T-185 | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | M5 | C4 | Opus | backend-engineer | T-132, T-181, T-182, T-184 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED; backend-ci incl. Testcontainers green on ci/T-185 | Plan v1.1 (new, from T-132) Batch 12. FU-129 |
 | T-186 | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | M5 | C4 | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | DONE | batch 29 review [batch-29](05-reviews/batch-29.md) | Plan v1.1 (new, from T-136); R6-1 Batch 29. FU-249 |
+| T-187 | Hide amounts in the app (eye toggle, `****`) | M8 | C3 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
+| T-188 | Chart period selector (presets, stepping, custom range) | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
+| T-189 | Charts review: interaction, comparison and clarity (mockups first) | M8 | C3 | Opus→Sonnet | ux-designer → flutter-ui-engineer | T-188 | TODO | — | Added 2026-11-19 (PO request / QA audit). |
+| T-190 | App size: measure and reduce (~150 MB reported) | M8 | C3 | Sonnet | native-platform-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
+| T-191 | Production trust anchors in release builds (BUG-001) | M8 | C4 | Opus | flutter-core-engineer | T-140 | BLOCKED | — | Added 2026-11-19 (PO request / QA audit). |
+| T-192 | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | M8 | C2 | Sonnet | backend-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
+| T-193 | Follow-up sweep FU-263 / FU-264 | M8 | C2 | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 
 ## Follow-ups (from reviews)
 | ID | From | Item | Owner / target | Status |

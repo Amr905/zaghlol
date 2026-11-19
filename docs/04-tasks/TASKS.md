@@ -33,6 +33,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | **M5 — Backend services & Zaghlol Gold** | Install/sync/catalog/flags/prices, purchases & entitlements with one-phone Gold (seat service, attestation, same-iPhone seat keys, trusted time), store notifications, optional sign-in, support path, operator CLI. | 35 |
 | **M6 — Backup, import/export, OCR, settings & security** | Encrypted Drive/iCloud backup & restore, CSV/XLSX/PDF/online statements, OCR, settings, app lock, delete everything. | 19 |
 | **M7 — Flagged features, hardening & launch** | Zakah & ROI behind flags, privacy/perf/a11y/security verification, store release pipelines. | 11 |
+| **M8 — Post-audit improvements** | PO requests of 2026-11-19 (hide amounts, chart periods and interaction, app size) and the open QA / security bugs. | 7 |
 
 ## M0 — Foundations & spikes
 
@@ -262,6 +263,20 @@ Every task file has: ID, description, technical details, dependencies, affected 
 
 \* = critical (C4): Opus + security-privacy-reviewer.
 
+
+## M8 — Post-audit improvements
+
+Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dark-mode redesigns are **not** tasks yet: they wait for the PO to pick a design on the design canvas.
+
+| ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| [T-187](tasks/T-187.md) | Hide amounts in the app (eye toggle, `****`) | PO 11-19 | High | Sonnet | flutter-ui-engineer | — | G | 12 | TODO |
+| [T-188](tasks/T-188.md) | Chart period selector (presets, stepping, custom range) | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | TODO |
+| [T-189](tasks/T-189.md) | Charts review: interaction, comparison and clarity (mockups first) | PO 11-19 | High | Opus→Sonnet | ux-designer → flutter-ui-engineer | T-188 | G | 13 | TODO |
+| [T-190](tasks/T-190.md) | App size: measure and reduce (~150 MB reported) | PO 11-19 | High | Sonnet | native-platform-engineer | — | N | 12 | TODO |
+| [T-191](tasks/T-191.md) | Production trust anchors in release builds (BUG-001) | QA | High* | Opus | flutter-core-engineer | T-140 | A | 13 | BLOCKED |
+| [T-192](tasks/T-192.md) | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | T-175 | Medium | Sonnet | backend-engineer | — | B | 12 | TODO |
+| [T-193](tasks/T-193.md) | Follow-up sweep FU-263 / FU-264 | batches 43–44 | Medium | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 merged | B | 12 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

@@ -203,6 +203,11 @@ This session had **no push access** (the push attach was refused), so the batch 
 - **T-175 pass 1** (`docs/05-reviews/T-175-pass1.md`): 0 Critical, 1 High (= BUG-001), 1 Medium, 6 Low. Fixed here: M-1 (Dependabot, osv-scanner, gitleaks, CycloneDX SBOM in `security-scan.yml`), L-1 (notification taps only via the non-exported `NotificationTapActivity` with a per-process token; mark-paid waits for the lock and asks), L-2 (early error muting), L-3, L-6 (authenticated-by-default fallback policy, anonymous routes = spec `security: []`). Pass 2 needs signed builds, staging and devices.
 - Review: one Opus combined review + one Sonnet delta; two Lead deltas (break-glass F1/F2, test-host routes under the fallback policy).
 
+## 2026-11-19 evening: PO requests → M8, and two designs awaiting a pick
+
+- **New tasks (M8, SRS v1.9 D-67…D-69):** T-187 hide amounts (eye, `****`), T-188 chart period selector, T-189 charts review (mockups for PO sign-off first; Lead review findings and research in the task file), T-190 app size (measure first; ~150 MB reported), T-191 BUG-001 trust anchors (blocked on T-140), T-192 T-175 leftovers, T-193 FU-263/264 sweep. Board now 193 tasks.
+- **Designs, NOT tasks yet (PO asked to agree first):** design canvas "Zaghlol: bottom bar and dark mode options" (claude.ai artifact `7f8c9c63-f72c-433f-a501-8d9bdbed1b3d`): bottom-bar options A (current) … E (Captain Zaghlol hub), each on iOS 26 and Android M3 with a light/dark switch; dark themes 1 Jade Night (current) … 5 Night Garden. When the PO picks, update `docs/02-design/03-navigation.md` / `05-theme-2026.md` and then add the build tasks.
+
 ## Ready next
 
 All board tasks left (19) wait on PO inputs or devices; see `PO_DECISIONS.md` Part 2:

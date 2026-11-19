@@ -35,5 +35,6 @@ The Lead updates this file at every gate. Newest entry at the bottom.
 | 2026-11-11 → 2026-11-18 | 5 — Implementation | Batch review, cost rules and sprint mode (`SPRINT.md`); batches 9–42 merged (PRs #28–#76); 167 of 186 tasks DONE. Detail per batch in `LEAD_HANDOFF.md`, decisions in `PO_DECISIONS.md`. | Every remaining board task waits on PO inputs, devices or hosting. |
 | 2026-11-19 | 5 — Implementation | Independent QA audit of `main` @ bc5b9d1d (`docs/qa/`): NOT READY for release; 9 bugs (1 high, 2 medium, 6 low), no critical. | BUG-001 waits for T-140 keys; the others fixed in batch 43. |
 
+| 2026-11-19 | 1/4 → 5 — Change | PO requests: hide amounts, chart periods + review, app size. SRS v1.9 (D-67…D-69); M8 added (T-187…T-193, incl. QA/security bugs). Bottom-bar and dark-mode redesign options on a design canvas, awaiting the PO's pick before tasks. | Board 193 tasks. |
 ## Current phase
 **Phase 5 — Implementation: RUNNING (CI on GitHub Actions)**
