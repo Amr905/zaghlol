@@ -21,6 +21,7 @@ using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
 using Zaghlol.Infrastructure.Prices;
 using Zaghlol.Infrastructure.Purchases;
+using Zaghlol.Infrastructure.Reports;
 using Zaghlol.Infrastructure.Seats;
 using Zaghlol.Infrastructure.Support;
 
@@ -72,6 +73,7 @@ builder.Services.AddZaghlolInstalls();
 builder.Services.AddZaghlolCatalog();
 // Contribution review queue (T-129): promote edits the draft under the catalog lock, so it follows the catalog registration.
 builder.Services.AddZaghlolContributionAdmin();
+builder.Services.AddZaghlolOpsReports();
 // Feature flags (T-126): the admin store on the Admin login, the reader on the App login, the ops-channel notifier.
 builder.Services.AddZaghlolFlagAdmin();
 builder.Services.AddZaghlolFlagReader();
@@ -126,6 +128,7 @@ app.MapGoogleNotifications();
 app.MapCatalog();
 app.MapCatalogAdmin();
 app.MapContributionAdmin();
+app.MapOpsReports();
 app.MapFlagAdmin();
 app.MapSupportAdmin();
 app.MapPriceAdmin();

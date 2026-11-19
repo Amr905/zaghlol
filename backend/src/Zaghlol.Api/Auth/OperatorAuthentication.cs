@@ -21,6 +21,9 @@ internal static class OperatorRoles
     public const string SupportAgent = Application.Operators.OperatorRoles.SupportAgent;
     public const string SupportLead = Application.Operators.OperatorRoles.SupportLead;
 
+    /// <summary>The <c>x-required-roles: [any]</c> marker: any authenticated operator role (policy <c>operator:any</c>).</summary>
+    public const string Any = "any";
+
     public static IReadOnlyList<string> All => Application.Operators.OperatorRoles.All;
 }
 
@@ -72,6 +75,11 @@ internal static class OperatorAuthentication
                 PolicyFor(role),
                 policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser().RequireClaim(ClaimTypes.Role, role));
         }
+
+        // x-required-roles [any]: a validated operator holding at least one role the API knows.
+        authorization.AddPolicy(
+            PolicyFor(OperatorRoles.Any),
+            policy => policy.AddAuthenticationSchemes(Scheme).RequireAuthenticatedUser().RequireClaim(ClaimTypes.Role, OperatorRoles.All));
 
         return services;
     }

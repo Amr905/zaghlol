@@ -45,5 +45,7 @@ namespace Zaghlol.Api.Json;
 [JsonSerializable(typeof(ContributionPromoteRequest))]
 [JsonSerializable(typeof(ContributionQueueDto))]
 [JsonSerializable(typeof(ContributionDecisionDto))]
+[JsonSerializable(typeof(BankRequestRankingDto))]
+[JsonSerializable(typeof(DailyActiveMetricsDto))]
 [JsonSerializable(typeof(string))]
 internal sealed partial class ApiJsonContext : JsonSerializerContext;
