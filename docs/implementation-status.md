@@ -229,7 +229,7 @@
 | T-197 | Tell credit cards from debit cards at a glance | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-198 | Bank badges: real initials and brand colours (not «بنك»), everywhere | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-199 | Net worth breakdown: where the number comes from, balance per bank | M8 | C3 | Sonnet (+Opus note) | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
-| T-200 | Production key files: hardened file KMS (no cloud) | M8 | C4 | Opus | backend-engineer | — | IN_PROGRESS | — | Added 2026-11-20 (D-76). |
+| T-200 | Production key files: hardened file KMS (no cloud) | M8 | C4 | Opus | backend-engineer | — | IN_REVIEW | [T-200 review](05-reviews/T-200.md) APPROVED after one fix round (Opus code+security, Sonnet delta) | File KMS + 15 start-up guards, key tool, non-dumpable process, ADR-023, deployment §3. DONE once CI is green on push. T-201 must land before Gold is sold. FU-265 |
 | T-201 | Self-hosted OpenBao Transit KMS adapter | M8 | C4 | Opus | backend-engineer | T-200 | TODO | — | Added 2026-11-20 (D-76). |
 
 ## Follow-ups (from reviews)
@@ -857,6 +857,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-264** (batch 44): (1) break-glass unfreeze: also check 24 h since the correction that started the freeze (review F2c); no automated test (psql script; Lead proof in batch-44.md). (2) T-137 minors F3–F8: Ctrl-C at the order-ID prompt waits for Enter; `support lookup --email` lands in shell history (prompt for it instead); runbook's quarterly review uses `ops_ro`, which has no credentials yet; `apiUrl` path prefix dropped; design note vs printed API errors; Windows store doesn't read back after write. (3) L-1 minors N1–N3: stale launch route not cleared on a plain launch; Recents relaunch can replay a route (ignore FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY); mark-paid dialog doesn't name the bill, no ar/en widget test. (4) Infra: gitleaks allowlists whole test trees (narrow to files/values); L-5 Docker digests (run `docker buildx imagetools inspect`); anonymous-route test skips `/dev`; dependabot pub `directory: /`; Gradle scan covers only verification-metadata (export `:app:dependencies`); osv/gitleaks action SHAs from `git ls-remote`, confirm on GitHub. (5) I-9: `HostStartupTests.TheApiRefusesToStartWithoutAKeyRing` failed 2 times in ~70 runs alongside other host tests; root cause open. (6) Emulator: forged `am start` to MainActivity (cold/warm, with/without token) does nothing; real tap and Mark-as-paid still work.
 
+- **FU-265** (T-200): C3 overlapping G12 checks (make each independently tested); C6 rotation steps miss chmod / leftover-folder cleanup; C8 pin the PEM/DER parse buffers; rename the Dart test kid `s2026a` (catalog_build_test.dart) that reuses the committed dev catalog key; I-9 host-startup flake seen again (tracked in T-193).
+
 ## Log
 | Date | Event |
 |---|---|
@@ -954,3 +956,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-18 | Batch 42 (`batch/2026-11-18-42`): SMS-po42 (CIB promo fix, Arab Bank EG template-only, Mashreq, Vodafone Cash), T-156b (3 layouts + scanned OCR, review/year confirmation). FU-262. |
 | 2026-11-19 | Batch 43 (`batch/2026-11-19-43-qa-fixes`): QA audit fixes BUG-002…BUG-009 (SIGTERM exit 0, operator bank-requests and daily-active reports, Zaghlol-App required on /v1, purchaseToken 400, catalog_version CHECK, analyzer ignore, SRS/status/README sync). BUG-001 waits for T-140. Review [batch-43](05-reviews/batch-43.md) APPROVED. FU-263. Progress 167/186. |
 | 2026-11-19 | Batch 44 (`batch/2026-11-19-44`): T-137 ops CLI + runbook + disclosures; T-175 pass 1 (0 Critical, 1 High = BUG-001) and fixes M-1, L-1, L-2, L-3, L-6. Review [batch-44](05-reviews/batch-44.md) APPROVED after two Lead deltas. FU-264. Progress 167/186 (T-137 DONE on green CI). |
+| 2026-11-20 | Batch 45 (`batch/2026-11-19-45-planning`): M8 planning T-187…T-201 (SRS v1.9–1.11) and **T-200** hardened file KMS for self-hosting (D-76), review APPROVED after one fix round. FU-265. Progress 167/201. |

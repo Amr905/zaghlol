@@ -283,7 +283,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-197](tasks/T-197.md) | Tell credit cards from debit cards at a glance | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | TODO |
 | [T-198](tasks/T-198.md) | Bank badges: real initials and brand colours (not «بنك»), everywhere | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | TODO |
 | [T-199](tasks/T-199.md) | Net worth breakdown: where the number comes from, balance per bank | PO 11-19 | High | Sonnet (+Opus note) | flutter-core-engineer | — | A | 12 | TODO |
-| [T-200](tasks/T-200.md) | Production key files: hardened file KMS (no cloud) | PO 11-20 | High* | Opus | backend-engineer | — | B | 12 | IN_PROGRESS |
+| [T-200](tasks/T-200.md) | Production key files: hardened file KMS (no cloud) | PO 11-20 | High* | Opus | backend-engineer | — | B | 12 | IN_REVIEW (approved) |
 | [T-201](tasks/T-201.md) | Self-hosted OpenBao Transit KMS adapter | PO 11-20 | High* | Opus | backend-engineer | T-200 | B | 13 | TODO |
 
 ## Blocked or external items

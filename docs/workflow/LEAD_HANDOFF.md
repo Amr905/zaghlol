@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-265**.
+Next free follow-up number: **FU-266**.
 
 ## Batch 39 (2026-11-18)
 
@@ -207,6 +207,10 @@ This session had **no push access** (the push attach was refused), so the batch 
 
 - **New tasks (M8, SRS v1.9 D-67…D-69):** T-187 hide amounts (eye, `****`), T-188 chart period selector, T-189 charts review (mockups for PO sign-off first; Lead review findings and research in the task file), T-190 app size (measure first; ~150 MB reported), T-191 BUG-001 trust anchors (blocked on T-140), T-192 T-175 leftovers, T-193 FU-263/264 sweep. Later the same evening T-194…T-199 (dark-mode quip, salary matching, 1/3/6/12-month bills, credit vs debit, bank badges, net-worth breakdown; SRS v1.10 D-70…D-75). Board now 199 tasks.
 - **Designs, NOT tasks yet (PO asked to agree first):** design canvas "Zaghlol: bottom bar and dark mode options" (claude.ai artifact `7f8c9c63-f72c-433f-a501-8d9bdbed1b3d`): bottom-bar options A (current) … E (Captain Zaghlol hub), each on iOS 26 and Android M3 with a light/dark switch; dark themes 1 Jade Night (current) … 5 Night Garden. When the PO picks, update `docs/02-design/03-navigation.md` / `05-theme-2026.md` and then add the build tasks.
+
+## 2026-11-20: no cloud KMS → T-200 (file keys) now, T-201 (OpenBao) before Gold
+
+PO can't use a cloud provider. D-76 / ADR-023: `Kms:Provider = File` (T-200, merged into `batch/2026-11-19-45-planning`, review APPROVED) runs on a self-hosted Linux server: keys generated with `dotnet Zaghlol.Workers.dll --generate-keys`, bind-mounted read-only, owned by uid 1654, 0400/0500; 15 start-up guards; process non-dumpable. Deployment steps: `deployment.md` §3 "File KMS on a self-hosted server". T-201 (self-hosted OpenBao Transit) must land before Gold is sold to real users; envelope re-wrap decision belongs in its design note.
 
 ## Ready next
 
