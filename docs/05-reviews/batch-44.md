@@ -103,3 +103,36 @@ F1 and two of the three F2 checks fixed by the Lead in `backend/deploy/db/break-
 Proof, local PostgreSQL 16 migrated with `Zaghlol.Workers --migrate`: an upper-case UUID run cleared the freeze and wrote target `aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee`; a `support_agent`-only operator was refused; with a second enabled lead the script refused and wrote no row. Not automated (the script runs under psql); recorded here. The third F2 check (24 h since the correction that started the freeze) is left as FU-264.
 
 **T-137: APPROVED after delta.**
+
+## Delta review: T-175 infra lane
+
+Scope: `git diff 0595a0be HEAD` (fixes M-1, L-3, L-5 partial, L-6 of `T-175-pass1.md`). Reviewer: code-reviewer. Backend builds clean (0 warnings). DB/Docker tests cannot run here; the non-DB subset was compared against the base commit.
+
+### Findings
+
+**F1 (major) - the fallback policy breaks 39 existing non-DB tests in `Zaghlol.Api.Tests`.**
+Base `0595a0be`: 0 non-Docker failures. HEAD: 39 (every one is `Unauthorized` where `OK/NotFound/BadRequest/...` is expected). `Zaghlol.Api.Tests` fails 354 on base and 393+ on HEAD for the Docker reason; the extra 39 are real.
+Cause: the test hosts map routes without a policy or `AllowAnonymous()`, and `AddInstallTokenAuthentication` now installs the fallback. Affected: `Signing/SigningHostFixture.cs:114-182` (`/t/signed*`, `/t/anchored*`, `/t/unsigned`: ResponseSigningTests, TimeNonceTests), the `/t/...` routes behind `Installs/InstallsHostFixture.cs` used by RateLimitTests, and `Observability/ObservabilityHostFixture.cs` (VerboseLevelSentinelTests).
+Required change: add `.AllowAnonymous()` to those test routes (or to the groups mapping them) and re-run; CI `backend-ci` would otherwise go red. Production behaviour is unaffected. `Zaghlol.Contract.Tests`: the 2 new tests pass; the other 88 non-Docker tests pass; 91 fail only on Docker.
+
+**F2 (minor) - the live contract test covers only `/v1/` and `/admin/`** (`AnonymousRoutesLiveContractTests.cs`, route filter in the second test). `/health`, `/dev/v1/*` and any future route outside those prefixes are not compared. `/health` is in the spec (`security: []`) but is filtered out of `code`, so the equality passes only because `/health` is excluded from the spec side? It is not: spec side includes `GET /health`, so `Assert.Equal(spec, code)` must fail unless `/health` is mapped under `/v1/`. It passed, so health is evidently served under `/v1/health`; confirm and add a comment. Dev routes are mapped only in Development and are untested; their `AllowAnonymous()` is required (without it the fallback would 401 them) and is correct.
+
+**F3 (minor) - `.gitleaks.toml` allowlists whole test trees** (`backend/tests/.*`, `app/test/.*`, `packages/*/test/.*`). A real secret pasted into a test file would be hidden. Prefer the `_dev_only` regex plus specific fingerprints; keep path allowlists to the named dev files only. `docker-compose*.yml` and `dev_signing_key.json` are documented dev-only values: acceptable.
+
+**F4 (minor) - Dockerfile L-5 is not done** (digest pins are TODO comments, `backend/Dockerfile:5-8, 26`); the finding is only partially addressed as stated. Dependabot docker ecosystem will not bump an unpinned tag to a digest. Track as a follow-up with a named owner.
+
+**F5 (nit)** - `dotnet-tools.json` lost its trailing newline (cosmetic). `dependabot.yml` `directory: /` for pub assumes the root `pubspec.yaml` is the app (CLAUDE.md puts the app in `app/`; the audit uses `/pubspec.lock`, so presumably a workspace root); confirm, or Dependabot finds no manifest.
+
+### Checks that passed
+
+- **Fallback policy semantics** (`InstallTokenAuthentication.cs:36-55`): applies only to endpoints with no `IAuthorizeData` and no `IAllowAnonymous`, so it cannot open a protected route nor override one. Install-scoped routes keep `RequireInstallToken`; the `/admin/v1/*` groups keep `RequireOperatorRole` (every admin MapGet/Post/Put/Delete found carries it: catalog, contributions, bank-requests, metrics, flags, prices, support); RTDN keeps `PubSubPushAuthentication.Policy`. The default-scheme handler returns `NoResult` for unmarked endpoints, so an unmarked route yields a 401 challenge and never a DB lookup. Unmatched (404) and 405 requests carry no `RouteEndpoint`, so they pass and keep their problem answers.
+- **Anonymous set**: `GET /health`, `POST /v1/installs`, `GET /v1/catalog/{version}/full`, `POST /v1/apple/android-callback`, the Apple notification ingest, and the two `/dev/v1/*` routes carry `AllowAnonymous()`; nothing the app needs anonymously is closed. `RequireAppHeader` and the rate-limit/signing metadata on those routes are untouched.
+- **Contract test** (second test): meaningful (compares the real endpoint data source with the spec's empty-`security` operations, asserts a floor of 4 and that no policy-less route is spec-anonymous). First test exercises the fallback directly for anonymous, signed-in, no-endpoint and 405 cases.
+- **OpenAPI**: the 5 `security: []` additions match the 5 non-dev anonymous routes; no top-level `security` default exists, so the absent-key reading in the test is consistent.
+- **Workflow**: `permissions: contents: read` only; third-party actions pinned by SHA with version comments; checkout, setup-dotnet and upload-artifact SHAs are identical to `backend-ci.yml`; the osv-scanner and gitleaks SHAs could not be verified offline (no GitHub API access in this session). Secrets: only `GITLEAKS_LICENSE`; PR comments and artifact upload disabled; no `pull_request_target`; `continue-on-error` is on the two scan jobs and documented as temporary, the SBOM job is blocking. Dependabot config is sane (weekly, grouped, small limits).
+- **lodash override** (`package.json`, lockfile): single hoisted 4.18.1, five nested copies removed, consistent with the override; spectral-cli 6.15.0 unchanged.
+- **Kotlin 2.4.0 to 2.4.20** (`settings.gradle.kts`): both plugins move together; Gradle verification metadata is not changed in this diff, so confirm `verification-metadata.xml` covers the new Kotlin artifacts (a Gradle build was not run here). The junit 4.12 deferral comment is accurate.
+
+### Verdict
+
+**CHANGES_REQUESTED** - one major (F1): add `AllowAnonymous()` to the test-host routes so the 39 regressed tests pass again. No blocker; the production authorization design is correct.
