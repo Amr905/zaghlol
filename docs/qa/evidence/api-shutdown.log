@@ -1,0 +1,12 @@
+{"ts":"2026-11-19T01:28:31.921Z","level":"info","msg":"Database login for role {Role} verified","service":"api","category":"Zaghlol.Infrastructure.Persistence.DatabaseRoleGuardService"}
+{"ts":"2026-11-19T01:28:31.936Z","level":"info","msg":"Database login for role {Role} verified","service":"api","category":"Zaghlol.Infrastructure.Persistence.DatabaseRoleGuardService"}
+{"ts":"2026-11-19T01:28:32.176Z","level":"info","msg":"request completed","traceId":"f3bddf29116b1c8aecc92378c9b0c1b0","spanId":"4ceee0d41c0325c9","service":"api","category":"Zaghlol.Api.Observability.RequestLogMiddleware","method":"GET","route":"/v1/health","status":200,"durationMs":73}
+{"ts":"2026-11-19T01:28:33.183Z","level":"info","msg":"Application is shutting down...","service":"api","category":"Microsoft.Hosting.Lifetime"}
+Unhandled exception. System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'IServiceProvider'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ThrowHelper.ThrowObjectDisposedException()
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Program.<Main>$(String[] args) in /sessions/rcw-0153dtb2bvnr4aw3rnyspwcj/qa/repo/backend/src/Zaghlol.Api/Program.cs:line 133
+   at Program.<Main>(String[] args)
