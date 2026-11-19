@@ -33,7 +33,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | **M5 — Backend services & Zaghlol Gold** | Install/sync/catalog/flags/prices, purchases & entitlements with one-phone Gold (seat service, attestation, same-iPhone seat keys, trusted time), store notifications, optional sign-in, support path, operator CLI. | 35 |
 | **M6 — Backup, import/export, OCR, settings & security** | Encrypted Drive/iCloud backup & restore, CSV/XLSX/PDF/online statements, OCR, settings, app lock, delete everything. | 19 |
 | **M7 — Flagged features, hardening & launch** | Zakah & ROI behind flags, privacy/perf/a11y/security verification, store release pipelines. | 11 |
-| **M8 — Post-audit improvements** | PO requests of 2026-11-19 (hide amounts, chart periods and interaction, app size) and the open QA / security bugs. | 7 |
+| **M8 — Post-audit improvements** | PO requests of 2026-11-19 (hide amounts, charts, app size, dark-mode quip, salary, recurring bills, card types, bank badges, net-worth breakdown) and the open QA / security bugs. | 13 |
 
 ## M0 — Foundations & spikes
 
@@ -277,6 +277,12 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-191](tasks/T-191.md) | Production trust anchors in release builds (BUG-001) | QA | High* | Opus | flutter-core-engineer | T-140 | A | 13 | BLOCKED |
 | [T-192](tasks/T-192.md) | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | T-175 | Medium | Sonnet | backend-engineer | — | B | 12 | TODO |
 | [T-193](tasks/T-193.md) | Follow-up sweep FU-263 / FU-264 | batches 43–44 | Medium | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 merged | B | 12 | TODO |
+| [T-194](tasks/T-194.md) | Dark-mode quip «يعني تبقى فلوسك والمود؟» | PO 11-19 | Low | Haiku | boilerplate-engineer | — | G | 12 | TODO |
+| [T-195](tasks/T-195.md) | Salary as income: add it manually, use the SMS when it arrives | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | TODO |
+| [T-196](tasks/T-196.md) | Recurring every 1/3/6/12 months becomes a bill automatically | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | TODO |
+| [T-197](tasks/T-197.md) | Tell credit cards from debit cards at a glance | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | TODO |
+| [T-198](tasks/T-198.md) | Bank badges: real initials and brand colours (not «بنك»), everywhere | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | TODO |
+| [T-199](tasks/T-199.md) | Net worth breakdown: where the number comes from, balance per bank | PO 11-19 | High | Sonnet (+Opus note) | flutter-core-engineer | — | A | 12 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

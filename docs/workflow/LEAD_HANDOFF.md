@@ -205,7 +205,7 @@ This session had **no push access** (the push attach was refused), so the batch 
 
 ## 2026-11-19 evening: PO requests → M8, and two designs awaiting a pick
 
-- **New tasks (M8, SRS v1.9 D-67…D-69):** T-187 hide amounts (eye, `****`), T-188 chart period selector, T-189 charts review (mockups for PO sign-off first; Lead review findings and research in the task file), T-190 app size (measure first; ~150 MB reported), T-191 BUG-001 trust anchors (blocked on T-140), T-192 T-175 leftovers, T-193 FU-263/264 sweep. Board now 193 tasks.
+- **New tasks (M8, SRS v1.9 D-67…D-69):** T-187 hide amounts (eye, `****`), T-188 chart period selector, T-189 charts review (mockups for PO sign-off first; Lead review findings and research in the task file), T-190 app size (measure first; ~150 MB reported), T-191 BUG-001 trust anchors (blocked on T-140), T-192 T-175 leftovers, T-193 FU-263/264 sweep. Later the same evening T-194…T-199 (dark-mode quip, salary matching, 1/3/6/12-month bills, credit vs debit, bank badges, net-worth breakdown; SRS v1.10 D-70…D-75). Board now 199 tasks.
 - **Designs, NOT tasks yet (PO asked to agree first):** design canvas "Zaghlol: bottom bar and dark mode options" (claude.ai artifact `7f8c9c63-f72c-433f-a501-8d9bdbed1b3d`): bottom-bar options A (current) … E (Captain Zaghlol hub), each on iOS 26 and Android M3 with a light/dark switch; dark themes 1 Jade Night (current) … 5 Night Garden. When the PO picks, update `docs/02-design/03-navigation.md` / `05-theme-2026.md` and then add the build tasks.
 
 ## Ready next

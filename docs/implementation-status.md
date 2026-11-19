@@ -223,6 +223,12 @@
 | T-191 | Production trust anchors in release builds (BUG-001) | M8 | C4 | Opus | flutter-core-engineer | T-140 | BLOCKED | — | Added 2026-11-19 (PO request / QA audit). |
 | T-192 | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | M8 | C2 | Sonnet | backend-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 | T-193 | Follow-up sweep FU-263 / FU-264 | M8 | C2 | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 | TODO | — | Added 2026-11-19 (PO request / QA audit). |
+| T-194 | Dark-mode quip «يعني تبقى فلوسك والمود؟» | M8 | C1 | Haiku | boilerplate-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-195 | Salary as income: add it manually, use the SMS when it arrives | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-196 | Recurring every 1/3/6/12 months becomes a bill automatically | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-197 | Tell credit cards from debit cards at a glance | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-198 | Bank badges: real initials and brand colours (not «بنك»), everywhere | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-199 | Net worth breakdown: where the number comes from, balance per bank | M8 | C3 | Sonnet (+Opus note) | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 
 ## Follow-ups (from reviews)
 | ID | From | Item | Owner / target | Status |
