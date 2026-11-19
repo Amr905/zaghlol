@@ -68,7 +68,10 @@ builder.Services.AddZaghlolAppleRevocationWorker();
 builder.Services.AddHostedService<AppleRevocationRetryService>();
 
 using var host = builder.Build();
+
+// Resolved before RunAsync, which disposes the host and its service provider (BUG-002).
+var exitCode = host.Services.GetRequiredService<HostExitCode>();
 await host.RunAsync();
 
 // Non-zero when a guard stopped the host (FU-023), e.g. a rejected database login.
-return host.Services.GetRequiredService<HostExitCode>().Value;
+return exitCode.Value;

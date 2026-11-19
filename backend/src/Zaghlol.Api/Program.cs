@@ -110,6 +110,10 @@ builder.Services.AddZaghlolSupport();
 
 var app = builder.Build();
 
+// Resolved before RunAsync, which disposes the host and its service provider (BUG-002): reading it afterwards threw
+// ObjectDisposedException on every graceful shutdown and the process exited 134.
+var exitCode = app.Services.GetRequiredService<HostExitCode>();
+
 app.UseZaghlolPipeline();
 app.MapHealth();
 app.MapInstalls();
@@ -130,6 +134,6 @@ app.MapDevFakeStores();
 await app.RunAsync();
 
 // Non-zero when a guard stopped the host (FU-023), e.g. a rejected database login.
-return app.Services.GetRequiredService<HostExitCode>().Value;
+return exitCode.Value;
 
 public partial class Program;
