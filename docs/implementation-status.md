@@ -229,6 +229,8 @@
 | T-197 | Tell credit cards from debit cards at a glance | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-198 | Bank badges: real initials and brand colours (not «بنك»), everywhere | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-199 | Net worth breakdown: where the number comes from, balance per bank | M8 | C3 | Sonnet (+Opus note) | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-200 | Production key files: hardened file KMS (no cloud) | M8 | C4 | Opus | backend-engineer | — | IN_PROGRESS | — | Added 2026-11-20 (D-76). |
+| T-201 | Self-hosted OpenBao Transit KMS adapter | M8 | C4 | Opus | backend-engineer | T-200 | TODO | — | Added 2026-11-20 (D-76). |
 
 ## Follow-ups (from reviews)
 | ID | From | Item | Owner / target | Status |

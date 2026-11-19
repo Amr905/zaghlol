@@ -33,7 +33,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | **M5 — Backend services & Zaghlol Gold** | Install/sync/catalog/flags/prices, purchases & entitlements with one-phone Gold (seat service, attestation, same-iPhone seat keys, trusted time), store notifications, optional sign-in, support path, operator CLI. | 35 |
 | **M6 — Backup, import/export, OCR, settings & security** | Encrypted Drive/iCloud backup & restore, CSV/XLSX/PDF/online statements, OCR, settings, app lock, delete everything. | 19 |
 | **M7 — Flagged features, hardening & launch** | Zakah & ROI behind flags, privacy/perf/a11y/security verification, store release pipelines. | 11 |
-| **M8 — Post-audit improvements** | PO requests of 2026-11-19 (hide amounts, charts, app size, dark-mode quip, salary, recurring bills, card types, bank badges, net-worth breakdown) and the open QA / security bugs. | 13 |
+| **M8 — Post-audit improvements** | PO requests of 2026-11-19 (hide amounts, charts, app size, dark-mode quip, salary, recurring bills, card types, bank badges, net-worth breakdown) and the open QA / security bugs; self-hosted key custody. | 15 |
 
 ## M0 — Foundations & spikes
 
@@ -283,6 +283,8 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-197](tasks/T-197.md) | Tell credit cards from debit cards at a glance | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | TODO |
 | [T-198](tasks/T-198.md) | Bank badges: real initials and brand colours (not «بنك»), everywhere | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | TODO |
 | [T-199](tasks/T-199.md) | Net worth breakdown: where the number comes from, balance per bank | PO 11-19 | High | Sonnet (+Opus note) | flutter-core-engineer | — | A | 12 | TODO |
+| [T-200](tasks/T-200.md) | Production key files: hardened file KMS (no cloud) | PO 11-20 | High* | Opus | backend-engineer | — | B | 12 | IN_PROGRESS |
+| [T-201](tasks/T-201.md) | Self-hosted OpenBao Transit KMS adapter | PO 11-20 | High* | Opus | backend-engineer | T-200 | B | 13 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
