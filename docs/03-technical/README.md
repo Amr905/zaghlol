@@ -51,6 +51,7 @@
 | [021](adr/ADR-021-success-metrics-measurement.md) | Backend aggregate counters + store consoles + CI accuracy (answers OQ-01) | Telemetry | Proposed |
 | [022](adr/ADR-022-backend-architecture.md) | .NET 10 modular monolith + PostgreSQL 17; *amended 2026-11-05:* open third-party bodies, no query logging, `backend/Dockerfile` | Microservices, serverless | Proposed |
 | [023](adr/ADR-023-self-hosted-key-custody.md) | No cloud KMS (D-76): hardened key files now (`Kms:Provider = File`, T-200), self-hosted OpenBao Transit before Gold is sold (`Kms:Provider = OpenBao`, T-201) | Cloud KMS, hardware HSM | Accepted |
+| [024](adr/ADR-024-app-size-ocr-pdf-options.md) | App size (T-190): measured 28.8 MiB Play download arm64 / 17.4 MiB IPA; options to drop or defer OCR engines, PDFium, Rive | Drop Tesseract, drop ML Kit, on-demand OCR/PDF, OS PDF APIs, defer Rive | **Proposed** |
 
 ## Change requests raised by this phase (need product-owner approval)
 

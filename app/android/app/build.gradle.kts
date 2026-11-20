@@ -141,6 +141,25 @@ android {
             // Native debug symbols go inside the AAB; Play keeps them private
             // and uses them to symbolicate native crashes (no third-party SDK).
             ndk { debugSymbolLevel = "SYMBOL_TABLE" }
+            // T-190 (NFR-PERF-07): R8 code shrinking and resource shrinking, set
+            // explicitly (the Flutter Gradle plugin enables them by default). The
+            // keep rules are in proguard-rules.pro; the Flutter plugin adds that
+            // file together with proguard-android-optimize.txt and its own rules.
+            isMinifyEnabled = true
+            isShrinkResources = true
+        }
+    }
+}
+
+// T-190 (NFR-PERF-07): release builds ship arm64-v8a and armeabi-v7a only. Flutter's
+// --target-platform filters the engine and libapp.so, but not the .so files that come
+// with AARs (ML Kit, Tesseract, ...) or native assets, so the x86_64 ones are excluded
+// from the release packaging here. Debug and profile keep x86_64 for emulators.
+// -Pzaghlol.releaseX86=true keeps them, for a release-configuration smoke test on an x86_64 emulator.
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        if (findProperty("zaghlol.releaseX86") != "true") {
+            variant.packaging.jniLibs.excludes.add("lib/x86_64/**")
         }
     }
 }
