@@ -23,35 +23,38 @@ final budgetSaverProvider = FutureProvider<BudgetSaver>((ref) async {
   final now = ref.watch(clockProvider);
   final dao = BudgetsDao(db);
   return (Currency currency, BudgetValidated v, bool rollover) async {
-    final existing = (await dao.inCurrency(currency))
-        .where((b) => b.period == BudgetPeriod.cycle)
-        .toList();
-    final wanted = <String?, Money>{
-      if (v.total != null) null: v.total!,
-      ...v.limits,
-    };
-    for (final row in existing) {
-      final limit = wanted.remove(row.categoryId);
-      if (limit == null) {
-        await dao.deleteById(row.id);
-        continue;
+    // FU-155a: delete/update/insert land together or not at all.
+    await db.transaction(() async {
+      final existing = (await dao.inCurrency(currency))
+          .where((b) => b.period == BudgetPeriod.cycle)
+          .toList();
+      final wanted = <String?, Money>{
+        if (v.total != null) null: v.total!,
+        ...v.limits,
+      };
+      for (final row in existing) {
+        final limit = wanted.remove(row.categoryId);
+        if (limit == null) {
+          await dao.deleteById(row.id);
+          continue;
+        }
+        await dao.updateLimit(row.id, limit);
+        await dao.setThresholds(row.id, v.thresholds);
+        await (db.update(db.budgets)..where((b) => b.id.equals(row.id))).write(
+          BudgetsCompanion(rollover: Value(rollover ? 1 : 0)),
+        );
       }
-      await dao.updateLimit(row.id, limit);
-      await dao.setThresholds(row.id, v.thresholds);
-      await (db.update(db.budgets)..where((b) => b.id.equals(row.id))).write(
-        BudgetsCompanion(rollover: Value(rollover ? 1 : 0)),
-      );
-    }
-    for (final e in wanted.entries) {
-      await dao.insert(
-        id: newId(),
-        categoryId: e.key,
-        limit: e.value,
-        period: BudgetPeriod.cycle,
-        rollover: rollover,
-        thresholds: v.thresholds,
-        createdAt: now().toUtc().millisecondsSinceEpoch,
-      );
-    }
+      for (final e in wanted.entries) {
+        await dao.insert(
+          id: newId(),
+          categoryId: e.key,
+          limit: e.value,
+          period: BudgetPeriod.cycle,
+          rollover: rollover,
+          thresholds: v.thresholds,
+          createdAt: now().toUtc().millisecondsSinceEpoch,
+        );
+      }
+    });
   };
 });

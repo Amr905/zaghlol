@@ -166,6 +166,14 @@ void main() {
     expect(edit.note, isNull);
   });
 
+  testWidgets('FU-158c: edit cannot change the currency', (tester) async {
+    await pumpEditor(tester, FakeEditor(), existing: txnRec('a', minor: 45000));
+    await tester.tap(find.text('EGP'));
+    await tester.pumpAndSettle();
+    expect(find.text('Currency'), findsNothing);
+    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+  });
+
   testWidgets('edit that removed links shows the notice', (tester) async {
     final ed = FakeEditor()..removedLinks = ['l1'];
     await pumpEditor(tester, ed, existing: txnRec('a', minor: 45000));

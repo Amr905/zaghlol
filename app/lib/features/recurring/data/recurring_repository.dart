@@ -384,8 +384,9 @@ class RecurringRepository {
   }
 
   /// T-102: edits a manual item in place (S-25). Same validation as
-  /// [addManual]; the item keeps its id, merchant key and status unless the
-  /// paid count now reaches the total. False when it does not exist.
+  /// [addManual]; the item keeps its id and merchant key. Status is rewritten:
+  /// completed when the paid count reaches the total, otherwise active (a
+  /// paused item becomes active on save). False when it does not exist.
   Future<bool> updateManual(
     String id, {
     required String kind,
