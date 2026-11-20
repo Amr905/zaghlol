@@ -1,6 +1,7 @@
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using Zaghlol.Infrastructure.Kms;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Infrastructure.Tests.Kms;
 

@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Zaghlol.Infrastructure.Tests.Kms;
+namespace Zaghlol.Testing;
 
 /// <summary>
 /// T-201: an in-process stand-in for the OpenBao endpoints the adapter and the key tool use, over TLS with its own test CA.

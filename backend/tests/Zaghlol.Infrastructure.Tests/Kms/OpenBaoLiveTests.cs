@@ -40,7 +40,7 @@ public sealed class OpenBaoLiveTests
             legacy = await file.GetRequiredService<IEnvelopeCipher>().EncryptAsync("legacy"u8.ToArray(), "live", CancellationToken.None);
         }
 
-        await using var services = OpenBaoTestBed.Services("Production", ApiSettings());
+        await using var services = OpenBaoHost.Services("Production", ApiSettings());
         await FileKmsHost.StartAsync(services);
 
         var signer = services.GetRequiredService<ISigner>();
@@ -65,7 +65,7 @@ public sealed class OpenBaoLiveTests
         Assert.Equal("legacy"u8.ToArray(), await cipher.DecryptAsync(legacy, "live", CancellationToken.None));
 
         // The worker: envelope keys only, its own AppRole.
-        await using (var worker = OpenBaoTestBed.Services("Production", WorkerSettings()))
+        await using (var worker = OpenBaoHost.Services("Production", WorkerSettings()))
         {
             await FileKmsHost.StartAsync(worker);
             var workerCipher = worker.GetRequiredService<IEnvelopeCipher>();
@@ -80,7 +80,7 @@ public sealed class OpenBaoLiveTests
     public async Task Phase2_AfterARestartTheHashesAndEnvelopesAreUnchanged()
     {
         var state = JsonSerializer.Deserialize<State>(await File.ReadAllTextAsync(StatePath))!;
-        await using var services = OpenBaoTestBed.Services("Production", ApiSettings());
+        await using var services = OpenBaoHost.Services("Production", ApiSettings());
         await FileKmsHost.StartAsync(services);
 
         Assert.Equal(state.Macs, await MacsAsync(services));
@@ -98,7 +98,7 @@ public sealed class OpenBaoLiveTests
     private static async Task AssertUnavailableAsync()
     {
         var state = JsonSerializer.Deserialize<State>(await File.ReadAllTextAsync(StatePath))!;
-        await using var services = OpenBaoTestBed.Services("Production", ApiSettings());
+        await using var services = OpenBaoHost.Services("Production", ApiSettings());
 
         await Assert.ThrowsAsync<KmsUnavailableException>(() => services.GetRequiredService<ISigner>().SignAsync(SigningPurpose.Sync, Probe, CancellationToken.None).AsTask());
         await Assert.ThrowsAsync<KmsUnavailableException>(() => services.GetRequiredService<IKeyedHasher>().HmacSha256Async(KeyedHashKey.Seat, Probe, CancellationToken.None).AsTask());
@@ -106,7 +106,7 @@ public sealed class OpenBaoLiveTests
         await Assert.ThrowsAsync<KmsUnavailableException>(() => cipher.DecryptAsync(Convert.FromBase64String(state.Fresh), "live", CancellationToken.None).AsTask());
         await Assert.ThrowsAsync<KmsUnavailableException>(() => cipher.DecryptAsync(Convert.FromBase64String(state.Legacy), "live", CancellationToken.None).AsTask());
 
-        await using var starting = OpenBaoTestBed.Services("Production", ApiSettings());
+        await using var starting = OpenBaoHost.Services("Production", ApiSettings());
         var error = await Assert.ThrowsAsync<KmsConfigurationException>(() => FileKmsHost.StartAsync(starting));
         Assert.Equal(OpenBaoKms.UnreachableMessage, error.Message);
     }

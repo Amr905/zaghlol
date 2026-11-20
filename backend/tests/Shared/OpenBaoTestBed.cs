@@ -1,13 +1,7 @@
 using System.Runtime.Versioning;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Zaghlol.Infrastructure.Kms;
-using Zaghlol.Infrastructure.Seats;
-using Zaghlol.Testing;
 
-namespace Zaghlol.Infrastructure.Tests.Kms;
+namespace Zaghlol.Testing;
 
 /// <summary>
 /// T-201: the migration as an operator runs it, against <see cref="OpenBaoStub"/>. T-200 File keys (seat, audit,
@@ -21,6 +15,11 @@ internal sealed class OpenBaoTestBed : IAsyncDisposable
     public const string SyncKid = "s2027a";
     public const string EntitlementKid = "e2027a";
     public const string Envelope = "envelope-2027";
+
+    // The credential file names the adapter reads (OpenBaoKms.RoleIdFile, SecretIdFile, CaFile; deployment.md §3).
+    public const string RoleIdFile = "role-id";
+    public const string SecretIdFile = "secret-id";
+    public const string CaFileName = "ca.pem";
 
     public static readonly Dictionary<string, string> PolicyEnvironment = new(StringComparer.Ordinal)
     {
@@ -158,27 +157,6 @@ internal sealed class OpenBaoTestBed : IAsyncDisposable
         return settings;
     }
 
-    /// <summary>The KMS services of a host (AddZaghlolKms + AddZaghlolSeatKeys), optionally with a tighter call policy.</summary>
-    public static ServiceProvider Services(string environment, Dictionary<string, string?> settings, FileKmsHost.CapturingLogs? logs = null, KmsCallPolicy? policy = null)
-    {
-        var services = new ServiceCollection();
-        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(settings).Build());
-        services.AddSingleton<IHostEnvironment>(new FileKmsHost.TestEnvironment(environment, AppContext.BaseDirectory));
-        services.AddLogging(l => l.ClearProviders().AddProvider(logs ?? new FileKmsHost.CapturingLogs()).SetMinimumLevel(LogLevel.Trace));
-        if (policy is not null)
-        {
-            services.AddSingleton(policy);
-        }
-
-        services.AddZaghlolKms();
-        if (settings.GetValueOrDefault("Kms:Scope") != "Envelope")
-        {
-            services.AddZaghlolSeatKeys();
-        }
-
-        return services.BuildServiceProvider();
-    }
-
     public static IEnumerable<KeyValuePair<string, string>> ParseEnvLines(string output)
     {
         foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
@@ -208,9 +186,9 @@ internal sealed class OpenBaoTestBed : IAsyncDisposable
     {
         Directory.CreateDirectory(directory);
         File.SetUnixFileMode(directory, FileKmsKeySet.Mode0700);
-        WritePrivate(Path.Combine(directory, OpenBaoKms.RoleIdFile), role.RoleId + "\n");
-        WritePrivate(Path.Combine(directory, OpenBaoKms.SecretIdFile), role.SecretId + "\n");
-        WritePrivate(Path.Combine(directory, OpenBaoKms.CaFile), caPem);
+        WritePrivate(Path.Combine(directory, RoleIdFile), role.RoleId + "\n");
+        WritePrivate(Path.Combine(directory, SecretIdFile), role.SecretId + "\n");
+        WritePrivate(Path.Combine(directory, CaFileName), caPem);
     }
 
     public async ValueTask DisposeAsync()

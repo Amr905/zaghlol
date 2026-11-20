@@ -21,6 +21,8 @@
     <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
     <Compile Include="..\Shared\FileKmsKeySet.cs" Link="Shared\FileKmsKeySet.cs" />
+    <Compile Include="..\Shared\OpenBaoStub.cs" Link="Shared\OpenBaoStub.cs" />
+    <Compile Include="..\Shared\OpenBaoTestBed.cs" Link="Shared\OpenBaoTestBed.cs" />
     <Compile Include="..\Shared\PlayWireMock.cs" Link="Shared\PlayWireMock.cs" />
     <Compile Include="..\Shared\AppleTestPki.cs" Link="Shared\AppleTestPki.cs" />
     <Compile Include="..\Shared\AppleWireMock.cs" Link="Shared\AppleWireMock.cs" />

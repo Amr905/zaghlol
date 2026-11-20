@@ -32,7 +32,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     public async Task AfterTheMigrationEveryPortWorksAndT200ValuesStayValid(string environment)
     {
         var logs = new FileKmsHost.CapturingLogs();
-        await using var services = OpenBaoTestBed.Services(environment, bed.Settings(), logs);
+        await using var services = OpenBaoHost.Services(environment, bed.Settings(), logs);
 
         await FileKmsHost.StartAsync(services);
 
@@ -75,7 +75,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
         }
 
         Assert.Equal("file:envelope", Encoding.ASCII.GetString(legacy, 2, legacy[1]));
-        await using var services = OpenBaoTestBed.Services("Production", bed.Settings());
+        await using var services = OpenBaoHost.Services("Production", bed.Settings());
         await FileKmsHost.StartAsync(services);
 
         var opened = await services.GetRequiredService<IEnvelopeCipher>().DecryptAsync(legacy, "account/apple-rt/v1/x", CancellationToken.None);
@@ -89,12 +89,12 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     {
         var settings = bed.Settings();
         Assert.Equal(bed.FileKeys.Settings()["Kms:HmacKeys:SeatCheck"], settings["Kms:HmacKeys:SeatCheck"]);
-        await using var services = OpenBaoTestBed.Services("Production", settings);
+        await using var services = OpenBaoHost.Services("Production", settings);
 
         await FileKmsHost.StartAsync(services);
 
         settings["Kms:HmacKeys:SeatCheck"] = new string('0', 64);
-        await using var wrong = OpenBaoTestBed.Services("Production", settings);
+        await using var wrong = OpenBaoHost.Services("Production", settings);
         var error = await Assert.ThrowsAsync<KmsConfigurationException>(() => FileKmsHost.StartAsync(wrong));
         Assert.Equal(SeatKeyStartupCheck.MismatchMessage, error.Message);
     }
@@ -173,7 +173,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     public async Task ASealedServerRefusesTheStart()
     {
         bed.Stub.Sealed = true;
-        await using var services = OpenBaoTestBed.Services("Production", bed.Settings());
+        await using var services = OpenBaoHost.Services("Production", bed.Settings());
 
         var error = await Assert.ThrowsAsync<KmsConfigurationException>(() => FileKmsHost.StartAsync(services));
 
@@ -290,7 +290,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     [LinuxFact]
     public async Task ManyConcurrentCallersShareOneLogin()
     {
-        await using var services = OpenBaoTestBed.Services("Production", bed.Settings());
+        await using var services = OpenBaoHost.Services("Production", bed.Settings());
         var signer = services.GetRequiredService<ISigner>();
         var jwk = signer.PublishedKeys(SigningPurpose.Sync).Single().PublicJwk;
 
@@ -309,7 +309,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     public async Task TheWorkerStartsWithEnvelopeKeysOnly()
     {
         bed.Stub.Requests.Clear();
-        await using var services = OpenBaoTestBed.Services("Production", bed.Settings(worker: true));
+        await using var services = OpenBaoHost.Services("Production", bed.Settings(worker: true));
         await FileKmsHost.StartAsync(services);
 
         var cipher = services.GetRequiredService<IEnvelopeCipher>();
@@ -325,7 +325,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
         // The worker's AppRole with the API's full scope: its policy refuses the signing key read, so the start is refused.
         var settings = bed.Settings();
         settings["Kms:OpenBao:CredentialDirectory"] = bed.WorkerCredentials;
-        await using var services = OpenBaoTestBed.Services("Production", settings);
+        await using var services = OpenBaoHost.Services("Production", settings);
 
         var error = await Assert.ThrowsAsync<KmsConfigurationException>(() => FileKmsHost.StartAsync(services));
 
@@ -362,7 +362,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     {
         using var other = new TestCa("someone-else");
         OpenBaoTestBed.WriteCredentials(bed.ApiCredentials, bed.ApiRole, other.Pem);
-        await using var services = OpenBaoTestBed.Services("Production", bed.Settings());
+        await using var services = OpenBaoHost.Services("Production", bed.Settings());
 
         var error = await Assert.ThrowsAsync<KmsConfigurationException>(() => FileKmsHost.StartAsync(services));
 
@@ -557,7 +557,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
 
     private async Task<ServiceProvider> StartedAsync(KmsCallPolicy? policy = null)
     {
-        var services = OpenBaoTestBed.Services("Production", bed.Settings(), policy: policy);
+        var services = OpenBaoHost.Services("Production", bed.Settings(), policy: policy);
         await FileKmsHost.StartAsync(services);
         return services;
     }
@@ -565,7 +565,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     private async Task<KmsConfigurationException> AssertRefusedAsync(Dictionary<string, string?> settings, string? message, string environment = "Production")
     {
         var logs = new FileKmsHost.CapturingLogs();
-        await using var services = OpenBaoTestBed.Services(environment, settings, logs);
+        await using var services = OpenBaoHost.Services(environment, settings, logs);
 
         var error = await Assert.ThrowsAsync<KmsConfigurationException>(() => FileKmsHost.StartAsync(services));
 

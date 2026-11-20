@@ -119,7 +119,11 @@ public sealed class FileKmsWorkerTests : IDisposable
         return (keys, settings);
     }
 
-    private async Task<(bool Exited, string Output)> RunWorkerAsync(string environment, Dictionary<string, string> kms, string? until)
+    private Task<(bool Exited, string Output)> RunWorkerAsync(string environment, Dictionary<string, string> kms, string? until) =>
+        RunWorkerAsync(root, environment, kms, until);
+
+    /// <summary>Starts the worker binary with Production-complete settings plus <paramref name="kms"/> (also used by T-201).</summary>
+    internal static async Task<(bool Exited, string Output)> RunWorkerAsync(string root, string environment, Dictionary<string, string> kms, string? until)
     {
         using var appleKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         var env = new Dictionary<string, string>(kms, StringComparer.Ordinal)
@@ -157,6 +161,23 @@ public sealed class FileKmsWorkerTests : IDisposable
         return (code is not null, output);
     }
 
+    /// <summary>
+    /// The worker as built by its own project (same configuration and framework as this test), not the copy in this test's
+    /// output: this project also references the ASP.NET Core framework (the T-201 OpenBao stub), which leaves the worker's own
+    /// dependencies out of the test output.
+    /// </summary>
+    internal static string WorkerDll
+    {
+        get
+        {
+            var output = new DirectoryInfo(AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar));
+            var framework = output.Name;
+            var configuration = output.Parent!.Name;
+            var backend = output.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+            return Path.Combine(backend, "src", "Zaghlol.Workers", "bin", configuration, framework, "Zaghlol.Workers.dll");
+        }
+    }
+
     /// <summary>Runs Zaghlol.Workers.dll. With <paramref name="until"/>, stops it (SIGTERM) once that text appears; the code is then null.</summary>
     private static async Task<(int? Code, string Output)> RunAsync(
         IEnumerable<string> args,
@@ -172,7 +193,7 @@ public sealed class FileKmsWorkerTests : IDisposable
             RedirectStandardError = true,
             UseShellExecute = false,
         };
-        start.ArgumentList.Add(Path.Combine(AppContext.BaseDirectory, "Zaghlol.Workers.dll"));
+        start.ArgumentList.Add(WorkerDll);
         foreach (var arg in args)
         {
             start.ArgumentList.Add(arg);
