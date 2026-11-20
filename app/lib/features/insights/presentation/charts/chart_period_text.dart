@@ -49,9 +49,10 @@ class ChartPeriodText {
   /// not in the current year.
   String range(ChartPeriod p) {
     final withYear = p.from.year != p.to.year || p.to.year != today.year;
+    // The generated signature is (end, start).
     return l.commonDateRange(
-      _date(p.from, withYear: withYear),
       _date(p.to, withYear: withYear),
+      _date(p.from, withYear: withYear),
     );
   }
 

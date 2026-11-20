@@ -1,8 +1,13 @@
 // T-107 test support: synthetic chart data and provider overrides.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:zaghlol/features/budget/application/budget_providers.dart';
 import 'package:zaghlol/features/budget/presentation/budget_providers_ui.dart';
+import 'package:zaghlol/features/insights/application/chart_period_providers.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/insights/domain/chart_period_selection.dart';
+import 'package:zaghlol/features/insights/presentation/chart_explain_providers.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -10,14 +15,57 @@ import '../../../budget/presentation/budget_test_support.dart';
 
 export '../../../budget/presentation/budget_test_support.dart';
 
-ChartPeriod _p(int m) => ChartPeriod.month(2026, m);
+/// T-188: the clock and payday behind the period chip in widget tests.
+final CivilDate chartsToday = CivilDate(2026, 11, 10);
 
+class ChartsFixedToday extends TodayNotifier {
+  @override
+  CivilDate build() => chartsToday;
+}
+
+/// A selection store that never touches the settings table. [last] holds
+/// what was selected most recently (null until a select).
+class FakeChartPeriodSelection extends ChartPeriodSelectionNotifier {
+  FakeChartPeriodSelection([this.initial = ChartPeriodSelection.thisCycle]);
+  final ChartPeriodSelection initial;
+  static ChartPeriodSelection? last;
+
+  @override
+  Future<ChartPeriodSelection> build() async => initial;
+
+  @override
+  Future<void> select(ChartPeriodSelection selection) async {
+    last = selection;
+    state = AsyncData(selection);
+  }
+}
+
+/// The default cycle (25 Oct, 17 days in): one point per day, as the cash
+/// flow chart draws a one-cycle period (T-188).
 List<CashFlowPoint> cashFlowPoints() => [
-  for (var m = 5; m <= 10; m++)
+  for (var i = 0; i < 17; i++)
     CashFlowPoint(
-      period: _p(m),
-      income: egpM(30000),
-      spend: egpM(18000 + m * 500),
+      period: ChartPeriod(
+        CivilDate(2026, 10, 25).plusDays(i),
+        CivilDate(2026, 10, 25).plusDays(i),
+      ),
+      income: egpM(i == 0 ? 30000 : 0),
+      spend: egpM(600 + i * 50),
+      isPartial: false,
+    ),
+];
+
+/// Six months of weekly points (26 weeks to 10 Nov 2026), the "last 6
+/// months" view.
+List<CashFlowPoint> weeklyCashFlowPoints() => [
+  for (var i = 0; i < 24; i++)
+    CashFlowPoint(
+      period: ChartPeriod(
+        CivilDate(2026, 6, 1).plusDays(i * 7),
+        CivilDate(2026, 6, 1).plusDays(i * 7 + 6),
+      ),
+      income: egpM(i % 4 == 0 ? 30000 : 1000),
+      spend: egpM(4000 + (i * 7919) % 3000),
       isPartial: false,
     ),
 ];
@@ -47,6 +95,7 @@ List<Override> chartOverrides({
   ChartResult<List<MerchantSpend>>? top,
   bool cashFlowError = false,
   bool loading = false,
+  ChartPeriodSelection selection = ChartPeriodSelection.thisCycle,
 }) {
   final cur = currencies ?? [egp];
   return [
@@ -59,11 +108,28 @@ List<Override> chartOverrides({
       if (cashFlowError) throw StateError('boom');
       return cashFlow ?? ChartReady(cashFlowPoints());
     }),
+    cashFlowTotalProvider.overrideWith((ref, code) async {
+      final r = cashFlow ?? ChartReady(cashFlowPoints());
+      return switch (r) {
+        ChartReady(:final data) => ChartReady([CashFlowPoint.total(data)]),
+        ChartNotEnoughData() => r,
+      };
+    }),
+    previousCashFlowTotalProvider.overrideWith(
+      (ref, code) async => ChartReady([CashFlowPoint.total(cashFlowPoints())]),
+    ),
     donutChartProvider.overrideWith(
       (ref, code) async => donut ?? ChartReady(donutData()),
     ),
     merchantsChartProvider.overrideWith(
       (ref, code) async => top ?? ChartReady(merchants(5)),
+    ),
+    todayProvider.overrideWith(ChartsFixedToday.new),
+    paydayScheduleProvider.overrideWith(
+      (ref) async => PaydaySchedule.single(25),
+    ),
+    chartPeriodSelectionProvider.overrideWith(
+      () => FakeChartPeriodSelection(selection),
     ),
   ];
 }

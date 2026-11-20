@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/insights/domain/chart_period_selection.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart' show CivilDate;
 import 'package:zaghlol/features/insights/presentation/charts/charts_providers.dart';
 import 'package:zaghlol/features/insights/presentation/charts/chart_card.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
@@ -153,20 +155,101 @@ void main() {
     );
   });
 
-  testWidgets('period chip: this cycle by default, picks last cycle', (
+  testWidgets(
+    'period chip shows the resolved range; the sheet picks a preset',
+    (tester) async {
+      await _pump(tester);
+      expect(find.text('Oct 25 – Nov 24'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('charts-period')));
+      await tester.pumpAndSettle();
+      final l = _l(tester);
+      for (final name in [
+        l.commonPeriodThisCycle,
+        l.commonPeriodLastCycle,
+        l.commonPeriodThisMonth,
+        l.commonPeriodLastMonth,
+        l.commonPeriodThisYear,
+        l.commonPeriodCustom,
+      ]) {
+        expect(find.text(name), findsOneWidget, reason: name);
+      }
+      await tester.tap(find.byKey(const Key('charts-period-last6Months')));
+      await tester.pumpAndSettle();
+      expect(
+        FakeChartPeriodSelection.last,
+        const ChartPeriodSelection(ChartPreset.last6Months),
+      );
+      expect(find.text('Jun 1 – Nov 10'), findsOneWidget);
+    },
+  );
+
+  testWidgets('previous / next step the period and next stops at today', (
     tester,
   ) async {
+    FakeChartPeriodSelection.last = null;
     await _pump(tester);
-    expect(find.text('This cycle'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('charts-period')));
+    IconButton button(String key) =>
+        tester.widget<IconButton>(find.byKey(Key(key)));
+    expect(button('charts-period-next').onPressed, isNull);
+    await tester.tap(find.byKey(const Key('charts-period-prev')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Last cycle'));
+    expect(find.text('Sep 25 – Oct 24'), findsOneWidget);
+    expect(button('charts-period-next').onPressed, isNotNull);
+    await tester.tap(find.byKey(const Key('charts-period-next')));
     await tester.pumpAndSettle();
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(ChartsScreen)),
+    expect(find.text('Oct 25 – Nov 24'), findsOneWidget);
+    expect(button('charts-period-next').onPressed, isNull);
+  });
+
+  testWidgets('cash flow caption and bars follow the bucket size', (
+    tester,
+  ) async {
+    // One cycle: day buckets.
+    final days = [
+      for (var i = 0; i < 17; i++)
+        CashFlowPoint(
+          period: ChartPeriod(
+            CivilDate(2026, 10, 25).plusDays(i),
+            CivilDate(2026, 10, 25).plusDays(i),
+          ),
+          income: egpM(i == 0 ? 30000 : 0),
+          spend: egpM(100 + i),
+          isPartial: false,
+        ),
+    ];
+    await _pump(tester, overrides: chartOverrides(cashFlow: ChartReady(days)));
+    expect(find.text('17 days'), findsOneWidget);
+    final chart = tester.widget<BarChart>(find.byType(BarChart));
+    // Dense: income and spent only.
+    expect(chart.data.barGroups.first.barRods, hasLength(2));
+    expect(find.text('Saved'), findsNothing);
+  });
+
+  testWidgets('cycle-only charts say so for a month period', (tester) async {
+    GoldGate.chartsOpenToFree = true;
+    await _pump(
+      tester,
+      overrides: [
+        ...chartOverrides(
+          selection: const ChartPeriodSelection(ChartPreset.thisMonth),
+        ),
+        ...goldChartOverrides(),
+      ],
     );
-    expect(container.read(chartsPeriodProvider), isTrue);
-    expect(find.text('Last cycle'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text(_l(tester).insightsChartTitleVsAverage),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.text(_l(tester).insightsChartsPeriodNeedsCycle),
+      findsNWidgets(2),
+    );
+    // The budget card says it shows the current cycle.
+    expect(
+      find.text(_l(tester).insightsChartsPeriodBudgetNote, skipOffstage: false),
+      findsOneWidget,
+    );
   });
 
   testWidgets('currency chips switch currency', (tester) async {

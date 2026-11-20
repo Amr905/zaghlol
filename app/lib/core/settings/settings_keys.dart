@@ -51,8 +51,8 @@ abstract final class Settings {
   /// and equals the last era's day. Written first by `setPayday`.
   static final paydayEras = SettingKey.paydaySchedule('payday_eras');
 
-  /// Also stored in `settings`, defined beside their feature: `charts.period`
-  /// (T-188, `features/insights/application/chart_period_providers.dart`).
+  // `charts.period` (T-188) is also a setting; its key lives beside its
+  // feature in `features/insights/application/chart_period_providers.dart`.
 
   /// T-195 (D-71): "My salary" (amount, currency, payday, account); unset
   /// is null and the feature is off. Not a transaction: the expected salary
