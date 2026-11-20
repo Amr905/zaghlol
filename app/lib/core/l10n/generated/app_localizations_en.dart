@@ -3297,12 +3297,13 @@ class AppLocalizationsEn extends AppLocalizations {
     String gap,
     String saved,
     String percent,
+    String now,
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'short':
-          'This cycle you earned $income and spent $spent, so you\'re $gap over your income. Let\'s sort it out together.',
+          'Over $now you earned $income and spent $spent, so you\'re $gap over your income. Let\'s sort it out together.',
       'other':
-          'This cycle you earned $income and spent $spent, so you saved $saved. That\'s $percent of your income. Well done!',
+          'Over $now you earned $income and spent $spent, so you saved $saved. That\'s $percent of your income. Well done!',
     });
     return '$_temp0';
   }
@@ -3323,11 +3324,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String insightsExplainCashFlowDeep(String trend, String delta) {
+  String insightsExplainCashFlowDeep(
+    String trend,
+    String delta,
+    String now,
+    String prev,
+  ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'This cycle\'s net is $delta better than last cycle.',
-      'down': 'This cycle\'s net is $delta lower than last cycle.',
-      'other': 'This cycle\'s net is about the same as last cycle.',
+      'up': 'Net over $now is $delta better than $prev.',
+      'down': 'Net over $now is $delta lower than $prev.',
+      'other': 'Net over $now is about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3358,11 +3364,12 @@ class AppLocalizationsEn extends AppLocalizations {
     String trend,
     String category,
     String delta,
+    String prev,
   ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': '$category is up $delta on last cycle.',
-      'down': '$category is down $delta on last cycle.',
-      'other': '$category is about the same as last cycle.',
+      'up': '$category is up $delta on $prev.',
+      'down': '$category is down $delta on $prev.',
+      'other': '$category is about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3425,14 +3432,15 @@ class AppLocalizationsEn extends AppLocalizations {
     String needsPct,
     String wantsPct,
     String savingsPct,
+    String now,
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'wantsHigh':
-          'This cycle: $needsPct needs, $wantsPct wants, $savingsPct savings. Wants are above the usual rule.',
+          'Over $now: $needsPct needs, $wantsPct wants, $savingsPct savings. Wants are above the usual rule.',
       'savingsLow':
-          'This cycle: $needsPct needs, $wantsPct wants, $savingsPct savings. Savings are below the usual rule.',
+          'Over $now: $needsPct needs, $wantsPct wants, $savingsPct savings. Savings are below the usual rule.',
       'other':
-          'This cycle: $needsPct needs, $wantsPct wants, $savingsPct savings. That\'s close to the usual rule.',
+          'Over $now: $needsPct needs, $wantsPct wants, $savingsPct savings. That\'s close to the usual rule.',
     });
     return '$_temp0';
   }
@@ -3448,11 +3456,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String insightsExplainRule503020Deep(String trend, String savingsPct) {
+  String insightsExplainRule503020Deep(
+    String trend,
+    String savingsPct,
+    String prev,
+  ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'Savings rose from last cycle to $savingsPct.',
-      'down': 'Savings fell from last cycle to $savingsPct.',
-      'other': 'Savings are about the same as last cycle.',
+      'up': 'Savings rose from $prev to $savingsPct.',
+      'down': 'Savings fell from $prev to $savingsPct.',
+      'other': 'Savings are about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3482,12 +3494,12 @@ class AppLocalizationsEn extends AppLocalizations {
     String trend,
     String peakDay,
     String amount,
+    String prev,
   ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'Your average on $peakDay is $amount, higher than last cycle.',
-      'down': 'Your average on $peakDay is $amount, lower than last cycle.',
-      'other':
-          'Your average on $peakDay is $amount, about the same as last cycle.',
+      'up': 'Your average on $peakDay is $amount, higher than $prev.',
+      'down': 'Your average on $peakDay is $amount, lower than $prev.',
+      'other': 'Your average on $peakDay is $amount, about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3523,11 +3535,12 @@ class AppLocalizationsEn extends AppLocalizations {
     String trend,
     String merchant,
     String delta,
+    String prev,
   ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': '$merchant is up $delta on last cycle.',
-      'down': '$merchant is down $delta on last cycle.',
-      'other': '$merchant is about the same as last cycle.',
+      'up': '$merchant is up $delta on $prev.',
+      'down': '$merchant is down $delta on $prev.',
+      'other': '$merchant is about the same as $prev.',
     });
     return 'Your top three merchants take $percent of your spending. $_temp0';
   }
@@ -3668,11 +3681,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String insightsExplainCardsDeep(String trend, String card) {
+  String insightsExplainCardsDeep(String trend, String card, String prev) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': '$card\'s share of your spending rose since last cycle.',
-      'down': '$card\'s share of your spending fell since last cycle.',
-      'other': '$card\'s share of your spending is unchanged since last cycle.',
+      'up': '$card\'s share of your spending rose since $prev.',
+      'down': '$card\'s share of your spending fell since $prev.',
+      'other': '$card\'s share of your spending is unchanged since $prev.',
     });
     return '$_temp0';
   }
@@ -7237,8 +7250,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatMainRoastTag => 'Roast';
 
   @override
-  String insightsChartsSavedFootnote(String amount, String percent) {
-    return 'You saved $amount this month ($percent)';
+  String insightsChartsSavedFootnote(
+    String amount,
+    String percent,
+    String now,
+  ) {
+    return 'You saved $amount over $now ($percent)';
   }
 
   @override
@@ -7560,4 +7577,141 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationsSalaryNudgeBody =>
       'No salary message yet. If it landed, add it from Home in one tap.';
+
+  @override
+  String get commonPeriodLastMonth => 'Last month';
+
+  @override
+  String get commonPeriodThisYear => 'This year';
+
+  @override
+  String get insightsChartsPeriodSheetTitle => 'Chart period';
+
+  @override
+  String get insightsChartsPeriodPrev => 'Previous period';
+
+  @override
+  String get insightsChartsPeriodNext => 'Next period';
+
+  @override
+  String insightsChartsPeriodA11y(String name, String range) {
+    return 'Chart period: $name, $range. Double tap to change';
+  }
+
+  @override
+  String get insightsChartsPeriodNeedsCycle =>
+      'This chart works on a payday cycle. Pick this cycle or last cycle to see it.';
+
+  @override
+  String get insightsChartsPeriodBudgetNote =>
+      'Budget progress always shows the current cycle.';
+
+  @override
+  String insightsChartsDaysCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText days',
+      one: '$countText day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsWeeksCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText weeks',
+      one: '$countText week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsPeriodNowThisCycle => 'this cycle';
+
+  @override
+  String get insightsChartsPeriodNowLastCycle => 'the previous cycle';
+
+  @override
+  String get insightsChartsPeriodNowThisMonth => 'this month';
+
+  @override
+  String get insightsChartsPeriodNowLastMonth => 'the previous month';
+
+  @override
+  String insightsChartsPeriodNowMonths(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'the last $n months',
+      one: 'the last month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsPeriodNowThisYear => 'this year';
+
+  @override
+  String get insightsChartsPeriodNowLastYear => 'the previous year';
+
+  @override
+  String insightsChartsPeriodNowRange(String start, String end) {
+    return 'the period $start – $end';
+  }
+
+  @override
+  String get insightsChartsPeriodPrevCycleNow => 'last cycle';
+
+  @override
+  String get insightsChartsPeriodPrevMonthNow => 'last month';
+
+  @override
+  String get insightsChartsPeriodPrevYearNow => 'last year';
+
+  @override
+  String get insightsChartsPeriodPrevCycle => 'the cycle before';
+
+  @override
+  String get insightsChartsPeriodPrevMonth => 'the month before';
+
+  @override
+  String insightsChartsPeriodPrevMonths(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'the $n months before',
+      one: 'the month before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsPeriodPrevYear => 'the year before';
+
+  @override
+  String get insightsChartsPeriodPrevRange => 'the period before';
+
+  @override
+  String commonPeriodLastCycles(String n) {
+    return 'Last $n cycles';
+  }
+
+  @override
+  String insightsChartsCyclesCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText cycles',
+      one: '$countText cycle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsPeriodPrevSameDays(String prev) {
+    return 'the same days of $prev';
+  }
 }

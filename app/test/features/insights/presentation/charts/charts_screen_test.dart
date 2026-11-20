@@ -1,12 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/insights/domain/chart_period_selection.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart' show CivilDate;
 import 'package:zaghlol/features/insights/presentation/charts/charts_providers.dart';
 import 'package:zaghlol/features/insights/presentation/charts/chart_card.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
@@ -153,20 +154,155 @@ void main() {
     );
   });
 
-  testWidgets('period chip: this cycle by default, picks last cycle', (
+  testWidgets(
+    'period chip shows the resolved range; the sheet picks a preset',
+    (tester) async {
+      await _pump(tester);
+      expect(find.text('Oct 25 – Nov 24'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('charts-period')));
+      await tester.pumpAndSettle();
+      final l = _l(tester);
+      for (final name in [
+        l.commonPeriodThisCycle,
+        l.commonPeriodLastCycle,
+        l.commonPeriodThisMonth,
+        l.commonPeriodLastMonth,
+        l.commonPeriodThisYear,
+        l.commonPeriodCustom,
+      ]) {
+        expect(find.text(name), findsOneWidget, reason: name);
+      }
+      await tester.tap(find.byKey(const Key('charts-period-last6Months')));
+      await tester.pumpAndSettle();
+      expect(
+        FakeChartPeriodSelection.last,
+        const ChartPeriodSelection(ChartPreset.last6Months),
+      );
+      expect(find.text('Jun 1 – Nov 10'), findsOneWidget);
+    },
+  );
+
+  testWidgets('previous / next step the period and next stops at today', (
+    tester,
+  ) async {
+    FakeChartPeriodSelection.last = null;
+    await _pump(tester);
+    IconButton button(String key) =>
+        tester.widget<IconButton>(find.byKey(Key(key)));
+    expect(button('charts-period-next').onPressed, isNull);
+    await tester.tap(find.byKey(const Key('charts-period-prev')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sep 25 – Oct 24'), findsOneWidget);
+    expect(button('charts-period-next').onPressed, isNotNull);
+    await tester.tap(find.byKey(const Key('charts-period-next')));
+    await tester.pumpAndSettle();
+    expect(find.text('Oct 25 – Nov 24'), findsOneWidget);
+    expect(button('charts-period-next').onPressed, isNull);
+  });
+
+  testWidgets('RTL: previous sits on the right, the chevrons mirror', (
+    tester,
+  ) async {
+    await _pump(tester, locale: _ar);
+    final prev = tester.getCenter(find.byKey(const Key('charts-period-prev')));
+    final next = tester.getCenter(find.byKey(const Key('charts-period-next')));
+    expect(prev.dx, greaterThan(next.dx));
+    expect(
+      tester.getSize(find.byKey(const Key('charts-period-prev'))).shortestSide,
+      greaterThanOrEqualTo(44),
+    );
+    // Arabic digits in the range, Gregorian month names.
+    expect(find.textContaining('٢٥'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('custom range from the picker is clamped and applied', (
+    tester,
+  ) async {
+    FakeChartPeriodSelection.last = null;
+    await _pump(tester);
+    await tester.tap(find.byKey(const Key('charts-period')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('charts-period-custom')));
+    await tester.pumpAndSettle();
+    // The Material range picker opens; confirm its default range.
+    await tester.tap(find.text(_l(tester).commonActionDone));
+    await tester.pumpAndSettle();
+    final s = FakeChartPeriodSelection.last!;
+    expect(s.preset, ChartPreset.custom);
+    expect(s.customFrom, CivilDate(2026, 10, 25));
+    // This cycle ends on 24 Nov, after today: the picker opens cut at today.
+    expect(s.customTo, chartsToday);
+  });
+
+  testWidgets('default: six cycles, caption says so, three rods per bar', (
     tester,
   ) async {
     await _pump(tester);
-    expect(find.text('This cycle'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('charts-period')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Last cycle'));
-    await tester.pumpAndSettle();
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(ChartsScreen)),
+    expect(find.text('6 cycles'), findsOneWidget);
+    final chart = tester.widget<BarChart>(find.byType(BarChart));
+    expect(chart.data.barGroups, hasLength(6));
+    expect(chart.data.barGroups.first.barRods, hasLength(3));
+  });
+
+  testWidgets('cash flow caption and bars follow the bucket size', (
+    tester,
+  ) async {
+    // One cycle: day buckets.
+    final days = [
+      for (var i = 0; i < 17; i++)
+        CashFlowPoint(
+          period: ChartPeriod(
+            CivilDate(2026, 10, 25).plusDays(i),
+            CivilDate(2026, 10, 25).plusDays(i),
+          ),
+          income: egpM(i == 0 ? 30000 : 0),
+          spend: egpM(100 + i),
+          isPartial: false,
+        ),
+    ];
+    await _pump(
+      tester,
+      overrides: chartOverrides(
+        cashFlow: ChartReady(days),
+        selection: const ChartPeriodSelection(ChartPreset.thisMonth),
+      ),
     );
-    expect(container.read(chartsPeriodProvider), isTrue);
-    expect(find.text('Last cycle'), findsOneWidget);
+    expect(find.text('17 days'), findsOneWidget);
+    // Month cue on the first bar and on day 1 (F7).
+    expect(find.text('Oct 25'), findsOneWidget);
+    expect(find.text('Nov 1'), findsOneWidget);
+    final chart = tester.widget<BarChart>(find.byType(BarChart));
+    // Dense: income and spent only.
+    expect(chart.data.barGroups.first.barRods, hasLength(2));
+    expect(find.text('Saved'), findsNothing);
+  });
+
+  testWidgets('cycle-only charts say so for a month period', (tester) async {
+    GoldGate.chartsOpenToFree = true;
+    await _pump(
+      tester,
+      overrides: [
+        ...chartOverrides(
+          selection: const ChartPeriodSelection(ChartPreset.thisMonth),
+        ),
+        ...goldChartOverrides(),
+      ],
+    );
+    await tester.scrollUntilVisible(
+      find.text(_l(tester).insightsChartTitleVsAverage),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.text(_l(tester).insightsChartsPeriodNeedsCycle),
+      findsNWidgets(2),
+    );
+    // The budget card says it shows the current cycle.
+    expect(
+      find.text(_l(tester).insightsChartsPeriodBudgetNote, skipOffstage: false),
+      findsOneWidget,
+    );
   });
 
   testWidgets('currency chips switch currency', (tester) async {

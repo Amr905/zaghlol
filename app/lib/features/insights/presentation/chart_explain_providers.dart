@@ -45,16 +45,17 @@ final essentialCategoryIdsProvider = FutureProvider<Set<String>>((ref) async {
   };
 }, name: 'essentialCategoryIdsProvider');
 
+/// The previous period of the same kind and length (T-188): the cycle,
+/// month, block of months, year or custom range one step back.
 final previousDonutChartProvider =
     FutureProvider.family<ChartResult<CategoryDonut>, String>((
       ref,
       code,
     ) async {
-      final schedule = await ref.watch(paydayScheduleProvider.future);
-      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
       final repo = await ref.watch(chartRepositoryProvider.future);
       return repo.categoryDonut(
-        ChartPeriod.cycle(schedule.before(cycle)),
+        resolved.previous,
         ChartFilter(currency: Currency.of(code)),
       );
     }, name: 'previousDonutChartProvider');
@@ -64,25 +65,47 @@ final previousMerchantsChartProvider =
       ref,
       code,
     ) async {
-      final schedule = await ref.watch(paydayScheduleProvider.future);
-      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
       final repo = await ref.watch(chartRepositoryProvider.future);
       return repo.topMerchants(
-        ChartPeriod.cycle(schedule.before(cycle)),
+        resolved.previous,
         ChartFilter(currency: Currency.of(code)),
         limit: topMerchantsLimitFor(ref.watch(entitlementStateProvider)),
       );
     }, name: 'previousMerchantsChartProvider');
 
+/// One point for the previous period as a whole (cash flow explainer).
+final previousCashFlowTotalProvider =
+    FutureProvider.family<ChartResult<List<CashFlowPoint>>, String>((
+      ref,
+      code,
+    ) async {
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
+      final repo = await ref.watch(chartRepositoryProvider.future);
+      return repo.cashFlow([
+        resolved.previous,
+      ], ChartFilter(currency: Currency.of(code)));
+    }, name: 'previousCashFlowTotalProvider');
+
 final previousBurnChartProvider =
     FutureProvider.family<ChartResult<BurnCurve>, String>((ref, code) async {
-      final schedule = await ref.watch(paydayScheduleProvider.future);
-      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
+      if (resolved.cycle == null) {
+        return const ChartNotEnoughData<BurnCurve>(
+          NotEnoughReason.noData,
+          have: 0,
+          need: 1,
+        );
+      }
       final repo = await ref.watch(chartRepositoryProvider.future);
-      final prev = schedule.before(cycle);
+      // The whole earlier cycle, read up to the same day as now (to-date).
+      final prev = Cycle(
+        start: resolved.previousFull.from,
+        end: resolved.previousFull.to,
+      );
       return repo.burnCurve(
         prev,
-        prev.end,
+        resolved.previous.to,
         ChartFilter(currency: Currency.of(code)),
       );
     }, name: 'previousBurnChartProvider');
@@ -92,11 +115,10 @@ final previousRule503020ChartProvider =
       ref,
       code,
     ) async {
-      final schedule = await ref.watch(paydayScheduleProvider.future);
-      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
       final repo = await ref.watch(chartRepositoryProvider.future);
       return repo.fiftyThirtyTwenty(
-        ChartPeriod.cycle(schedule.before(cycle)),
+        resolved.previous,
         ChartFilter(currency: Currency.of(code)),
       );
     }, name: 'previousRule503020ChartProvider');
@@ -106,11 +128,10 @@ final previousCardsChartProvider =
       ref,
       code,
     ) async {
-      final schedule = await ref.watch(paydayScheduleProvider.future);
-      final cycle = await ref.watch(chartsCurrentCycleProvider.future);
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
       final repo = await ref.watch(chartRepositoryProvider.future);
       return repo.cardsSplit(
-        ChartPeriod.cycle(schedule.before(cycle)),
+        resolved.previous,
         ChartFilter(currency: Currency.of(code)),
       );
     }, name: 'previousCardsChartProvider');
@@ -125,7 +146,7 @@ NotEnoughReason? _reasonOf(ChartResult<Object?> r) => switch (r) {
   _ => null,
 };
 
-final chartExplanationProvider =
+final _rawExplanationProvider =
     FutureProvider.family<ExplainOutcome, ChartExplainKey>((ref, key) async {
       final tier = tierFor(isGold: ref.watch(entitlementStateProvider).isGold);
       final deep = tier == ExplanationTier.deep;
@@ -137,7 +158,7 @@ final chartExplanationProvider =
       Explanation empty() => Explanation(key.chart, tier, const []);
       switch (key.chart) {
         case ChartId.cashFlow:
-          final r = await ref.watch(cashFlowChartProvider(key.code).future);
+          final r = await ref.watch(cashFlowTotalProvider(key.code).future);
           final points = _ready(r);
           if (points == null || points.isEmpty) {
             return (explanation: empty(), reason: _reasonOf(r));
@@ -145,13 +166,18 @@ final chartExplanationProvider =
           final donut = _ready(
             await ref.watch(donutChartProvider(key.code).future),
           );
+          final prev = deep
+              ? _ready(
+                  await ref.watch(
+                    previousCashFlowTotalProvider(key.code).future,
+                  ),
+                )
+              : null;
           return (
             explanation: explainChart(
               CashFlowExplainInput(
                 current: points.last,
-                previous: deep && points.length > 1
-                    ? points[points.length - 2]
-                    : null,
+                previous: prev == null || prev.isEmpty ? null : prev.last,
                 categories: donut?.slices ?? const [],
               ),
               tier,
@@ -324,4 +350,25 @@ final chartExplanationProvider =
         default:
           return (explanation: empty(), reason: NotEnoughReason.noData);
       }
+    }, name: '_rawExplanationProvider');
+
+/// The explanation for the chosen period. The tip lines say "next cycle" and
+/// "a year" and their targets are sized for one cycle, so they are shown
+/// only when the period is a cycle; other periods get the facts (T-188,
+/// design note §6).
+final chartExplanationProvider =
+    FutureProvider.family<ExplainOutcome, ChartExplainKey>((ref, key) async {
+      final outcome = await ref.watch(_rawExplanationProvider(key).future);
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
+      if (resolved.isCycle || outcome.explanation.isEmpty) return outcome;
+      final e = outcome.explanation;
+      return (
+        explanation: Explanation(e.chart, e.tier, [
+          for (final line in e.lines)
+            if (line.key.part != ExplanationPart.tip &&
+                line.key.part != ExplanationPart.deepTip)
+              line,
+        ]),
+        reason: outcome.reason,
+      );
     }, name: 'chartExplanationProvider');

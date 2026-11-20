@@ -1376,7 +1376,7 @@
       }
     }
   },
-  "insightsExplainCashFlowBasic": "{state, select, short{This cycle you earned {income} and spent {spent}, so you're {gap} over your income. Let's sort it out together.} other{This cycle you earned {income} and spent {spent}, so you saved {saved}. That's {percent} of your income. Well done!}}",
+  "insightsExplainCashFlowBasic": "{state, select, short{Over {now} you earned {income} and spent {spent}, so you're {gap} over your income. Let's sort it out together.} other{Over {now} you earned {income} and spent {spent}, so you saved {saved}. That's {percent} of your income. Well done!}}",
   "@insightsExplainCashFlowBasic": {
     "description": "E · state:select(short/other): short = spent more than earned. No emoji in the short branch",
     "placeholders": {
@@ -1397,6 +1397,9 @@
       },
       "percent": {
         "type": "String"
+      },
+      "now": {
+        "type": "String"
       }
     }
   },
@@ -1415,7 +1418,7 @@
       }
     }
   },
-  "insightsExplainCashFlowDeep": "{trend, select, up{This cycle's net is {delta} better than last cycle.} down{This cycle's net is {delta} lower than last cycle.} other{This cycle's net is about the same as last cycle.}}",
+  "insightsExplainCashFlowDeep": "{trend, select, up{Net over {now} is {delta} better than {prev}.} down{Net over {now} is {delta} lower than {prev}.} other{Net over {now} is about the same as {prev}.}}",
   "@insightsExplainCashFlowDeep": {
     "description": "E · Gold · trend (up = better)",
     "placeholders": {
@@ -1423,6 +1426,12 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "now": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1472,7 +1481,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeep": "{trend, select, up{{category} is up {delta} on last cycle.} down{{category} is down {delta} on last cycle.} other{{category} is about the same as last cycle.}}",
+  "insightsExplainCategoriesDeep": "{trend, select, up{{category} is up {delta} on {prev}.} down{{category} is down {delta} on {prev}.} other{{category} is about the same as {prev}.}}",
   "@insightsExplainCategoriesDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1483,6 +1492,9 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1556,7 +1568,7 @@
       }
     }
   },
-  "insightsExplainRule503020Basic": "{state, select, wantsHigh{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Wants are above the usual rule.} savingsLow{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Savings are below the usual rule.} other{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. That's close to the usual rule.}}",
+  "insightsExplainRule503020Basic": "{state, select, wantsHigh{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Wants are above the usual rule.} savingsLow{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Savings are below the usual rule.} other{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. That's close to the usual rule.}}",
   "@insightsExplainRule503020Basic": {
     "description": "E · state:select(wantsHigh/savingsLow/other). The rule is fifty, thirty, twenty; the chart title carries it",
     "placeholders": {
@@ -1570,6 +1582,9 @@
         "type": "String"
       },
       "savingsPct": {
+        "type": "String"
+      },
+      "now": {
         "type": "String"
       }
     }
@@ -1586,7 +1601,7 @@
       }
     }
   },
-  "insightsExplainRule503020Deep": "{trend, select, up{Savings rose from last cycle to {savingsPct}.} down{Savings fell from last cycle to {savingsPct}.} other{Savings are about the same as last cycle.}}",
+  "insightsExplainRule503020Deep": "{trend, select, up{Savings rose from {prev} to {savingsPct}.} down{Savings fell from {prev} to {savingsPct}.} other{Savings are about the same as {prev}.}}",
   "@insightsExplainRule503020Deep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1594,6 +1609,9 @@
         "type": "String"
       },
       "savingsPct": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1640,7 +1658,7 @@
       }
     }
   },
-  "insightsExplainWeekPatternDeep": "{trend, select, up{Your average on {peakDay} is {amount}, higher than last cycle.} down{Your average on {peakDay} is {amount}, lower than last cycle.} other{Your average on {peakDay} is {amount}, about the same as last cycle.}}",
+  "insightsExplainWeekPatternDeep": "{trend, select, up{Your average on {peakDay} is {amount}, higher than {prev}.} down{Your average on {peakDay} is {amount}, lower than {prev}.} other{Your average on {peakDay} is {amount}, about the same as {prev}.}}",
   "@insightsExplainWeekPatternDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1651,6 +1669,9 @@
         "type": "String"
       },
       "amount": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1700,7 +1721,7 @@
       }
     }
   },
-  "insightsExplainMerchantsDeep": "Your top three merchants take {percent} of your spending. {trend, select, up{{merchant} is up {delta} on last cycle.} down{{merchant} is down {delta} on last cycle.} other{{merchant} is about the same as last cycle.}}",
+  "insightsExplainMerchantsDeep": "Your top three merchants take {percent} of your spending. {trend, select, up{{merchant} is up {delta} on {prev}.} down{{merchant} is down {delta} on {prev}.} other{{merchant} is about the same as {prev}.}}",
   "@insightsExplainMerchantsDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1714,6 +1735,9 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1922,7 +1946,7 @@
       }
     }
   },
-  "insightsExplainCardsDeep": "{trend, select, up{{card}'s share of your spending rose since last cycle.} down{{card}'s share of your spending fell since last cycle.} other{{card}'s share of your spending is unchanged since last cycle.}}",
+  "insightsExplainCardsDeep": "{trend, select, up{{card}'s share of your spending rose since {prev}.} down{{card}'s share of your spending fell since {prev}.} other{{card}'s share of your spending is unchanged since {prev}.}}",
   "@insightsExplainCardsDeep": {
     "description": "E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10)",
     "placeholders": {
@@ -1930,6 +1954,9 @@
         "type": "String"
       },
       "card": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -6871,7 +6898,7 @@
   "@chatMainRoastTag": {
     "description": "S-50 design pass"
   },
-  "insightsChartsSavedFootnote": "You saved {amount} this month ({percent})",
+  "insightsChartsSavedFootnote": "You saved {amount} over {now} ({percent})",
   "@insightsChartsSavedFootnote": {
     "description": "S-20 cash-flow footnote",
     "placeholders": {
@@ -6879,6 +6906,9 @@
         "type": "String"
       },
       "percent": {
+        "type": "String"
+      },
+      "now": {
         "type": "String"
       }
     }
@@ -7317,5 +7347,187 @@
   "notificationsSalaryNudgeBody": "No salary message yet. If it landed, add it from Home in one tap.",
   "@notificationsSalaryNudgeBody": {
     "description": "N"
+  },
+  "commonPeriodLastMonth": "Last month",
+  "@commonPeriodLastMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodThisYear": "This year",
+  "@commonPeriodThisYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodSheetTitle": "Chart period",
+  "@insightsChartsPeriodSheetTitle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrev": "Previous period",
+  "@insightsChartsPeriodPrev": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNext": "Next period",
+  "@insightsChartsPeriodNext": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodA11y": "Chart period: {name}, {range}. Double tap to change",
+  "@insightsChartsPeriodA11y": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNeedsCycle": "This chart works on a payday cycle. Pick this cycle or last cycle to see it.",
+  "@insightsChartsPeriodNeedsCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodBudgetNote": "Budget progress always shows the current cycle.",
+  "@insightsChartsPeriodBudgetNote": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsDaysCount": "{count, plural, one{{countText} day} other{{countText} days}}",
+  "@insightsChartsDaysCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsWeeksCount": "{count, plural, one{{countText} week} other{{countText} weeks}}",
+  "@insightsChartsWeeksCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNowThisCycle": "this cycle",
+  "@insightsChartsPeriodNowThisCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastCycle": "the previous cycle",
+  "@insightsChartsPeriodNowLastCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowThisMonth": "this month",
+  "@insightsChartsPeriodNowThisMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastMonth": "the previous month",
+  "@insightsChartsPeriodNowLastMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowMonths": "{count, plural, =1{the last month} other{the last {n} months}}",
+  "@insightsChartsPeriodNowMonths": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNowThisYear": "this year",
+  "@insightsChartsPeriodNowThisYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastYear": "the previous year",
+  "@insightsChartsPeriodNowLastYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowRange": "the period {start} – {end}",
+  "@insightsChartsPeriodNowRange": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevCycleNow": "last cycle",
+  "@insightsChartsPeriodPrevCycleNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonthNow": "last month",
+  "@insightsChartsPeriodPrevMonthNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevYearNow": "last year",
+  "@insightsChartsPeriodPrevYearNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevCycle": "the cycle before",
+  "@insightsChartsPeriodPrevCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonth": "the month before",
+  "@insightsChartsPeriodPrevMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonths": "{count, plural, =1{the month before} other{the {n} months before}}",
+  "@insightsChartsPeriodPrevMonths": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevYear": "the year before",
+  "@insightsChartsPeriodPrevYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevRange": "the period before",
+  "@insightsChartsPeriodPrevRange": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodLastCycles": "Last {n} cycles",
+  "@commonPeriodLastCycles": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCyclesCount": "{count, plural, one{{countText} cycle} other{{countText} cycles}}",
+  "@insightsChartsCyclesCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevSameDays": "the same days of {prev}",
+  "@insightsChartsPeriodPrevSameDays": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
   }
 }

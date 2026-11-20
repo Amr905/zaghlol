@@ -5060,7 +5060,7 @@ abstract class AppLocalizations {
   /// E · state:select(short/other): short = spent more than earned. No emoji in the short branch
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, short{الدورة دي دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{الدورة دي دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}'**
+  /// **'{state, select, short{في {now} دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{في {now} دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}'**
   String insightsExplainCashFlowBasic(
     String state,
     String income,
@@ -5068,6 +5068,7 @@ abstract class AppLocalizations {
     String gap,
     String saved,
     String percent,
+    String now,
   );
 
   /// S · state, category = largest category, target
@@ -5083,8 +5084,13 @@ abstract class AppLocalizations {
   /// E · Gold · trend (up = better)
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{صافي الدورة دي أحسن من الدورة اللي فاتت بـ {delta}.} down{صافي الدورة دي أقل من الدورة اللي فاتت بـ {delta}.} other{صافي الدورة دي زي الدورة اللي فاتت تقريباً.}}'**
-  String insightsExplainCashFlowDeep(String trend, String delta);
+  /// **'{trend, select, up{صافي {now} أحسن من {prev} بـ {delta}.} down{صافي {now} أقل من {prev} بـ {delta}.} other{صافي {now} زي {prev} تقريباً.}}'**
+  String insightsExplainCashFlowDeep(
+    String trend,
+    String delta,
+    String now,
+    String prev,
+  );
 
   /// S · Gold
   ///
@@ -5113,11 +5119,12 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{{category} زاد عن الدورة اللي فاتت بـ {delta}.} down{{category} قل عن الدورة اللي فاتت بـ {delta}.} other{{category} تقريباً زي الدورة اللي فاتت.}}'**
+  /// **'{trend, select, up{{category} زاد عن {prev} بـ {delta}.} down{{category} قل عن {prev} بـ {delta}.} other{{category} تقريباً زي {prev}.}}'**
   String insightsExplainCategoriesDeep(
     String trend,
     String category,
     String delta,
+    String prev,
   );
 
   /// S · Gold
@@ -5163,12 +5170,13 @@ abstract class AppLocalizations {
   /// E · state:select(wantsHigh/savingsLow/other). The rule is fifty, thirty, twenty; the chart title carries it
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, wantsHigh{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}'**
+  /// **'{state, select, wantsHigh{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}'**
   String insightsExplainRule503020Basic(
     String state,
     String needsPct,
     String wantsPct,
     String savingsPct,
+    String now,
   );
 
   /// S
@@ -5180,8 +5188,12 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{التحويش زاد عن الدورة اللي فاتت لـ {savingsPct}.} down{التحويش نزل عن الدورة اللي فاتت لـ {savingsPct}.} other{التحويش ثابت تقريباً عن الدورة اللي فاتت.}}'**
-  String insightsExplainRule503020Deep(String trend, String savingsPct);
+  /// **'{trend, select, up{التحويش زاد عن {prev} لـ {savingsPct}.} down{التحويش نزل عن {prev} لـ {savingsPct}.} other{التحويش ثابت تقريباً عن {prev}.}}'**
+  String insightsExplainRule503020Deep(
+    String trend,
+    String savingsPct,
+    String prev,
+  );
 
   /// S · Gold · percent = the next 5-point step
   ///
@@ -5209,11 +5221,12 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من الدورة اللي فاتت.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من الدورة اللي فاتت.} other{متوسط صرفك يوم {peakDay} {amount}، زي الدورة اللي فاتت تقريباً.}}'**
+  /// **'{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من {prev}.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من {prev}.} other{متوسط صرفك يوم {peakDay} {amount}، زي {prev} تقريباً.}}'**
   String insightsExplainWeekPatternDeep(
     String trend,
     String peakDay,
     String amount,
+    String prev,
   );
 
   /// S · Gold
@@ -5247,12 +5260,13 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن الدورة اللي فاتت بـ {delta}.} down{و{merchant} قل عن الدورة اللي فاتت بـ {delta}.} other{و{merchant} زي الدورة اللي فاتت تقريباً.}}'**
+  /// **'أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن {prev} بـ {delta}.} down{و{merchant} قل عن {prev} بـ {delta}.} other{و{merchant} زي {prev} تقريباً.}}'**
   String insightsExplainMerchantsDeep(
     String percent,
     String trend,
     String merchant,
     String delta,
+    String prev,
   );
 
   /// S · Gold
@@ -5374,8 +5388,8 @@ abstract class AppLocalizations {
   /// E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10)
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{نصيب {card} من صرفك زاد عن الدورة اللي فاتت.} down{نصيب {card} من صرفك قل عن الدورة اللي فاتت.} other{نصيب {card} من صرفك ثابت عن الدورة اللي فاتت.}}'**
-  String insightsExplainCardsDeep(String trend, String card);
+  /// **'{trend, select, up{نصيب {card} من صرفك زاد عن {prev}.} down{نصيب {card} من صرفك قل عن {prev}.} other{نصيب {card} من صرفك ثابت عن {prev}.}}'**
+  String insightsExplainCardsDeep(String trend, String card, String prev);
 
   /// S · Gold
   ///
@@ -10642,8 +10656,8 @@ abstract class AppLocalizations {
   /// S-20 cash-flow footnote
   ///
   /// In ar, this message translates to:
-  /// **'وفرت {amount} الشهر ده ({percent})'**
-  String insightsChartsSavedFootnote(String amount, String percent);
+  /// **'وفرت {amount} في {now} ({percent})'**
+  String insightsChartsSavedFootnote(String amount, String percent, String now);
 
   /// S-20 cash-flow card caption: number of months shown
   ///
@@ -11147,6 +11161,180 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لسه مجاليش رسالة بالمرتب. لو نزل، سجّله من الرئيسية بضغطة.'**
   String get notificationsSalaryNudgeBody;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get commonPeriodLastMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة دي'**
+  String get commonPeriodThisYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار الفترة'**
+  String get insightsChartsPeriodSheetTitle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة اللي قبلها'**
+  String get insightsChartsPeriodPrev;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة اللي بعدها'**
+  String get insightsChartsPeriodNext;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'فترة الرسومات: {name}، {range}. دوس مرتين عشان تغيّرها'**
+  String insightsChartsPeriodA11y(String name, String range);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.'**
+  String get insightsChartsPeriodNeedsCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'تقدّم الميزانية بيعرض الدورة الحالية دايماً.'**
+  String get insightsChartsPeriodBudgetNote;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{يوم} two{يومين} few{{countText} أيام} other{{countText} يوم}}'**
+  String insightsChartsDaysCount(int count, String countText);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{أسبوع} two{أسبوعين} few{{countText} أسابيع} other{{countText} أسبوع}}'**
+  String insightsChartsWeeksCount(int count, String countText);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة دي'**
+  String get insightsChartsPeriodNowThisCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة اللي فاتت'**
+  String get insightsChartsPeriodNowLastCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده'**
+  String get insightsChartsPeriodNowThisMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get insightsChartsPeriodNowLastMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{آخر شهر} =2{آخر شهرين} few{آخر {n} شهور} many{آخر {n} شهر} other{آخر {n} شهر}}'**
+  String insightsChartsPeriodNowMonths(int count, String n);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة دي'**
+  String get insightsChartsPeriodNowThisYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة اللي فاتت'**
+  String get insightsChartsPeriodNowLastYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة من {start} لـ {end}'**
+  String insightsChartsPeriodNowRange(String start, String end);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة اللي فاتت'**
+  String get insightsChartsPeriodPrevCycleNow;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get insightsChartsPeriodPrevMonthNow;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة اللي فاتت'**
+  String get insightsChartsPeriodPrevYearNow;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة اللي قبلها'**
+  String get insightsChartsPeriodPrevCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي قبله'**
+  String get insightsChartsPeriodPrevMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{الشهر اللي قبله} =2{الشهرين اللي قبلهم} few{الـ{n} شهور اللي قبلهم} many{الـ{n} شهر اللي قبلهم} other{الـ{n} شهر اللي قبلهم}}'**
+  String insightsChartsPeriodPrevMonths(int count, String n);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة اللي قبلها'**
+  String get insightsChartsPeriodPrevYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة اللي قبلها'**
+  String get insightsChartsPeriodPrevRange;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر {n} دورات'**
+  String commonPeriodLastCycles(String n);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}'**
+  String insightsChartsCyclesCount(int count, String countText);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'نفس الأيام من {prev}'**
+  String insightsChartsPeriodPrevSameDays(String prev);
 }
 
 class _AppLocalizationsDelegate

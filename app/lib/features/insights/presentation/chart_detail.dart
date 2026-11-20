@@ -26,7 +26,9 @@ import 'charts/chart_bodies.dart';
 import 'charts/chart_card.dart';
 import 'charts/chart_format.dart';
 import 'charts/charts_providers.dart';
+import 'charts/chart_period_text.dart';
 import 'charts/gold_chart_card.dart';
+import '../domain/chart_period_selection.dart';
 import '../../../core/ui/amount_semantics.dart';
 
 /// The typing indicator never runs longer than this (S-21).
@@ -85,6 +87,10 @@ class ChartDetailScreen extends ConsumerWidget {
       ref.watch(entitlementStateProvider),
       chart,
     ).allowed;
+    // A chart that needs a payday cycle says so and has nothing to explain
+    // for another period (T-188).
+    final unsupported =
+        ref.watch(chartsResolvedPeriodProvider).value?.supports(chart) == false;
     final c = ZColors.of(context);
     return Scaffold(
       backgroundColor: c.bg,
@@ -105,7 +111,8 @@ class ChartDetailScreen extends ConsumerWidget {
             _LockedDetail(title: title)
           else ...[
             _ChartSection(chart: chart, code: code, title: title),
-            _Explainer(chart: chart, code: code, startOpen: openExplainer),
+            if (!unsupported)
+              _Explainer(chart: chart, code: code, startOpen: openExplainer),
           ],
         ],
       ),
@@ -139,11 +146,8 @@ class _BackButton extends StatelessWidget {
   }
 }
 
-String _contextLine(AppLocalizations l, String code) => l.insightsChartsContext(
-  l.commonCardFilterAll,
-  code,
-  l.commonPeriodThisCycle,
-);
+String _contextLine(AppLocalizations l, String code, String period) =>
+    l.insightsChartsContext(l.commonCardFilterAll, code, period);
 
 class _LockedDetail extends ConsumerWidget {
   const _LockedDetail({required this.title});
@@ -194,10 +198,15 @@ class _ChartSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     String money0(Money m) => chartMoney(ref, context, m);
+    final resolved = ref.watch(chartsResolvedPeriodProvider).value;
+    final periodLabel = resolved == null
+        ? ''
+        : ChartPeriodText.of(context, ref).range(resolved.period);
+    final bucketKind = resolved?.bucketKind ?? ChartBucketKind.month;
     Widget empty(ChartNotEnoughData<Object?>? r) => ChartCard(
       bare: true,
       title: title,
-      contextLine: _contextLine(l, code),
+      contextLine: _contextLine(l, code, periodLabel),
       child: ChartMessage(
         text: r?.reason == NotEnoughReason.noData
             ? l.insightsChartsEmptyFilter
@@ -220,9 +229,16 @@ class _ChartSection extends ConsumerWidget {
                 ChartReady(:final data) => ChartCard(
                   bare: true,
                   title: title,
-                  contextLine: _contextLine(l, code),
-                  summary: CashFlowBody.summary(l, money0, data),
-                  child: CashFlowBody(points: data),
+                  contextLine: _contextLine(l, code, periodLabel),
+                  summary: CashFlowBody.summary(
+                    l,
+                    money0,
+                    cashFlowPeriodPoints(
+                      ref.watch(cashFlowTotalProvider(code)),
+                      data,
+                    ),
+                  ),
+                  child: CashFlowBody(points: data, bucketKind: bucketKind),
                 ),
                 ChartNotEnoughData() => empty(r),
               },
@@ -247,7 +263,7 @@ class _ChartSection extends ConsumerWidget {
                 ChartReady(:final data) => ChartCard(
                   bare: true,
                   title: title,
-                  contextLine: _contextLine(l, code),
+                  contextLine: _contextLine(l, code, periodLabel),
                   summary: DonutBody.summary(
                     l,
                     money0,
@@ -277,7 +293,7 @@ class _ChartSection extends ConsumerWidget {
                 ChartReady(:final data) when data.isNotEmpty => ChartCard(
                   bare: true,
                   title: title,
-                  contextLine: _contextLine(l, code),
+                  contextLine: _contextLine(l, code, periodLabel),
                   summary: MerchantsBody.summary(l, money0, data),
                   child: MerchantsBody(rows: data),
                 ),
@@ -292,7 +308,7 @@ class _ChartSection extends ConsumerWidget {
         return ChartCard(
           bare: true,
           title: title,
-          contextLine: _contextLine(l, code),
+          contextLine: _contextLine(l, code, periodLabel),
           child: ChartMessage(
             text: l.insightsChartDetailNeedsData(
               needsDataFor(chart, NotEnoughReason.noData),
@@ -416,12 +432,20 @@ class _Lines extends ConsumerWidget {
     final c = ZColors.of(context);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final cats = ref.watch(categoryRowsProvider).value ?? const [];
-    final fmt = ExplainFormat.of(context, ref, (id) {
-      for (final r in cats) {
-        if (r.id == id) return arabic ? r.nameAr : r.nameEn;
-      }
-      return l.insightsChartsOtherSlice;
-    });
+    final resolved = ref.watch(chartsResolvedPeriodProvider).value;
+    final periodText = ChartPeriodText.of(context, ref);
+    final fmt = ExplainFormat.of(
+      context,
+      ref,
+      (id) {
+        for (final r in cats) {
+          if (r.id == id) return arabic ? r.nameAr : r.nameEn;
+        }
+        return l.insightsChartsOtherSlice;
+      },
+      now: resolved == null ? '' : periodText.now(resolved),
+      prev: resolved == null ? '' : periodText.prev(resolved),
+    );
     final e = outcome.explanation;
     if (e.isEmpty) {
       return Text(
