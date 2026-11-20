@@ -22,6 +22,8 @@ import '../../../../core/ui/z_components.dart';
 import '../../../../core/ui/shell/add_sheet.dart'
     show AddAction, closeAddSheetThen;
 import '../../../budget/application/budget_providers.dart';
+import '../../../salary/application/salary_providers.dart';
+import '../../../salary/application/salary_service.dart';
 import '../../data/transactions_providers.dart';
 import '../../domain/transaction.dart';
 import '../../application/duplicate_finder.dart';
@@ -121,6 +123,10 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
   late final TextEditingController _note;
   late Currency _currency;
   bool _currencyTouched = false;
+
+  /// T-195: the new income is the salary (counted once even when the bank
+  /// message arrives too).
+  bool _salary = false;
   String? _categoryId;
   String? _accountId;
   String? _toAccountId;
@@ -188,13 +194,18 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
 
   CivilDate _today() => ref.read(todayProvider);
 
+  bool get _salarySelected =>
+      _salary && _type == TxnEditType.income && !_isEdit;
+
   void _revalidate() {
     setState(() {
       _errors = validateForm(
         type: _type,
         amountText: _amount.text,
         currency: _currency,
-        categoryId: _isTransferEdit ? 'n/a' : _categoryId,
+        categoryId: _isTransferEdit
+            ? 'n/a'
+            : (_categoryId ?? (_salarySelected ? 'sys:income' : null)),
         accountId: _accountId,
         toAccountId: _isTransferEdit ? null : _toAccountId,
         date: _date ?? _today(),
@@ -337,7 +348,14 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
             return;
           }
         }
-        await editor.add(legs);
+        if (_salarySelected) {
+          if (!await _saveSalary(legs.first)) {
+            if (mounted) setState(() => _saving = false);
+            return;
+          }
+        } else {
+          await editor.add(legs);
+        }
       }
       ref.invalidate(txnListProvider);
       if (removed.isNotEmpty) {
@@ -357,6 +375,45 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
         });
       }
     }
+  }
+
+  /// T-195: saves [leg] as the salary. When a received credit already looks
+  /// like it, asks: the same one (it is tied, nothing is added) or another
+  /// income (it is added). False = the user cancelled.
+  Future<bool> _saveSalary(NewTransaction leg) async {
+    final service = await ref.read(salaryServiceProvider.future);
+    final result = await service.recordManual(leg);
+    if (result is SalaryFoundExisting) {
+      if (!mounted) return false;
+      final l = AppLocalizations.of(context);
+      final lang = Localizations.localeOf(context).languageCode;
+      final fmt = TxnFmt(lang, ref.read(digitsModeProvider(lang)));
+      final same = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l.salaryFoundTitle),
+          content: Text(l.salaryFoundBody(fmt.money(result.amount))),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l.salaryFoundNo),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l.salaryFoundYes),
+            ),
+          ],
+        ),
+      );
+      if (same == null) return false;
+      if (same) {
+        await service.linkExisting(await service.anchorFor(leg), result.txnId);
+      } else {
+        await service.recordManual(leg, allowDuplicate: true);
+      }
+    }
+    ref.invalidate(expectedSalaryProvider);
+    return true;
   }
 
   /// S-32: when the same transaction is already saved, show it and let the
@@ -639,6 +696,22 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                       ),
                     ),
                     const SizedBox(height: ZSpacing.lg),
+                  ],
+                  if (_type == TxnEditType.income && !_isEdit) ...[
+                    SwitchListTile.adaptive(
+                      key: const ValueKey('txn-salary-switch'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.salaryAddSwitch),
+                      subtitle: Text(l.salaryAddSwitchHint),
+                      value: _salary,
+                      onChanged: ZHaptics.onToggle(
+                        (v) => setState(() {
+                          _salary = v;
+                          _touch();
+                        }),
+                      ),
+                    ),
+                    const SizedBox(height: ZSpacing.sm),
                   ],
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

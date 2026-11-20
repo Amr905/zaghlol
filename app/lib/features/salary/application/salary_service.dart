@@ -166,12 +166,7 @@ class SalaryService {
     if (txn.direction != TxnDirection.income || !txn.amount.isPositive) {
       throw SalaryServiceException(SalaryServiceException.notOpen);
     }
-    final date = CivilDate.fromLocalMs(
-      txn.occurredAt.toUtc().millisecondsSinceEpoch,
-      txn.occurredTzOffsetMin,
-    );
-    final plan = await this.plan();
-    final p = plan == null ? null : salaryPaydayFor(date, plan.day);
+    final anchor = await anchorFor(txn);
     return _record(
       NewTransaction(
         accountId: txn.accountId,
@@ -184,9 +179,21 @@ class SalaryService {
         merchant: txn.merchant,
         note: txn.note,
       ),
-      anchor: p ?? date,
+      anchor: anchor,
       allowDuplicate: allowDuplicate,
     );
+  }
+
+  /// The anchor a manual salary [txn] takes: the plan's payday when its date
+  /// falls in that window, else its own local date (a one-off).
+  Future<CivilDate> anchorFor(NewTransaction txn) async {
+    final date = CivilDate.fromLocalMs(
+      txn.occurredAt.toUtc().millisecondsSinceEpoch,
+      txn.occurredTzOffsetMin,
+    );
+    final plan = await this.plan();
+    final p = plan == null ? null : salaryPaydayFor(date, plan.day);
+    return p ?? date;
   }
 
   /// "Same one": ties the received credit [txnId] to [payday], closing the
