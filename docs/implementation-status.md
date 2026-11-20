@@ -216,7 +216,7 @@
 | T-184 | Seat service: bind, move, same-iPhone rebind with cap, claimants, reclaim and support-move primitive | M5 | C4 | Opus | backend-engineer | T-122, T-182 | DONE | batch 9 review [batch-9](05-reviews/batch-9.md) + [security](05-reviews/batch-9-security.md) APPROVED; backend-ci incl. Testcontainers green | Plan v1.1 (new, from T-132) Batch 9. FU-112 |
 | T-185 | POST /v1/purchases/restore: strict parse, install binding, attestation, seat outcomes and limits | M5 | C4 | Opus | backend-engineer | T-132, T-181, T-182, T-184 | DONE | batch 12 review [batch-12](05-reviews/batch-12.md) APPROVED; backend-ci incl. Testcontainers green on ci/T-185 | Plan v1.1 (new, from T-132) Batch 12. FU-129 |
 | T-186 | Support seat:move, purchase:detach and purchase:unfreeze endpoints with dispute freeze | M5 | C4 | Opus | backend-engineer | T-136, T-184, T-130, T-131, T-132 | DONE | batch 29 review [batch-29](05-reviews/batch-29.md) | Plan v1.1 (new, from T-136); R6-1 Batch 29. FU-249 |
-| T-187 | Hide amounts in the app (eye toggle, `****`) | M8 | C3 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
+| T-187 | Hide amounts in the app (eye toggle, `****`) | M8 | C3 | Sonnet | flutter-ui-engineer | — | IN_REVIEW | [T-187 review](05-reviews/T-187.md) APPROVED after one fix round + Lead delta | Hide amounts app-wide (eye on Home + money screens, Settings switch), `no_unmasked_amount` lint, a11y "amount hidden", notifications/widget/share masked. Goldens need CI regen. FU-267 |
 | T-188 | Chart period selector (presets, stepping, custom range) | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 | T-189 | Charts review: interaction, comparison and clarity (mockups first) | M8 | C3 | Opus→Sonnet | ux-designer → flutter-ui-engineer | T-188 | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 | T-190 | App size: measure and reduce (~150 MB reported) | M8 | C3 | Sonnet | native-platform-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
@@ -225,7 +225,7 @@
 | T-193 | Follow-up sweep FU-263 / FU-264 | M8 | C2 | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 | T-194 | Dark-mode quip «يعني تبقى فلوسك والمود؟» | M8 | C1 | Haiku | boilerplate-engineer | — | IN_REVIEW | Lead spot-check + T-198 review §T-194 APPROVED | Dark-mode quip on a user pick of Dark. |
 | T-195 | Salary as income: add it manually, use the SMS when it arrives | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
-| T-196 | Recurring every 1/3/6/12 months becomes a bill automatically | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-196 | Recurring every 1/3/6/12 months becomes a bill automatically | M8 | C3 | Sonnet | flutter-core-engineer | — | IN_REVIEW | [T-196 review](05-reviews/T-196.md) APPROVED after one fix round (Opus code + data safety; Sonnet delta) | Schema v5 (quarterly/semi_annual, auto_added_at, recurring_dismissals); 1/3/6/12-month chains auto-added with 6 s Undo; excluded categories groceries, dining, transport, cash, income. FU-267 |
 | T-197 | Tell credit cards from debit cards at a glance | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-198 | Bank badges: real initials and brand colours (not «بنك»), everywhere | M8 | C2 | Sonnet | flutter-ui-engineer | — | IN_REVIEW | [T-198 review](05-reviews/T-198.md) APPROVED after Lead delta | One badge (short code on brand colour) on every surface; 36+ colours/codes are guesses for the PO in docs/02-design/bank-badges.md. FU-266 |
 | T-199 | Net worth breakdown: where the number comes from, balance per bank | M8 | C3 | Sonnet (+Opus note) | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
@@ -861,6 +861,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-266** (batch 46): T-201 — pin `ghcr.io/openbao/openbao` by digest (S3); N1 a caller that loses the relogin CAS gets a retryable 503 instead of waiting; N2 verify-only pins share the bare `file:` name; PO: switch-over moment, recovery-share holders, unseal-key residual (design note T-201). T-198 — badge tests for «مصرف أبوظبي», a one-word label, "", "Bank"; Arabic comma after a generic word; PO checks brand colours and short codes. T-194 — shared mascot toast instead of a plain SnackBar.
 
+- **FU-267** (batch 47): T-187 F-4 re-redact already-scheduled notifications at startup when hiding is on (needs a native cancel/reschedule hook or persisted scheduled alerts); T-196 no UI to see or revive a dismissed bill after the Undo snackbar; T-196 6/12-month chains need only 2 charges, so a coincidental pair can auto-add (undo exists); `capture_providers_test` "starts after the database opened" flakes under full-suite load (passes alone 3/3); goldens for batches 46–47 need the CI app-regen run.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -960,3 +962,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-19 | Batch 44 (`batch/2026-11-19-44`): T-137 ops CLI + runbook + disclosures; T-175 pass 1 (0 Critical, 1 High = BUG-001) and fixes M-1, L-1, L-2, L-3, L-6. Review [batch-44](05-reviews/batch-44.md) APPROVED after two Lead deltas. FU-264. Progress 167/186 (T-137 DONE on green CI). |
 | 2026-11-20 | Batch 45 (`batch/2026-11-19-45-planning`): M8 planning T-187…T-201 (SRS v1.9–1.11) and **T-200** hardened file KMS for self-hosting (D-76), review APPROVED after one fix round. FU-265. Progress 167/201. |
 | 2026-11-20 | Batch 46 (`batch/2026-11-20-46`): T-201 OpenBao Transit KMS, T-198 bank badges, T-194 dark-mode quip; all reviews APPROVED. FU-266. |
+| 2026-11-20 | Batch 47 (`batch/2026-11-20-47`): T-196 recurring 1/3/6/12-month bills (schema v5), T-187 hide amounts; reviews APPROVED; full non-golden app suite on the merged tree: 1 known load flake only. FU-267. |
