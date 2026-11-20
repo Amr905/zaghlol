@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-268**.
+Next free follow-up number: **FU-269**.
 
 ## Batch 39 (2026-11-18)
 
@@ -211,6 +211,13 @@ This session had **no push access** (the push attach was refused), so the batch 
 ## 2026-11-20: no cloud KMS → T-200 (file keys) now, T-201 (OpenBao) before Gold
 
 PO can't use a cloud provider. D-76 / ADR-023: `Kms:Provider = File` (T-200, merged into `batch/2026-11-19-45-planning`, review APPROVED) runs on a self-hosted Linux server: keys generated with `dotnet Zaghlol.Workers.dll --generate-keys`, bind-mounted read-only, owned by uid 1654, 0400/0500; 15 start-up guards; process non-dumpable. Deployment steps: `deployment.md` §3 "File KMS on a self-hosted server". T-201 (self-hosted OpenBao Transit) must land before Gold is sold to real users; envelope re-wrap decision belongs in its design note.
+
+## Batches 46–48 (2026-11-20, run back to back at the PO's request)
+
+- **46:** T-201 OpenBao Transit KMS, T-198 bank badges, T-194 dark-mode quip.
+- **47:** T-196 recurring 1/3/6/12-month bills (schema v5), T-187 hide amounts (eye + `no_unmasked_amount` lint).
+- **48:** T-195 salary as income (no schema change), T-197 credit vs debit.
+All approved; branches stack: `batch/2026-11-20-48` contains 43–48. Not pushed (no push access this session); delivered as a git bundle. Before merging: run the CI `app-regen` workflow for goldens (lists in each review), then app-ci / backend-ci / the new `openbao-live` job. Still waiting on the PO: bottom-bar and dark-theme pick (design canvas), T-189 mockups, T-190 (Android build machine), T-191 production keys, bank badge colours/codes.
 
 ## Ready next
 

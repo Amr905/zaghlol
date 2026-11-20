@@ -224,9 +224,9 @@
 | T-192 | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | M8 | C2 | Sonnet | backend-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 | T-193 | Follow-up sweep FU-263 / FU-264 | M8 | C2 | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 | T-194 | Dark-mode quip «يعني تبقى فلوسك والمود؟» | M8 | C1 | Haiku | boilerplate-engineer | — | IN_REVIEW | Lead spot-check + T-198 review §T-194 APPROVED | Dark-mode quip on a user pick of Dark. |
-| T-195 | Salary as income: add it manually, use the SMS when it arrives | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-195 | Salary as income: add it manually, use the SMS when it arrives | M8 | C3 | Sonnet | flutter-core-engineer | — | IN_REVIEW | [T-195 review](05-reviews/T-195.md) APPROVED after one fix round (Sonnet + delta) | Expected salary from settings (no schema change), SMS/manual matching with one income per payday, nudge, My salary sheet. Onboarding entry deferred. FU-268 |
 | T-196 | Recurring every 1/3/6/12 months becomes a bill automatically | M8 | C3 | Sonnet | flutter-core-engineer | — | IN_REVIEW | [T-196 review](05-reviews/T-196.md) APPROVED after one fix round (Opus code + data safety; Sonnet delta) | Schema v5 (quarterly/semi_annual, auto_added_at, recurring_dismissals); 1/3/6/12-month chains auto-added with 6 s Undo; excluded categories groceries, dining, transport, cash, income. FU-267 |
-| T-197 | Tell credit cards from debit cards at a glance | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-197 | Tell credit cards from debit cards at a glance | M8 | C2 | Sonnet | flutter-ui-engineer | — | IN_REVIEW | [T-197 review](05-reviews/T-197.md) APPROVED after one fix round (Sonnet + delta) | Type chip + icon on card surfaces, credit used/limit bar + due date, Money tab grouped by type. Goldens need CI regen. FU-268 |
 | T-198 | Bank badges: real initials and brand colours (not «بنك»), everywhere | M8 | C2 | Sonnet | flutter-ui-engineer | — | IN_REVIEW | [T-198 review](05-reviews/T-198.md) APPROVED after Lead delta | One badge (short code on brand colour) on every surface; 36+ colours/codes are guesses for the PO in docs/02-design/bank-badges.md. FU-266 |
 | T-199 | Net worth breakdown: where the number comes from, balance per bank | M8 | C3 | Sonnet (+Opus note) | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-200 | Production key files: hardened file KMS (no cloud) | M8 | C4 | Opus | backend-engineer | — | IN_REVIEW | [T-200 review](05-reviews/T-200.md) APPROVED after one fix round (Opus code+security, Sonnet delta) | File KMS + 15 start-up guards, key tool, non-dumpable process, ADR-023, deployment §3. DONE once CI is green on push. T-201 must land before Gold is sold. FU-265 |
@@ -863,6 +863,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-267** (batch 47): T-187 F-4 re-redact already-scheduled notifications at startup when hiding is on (needs a native cancel/reschedule hook or persisted scheduled alerts); T-196 no UI to see or revive a dismissed bill after the Undo snackbar; T-196 6/12-month chains need only 2 charges, so a coincidental pair can auto-add (undo exists); `capture_providers_test` "starts after the database opened" flakes under full-suite load (passes alone 3/3); goldens for batches 46–47 need the CI app-regen run.
 
+- **FU-268** (batch 48): T-195 salary setup in onboarding; a declined credit is never re-offered even if the "another income" row is deleted; optional `expected(today)` inside the transaction (F5). T-197 card-detail and home-filter golden fixtures with a credit-kind case; type label on compact rows/review/merge/capture screens is a scope cut. Goldens for batches 46–48 need the CI app-regen run.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -963,3 +965,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-20 | Batch 45 (`batch/2026-11-19-45-planning`): M8 planning T-187…T-201 (SRS v1.9–1.11) and **T-200** hardened file KMS for self-hosting (D-76), review APPROVED after one fix round. FU-265. Progress 167/201. |
 | 2026-11-20 | Batch 46 (`batch/2026-11-20-46`): T-201 OpenBao Transit KMS, T-198 bank badges, T-194 dark-mode quip; all reviews APPROVED. FU-266. |
 | 2026-11-20 | Batch 47 (`batch/2026-11-20-47`): T-196 recurring 1/3/6/12-month bills (schema v5), T-187 hide amounts; reviews APPROVED; full non-golden app suite on the merged tree: 1 known load flake only. FU-267. |
+| 2026-11-20 | Batch 48 (`batch/2026-11-20-48`): T-195 salary as income, T-197 credit vs debit; reviews APPROVED; full non-golden app suite on the merged tree 5020/5020, backend build clean. FU-268. |
