@@ -542,6 +542,11 @@ These details were not spelled out above. `backend/openapi/zaghlol-v1.yaml` is a
 | `GET /admin/v1/bank-requests` | catalog_editor | Ranked list |
 | `GET /admin/v1/metrics/daily-active` | any | Aggregate counters |
 
+Report limits (the OpenAPI descriptions are the contract; this is the summary):
+
+- `GET /admin/v1/bank-requests` (role `catalog_editor`): no query parameters (any is `400 VALIDATION_FAILED`). One entry per normalized institution name, country and channel; `count` is the number of distinct installs that asked. Ordered by `count` descending, then `lastRequestedAt` descending, then name, country and channel name ascending, so the order is fixed. At most 500 entries (the least requested are cut). `lastRequestedAt` is the exact UTC time of the newest request (to the second), so an institution asked for by one install shows that install's last request time; no install identifier is ever returned. `Cache-Control: no-store`.
+- `GET /admin/v1/metrics/daily-active` (any role): optional `days`, an integer 1 to 90 written in ASCII digits, default 14; repeated, non-integer, out-of-range or any other parameter is `400 VALIDATION_FAILED`. One entry per UTC day, oldest first, ending today, summed over platform and app version, with `activeInstalls: 0` for a day without counts. `Cache-Control: no-store`.
+
 ### 5.1 Concrete operations (OpenAPI)
 
 The table above uses shorthand. These are the exact operations in `zaghlol-v1.yaml`; a contract test compares this list to the spec exactly. `entity` is `categories`, `merchants`, `aliases` or `keywords`. All admin calls use an operator bearer token (`operatorOidc`) and each operation declares its role in `x-required-roles`.
