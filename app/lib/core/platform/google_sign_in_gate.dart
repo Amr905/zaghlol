@@ -1,13 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 // google_sign_in 7.x keeps one global configuration (including the nonce), so
 // the sign-in flow and the Drive authorizer must not interleave their
 // initialize/authenticate pairs (FU-189b).
 
 /// Serializes Google plugin sessions and counts the nonce configurations.
 final class GoogleSignInGate {
-  GoogleSignInGate._();
-
-  /// The process-wide gate.
-  static final GoogleSignInGate instance = GoogleSignInGate._();
+  GoogleSignInGate();
 
   Future<void> _tail = Future<void>.value();
   int _epoch = 0;
@@ -27,3 +26,9 @@ final class GoogleSignInGate {
     return result;
   }
 }
+
+/// The one gate shared by sign-in, Drive auth and delete-everything.
+final googleSignInGateProvider = Provider<GoogleSignInGate>(
+  (ref) => GoogleSignInGate(),
+  name: 'googleSignInGateProvider',
+);

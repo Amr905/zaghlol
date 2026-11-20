@@ -40,9 +40,11 @@ final class GoogleSignInDriveAuthorizer implements DriveAuthorizer {
     this.clientId = googleIosClientId,
     this.serverClientId = googleServerClientId,
     required this.isIos,
+    required this.gate,
   }) : _signIn = signIn ?? GoogleSignIn.instance;
 
   final GoogleSignIn _signIn;
+  final GoogleSignInGate gate;
   final String clientId;
   final String serverClientId;
   final bool isIos;
@@ -55,7 +57,6 @@ final class GoogleSignInDriveAuthorizer implements DriveAuthorizer {
     if (isIos ? clientId.isEmpty : serverClientId.isEmpty) {
       throw DriveBackupException(DriveBackupErrorCode.notConfigured);
     }
-    final gate = GoogleSignInGate.instance;
     if (_initEpoch != gate.epoch) {
       // A sign-in configured the plugin with its own nonce since: ours is gone.
       _init = null;
@@ -74,7 +75,7 @@ final class GoogleSignInDriveAuthorizer implements DriveAuthorizer {
 
   @override
   Future<String> accessToken({required bool interactive}) =>
-      GoogleSignInGate.instance.run(() => _accessToken(interactive));
+      gate.run(() => _accessToken(interactive));
 
   Future<String> _accessToken(bool interactive) async {
     await _ensureInit();

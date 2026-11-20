@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
+import '../../../core/platform/google_sign_in_gate.dart';
 import '../crypto/backup_crypto_providers.dart';
 import '../data/drive_auth.dart';
 import '../data/drive_store.dart';
@@ -15,7 +16,10 @@ import 'backup_snapshot_providers.dart';
 import 'drive_backup_service.dart';
 
 final driveAuthorizerProvider = Provider<DriveAuthorizer>(
-  (ref) => GoogleSignInDriveAuthorizer(isIos: Platform.isIOS),
+  (ref) => GoogleSignInDriveAuthorizer(
+    isIos: Platform.isIOS,
+    gate: ref.watch(googleSignInGateProvider),
+  ),
   name: 'driveAuthorizerProvider',
 );
 

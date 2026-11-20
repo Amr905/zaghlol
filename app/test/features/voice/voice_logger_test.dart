@@ -374,6 +374,23 @@ void main() {
     },
   );
 
+  testWidgets('countOne throwing after a write is not retried (FU-273)', (
+    t,
+  ) async {
+    final r = VoiceRig();
+    r.usage.failFirstCount = true;
+    await r.pump(t);
+    await speakAndStop(t, r, phrase);
+    await t.tap(find.byKey(const ValueKey('voice-save')));
+    await t.pumpAndSettle();
+    expect(r.editor.added.length, 1);
+    await t.tap(find.byKey(const ValueKey('voice-save')));
+    await t.pumpAndSettle();
+    expect(r.editor.added.length, 3);
+    expect(r.usage.attempts, 1, reason: 'one log is never counted twice');
+    expect(find.text('3 expenses saved ✓'), findsOneWidget);
+  });
+
   testWidgets('closing without saving saves and counts nothing', (t) async {
     final r = VoiceRig();
     await r.pump(t);
