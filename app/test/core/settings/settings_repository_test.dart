@@ -49,6 +49,7 @@ allKeys = [
   (key: Settings.appLockEnabled, byDefault: false, other: true),
   (key: Settings.appLockTimeoutS, byDefault: 60, other: 0),
   (key: Settings.hideAmountsApp, byDefault: false, other: true),
+  (key: Settings.moneyGroupByType, byDefault: true, other: false),
   (key: Settings.hideAmountsNotifications, byDefault: false, other: true),
   (key: Settings.hideAmountsWidget, byDefault: false, other: true),
   (key: Settings.hideAmountsShareCards, byDefault: true, other: false),
