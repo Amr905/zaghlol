@@ -49,6 +49,9 @@ class _State extends ConsumerState<CategoryEditScreen> {
   bool _loaded = false;
   bool _saving = false;
   bool _failed = false;
+
+  /// FU-179c: the support code of a typed failure, shown after the message.
+  String? _failCode;
   bool _bucketMissing = false;
 
   @override
@@ -95,6 +98,7 @@ class _State extends ConsumerState<CategoryEditScreen> {
     setState(() {
       _saving = true;
       _failed = false;
+      _failCode = null;
     });
     try {
       final admin = await ref.read(categoriesAdminProvider.future);
@@ -118,11 +122,12 @@ class _State extends ConsumerState<CategoryEditScreen> {
       }
       ref.invalidate(categoryItemsProvider);
       if (mounted) Navigator.of(context).pop(true);
-    } on Object {
+    } on Object catch (e) {
       if (mounted) {
         setState(() {
           _saving = false;
           _failed = true;
+          _failCode = e is CategoriesAdminException ? e.code : null;
         });
       }
     }
@@ -152,8 +157,13 @@ class _State extends ConsumerState<CategoryEditScreen> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(t.categoriesEditDeleted)));
       Navigator.of(context).pop(true);
-    } on Object {
-      if (mounted) setState(() => _failed = true);
+    } on Object catch (e) {
+      if (mounted) {
+        setState(() {
+          _failed = true;
+          _failCode = e is CategoriesAdminException ? e.code : null;
+        });
+      }
     }
   }
 
@@ -373,7 +383,10 @@ class _State extends ConsumerState<CategoryEditScreen> {
                   Padding(
                     padding: const EdgeInsetsDirectional.only(top: ZSpacing.md),
                     child: Text(
-                      t.commonErrorSaveFailed,
+                      _failCode == null
+                          ? t.commonErrorSaveFailed
+                          : '${t.commonErrorSaveFailed} '
+                                '${t.commonSupportCodeValue(_failCode!)}',
                       style: ZType.body.copyWith(color: c.dangerText),
                     ),
                   ),

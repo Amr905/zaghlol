@@ -61,7 +61,8 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     final rest = _pending.values.toList();
     _pending.clear();
     for (final run in rest) {
-      unawaited(run());
+      // FU-173a: a failing job must not surface as an unhandled error.
+      unawaited(run().catchError((Object _) {}));
     }
     super.dispose();
   }

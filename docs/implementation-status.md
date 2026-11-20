@@ -653,17 +653,17 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-154a | core | T-155 existingAt reads limit 500 and compares unsanitised merchantRaw (duplicate import risk) | export_import/data/drift_csv_import_store.dart:58 | none | OPEN |
 | FU-154b | core | T-155 DB constraint failure surfaces as raw store exception, not an ImportCsvException code | export_import/application/import_csv.dart:169-222 | none | OPEN |
 | FU-154c | core | T-155 imported refunds link only after categorization sets merchant_norm | export_import/application/import_csv.dart | none | OPEN |
-| FU-155a | ui | T-101 budget saver delete/update/insert not in one DB transaction | budget/application/budget_saver.dart:36-46 | none | OPEN |
+| FU-155a | ui | T-101 budget saver delete/update/insert not in one DB transaction | budget/application/budget_saver.dart:36-46 | none | FIXED (batch 51) |
 | FU-156a | core | T-106 second copy of essential-category set differs from domain copy (transport_work, utilities, installments vs work_transport) | insights/application/explanations.dart:258 | none | OPEN |
 | FU-157a | parsing | T-110 ask engine catches Exception only, so an Error escapes the "never throws" contract | ask/application/ask_engine.dart:72,120 | none | OPEN |
 | FU-157b | parsing | T-110 "budget left" uses categoryDonut total; confirm equals Home/budget net-spend | ask/application/ask_engine.dart:351-365 | none | OPEN |
 | FU-157c | parsing | T-110 unknownTarget guard may reject balance questions with filler words not in the stop list | packages/zaghlol_parsing/lib/chat/ask_parser.dart | none | OPEN |
-| FU-158a | ui | T-080 EC-40 repair event dropped in onAmountChange; cycle/budget views stale until next event | transactions/data/transactions_providers.dart:56 | none | OPEN |
-| FU-158b | ui | T-080 EC-40 notice reuses transfersAssignErrorExceedsExpense; add transactionsEditLinksRemoved | transactions/presentation/edit/transaction_edit_screen.dart | PO (copy) | OPEN |
-| FU-158c | ui | T-080 currency chip change on an edit with no links silently re-denominates the row | transactions/presentation/edit/transaction_edit_screen.dart:122 | none | OPEN |
-| FU-158d | ui | T-080 contextual cards on S-13 not built | transactions/presentation/detail | none | OPEN |
-| FU-159a | ui | T-085 merge_flow swallows the error code (catch on Object) | accounts/presentation/merge_flow.dart:47 | none | OPEN |
-| FU-159b | ui | T-085 confirm copy does not say the newer balance replaces the older | accounts/presentation/merge_flow.dart | PO (copy) | OPEN |
+| FU-158a | ui | T-080 EC-40 repair event dropped in onAmountChange; cycle/budget views stale until next event | transactions/data/transactions_providers.dart:56 | none | OPEN (batch 51: needs a post-commit event hook in the data layer (core lane)) |
+| FU-158b | ui | T-080 EC-40 notice reuses transfersAssignErrorExceedsExpense; add transactionsEditLinksRemoved | transactions/presentation/edit/transaction_edit_screen.dart | PO (copy) | OPEN (batch 51: PO copy) |
+| FU-158c | ui | T-080 currency chip change on an edit with no links silently re-denominates the row | transactions/presentation/edit/transaction_edit_screen.dart:122 | none | FIXED (batch 51) |
+| FU-158d | ui | T-080 contextual cards on S-13 not built | transactions/presentation/detail | none | OPEN (batch 51: new S-13 cards need design/copy) |
+| FU-159a | ui | T-085 merge_flow swallows the error code (catch on Object) | accounts/presentation/merge_flow.dart:47 | none | OBSOLETE (batch 51): AccountsException branch already shows the support code; only an untyped error has none |
+| FU-159b | ui | T-085 confirm copy does not say the newer balance replaces the older | accounts/presentation/merge_flow.dart | PO (copy) | OPEN (batch 51: PO copy) |
 | FU-160a | ui | T-162 confirmed delete with null wipe provider does nothing silently; wipe() error not caught | settings/presentation/privacy_screen.dart:200-224 | none | CLOSED (wipe in try/catch at :224, provider wired by T-166) |
 | FU-160b | ui | T-162 D-55 Gold-on-Android warning before Delete everything | settings/presentation/privacy_screen.dart:162 | none | CLOSED (EC-69 warning present) |
 | FU-161a | core | T-143 one bad row deletes every gathered row (contributions and bank requests) | catalog_sync/application/sync_orchestrator.dart:446-455 | none | OPEN |
@@ -685,9 +685,9 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-165d | core | T-145 no native wake-up: purchase retry only if user opens app within 3 days; needs purchase-retry-worker and PO call | gold/application/purchase.dart | PO | OPEN |
 | FU-165e | core | T-145 verified entry whose purchase is gone (refunded) stays in outbox forever; add age-out | gold/application/purchase.dart:155 | none | OPEN |
 | FU-165f | core | T-145 device items: StoreKit-config test, release user-CA check, sandbox purchases | gold | device | OPEN |
-| FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | OPEN |
+| FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | OPEN (batch 51: needs encrypted prefs store plus a first caller; not UI-only) |
 | FU-166b | ui | T-146 paywallTriggerOverride and goldLinkOpener wired in root | app/app_navigation.dart:96-100 | none | CLOSED (WIRE-NAV, FU-195) |
-| FU-166c | ui | T-146 tampered-clock copy "set clock to automatic" missing | gold/application/gold_messages.dart | PO (copy) | OPEN |
+| FU-166c | ui | T-146 tampered-clock copy "set clock to automatic" missing | gold/application/gold_messages.dart | PO (copy) | OPEN (batch 51: PO copy) |
 | FU-167a | native | T-151 one quota error on any old file blocks every later iCloud backup | backup/application/icloud_backup_service.dart:109 | none | OPEN |
 | FU-167b | native | T-151 manual device test steps 1-6 and PO portal setup pending | docs/04-tasks/tasks/T-151.md | device; PO (portal) | OPEN |
 | FU-168a | core | T-152 keep and Gold check read entitlementStateProvider before first evaluate (manual backup could prune a Gold user to 1) | backup/application/schedule.dart:136,228,257 | none | CLOSED (pendingVerification keeps 5 and skips reconcile, Lead delta check batch 18) |
@@ -696,29 +696,29 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-168d | core | T-152 isScheduleDue: lastSuccess in the future (clock moved back) means never due | backup/application/schedule.dart:83-100 | none | OPEN |
 | FU-168e | core | T-152 WorkManager/BGProcessing binding, alert sink, reminder keys are inert seams | backup/application/schedule.dart | none | OPEN |
 | FU-169a | ui | T-107 locked previews shown to Gold users | insights/presentation/charts/charts_screen.dart:131 | none | CLOSED (decideChart(...).allowed skips the lock card) |
-| FU-169b | ui | T-107 percent computed through double (net*100/income).round() | insights/presentation/charts/chart_bodies.dart:59 | none | OPEN |
-| FU-170a | ui | T-108 essential set follows the bucket, so user-made needs category becomes essential (document) | insights/application/chart_explain_providers.dart:34 | none | OPEN |
-| FU-171a | ui | T-102 updateManual doc says keeps status but writes active/completed | accounts or bills/data/recurring_repository.dart:305 | none | OPEN |
-| FU-171b | ui | T-102 updateManual does not check id exists; UI says saved regardless | bills/presentation/bill_edit_screen.dart | none | OPEN |
+| FU-169b | ui | T-107 percent computed through double (net*100/income).round() | insights/presentation/charts/chart_bodies.dart:59 | none | OBSOLETE (batch 51): savedPercent already integer-only |
+| FU-170a | ui | T-108 essential set follows the bucket, so user-made needs category becomes essential (document) | insights/application/chart_explain_providers.dart:34 | none | FIXED (batch 51) |
+| FU-171a | ui | T-102 updateManual doc says keeps status but writes active/completed | accounts or bills/data/recurring_repository.dart:305 | none | FIXED (batch 51) |
+| FU-171b | ui | T-102 updateManual does not check id exists; UI says saved regardless | bills/presentation/bill_edit_screen.dart | none | FIXED (batch 51) |
 | FU-172a | ui | T-104 real HomeCardActions.enableAppLock test (FU-130 privacy property) | test/features/home/application | none | CLOSED (added in batch 18 fix round, Lead delta check) |
-| FU-172b | ui | T-104 two writes after enable not guarded; second throw leaves lock on, amounts visible | home/application/home_cards.dart:132-146 | none | OPEN |
-| FU-172c | ui | T-104 app-lock offer does not mention hidden notification amounts | core/l10n/app_en.arb:345 | PO (copy) | OPEN |
-| FU-172d | ui | T-104 salary-credit and backup-exists providers are stubs (payday and backup cards off) | home/application/home_cards.dart:28 | none | OPEN |
-| FU-173a | ui | T-081 throwing deferred job in closed.then unhandled; item stays hidden | ingestion/presentation/review/review_screen.dart:84-88 | none | OPEN |
-| FU-173b | ui | T-081 categorize edits transaction and resolves item in two calls (not atomic) | ingestion/presentation/review | none | OPEN |
-| FU-174a | ui | T-086 re-scan offer after un-ignoring overwrites the saved scan depth | settings/presentation/capture_settings_screen.dart:497-503 | none | OPEN |
-| FU-175a | ui | T-121 certificate/stock names have no length cap | wealth/application/validateAssetForm | none | OPEN |
-| FU-175b | ui | T-121 pricePaid without currency puts the error on a field the gold form does not render | wealth/presentation | none | OPEN |
+| FU-172b | ui | T-104 two writes after enable not guarded; second throw leaves lock on, amounts visible | home/application/home_cards.dart:132-146 | none | FIXED (batch 51) |
+| FU-172c | ui | T-104 app-lock offer does not mention hidden notification amounts | core/l10n/app_en.arb:345 | PO (copy) | OPEN (batch 51: PO copy) |
+| FU-172d | ui | T-104 salary-credit and backup-exists providers are stubs (payday and backup cards off) | home/application/home_cards.dart:28 | none | OPEN (batch 51: salary/backup sources are core work (FU-144)) |
+| FU-173a | ui | T-081 throwing deferred job in closed.then unhandled; item stays hidden | ingestion/presentation/review/review_screen.dart:84-88 | none | FIXED (batch 51) |
+| FU-173b | ui | T-081 categorize edits transaction and resolves item in two calls (not atomic) | ingestion/presentation/review | none | OBSOLETE (batch 51): not atomic but idempotent; failure re-shows the item and a retry converges |
+| FU-174a | ui | T-086 re-scan offer after un-ignoring overwrites the saved scan depth | settings/presentation/capture_settings_screen.dart:497-503 | none | OBSOLETE (batch 51): rescan(depthMonths: null) never saves depth |
+| FU-175a | ui | T-121 certificate/stock names have no length cap | wealth/application/validateAssetForm | none | OBSOLETE (batch 51): maxAssetNameLength cap already validated |
+| FU-175b | ui | T-121 pricePaid without currency puts the error on a field the gold form does not render | wealth/presentation | none | OBSOLETE (batch 51): gold form already puts the error on pricePaid |
 | FU-176a | ui | T-055 welcome minHeight magic number can go negative | onboarding/presentation/welcome.dart:62 | none | CLOSED (now ZSpacing.minTarget) |
 | FU-177a | ui | T-056 _listenScan runs twice and leaks the earlier subscription | onboarding/presentation/android_setup.dart:102,147 | none | CLOSED (earlier _sub cancelled at :102) |
-| FU-177b | ui | T-056 degraded Continue calls onSkipped then onDone (double navigation; records SMS as skipped) | onboarding/presentation/android_setup.dart:525 | none | OPEN |
-| FU-177c | ui | T-056 scan errors swallowed, card stays at "running" | onboarding/presentation/android_setup.dart:151 | none | OPEN |
-| FU-178a | ui | T-111 Ask text field keeps IME learning/suggestions/autocorrect | ask/presentation/ask_screen.dart | none | OPEN |
-| FU-178b | ui | T-111 hard-coded Arabic comma in English locale | ask/presentation/ask_answer_text.dart:200,250 | none | OPEN |
-| FU-178c | ui | T-111 literal '0' passed to chatAnswerDues bypasses digit mode | ask/presentation/ask_answer_text.dart:150 | none | OPEN |
-| FU-179a | ui | T-163 delete leaves subcategories on archived parent (children hidden, rules/transactions not moved) | categorization/data/categories_admin.dart:240-262 | none | OPEN |
-| FU-179b | ui | T-163 delete leaves budgets rows on the archived category | categorization/data/categories_admin.dart:240-262 | none | OPEN |
-| FU-179c | ui | T-163 delete failure shows generic message without a code | categorization/presentation/categories_screens.dart | none | OPEN |
+| FU-177b | ui | T-056 degraded Continue calls onSkipped then onDone (double navigation; records SMS as skipped) | onboarding/presentation/android_setup.dart:525 | none | OBSOLETE (batch 51): Continue calls onSkipped, or onDone only when no onSkipped |
+| FU-177c | ui | T-056 scan errors swallowed, card stays at "running" | onboarding/presentation/android_setup.dart:151 | none | OBSOLETE (batch 51): _listenScan onError sets ScanPhase.failed |
+| FU-178a | ui | T-111 Ask text field keeps IME learning/suggestions/autocorrect | ask/presentation/ask_screen.dart | none | OBSOLETE (batch 51): IME learning/suggestions/autocorrect already off |
+| FU-178b | ui | T-111 hard-coded Arabic comma in English locale | ask/presentation/ask_answer_text.dart:200,250 | none | OBSOLETE (batch 51): separator already locale-driven (_sep) |
+| FU-178c | ui | T-111 literal '0' passed to chatAnswerDues bypasses digit mode | ask/presentation/ask_answer_text.dart:150 | none | OBSOLETE (batch 51): 0 now goes through _n digit mode |
+| FU-179a | ui | T-163 delete leaves subcategories on archived parent (children hidden, rules/transactions not moved) | categorization/data/categories_admin.dart:240-262 | none | FIXED (batch 51) |
+| FU-179b | ui | T-163 delete leaves budgets rows on the archived category | categorization/data/categories_admin.dart:240-262 | none | FIXED (batch 51) |
+| FU-179c | ui | T-163 delete failure shows generic message without a code | categorization/presentation/categories_screens.dart | none | FIXED (batch 51) |
 | FU-180a | core | T-098 defaultEssentialCategoryIds holds bare codes but DB ids are sys:<code>; subcategories unprotected (before first caller) | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:30-39 | none | OPEN |
 | FU-180b | core | T-098 diningSpike shocked pose takes any category; caller must restrict to dining/delivery | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:69 | none | OPEN |
 | FU-181a | ui | T-093 saveSplit applies removals/updates/adds as separate calls, not one transaction | transfers/presentation/split_sheet.dart | none | OPEN |

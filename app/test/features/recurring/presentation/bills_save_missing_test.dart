@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/recurring/data/recurring_repository.dart';
 import 'package:zaghlol/features/recurring/presentation/bills_providers.dart';
-import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/financial_fixtures.dart';

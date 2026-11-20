@@ -266,6 +266,26 @@ class DriftCategoriesAdmin implements CategoriesAdmin {
         ],
         updates: {_db.merchantRules},
       );
+      // FU-179a: children of the deleted category become top-level so they
+      // stay visible (their own transactions and rules are untouched).
+      await _db.customUpdate(
+        'UPDATE categories SET parent_id = NULL WHERE parent_id = ?1',
+        variables: [Variable.withString(id)],
+        updates: {_db.categories},
+      );
+      // FU-179b: a limit on a removed category has no meaning; drop it and
+      // its fired-alert memory.
+      await _db.customUpdate(
+        'DELETE FROM fired_alerts WHERE subject_id '
+        'IN (SELECT id FROM budgets WHERE category_id = ?1)',
+        variables: [Variable.withString(id)],
+        updates: {_db.firedAlerts},
+      );
+      await _db.customUpdate(
+        'DELETE FROM budgets WHERE category_id = ?1',
+        variables: [Variable.withString(id)],
+        updates: {_db.budgets},
+      );
       await _dao.setArchived(id, archived: true);
       return moved;
     });

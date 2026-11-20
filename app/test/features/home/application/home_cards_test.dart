@@ -75,7 +75,9 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWith((ref) async => db),
           settingsRepositoryProvider.overrideWith((ref) async => repo),
-          appLockControllerProvider.overrideWith(() => _FakeLock(result, throws: throws)),
+          appLockControllerProvider.overrideWith(
+            () => _FakeLock(result, throws: throws),
+          ),
         ],
       );
       addTearDown(c.dispose);
