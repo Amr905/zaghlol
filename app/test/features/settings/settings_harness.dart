@@ -48,6 +48,7 @@ class SettingsHarness {
     approxViewTargetProvider.overrideWith(
       (ref) => Stream.value(Currency.of('EGP')),
     ),
+    hideAmountsAppProvider.overrideWith((ref) => Stream.value(false)),
     appLockEnabledProvider.overrideWith((ref) => Stream.value(appLock)),
     appLockTimeoutSProvider.overrideWith((ref) => Stream.value(60)),
     contributionOptInProvider.overrideWith((ref) => Stream.value(contributing)),

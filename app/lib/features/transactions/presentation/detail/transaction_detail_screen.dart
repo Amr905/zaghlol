@@ -26,6 +26,8 @@ import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
 import 'txn_detail_providers.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/settings/settings_providers.dart';
+import '../../../../core/ui/z_hide_amounts_button.dart';
 
 /// Longest note, in characters (S-12 validation).
 const int detailNoteMaxChars = 200;
@@ -58,7 +60,11 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
 
   TxnFmt _fmt(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
-    return TxnFmt(lang, ref.watch(digitsModeProvider(lang)));
+    return TxnFmt(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
   }
 
   void _toast(String text, {SnackBarAction? action}) {
@@ -118,6 +124,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
           ),
         ),
         actions: [
+          const ZHideAmountsButton(),
           if (d != null) ...[
             IconButton(
               tooltip: l.commonActionEdit,

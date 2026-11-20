@@ -18,6 +18,8 @@ import '../../../core/ui/z_components.dart';
 import '../../gold/application/gating.dart';
 import 'asset_format.dart';
 import 'assets_providers.dart';
+import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 class AssetsSection extends ConsumerWidget {
   const AssetsSection({
@@ -216,18 +218,26 @@ class _GoldUnits extends ConsumerWidget {
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
+    final hidden = ref.watch(hideAmountsProvider);
     final lines = <String>[];
     for (final u in units) {
       if (u.unit == GoldSymbols.coin) {
         final count = u.netMinor ~/ 1000;
-        lines.add(l10n.wealthOverviewUnitCoins(count, digits.render('$count')));
+        lines.add(
+          l10n.wealthOverviewUnitCoins(
+            count,
+            hidden ? kAmountMask : digits.render('$count'),
+          ),
+        );
       } else {
         final karat = RegExp(r'^XAU(\d+)_G$').firstMatch(u.unit)?.group(1);
         if (karat == null) continue;
         lines.add(
           l10n.wealthOverviewUnitGold(
             digits.render(karat),
-            l10n.commonUnitGrams(formatMilli(u.netMinor, digits)),
+            l10n.commonUnitGrams(
+              hidden ? kAmountMask : formatMilli(u.netMinor, digits),
+            ),
           ),
         );
       }
@@ -236,7 +246,10 @@ class _GoldUnits extends ConsumerWidget {
       padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
       child: Semantics(
         container: true,
-        label: l10n.wealthOverviewUnitsA11y(lines.join(', ')),
+        label: a11yAmounts(
+          l10n,
+          l10n.wealthOverviewUnitsA11y(lines.join(', ')),
+        ),
         excludeSemantics: true,
         child: Wrap(
           spacing: ZSpacing.sm,
@@ -261,8 +274,13 @@ class _AssetRow extends ConsumerWidget {
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    String money(Money m) =>
-        MoneyFormat.format(m, languageCode: lang, digits: digits);
+    final hidden = ref.watch(hideAmountsProvider);
+    String money(Money m) => MoneyFormat.format(
+      m,
+      languageCode: lang,
+      digits: digits,
+      hidden: hidden,
+    );
     final a = view.row;
     final cur = a.currency == null ? null : Currency.tryOf(a.currency!);
 
@@ -275,7 +293,7 @@ class _AssetRow extends ConsumerWidget {
       case AssetType.gold:
         title = l10n.wealthOverviewGoldTitle(digits.render('${a.karat ?? 0}'));
         final grams = l10n.commonUnitGrams(
-          formatMilli(a.quantityMilli ?? 0, digits),
+          hidden ? kAmountMask : formatMilli(a.quantityMilli ?? 0, digits),
         );
         sub = view.goldValue == null
             ? grams
@@ -283,7 +301,10 @@ class _AssetRow extends ConsumerWidget {
       case AssetType.goldCoin:
         title = l10n.commonKaratCoin;
         final n = (a.quantityMilli ?? 0) ~/ 1000;
-        sub = l10n.wealthOverviewUnitCoins(n, digits.render('$n'));
+        sub = l10n.wealthOverviewUnitCoins(
+          n,
+          hidden ? kAmountMask : digits.render('$n'),
+        );
         if (view.goldValue != null) {
           sub = l10n.wealthOverviewGoldSub(sub, money(view.goldValue!));
         }
@@ -322,11 +343,14 @@ class _AssetRow extends ConsumerWidget {
           trailing = money(Money.fromStorage(v, a.currency!));
         }
     }
-    final semantics = [
-      l10n.wealthOverviewAssetRowA11y(title, trailing ?? sub ?? ''),
-      if (estimated) l10n.wealthOverviewManualValue,
-      if (view.goldStale) l10n.commonBadgeStaleA11y,
-    ].join(', ');
+    final semantics = a11yAmounts(
+      l10n,
+      [
+        l10n.wealthOverviewAssetRowA11y(title, trailing ?? sub ?? ''),
+        if (estimated) l10n.wealthOverviewManualValue,
+        if (view.goldStale) l10n.commonBadgeStaleA11y,
+      ].join(', '),
+    );
     return Semantics(
       container: true,
       label: semantics,

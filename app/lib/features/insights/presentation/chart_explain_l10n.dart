@@ -13,6 +13,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
 import '../domain/explanations.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Locale-aware formatting of explanation arguments.
 class ExplainFormat {
@@ -21,11 +22,15 @@ class ExplainFormat {
       lang = Localizations.localeOf(context).languageCode,
       digits = ref.watch(
         digitsModeProvider(Localizations.localeOf(context).languageCode),
-      );
+      ),
+      hidden = ref.watch(hideAmountsProvider);
 
   final AppLocalizations l;
   final String lang;
   final DigitsMode digits;
+
+  /// D-67: amounts show as `****` (percentages and counts stay).
+  final bool hidden;
 
   /// Category id (null = uncategorized) to its localised name.
   final String Function(String? id) categoryName;
@@ -35,8 +40,10 @@ class ExplainFormat {
       money,
       languageCode: lang,
       digits: digits,
+      hidden: hidden,
     ),
-    UnitAmountArg(:final unit, :final minor) => digits.render('$minor $unit'),
+    UnitAmountArg(:final unit, :final minor) =>
+      hidden ? '$kAmountMask $unit' : digits.render('$minor $unit'),
     PercentArg(:final bp) => digits.render('${(bp + 50) ~/ 100}%'),
     CountArg(:final count) => digits.render('$count'),
     NameArg(:final name) => name,

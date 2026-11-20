@@ -27,6 +27,7 @@ import 'charts/chart_card.dart';
 import 'charts/chart_format.dart';
 import 'charts/charts_providers.dart';
 import 'charts/gold_chart_card.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// The typing indicator never runs longer than this (S-21).
 const Duration chartTypingDuration = Duration(milliseconds: 500);
@@ -440,7 +441,7 @@ class _Lines extends ConsumerWidget {
     Widget labelled(String label, IconData icon, ExplanationLine line) =>
         Semantics(
           container: true,
-          label: '$label: ${renderExplanationLine(fmt, line)}',
+          label: a11yAmounts(l, '$label: ${renderExplanationLine(fmt, line)}'),
           excludeSemantics: true,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

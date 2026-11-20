@@ -12,6 +12,7 @@ import 'package:zaghlol/features/transactions/presentation/list/transactions_lis
 import 'package:zaghlol/features/transactions/presentation/list/txn_row.dart';
 
 import 'list_harness.dart';
+import '../../../../support/hide_amounts_support.dart';
 
 const _ar = Locale('ar', 'EG');
 
@@ -253,6 +254,36 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Select'), findsOneWidget);
     });
+  });
+
+  group('T-187 hide amounts', () {
+    for (final locale in const [Locale('en'), Locale('ar', 'EG')]) {
+      testWidgets('${locale.languageCode}: masking on: rows and day totals '
+          'show no digit, the eye is in the top bar', (tester) async {
+        final hide = HideAmountsHarness(hidden: true);
+        addTearDown(hide.dispose);
+        await tester.binding.setSurfaceSize(const Size(390, 844));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          listApp(tenRows(), locale: locale, hideAmounts: hide),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
+        await expectNoMaskGlyphInSemantics(tester);
+        final amounts = <String>[
+          for (final w in tester.widgetList<ZMoneyText>(
+            find.byType(ZMoneyText),
+          ))
+            w.text,
+          for (final w in tester.widgetList<Text>(find.byType(Text)))
+            if (RegExp(r'EGP|USD|ج\.م').hasMatch(w.data ?? '')) w.data!,
+        ];
+        expect(amounts, isNotEmpty);
+        for (final a in amounts) {
+          expect(RegExp(r'[0-9٠-٩]').hasMatch(a), isFalse, reason: a);
+        }
+      });
+    }
   });
 
   group('day totals', () {

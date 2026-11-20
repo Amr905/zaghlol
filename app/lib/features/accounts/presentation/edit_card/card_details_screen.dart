@@ -115,6 +115,7 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
     _loadTaken();
   }
 
+  // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
   static String _plain(Money m) => m.toCanonicalString();
 
   Future<void> _loadTaken() async {

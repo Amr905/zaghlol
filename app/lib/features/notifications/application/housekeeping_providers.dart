@@ -65,8 +65,13 @@ Future<BudgetAlertService> _budgetAlertService(Ref ref, AppDatabase db) async {
       final l = notificationL10n(ref);
       final lang = l.localeName;
       final digits = ref.read(digitsModeProvider(lang));
-      String money(Money m) =>
-          MoneyFormat.format(m, languageCode: lang, digits: digits);
+      final hidden = notificationHidden(ref);
+      String money(Money m) => MoneyFormat.format(
+        m,
+        languageCode: lang,
+        digits: digits,
+        hidden: hidden,
+      );
       final id = p.spec.categoryId;
       final category = id == null
           ? l.budgetEditOverall
@@ -218,6 +223,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                       money,
                       languageCode: l.localeName,
                       digits: digits,
+                      hidden: notificationHidden(ref),
                     ),
                   ),
                   redactedTitle: l.notificationsAlertOverdueTitle(r.item.name),
@@ -244,6 +250,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                     money,
                     languageCode: l.localeName,
                     digits: digits,
+                    hidden: notificationHidden(ref),
                   ),
                   digits.render('$days'),
                 ),

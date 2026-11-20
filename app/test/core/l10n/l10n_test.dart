@@ -9,6 +9,7 @@ import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
 import 'package:zaghlol/core/l10n/money_format.dart';
+import 'package:zaghlol/core/ui/amount_semantics.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -21,6 +22,7 @@ String fmt(String code, int minor, String lang, DigitsMode d) =>
       Money(Currency.of(code), minor),
       languageCode: lang,
       digits: d,
+      hidden: false,
     ).replaceAll(_fsi, '').replaceAll(_pdi, '');
 
 void main() {
@@ -94,6 +96,7 @@ void main() {
         Money(Currency.of('EGP'), -450),
         languageCode: 'ar',
         digits: DigitsMode.arabicIndic,
+        hidden: false,
       );
       expect(s.startsWith(_fsi), isTrue);
       expect(s.endsWith(_pdi), isTrue);
@@ -187,5 +190,88 @@ void main() {
     for (final l in AppLocalizations.supportedLocales) {
       expect(GlobalMaterialLocalizations.delegate.isSupported(l), isTrue);
     }
+  });
+
+  group('T-187 hidden amounts', () {
+    String hide(
+      String code,
+      int minor,
+      String lang,
+      DigitsMode d, {
+      bool withCurrency = true,
+    }) => MoneyFormat.format(
+      Money(Currency.of(code), minor),
+      languageCode: lang,
+      digits: d,
+      hidden: true,
+      withCurrency: withCurrency,
+    ).replaceAll(_fsi, '').replaceAll(_pdi, '');
+
+    test('digits become the fixed mask; sign and currency stay', () {
+      expect(hide('EGP', -45000, 'ar', DigitsMode.arabicIndic), '-**** ج.م');
+      expect(hide('EGP', 45000, 'en', DigitsMode.western), 'EGP ****');
+      expect(hide('EGP', -45000, 'en', DigitsMode.western), 'EGP -****');
+      expect(hide('USD', 100, 'ar', DigitsMode.arabicIndic), '**** USD');
+    });
+
+    test('the mask length does not depend on the size or the exponent', () {
+      final lengths = {
+        for (final (code, minor) in [
+          ('EGP', 5),
+          ('EGP', 123456789012),
+          ('KWD', 1),
+          ('JPY', 7),
+        ])
+          hide(code, minor, 'en', DigitsMode.western, withCurrency: false),
+      };
+      expect(lengths, {'****'});
+    });
+
+    test('no digit of either script survives', () {
+      for (final d in DigitsMode.values) {
+        for (final lang in ['ar', 'en']) {
+          final s = hide('EGP', -1234567, lang, d);
+          expect(RegExp(r'[0-9٠-٩]').hasMatch(s), isFalse, reason: s);
+        }
+      }
+    });
+
+    test('still bidi-isolated', () {
+      final s = MoneyFormat.format(
+        Money(Currency.of('EGP'), -450),
+        languageCode: 'ar',
+        digits: DigitsMode.arabicIndic,
+        hidden: true,
+      );
+      expect(s.startsWith(_fsi), isTrue);
+      expect(s.endsWith(_pdi), isTrue);
+    });
+
+    test('maskAmountText masks both digit scripts and their separators', () {
+      expect(maskAmountText('-١٬٢٣٤٫٥٠ ج.م'), '-**** ج.م');
+      expect(maskAmountText('EGP 1,234.50'), 'EGP ****');
+      expect(maskAmountText('+450 EGP'), '+**** EGP');
+      expect(maskAmountText('no number'), 'no number');
+    });
+
+    test('a11yAmounts says "amount hidden" for every masked form', () {
+      for (final lang in ['ar', 'en']) {
+        final l = lookupAppLocalizations(Locale(lang));
+        for (final d in [DigitsMode.western, DigitsMode.arabicIndic]) {
+          for (final minor in [-45000, 45000]) {
+            final amount = MoneyFormat.format(
+              Money(Currency.of('EGP'), minor),
+              languageCode: lang,
+              digits: d,
+              hidden: true,
+            );
+            final out = a11yAmounts(l, 'Carrefour, $amount, card');
+            expect(out.contains('*'), isFalse, reason: out);
+            expect(out, contains(l.commonAmountHidden));
+          }
+        }
+        expect(a11yAmounts(l, '24 g, 450'), '24 g, 450');
+      }
+    });
   });
 }

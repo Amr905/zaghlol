@@ -16,6 +16,9 @@ import '../data/prices_providers.dart';
 import '../data/prices_repository.dart';
 import '../domain/price_feed.dart';
 import 'assets_providers.dart';
+import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 class PricesScreen extends ConsumerStatefulWidget {
   const PricesScreen({super.key});
@@ -62,6 +65,7 @@ class _PricesScreenState extends ConsumerState<PricesScreen> {
       backgroundColor: c.bg,
       appBar: AppBar(
         backgroundColor: c.bg,
+        actions: const [ZHideAmountsButton()],
         title: Semantics(
           header: true,
           child: Text(
@@ -99,8 +103,13 @@ class _PricesScreenState extends ConsumerState<PricesScreen> {
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    String money(Money m) =>
-        MoneyFormat.format(m, languageCode: lang, digits: digits);
+    final hidden = ref.watch(hideAmountsProvider);
+    String money(Money m) => MoneyFormat.format(
+      m,
+      languageCode: lang,
+      digits: digits,
+      hidden: hidden,
+    );
     final asOf = d.status.backendAsOfMs;
     final when = asOf == null
         ? null
@@ -193,13 +202,16 @@ class _PricesScreenState extends ConsumerState<PricesScreen> {
             if (r.value != null)
               Semantics(
                 container: true,
-                label: l10n.wealthPricesCurrencyRowA11y(
-                  r.currency.code,
-                  money(r.value!),
+                label: a11yAmounts(
+                  l10n,
+                  l10n.wealthPricesCurrencyRowA11y(
+                    r.currency.code,
+                    money(r.value!),
+                  ),
                 ),
                 excludeSemantics: true,
                 child: Text(
-                  '${r.currency.code} ${MoneyFormat.format(r.value!, languageCode: lang, digits: digits, withCurrency: false)}'
+                  '${r.currency.code} ${MoneyFormat.format(r.value!, languageCode: lang, digits: digits, hidden: hidden, withCurrency: false)}'
                   '${r.stale ? ' · ${l10n.commonBadgeStale}' : ''}',
                   style: ZType.body.copyWith(color: c.text),
                 ),
@@ -258,7 +270,10 @@ class _GoldRow extends ConsumerWidget {
                 container: true,
                 label: priceText == null
                     ? l10n.commonKaratLabel(karat)
-                    : l10n.wealthPricesGoldRowA11y(karat, priceText!),
+                    : a11yAmounts(
+                        l10n,
+                        l10n.wealthPricesGoldRowA11y(karat, priceText!),
+                      ),
                 excludeSemantics: true,
                 child: Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,

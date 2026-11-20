@@ -10200,5 +10200,29 @@
   "importFlowUnavailable": "المصدر ده لسه مش جاهز",
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
+  },
+  "commonAmountsHide": "إخفاء المبالغ",
+  "@commonAmountsHide": {
+    "description": "D-67 eye button label and tooltip: hide every amount in the app"
+  },
+  "commonAmountsShow": "إظهار المبالغ",
+  "@commonAmountsShow": {
+    "description": "D-67 eye button label and tooltip: show the amounts again"
+  },
+  "commonAmountHidden": "المبلغ مخفي",
+  "@commonAmountHidden": {
+    "description": "D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)"
+  },
+  "settingsPrefsHideAmounts": "اخفي المبالغ في التطبيق",
+  "@settingsPrefsHideAmounts": {
+    "description": "D-67 Preferences switch: hide every amount in the app"
+  },
+  "settingsPrefsHideAmountsHint": "كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.",
+  "@settingsPrefsHideAmountsHint": {
+    "description": "D-67 hint under the hide-amounts switch"
+  },
+  "shareStudioShowAmountsLocked": "المبالغ مخفية في التطبيق كله، فالكارت هيطلع بالنسب بس. اظهرها من الأيقونة اللي جنب المبالغ.",
+  "@shareStudioShowAmountsLocked": {
+    "description": "D-67 hint under the disabled Show amounts switch while hiding is on in the whole app"
   }
 }

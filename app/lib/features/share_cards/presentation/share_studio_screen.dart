@@ -18,6 +18,7 @@ import '../application/share_providers.dart';
 import '../domain/share_figures.dart';
 import 'share_card.dart';
 import '../../../core/ui/z_haptics.dart';
+import '../../../core/settings/settings_providers.dart';
 
 class ShareStudioScreen extends ConsumerStatefulWidget {
   const ShareStudioScreen({super.key});
@@ -125,6 +126,7 @@ class _ShareStudioScreenState extends ConsumerState<ShareStudioScreen> {
             ],
           );
         }
+        final appHidden = ref.watch(hideAmountsProvider);
         final figure = list.firstWhere(
           (f) => f.template == _template,
           orElse: () => list.first,
@@ -159,11 +161,17 @@ class _ShareStudioScreenState extends ConsumerState<ShareStudioScreen> {
             SwitchListTile(
               contentPadding: EdgeInsetsDirectional.zero,
               title: Text(l.shareStudioShowAmounts),
-              subtitle: Text(l.shareStudioShowAmountsHint),
-              value: _showAmounts,
-              onChanged: ZHaptics.onToggle(
-                (v) => setState(() => _showAmounts = v),
+              subtitle: Text(
+                appHidden
+                    ? l.shareStudioShowAmountsLocked
+                    : l.shareStudioShowAmountsHint,
               ),
+              // D-67: while amounts are hidden app-wide the card is percent
+              // only, so the switch reads off and cannot be turned on.
+              value: _showAmounts && !appHidden,
+              onChanged: appHidden
+                  ? null
+                  : ZHaptics.onToggle((v) => setState(() => _showAmounts = v)),
             ),
             ZBanner(
               message: l.shareStudioUnencrypted,

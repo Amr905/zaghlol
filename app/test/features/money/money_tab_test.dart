@@ -13,6 +13,9 @@ import 'package:zaghlol/features/wealth/domain/approx_view.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../support/golden_matrix.dart';
+import '../../support/hide_amounts_support.dart';
+
+import 'package:zaghlol/core/ui/z_money_text.dart';
 
 final _egp = Currency.of('EGP');
 final _usd = Currency.of('USD');
@@ -109,12 +112,14 @@ Future<void> _pump(
   bool gold = false,
   ApproxView approx = const ApproxViewOff(),
   Size size = const Size(390, 900),
+  HideAmountsHarness? hideAmounts,
 }) async {
   await tester.binding.setSurfaceSize(size);
   addTearDown(() => tester.binding.setSurfaceSize(null));
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...(hideAmounts ?? HideAmountsHarness()).overrides,
         accountsRepositoryProvider.overrideWith((ref) async => repo),
         approxViewProvider.overrideWith((ref, totals) async => approx),
         if (gold) entitlementStateProvider.overrideWith(() => _GoldNotifier()),
@@ -181,6 +186,28 @@ void main() {
       });
     });
   }
+
+  testWidgets('T-187: masking on: no digit in any amount, eye in the top bar', (
+    t,
+  ) async {
+    for (final loc in const [Locale('en'), Locale('ar', 'EG')]) {
+      final h = HideAmountsHarness(hidden: true);
+      addTearDown(h.dispose);
+      await _pump(t, repo: _FakeRepo(_full), locale: loc, hideAmounts: h);
+      expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
+      await expectNoMaskGlyphInSemantics(t);
+      final amounts = <String>[
+        for (final w in t.widgetList<ZMoneyText>(find.byType(ZMoneyText)))
+          '${w.text} ${w.unit ?? ''}',
+        for (final w in t.widgetList<Text>(find.byType(Text)))
+          if (RegExp(r'EGP|USD|ج\.م').hasMatch(w.data ?? '')) w.data!,
+      ];
+      expect(amounts, isNotEmpty);
+      for (final a in amounts) {
+        expect(RegExp(r'[0-9٠-٩]').hasMatch(a), isFalse, reason: a);
+      }
+    }
+  });
 
   testWidgets('loading shows skeleton', (t) async {
     await t.pumpWidget(

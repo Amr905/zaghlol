@@ -152,6 +152,13 @@ abstract final class Settings {
     'hide_amounts.notifications',
     byDefault: false,
   );
+
+  /// D-67 / FR-HOME-06: the eye toggle. While on, every amount in the app
+  /// shows as `****`, and notifications, the widget and share cards hide too.
+  static final hideAmountsApp = SettingKey.boolean(
+    'hide_amounts.app',
+    byDefault: false,
+  );
   static final hideAmountsWidget = SettingKey.boolean(
     'hide_amounts.widget',
     byDefault: false,

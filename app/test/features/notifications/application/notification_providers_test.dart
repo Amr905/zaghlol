@@ -146,6 +146,53 @@ void main() {
     expect(gw.shown.last.body, 'Open Zaghlol');
   });
 
+  test('T-187: the app-wide hide toggle redacts a notification', () async {
+    final repo = SettingsRepository(SettingsDao(db));
+    await repo.set(Settings.hideAmountsApp, true);
+    final svc = await c.read(notificationServiceProvider.future);
+    await svc.notify(
+      const AlertRequest(
+        type: NotificationType.budgetThreshold,
+        subjectId: 'b1',
+        periodKey: 'p1',
+        title: 'Food: 4,000 EGP',
+        body: 'You spent 4,000 EGP',
+        redactedTitle: 'Budget alert',
+        redactedBody: 'Open Zaghlol',
+      ),
+    );
+    expect(gw.shown.single.title, 'Budget alert');
+    expect(gw.shown.single.body, 'Open Zaghlol');
+  });
+
+  test('T-187: turning the app-wide toggle on re-schedules a waiting alert '
+      'redacted', () async {
+    final repo = SettingsRepository(SettingsDao(db));
+    final local = now.toLocal();
+    final m = local.hour * 60 + local.minute;
+    await repo.set(Settings.quietHoursEnabled, true);
+    await repo.set(Settings.quietHoursStartMin, (m + 1380) % 1440);
+    await repo.set(Settings.quietHoursEndMin, (m + 60) % 1440);
+    final svc = await c.read(notificationServiceProvider.future);
+    await svc.notify(
+      const AlertRequest(
+        type: NotificationType.budgetThreshold,
+        subjectId: 'b1',
+        periodKey: 'p1',
+        title: 'Food: 4,000 EGP',
+        body: 'You spent 4,000 EGP',
+        redactedTitle: 'Budget alert',
+        redactedBody: 'Open Zaghlol',
+      ),
+    );
+    await repo.set(Settings.hideAmountsApp, true);
+    for (var i = 0; i < 20 && gw.shown.length < 2; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    expect(gw.shown, hasLength(2));
+    expect(gw.shown.last.body, 'Open Zaghlol');
+  });
+
   test('backup sink override raises the failure alert', () async {
     await c.read(backupAlertSinkProvider)(
       BackupAlertKind.failure,

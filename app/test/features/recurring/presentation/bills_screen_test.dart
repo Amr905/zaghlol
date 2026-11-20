@@ -11,6 +11,7 @@ import 'package:zaghlol/features/recurring/presentation/bills_view.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../budget/presentation/budget_test_support.dart';
+import '../../../support/hide_amounts_support.dart';
 
 class FakeActions implements BillsActions {
   final calls = <String>[];
@@ -109,6 +110,29 @@ void main() {
   for (final locale in const [Locale('ar', 'EG'), Locale('en')]) {
     final lang = locale.languageCode;
     for (final scale in [1.0, 1.3]) {
+      testWidgets('T-187: masking on: no digit in any amount ($lang x$scale)', (
+        tester,
+      ) async {
+        final h = HideAmountsHarness(hidden: true);
+        addTearDown(h.dispose);
+        await tester.binding.setSurfaceSize(const Size(390, 2600));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(
+          harness(
+            const BillsScreen(),
+            locale: locale,
+            scale: scale,
+            hideAmounts: h,
+            overrides: [billsDataProvider.overrideWith((ref) async => full())],
+          ),
+        );
+        await tester.pumpAndSettle();
+        await expectNoAmountDigits(
+          tester,
+          allowLines: RegExp(r'Payment \d of'),
+        );
+      });
+
       testWidgets('timeline renders without overflow $lang x$scale', (
         tester,
       ) async {

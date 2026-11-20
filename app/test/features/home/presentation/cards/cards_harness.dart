@@ -10,6 +10,8 @@ import 'package:zaghlol/features/onboarding/application/contextual.dart';
 import 'package:zaghlol/features/security/domain/app_lock_controller.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../support/hide_amounts_support.dart';
+
 class FakeCardActions implements HomeCardActions {
   final calls = <String>[];
   EnableLockResult lockResult = EnableLockResult.enabled;
@@ -46,6 +48,7 @@ Future<void> pumpCards(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...amountsShown(),
         homeCardsProvider(hasTransactions).overrideWith((ref) async => cards),
         homeCardActionsProvider.overrideWithValue(actions),
       ],

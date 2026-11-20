@@ -24,6 +24,7 @@ import '../../transactions/presentation/list/txn_row.dart' show TxnFmt;
 import '../data/roi_providers.dart' show roiSuggestionsProvider;
 import 'roi_tips_providers.dart';
 import '../../../core/ui/z_haptics.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// The `years` select value of `roiTipsProjection` (year 1 and year 2).
 const String _twoYears = 'two';
@@ -188,7 +189,7 @@ class RoiTipCard extends ConsumerWidget {
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    final fmt = TxnFmt(lang, digits);
+    final fmt = TxnFmt(lang, digits, hidden: ref.watch(hideAmountsProvider));
     final text = roiTipText(l, tip, fmt);
     final projection = l.roiTipsProjection(
       _twoYears,

@@ -15,6 +15,7 @@ import '../../../core/ui/z_components.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import 'import_ports.dart';
 import 'import_source_screen.dart' show ImportRoundButton;
+import '../../../core/settings/settings_providers.dart';
 
 class ImportDoneScreen extends ConsumerWidget {
   const ImportDoneScreen({
@@ -138,6 +139,7 @@ class ImportDoneScreen extends ConsumerWidget {
                             o.topCategories[i].total,
                             languageCode: lang,
                             digits: digits,
+                            hidden: ref.watch(hideAmountsProvider),
                             dropZeroFraction: true,
                           ),
                           style: ZType.titleSmall.copyWith(color: c.text),

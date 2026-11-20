@@ -21,6 +21,8 @@ import '../application/home_read_model.dart';
 import 'home_format.dart';
 import '../../../core/ui/bank_name_text.dart';
 import '../../../core/ui/z_haptics.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// Accounts for the card filter sheet and the filter chip label.
 final homeAccountsProvider = FutureProvider<List<Account>>((ref) async {
@@ -94,11 +96,19 @@ class HomeHero extends StatelessWidget {
               ),
             ),
             const SizedBox(height: ZSpacing.xs),
-            ZMoneyText(
-              text: format.number(main),
-              unit: format.currency(main),
-              size: ZMoneySize.hero,
-              semanticsLabel: format.money(main),
+            // D-67: the eye sits beside the amount and masks the whole app.
+            Row(
+              children: [
+                Expanded(
+                  child: ZMoneyText(
+                    text: format.number(main),
+                    unit: format.currency(main),
+                    size: ZMoneySize.hero,
+                    semanticsLabel: format.money(main),
+                  ),
+                ),
+                const ZHideAmountsButton(),
+              ],
             ),
             Text(caption, style: ZType.bodySmall.copyWith(color: c.textMuted)),
             if (used) ...[
@@ -215,7 +225,7 @@ class _Kpi extends StatelessWidget {
       borderRadius: BorderRadius.circular(ZRadius.md),
       child: Semantics(
         container: true,
-        label: '$label, $text',
+        label: a11yAmounts(AppLocalizations.of(context), '$label, $text'),
         excludeSemantics: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

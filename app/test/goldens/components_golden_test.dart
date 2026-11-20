@@ -105,12 +105,7 @@ Widget _money() => const Column(
     ZMoneyText(text: '-450 EGP', size: ZMoneySize.title),
     ZMoneyText(text: '+3,500 EGP', kind: ZMoneyKind.income),
     ZMoneyText(text: '450 EGP', kind: ZMoneyKind.neutral),
-    ZMoneyText(
-      text: '-450 EGP',
-      size: ZMoneySize.caption,
-      masked: true,
-      maskedText: '•••',
-    ),
+    ZMoneyText(text: '-450 EGP', size: ZMoneySize.caption, masked: true),
   ],
 );
 

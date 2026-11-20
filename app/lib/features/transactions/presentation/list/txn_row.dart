@@ -16,15 +16,19 @@ import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
 import '../../domain/transaction.dart';
 import 'txn_list_providers.dart';
+import '../../../../core/ui/amount_semantics.dart';
 
 /// Locale-aware formatting shared by the rows and headers.
 final class TxnFmt {
-  const TxnFmt(this.lang, this.digits);
+  const TxnFmt(this.lang, this.digits, {required this.hidden});
   final String lang;
   final DigitsMode digits;
 
+  /// D-67: amounts show as `****`.
+  final bool hidden;
+
   String money(Money m) =>
-      MoneyFormat.format(m, languageCode: lang, digits: digits);
+      MoneyFormat.format(m, languageCode: lang, digits: digits, hidden: hidden);
   String count(int n) => digits.render('$n');
 }
 
@@ -134,12 +138,9 @@ class TxnRow extends StatelessWidget {
       container: true,
       selected: selected,
       onLongPress: onLongPress,
-      label: l.transactionsRowLabelA11y(
-        amountText,
-        cardName,
-        catName,
-        title,
-        time,
+      label: a11yAmounts(
+        l,
+        l.transactionsRowLabelA11y(amountText, cardName, catName, title, time),
       ),
       excludeSemantics: true,
       onTap: onTap,

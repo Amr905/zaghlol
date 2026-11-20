@@ -14,6 +14,8 @@ import 'package:zaghlol/features/roi/presentation/roi_tips_providers.dart';
 import 'package:zaghlol/features/roi/presentation/roi_tips_screen.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../support/hide_amounts_support.dart';
+
 final egp = Currency.of('EGP');
 final usd = Currency.of('USD');
 
@@ -50,6 +52,7 @@ Future<List<String>> pump(
   await t.pumpWidget(
     ProviderScope(
       overrides: [
+        ...amountsShown(),
         featureFlagProvider.overrideWith(
           (ref, f) => flag && f == FeatureFlag.smartRoi,
         ),
@@ -207,6 +210,7 @@ void main() {
     await t.pumpWidget(
       ProviderScope(
         overrides: [
+          ...amountsShown(),
           featureFlagProvider.overrideWith((ref, f) => true),
           entitlementStateProvider.overrideWith(() => _GoldNotifier()),
           chartsCurrenciesProvider.overrideWith((ref) async => [egp]),

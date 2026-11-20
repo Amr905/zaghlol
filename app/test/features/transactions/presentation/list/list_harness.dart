@@ -23,6 +23,8 @@ import 'package:zaghlol/features/transactions/presentation/list/transactions_lis
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../support/hide_amounts_support.dart';
+
 final egp = Currency.of('EGP');
 final usd = Currency.of('USD');
 
@@ -237,8 +239,10 @@ Widget listApp(
   Locale locale = const Locale('en'),
   double textScale = 1.0,
   bool dark = false,
+  HideAmountsHarness? hideAmounts,
 }) => ProviderScope(
   overrides: [
+    ...(hideAmounts ?? HideAmountsHarness()).overrides,
     transactionRepositoryProvider.overrideWith((ref) async => h.repo),
     txnBulkActionsProvider.overrideWith((ref) async => h.actions),
     txnLookupsProvider.overrideWith((ref) async => lookups),

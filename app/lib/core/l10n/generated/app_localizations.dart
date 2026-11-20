@@ -10889,6 +10889,42 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المصدر ده لسه مش جاهز'**
   String get importFlowUnavailable;
+
+  /// D-67 eye button label and tooltip: hide every amount in the app
+  ///
+  /// In ar, this message translates to:
+  /// **'إخفاء المبالغ'**
+  String get commonAmountsHide;
+
+  /// D-67 eye button label and tooltip: show the amounts again
+  ///
+  /// In ar, this message translates to:
+  /// **'إظهار المبالغ'**
+  String get commonAmountsShow;
+
+  /// D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ مخفي'**
+  String get commonAmountHidden;
+
+  /// D-67 Preferences switch: hide every amount in the app
+  ///
+  /// In ar, this message translates to:
+  /// **'اخفي المبالغ في التطبيق'**
+  String get settingsPrefsHideAmounts;
+
+  /// D-67 hint under the hide-amounts switch
+  ///
+  /// In ar, this message translates to:
+  /// **'كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.'**
+  String get settingsPrefsHideAmountsHint;
+
+  /// D-67 hint under the disabled Show amounts switch while hiding is on in the whole app
+  ///
+  /// In ar, this message translates to:
+  /// **'المبالغ مخفية في التطبيق كله، فالكارت هيطلع بالنسب بس. اظهرها من الأيقونة اللي جنب المبالغ.'**
+  String get shareStudioShowAmountsLocked;
 }
 
 class _AppLocalizationsDelegate

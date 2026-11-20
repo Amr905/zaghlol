@@ -91,13 +91,15 @@ WidgetSnapshot buildWidgetSnapshot(WidgetSnapshotInput i) {
     );
   }
   final masked = i.hideAmounts || i.appLocked;
-  final amount = masked
-      ? widgetAmountMask
-      : MoneyFormat.format(
-          safe,
-          languageCode: i.languageCode,
-          digits: i.digits,
-        );
+  // The formatter masks too, so the real figure is never built while masked;
+  // the widget shows its contract mask (platform-channels.md).
+  final formatted = MoneyFormat.format(
+    safe,
+    languageCode: i.languageCode,
+    digits: i.digits,
+    hidden: masked,
+  );
+  final amount = masked ? widgetAmountMask : formatted;
   final days = overview.daysRemaining;
   return WidgetSnapshot(
     state: WidgetDisplayState.ok,

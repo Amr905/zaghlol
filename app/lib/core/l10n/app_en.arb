@@ -7097,5 +7097,29 @@
   "importFlowUnavailable": "This source isn't ready yet",
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
+  },
+  "commonAmountsHide": "Hide amounts",
+  "@commonAmountsHide": {
+    "description": "D-67 eye button label and tooltip: hide every amount in the app"
+  },
+  "commonAmountsShow": "Show amounts",
+  "@commonAmountsShow": {
+    "description": "D-67 eye button label and tooltip: show the amounts again"
+  },
+  "commonAmountHidden": "Amount hidden",
+  "@commonAmountHidden": {
+    "description": "D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)"
+  },
+  "settingsPrefsHideAmounts": "Hide amounts in the app",
+  "@settingsPrefsHideAmounts": {
+    "description": "D-67 Preferences switch: hide every amount in the app"
+  },
+  "settingsPrefsHideAmountsHint": "Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.",
+  "@settingsPrefsHideAmountsHint": {
+    "description": "D-67 hint under the hide-amounts switch"
+  },
+  "shareStudioShowAmountsLocked": "Amounts are hidden in the whole app, so the card shows percentages only. Show them with the eye icon first.",
+  "@shareStudioShowAmountsLocked": {
+    "description": "D-67 hint under the disabled Show amounts switch while hiding is on in the whole app"
   }
 }

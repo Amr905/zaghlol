@@ -19,6 +19,8 @@ import 'package:zaghlol/features/wealth/presentation/assets_section.dart';
 import 'package:zaghlol/features/wealth/presentation/prices_screen.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../support/hide_amounts_support.dart';
+
 final _now = DateTime.utc(2026, 11, 13, 12);
 final _egp = Currency.of('EGP');
 
@@ -80,6 +82,7 @@ Future<void> _pump(
   bool dark = false,
   bool gold = true,
   double scale = 1.0,
+  HideAmountsHarness? hideAmounts,
   List<GoldCapability>? paywall,
 }) async {
   await t.binding.setSurfaceSize(const Size(390, 900));
@@ -87,6 +90,7 @@ Future<void> _pump(
   await t.pumpWidget(
     ProviderScope(
       overrides: [
+        ...(hideAmounts ?? HideAmountsHarness()).overrides,
         pricesClockProvider.overrideWithValue(() => _now),
         pricesRepositoryProvider.overrideWith((ref) async => env.prices),
         netWorthRepositoryProvider.overrideWith((ref) async => env.repo),
@@ -198,6 +202,28 @@ void main() {
         await t.tap(find.text(l10n.wealthAssetTitleAdd));
         expect(added, 1);
       });
+
+      testWidgets(
+        'T-187: masking on: assets and gold quantities show no digit',
+        (t) async {
+          final env = await _env(t);
+          await _seedAssets(env, t);
+          final h = HideAmountsHarness(hidden: true);
+          addTearDown(h.dispose);
+          await _pump(t, env, _section(), locale: loc, hideAmounts: h);
+          await expectNoAmountDigits(t);
+          expect(find.textContaining('90,000'), findsNothing);
+          expect(find.textContaining('٩٠٬٠٠٠'), findsNothing);
+          await _pump(
+            t,
+            env,
+            const PricesScreen(),
+            locale: loc,
+            hideAmounts: h,
+          );
+          await expectNoAmountDigits(t);
+        },
+      );
 
       testWidgets(
         'Gold rows: gold native unit, cert payout, no-rate, estimate',

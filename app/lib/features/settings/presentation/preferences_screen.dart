@@ -190,6 +190,17 @@ class PreferencesScreen extends ConsumerWidget {
         ),
         SettingsSection(
           children: [
+            SettingsSwitchRow(
+              key: const ValueKey('prefs-hide-amounts'),
+              title: t.settingsPrefsHideAmounts,
+              subtitle: t.settingsPrefsHideAmountsHint,
+              value: ref.watch(hideAmountsProvider),
+              onChanged: (v) => _write(ref, Settings.hideAmountsApp, v),
+            ),
+          ],
+        ),
+        SettingsSection(
+          children: [
             const _PaydayRow(),
             _IncomeRow(
               currency: currency ?? Settings.primaryCurrency.defaultValue,
@@ -364,6 +375,7 @@ class _IncomeRowState extends ConsumerState<_IncomeRow> {
       final lang = Localizations.localeOf(context).languageCode;
       _controller.text = ref
           .read(digitsModeProvider(lang))
+          // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
           .render(stored.toCanonicalString());
     }
     return SettingsControlRow(

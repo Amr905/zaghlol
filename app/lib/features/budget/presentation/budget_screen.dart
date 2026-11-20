@@ -23,6 +23,9 @@ import 'budget_providers_ui.dart';
 import 'budget_view.dart';
 import 'edit_budgets_screen.dart';
 import '../../../core/ui/z_haptics.dart';
+import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// Hosts [BudgetScreen] as a pushed route (Home hero tap). The screen itself is
 /// a tab body with no Scaffold, so on its own it renders without Material
@@ -37,7 +40,11 @@ class BudgetRouteScaffold extends StatelessWidget {
     final c = ZColors.of(context);
     return Scaffold(
       backgroundColor: c.bg,
-      appBar: AppBar(backgroundColor: c.bg, title: Text(l.insightsTabsBudget)),
+      appBar: AppBar(
+        backgroundColor: c.bg,
+        title: Text(l.insightsTabsBudget),
+        actions: const [ZHideAmountsButton()],
+      ),
       body: child,
     );
   }
@@ -185,6 +192,7 @@ String _money(WidgetRef ref, BuildContext context, Money m) {
       m,
       languageCode: lang,
       digits: ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
     ),
   );
 }
@@ -347,9 +355,12 @@ class _CurrencySection extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Semantics(
-                        label: l.budgetOverviewOverall(
-                          _money(ref, context, view.spent),
-                          _money(ref, context, view.limit!),
+                        label: a11yAmounts(
+                          l,
+                          l.budgetOverviewOverall(
+                            _money(ref, context, view.spent),
+                            _money(ref, context, view.limit!),
+                          ),
                         ),
                         excludeSemantics: true,
                         child: Text.rich(
@@ -386,6 +397,12 @@ class _CurrencySection extends ConsumerWidget {
                   Text(
                     l.budgetOverviewSafePerDay(
                       _money(ref, context, view.safePerDay!),
+                    ),
+                    semanticsLabel: a11yAmounts(
+                      l,
+                      l.budgetOverviewSafePerDay(
+                        _money(ref, context, view.safePerDay!),
+                      ),
                     ),
                     style: ZType.body.copyWith(color: c.text),
                   ),
@@ -563,16 +580,14 @@ class _CategoryRow extends ConsumerWidget {
         : pct >= budgetWarnPercent
         ? l.budgetOverviewStatusNear
         : null;
-    final label = l.budgetOverviewRowA11y(
-      name,
-      spent,
-      limit,
-      _percent(ref, context, pct),
+    final label = a11yAmounts(
+      l,
+      l.budgetOverviewRowA11y(name, spent, limit, _percent(ref, context, pct)),
     );
     return Semantics(
       button: onTap != null,
       excludeSemantics: true,
-      label: status == null ? label : '$label. $status',
+      label: status == null ? label : a11yAmounts(l, '$label. $status'),
       child: InkWell(
         onTap: onTap,
         child: ConstrainedBox(
@@ -681,7 +696,11 @@ class _NotBudgetedRow extends StatelessWidget {
                 ],
               ),
             ),
-            Text(amount, style: ZType.bodySmall.copyWith(color: c.text)),
+            Text(
+              amount,
+              semanticsLabel: a11yAmounts(AppLocalizations.of(context), amount),
+              style: ZType.bodySmall.copyWith(color: c.text),
+            ),
           ],
         ),
       ),

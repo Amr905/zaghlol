@@ -107,6 +107,7 @@ class _BillFormState extends ConsumerState<BillForm> {
     _kind = r?.kind ?? RecurringKind.subscription;
     _name = TextEditingController(text: r?.name ?? '');
     _amount = TextEditingController(
+      // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
       text: r == null || r.amountMinor == 0 ? '' : r.amount.toCanonicalString(),
     );
     _paid = TextEditingController(text: '${r?.paidCount ?? 0}');

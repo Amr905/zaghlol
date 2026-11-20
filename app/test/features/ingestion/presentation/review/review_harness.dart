@@ -15,6 +15,8 @@ import 'package:zaghlol/features/ingestion/presentation/review/review_providers.
 import 'package:zaghlol/features/ingestion/presentation/review/review_screen.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../support/hide_amounts_support.dart';
+
 Money egp(int minor) => Money.tryMinor(Currency.of('EGP'), minor)!;
 
 /// Records calls; synthetic data only.
@@ -141,6 +143,7 @@ Widget reviewApp({
 }) {
   return ProviderScope(
     overrides: [
+      ...amountsShown(),
       reviewActionsProvider.overrideWithValue(actions),
       reviewCategoriesProvider.overrideWith((ref) async => sampleCategories),
       reviewQueueProvider.overrideWith((ref) async {

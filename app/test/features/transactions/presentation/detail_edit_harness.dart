@@ -23,6 +23,7 @@ import 'package:zaghlol/features/transactions/presentation/edit/txn_edit_provide
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 
 import 'list/list_harness.dart';
+import '../../../support/hide_amounts_support.dart';
 
 /// Records what the editor was asked to store.
 class FakeEditor implements TxnEditorPort {
@@ -80,8 +81,10 @@ Widget _app(
   required double textScale,
   required bool dark,
   GlobalKey<NavigatorState>? navigatorKey,
+  HideAmountsHarness? hideAmounts,
 }) => ProviderScope(
   overrides: [
+    ...(hideAmounts ?? HideAmountsHarness()).overrides,
     txnLookupsProvider.overrideWith((ref) async => lookups),
     paydayScheduleProvider.overrideWith(
       (ref) async => PaydaySchedule.single(1),
@@ -124,6 +127,7 @@ Future<void> pumpDetail(
   double textScale = 1.0,
   bool dark = false,
   String id = 'a',
+  HideAmountsHarness? hideAmounts,
 }) async {
   await tester.binding.setSurfaceSize(const Size(390, 844));
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -156,6 +160,7 @@ Future<void> pumpDetail(
           ),
         ),
       ),
+      hideAmounts: hideAmounts,
       locale: locale,
       textScale: textScale,
       dark: dark,

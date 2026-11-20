@@ -7,6 +7,7 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_card.dart';
+import '../../../../core/ui/amount_semantics.dart';
 
 class ChartCard extends StatelessWidget {
   const ChartCard({
@@ -47,7 +48,11 @@ class ChartCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final body = summary != null
-        ? Semantics(label: summary, container: true, child: child)
+        ? Semantics(
+            label: a11yAmounts(AppLocalizations.of(context), summary!),
+            container: true,
+            child: child,
+          )
         : child;
     final footer = (footnote != null || trailing != null)
         ? Padding(
@@ -58,6 +63,10 @@ class ChartCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       footnote!,
+                      semanticsLabel: a11yAmounts(
+                        AppLocalizations.of(context),
+                        footnote!,
+                      ),
                       style: ZType.body.copyWith(color: c.text),
                     ),
                   )
