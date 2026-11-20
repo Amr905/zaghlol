@@ -48,7 +48,7 @@ void main() {
     });
     test('other MoneyFormat members are not format calls', () {
       expect(
-        run(ui, "Object f(i, c) => MoneyFormat.parseInput(i, c);"),
+        run(ui, 'Object f(i, c) => MoneyFormat.parseInput(i, c);'),
         isEmpty,
       );
     });
