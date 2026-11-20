@@ -8,6 +8,7 @@ import 'package:zaghlol/features/export_import/presentation/import_source_screen
 import 'package:zaghlol/features/gold/application/gating.dart';
 
 import 'import_flow_support.dart';
+import '../../../support/hide_amounts_support.dart';
 
 void main() {
   // Arabic uses Arabic-Indic digits under the default digit mode.
@@ -38,6 +39,7 @@ void main() {
         paywallFor = null;
         container = ProviderContainer(
           overrides: [
+            ...amountsShown(),
             ...importOverrides(lang, picker: picker, runner: runner),
             paywallTriggerProvider.overrideWithValue((c) => paywallFor = c),
           ],

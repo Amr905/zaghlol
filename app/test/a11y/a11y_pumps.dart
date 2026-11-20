@@ -24,6 +24,7 @@ import '../features/capture/presentation/template_builder_screen_test.dart'
 import '../features/home/presentation/home_harness.dart' as home;
 import '../features/settings/settings_harness.dart';
 import '../support/golden_matrix.dart';
+import '../support/hide_amounts_support.dart';
 
 Locale _loc(GoldenVariant v) => v.locale;
 
@@ -47,6 +48,7 @@ Future<void> pumpEditBudgets(WidgetTester t, GoldenVariant v) async {
       dark: v.dark,
       scale: v.textScale,
       overrides: [
+        ...amountsShown(),
         categoryRowsProvider.overrideWith((ref) async => const []),
         cycleBudgetRowsProvider.overrideWith((ref) async => const []),
       ],
@@ -69,6 +71,7 @@ Future<void> pumpInsightsShell(WidgetTester t, GoldenVariant v) async {
       dark: v.dark,
       scale: v.textScale,
       overrides: [
+        ...amountsShown(),
         budgetScreenDataProvider.overrideWith((ref) async => data([egpView()])),
       ],
     ),
@@ -140,6 +143,7 @@ Future<void> pumpHomeCardFilterSheet(WidgetTester t, GoldenVariant v) async {
     detail.host(
       const Scaffold(body: HomeCardFilterSheet()),
       overrides: [
+        ...amountsShown(),
         homeAccountsProvider.overrideWith(
           (ref) async => [
             home.account('a1', 'CIB Credit', '1234'),

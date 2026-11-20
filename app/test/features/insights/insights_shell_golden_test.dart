@@ -15,6 +15,7 @@ import 'package:zaghlol/features/recurring/presentation/bills_providers.dart';
 import '../budget/presentation/budget_test_support.dart';
 import '../recurring/presentation/bills_screen_test.dart' as bills;
 import 'presentation/charts/charts_test_support.dart' as charts;
+import '../../support/hide_amounts_support.dart';
 
 void main() {
   for (final locale in const [Locale('ar', 'EG'), Locale('en')]) {
@@ -35,6 +36,7 @@ void main() {
               locale: locale,
               dark: dark,
               overrides: [
+                ...amountsShown(),
                 ...charts.chartOverrides(currencies: null),
                 homeAccountsProvider.overrideWith((ref) async => const []),
                 billsDataProvider.overrideWith((ref) async => bills.full()),

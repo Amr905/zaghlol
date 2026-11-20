@@ -24,6 +24,7 @@ import 'package:zaghlol/features/voice/presentation/voice_logger_screen.dart';
 
 import '../transactions/presentation/detail_edit_harness.dart';
 import '../transactions/presentation/list/list_harness.dart';
+import '../../support/hide_amounts_support.dart';
 
 const voiceLookups = TxnLookups(
   categories: [
@@ -165,6 +166,7 @@ class VoiceRig {
   int settings = 0;
 
   List<Override> get overrides => [
+    ...amountsShown(),
     speechPortProvider.overrideWithValue(speech),
     voiceInterpreterProvider.overrideWith((ref) async => TestInterpreter()),
     voiceUsageProvider.overrideWith((ref) async => usage),
