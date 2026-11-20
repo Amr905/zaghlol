@@ -3,9 +3,13 @@ name: size-report
 # T-190: measures the app size (debug universal APK, release universal APK,
 # release per-ABI APKs, release AAB with --analyze-size, per-device download
 # size via bundletool, iOS IPA) and uploads only text/JSON reports.
-# Manual dispatch only. The repository is public: no APK, AAB, IPA, R8 mapping
+# Manual dispatch, or a push to a size/** branch (a workflow_dispatch can only be
+# triggered through the API once the file is on the default branch). The repository is public: no APK, AAB, IPA, R8 mapping
 # or Dart symbol file is ever uploaded from this workflow.
 on:
+  push:
+    branches:
+      - 'size/**'
   workflow_dispatch:
     inputs:
       ios:
@@ -117,7 +121,7 @@ jobs:
 
   ios:
     name: ios prod
-    if: ${{ inputs.ios }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.ios }}
     runs-on: macos-15
     timeout-minutes: 90
     steps:
