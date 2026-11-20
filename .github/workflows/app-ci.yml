@@ -84,9 +84,11 @@ jobs:
             while read -r line; do echo "::error::format: $line"; done < format.log
             exit 1
           fi
-      - name: flutter analyze
+      # FU-271: `dart analyze`, not `flutter analyze`; the latter can return before the riverpod_lint plugin reports (FU-270).
+      # --fatal-infos keeps today's rule: any info, warning or error fails the step.
+      - name: dart analyze
         run: |
-          if ! flutter analyze > analyze.log 2>&1; then
+          if ! dart analyze --fatal-infos > analyze.log 2>&1; then
             grep -iE "^\s*(info|warning|error)" analyze.log | while read -r line; do echo "::error::analyze: $line"; done
             tail -n 5 analyze.log | while read -r line; do echo "::error::analyze: $line"; done
             exit 1
