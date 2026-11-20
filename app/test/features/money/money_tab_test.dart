@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/core/theme/z_tokens.dart';
 import 'package:zaghlol/features/accounts/data/accounts_providers.dart';
 import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/features/accounts/domain/accounts_repository.dart';
@@ -363,6 +364,75 @@ void main() {
       expect(find.text(l.commonAccountTypeCredit), findsOneWidget);
     });
 
+    testWidgets('over the limit: used above limit, full bar, warning tone', (
+      t,
+    ) async {
+      final over = [
+        AccountWithBalances(
+          _acc(
+            'o',
+            'Over',
+            kind: AccountKind.credit,
+            limit: Money(_egp, 1000000),
+          ),
+          [_bal('o', _egp, 0, avail: -200000)],
+        ),
+      ];
+      await _pump(t, repo: _FakeRepo(over));
+      expect(find.textContaining('12,000'), findsWidgets); // used > 10,000
+      final bar = t.widget<LinearProgressIndicator>(
+        find.byKey(const Key('money-credit-bar')),
+      );
+      expect(bar.value, 1.0);
+      expect(
+        bar.color,
+        ZColors.of(t.element(find.byType(MoneyTab))).warningText,
+      );
+    });
+
+    testWidgets('limit and available in different currencies: no bar', (
+      t,
+    ) async {
+      final mixed = [
+        AccountWithBalances(
+          _acc(
+            'm',
+            'Mixed',
+            kind: AccountKind.credit,
+            limit: Money(_egp, 1000000),
+          ),
+          [_bal('m', _usd, 0, avail: 50000)],
+        ),
+      ];
+      await _pump(t, repo: _FakeRepo(mixed));
+      expect(find.byKey(const Key('money-credit-bar')), findsNothing);
+      expect(find.textContaining('used of'), findsNothing);
+    });
+
+    testWidgets('hidden amounts: the used share is not spoken', (t) async {
+      final h = HideAmountsHarness(hidden: true);
+      addTearDown(h.dispose);
+      final handle = t.ensureSemantics();
+      await _pump(t, repo: _FakeRepo(_full), hideAmounts: h);
+      final l = AppLocalizations.of(t.element(find.byType(MoneyTab)));
+      expect(find.bySemanticsLabel(RegExp('50%|50٪')), findsNothing);
+      expect(
+        find.bySemanticsLabel(RegExp(l.commonAccountTypeCredit)),
+        findsWidgets,
+      );
+      handle.dispose();
+    });
+
+    testWidgets('shown amounts: the used share is spoken', (t) async {
+      final handle = t.ensureSemantics();
+      await _pump(t, repo: _FakeRepo(_full));
+      expect(
+        find.bySemanticsLabel(RegExp('50% of your limit used')),
+        findsOneWidget,
+      );
+      handle.dispose();
+    });
+
     testWidgets('toggle writes the persisted choice', (t) async {
       final h = HideAmountsHarness();
       addTearDown(h.dispose);
@@ -381,4 +451,7 @@ Future<void> pumpForGolden(WidgetTester tester, GoldenVariant v) => _pump(
   locale: v.locale,
   dark: v.dark,
   scale: v.textScale,
+  // Golden fixture: credit with limit, used and a due date, debit, wallet,
+  // cash and a multi-currency account (T-197).
+  due: {'b': CivilDate(2026, 11, 28)},
 );

@@ -26,6 +26,9 @@ import '../../../core/settings/settings_providers.dart';
 import '../../../core/ui/z_hide_amounts_button.dart';
 import '../../../core/ui/amount_semantics.dart';
 
+/// Diameter of the bank tile; the credit bar lines up under the text.
+const double _kTileSize = 48;
+
 /// Shown when there are no balances yet.
 final _zeroEgp = Money(Currency.of('EGP'), 0);
 
@@ -446,18 +449,23 @@ class _AccountRow extends ConsumerWidget {
       final limit = account.creditLimit;
       final isCredit = account.kind == AccountKind.credit;
       if (isCredit && first.available != null) {
-        if (limit == null) {
-          primary = _fmt(context, ref, first.available!);
+        final avail = first.available!;
+        if (limit == null || limit.currency != avail.currency) {
+          // No limit, or figures in different currencies: no used figure.
+          primary = _fmt(context, ref, avail);
         } else {
-          final usedMinor = (limit.minor - first.available!.minor).clamp(
-            0,
-            limit.minor,
-          );
+          // Over the limit shows used > limit (available below zero); only a
+          // negative "used" is floored.
+          final usedMinor = limit.minor - avail.minor < 0
+              ? 0
+              : limit.minor - avail.minor;
           primary = l10n.accountsOverviewUsedOf(
             _fmt(context, ref, Money(limit.currency, usedMinor)),
             _fmt(context, ref, limit),
           );
-          usedFraction = limit.minor == 0 ? 0 : usedMinor / limit.minor;
+          usedFraction = limit.minor <= 0
+              ? (usedMinor > 0 ? 1 : 0)
+              : usedMinor / limit.minor;
           usedPct = digits.render('${(usedFraction * 100).round()}%');
         }
       } else if (first.balance != null) {
@@ -479,7 +487,10 @@ class _AccountRow extends ConsumerWidget {
       label,
       accountKindLabel(l10n, account.kind),
       ?primary,
-      ?(usedPct == null ? null : l10n.accountsOverviewUsedBarA11y(usedPct)),
+      // The used share is a figure of the amounts: not spoken while hidden.
+      ?(usedPct == null || ref.watch(hideAmountsProvider)
+          ? null
+          : l10n.accountsOverviewUsedBarA11y(usedPct)),
       ?dueText,
       ?sub,
     ].join(', ');
@@ -570,15 +581,16 @@ class _AccountRow extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsetsDirectional.only(
                       top: ZSpacing.sm,
-                      start: 48 + ZSpacing.md,
+                      start: _kTileSize + ZSpacing.md,
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(ZRadius.pill),
                       child: LinearProgressIndicator(
                         key: const Key('money-credit-bar'),
-                        value: usedFraction,
+                        value: usedFraction.clamp(0.0, 1.0),
                         minHeight: 8,
-                        color: c.primary,
+                        // Near or over the limit: warning tone (text stays too).
+                        color: usedFraction >= 0.9 ? c.warningText : c.primary,
                         backgroundColor: c.surfaceAlt,
                       ),
                     ),
@@ -603,8 +615,8 @@ class _Tile extends StatelessWidget {
     final c = ZColors.of(context);
     if (account.kind == AccountKind.cash) {
       return Container(
-        width: 48,
-        height: 48,
+        width: _kTileSize,
+        height: _kTileSize,
         alignment: AlignmentDirectional.center,
         decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
         child: Icon(Icons.payments_rounded, color: c.primary),
@@ -614,7 +626,7 @@ class _Tile extends StatelessWidget {
     return ZInstitutionAvatar(
       institutionCode: account.institutionCode,
       label: account.label,
-      size: 48,
+      size: _kTileSize,
     );
   }
 }

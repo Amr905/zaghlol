@@ -3034,6 +3034,18 @@
       }
     }
   },
+  "accountsTypeCurrency": "{type} · {currency}",
+  "@accountsTypeCurrency": {
+    "description": "S · account picker subtitle: account type and currency code",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "accountsOverviewCompare": "قارن",
   "@accountsOverviewCompare": {
     "description": "L · text button, opens S-42"

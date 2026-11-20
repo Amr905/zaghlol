@@ -618,6 +618,18 @@
       }
     }
   },
+  "accountsTypeCurrency": "{type} · {currency}",
+  "@accountsTypeCurrency": {
+    "description": "S",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "accountsOverviewCompare": "Compare",
   "accountsOverviewAsOf": "as of {when}",
   "accountsOverviewCreditAvailable": "available of {limit}",

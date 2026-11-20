@@ -3472,6 +3472,12 @@ abstract class AppLocalizations {
   /// **'السداد {date}'**
   String accountsOverviewDueOn(String date);
 
+  /// S · account picker subtitle: account type and currency code
+  ///
+  /// In ar, this message translates to:
+  /// **'{type} · {currency}'**
+  String accountsTypeCurrency(String type, String currency);
+
   /// L · text button, opens S-42
   ///
   /// In ar, this message translates to:

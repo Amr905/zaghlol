@@ -496,7 +496,10 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
               title: accountName(a, fmt),
               subtitle: a.kind == null
                   ? a.currencyCode
-                  : '${accountKindLabel(AppLocalizations.of(ctx), a.kind!)} \u00b7 ${a.currencyCode}',
+                  : AppLocalizations.of(ctx).accountsTypeCurrency(
+                      accountKindLabel(AppLocalizations.of(ctx), a.kind!),
+                      a.currencyCode,
+                    ),
               onTap: () => Navigator.of(ctx).pop(a.id),
             ),
         ],

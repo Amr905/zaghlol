@@ -2341,6 +2341,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String accountsTypeCurrency(String type, String currency) {
+    return '$type · $currency';
+  }
+
+  @override
   String get accountsOverviewCompare => 'قارن';
 
   @override
