@@ -282,6 +282,8 @@ class CaptureRuntime internal constructor(seams: CaptureSeams) {
         if (uiKey !== key) return
         uiEvents = null
         uiKey = null
+        // FU-164a: revoking SMS in system settings kills the process, so Dart
+        // sees a revocation only through the next start's getCapabilities.
         uiPermissions?.detach()
         uiPermissions = null
         lastCaps = null
