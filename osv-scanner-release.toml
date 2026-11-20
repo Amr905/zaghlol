@@ -1,1 +1,4 @@
-# osv-scanner config for the release runtime classpaths (blocking scan). Entries need id, ignoreUntil, reason.
+# osv-scanner config for the BLOCKING release scan (security-scan.yml, job osv-release): pub, npm and the Android prod release
+# runtime classpaths. Intentionally has no ignores: batch 52 found 0 advisories on the release runtime classpaths.
+# If an advisory ever has to be accepted, add it here with id, ignoreUntil (max 90 days) and a reason that names the package,
+# the CVE/GHSA, and whether the vulnerable code is reachable. Prefer a dependency constraint bump.
