@@ -7557,4 +7557,96 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get importFlowUnavailable => 'المصدر ده لسه مش جاهز';
+
+  @override
+  String get salaryExpectedTitle => 'المرتب — متوقع';
+
+  @override
+  String salaryExpectedSub(String day) {
+    return 'ميعاده يوم $day · مش محسوب لحد ما يتأكد';
+  }
+
+  @override
+  String get salaryActionArrived => 'نزل';
+
+  @override
+  String get salaryActionNotYet => 'لسه';
+
+  @override
+  String get salaryActionSkip => 'تخطي الشهر ده';
+
+  @override
+  String get salaryRecorded => 'اتسجل المرتب';
+
+  @override
+  String get salaryErrorGeneric => 'معرفتش أسجل المرتب. جرب تاني.';
+
+  @override
+  String get salaryFoundTitle => 'في مبلغ نزل قبل كده';
+
+  @override
+  String salaryFoundBody(String amount) {
+    return 'في دخل بـ $amount نزل في ميعاد المرتب. هو ده المرتب؟';
+  }
+
+  @override
+  String get salaryFoundYes => 'أيوه، هو ده';
+
+  @override
+  String get salaryFoundNo => 'لأ، دخل تاني';
+
+  @override
+  String get salaryAddSwitch => 'ده مرتب';
+
+  @override
+  String get salaryAddSwitchHint =>
+      'لو رسالة البنك وصلت بعد كده، هتتحسب مرة واحدة بس';
+
+  @override
+  String get salaryMergedTitle => 'المرتب ده اتدمج مع اللي سجلته';
+
+  @override
+  String get salaryMergedUndo => 'رجّع اللي سجلته';
+
+  @override
+  String get salaryMergedUndone => 'رجعنا اللي سجلته';
+
+  @override
+  String get salaryMergedGone => 'اللي سجلته اتمسح ومينفعش يرجع';
+
+  @override
+  String get settingsSalaryTitle => 'مرتبي';
+
+  @override
+  String get settingsSalaryUnset => 'ضيفه وزغلول يتابعه معاك';
+
+  @override
+  String settingsSalarySummary(String amount, String day) {
+    return '$amount · يوم $day';
+  }
+
+  @override
+  String get settingsSalaryAmount => 'المبلغ';
+
+  @override
+  String get settingsSalaryDay => 'يوم القبض (١–٢٨)';
+
+  @override
+  String get settingsSalaryAccount => 'بينزل فين';
+
+  @override
+  String get settingsSalaryAccountDefault => 'الكاش';
+
+  @override
+  String get settingsSalaryRemove => 'شيل المرتب';
+
+  @override
+  String get settingsSalaryInvalid => 'اكتب مبلغ صح ويوم من ١ لـ ٢٨';
+
+  @override
+  String get notificationsSalaryNudgeTitle => 'المرتب نزل؟';
+
+  @override
+  String get notificationsSalaryNudgeBody =>
+      'لسه مجاليش رسالة بالمرتب. لو نزل، سجّله من الرئيسية بضغطة.';
 }

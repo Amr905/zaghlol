@@ -10200,5 +10200,135 @@
   "importFlowUnavailable": "المصدر ده لسه مش جاهز",
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
+  },
+  "salaryExpectedTitle": "المرتب — متوقع",
+  "@salaryExpectedTitle": {
+    "description": "Home row title"
+  },
+  "salaryExpectedSub": "ميعاده يوم {day} · مش محسوب لحد ما يتأكد",
+  "@salaryExpectedSub": {
+    "description": "Home row subtitle · day",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryActionArrived": "نزل",
+  "@salaryActionArrived": {
+    "description": "Home row button"
+  },
+  "salaryActionNotYet": "لسه",
+  "@salaryActionNotYet": {
+    "description": "Home row button"
+  },
+  "salaryActionSkip": "تخطي الشهر ده",
+  "@salaryActionSkip": {
+    "description": "Home row button"
+  },
+  "salaryRecorded": "اتسجل المرتب",
+  "@salaryRecorded": {
+    "description": "Snackbar"
+  },
+  "salaryErrorGeneric": "معرفتش أسجل المرتب. جرب تاني.",
+  "@salaryErrorGeneric": {
+    "description": "Snackbar error"
+  },
+  "salaryFoundTitle": "في مبلغ نزل قبل كده",
+  "@salaryFoundTitle": {
+    "description": "Dialog title"
+  },
+  "salaryFoundBody": "في دخل بـ {amount} نزل في ميعاد المرتب. هو ده المرتب؟",
+  "@salaryFoundBody": {
+    "description": "Dialog body · amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryFoundYes": "أيوه، هو ده",
+  "@salaryFoundYes": {
+    "description": "Dialog button"
+  },
+  "salaryFoundNo": "لأ، دخل تاني",
+  "@salaryFoundNo": {
+    "description": "Dialog button"
+  },
+  "salaryAddSwitch": "ده مرتب",
+  "@salaryAddSwitch": {
+    "description": "Add-income switch"
+  },
+  "salaryAddSwitchHint": "لو رسالة البنك وصلت بعد كده، هتتحسب مرة واحدة بس",
+  "@salaryAddSwitchHint": {
+    "description": "Add-income switch hint"
+  },
+  "salaryMergedTitle": "المرتب ده اتدمج مع اللي سجلته",
+  "@salaryMergedTitle": {
+    "description": "Transaction detail line"
+  },
+  "salaryMergedUndo": "رجّع اللي سجلته",
+  "@salaryMergedUndo": {
+    "description": "Transaction detail button"
+  },
+  "salaryMergedUndone": "رجعنا اللي سجلته",
+  "@salaryMergedUndone": {
+    "description": "Snackbar"
+  },
+  "salaryMergedGone": "اللي سجلته اتمسح ومينفعش يرجع",
+  "@salaryMergedGone": {
+    "description": "Snackbar"
+  },
+  "settingsSalaryTitle": "مرتبي",
+  "@settingsSalaryTitle": {
+    "description": "Settings row and sheet title"
+  },
+  "settingsSalaryUnset": "ضيفه وزغلول يتابعه معاك",
+  "@settingsSalaryUnset": {
+    "description": "Settings row subtitle"
+  },
+  "settingsSalarySummary": "{amount} · يوم {day}",
+  "@settingsSalarySummary": {
+    "description": "Settings row subtitle · amount, day",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSalaryAmount": "المبلغ",
+  "@settingsSalaryAmount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryDay": "يوم القبض (١–٢٨)",
+  "@settingsSalaryDay": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccount": "بينزل فين",
+  "@settingsSalaryAccount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccountDefault": "الكاش",
+  "@settingsSalaryAccountDefault": {
+    "description": "Sheet account choice (default cash account)"
+  },
+  "settingsSalaryRemove": "شيل المرتب",
+  "@settingsSalaryRemove": {
+    "description": "Sheet button"
+  },
+  "settingsSalaryInvalid": "اكتب مبلغ صح ويوم من ١ لـ ٢٨",
+  "@settingsSalaryInvalid": {
+    "description": "Sheet error"
+  },
+  "notificationsSalaryNudgeTitle": "المرتب نزل؟",
+  "@notificationsSalaryNudgeTitle": {
+    "description": "N"
+  },
+  "notificationsSalaryNudgeBody": "لسه مجاليش رسالة بالمرتب. لو نزل، سجّله من الرئيسية بضغطة.",
+  "@notificationsSalaryNudgeBody": {
+    "description": "N"
   }
 }

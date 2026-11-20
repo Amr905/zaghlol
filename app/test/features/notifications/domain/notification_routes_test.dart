@@ -4,6 +4,7 @@ import 'package:zaghlol/features/notifications/domain/notification_routes.dart';
 void main() {
   test('known route ids map to their targets', () {
     expect(notificationTargetFor('/budget'), isA<InsightsTarget>());
+    expect(notificationTargetFor('/home'), isA<HomeTarget>());
     expect(notificationTargetFor('/insights'), isA<InsightsTarget>());
     expect(notificationTargetFor('/settings/backup'), isA<BackupTarget>());
     final t = notificationTargetFor('/transactions/ab-12_Z');

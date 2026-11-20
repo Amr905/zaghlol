@@ -18,6 +18,8 @@ import '../../budget/data/payday_schedule_store.dart' show localToday;
 import '../../capture/application/capture_providers.dart'
     show ingestionPauseGateProvider;
 import '../../recurring/application/notify_auto_added.dart';
+import '../../salary/application/notify_salary_check.dart';
+import '../../salary/application/salary_providers.dart';
 import '../../recurring/application/send_due_reminders.dart';
 import '../../recurring/data/recurring_repository.dart';
 import '../../transactions/application/dangling_links_sweep.dart';
@@ -169,6 +171,34 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                     ),
               redactedTitle: l.notificationsAutoAddedTitle,
               redactedBody: l.notificationsAutoAddedHidden,
+              payload: base.payload,
+            ),
+          );
+        },
+      ),
+      (
+        name: 'salary_check',
+        run: () async {
+          // D-71: tie received salary credits to the expected one, then the
+          // one nudge per payday.
+          if (restoreWaiting()) return;
+          final now = ref.read(clockProvider)().toUtc().millisecondsSinceEpoch;
+          final today = localToday(now, ref.read(localZoneProvider));
+          final l = notificationL10n(ref);
+          await runSalaryCheck(
+            matching: await ref.read(salaryMatchingProvider.future),
+            service: await ref.read(salaryServiceProvider.future),
+            notifications: await ref.read(notificationServiceProvider.future),
+            today: today,
+            shouldStop: restoreWaiting,
+            buildText: (base) => AlertRequest(
+              type: base.type,
+              subjectId: base.subjectId,
+              periodKey: base.periodKey,
+              title: l.notificationsSalaryNudgeTitle,
+              body: l.notificationsSalaryNudgeBody,
+              redactedTitle: l.notificationsSalaryNudgeTitle,
+              redactedBody: l.notificationsSalaryNudgeBody,
               payload: base.payload,
             ),
           );

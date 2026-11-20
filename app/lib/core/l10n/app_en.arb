@@ -7097,5 +7097,135 @@
   "importFlowUnavailable": "This source isn't ready yet",
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
+  },
+  "salaryExpectedTitle": "Salary — expected",
+  "@salaryExpectedTitle": {
+    "description": "Home row title"
+  },
+  "salaryExpectedSub": "Due on day {day} · not counted until confirmed",
+  "@salaryExpectedSub": {
+    "description": "Home row subtitle · day",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryActionArrived": "It arrived",
+  "@salaryActionArrived": {
+    "description": "Home row button"
+  },
+  "salaryActionNotYet": "Not yet",
+  "@salaryActionNotYet": {
+    "description": "Home row button"
+  },
+  "salaryActionSkip": "Skip this month",
+  "@salaryActionSkip": {
+    "description": "Home row button"
+  },
+  "salaryRecorded": "Salary added",
+  "@salaryRecorded": {
+    "description": "Snackbar"
+  },
+  "salaryErrorGeneric": "Couldn't add the salary. Try again.",
+  "@salaryErrorGeneric": {
+    "description": "Snackbar error"
+  },
+  "salaryFoundTitle": "A payment already arrived",
+  "@salaryFoundTitle": {
+    "description": "Dialog title"
+  },
+  "salaryFoundBody": "An income of {amount} arrived around payday. Is that your salary?",
+  "@salaryFoundBody": {
+    "description": "Dialog body · amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryFoundYes": "Yes, that's it",
+  "@salaryFoundYes": {
+    "description": "Dialog button"
+  },
+  "salaryFoundNo": "No, another income",
+  "@salaryFoundNo": {
+    "description": "Dialog button"
+  },
+  "salaryAddSwitch": "This is a salary",
+  "@salaryAddSwitch": {
+    "description": "Add-income switch"
+  },
+  "salaryAddSwitchHint": "If the bank message arrives later, it is counted once",
+  "@salaryAddSwitchHint": {
+    "description": "Add-income switch hint"
+  },
+  "salaryMergedTitle": "Merged with the salary you added",
+  "@salaryMergedTitle": {
+    "description": "Transaction detail line"
+  },
+  "salaryMergedUndo": "Restore mine",
+  "@salaryMergedUndo": {
+    "description": "Transaction detail button"
+  },
+  "salaryMergedUndone": "Your entry is back",
+  "@salaryMergedUndone": {
+    "description": "Snackbar"
+  },
+  "salaryMergedGone": "Your entry was removed and can't come back",
+  "@salaryMergedGone": {
+    "description": "Snackbar"
+  },
+  "settingsSalaryTitle": "My salary",
+  "@settingsSalaryTitle": {
+    "description": "Settings row and sheet title"
+  },
+  "settingsSalaryUnset": "Add it so Zaghlol can track it",
+  "@settingsSalaryUnset": {
+    "description": "Settings row subtitle"
+  },
+  "settingsSalarySummary": "{amount} · day {day}",
+  "@settingsSalarySummary": {
+    "description": "Settings row subtitle · amount, day",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSalaryAmount": "Amount",
+  "@settingsSalaryAmount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryDay": "Payday (1–28)",
+  "@settingsSalaryDay": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccount": "Lands in",
+  "@settingsSalaryAccount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccountDefault": "Cash",
+  "@settingsSalaryAccountDefault": {
+    "description": "Sheet account choice (default cash account)"
+  },
+  "settingsSalaryRemove": "Remove salary",
+  "@settingsSalaryRemove": {
+    "description": "Sheet button"
+  },
+  "settingsSalaryInvalid": "Enter a valid amount and a day from 1 to 28",
+  "@settingsSalaryInvalid": {
+    "description": "Sheet error"
+  },
+  "notificationsSalaryNudgeTitle": "Did your salary arrive?",
+  "@notificationsSalaryNudgeTitle": {
+    "description": "N"
+  },
+  "notificationsSalaryNudgeBody": "No salary message yet. If it landed, add it from Home in one tap.",
+  "@notificationsSalaryNudgeBody": {
+    "description": "N"
   }
 }

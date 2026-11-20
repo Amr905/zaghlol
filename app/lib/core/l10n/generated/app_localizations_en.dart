@@ -7412,4 +7412,97 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importFlowUnavailable => 'This source isn\'t ready yet';
+
+  @override
+  String get salaryExpectedTitle => 'Salary — expected';
+
+  @override
+  String salaryExpectedSub(String day) {
+    return 'Due on day $day · not counted until confirmed';
+  }
+
+  @override
+  String get salaryActionArrived => 'It arrived';
+
+  @override
+  String get salaryActionNotYet => 'Not yet';
+
+  @override
+  String get salaryActionSkip => 'Skip this month';
+
+  @override
+  String get salaryRecorded => 'Salary added';
+
+  @override
+  String get salaryErrorGeneric => 'Couldn\'t add the salary. Try again.';
+
+  @override
+  String get salaryFoundTitle => 'A payment already arrived';
+
+  @override
+  String salaryFoundBody(String amount) {
+    return 'An income of $amount arrived around payday. Is that your salary?';
+  }
+
+  @override
+  String get salaryFoundYes => 'Yes, that\'s it';
+
+  @override
+  String get salaryFoundNo => 'No, another income';
+
+  @override
+  String get salaryAddSwitch => 'This is a salary';
+
+  @override
+  String get salaryAddSwitchHint =>
+      'If the bank message arrives later, it is counted once';
+
+  @override
+  String get salaryMergedTitle => 'Merged with the salary you added';
+
+  @override
+  String get salaryMergedUndo => 'Restore mine';
+
+  @override
+  String get salaryMergedUndone => 'Your entry is back';
+
+  @override
+  String get salaryMergedGone => 'Your entry was removed and can\'t come back';
+
+  @override
+  String get settingsSalaryTitle => 'My salary';
+
+  @override
+  String get settingsSalaryUnset => 'Add it so Zaghlol can track it';
+
+  @override
+  String settingsSalarySummary(String amount, String day) {
+    return '$amount · day $day';
+  }
+
+  @override
+  String get settingsSalaryAmount => 'Amount';
+
+  @override
+  String get settingsSalaryDay => 'Payday (1–28)';
+
+  @override
+  String get settingsSalaryAccount => 'Lands in';
+
+  @override
+  String get settingsSalaryAccountDefault => 'Cash';
+
+  @override
+  String get settingsSalaryRemove => 'Remove salary';
+
+  @override
+  String get settingsSalaryInvalid =>
+      'Enter a valid amount and a day from 1 to 28';
+
+  @override
+  String get notificationsSalaryNudgeTitle => 'Did your salary arrive?';
+
+  @override
+  String get notificationsSalaryNudgeBody =>
+      'No salary message yet. If it landed, add it from Home in one tap.';
 }
