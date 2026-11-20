@@ -20,6 +20,8 @@ import '../../accounts/data/drift_accounts_repository.dart';
 import '../../categorization/data/categorizer_ports.dart';
 import '../../categorization/data/rules_repository.dart';
 import '../../transactions/application/refund_matching.dart';
+import '../../salary/application/salary_matching.dart';
+import '../../salary/application/salary_matching_hook.dart';
 import '../../transactions/application/refund_matching_hook.dart';
 import '../../transfers/application/suggestion_hook.dart';
 import '../application/ingest_raw_messages.dart';
@@ -85,6 +87,16 @@ IngestRawMessages buildIngestRawMessages(
       ),
     ),
     ...hooks,
+    // Last: a transfer-in leg is paired (and so internal) before it is
+    // offered as a salary.
+    SalaryMatchingHook(
+      SalaryMatching(
+        db,
+        loadSchedule: refundSchedule ?? _dbSchedule(db, zone, clock),
+        clock: clock,
+        events: events,
+      ),
+    ),
   ],
   diag: diag,
   events: events,

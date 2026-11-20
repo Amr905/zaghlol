@@ -10,26 +10,26 @@ final usd = Currency.of('USD');
 Money m(int minor, [Currency? c]) => Money(c ?? egp, minor);
 CivilDate d(int y, int mo, int day) => CivilDate(y, mo, day);
 
-SalaryCredit credit(
+SalaryCandidate credit(
   int minor,
   CivilDate date, {
   Currency? currency,
   bool keyword = false,
 }) =>
-    SalaryCredit(amount: m(minor, currency), localDate: date, keyword: keyword);
+    SalaryCandidate(amount: m(minor, currency), localDate: date, keyword: keyword);
 
 SalaryPlan plan({int minor = 1000000, int day = 25, Currency? c}) =>
     SalaryPlan.tryCreate(amount: m(minor, c), day: day)!;
 
 SalaryDecision decide(
-  SalaryCredit c, {
+  SalaryCandidate c, {
   SalaryPlan? p,
   SalaryState state = SalaryState.empty,
   List<SalaryEntry> manual = const [],
   List<LiveSalaryTxn> manualTxns = const [],
   bool Function(CivilDate)? closed,
   String id = 'sms1',
-}) => decideSalaryCredit(
+}) => decideSalaryCandidate(
   creditTxnId: id,
   credit: c,
   plan: p,

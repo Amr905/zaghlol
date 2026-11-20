@@ -167,8 +167,8 @@ bool salaryLooksLikeSalary(Iterable<String?> texts) {
 }
 
 /// A captured credit as the matcher sees it.
-final class SalaryCredit {
-  const SalaryCredit({
+final class SalaryCandidate {
+  const SalaryCandidate({
     required this.amount,
     required this.localDate,
     required this.keyword,
@@ -185,7 +185,7 @@ final class SalaryCredit {
 bool salaryMatches({
   required CivilDate anchor,
   required Money expected,
-  required SalaryCredit credit,
+  required SalaryCandidate credit,
 }) {
   if (credit.amount.currency != expected.currency) return false;
   if (!salaryInWindow(anchor, credit.localDate)) return false;
@@ -333,6 +333,13 @@ final class SalaryState {
     );
   }
 
+  @override
+  bool operator ==(Object other) =>
+      other is SalaryState && other.toJson() == toJson();
+
+  @override
+  int get hashCode => toJson().hashCode;
+
   String toJson() => jsonEncode({
     'v': 1,
     'e': [for (final e in entries) e.toJson()],
@@ -414,9 +421,9 @@ final class SalaryMergeManual extends SalaryDecision {
 /// whose transaction is still live (the caller checks the database).
 /// [paydayClosed] says whether the payday already has a live tied
 /// transaction.
-SalaryDecision decideSalaryCredit({
+SalaryDecision decideSalaryCandidate({
   required String creditTxnId,
-  required SalaryCredit credit,
+  required SalaryCandidate credit,
   required SalaryPlan? plan,
   required SalaryState state,
   required List<SalaryEntry> liveManual,
