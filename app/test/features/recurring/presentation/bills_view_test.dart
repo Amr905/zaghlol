@@ -17,6 +17,22 @@ void main() {
     expect(yearlyOf(Money(egp, 100), 'custom_days', 365).minor, 100);
   });
 
+  test('T-196: every 3 and 6 months: yearly x4 / x2, monthly equivalent', () {
+    final m = Money(egp, 30000);
+    expect(yearlyOf(m, 'quarterly', null).minor, 120000);
+    expect(yearlyOf(m, 'semi_annual', null).minor, 60000);
+    expect(monthlyOf(m, 'quarterly', null).minor, 10000);
+    expect(monthlyOf(m, 'semi_annual', null).minor, 5000);
+    // Rounded half up: 100 / 3 months = 33.33 a month -> 33; 250 / 6 -> 41.67.
+    expect(monthlyOf(Money(egp, 100), 'quarterly', null).minor, 33);
+    expect(monthlyOf(Money(egp, 250), 'semi_annual', null).minor, 42);
+    // All six stored codes give a yearly figure that never mixes currencies.
+    for (final c in RecurrenceCadence.values) {
+      final days = c == RecurrenceCadence.customDays ? 30 : null;
+      expect(yearlyOf(m, c.code, days).currency, egp, reason: c.code);
+    }
+  });
+
   test('merchant key for hand-typed names', () {
     expect(billMerchantKey('Gym  Club!', 'ID-1'), 'gym club');
     expect(billMerchantKey('قسط الثلاجة', 'AB-12-cd'), 'bill ab12cd');
