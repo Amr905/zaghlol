@@ -61,9 +61,7 @@ public sealed class FileKmsHostStartupTests : IDisposable
     public void TheApiRefusesAGroupReadableKeyFile(string environment)
     {
         File.SetUnixFileMode(Path.Combine(keys.Directory, "envelope.key"), UnixFileMode.UserRead | UnixFileMode.GroupRead);
-        using var factory = Factory(environment, keys.Settings());
-
-        var error = Assert.ThrowsAny<Exception>(() => factory.Services);
+        var error = ApiStartRefusal.Expect(() => Factory(environment, keys.Settings()));
 
         var refusal = Assert.Single(HostStartupTests.Chain(error).OfType<KmsConfigurationException>());
         Assert.StartsWith("Kms:File:KeyDirectory holds an entry that is a symbolic link, not a regular file, group/other accessible", refusal.Message, StringComparison.Ordinal);
@@ -77,9 +75,7 @@ public sealed class FileKmsHostStartupTests : IDisposable
         var settings = keys.Settings();
         settings["Kms:Provider"] = "Local";
         settings["Kms:Local:KeyDirectory"] = keys.Directory;
-        using var factory = Factory("Production", settings);
-
-        var error = Assert.ThrowsAny<Exception>(() => factory.Services);
+        var error = ApiStartRefusal.Expect(() => Factory("Production", settings));
 
         Assert.Contains(HostStartupTests.Chain(error), e => e is KmsConfigurationException && e.Message.Contains("Development and Testing", StringComparison.Ordinal));
     }

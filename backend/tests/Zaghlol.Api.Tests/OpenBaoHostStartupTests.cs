@@ -65,9 +65,7 @@ public sealed class OpenBaoHostStartupTests : IAsyncLifetime, IDisposable
     public void TheApiRefusesToStartWhenOpenBaoIsSealed()
     {
         bed.Stub.Sealed = true;
-        using var factory = Factory("Production", bed.Settings());
-
-        var error = Assert.ThrowsAny<Exception>(() => factory.Services);
+        var error = ApiStartRefusal.Expect(() => Factory("Production", bed.Settings()));
 
         var refusal = Assert.Single(HostStartupTests.Chain(error).OfType<KmsConfigurationException>());
         Assert.StartsWith("OpenBao could not be used at start", refusal.Message, StringComparison.Ordinal);
