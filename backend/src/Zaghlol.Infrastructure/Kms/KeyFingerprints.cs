@@ -36,8 +36,11 @@ internal static class KnownTestKeys
     /// <summary>SHA-256 of the SubjectPublicKeyInfo (<see cref="KeyFingerprints.OfSigningKey"/>).</summary>
     public static readonly IReadOnlySet<string> SigningKeys = new HashSet<string>(StringComparer.Ordinal)
     {
-        // tools/catalog_build/dev/dev_signing_key.json (kid s0000a), also used as kid s2026a in catalog_build_test.dart.
+        // tools/catalog_build/dev/dev_signing_key.json (kid s0000a).
         "ad9ff1919f982e118731b71ab679038b10fc2e74b1a6c267eb2886fce8c6b0a2",
+
+        // tools/catalog_build/test/catalog_build_test.dart: synthetic scalar 0x01..0x20 (kid s9999z, non-dev-kid refusal test).
+        "f1d59449b727165de732bf283338122b99628a615918fedc67d878fffcf47da7",
 
         // backend/tests/Zaghlol.Contract.Tests/vectors/catalog-snapshot-v1.json (s0000t).
         "3de8200d8b9b5bb06afb2e2394ff128d984b72f2d9197ee12902a5819675df54",

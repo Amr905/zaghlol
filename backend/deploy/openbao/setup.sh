@@ -158,7 +158,9 @@ credentials() {
   name="$1"
   dir="$2"
   mkdir -p "$dir"
-  bao read -field=role_id "auth/approle/role/$name/role-id" >"$dir/role-id"
+  # Re-runs: role-id is 0400 from the first run, so write a new file and rename it over the old one.
+  bao read -field=role_id "auth/approle/role/$name/role-id" >"$dir/role-id.new"
+  mv -f "$dir/role-id.new" "$dir/role-id"
   if [ -s "$dir/secret-id" ]; then
     echo "credentials: $dir/secret-id kept (destroy it and re-run to issue a new one)"
   else
@@ -207,7 +209,8 @@ apply() {
   credentials zaghlol-worker "$out/worker"
 
   # The key tool's token: 15 minutes, 40 uses, the keytool policy only. Revoke it after the import (bao token revoke).
-  bao token create -policy=zaghlol-keytool -no-default-policy -ttl=15m -use-limit=40 -field=token >"$out/keytool-token"
+  bao token create -policy=zaghlol-keytool -no-default-policy -ttl=15m -use-limit=40 -field=token >"$out/keytool-token.new"
+  mv -f "$out/keytool-token.new" "$out/keytool-token"
   chmod 0400 "$out/keytool-token"
   echo "keytool token: $out/keytool-token (15 min; not printed)"
   echo "next: run the key tool (--openbao-keys), copy ca.pem into each credential folder, chown to the app uid (deployment.md §3)"
