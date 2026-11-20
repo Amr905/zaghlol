@@ -40,6 +40,13 @@ final class OpeningBalances {
   // accountId -> currency code -> entry
   final Map<String, Map<String, OpeningBalance>> _byAccount;
 
+  @override
+  bool operator ==(Object other) =>
+      other is OpeningBalances && other.toJson() == toJson();
+
+  @override
+  int get hashCode => toJson().hashCode;
+
   int get length => _byAccount.values.fold(0, (n, m) => n + m.length);
 
   OpeningBalance? of(String accountId, String currency) =>

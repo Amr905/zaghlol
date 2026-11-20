@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/accounts_dao.dart';
+import '../../../core/db/daos/settings_dao.dart';
 import '../../transactions/data/transactions_providers.dart';
 import '../domain/accounts_repository.dart';
 import 'drift_accounts_repository.dart';
@@ -16,6 +17,7 @@ final accountsRepositoryProvider = FutureProvider<AccountsRepository>((
   final db = await ref.watch(appDatabaseProvider.future);
   return DriftAccountsRepository(
     AccountsDao(db),
+    settings: SettingsDao(db),
     clock: ref.watch(clockProvider),
     newId: ref.watch(idGeneratorProvider),
   );

@@ -27,6 +27,8 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/db/daos/assets_dao.dart';
 import '../../../core/db/daos/prices_dao.dart';
+import '../../../core/db/daos/settings_dao.dart';
+import '../../../core/settings/settings_keys.dart' as keys;
 import 'prices_repository.dart';
 import '../domain/price_feed.dart';
 
@@ -122,70 +124,204 @@ class NetWorthRepository {
       _assets.archive(id, at: _clock().toUtc().millisecondsSinceEpoch);
 
   /// Net worth per unit now. Gold is valued in [goldCurrency] (A-58).
-  Future<NetWorth> compute({required Currency goldCurrency}) async {
-    final money = <MoneyLine>[];
-    final gold = <GoldLine>[];
+  Future<NetWorth> compute({required Currency goldCurrency}) async =>
+      (await breakdown(goldCurrency: goldCurrency)).worth;
 
-    final accounts = await (_db.select(
-      _db.accounts,
-    )..where((a) => a.mergedIntoId.isNull())).get();
-    final kindOf = {for (final a in accounts) a.id: a.kind};
-    final balances = await _db.select(_db.accountBalances).get();
-    final carded = <String>{}; // 'accountId|currency' of card/bnpl balances
-    for (final b in balances) {
-      final kind = kindOf[b.accountId];
-      final minor = b.balanceMinor;
-      if (kind == null || minor == null) continue;
-      final owed = kind == 'credit' || kind == 'bnpl';
-      if (owed) carded.add('${b.accountId}|${b.currency}');
-      money.add(
-        MoneyLine(Money.fromStorage(minor, b.currency), isLiability: owed),
-      );
-    }
-
-    for (final a in await _assets.live()) {
-      final line = _assetLine(a);
-      if (line is MoneyLine) money.add(line);
-      if (line is GoldLine) gold.add(line);
-    }
-
-    final items =
-        await (_db.select(_db.recurringItems)..where(
-              (r) => r.kind.equals('installment') & r.status.equals('active'),
-            ))
-            .get();
-    for (final r in items) {
-      final total = r.totalCount;
-      if (total == null) continue;
-      if (r.accountId != null &&
-          carded.contains('${r.accountId}|${r.currency}')) {
-        continue;
+  /// The net worth with every line it is made of (D-75, design note
+  /// T-199). [includeAssets] false is the free tier: accounts only (credit
+  /// and BNPL accounts as liabilities), no live assets, gold or
+  /// installments. The figure and the lines come from the same list.
+  Future<NetWorthBreakdown> breakdown({
+    required Currency goldCurrency,
+    bool includeAssets = true,
+    DateTime? now,
+  }) async {
+    final at = (now ?? _clock()).toUtc();
+    final lines = <BreakdownLine>[...await _accountLines(at)];
+    final carded = <String>{}; // 'accountId|currency' with a counted owed
+    for (final l in lines) {
+      if (l.isLiability && l.isAccount && l.amount != null) {
+        carded.add('${l.refId}|${l.unit}');
       }
-      final remaining = total - r.paidCount;
-      if (remaining <= 0) continue;
-      try {
-        money.add(
-          MoneyLine(
-            Money.fromStorage(r.amountMinor, r.currency).times(remaining),
-            isLiability: true,
-          ),
-        );
-      } on MoneyOverflow {
-        throw NetWorthOverflow();
+    }
+
+    if (includeAssets) {
+      for (final a in await _assets.live()) {
+        final line = _assetLine(a);
+        if (line != null) lines.add(line);
+      }
+      final items =
+          await (_db.select(_db.recurringItems)..where(
+                (r) => r.kind.equals('installment') & r.status.equals('active'),
+              ))
+              .get();
+      for (final r in items) {
+        final total = r.totalCount;
+        if (total == null) continue;
+        if (r.accountId != null &&
+            carded.contains('${r.accountId}|${r.currency}')) {
+          continue;
+        }
+        final remaining = total - r.paidCount;
+        if (remaining <= 0) continue;
+        try {
+          lines.add(
+            BreakdownLine(
+              group: BreakdownGroup.liabilities,
+              unit: r.currency,
+              label: r.name,
+              source: BalanceSource.installments,
+              refId: r.id,
+              amount: Money.fromStorage(
+                r.amountMinor,
+                r.currency,
+              ).times(remaining),
+            ),
+          );
+        } on MoneyOverflow {
+          throw NetWorthOverflow();
+        }
       }
     }
 
     final prices = <String, GoldPrice>{};
-    for (final symbol in {for (final g in gold) g.symbol}) {
+    for (final symbol in {for (final g in goldLinesOf(lines)) g.symbol}) {
       final p = await _prices.price(symbol, goldCurrency);
       if (p != null && p.perUnit == perUnitOfSymbol(symbol)) {
         prices[symbol] = GoldPrice(price: p.price, stale: p.stale);
       }
     }
-    return computeNetWorth(
-      money: money,
-      gold: gold,
+    final worth = computeNetWorth(
+      money: moneyLinesOf(lines),
+      gold: goldLinesOf(lines),
       goldPrice: (s) => prices[s],
+    );
+    return NetWorthBreakdown(
+      lines: List.unmodifiable(lines),
+      units: buildUnitBreakdowns(lines),
+      worth: worth,
+    );
+  }
+
+  /// One line per (account, currency) pair of every live account (hidden
+  /// ones count, merged ones are gone): reported row, user-entered balance,
+  /// and any currency the account has posted transactions in; an account with
+  /// none of these is listed once, in its default currency.
+  Future<List<BreakdownLine>> _accountLines(DateTime now) async {
+    final accounts =
+        await (_db.select(_db.accounts)
+              ..where((a) => a.mergedIntoId.isNull())
+              ..orderBy([
+                (a) => OrderingTerm.asc(a.createdAt),
+                (a) => OrderingTerm.asc(a.id),
+              ]))
+            .get();
+    final balances = <String, Map<String, AccountBalanceRow>>{};
+    for (final b in await _db.select(_db.accountBalances).get()) {
+      (balances[b.accountId] ??= {})[b.currency] = b;
+    }
+    final opening = keys.Settings.openingBalances.parse(
+      await SettingsDao(_db).read(keys.Settings.openingBalances.name),
+    );
+    final txnCurrencies = <String, Set<String>>{};
+    final rows = await _db
+        .customSelect(
+          'SELECT DISTINCT account_id, currency FROM transactions '
+          "WHERE deleted_at IS NULL AND status = 'posted'",
+          readsFrom: {_db.transactions},
+        )
+        .get();
+    for (final r in rows) {
+      (txnCurrencies[r.read<String>('account_id')] ??= {}).add(
+        r.read<String>('currency'),
+      );
+    }
+
+    final out = <BreakdownLine>[];
+    for (final a in accounts) {
+      final liability = a.kind == 'credit' || a.kind == 'bnpl';
+      final currencies = <String>{
+        ...?balances[a.id]?.keys,
+        ...opening.forAccount(a.id).keys,
+        ...?txnCurrencies[a.id],
+      };
+      // An account with nothing at all is listed in its own currency.
+      if (currencies.isEmpty) currencies.add(a.defaultCurrency);
+      for (final code in currencies.toList()..sort()) {
+        final cur = Currency.tryOf(code);
+        if (cur == null) continue;
+        final row = balances[a.id]?[code];
+        final user = opening.of(a.id, code);
+        final limit = a.creditLimitMinor == null
+            ? null
+            : Money.tryFromStorage(a.creditLimitMinor!, a.defaultCurrency);
+        final anchor = pickAnchor(
+          currency: cur,
+          isLiability: liability,
+          reportedBalance: row?.balanceMinor == null
+              ? null
+              : Money.fromStorage(row!.balanceMinor!, code),
+          reportedAvailable: row?.availableMinor == null
+              ? null
+              : Money.fromStorage(row!.availableMinor!, code),
+          creditLimit: limit,
+          reportedAsOf: row == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(row.asOf, isUtc: true),
+          userBalance: user?.amount,
+          userAsOf: user?.asOf,
+        );
+        final totals = anchor == null
+            ? const TxnTotals()
+            : await _totalsAfter(a.id, code, anchor.asOf);
+        out.add(
+          resolveAccountLine(
+            accountId: a.id,
+            label: a.label,
+            accountKind: a.kind,
+            currency: cur,
+            isLiability: liability,
+            now: now,
+            anchor: anchor,
+            totals: totals,
+            institutionCode: a.institutionCode,
+            isHidden: a.isHidden != 0,
+          ),
+        );
+      }
+    }
+    return out;
+  }
+
+  /// The counted transactions of one pair strictly after [after]: live,
+  /// posted, own currency; the cash-side effect by direction. Internal
+  /// (paired) transfers count: they move real money between accounts.
+  Future<TxnTotals> _totalsAfter(
+    String accountId,
+    String currency,
+    DateTime after,
+  ) async {
+    final r = await _db
+        .customSelect(
+          'SELECT COUNT(*) AS n, '
+          "COALESCE(SUM(CASE WHEN direction IN ('income','refund','transfer_in') "
+          'THEN amount_minor '
+          "WHEN direction IN ('expense','fee','transfer_out') "
+          'THEN -amount_minor ELSE 0 END), 0) AS eff '
+          'FROM transactions WHERE account_id = ?1 AND currency = ?2 '
+          "AND deleted_at IS NULL AND status = 'posted' AND occurred_at > ?3 "
+          "AND direction IN ('income','refund','transfer_in','expense','fee','transfer_out')",
+          variables: [
+            Variable.withString(accountId),
+            Variable.withString(currency),
+            Variable.withInt(after.millisecondsSinceEpoch),
+          ],
+          readsFrom: {_db.transactions},
+        )
+        .getSingle();
+    return TxnTotals(
+      cashEffectMinor: r.read<int>('eff'),
+      count: r.read<int>('n'),
     );
   }
 
@@ -288,21 +424,64 @@ class NetWorthRepository {
     return text == null ? null : CivilDate.tryParse(text);
   }
 
-  static Object? _assetLine(AssetRow a) {
+  static BreakdownLine? _assetLine(AssetRow a) {
     final liability = a.isLiability != 0;
+    final group = liability
+        ? BreakdownGroup.liabilities
+        : BreakdownGroup.assets;
     if (a.type == AssetType.gold || a.type == AssetType.goldCoin) {
       final q = a.quantityMilli;
       final symbol = a.type == AssetType.goldCoin
           ? GoldSymbols.coin
           : (a.karat == null ? null : GoldSymbols.forKarat(a.karat!));
-      if (q == null || symbol == null || liability) return null;
-      return GoldLine(symbol, q);
+      if (q == null || q < 1 || symbol == null || liability) return null;
+      return BreakdownLine(
+        group: group,
+        unit: symbol,
+        label: a.name,
+        source: BalanceSource.asset,
+        refId: a.id,
+        quantityMilli: q,
+      );
     }
     final cur = a.currency;
     final minor = a.type == AssetType.certificate
         ? a.principalMinor
         : (a.manualValueMinor ?? a.principalMinor);
     if (cur == null || minor == null) return null;
-    return MoneyLine(Money.fromStorage(minor, cur), isLiability: liability);
+    return BreakdownLine(
+      group: group,
+      unit: cur,
+      label: a.name,
+      source: BalanceSource.asset,
+      refId: a.id,
+      amount: Money.fromStorage(minor, cur),
+    );
   }
+}
+
+/// The net worth and every line it is made of.
+final class NetWorthBreakdown {
+  const NetWorthBreakdown({
+    required this.lines,
+    required this.units,
+    required this.worth,
+  });
+  final List<BreakdownLine> lines;
+  final List<UnitBreakdown> units;
+  final NetWorth worth;
+
+  UnitBreakdown? unit(String code) {
+    for (final u in units) {
+      if (u.unit == code) return u;
+    }
+    return null;
+  }
+
+  /// Net per currency (never gold), for the Money tab figure.
+  List<Money> get currencyNets => [
+    for (final u in units)
+      if (!u.isGold && (worth.unit(u.unit) != null))
+        Money(Currency.of(u.unit), u.netMinor),
+  ];
 }

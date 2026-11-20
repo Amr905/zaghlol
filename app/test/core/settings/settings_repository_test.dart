@@ -42,6 +42,15 @@ allKeys = [
     ),
   ),
   (
+    key: Settings.openingBalances,
+    byDefault: OpeningBalances.empty,
+    other: OpeningBalances.empty.withEntry(
+      'acc-1',
+      Money(kwd, 1234567),
+      DateTime.utc(2026, 11, 1),
+    ),
+  ),
+  (
     key: Settings.salaryState,
     byDefault: SalaryState.empty,
     other: SalaryState.empty.withSkipped(CivilDate(2026, 11, 25)),

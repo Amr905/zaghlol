@@ -70,6 +70,15 @@ abstract final class Settings {
     encode: (v) => v.toJson(),
   );
 
+  /// T-199 (D-75): balances the user typed per account and currency, each
+  /// with the instant it is true for. Read as empty when unreadable.
+  static final openingBalances = SettingKey.custom<OpeningBalances>(
+    'balance.opening',
+    byDefault: OpeningBalances.empty,
+    decode: OpeningBalances.fromJson,
+    encode: (v) => v.toJson(),
+  );
+
   /// Optional (FR-ONB-03); unset is null.
   static final incomeTarget = SettingKey.optionalMoney('income_target');
 
