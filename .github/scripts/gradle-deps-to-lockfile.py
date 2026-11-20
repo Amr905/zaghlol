@@ -11,7 +11,33 @@ Fails when no coordinate is found (an empty graph must not look like a clean sca
 import re
 import sys
 
-COORD = re.compile(r"([A-Za-z0-9_.\-]+):([A-Za-z0-9_.\-]+):([^\s:]+?)(?:\s+->\s+([^\s]+))?(?:\s+\(\*\)|\s+\(c\)|\s+\(n\))?\s*$")
+MARKERS = re.compile(r"(\s+\((?:\*|c|n)\))+\s*$")
+VERSION = re.compile(r"^[0-9][A-Za-z0-9_.\-+]*$")
+
+
+def parse_line(text):
+    """Return (group, artifact, version) for one tree entry, or None.
+
+    Handles `g:a:1.0`, `g:a:1.0 -> 1.1`, BOM-managed `g:a -> 1.1`, `g:a:{strictly 1.0} -> 1.1` and
+    `g:a:1.0 -> g2:a2:2.0` (substitution). Ranges and unresolved constraints are not versions.
+    """
+    text = MARKERS.sub("", text.strip())
+    left, _, right = text.partition(" -> ")
+    parts = left.strip().split(":")
+    if len(parts) < 2 or not all(re.match(r"^[A-Za-z0-9_.\-]+$", x) for x in parts[:2]):
+        return None
+    group, artifact = parts[0], parts[1]
+    version = parts[2] if len(parts) > 2 else ""
+    right = right.strip()
+    if right:
+        if ":" in right:  # "-> group:artifact:version" substitution
+            r = right.split(":")
+            if len(r) < 3:
+                return None
+            group, artifact, version = r[0], r[1], r[2]
+        else:
+            version = right
+    return (group, artifact, version) if VERSION.match(version) else None
 
 
 def main(argv):
@@ -25,18 +51,9 @@ def main(argv):
                 # Tree lines start with "+--- ", "\--- " or "|    "; skip project() and FAILED entries.
                 if "--- " not in line or "project :" in line or "FAILED" in line:
                     continue
-                m = COORD.search(line.split("--- ", 1)[1].rstrip())
-                if not m:
-                    continue
-                group, artifact, requested, resolved = m.groups()
-                version = resolved or requested
-                # A range or a "{strictly ...}" constraint is not a version; a bare "->" target is already resolved.
-                if not re.match(r"^[0-9][A-Za-z0-9_.\-+]*$", version):
-                    continue
-                if resolved and ":" in resolved:  # "-> group:artifact:version" substitution
-                    g, a, v = resolved.split(":")[:3]
-                    group, artifact, version = g, a, v
-                found.add(f"{group}:{artifact}:{version}")
+                c = parse_line(line.split("--- ", 1)[1])
+                if c:
+                    found.add(":".join(c))
     if not found:
         print("::error::no Gradle coordinates found in the dependency graph; the scan would be vacuous")
         return 1

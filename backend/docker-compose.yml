@@ -13,7 +13,7 @@ x-backend-image: &backend-image
 
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17@sha256:b60e90042aa6b8dbecd58e224b3e36114dbf8ad754465264c2476ad58a86e45c # postgres:17
     # FU-025: no DETAIL/HINT in server logs ("Failing row contains (...)" would log row values on a CHECK failure).
     command: ["postgres", "-c", "log_error_verbosity=terse"]
     environment:
@@ -36,7 +36,7 @@ services:
   # Local OpenTelemetry collector (T-138): receives OTLP from the api and the worker and exposes the metrics in Prometheus
   # format on :8889 (curl http://localhost:8889/metrics | grep zaghlol_). Logs are JSON on stdout, not OTLP.
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.116.1
+    image: otel/opentelemetry-collector-contrib:0.116.1@sha256:d0ebf65280da2e1b1491d1b93648281afd353d4b9ea19160090303cec9a233bd # otel/opentelemetry-collector-contrib:0.116.1
     command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
       - ./deploy/observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro

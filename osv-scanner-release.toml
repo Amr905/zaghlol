@@ -1,0 +1,1 @@
+# osv-scanner config for the release runtime classpaths (blocking scan). Entries need id, ignoreUntil, reason.
