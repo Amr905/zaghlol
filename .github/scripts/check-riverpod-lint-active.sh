@@ -16,7 +16,13 @@ trap 'rm -f "$probe" "$log"' EXIT
 
 cp "$probe_src" "$probe"
 # The probe has an expected finding, so a non-zero exit of analyze is normal here; only the output matters.
-flutter analyze > "$log" 2>&1
+# A fresh HOME gives the analysis server an empty cache (~/.dartServer), as in the first analyze of a CI job: a second, warm
+# run in the same job reported "No issues found" for the probe in 9 s, while the cold run reported riverpod_lint findings.
+# PUB_CACHE stays where it is, so no packages are downloaded again; only the plugin is rebuilt.
+export PUB_CACHE="${PUB_CACHE:-$HOME/.pub-cache}"
+cold_home=$(mktemp -d)
+trap 'rm -rf "$probe" "$log" "$cold_home"' EXIT
+HOME="$cold_home" flutter analyze > "$log" 2>&1
 
 if grep -E 'zz_riverpod_lint_probe\.dart' "$log" | grep -Eq '(missing_provider_scope|avoid_public_notifier_properties)'; then
   echo "riverpod_lint is active: the probe produced its diagnostics."
