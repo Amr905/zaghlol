@@ -809,10 +809,10 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-230c | parsing | T-161 shared PDF/CSV discarded when no navigator context; shown as not available | capture/application/shared_items_lifecycle.dart:119-130 | task T-158 | OPEN |
 | FU-230d | parsing | T-161 OcrHost.sealImageNow standardizedFileURL does not resolve symlinks | ios/Runner/Platform/OCR/OcrHost.swift | none | OPEN |
 | FU-230e | parsing | T-161 prefilled last-4 account lost on new item (major F7) | transactions/presentation/edit/transaction_edit_screen.dart:161 | none | CLOSED (fix round batch 24) |
-| FU-233a | backend | T-135 lock order not one global order (sign-in attach subset vs restore) | backend/.../Accounts/SignInService.cs:210-219; AccountStores.cs:61-66 | none | OPEN |
+| FU-233a | backend | T-135 lock order not one global order (sign-in attach subset vs restore) | backend/.../Accounts/SignInService.cs:210-219; AccountStores.cs:61-66 | none | CLOSED (obsolete batch 51: LockPurchasesAsync already locks the union of both sets in one ascending id order, AccountStores.cs:69-73; the attach subset is re-locked inside it) |
 | FU-233b | backend | T-135 permanent Apple revoke failure blocks account deletion; pending-revocation queue | backend/.../AccountLifecycleService.cs:64-70 | PO | CLOSED (PendingAppleRevocationStore added, batch 25 fix) |
 | FU-233c | backend | T-135 RevokeAsync catches only HTTP/Cancel exceptions | backend/.../AppleAccountClient.cs:110 | none | CLOSED (CryptographicException added) |
-| FU-233d | backend | T-135 null vault.OpenAsync deletes account with no record | backend/.../AccountLifecycleService.cs:69 | none | OPEN |
+| FU-233d | backend | T-135 null vault.OpenAsync deletes account with no record | backend/.../AccountLifecycleService.cs:69 | none | CLOSED (by design batch 51: an unreadable sealed token cannot be revoked at all; the account must still delete; it is logged as a warning, LogTokenUnreadable) |
 | FU-233e | backend | T-135 worker requires all Accounts:* config in Production (D1, before go-live) | backend/src/Zaghlol.Workers/Program.cs:64-68 | hosting go-live | OPEN |
 | FU-233f | backend | T-135 PendingAppleRevocationStore.ListDue lacks SKIP LOCKED (one worker replica documented) | backend/.../PendingAppleRevocationStore.cs:14-18 | hosting | OPEN |
 | FU-234a | core | T-167 percent hand-assembled with Latin % in zakah screen (Z3) | zakah/presentation/zakah_screen.dart:541 | none | OPEN |
@@ -838,6 +838,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-248b | parsing | T-070 sender contact and wallet name Contact are generic guesses | app/assets/guard/guard_base.json:107,408 | PO | OPEN |
 | FU-249a | backend | T-186 detach phase 1 does not run link/source checks | backend/.../Support/SupportActionService.cs | none | CLOSED (commit 08434bf2) |
 | FU-249b | backend | T-186 freeze/unfreeze lock compares app clock with DB now() | backend/.../SupportActionService.cs | none | CLOSED (commits 08434bf2, 81fc987e) |
+| FU-271 | ci | app-ci main analyze step can miss riverpod_lint diagnostics (flutter analyze may return before the plugin reports; FU-270) | .github/workflows/app-ci.yml:87 | none | CLOSED (batch 51: step now `dart analyze --fatal-infos`, same annotations; local run not possible here, the analysis server crashes in this sandbox, so CI is the first run) |
 
 - **FU-256** (batch 36): see the batch-36 Lead delta check.
 
@@ -860,6 +861,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 - **FU-265** (T-200): C3 overlapping G12 checks (make each independently tested); C6 rotation steps miss chmod / leftover-folder cleanup; C8 pin the PEM/DER parse buffers; rename the Dart test kid `s2026a` (catalog_build_test.dart) that reuses the committed dev catalog key; I-9 host-startup flake seen again (tracked in T-193).
 
 - **FU-266** (batch 46): T-201 — pin `ghcr.io/openbao/openbao` by digest (S3); N1 a caller that loses the relogin CAS gets a retryable 503 instead of waiting; N2 verify-only pins share the bare `file:` name; PO: switch-over moment, recovery-share holders, unseal-key residual (design note T-201). T-198 — badge tests for «مصرف أبوظبي», a one-word label, "", "Bank"; Arabic comma after a generic word; PO checks brand colours and short codes. T-194 — shared mascot toast instead of a plain SnackBar.
+  - Batch 51: N1 left open. Not small: a CAS loser arriving before the winner clears the session cannot be told from a policy denial without new state, so a correct fix needs a generation/in-flight marker in RenewAfterRefusalAsync (OpenBaoClient.cs:378-406) and a concurrency test.
 
 - **FU-267** (batch 47): T-187 F-4 re-redact already-scheduled notifications at startup when hiding is on (needs a native cancel/reschedule hook or persisted scheduled alerts); T-196 no UI to see or revive a dismissed bill after the Undo snackbar; T-196 6/12-month chains need only 2 charges, so a coincidental pair can auto-add (undo exists); `capture_providers_test` "starts after the database opened" flakes under full-suite load (passes alone 3/3); goldens for batches 46–47 need the CI app-regen run.
 
