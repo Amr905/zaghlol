@@ -335,22 +335,21 @@ void main() {
       },
     );
 
-    test('a typed balance dated in the future counts as dated now', () async {
+    test('a typed balance dated in the future is ignored (m-4)', () async {
       await account('a', 'debit');
       await setOpening(
         'a',
         Money(egp, 500),
         now.add(const Duration(days: 365)),
       );
+      // Ignored: with no bank figure the balance is unknown (asks again).
+      expect((await line('a')).source, BalanceSource.unknown);
+      // An older bank message wins and later transactions still count.
+      await reported('a', egp, 900, now.millisecondsSinceEpoch - 5000);
       await tx('a', 'expense', 100, now.millisecondsSinceEpoch - 1000);
-      var l = await line('a');
-      expect(l.asOf, now);
-      expect(l.amount!.minor, 500);
-      // A bank message at "now" is not beaten by it.
-      await reported('a', egp, 900, now.millisecondsSinceEpoch);
-      l = await line('a');
-      expect(l.source, BalanceSource.reported);
-      expect(l.amount!.minor, 900);
+      final l = await line('a');
+      expect(l.source, BalanceSource.computed);
+      expect(l.amount!.minor, 800);
     });
 
     test('staleness flagged after 30 days, still counted', () async {

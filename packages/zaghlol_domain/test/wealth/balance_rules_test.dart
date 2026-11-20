@@ -175,31 +175,6 @@ void main() {
       expect(a.userEntered, isTrue);
     });
 
-    test('a typed balance dated in the future is dated now', () {
-      final a = pickAnchor(
-        currency: _egp,
-        isLiability: false,
-        userBalance: _m(700),
-        userAsOf: _now.add(const Duration(days: 400)),
-        reportedBalance: _m(5),
-        reportedAsOf: _now.subtract(const Duration(hours: 1)),
-        now: _now,
-      )!;
-      expect(a.asOf, _now);
-      expect(a.amount.minor, 700); // dated now: newer than the bank figure
-      // ...but a bank message dated at/after now still wins.
-      final b = pickAnchor(
-        currency: _egp,
-        isLiability: false,
-        userBalance: _m(700),
-        userAsOf: _now.add(const Duration(days: 400)),
-        reportedBalance: _m(5),
-        reportedAsOf: _now,
-        now: _now,
-      )!;
-      expect(b.amount.minor, 5);
-    });
-
     test('credit: owed = limit - available; floored at 0', () {
       final used = pickAnchor(
         currency: _egp,
@@ -492,5 +467,28 @@ void main() {
         throwsA(isA<NetWorthOverflow>()),
       );
     });
+  });
+
+  test('a typed balance dated in the future is ignored (T-199 m-4)', () {
+    final now = DateTime.utc(2026, 11, 20, 12);
+    final reported = pickAnchor(
+      currency: _egp,
+      isLiability: false,
+      reportedBalance: Money(_egp, 500000),
+      reportedAsOf: now.subtract(const Duration(days: 2)),
+      userBalance: Money(_egp, 100),
+      userAsOf: now.add(const Duration(days: 30)),
+      now: now,
+    );
+    expect(reported!.userEntered, isFalse);
+    expect(reported.amount, Money(_egp, 500000));
+    final alone = pickAnchor(
+      currency: _egp,
+      isLiability: false,
+      userBalance: Money(_egp, 100),
+      userAsOf: now.add(const Duration(days: 30)),
+      now: now,
+    );
+    expect(alone, isNull);
   });
 }

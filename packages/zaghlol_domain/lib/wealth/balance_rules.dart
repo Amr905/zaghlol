@@ -155,11 +155,13 @@ BalanceAnchor? pickAnchor({
       userAsOf != null &&
       userBalance.currency == currency) {
     final when = userAsOf.toUtc();
-    user = BalanceAnchor(
-      amount: userBalance,
-      asOf: now != null && when.isAfter(now.toUtc()) ? now.toUtc() : when,
-      userEntered: true,
-    );
+    // A typed balance dated after now (e.g. restored from a device with a wrong
+    // clock) is ignored: clamping it to now would keep it newer than every
+    // later bank message and freeze the balance until its date (T-199 m-4).
+    // The user is asked for the balance again (unknown) or the bank figure is used.
+    if (now == null || !when.isAfter(now.toUtc())) {
+      user = BalanceAnchor(amount: userBalance, asOf: when, userEntered: true);
+    }
   }
   if (reported == null) return user;
   if (user == null) return reported;
