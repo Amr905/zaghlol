@@ -132,8 +132,9 @@ class _UnitSection extends ConsumerWidget {
     final String net;
     if (unit.isGold) {
       title = _goldTitle(l, unit.unit, digits);
+      final coins = unit.netMinor ~/ 1000;
       net = unit.unit == GoldSymbols.coin
-          ? digits.render('${unit.netMinor ~/ 1000}')
+          ? (hidden ? kAmountMask : digits.render('$coins'))
           : l.commonUnitGrams(
               hidden ? kAmountMask : formatMilli(unit.netMinor, digits),
             );
@@ -314,6 +315,7 @@ class _BankBlock extends ConsumerWidget {
           ),
           excludeSemantics: true,
           child: InkWell(
+            key: Key('networth-bank-${bank.key}'),
             onTap: open(ids),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
@@ -385,8 +387,9 @@ class _LineRow extends ConsumerWidget {
     if (line.amount != null) {
       amount = _fmt(ref, lang, line.amount!);
     } else if (line.quantityMilli != null) {
+      final coins = line.quantityMilli! ~/ 1000;
       amount = line.unit == GoldSymbols.coin
-          ? digits.render('${line.quantityMilli! ~/ 1000}')
+          ? (hidden ? kAmountMask : digits.render('$coins'))
           : l.commonUnitGrams(
               hidden ? kAmountMask : formatMilli(line.quantityMilli!, digits),
             );

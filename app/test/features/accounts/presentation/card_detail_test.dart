@@ -20,6 +20,8 @@ import 'package:zaghlol/features/home/application/card_filter.dart';
 import 'package:zaghlol/features/accounts/presentation/edit_card/edit_card_providers.dart'
     show accountTxnCountProvider, institutionOptionsProvider;
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/wealth/data/net_worth_repository.dart';
+import 'package:zaghlol/features/wealth/presentation/net_worth_breakdown_providers.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -222,6 +224,77 @@ void main() {
     await pumpDetail(t, overrides: detailOverrides(), hideAmounts: h);
     expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
     await expectNoAmountDigits(t);
+  });
+
+  group('T-199: balance source on the card', () {
+    final debit = Account(
+      id: 'a1',
+      kind: AccountKind.debit,
+      label: 'NBE',
+      defaultCurrency: egp,
+      isHidden: false,
+      isDefaultCash: false,
+      createdAt: _t,
+      updatedAt: _t,
+      institutionCode: 'nbe',
+      last4: '9999',
+    );
+
+    NetWorthBreakdown breakdown(BreakdownLine line) => NetWorthBreakdown(
+      lines: [line],
+      units: buildUnitBreakdowns([line]),
+      worth: computeNetWorth(money: moneyLinesOf([line])),
+    );
+
+    testWidgets('computed balance shows the amount and says it is computed', (
+      t,
+    ) async {
+      final line = resolveAccountLine(
+        accountId: 'a1',
+        label: 'NBE',
+        accountKind: 'debit',
+        currency: egp,
+        isLiability: false,
+        now: _t,
+        anchor: BalanceAnchor(amount: m(100000), asOf: _t, userEntered: false),
+        totals: const TxnTotals(cashEffectMinor: -2500, count: 1),
+      );
+      await pumpDetail(
+        t,
+        overrides: [
+          ...detailOverrides(acc: AccountWithBalances(debit, const [])),
+          netWorthBreakdownProvider.overrideWith(
+            (ref) async => breakdown(line),
+          ),
+        ],
+      );
+      expect(find.textContaining('975'), findsWidgets);
+      expect(
+        find.textContaining('Worked out from transactions'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('no balance: unknown text and a set-balance button', (t) async {
+      final line = resolveAccountLine(
+        accountId: 'a1',
+        label: 'NBE',
+        accountKind: 'debit',
+        currency: egp,
+        isLiability: false,
+        now: _t,
+      );
+      await pumpDetail(
+        t,
+        overrides: [
+          ...detailOverrides(acc: AccountWithBalances(debit, const [])),
+          netWorthBreakdownProvider.overrideWith(
+            (ref) async => breakdown(line),
+          ),
+        ],
+      );
+      expect(find.byKey(const Key('card-set-balance')), findsOneWidget);
+    });
   });
 
   testWidgets('populated: limit, due date, donut total and sections', (

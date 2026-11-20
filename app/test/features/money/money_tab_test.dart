@@ -13,6 +13,8 @@ import 'package:zaghlol/features/accounts/presentation/money_tab.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 import 'package:zaghlol/features/wealth/data/approx_view_providers.dart';
+import 'package:zaghlol/features/wealth/data/net_worth_repository.dart';
+import 'package:zaghlol/features/wealth/presentation/net_worth_breakdown_providers.dart';
 import 'package:zaghlol/features/wealth/domain/approx_view.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -24,6 +26,22 @@ import 'package:zaghlol/core/ui/z_money_text.dart';
 final _egp = Currency.of('EGP');
 final _usd = Currency.of('USD');
 final _t = DateTime.utc(2026, 11, 1);
+
+extension on Account {
+  Account copyWithInst(String code) => Account(
+    id: id,
+    kind: kind,
+    label: label,
+    defaultCurrency: defaultCurrency,
+    isHidden: isHidden,
+    isDefaultCash: isDefaultCash,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    last4: last4,
+    creditLimit: creditLimit,
+    institutionCode: code,
+  );
+}
 
 Account _acc(
   String id,
@@ -125,6 +143,7 @@ Future<void> _pump(
   HideAmountsHarness? hideAmounts,
   bool grouped = true,
   Map<String, CivilDate> due = const {},
+  VoidCallback? onOpenNetWorth,
 }) async {
   await tester.binding.setSurfaceSize(size);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -133,6 +152,10 @@ Future<void> _pump(
       overrides: [
         ...(hideAmounts ?? HideAmountsHarness()).overrides,
         accountsRepositoryProvider.overrideWith((ref) async => repo),
+        netWorthBreakdownProvider.overrideWith(
+          (ref) async =>
+              _breakdownOf(repo is _FakeRepo ? repo.items : const []),
+        ),
         moneyGroupByTypeProvider.overrideWith((ref) => Stream.value(grouped)),
         cardDueDatesProvider.overrideWith((ref) async => due),
         approxViewProvider.overrideWith((ref, totals) async => approx),
@@ -147,11 +170,43 @@ Future<void> _pump(
           data: MediaQuery.of(c).copyWith(textScaler: TextScaler.linear(scale)),
           child: child!,
         ),
-        home: const MoneyTab(),
+        home: MoneyTab(onOpenNetWorth: onOpenNetWorth),
       ),
     ),
   );
   await tester.pumpAndSettle();
+}
+
+/// The breakdown the real repository would build from [items]: each balance is
+/// a reported anchor (a card's balance is the amount owed).
+NetWorthBreakdown _breakdownOf(List<AccountWithBalances> items) {
+  final lines = <BreakdownLine>[
+    for (final i in items)
+      for (final b in i.balances)
+        resolveAccountLine(
+          accountId: i.account.id,
+          label: i.account.label,
+          accountKind: i.account.kind.code,
+          currency: b.currency,
+          isLiability: !i.account.kind.isAsset,
+          now: _t,
+          institutionCode: i.account.institutionCode,
+          last4: i.account.last4,
+          isHidden: i.account.isHidden,
+          anchor: b.balance == null
+              ? null
+              : BalanceAnchor(
+                  amount: b.balance!,
+                  asOf: b.asOf,
+                  userEntered: false,
+                ),
+        ),
+  ];
+  return NetWorthBreakdown(
+    lines: lines,
+    units: buildUnitBreakdowns(lines),
+    worth: computeNetWorth(money: moneyLinesOf(lines)),
+  );
 }
 
 class _GoldNotifier extends EntitlementNotifier {
@@ -227,6 +282,9 @@ void main() {
     await t.pumpWidget(
       ProviderScope(
         overrides: [
+          netWorthBreakdownProvider.overrideWith(
+            (ref) async => _breakdownOf(const []),
+          ),
           accountsRepositoryProvider.overrideWith(
             (ref) => Future<AccountsRepository>.delayed(
               const Duration(seconds: 1),
@@ -253,8 +311,8 @@ void main() {
     await _pump(t, repo: _FakeRepo(_full.take(3).toList()));
     final s = AppLocalizations.of(t.element(find.byType(MoneyTab)));
     expect(find.text(s.accountsOverviewHiddenEntry), findsNothing);
-    // EGP 12,400 + 1,000 = 13,400 (credit is a debt, left out); USD kept apart.
-    expect(find.textContaining('13,400'), findsOneWidget);
+    // EGP 12,400 + 1,000 - 5,000 owed on the card = 8,400; USD kept apart.
+    expect(find.textContaining('8,400'), findsOneWidget);
     expect(find.textContaining('1,200'), findsWidgets);
   });
 
@@ -292,6 +350,52 @@ void main() {
     await _pump(t, repo: _FakeRepo(_full));
     expect(find.textContaining('≈'), findsNothing);
     expect(find.byKey(const Key('approx-not-included')), findsNothing);
+  });
+
+  group('T-199: net worth figure and balance per bank', () {
+    final bank = [
+      AccountWithBalances(_acc('a', 'CIB', last4: '1111').copyWithInst('cib'), [
+        _bal('a', _egp, 1000000),
+      ]),
+      AccountWithBalances(_acc('b', 'CIB', last4: '2222').copyWithInst('cib'), [
+        _bal('b', _egp, 500000),
+      ]),
+      AccountWithBalances(_acc('c', 'NBE', last4: '3333').copyWithInst('nbe'), [
+        _bal('c', _egp, 250000),
+      ]),
+    ];
+
+    testWidgets('tapping the net worth figure opens the breakdown', (t) async {
+      var opened = 0;
+      await _pump(t, repo: _FakeRepo(bank), onOpenNetWorth: () => opened++);
+      await t.tap(find.byKey(const Key('money-hero-tap')));
+      expect(opened, 1);
+    });
+
+    testWidgets('a bank with two accounts gets a header with its total', (
+      t,
+    ) async {
+      await _pump(t, repo: _FakeRepo(bank));
+      expect(find.byKey(const Key('money-bank-header')), findsOneWidget);
+      expect(
+        find.textContaining('15,000'),
+        findsWidgets,
+      ); // CIB: 10,000 + 5,000
+    });
+
+    testWidgets('rows say where the balance comes from', (t) async {
+      await _pump(t, repo: _FakeRepo(bank));
+      expect(find.textContaining('Bank message'), findsWidgets);
+    });
+
+    testWidgets('hidden amounts: the bank total is masked too', (t) async {
+      final h = HideAmountsHarness(hidden: true);
+      addTearDown(h.dispose);
+      await _pump(t, repo: _FakeRepo(bank), hideAmounts: h);
+      expect(find.byKey(const Key('money-bank-header')), findsOneWidget);
+      expect(find.textContaining('15,000'), findsNothing);
+      await expectNoMaskGlyphInSemantics(t);
+    });
   });
 
   group('T-197: card type at a glance', () {
