@@ -873,6 +873,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-272** (batch 50 review minors, OPEN): T-192 `gradle-deps-to-lockfile.py` drops BOM-managed `group:artifact -> version` lines; local dev compose images (postgres, otel, alpine) unpinned; Gradle graph scan stays `continue-on-error` until release runtime classpaths are scanned on their own with an osv-scanner.toml for the build-tool advisories (93 in 20 packages); gitleaks job needs the pinned binary or `GITLEAKS_LICENSE` before it can block. T-190 bundletool jar downloaded without a hash check (`size-report.yml`); `enforce_budget: true` vs "budgets are proposals" comment; no release (R8) build run on a device yet. T-193 import order nit.
 
+- **FU-273** (batch 51 review minors, OPEN): purchase.dart doc comment above `outboxMaxAge` misplaced; Gold sign-out also stops scheduled Drive backups (PO call); delete-everything's Google sign-out bypasses the new sign-in gate; the gate is a module singleton (move to a provider); no rollback tests for FU-155a (budget saver) and FU-181a (split save); voice quota: if `countOne` throws after a row is written, the retry counts on the next row. Details in [batch-51](05-reviews/batch-51.md).
+
 ## Log
 | Date | Event |
 |---|---|
