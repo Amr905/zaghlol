@@ -19,20 +19,25 @@ import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
 
 import 'settings_harness.dart';
 
-class _FakeLock extends AppLockController {
-  _FakeLock(this.result);
-  final EnableLockResult result;
+/// What the fake lock saw; kept outside the notifier (riverpod_lint: no public notifier properties).
+class _LockCalls {
   int enableCalls = 0;
   bool? synced;
+}
+
+class _FakeLock extends AppLockController {
+  _FakeLock(this._result, [_LockCalls? calls]) : _calls = calls ?? _LockCalls();
+  final EnableLockResult _result;
+  final _LockCalls _calls;
 
   @override
   Future<EnableLockResult> enable(String reason) async {
-    enableCalls++;
-    return result;
+    _calls.enableCalls++;
+    return _result;
   }
 
   @override
-  void syncEnabled(bool enabled) => synced = enabled;
+  void syncEnabled(bool enabled) => _calls.synced = enabled;
 }
 
 AppLocalizations _t(WidgetTester tester, Type screen) =>
@@ -294,7 +299,8 @@ void main() {
     ) async {
       final h = SettingsHarness();
       addTearDown(h.db.close);
-      final fake = _FakeLock(EnableLockResult.enabled);
+      final calls = _LockCalls();
+      final fake = _FakeLock(EnableLockResult.enabled, calls);
       await tester.pumpWidget(
         h.app(
           const PreferencesScreen(),
@@ -307,7 +313,7 @@ void main() {
         () => Future<void>.delayed(const Duration(milliseconds: 100)),
       );
       await tester.pump();
-      expect(fake.enableCalls, 1);
+      expect(calls.enableCalls, 1);
       expect(
         await tester.runAsync(
           () => h.repo.get(Settings.hideAmountsNotifications),
@@ -352,7 +358,8 @@ void main() {
     testWidgets('app lock off persists false', (tester) async {
       final h = SettingsHarness();
       addTearDown(h.db.close);
-      final fake = _FakeLock(EnableLockResult.enabled);
+      final calls = _LockCalls();
+      final fake = _FakeLock(EnableLockResult.enabled, calls);
       await tester.runAsync(() => h.repo.set(Settings.appLockEnabled, true));
       await tester.pumpWidget(
         h.app(
@@ -370,7 +377,7 @@ void main() {
         await tester.runAsync(() => h.repo.get(Settings.appLockEnabled)),
         isFalse,
       );
-      expect(fake.synced, isFalse);
+      expect(calls.synced, isFalse);
     });
   });
 

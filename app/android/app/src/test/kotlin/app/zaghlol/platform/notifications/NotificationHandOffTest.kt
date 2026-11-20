@@ -55,7 +55,7 @@ class NotificationHandOffTest {
   fun `each process gets its own token`() {
     val other = NotificationHandOffToken()
     assertNotEquals(token, other.value)
-    assertTrue(token.matches(action, token))
+    assertTrue(NotificationHandOff.token.matches(action, token))
     assertFalse(other.matches(action, token))
     assertTrue(other.value.matches(Regex("[0-9a-f]{32}")))
   }
