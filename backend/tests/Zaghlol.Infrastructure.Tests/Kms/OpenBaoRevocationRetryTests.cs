@@ -39,8 +39,11 @@ public sealed class OpenBaoRevocationRetryTests : IAsyncLifetime
         await FileKmsHost.StartAsync(worker);
         var (job, store, apple) = Job(worker);
 
-        await Assert.ThrowsAsync<KmsUnavailableException>(() => job.RunOnceAsync(CancellationToken.None));
+        // The envelope's key isn't configured: unavailable, not unreadable. The row is kept and deferred (not dropped).
+        var run = await job.RunOnceAsync(CancellationToken.None);
 
+        Assert.Equal(1, run.Deferred);
+        Assert.Equal(0, run.Dropped);
         Assert.Empty(store.Deleted);
         Assert.Equal(0, apple.Revokes);
     }
