@@ -5,7 +5,9 @@
 --   psql "$MIGRATOR_URL" -v purchase='<purchase UUID>' -v ticket='<ticket ref>' -v operator_sub='<IdP sub of the requesting operator>' \
 --        -f backend/deploy/db/break-glass-unfreeze.sql
 --
--- What it does, in one transaction: checks that the purchase has a running freeze and that the operator is enabled, holds support_lead and is the only enabled support_lead; clears
+-- What it does, in one transaction: checks that the purchase has a running freeze that started at least 24 hours ago (the API's rule,
+-- R6-1: the newest correction audit row that started it, or, when no such row exists, `dispute_frozen_until` minus the 30-day freeze length),
+-- and that the operator is enabled, holds support_lead and is the only enabled support_lead; clears
 -- `dispute_frozen_until` (nothing else: no seat, account, window or claimant changes, like the API's unfreeze); writes one
 -- `support_unfreeze` audit row for that operator with `break_glass: true` and `ownership_outcome: manual`. The audit row also starts the
 -- R6-1 24-hour lock for that operator (they cannot make the next ordinary move on this purchase for 24 hours), as for an API unfreeze.
@@ -34,16 +36,29 @@ WITH op AS (
                           AND o2.oidc_subject <> btrim(:'operator_sub'))
 ), frozen AS (
     SELECT id, dispute_frozen_until FROM zaghlol.purchases WHERE id = :'purchase'::uuid AND dispute_frozen_until > now() FOR UPDATE
+), started AS (
+    -- The correction that started the freeze: the same rows as the API's "newest freeze start" (a correcting move or a detach).
+    SELECT id, at FROM zaghlol.audit_log
+     WHERE target = (:'purchase'::uuid)::text
+       AND ((action = 'support_seat_move' AND details->>'reason_code' = 'correction' AND details->>'outcome' IN ('moved', 'moved_and_attached'))
+            OR (action = 'support_detach' AND details->>'outcome' = 'detached'))
+     ORDER BY id DESC LIMIT 1
 ), cleared AS (
     UPDATE zaghlol.purchases p SET dispute_frozen_until = NULL
-      FROM frozen f, op WHERE p.id = f.id
-    RETURNING f.dispute_frozen_until AS was, op.id AS operator_id
+      FROM frozen f
+      JOIN op ON true
+      LEFT JOIN started s ON true
+     WHERE p.id = f.id
+       -- R6-1: at least 24 h since the freeze started (the API's FreezeLockElapsed). With no correction row, the start is the
+       -- freeze end minus the 30-day freeze length.
+       AND COALESCE(s.at, f.dispute_frozen_until - interval '30 days') <= now() - interval '24 hours'
+    RETURNING f.dispute_frozen_until AS was, op.id AS operator_id, s.id AS freeze_audit_id
 ), logged AS (
     INSERT INTO zaghlol.audit_log (operator_id, action, target, details)
     -- The target is the canonical lower-case UUID, as the API writes and looks it up (batch-44 review F1): an upper-case paste would
     -- otherwise hide the row from the server's R6-1 lock and from per-purchase audit queries.
     SELECT c.operator_id, 'support_unfreeze', (:'purchase'::uuid)::text,
-           jsonb_build_object('ticket_ref', :'ticket', 'freeze_audit_id', NULL, 'frozen_until', c.was,
+           jsonb_build_object('ticket_ref', :'ticket', 'freeze_audit_id', c.freeze_audit_id, 'frozen_until', c.was,
                               'ownership_check', 'order_id', 'ownership_outcome', 'manual', 'outcome', 'unfrozen', 'break_glass', true)
       FROM cleared c
     RETURNING id
@@ -55,7 +70,7 @@ COMMIT;
 \echo 'break-glass-unfreeze: freeze cleared and audited.'
 \else
 ROLLBACK;
-DO $$ BEGIN RAISE EXCEPTION 'break-glass-unfreeze: the purchase has no running freeze, or that subject is not the only enabled support_lead; nothing was changed'; END $$;
+DO $$ BEGIN RAISE EXCEPTION 'break-glass-unfreeze: the purchase has no running freeze, the freeze is less than 24 hours old, or that subject is not the only enabled support_lead; nothing was changed'; END $$;
 \endif
 \else
 DO $$ BEGIN RAISE EXCEPTION 'break-glass-unfreeze: purchase must be a UUID, ticket 1-32 letters, digits, - or _, operator_sub 1-255 characters without @'; END $$;
