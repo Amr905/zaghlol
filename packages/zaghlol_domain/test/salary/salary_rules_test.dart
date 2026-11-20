@@ -15,8 +15,11 @@ SalaryCandidate credit(
   CivilDate date, {
   Currency? currency,
   bool keyword = false,
-}) =>
-    SalaryCandidate(amount: m(minor, currency), localDate: date, keyword: keyword);
+}) => SalaryCandidate(
+  amount: m(minor, currency),
+  localDate: date,
+  keyword: keyword,
+);
 
 SalaryPlan plan({int minor = 1000000, int day = 25, Currency? c}) =>
     SalaryPlan.tryCreate(amount: m(minor, c), day: day)!;

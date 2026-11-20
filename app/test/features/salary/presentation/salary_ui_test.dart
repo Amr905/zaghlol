@@ -3,7 +3,6 @@
 // data only.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
@@ -99,24 +98,22 @@ void main() {
     setUp(() => h = SettingsHarness());
     tearDown(() => h.db.close());
 
-    Widget sheet({SalaryPlan? plan, Locale locale = const Locale('en')}) =>
-        h.app(
-          const Scaffold(body: SingleChildScrollView(child: SalarySheet())),
-          locale: locale,
-          overrides: [
-            salaryPlanProvider.overrideWith((ref) => Stream.value(plan)),
-            txnLookupsProvider.overrideWith(
-              (ref) async => const TxnLookups(categories: [], accounts: []),
-            ),
-            salaryServiceProvider.overrideWith(
-              (ref) async => SalaryService(
-                h.db,
-                DriftTransactionRepository(TransactionsDao(h.db)),
-                zone: const FixedLocalZone(120),
-              ),
-            ),
-          ],
-        );
+    Widget sheet({Locale locale = const Locale('en')}) => h.app(
+      const Scaffold(body: SingleChildScrollView(child: SalarySheet())),
+      locale: locale,
+      overrides: [
+        txnLookupsProvider.overrideWith(
+          (ref) async => const TxnLookups(categories: [], accounts: []),
+        ),
+        salaryServiceProvider.overrideWith(
+          (ref) async => SalaryService(
+            h.db,
+            DriftTransactionRepository(TransactionsDao(h.db)),
+            zone: const FixedLocalZone(120),
+          ),
+        ),
+      ],
+    );
 
     testWidgets('a bad amount or day shows the error and writes nothing', (
       tester,
