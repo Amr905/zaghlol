@@ -1,0 +1,6 @@
+{
+  "growth_percent": 10,
+  "enforce_budget": false,
+  "budget_bytes": {},
+  "baseline_bytes": {}
+}
