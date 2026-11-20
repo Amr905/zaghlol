@@ -5728,7 +5728,7 @@
   "@notificationsSettingsDuplicates": {
     "description": "L"
   },
-  "notificationsSettingsRenewals": "Subscription renewals",
+  "notificationsSettingsRenewals": "Auto-added bills",
   "@notificationsSettingsRenewals": {
     "description": "L"
   },

@@ -226,9 +226,14 @@ void main() {
       );
     });
 
-    test('internal transfers, deleted rows and essential categories are '
+    test('internal transfers, deleted rows and groceries are '
         'ignored', () async {
-      for (final c in ['sys:groceries', 'sys:dining']) {
+      for (final c in [
+        'sys:groceries',
+        'sys:dining',
+        'sys:rent',
+        'sys:bills',
+      ]) {
         await db.customStatement(
           'INSERT INTO categories (id, name_ar, name_en, icon, color, bucket, '
           "sort) VALUES ('$c', 'x', 'X', 'i', '#000000', 'needs', 1)",
@@ -247,11 +252,24 @@ void main() {
         await setCategory(id, 'sys:groceries');
       }
       await chain(3, 1, 2026, 10, 8, 100, merchant: 'fun', prefix: 'f');
-      for (final id in ['f1', 'f2', 'f3']) {
-        await setCategory(id, 'sys:dining');
+      await chain(3, 1, 2026, 10, 11, 100, merchant: 'eatery', prefix: 'd');
+      for (final id in ['d1', 'd2', 'd3']) {
+        await setCategory(id, 'sys:dining'); // dining is not a bill
+      }
+      // Rent and an electricity bill ARE bills; groceries is not.
+      await chain(3, 1, 2026, 10, 9, 500000, merchant: 'landlord', prefix: 'l');
+      for (final id in ['l1', 'l2', 'l3']) {
+        await setCategory(id, 'sys:rent');
+      }
+      await chain(3, 1, 2026, 10, 10, 90000, merchant: 'power co', prefix: 'p');
+      for (final id in ['p1', 'p2', 'p3']) {
+        await setCategory(id, 'sys:bills');
       }
       final added = await repo.detectAndAutoAdd();
-      expect([for (final r in added) r.merchantNorm], ['fun']);
+      expect(
+        {for (final r in added) r.merchantNorm},
+        {'fun', 'landlord', 'power co'},
+      );
     });
 
     test('an own-account transfer (transfer_out) is never a bill', () async {

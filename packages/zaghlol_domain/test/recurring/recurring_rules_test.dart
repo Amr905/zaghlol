@@ -308,7 +308,8 @@ void main() {
       );
     });
 
-    test('essential categories are ignored; others are not', () {
+    test('rent, electricity, installments, insurance, subscriptions ARE '
+        'added; groceries, dining, rides, fuel, cash are not', () {
       RecurringCharge withCat(String id, CivilDate d, String? cat) =>
           RecurringCharge(
             id: id,
@@ -323,10 +324,33 @@ void main() {
         withCat('b', CivilDate(2026, 9, 1), cat),
         withCat('c', CivilDate(2026, 10, 1), cat),
       ];
-      expect(detect(three('sys:rent')), isEmpty);
-      expect(detect(three('groceries')), isEmpty);
-      expect(detect(three('sys:entertainment')), hasLength(1));
-      expect(detect(three(null)), hasLength(1));
+      for (final cat in [
+        'sys:rent',
+        'sys:housing',
+        'sys:bills',
+        'sys:utilities',
+        'sys:electricity',
+        'sys:installments',
+        'sys:education',
+        'sys:insurance',
+        'sys:subscriptions',
+        'sys:entertainment',
+        null,
+      ]) {
+        expect(detect(three(cat)), hasLength(1), reason: '$cat');
+      }
+      for (final cat in [
+        'sys:groceries',
+        'dining',
+        'sys:delivery',
+        'sys:transport',
+        'sys:ride_hailing',
+        'sys:fuel',
+        'sys:cash',
+        'sys:income',
+      ]) {
+        expect(detect(three(cat)), isEmpty, reason: cat);
+      }
     });
 
     test('zero amounts and unstorable merchant keys are ignored', () {

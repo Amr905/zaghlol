@@ -6472,7 +6472,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationsSettingsDuplicates => 'حركة اتسجلت مرتين';
 
   @override
-  String get notificationsSettingsRenewals => 'تجديد الاشتراكات';
+  String get notificationsSettingsRenewals => 'فواتير اتضافت لوحدها';
 
   @override
   String get notificationsSettingsBackup => 'مشاكل النسخة الاحتياطية';

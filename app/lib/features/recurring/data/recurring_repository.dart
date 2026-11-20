@@ -123,7 +123,7 @@ class RecurringRepository {
   /// set. Idempotent: a merchant/account/currency that already has any item
   /// (in any status), or is in `recurring_dismissals`, is skipped; so is a
   /// merchant and currency a hand-typed item names without an account.
-  /// Transfers between own accounts and charges in essential categories are
+  /// Transfers between own accounts and charges in non-recurring categories (groceries, dining, transport, fuel, cash, income) are
   /// not scanned. Returns the rows it created (the caller sends the single
   /// notice).
   Future<List<RecurringItemRow>> detectAndAutoAdd({

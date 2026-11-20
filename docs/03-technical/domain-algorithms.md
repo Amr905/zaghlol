@@ -97,7 +97,7 @@ edit/delete expense (EC-40): if Σ offsets > new amount → remove the newest li
 
 ```
 detectRecurring (daily, debounced; T-196, D-72):
-  group expenses by (merchant_norm, account, currency); drop essential-category charges (Q-25 set); sort by date
+  group expenses by (merchant_norm, account, currency); drop charges in non-recurring categories (groceries, dining, delivery, transport, ride-hailing, fuel, cash, instapay, income; rent, bills, utilities, installments, education, insurance, subscriptions are kept); sort by date
   cadence = window of the latest gap: monthly 25..35 d, 3 months 84..97 d, 6 months 176..189 d, 12 months 360..371 d
   chain = consecutive charges inside that window with |Δamount| ≤ 10% of the previous one, ending at the latest charge
   chain length ≥ 3 (monthly, 3 months) or ≥ 2 (6 months, 12 months); stale if next_due < today − 10 days → not added

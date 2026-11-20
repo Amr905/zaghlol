@@ -6337,7 +6337,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsSettingsDuplicates => 'Duplicate charges';
 
   @override
-  String get notificationsSettingsRenewals => 'Subscription renewals';
+  String get notificationsSettingsRenewals => 'Auto-added bills';
 
   @override
   String get notificationsSettingsBackup => 'Backup problems';

@@ -9290,7 +9290,7 @@ abstract class AppLocalizations {
   /// L
   ///
   /// In ar, this message translates to:
-  /// **'تجديد الاشتراكات'**
+  /// **'فواتير اتضافت لوحدها'**
   String get notificationsSettingsRenewals;
 
   /// L

@@ -7,8 +7,7 @@
 // rule no longer applies to these cadences.
 
 import '../budget/civil_date.dart';
-import '../mascot_rules/mascot_rules.dart'
-    show categoryCode, defaultEssentialCategoryIds;
+import '../mascot_rules/mascot_rules.dart' show categoryCode;
 import '../money/money.dart';
 
 /// Chain rule (BR-SUB-01): consecutive monthly charges 25..35 days apart.
@@ -138,10 +137,28 @@ _Window? _windowFor(int gap) {
   return null;
 }
 
-bool _isEssential(String? categoryId, Set<String> essential) =>
+/// Categories where the same merchant repeating is coincidence, not a bill
+/// (D-72, PO 2026-11-20): shopping trips, eating out, rides, fuel, cash
+/// withdrawals, transfers and income. Rent, utilities, bills, installments,
+/// education, insurance and subscriptions are NOT here: they must auto-add.
+const Set<String> nonRecurringCategoryIds = {
+  'groceries',
+  'dining',
+  'delivery',
+  'food_delivery',
+  'transport',
+  'ride_hailing',
+  'fuel',
+  'cash',
+  'cash_withdrawal',
+  'instapay',
+  'income',
+};
+
+bool _isExcluded(String? categoryId, Set<String> excluded) =>
     categoryId != null &&
-    (essential.contains(categoryId) ||
-        essential.contains(categoryCode(categoryId)));
+    (excluded.contains(categoryId) ||
+        excluded.contains(categoryCode(categoryId)));
 
 /// Finds charges that repeat every 1, 3, 6 or 12 months (BR-SUB-01 widened
 /// by D-72). Charges are grouped by (merchant, account, currency), so a chain
@@ -150,8 +167,8 @@ bool _isEssential(String? categoryId, Set<String> essential) =>
 /// the latest gap and amounts within 10% of the previous charge. A chain
 /// needs 3 charges for monthly and 3-month, 2 for 6- and 12-month. A longer
 /// old chain that has since stopped, or one whose next due date is more than
-/// [staleChainGraceDays] before [today], yields nothing. Charges in an
-/// essential category are ignored.
+/// [staleChainGraceDays] before [today], yields nothing. Charges in a
+/// [nonRecurringCategoryIds] category are ignored.
 ///
 /// Groups whose key is in [exclude] (`merchant|account|currency`, see
 /// [recurringKey]) are skipped: that is how an existing, dismissed or undone
@@ -163,13 +180,13 @@ List<RecurringChain> detectRecurring(
   Iterable<RecurringCharge> charges, {
   required CivilDate today,
   Set<String> exclude = const {},
-  Set<String> essentialCategoryIds = defaultEssentialCategoryIds,
+  Set<String> excludedCategoryIds = nonRecurringCategoryIds,
 }) {
   final groups = <String, List<RecurringCharge>>{};
   for (final c in charges) {
     if (!c.amount.isPositive ||
         !isStorableMerchantNorm(c.merchantNorm) ||
-        _isEssential(c.categoryId, essentialCategoryIds)) {
+        _isExcluded(c.categoryId, excludedCategoryIds)) {
       continue;
     }
     groups
