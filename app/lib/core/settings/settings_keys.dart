@@ -166,6 +166,13 @@ abstract final class Settings {
     max: 3600,
   );
 
+  /// T-197 / D-73: the Money tab lists accounts in sections by type (on) or
+  /// as one list (off).
+  static final moneyGroupByType = SettingKey.boolean(
+    'money.group_by_type',
+    byDefault: true,
+  );
+
   // Hide-amounts choices (FR-NTF-03, FR-WID-01; A-26: share cards hide).
   static final hideAmountsNotifications = SettingKey.boolean(
     'hide_amounts.notifications',

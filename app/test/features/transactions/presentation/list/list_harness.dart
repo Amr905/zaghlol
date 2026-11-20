@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
@@ -222,9 +223,15 @@ const lookups = TxnLookups(
       id: 'acc1',
       label: 'NBE Visa',
       last4: '4567',
+      kind: AccountKind.credit,
       currencyCode: 'EGP',
     ),
-    TxnAccount(id: 'acc2', label: 'Wallet', currencyCode: 'USD'),
+    TxnAccount(
+      id: 'acc2',
+      label: 'Wallet',
+      kind: AccountKind.wallet,
+      currencyCode: 'USD',
+    ),
   ],
 );
 

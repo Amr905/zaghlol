@@ -27,6 +27,7 @@ import '../../../salary/application/salary_service.dart';
 import '../../../salary/presentation/expected_salary_row.dart'
     show askSalarySame;
 import '../../data/transactions_providers.dart';
+import '../../../accounts/presentation/account_type.dart';
 import '../../domain/transaction.dart';
 import '../../application/duplicate_finder.dart';
 import '../detail/transaction_detail_screen.dart';
@@ -539,7 +540,12 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           for (final a in lk.accounts)
             ZListRow(
               title: accountName(a, fmt),
-              subtitle: a.currencyCode,
+              subtitle: a.kind == null
+                  ? a.currencyCode
+                  : AppLocalizations.of(ctx).accountsTypeCurrency(
+                      accountKindLabel(AppLocalizations.of(ctx), a.kind!),
+                      a.currencyCode,
+                    ),
               onTap: () => Navigator.of(ctx).pop(a.id),
             ),
         ],

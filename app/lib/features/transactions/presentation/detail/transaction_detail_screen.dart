@@ -21,6 +21,7 @@ import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
 import '../../data/transaction_detail_reader.dart';
 import '../../data/transactions_providers.dart';
+import '../../../accounts/presentation/account_type.dart';
 import '../../domain/transaction.dart';
 import '../edit/transaction_edit_screen.dart';
 import '../list/txn_list_providers.dart';
@@ -679,7 +680,9 @@ class _Body extends StatelessWidget {
             children: [
               field(
                 l.transactionsDetailFieldCard,
-                acc == null ? kNoValueDash : accountName(acc, fmt),
+                acc == null
+                    ? kNoValueDash
+                    : accountNameWithType(l, accountName(acc, fmt), acc.kind),
                 chevron: acc != null,
               ),
               field(

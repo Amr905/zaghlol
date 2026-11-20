@@ -31,6 +31,7 @@ import '../../../transactions/presentation/list/txn_list_providers.dart';
 import '../../../transactions/presentation/list/txn_row.dart';
 import '../../data/accounts_providers.dart';
 import '../../domain/account.dart';
+import '../account_type.dart';
 import '../edit_card/add_card_flow.dart';
 import '../edit_card/edit_card_providers.dart' show institutionOptionsProvider;
 import '../edit_card/merge_flow.dart';
@@ -175,6 +176,8 @@ class _State extends ConsumerState<CardDetailScreen> {
                       style: ZType.headline.copyWith(color: c.text),
                     ),
                   ),
+                  const SizedBox(height: ZSpacing.xs),
+                  AccountTypeChip(kind: account.kind),
                   if (data.value?.nextDue == null &&
                       widget.justAdded &&
                       account.statementDueDay != null)
