@@ -867,6 +867,10 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-269** (batch 49): T-188 N1 month-cue labels can overlap when a period starts on the 30th/31st; N2 the cash-flow card doesn't say bars are 6 cycles while totals are one; tips hidden outside single cycles (PO may want them rescaled). T-199 card-payment leg without the card side understates net worth until the card's next message; balance-only messages don't refresh the breakdown (no event); typed-balance date picker; credit-group bank header. `categorizer_seed_test` fuzzy p95 budget 11.5 ms fails on this cloud host even on the batch-47 tree (10.5–15 ms): host speed, check on the CI runner, widen or make it relative. riverpod_lint CI probe must be seen green on the first CI run.
 
+- **FU-270** (batch 50, CLOSED): the riverpod_lint CI probe used `flutter analyze`, which can return before the analyzer plugin reports; it now uses `dart analyze` and stays blocking. FU-271 (batch 51) moves the main analyze step to `dart analyze --fatal-infos` too.
+
+- **FU-272** (batch 50 review minors, OPEN): T-192 `gradle-deps-to-lockfile.py` drops BOM-managed `group:artifact -> version` lines; local dev compose images (postgres, otel, alpine) unpinned; Gradle graph scan stays `continue-on-error` until release runtime classpaths are scanned on their own with an osv-scanner.toml for the build-tool advisories (93 in 20 packages); gitleaks job needs the pinned binary or `GITLEAKS_LICENSE` before it can block. T-190 bundletool jar downloaded without a hash check (`size-report.yml`); `enforce_budget: true` vs "budgets are proposals" comment; no release (R8) build run on a device yet. T-193 import order nit.
+
 ## Log
 | Date | Event |
 |---|---|
