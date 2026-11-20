@@ -8,6 +8,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
+import '../../../../core/ui/institution_avatar.dart';
 import '../../../../core/ui/z_card.dart';
 import '../../domain/account.dart';
 import 'card_form_logic.dart';
@@ -226,8 +227,7 @@ class _BankPickerState extends ConsumerState<BankPicker> {
     Widget row(InstitutionOption i) => _BankCell(
       key: Key('bank-${i.code}'),
       name: i.name(lang),
-      letter: i.monogram(lang),
-      seed: i.code,
+      code: i.code,
       onTap: () => Navigator.of(context).pop(i),
     );
     Widget grid(List<InstitutionOption> items) => Wrap(
@@ -355,33 +355,21 @@ class _BankPickerState extends ConsumerState<BankPicker> {
   }
 }
 
-/// One bank in the grid: tinted round monogram with the name below.
+/// One bank in the grid: the shared badge with the name below.
 class _BankCell extends StatelessWidget {
   const _BankCell({
     super.key,
     required this.name,
-    required this.letter,
-    required this.seed,
+    required this.code,
     required this.onTap,
   });
   final String name;
-  final String letter;
-  final String seed;
+  final String code;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final palette = [
-      c.primary,
-      c.dangerText,
-      c.warningText,
-      c.tintBlue,
-      c.tintViolet,
-      c.tintTeal,
-    ];
-    final tone =
-        palette[seed.codeUnits.fold<int>(0, (a, b) => a + b) % palette.length];
     return SizedBox(
       width: (MediaQuery.sizeOf(context).width - 2 * ZSpacing.screen) / 4,
       child: Semantics(
@@ -395,21 +383,10 @@ class _BankCell extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
             child: Column(
               children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: tone.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    letter,
-                    style: ZType.label.copyWith(
-                      color: tone,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                ZInstitutionAvatar(
+                  institutionCode: code,
+                  label: name,
+                  size: 54,
                 ),
                 const SizedBox(height: ZSpacing.xs),
                 Text(

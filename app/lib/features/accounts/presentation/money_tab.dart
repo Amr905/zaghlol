@@ -495,14 +495,10 @@ class _Tile extends StatelessWidget {
         child: Icon(Icons.payments_rounded, color: c.primary),
       );
     }
-    final word = account.label.trim().split(RegExp(r'\s+')).first;
-    final short = word.length > 4 ? word.substring(0, 1) : word;
-    // FU-250: the shared avatar (logo, brand colour or neutral initials).
+    // T-198: the shared avatar (logo, brand colour or neutral initials).
     return ZInstitutionAvatar(
       institutionCode: account.institutionCode,
-      initials: short.toUpperCase(),
-      neutralBg: c.surfaceAlt,
-      neutralFg: c.primary,
+      label: account.label,
       size: 48,
     );
   }

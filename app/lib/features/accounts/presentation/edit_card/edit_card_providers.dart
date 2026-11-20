@@ -27,12 +27,6 @@ final class InstitutionOption {
   final bool isEgypt;
 
   String name(String languageCode) => languageCode == 'ar' ? nameAr : nameEn;
-
-  /// Monogram fallback while bank logos are gated (OQ-09, NFR-LEGAL-04).
-  String monogram(String languageCode) {
-    final n = name(languageCode).trim();
-    return n.isEmpty ? '?' : String.fromCharCode(n.runes.first).toUpperCase();
-  }
 }
 
 final institutionOptionsProvider = Provider<List<InstitutionOption>>((ref) {
