@@ -66,7 +66,7 @@ jobs:
           ./gradlew --no-daemon -q :buildEnvironment > "$out/build-environment.txt"
           : > "$out/release-dependencies.txt"
           for c in prodSmsReleaseRuntimeClasspath prodNoSmsReleaseRuntimeClasspath; do
-            ./gradlew --no-daemon -q :app:dependencies --configuration "$c" >> "$out/release-dependencies.txt"
+            ./gradlew --no-daemon --dependency-verification=off -q :app:dependencies --configuration "$c" >> "$out/release-dependencies.txt"
           done
           conv="$GITHUB_WORKSPACE/.github/scripts/gradle-deps-to-lockfile.py"
           python3 -I "$conv" "$out/release.lockfile" "$out/release-dependencies.txt"

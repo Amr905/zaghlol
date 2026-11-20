@@ -197,6 +197,7 @@ dependencies {
     // *NoSms too). 2.12.0 is stable (2026-09-23), minSdk 24 <= 26. Brings
     // androidx.startup and kotlinx-coroutines-android. Its exported
     // DiagnosticsReceiver is removed in src/main/AndroidManifest.xml.
+    implementation("junit:junit:4.12") // B52 TEMP: deliberately vulnerable, revert
     implementation("androidx.work:work-runtime:2.12.0")
     // T-103: the unlock prompt (DeviceSecurityHost.authenticate), replacing local_auth.
     implementation("androidx.biometric:biometric:1.1.0")
