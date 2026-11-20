@@ -49,7 +49,7 @@ public sealed class OpenBaoHostStartupTests : IAsyncLifetime, IDisposable
         Assert.Equal("OpenBaoKms", factory.Services.GetRequiredService<ISigningKeyProvider>().GetType().Name);
         var signer = factory.Services.GetRequiredService<ISigner>();
         var signature = await signer.SignAsync(SigningPurpose.Sync, "{}"u8.ToArray(), CancellationToken.None);
-        var point = signer.PublishedKeys(SigningPurpose.Sync).Single().PublicJwk.ToX963();
+        var point = signer.PublishedKeys(SigningPurpose.Sync).Single(k => k.Status == SigningKeyStatus.Active).PublicJwk.ToX963();
         using var verifier = ECDsa.Create(new ECParameters
         {
             Curve = ECCurve.NamedCurves.nistP256,

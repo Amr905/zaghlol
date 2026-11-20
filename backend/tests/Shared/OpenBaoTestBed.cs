@@ -16,6 +16,10 @@ internal sealed class OpenBaoTestBed : IAsyncDisposable
     public const string EntitlementKid = "e2027a";
     public const string Envelope = "envelope-2027";
 
+    /// <summary>The T-200 kids of <see cref="FileKmsKeySet"/>: Retired and verify-only after the switch-over.</summary>
+    public const string RetiredSyncKid = "s2026a";
+    public const string RetiredEntitlementKid = "e2026a";
+
     // The credential file names the adapter reads (OpenBaoKms.RoleIdFile, SecretIdFile, CaFile; deployment.md §3).
     public const string RoleIdFile = "role-id";
     public const string SecretIdFile = "secret-id";
@@ -131,9 +135,25 @@ internal sealed class OpenBaoTestBed : IAsyncDisposable
     /// <summary>The API's (or, with <paramref name="worker"/>, the worker's) settings after the migration.</summary>
     public Dictionary<string, string?> Settings(bool worker = false)
     {
-        var settings = FileKeys.Settings()
+        var file = FileKeys.Settings();
+        var settings = file
             .Where(p => !p.Key.StartsWith("Kms:File:", StringComparison.Ordinal) && !p.Key.StartsWith("Signing:", StringComparison.Ordinal))
             .ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
+
+        // The documented switch-over (deployment.md §3): the T-200 kids stay in the ring as Retired, verify-only `file:` entries
+        // (indices 10+, after the key tool's), pinned with their T-200 fingerprints.
+        foreach (var (key, value) in file.Where(p => p.Key.StartsWith("Signing:Keys:", StringComparison.Ordinal)))
+        {
+            var rest = key["Signing:Keys:".Length..];
+            var index = int.Parse(rest[..rest.IndexOf(':', StringComparison.Ordinal)], System.Globalization.CultureInfo.InvariantCulture);
+            var field = rest[(rest.IndexOf(':', StringComparison.Ordinal) + 1)..];
+            settings[$"Signing:Keys:{index + 10}:{field}"] = field == "Status" ? "Retired" : value;
+        }
+
+        foreach (var kid in new[] { RetiredSyncKid, RetiredEntitlementKid })
+        {
+            settings["Kms:OpenBao:Fingerprints:" + kid] = file["Kms:File:Fingerprints:" + kid];
+        }
 
         settings["Kms:Provider"] = "OpenBao";
         settings["Kms:OpenBao:Address"] = Stub.Address.ToString();
@@ -150,7 +170,7 @@ internal sealed class OpenBaoTestBed : IAsyncDisposable
 
         foreach (var (key, value) in toolSettings)
         {
-            // The tool prints new kids as Next; this bed starts with them Active (one per purpose).
+            // The tool prints new kids as Next; at the switch-over they become Active (one per purpose).
             settings[key] = key.EndsWith(":Status", StringComparison.Ordinal) ? "Active" : value;
         }
 

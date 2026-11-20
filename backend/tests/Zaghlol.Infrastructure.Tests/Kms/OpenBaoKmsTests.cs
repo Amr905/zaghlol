@@ -1,9 +1,11 @@
+using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Zaghlol.Domain;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Seats;
 using Zaghlol.Testing;
@@ -40,7 +42,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
         var signer = services.GetRequiredService<ISigner>();
         var signature = await signer.SignAsync(SigningPurpose.Sync, "{}"u8.ToArray(), CancellationToken.None);
         Assert.Equal(OpenBaoTestBed.SyncKid, signature.Kid);
-        Assert.True(signer.PublishedKeys(SigningPurpose.Sync).Single().PublicJwk.Verifies("{}"u8, signature.Signature.Span));
+        Assert.True(signer.PublishedKeys(SigningPurpose.Sync).Single(k => k.Status == SigningKeyStatus.Active).PublicJwk.Verifies("{}"u8, signature.Signature.Span));
         _ = await signer.CreateJwsAsync(SigningPurpose.Entitlement, new { gold = true }, CancellationToken.None);
 
         // HMAC: the imported key is the T-200 key, so stored hashes stay valid.
@@ -85,6 +87,79 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     }
 
     [LinuxFact]
+    public async Task C1_TheDocumentedSwitchOverKeepsT200TokensValidAndSignsWithTheNewKids()
+    {
+        // Before the switch: the File provider signs an account token with the T-200 kid e2026a.
+        var install = InstallId.FromGuid(Guid.NewGuid());
+        var now = DateTimeOffset.UtcNow;
+        string token;
+        await using (var file = FileKmsHost.Services("Production", bed.FileKeys.Settings()))
+        {
+            await FileKmsHost.StartAsync(file);
+            token = await file.GetRequiredService<ISigner>().CreateJwsAsync(
+                SigningPurpose.Entitlement,
+                new { sub = Guid.NewGuid().ToString("D"), iid = install.ToString(), exp = now.AddDays(30).ToUnixTimeSeconds() },
+                CancellationToken.None);
+        }
+
+        Assert.Contains("\"kid\":\"" + OpenBaoTestBed.RetiredEntitlementKid + "\"", Encoding.UTF8.GetString(Base64Url.DecodeFromChars(token.Split('.')[0])), StringComparison.Ordinal);
+
+        // After: OpenBao, the new kids Active, the T-200 kids Retired with file: references (verify-only).
+        var settings = bed.Settings();
+        Assert.Contains(settings, p => p.Value == "file:" + OpenBaoTestBed.RetiredEntitlementKid);
+        bed.Stub.Requests.Clear();
+        await using var services = OpenBaoHost.Services("Production", settings);
+        await FileKmsHost.StartAsync(services);
+
+        var signer = services.GetRequiredService<ISigner>();
+        var response = await signer.SignAsync(SigningPurpose.Sync, "{}"u8.ToArray(), CancellationToken.None);
+        Assert.Equal(OpenBaoTestBed.SyncKid, response.Kid);
+        var fresh = await signer.CreateJwsAsync(SigningPurpose.Entitlement, new { probe = 1 }, CancellationToken.None);
+        Assert.Contains("\"kid\":\"" + OpenBaoTestBed.EntitlementKid + "\"", Encoding.UTF8.GetString(Base64Url.DecodeFromChars(fresh.Split('.')[0])), StringComparison.Ordinal);
+
+        // The JWKS publishes both generations; the old account token still passes the validator's signature and claims check.
+        Assert.Equal(
+            [OpenBaoTestBed.EntitlementKid, OpenBaoTestBed.RetiredEntitlementKid],
+            signer.PublishedKeys(SigningPurpose.Entitlement).Select(k => k.Kid).Order(StringComparer.Ordinal).Reverse().ToArray());
+        var validator = new Zaghlol.Infrastructure.Entitlements.AccountTokenValidator(signer, services);
+        Assert.True(validator.TryRead(token, install, now, out _, out _));
+
+        // The retired kid never signs and is never looked up in OpenBao.
+        var provider = services.GetRequiredService<ISigningKeyProvider>();
+        await Assert.ThrowsAsync<KmsConfigurationException>(() => provider.SignDigestAsync("file:" + OpenBaoTestBed.RetiredSyncKid, new byte[32], CancellationToken.None).AsTask());
+        Assert.DoesNotContain(bed.Stub.Requests, r => r.Contains(OpenBaoTestBed.RetiredSyncKid, StringComparison.Ordinal) || r.Contains(OpenBaoTestBed.RetiredEntitlementKid, StringComparison.Ordinal));
+    }
+
+    [LinuxFact]
+    public async Task C1_ARetiredT200KidIsPinnedLikeT200()
+    {
+        var settings = bed.Settings();
+        settings[Pin(OpenBaoTestBed.RetiredEntitlementKid)] = new string('b', 64);
+        await AssertRefusedAsync(settings, OpenBaoKms.FingerprintMessage);
+
+        settings = bed.Settings();
+        settings.Remove(Pin(OpenBaoTestBed.RetiredSyncKid));
+        await AssertRefusedAsync(settings, OpenBaoKms.FingerprintMessage);
+    }
+
+    [LinuxTheory]
+    [InlineData("Active")]
+    [InlineData("Next")]
+    public async Task C1_AT200KidThatIsNotRetiredIsRefused(string status)
+    {
+        var settings = bed.Settings();
+        var statusKey = settings.Single(p => p.Value == "file:" + OpenBaoTestBed.RetiredSyncKid).Key.Replace(":KeyRef", ":Status", StringComparison.Ordinal);
+        settings[statusKey] = status;
+        if (status == "Active")
+        {
+            // Keep one Active per purpose: the new kid steps back to Next.
+            settings[settings.Single(p => p.Value == "openbao:" + OpenBaoTestBed.SyncKid).Key.Replace(":KeyRef", ":Status", StringComparison.Ordinal)] = "Next";
+        }
+
+        await AssertRefusedAsync(settings, OpenBaoKms.KeyRefMessage);
+    }
+
+    [LinuxFact]
     public async Task SeatCheckFromT200StillPasses()
     {
         var settings = bed.Settings();
@@ -114,7 +189,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
         var mac = await services.GetRequiredService<IKeyedHasher>().HmacSha256Async(KeyedHashKey.Seat, "x"u8.ToArray(), CancellationToken.None);
 
         // A rotated Transit key changes nothing: version 1 still signs (the published JWK verifies) and still MACs.
-        Assert.True(signer.PublishedKeys(SigningPurpose.Sync).Single().PublicJwk.Verifies("body"u8, signature.Signature.Span));
+        Assert.True(signer.PublishedKeys(SigningPurpose.Sync).Single(k => k.Status == SigningKeyStatus.Active).PublicJwk.Verifies("body"u8, signature.Signature.Span));
         Assert.Equal(HMACSHA256.HashData(bed.FileKeys.ReadSecret("seat"), "x"u8), mac);
         var sign = Assert.Single(bed.Stub.Requests, r => r.Contains("/transit/sign/", StringComparison.Ordinal));
         Assert.Contains("/v1/transit/sign/s2027a/sha2-256 ", sign, StringComparison.Ordinal);
@@ -133,7 +208,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
 
         foreach (var purpose in Enum.GetValues<SigningPurpose>())
         {
-            var key = signer.PublishedKeys(purpose).Single();
+            var key = signer.PublishedKeys(purpose).Single(k => k.Status == SigningKeyStatus.Active);
             Assert.Equal(key.PublicJwk.ToX963(), await provider.GetPublicKeyAsync(key.KeyRef, CancellationToken.None));
         }
     }
@@ -292,7 +367,7 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
     {
         await using var services = OpenBaoHost.Services("Production", bed.Settings());
         var signer = services.GetRequiredService<ISigner>();
-        var jwk = signer.PublishedKeys(SigningPurpose.Sync).Single().PublicJwk;
+        var jwk = signer.PublishedKeys(SigningPurpose.Sync).Single(k => k.Status == SigningKeyStatus.Active).PublicJwk;
 
         var results = await Task.WhenAll(Enumerable.Range(0, 64).Select(i => Task.Run(async () =>
         {

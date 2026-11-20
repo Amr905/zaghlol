@@ -9,6 +9,15 @@ namespace Zaghlol.Infrastructure.Kms;
 /// <summary>One KMS adapter: the three provider ports in one object (T-200 design note §1).</summary>
 internal interface IKmsBackend : ISigningKeyProvider, IHmacProvider, IDataKeyProvider;
 
+/// <summary>
+/// A provider that publishes some Retired kids without holding their keys (T-201 review C1: the T-200 <c>file:</c> kids after
+/// the switch to OpenBao). The startup check doesn't ask it for their public keys; their pins are its own check.
+/// </summary>
+internal interface IVerifyOnlySigningKeys
+{
+    bool IsVerifyOnly(string keyRef);
+}
+
 public static class KmsServiceCollectionExtensions
 {
     /// <summary>
@@ -109,6 +118,11 @@ internal sealed partial class KmsStartupCheck(
 
         foreach (var key in ring.All)
         {
+            if (key.Status == SigningKeyStatus.Retired && signingProvider is IVerifyOnlySigningKeys verifyOnly && verifyOnly.IsVerifyOnly(key.KeyRef))
+            {
+                continue;
+            }
+
             var point = await KmsCall.RunAsync(
                 policy, clock, "public_key", ct => signingProvider.GetPublicKeyAsync(key.KeyRef, ct), cancellationToken);
             if (!point.AsSpan().SequenceEqual(key.PublicJwk.ToX963()))

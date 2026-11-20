@@ -17,7 +17,7 @@ namespace Zaghlol.Infrastructure.Kms;
 /// associated data. Construction checks the settings and the credential directory (no network); <see cref="VerifyAsync"/>
 /// (run by <see cref="OpenBaoStartupCheck"/>) proves key attributes and pins.
 /// </summary>
-internal sealed class OpenBaoKms : IKmsBackend, IDisposable
+internal sealed class OpenBaoKms : IKmsBackend, IVerifyOnlySigningKeys, IDisposable
 {
     public const string ProviderName = "OpenBao";
     public const string Prefix = "openbao:";
@@ -32,7 +32,7 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
     public const string CredentialDirectoryUnsetMessage = "Kms:OpenBao:CredentialDirectory must be set.";
     public const string CredentialMessage = "Kms:OpenBao:CredentialDirectory must hold role-id and secret-id (1 to 256 printable characters, no spaces).";
     public const string CaMessage = "Kms:OpenBao:CredentialDirectory must hold ca.pem with at least one PEM certificate (the only trust anchor for OpenBao's TLS).";
-    public const string KeyRefMessage = "OpenBao KMS key references must be openbao:<name> (a-z, 0-9, '-'); file:<name> is accepted only in Kms:Envelope:PreviousKeyRefs (an imported File key).";
+    public const string KeyRefMessage = "OpenBao KMS key references must be openbao:<name> (a-z, 0-9, '-'); file:<name> is accepted only in Kms:Envelope:PreviousKeyRefs (an imported File key) and for Retired signing kids (verify-only).";
     public const string SharedKeyMessage = "An OpenBao key serves two roles: each signing, HMAC and envelope key needs its own Transit key.";
     public const string DevKidMessage = "Outside Development and Testing, the OpenBao KMS refuses the development and test kids (year 0000).";
     public const string OtherEnvironmentMalformedMessage = "Kms:OpenBao:OtherEnvironmentFingerprints entries must be 64 lower-case hex characters.";
@@ -75,6 +75,9 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         Hmac,
         Envelope,
         LegacyEnvelope,
+
+        /// <summary>A Retired T-200 kid (<c>file:</c>): verify-only, its public key is the configured JWK (pinned); never signs.</summary>
+        VerifyOnly,
     }
 
     /// <summary>The client, for tests (login count).</summary>
@@ -266,6 +269,9 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         return new DataKey(DecodeKey(SuccessData(answer)), wrapped.ToArray());
     }
 
+    /// <summary>True for a Retired <c>file:</c> kid: no key in OpenBao, nothing to compare at start but its pin.</summary>
+    public bool IsVerifyOnly(string keyRef) => roles.TryGetValue(keyRef, out var role) && role.Kind == KeyKind.VerifyOnly;
+
     public void Dispose() => client.Dispose();
 
     /// <summary>
@@ -279,18 +285,31 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         foreach (var role in roles.Values.Where(r => scope == KmsScope.Full || r.Kind is KeyKind.Envelope or KeyKind.LegacyEnvelope))
         {
             string fingerprint;
-            try
+            if (role.Kind == KeyKind.VerifyOnly)
             {
-                var info = await KmsCall.RunAsync(policy, clock, "public_key", ct => new ValueTask<KeyInfo>(ReadKeyAsync(role.TransitName, ct)), cancellationToken);
-                CheckAttributes(role, info);
-                fingerprint = role.Kind == KeyKind.Signing
-                    ? info.PublicKeyFingerprint!
-                    : Convert.ToHexStringLower(await KmsCall.RunAsync(
-                        policy, clock, "hmac", ct => new ValueTask<byte[]>(TransitHmacAsync(role.TransitName, PinLabel, ct)), cancellationToken));
+                // The T-200 definition (SHA-256 of the SPKI), from the configured public JWK: the pin is the T-200 one.
+                using var key = ECDsa.Create(new ECParameters
+                {
+                    Curve = ECCurve.NamedCurves.nistP256,
+                    Q = new ECPoint { X = role.ConfiguredPoint![1..33], Y = role.ConfiguredPoint[33..] },
+                });
+                fingerprint = Convert.ToHexStringLower(SHA256.HashData(key.ExportSubjectPublicKeyInfo()));
             }
-            catch (KmsUnavailableException)
+            else
             {
-                throw new KmsConfigurationException(UnreachableMessage);
+                try
+                {
+                    var info = await KmsCall.RunAsync(policy, clock, "public_key", ct => new ValueTask<KeyInfo>(ReadKeyAsync(role.TransitName, ct)), cancellationToken);
+                    CheckAttributes(role, info);
+                    fingerprint = role.Kind == KeyKind.Signing
+                        ? info.PublicKeyFingerprint!
+                        : Convert.ToHexStringLower(await KmsCall.RunAsync(
+                            policy, clock, "hmac", ct => new ValueTask<byte[]>(TransitHmacAsync(role.TransitName, PinLabel, ct)), cancellationToken));
+                }
+                catch (KmsUnavailableException)
+                {
+                    throw new KmsConfigurationException(UnreachableMessage);
+                }
             }
 
             if (!seen.Add(fingerprint))
@@ -300,7 +319,7 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
 
             var denied = role.Kind switch
             {
-                KeyKind.Signing => KnownTestKeys.SigningKeys,
+                KeyKind.Signing or KeyKind.VerifyOnly => KnownTestKeys.SigningKeys,
                 KeyKind.Hmac => KnownTestKeys.Secrets,
                 _ => (IReadOnlySet<string>)new HashSet<string>(),
             };
@@ -486,15 +505,28 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
     {
         var roles = new Dictionary<string, KeyRole>(StringComparer.Ordinal);
 
-        void Add(string keyRef, KeyKind kind)
+        void Add(string keyRef, KeyKind kind, byte[]? point = null)
         {
+            if (kind == KeyKind.VerifyOnly)
+            {
+                // Lives in no Transit key; its pin is looked up under the File key name (the T-200 pin name).
+                var fileName = keyRef[FileKms.Prefix.Length..];
+                if (!FileKms.NamePattern().IsMatch(fileName) || roles.ContainsKey(keyRef))
+                {
+                    throw new KmsConfigurationException(KeyRefMessage);
+                }
+
+                roles[keyRef] = new KeyRole(fileName, kind, point);
+                return;
+            }
+
             var legacy = keyRef.StartsWith(FileKms.Prefix, StringComparison.Ordinal);
             if (TransitName(keyRef) is not { } name || (legacy && kind != KeyKind.LegacyEnvelope) || (!legacy && kind == KeyKind.LegacyEnvelope))
             {
                 throw new KmsConfigurationException(KeyRefMessage);
             }
 
-            if (roles.ContainsKey(keyRef) || roles.Values.Any(r => r.TransitName == name))
+            if (roles.ContainsKey(keyRef) || roles.Values.Any(r => r.Kind != KeyKind.VerifyOnly && r.TransitName == name))
             {
                 throw new KmsConfigurationException(SharedKeyMessage);
             }
@@ -504,7 +536,15 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
 
         foreach (var key in settings.SigningKeys)
         {
-            Add(key.KeyRef, KeyKind.Signing);
+            // C1 (review): after the switch-over the T-200 kids stay published as Retired, verify-only; they never sign.
+            if (key.Status == SigningKeyStatus.Retired && key.KeyRef.StartsWith(FileKms.Prefix, StringComparison.Ordinal))
+            {
+                Add(key.KeyRef, KeyKind.VerifyOnly, key.PublicJwk.ToX963());
+            }
+            else
+            {
+                Add(key.KeyRef, KeyKind.Signing);
+            }
         }
 
         foreach (var keyRef in settings.HmacKeyRefs.Values)
@@ -688,7 +728,9 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
             ? role
             : throw new KmsConfigurationException("An OpenBao KMS key reference is not configured for this use.");
 
-    internal sealed record KeyRole(string TransitName, KeyKind Kind);
+    /// <param name="TransitName">The Transit key name; for <see cref="KeyKind.VerifyOnly"/> the File key name (pin lookup only).</param>
+    /// <param name="ConfiguredPoint">For <see cref="KeyKind.VerifyOnly"/>: the configured public point (X9.63).</param>
+    internal sealed record KeyRole(string TransitName, KeyKind Kind, byte[]? ConfiguredPoint = null);
 
     internal sealed record KeyInfo(
         string? Type,

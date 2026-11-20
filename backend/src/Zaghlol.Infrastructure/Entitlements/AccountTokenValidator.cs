@@ -44,7 +44,8 @@ internal sealed class AccountTokenValidator(ISigner signer, IServiceProvider ser
         return linked ? new ValidatedAccountToken(account, expires) : null;
     }
 
-    private bool TryRead(string text, InstallId caller, DateTimeOffset now, out Guid account, out DateTimeOffset expires)
+    /// <summary>Signature and claims, no database (internal for the T-201 switch-over test).</summary>
+    internal bool TryRead(string text, InstallId caller, DateTimeOffset now, out Guid account, out DateTimeOffset expires)
     {
         account = Guid.Empty;
         expires = default;

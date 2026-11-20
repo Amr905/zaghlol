@@ -45,11 +45,11 @@ public sealed class OpenBaoLiveTests
 
         var signer = services.GetRequiredService<ISigner>();
         var signature = await signer.SignAsync(SigningPurpose.Sync, Probe, CancellationToken.None);
-        Assert.True(signer.PublishedKeys(SigningPurpose.Sync).Single().PublicJwk.Verifies(Probe, signature.Signature.Span));
+        Assert.True(signer.PublishedKeys(SigningPurpose.Sync).Single(k => k.Status == SigningKeyStatus.Active).PublicJwk.Verifies(Probe, signature.Signature.Span));
         var provider = services.GetRequiredService<ISigningKeyProvider>();
         foreach (var purpose in Enum.GetValues<SigningPurpose>())
         {
-            var key = signer.PublishedKeys(purpose).Single();
+            var key = signer.PublishedKeys(purpose).Single(k => k.Status == SigningKeyStatus.Active);
             Assert.Equal(key.PublicJwk.ToX963(), await provider.GetPublicKeyAsync(key.KeyRef, CancellationToken.None));
         }
 
@@ -158,13 +158,28 @@ public sealed class OpenBaoLiveTests
         settings["Kms:HmacKeys:Audit"] = "openbao:audit";
         settings["Kms:HmacKeys:InstallHashPepper"] = "openbao:install-pepper";
         settings["Kms:Envelope:KeyRef"] = "openbao:envelope-2027";
-        settings["Kms:HmacKeys:SeatCheck"] = EnvFile("file-kms.env")["Kms:HmacKeys:SeatCheck"];
+        var file = EnvFile("file-kms.env");
+        settings["Kms:HmacKeys:SeatCheck"] = file["Kms:HmacKeys:SeatCheck"];
+
+        // The switch-over as documented: the T-200 kids stay published as Retired, verify-only `file:` entries, T-200 pins.
+        foreach (var (key, value) in file.Where(p => p.Key.StartsWith("Signing:Keys:", StringComparison.Ordinal)))
+        {
+            var rest = key["Signing:Keys:".Length..];
+            var index = int.Parse(rest[..rest.IndexOf(':', StringComparison.Ordinal)], System.Globalization.CultureInfo.InvariantCulture);
+            var field = rest[(rest.IndexOf(':', StringComparison.Ordinal) + 1)..];
+            settings[$"Signing:Keys:{index + 10}:{field}"] = field == "Status" ? "Retired" : value;
+        }
+
+        foreach (var kid in new[] { "s2026a", "e2026a" })
+        {
+            settings["Kms:OpenBao:Fingerprints:" + kid] = file["Kms:File:Fingerprints:" + kid];
+        }
         if (worker)
         {
             settings["Kms:Scope"] = "Envelope";
         }
 
-        foreach (var key in settings.Keys.Where(k => k.EndsWith(":Status", StringComparison.Ordinal)).ToList())
+        foreach (var key in settings.Keys.Where(k => k.EndsWith(":Status", StringComparison.Ordinal) && settings[k] == "Next").ToList())
         {
             settings[key] = "Active";
         }
