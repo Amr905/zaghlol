@@ -23,7 +23,7 @@ def main(argv):
         with open(path, encoding="utf-8") as f:
             for line in f:
                 # Tree lines start with "+--- ", "\--- " or "|    "; skip project() and FAILED entries.
-                if "---" not in line or "project :" in line or "FAILED" in line:
+                if "--- " not in line or "project :" in line or "FAILED" in line:
                     continue
                 m = COORD.search(line.split("--- ", 1)[1].rstrip())
                 if not m:
