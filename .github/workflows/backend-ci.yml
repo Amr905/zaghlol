@@ -77,9 +77,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      # TODO(Lead): pin the digest (ghcr.io/openbao/openbao:2.7.2@sha256:...); ghcr.io is not reachable from the build
-      # environment, so only the tag is pinned. Keep in step with backend/deploy/openbao/docker-compose.openbao.yml.
-      OPENBAO_IMAGE: ghcr.io/openbao/openbao:2.7.2
+      # T-192: pinned by multi-arch OCI index digest (tag 2.7.2). Dependabot cannot edit an env value: when it bumps
+      # backend/deploy/openbao/docker-compose.openbao.yml, copy the new reference here (the two must stay identical).
+      OPENBAO_IMAGE: ghcr.io/openbao/openbao:2.7.2@sha256:5046911075e137e154ce49ab051502f4ec7cf367d484ae4a4dce665d9b90561f
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
