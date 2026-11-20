@@ -172,12 +172,16 @@ class _SplitSheetState extends ConsumerState<SplitSheet> {
               label: l.commonActionUndo,
               onPressed: () async {
                 ZHaptics.light();
-                await port.assign(r.sourceId, [
-                  AssignLine(
-                    expenseId: d.expenseId,
-                    amountMinor: r.amount.minor,
-                  ),
-                ], participantId: p.id);
+                try {
+                  await port.assign(r.sourceId, [
+                    AssignLine(
+                      expenseId: d.expenseId,
+                      amountMinor: r.amount.minor,
+                    ),
+                  ], participantId: p.id);
+                } on Object catch (e) {
+                  if (mounted) setState(() => _error = errorMessage(l, e));
+                }
                 if (mounted) {
                   ref.invalidate(splitSheetDataProvider(d.expenseId));
                 }

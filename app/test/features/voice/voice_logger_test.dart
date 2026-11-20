@@ -7,6 +7,7 @@ import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/ui/z_components.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
+import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol/features/transactions/presentation/edit/transaction_edit_screen.dart';
 import 'package:zaghlol/features/voice/application/speech_port.dart';
 
@@ -284,6 +285,30 @@ void main() {
     expect(r.editor.added.single.single.accountId, 'usd');
   });
 
+  testWidgets('picking a different account on the row saves to it (FU-229d)', (
+    t,
+  ) async {
+    final r = VoiceRig(
+      lookups: TxnLookups(
+        categories: voiceLookups.categories,
+        accounts: const [
+          TxnAccount(id: 'cash', label: 'Cash', currencyCode: 'EGP'),
+          TxnAccount(id: 'usd', label: 'Dollar', currencyCode: 'USD'),
+          TxnAccount(id: 'usd2', label: 'Travel dollar', currencyCode: 'USD'),
+        ],
+      ),
+    );
+    await r.pump(t);
+    await speakAndStop(t, r, 'coffee 20 dollars');
+    await t.tap(find.byKey(const ValueKey('voice-acct-0')));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Travel dollar'));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const ValueKey('voice-save')));
+    await t.pumpAndSettle();
+    expect(r.editor.added.single.single.accountId, 'usd2');
+  });
+
   testWidgets('same-currency item shows no per-row account', (t) async {
     final r = VoiceRig();
     await r.pump(t);
@@ -328,6 +353,26 @@ void main() {
     expect(find.text('Groceries'), findsOneWidget);
     expect(r.usage.counted, 0);
   });
+
+  testWidgets(
+    'partial save counts one log once, even after a retry (FU-229a)',
+    (t) async {
+      final ed = FakeEditor()
+        ..failWith = TransactionsException('TXN_INVALID')
+        ..failOnlyAddCall = 1;
+      final r = VoiceRig(editor: ed);
+      await r.pump(t);
+      await speakAndStop(t, r, phrase);
+      await t.tap(find.byKey(const ValueKey('voice-save')));
+      await t.pumpAndSettle();
+      expect(r.editor.added.length, 1, reason: 'one row written, then failed');
+      expect(r.usage.counted, 1, reason: 'the written row is already a log');
+      await t.tap(find.byKey(const ValueKey('voice-save')));
+      await t.pumpAndSettle();
+      expect(r.editor.added.length, 3, reason: 'saved rows are not repeated');
+      expect(r.usage.counted, 1);
+    },
+  );
 
   testWidgets('closing without saving saves and counts nothing', (t) async {
     final r = VoiceRig();

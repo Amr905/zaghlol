@@ -273,17 +273,33 @@ class DriftCategoriesAdmin implements CategoriesAdmin {
         variables: [Variable.withString(id)],
         updates: {_db.categories},
       );
-      // FU-179b: a limit on a removed category has no meaning; drop it and
-      // its fired-alert memory.
+      // FU-179b: budgets follow the transactions to the replacement. Those
+      // that would collide with an existing replacement budget (UNIQUE
+      // category/currency/period) are dropped with their fired-alert memory.
+      const colliding =
+          'SELECT id FROM budgets WHERE category_id = ?1 AND EXISTS ('
+          'SELECT 1 FROM budgets b2 WHERE b2.category_id = ?2 '
+          'AND b2.currency = budgets.currency AND b2.period = budgets.period)';
+      final pair = [
+        Variable.withString(id),
+        Variable.withString(replacementId),
+      ];
       await _db.customUpdate(
-        'DELETE FROM fired_alerts WHERE subject_id '
-        'IN (SELECT id FROM budgets WHERE category_id = ?1)',
-        variables: [Variable.withString(id)],
+        'DELETE FROM fired_alerts WHERE subject_id IN ($colliding)',
+        variables: pair,
         updates: {_db.firedAlerts},
       );
       await _db.customUpdate(
-        'DELETE FROM budgets WHERE category_id = ?1',
-        variables: [Variable.withString(id)],
+        'DELETE FROM budgets WHERE id IN ($colliding)',
+        variables: pair,
+        updates: {_db.budgets},
+      );
+      await _db.customUpdate(
+        'UPDATE budgets SET category_id = ?1 WHERE category_id = ?2',
+        variables: [
+          Variable.withString(replacementId),
+          Variable.withString(id),
+        ],
         updates: {_db.budgets},
       );
       await _dao.setArchived(id, archived: true);

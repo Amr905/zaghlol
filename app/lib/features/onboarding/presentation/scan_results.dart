@@ -341,17 +341,21 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
               widget.onEditCard?.call(item.accountId);
             },
           ),
-          const SizedBox(height: ZSpacing.sm),
-          ZButton(
-            key: const ValueKey('scan-card-ignore'),
-            label: l.captureSettingsAddIgnore,
-            variant: ZButtonVariant.secondary,
-            expand: true,
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              unawaited(_ignore(item));
-            },
-          ),
+          // Without a last4 the ignore rule would cover the whole
+          // institution, not "this card" (FU-187a): hide it.
+          if (item.last4 != null && item.last4!.isNotEmpty) ...[
+            const SizedBox(height: ZSpacing.sm),
+            ZButton(
+              key: const ValueKey('scan-card-ignore'),
+              label: l.captureSettingsAddIgnore,
+              variant: ZButtonVariant.secondary,
+              expand: true,
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                unawaited(_ignore(item));
+              },
+            ),
+          ],
         ],
       ),
     );

@@ -194,6 +194,30 @@ void main() {
         expect(find.text('CIB ••1234'), findsNothing);
       });
 
+      testWidgets('no ignore action for a card without last4', (tester) async {
+        await tester.binding.setSurfaceSize(const Size(390, 1500));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        const noTail = ScanResultsData(
+          found: 3,
+          review: 0,
+          cards: [
+            ScanCardItem(
+              accountId: 'a9',
+              label: 'CIB wallet',
+              kind: AccountKind.wallet,
+              txnCount: 3,
+              institutionCode: 'cib',
+            ),
+          ],
+        );
+        await tester.pumpWidget(host(const AsyncData(noTail), lang));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('CIB wallet'));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('scan-card-edit')), findsOneWidget);
+        expect(find.byKey(const ValueKey('scan-card-ignore')), findsNothing);
+      });
+
       testWidgets('edit opens the card; confirm marks it', (tester) async {
         await tester.binding.setSurfaceSize(const Size(390, 1500));
         addTearDown(() => tester.binding.setSurfaceSize(null));

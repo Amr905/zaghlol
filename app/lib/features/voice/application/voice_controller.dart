@@ -102,6 +102,10 @@ class VoiceController extends Notifier<VoiceState> {
   int _session = 0;
   final Set<int> _savedKeys = {};
 
+  /// The save in this session already counted against the free quota
+  /// (counted on the first row written, so a partial save can't bypass it).
+  bool _counted = false;
+
   @override
   VoiceState build() {
     final port = ref.read(speechPortProvider);
@@ -237,6 +241,7 @@ class VoiceController extends Notifier<VoiceState> {
     _session++;
     await ref.read(speechPortProvider).cancel();
     _savedKeys.clear();
+    _counted = false;
     if (state.online) {
       await _listen(onDevice: false);
     } else {
@@ -395,10 +400,13 @@ class VoiceController extends Notifier<VoiceState> {
           ),
         ]);
         _savedKeys.add(d.key);
+        if (!_counted) {
+          await usage.countOne();
+          _counted = true;
+        }
         ids.addAll(saved);
         _set(state.copyWith(savedIds: ids));
       }
-      await usage.countOne();
       _set(state.copyWith(phase: VoicePhase.saved, savedIds: ids));
     } on Object {
       _set(state.copyWith(phase: VoicePhase.parsed, saveFailed: true));
