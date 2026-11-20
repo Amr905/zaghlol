@@ -223,14 +223,14 @@
 | T-191 | Production trust anchors in release builds (BUG-001) | M8 | C4 | Opus | flutter-core-engineer | T-140 | BLOCKED | — | Added 2026-11-19 (PO request / QA audit). |
 | T-192 | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | M8 | C2 | Sonnet | backend-engineer | — | TODO | — | Added 2026-11-19 (PO request / QA audit). |
 | T-193 | Follow-up sweep FU-263 / FU-264 | M8 | C2 | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 | TODO | — | Added 2026-11-19 (PO request / QA audit). |
-| T-194 | Dark-mode quip «يعني تبقى فلوسك والمود؟» | M8 | C1 | Haiku | boilerplate-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-194 | Dark-mode quip «يعني تبقى فلوسك والمود؟» | M8 | C1 | Haiku | boilerplate-engineer | — | IN_REVIEW | Lead spot-check + T-198 review §T-194 APPROVED | Dark-mode quip on a user pick of Dark. |
 | T-195 | Salary as income: add it manually, use the SMS when it arrives | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-196 | Recurring every 1/3/6/12 months becomes a bill automatically | M8 | C3 | Sonnet | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-197 | Tell credit cards from debit cards at a glance | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
-| T-198 | Bank badges: real initials and brand colours (not «بنك»), everywhere | M8 | C2 | Sonnet | flutter-ui-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
+| T-198 | Bank badges: real initials and brand colours (not «بنك»), everywhere | M8 | C2 | Sonnet | flutter-ui-engineer | — | IN_REVIEW | [T-198 review](05-reviews/T-198.md) APPROVED after Lead delta | One badge (short code on brand colour) on every surface; 36+ colours/codes are guesses for the PO in docs/02-design/bank-badges.md. FU-266 |
 | T-199 | Net worth breakdown: where the number comes from, balance per bank | M8 | C3 | Sonnet (+Opus note) | flutter-core-engineer | — | TODO | — | Added 2026-11-19 (PO request). |
 | T-200 | Production key files: hardened file KMS (no cloud) | M8 | C4 | Opus | backend-engineer | — | IN_REVIEW | [T-200 review](05-reviews/T-200.md) APPROVED after one fix round (Opus code+security, Sonnet delta) | File KMS + 15 start-up guards, key tool, non-dumpable process, ADR-023, deployment §3. DONE once CI is green on push. T-201 must land before Gold is sold. FU-265 |
-| T-201 | Self-hosted OpenBao Transit KMS adapter | M8 | C4 | Opus | backend-engineer | T-200 | TODO | — | Added 2026-11-20 (D-76). |
+| T-201 | Self-hosted OpenBao Transit KMS adapter | M8 | C4 | Opus | backend-engineer | T-200 | IN_REVIEW | [T-201 review](05-reviews/T-201.md) APPROVED after one fix round + Lead delta (Opus code+security, Sonnet delta) | OpenBao Transit adapter, setup/compose, CI live job (CI must prove), BYOK migration from T-200, verify-only retired kids, I-9 test helper. FU-266 |
 
 ## Follow-ups (from reviews)
 | ID | From | Item | Owner / target | Status |
@@ -859,6 +859,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-265** (T-200): C3 overlapping G12 checks (make each independently tested); C6 rotation steps miss chmod / leftover-folder cleanup; C8 pin the PEM/DER parse buffers; rename the Dart test kid `s2026a` (catalog_build_test.dart) that reuses the committed dev catalog key; I-9 host-startup flake seen again (tracked in T-193).
 
+- **FU-266** (batch 46): T-201 — pin `ghcr.io/openbao/openbao` by digest (S3); N1 a caller that loses the relogin CAS gets a retryable 503 instead of waiting; N2 verify-only pins share the bare `file:` name; PO: switch-over moment, recovery-share holders, unseal-key residual (design note T-201). T-198 — badge tests for «مصرف أبوظبي», a one-word label, "", "Bank"; Arabic comma after a generic word; PO checks brand colours and short codes. T-194 — shared mascot toast instead of a plain SnackBar.
+
 ## Log
 | Date | Event |
 |---|---|
@@ -957,3 +959,4 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-19 | Batch 43 (`batch/2026-11-19-43-qa-fixes`): QA audit fixes BUG-002…BUG-009 (SIGTERM exit 0, operator bank-requests and daily-active reports, Zaghlol-App required on /v1, purchaseToken 400, catalog_version CHECK, analyzer ignore, SRS/status/README sync). BUG-001 waits for T-140. Review [batch-43](05-reviews/batch-43.md) APPROVED. FU-263. Progress 167/186. |
 | 2026-11-19 | Batch 44 (`batch/2026-11-19-44`): T-137 ops CLI + runbook + disclosures; T-175 pass 1 (0 Critical, 1 High = BUG-001) and fixes M-1, L-1, L-2, L-3, L-6. Review [batch-44](05-reviews/batch-44.md) APPROVED after two Lead deltas. FU-264. Progress 167/186 (T-137 DONE on green CI). |
 | 2026-11-20 | Batch 45 (`batch/2026-11-19-45-planning`): M8 planning T-187…T-201 (SRS v1.9–1.11) and **T-200** hardened file KMS for self-hosting (D-76), review APPROVED after one fix round. FU-265. Progress 167/201. |
+| 2026-11-20 | Batch 46 (`batch/2026-11-20-46`): T-201 OpenBao Transit KMS, T-198 bank badges, T-194 dark-mode quip; all reviews APPROVED. FU-266. |
