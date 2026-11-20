@@ -347,6 +347,8 @@ CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INT
 -- every preference (FR-ONB-07, FR-BAK-06): language, digits, payday_day, income_target, primary_currency,
 -- approx_view{enabled,target}, theme, notif.*, quiet_hours, app_lock{enabled,timeout_s}, hide_amounts.*,
 -- payday_eras (JSON `[{"from":null|"YYYY-MM-DD","day":1..28}]`, T-051; `payday_day` stays the user-facing value and equals the last era's day),
+-- salary.plan (JSON `{"v":1,"m":minor,"c":"EGP","d":1..28,"a":accountId?}`, T-195: "My salary"; absent = off; the expected salary is derived from it and is never a transaction row),
+-- salary.state (JSON `{"v":1,"e":[{"t":txnId,"k":"c"|"m","a":"YYYY-MM-DD","mt"?,"mm"?,"mc"?}],"s":[skipped paydays],"d":[declined txn ids]}`, T-195: transactions tied to a payday; pruned to 8 / 8 / 16; unreadable text reads as empty; schema stays v5),
 -- contribution_opt_in, scan_depth_months, capture.scan_personal_senders (T-048, bool, default off), setup_progress, paywall_last_shown, … (typed accessors in core/settings)
 
 CREATE TABLE secure_state (key TEXT PRIMARY KEY, value BLOB NOT NULL, updated_at INTEGER NOT NULL);
