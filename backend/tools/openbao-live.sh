@@ -63,7 +63,8 @@ openssl req -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -subj "/CN=openba
 printf 'subjectAltName=DNS:openbao,DNS:localhost,IP:127.0.0.1\nextendedKeyUsage=serverAuth\nbasicConstraints=critical,CA:FALSE\n' >"$W/ext.cnf"
 openssl x509 -req -in "$W/server.csr" -CA "$W/tls/ca.pem" -CAkey "$W/ca-key.pem" -CAcreateserial -days 2 \
   -extfile "$W/ext.cnf" -out "$W/tls/server.pem" 2>/dev/null
-openssl rand -out "$W/unseal/unseal.key" 32
+# Hex, no newline: a raw 32-byte key could start or end with a white-space byte that the file:// reader may trim.
+openssl rand -hex 32 | tr -d '\n' >"$W/unseal/unseal.key"
 cp "$BACKEND/deploy/openbao/openbao.hcl" "$W/config/openbao.hcl"
 # The CI container is reached on 127.0.0.1 (published port), not the "openbao" network name.
 sed -i 's#^api_addr .*#api_addr     = "https://127.0.0.1:8200"#; s#^cluster_addr .*#cluster_addr = "https://127.0.0.1:8201"#' "$W/config/openbao.hcl"

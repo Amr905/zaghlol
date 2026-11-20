@@ -3,7 +3,7 @@
 # Host folders (create them as in deployment.md §3; uid 1655 = OpenBao, uid 1654 = the api/worker image user):
 #   /etc/zaghlol/openbao/config   openbao.hcl                      root-owned, 0755 dir / 0644 file
 #   /etc/zaghlol/openbao/tls      server.pem, server-key.pem, ca.pem   1655, 0500 / 0400
-#   /etc/zaghlol/openbao/unseal   unseal.key (32 raw bytes)        1655, 0500 / 0400 (root controls the parent)
+#   /etc/zaghlol/openbao/unseal   unseal.key (64 hex chars)        1655, 0500 / 0400 (root controls the parent)
 #   /var/lib/zaghlol/openbao/data and .../audit                    1655, 0700
 #   /etc/zaghlol/openbao-api and /etc/zaghlol/openbao-worker       1654, 0500 / 0400: role-id, secret-id, ca.pem
 name: zaghlol-backend
