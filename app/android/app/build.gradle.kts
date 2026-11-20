@@ -141,6 +141,12 @@ android {
             // Native debug symbols go inside the AAB; Play keeps them private
             // and uses them to symbolicate native crashes (no third-party SDK).
             ndk { debugSymbolLevel = "SYMBOL_TABLE" }
+            // T-190 (NFR-PERF-07): R8 code shrinking and resource shrinking, set
+            // explicitly (the Flutter Gradle plugin enables them by default). The
+            // keep rules are in proguard-rules.pro; the Flutter plugin adds that
+            // file together with proguard-android-optimize.txt and its own rules.
+            isMinifyEnabled = true
+            isShrinkResources = true
         }
     }
 }
