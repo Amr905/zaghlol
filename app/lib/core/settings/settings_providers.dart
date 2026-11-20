@@ -43,6 +43,8 @@ final contributionOptInProvider = settingProvider(Settings.contributionOptIn);
 final scanDepthMonthsProvider = settingProvider(Settings.scanDepthMonths);
 final setupProgressProvider = settingProvider(Settings.setupProgress);
 
+final moneyGroupByTypeProvider = settingProvider(Settings.moneyGroupByType);
+
 /// The raw `hide_amounts.app` setting (D-67).
 final hideAmountsAppProvider = settingProvider(Settings.hideAmountsApp);
 

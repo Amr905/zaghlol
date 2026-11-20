@@ -568,6 +568,56 @@
   "accountsOverviewNetWorth": "Net worth",
   "accountsOverviewOtherCurrenciesA11y": "Other currencies",
   "accountsOverviewAccountsTitle": "Cards & accounts",
+  "accountsGroupBank": "Bank accounts & debit cards",
+  "@accountsGroupBank": {
+    "description": "T"
+  },
+  "accountsGroupCredit": "Credit cards & pay later",
+  "@accountsGroupCredit": {
+    "description": "T"
+  },
+  "accountsGroupWallets": "Wallets & prepaid",
+  "@accountsGroupWallets": {
+    "description": "T"
+  },
+  "accountsGroupCash": "Cash",
+  "@accountsGroupCash": {
+    "description": "T"
+  },
+  "accountsGroupToggle": "Group by type",
+  "@accountsGroupToggle": {
+    "description": "C"
+  },
+  "accountsOverviewUsedOf": "{used} used of {limit}",
+  "@accountsOverviewUsedOf": {
+    "description": "L",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewUsedBarA11y": "{percent} of your limit used",
+  "@accountsOverviewUsedBarA11y": {
+    "description": "S",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewDueOn": "Due {date}",
+  "@accountsOverviewDueOn": {
+    "description": "C",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "accountsOverviewCompare": "Compare",
   "accountsOverviewAsOf": "as of {when}",
   "accountsOverviewCreditAvailable": "available of {limit}",

@@ -3424,6 +3424,54 @@ abstract class AppLocalizations {
   /// **'كروتك وحساباتك'**
   String get accountsOverviewAccountsTitle;
 
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابات وكروت ديبت'**
+  String get accountsGroupBank;
+
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'كروت كريدت وتقسيط'**
+  String get accountsGroupCredit;
+
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'محافظ وكروت مسبقة الدفع'**
+  String get accountsGroupWallets;
+
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'كاش'**
+  String get accountsGroupCash;
+
+  /// C · Money tab toggle chip: sections by account type
+  ///
+  /// In ar, this message translates to:
+  /// **'رتّب حسب النوع'**
+  String get accountsGroupToggle;
+
+  /// L · credit row, used and limit
+  ///
+  /// In ar, this message translates to:
+  /// **'مستخدم {used} من {limit}'**
+  String accountsOverviewUsedOf(String used, String limit);
+
+  /// S · credit bar semantics
+  ///
+  /// In ar, this message translates to:
+  /// **'مستخدم {percent} من الليميت'**
+  String accountsOverviewUsedBarA11y(String percent);
+
+  /// C · credit row, statement due date
+  ///
+  /// In ar, this message translates to:
+  /// **'السداد {date}'**
+  String accountsOverviewDueOn(String date);
+
   /// L · text button, opens S-42
   ///
   /// In ar, this message translates to:

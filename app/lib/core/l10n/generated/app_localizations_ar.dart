@@ -2311,6 +2311,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountsOverviewAccountsTitle => 'كروتك وحساباتك';
 
   @override
+  String get accountsGroupBank => 'حسابات وكروت ديبت';
+
+  @override
+  String get accountsGroupCredit => 'كروت كريدت وتقسيط';
+
+  @override
+  String get accountsGroupWallets => 'محافظ وكروت مسبقة الدفع';
+
+  @override
+  String get accountsGroupCash => 'كاش';
+
+  @override
+  String get accountsGroupToggle => 'رتّب حسب النوع';
+
+  @override
+  String accountsOverviewUsedOf(String used, String limit) {
+    return 'مستخدم $used من $limit';
+  }
+
+  @override
+  String accountsOverviewUsedBarA11y(String percent) {
+    return 'مستخدم $percent من الليميت';
+  }
+
+  @override
+  String accountsOverviewDueOn(String date) {
+    return 'السداد $date';
+  }
+
+  @override
   String get accountsOverviewCompare => 'قارن';
 
   @override

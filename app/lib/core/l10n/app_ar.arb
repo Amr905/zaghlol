@@ -2984,6 +2984,56 @@
   "@accountsOverviewAccountsTitle": {
     "description": "L"
   },
+  "accountsGroupBank": "حسابات وكروت ديبت",
+  "@accountsGroupBank": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupCredit": "كروت كريدت وتقسيط",
+  "@accountsGroupCredit": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupWallets": "محافظ وكروت مسبقة الدفع",
+  "@accountsGroupWallets": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupCash": "كاش",
+  "@accountsGroupCash": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupToggle": "رتّب حسب النوع",
+  "@accountsGroupToggle": {
+    "description": "C · Money tab toggle chip: sections by account type"
+  },
+  "accountsOverviewUsedOf": "مستخدم {used} من {limit}",
+  "@accountsOverviewUsedOf": {
+    "description": "L · credit row, used and limit",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewUsedBarA11y": "مستخدم {percent} من الليميت",
+  "@accountsOverviewUsedBarA11y": {
+    "description": "S · credit bar semantics",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewDueOn": "السداد {date}",
+  "@accountsOverviewDueOn": {
+    "description": "C · credit row, statement due date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "accountsOverviewCompare": "قارن",
   "@accountsOverviewCompare": {
     "description": "L · text button, opens S-42"

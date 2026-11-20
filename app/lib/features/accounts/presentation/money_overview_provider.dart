@@ -4,6 +4,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../recurring/data/recurring_repository.dart';
 import '../data/accounts_providers.dart';
 import '../domain/account.dart';
 
@@ -38,3 +39,22 @@ final moneyOverviewProvider = FutureProvider<MoneyOverview>((ref) async {
     totals: MultiCurrencyTotal.of(totals.values),
   );
 }, name: 'moneyOverviewProvider');
+
+/// T-197: the next statement due date per credit account (active card-due
+/// reminders). Read apart from the overview so a slow or failed lookup only
+/// leaves the date out of the row.
+final cardDueDatesProvider = FutureProvider<Map<String, CivilDate>>((
+  ref,
+) async {
+  final recurring = await ref.watch(recurringRepositoryProvider.future);
+  final out = <String, CivilDate>{};
+  for (final r in await recurring.list(status: RecurringStatus.active)) {
+    final id = r.accountId;
+    if (r.kind != RecurringKind.cardDue || id == null) continue;
+    final d = CivilDate.tryParse(r.nextDueDate ?? '');
+    if (d == null) continue;
+    final cur = out[id];
+    if (cur == null || d < cur) out[id] = d;
+  }
+  return out;
+}, name: 'cardDueDatesProvider');

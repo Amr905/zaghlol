@@ -2236,6 +2236,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountsOverviewAccountsTitle => 'Cards & accounts';
 
   @override
+  String get accountsGroupBank => 'Bank accounts & debit cards';
+
+  @override
+  String get accountsGroupCredit => 'Credit cards & pay later';
+
+  @override
+  String get accountsGroupWallets => 'Wallets & prepaid';
+
+  @override
+  String get accountsGroupCash => 'Cash';
+
+  @override
+  String get accountsGroupToggle => 'Group by type';
+
+  @override
+  String accountsOverviewUsedOf(String used, String limit) {
+    return '$used used of $limit';
+  }
+
+  @override
+  String accountsOverviewUsedBarA11y(String percent) {
+    return '$percent of your limit used';
+  }
+
+  @override
+  String accountsOverviewDueOn(String date) {
+    return 'Due $date';
+  }
+
+  @override
   String get accountsOverviewCompare => 'Compare';
 
   @override
