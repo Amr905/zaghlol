@@ -32,9 +32,17 @@ class FakeEditor implements TxnEditorPort {
   List<String> removedLinks = const [];
   Object? failWith;
 
+  /// When set, only the `add` call with this 0-based index throws [failWith].
+  int? failOnlyAddCall;
+  int _addCalls = 0;
+
   @override
   Future<List<String>> add(List<NewTransaction> legs) async {
-    if (failWith != null) throw failWith!;
+    final call = _addCalls++;
+    if (failWith != null &&
+        (failOnlyAddCall == null || failOnlyAddCall == call)) {
+      throw failWith!;
+    }
     added.add(legs);
     return [for (var i = 0; i < legs.length; i++) 'new$i'];
   }
