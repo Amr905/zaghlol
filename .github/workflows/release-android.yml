@@ -169,6 +169,13 @@ jobs:
           echo "UAPK=$PWD/$APK" >> "$GITHUB_ENV"
           ls -l "$APK"
 
+      # T-190 / NFR-PERF-07: release size guard (+10 % over .github/size-baseline.json, or over budget).
+      # The per-device Play download size is measured by the size-report workflow.
+      - name: Size guard (T-190)
+        run: |
+          printf 'android.%s.release_aab\t%s\n' "$FLAVOR" "$(stat -c %s "$AAB")" > "$RUNNER_TEMP/sizes.tsv"
+          bash .github/scripts/check-app-size.sh "$RUNNER_TEMP/sizes.tsv" "$FLAVOR" | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Assert permissions, ids, SDK levels, no OS backup, placement
         run: |
           set -e

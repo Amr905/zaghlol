@@ -34,7 +34,7 @@ for abi in arm64-v8a armeabi-v7a x86_64; do
        --ks="$T/tools/size.jks" --ks-pass=pass:sizepass --ks-key-alias=size --key-pass=pass:sizepass > "$OUT/bundletool-build-$abi.log" 2>&1; then
     java -jar "$JAR" get-size total --apks="$apks" --device-spec="$spec" > "$OUT/bundletool-size-$abi.csv" 2>> "$OUT/bundletool-build-$abi.log"
     echo "bundletool get-size ($abi):"; cat "$OUT/bundletool-size-$abi.csv"; tail -n 3 "$OUT/bundletool-build-$abi.log"
-    max=$(tail -n 1 "$OUT/bundletool-size-$abi.csv" | cut -d, -f2)
+    max=$(tail -n 1 "$OUT/bundletool-size-$abi.csv" | tr -d "\r" | cut -d, -f2)
     [[ "$max" =~ ^[0-9]+$ ]] && rec "android.$FLAVOR.play_download.$abi" "$max"
   else
     echo "::warning::bundletool build-apks failed for $abi: $(tail -n 5 "$OUT/bundletool-build-$abi.log" | tr '\n' '|')"

@@ -155,9 +155,12 @@ android {
 // --target-platform filters the engine and libapp.so, but not the .so files that come
 // with AARs (ML Kit, Tesseract, ...) or native assets, so the x86_64 ones are excluded
 // from the release packaging here. Debug and profile keep x86_64 for emulators.
+// -Pzaghlol.releaseX86=true keeps them, for a release-configuration smoke test on an x86_64 emulator.
 androidComponents {
     onVariants(selector().withBuildType("release")) { variant ->
-        variant.packaging.jniLibs.excludes.add("lib/x86_64/**")
+        if (findProperty("zaghlol.releaseX86") != "true") {
+            variant.packaging.jniLibs.excludes.add("lib/x86_64/**")
+        }
     }
 }
 

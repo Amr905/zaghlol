@@ -236,6 +236,13 @@ jobs:
           retention-days: 14
 
       # Dry-run output only: no signature, not installable, no secrets.
+      # T-190 / NFR-PERF-07: the unsigned IPA is an upper bound of the App Store download size.
+      - name: Size guard (T-190, dry run)
+        if: steps.sign.outputs.signed != 'true'
+        run: |
+          printf 'ios.release_ipa_unsigned\t%s\n' "$(stat -f %z "$RUNNER_TEMP/ipa/Zaghlol-UNSIGNED.ipa")" > "$RUNNER_TEMP/sizes.tsv"
+          bash .github/scripts/check-app-size.sh "$RUNNER_TEMP/sizes.tsv" ios | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Keep the unsigned archive as an IPA (3 days, dry run only)
         if: steps.sign.outputs.signed != 'true'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
