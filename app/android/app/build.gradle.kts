@@ -151,6 +151,16 @@ android {
     }
 }
 
+// T-190 (NFR-PERF-07): release builds ship arm64-v8a and armeabi-v7a only. Flutter's
+// --target-platform filters the engine and libapp.so, but not the .so files that come
+// with AARs (ML Kit, Tesseract, ...) or native assets, so the x86_64 ones are excluded
+// from the release packaging here. Debug and profile keep x86_64 for emulators.
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.packaging.jniLibs.excludes.add("lib/x86_64/**")
+    }
+}
+
 // T-159 (CR-02, BR-SYNC-03): ML Kit pulls in the Google datatransport CCT/firelog
 // backend, which uploads SDK-usage telemetry to Google. Excluded from every
 // configuration. transport-runtime stays (ML Kit's classes link against it);
