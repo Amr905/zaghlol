@@ -16,6 +16,7 @@ import '../../notifications/application/housekeeping_providers.dart'
 import '../../transfers/application/suggestion_hook.dart';
 import '../application/refund_matching.dart';
 import '../application/reimbursements.dart';
+import 'amount_repair_events.dart';
 import '../application/transfer_pairing.dart';
 import '../application/transactions_changed_event.dart';
 import 'alerting_transaction_repository.dart';
@@ -48,13 +49,13 @@ final transactionRepositoryProvider = FutureProvider<TransactionRepository>((
 ) async {
   final db = await ref.watch(appDatabaseProvider.future);
   final reimb = await ref.watch(reimbursementsProvider.future);
+  final repairs = AmountRepairEvents(reimb);
   final inner = DriftTransactionRepository(
     TransactionsDao(db),
     clock: ref.watch(clockProvider),
     newId: ref.watch(idGeneratorProvider),
     // EC-40: runs inside the edit's own transaction, before the write.
-    onAmountChange: (id, minor) async =>
-        (await reimb.repairForNewAmount(id, minor)).removedLinkIds,
+    onAmountChange: repairs.onAmountChange,
   );
   // WIRE-2: after a manual add, the reimbursement suggestion (T-092) and the
   // duplicate-charge check (T-100).
@@ -105,6 +106,8 @@ final transactionRepositoryProvider = FutureProvider<TransactionRepository>((
           ),
       ]);
       ref.read(domainEventBusProvider).publish(event);
+      // FU-158a: the repair's own event (EC-40), now the edit committed.
+      repairs.flush(ref.read(domainEventBusProvider));
     },
   );
 }, name: 'transactionRepositoryProvider');

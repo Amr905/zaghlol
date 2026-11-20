@@ -16,6 +16,7 @@ import '../../../core/backend/backend_client.dart';
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/app_database_opener.dart' show DbOpenFailure;
 import '../../../core/db/db_key_providers.dart';
+import '../../../core/platform/google_sign_in_gate.dart';
 import '../../../core/platform/seat_key_api.g.dart';
 import '../../backup/application/schedule_providers.dart';
 import '../../catalog_sync/application/sync_providers.dart';
@@ -53,11 +54,10 @@ final seatKeyRotationProvider = Provider<Future<void> Function()>((ref) {
 
 /// Drops the local Google sign-in session (Drive backup / account sign-in).
 /// Best effort; tests override it.
-final googleSessionSignOutProvider = Provider<Future<void> Function()>(
-  (ref) =>
-      () => GoogleSignIn.instance.signOut(),
-  name: 'googleSessionSignOutProvider',
-);
+final googleSessionSignOutProvider = Provider<Future<void> Function()>((ref) {
+  final gate = ref.watch(googleSignInGateProvider);
+  return () => gate.run(() => GoogleSignIn.instance.signOut());
+}, name: 'googleSessionSignOutProvider');
 
 /// The resume marker, next to the database directory (`<appSupport>`).
 final wipeMarkerProvider = Provider<WipeMarker>(

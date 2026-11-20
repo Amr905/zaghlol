@@ -186,6 +186,15 @@ final class CompareData {
   bool get isEmpty => available.length < 2;
 }
 
+/// The Total cell of a compare column: the sum of its category cells. The
+/// cells show cash payments in full while [CardSpend.spend] leaves out the
+/// part paid from earlier-withdrawn cash, so that part is added back
+/// (FU-186a).
+Money compareCardTotal(CardSpend card, CategoryDonut? donut) =>
+    donut?.coveredEarlier == null
+    ? card.spend
+    : card.spend + donut!.coveredEarlier!;
+
 final compareDataProvider = FutureProvider.autoDispose<CompareData>((
   ref,
 ) async {
@@ -216,7 +225,10 @@ final compareDataProvider = FutureProvider.autoDispose<CompareData>((
         CompareCard(
           accountId: c.accountId,
           label: c.label,
-          spend: c.spend,
+          spend: compareCardTotal(
+            c,
+            donut is ChartReady<CategoryDonut> ? donut.data : null,
+          ),
           byCategory: donut is ChartReady<CategoryDonut>
               ? {for (final s in donut.data.slices) s.categoryId: s.amount}
               : const {},

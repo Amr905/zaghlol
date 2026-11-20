@@ -10,6 +10,7 @@ import '../../catalog_sync/application/sync_providers.dart';
 import '../../gold/application/entitlement.dart';
 import '../../gold/application/gold_providers.dart';
 import '../../gold/domain/restore_outcome.dart';
+import '../../../core/platform/google_sign_in_gate.dart';
 import '../domain/sign_in_outcome.dart';
 import 'account_service.dart';
 import 'apple_state.dart';
@@ -21,6 +22,7 @@ final idTokenSourceProvider = Provider<IdTokenSource>((ref) {
   return RoutingIdTokenSource(
     google: GoogleIdTokenSource(
       port: PluginGoogleSignInPort(),
+      gate: ref.watch(googleSignInGateProvider),
       isIos: platform == ClientPlatform.ios,
     ),
     apple: AppleIdTokenSource(

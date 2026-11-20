@@ -121,12 +121,14 @@ final class PluginGoogleSignInPort implements GoogleSignInPort {
 final class GoogleIdTokenSource implements IdTokenSource {
   GoogleIdTokenSource({
     required this._port,
+    required this.gate,
     required this.isIos,
     this.clientId = googleIosClientId,
     this.serverClientId = googleServerClientId,
   });
 
   final GoogleSignInPort _port;
+  final GoogleSignInGate gate;
   final bool isIos;
   final String clientId;
   final String serverClientId;
@@ -141,10 +143,7 @@ final class GoogleIdTokenSource implements IdTokenSource {
       throw const SignInProviderException();
     }
     final run = _tail.then(
-      (_) => GoogleSignInGate.instance.run(
-        () => _attempt(hashedNonce),
-        setsNonce: true,
-      ),
+      (_) => gate.run(() => _attempt(hashedNonce), setsNonce: true),
     );
     _tail = run.then<void>((_) {}, onError: (Object _) {});
     return run;
@@ -153,7 +152,7 @@ final class GoogleIdTokenSource implements IdTokenSource {
   @override
   Future<void> signOut() async {
     try {
-      await GoogleSignInGate.instance.run(_port.signOut);
+      await gate.run(_port.signOut);
     } on Object {
       // Local sign-out must never fail because the plugin did.
     }

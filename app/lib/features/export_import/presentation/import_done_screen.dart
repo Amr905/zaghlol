@@ -13,6 +13,8 @@ import '../../../core/l10n/money_format.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
+import '../../transactions/presentation/list/txn_list_providers.dart';
+import '../../transactions/presentation/list/txn_row.dart' show categoryName;
 import 'import_ports.dart';
 import 'import_source_screen.dart' show ImportRoundButton;
 import '../../../core/settings/settings_providers.dart';
@@ -130,7 +132,13 @@ class ImportDoneScreen extends ConsumerWidget {
                   children: [
                     for (var i = 0; i < o.topCategories.length; i++)
                       ZListRow(
-                        title: o.topCategories[i].name,
+                        title: o.topCategories[i].name.isNotEmpty
+                            ? o.topCategories[i].name
+                            : _categoryTitle(
+                                ref,
+                                o.topCategories[i].categoryId,
+                                lang,
+                              ),
                         leading: ZCategoryGlyph(
                           categoryId: o.topCategories[i].categoryId,
                         ),
@@ -211,4 +219,10 @@ class _Stat extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The localized name of a category the runner reported by id only.
+String _categoryTitle(WidgetRef ref, String? id, String lang) {
+  final cat = ref.watch(txnLookupsProvider).value?.category(id);
+  return cat == null ? '' : categoryName(cat, lang);
 }

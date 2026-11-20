@@ -145,6 +145,16 @@ abstract interface class CsvImportStore {
   Future<String> insert(ImportedTxn row);
 }
 
+/// One category's spend among the rows an import added (FU-240b).
+final class ImportCategoryTotal {
+  const ImportCategoryTotal(this.categoryId, this.total);
+  final String categoryId;
+  final Money total;
+}
+
+/// How many top categories an import reports.
+const int importTopCategories = 3;
+
 final class ImportSummary {
   const ImportSummary({
     required this.totalRows,
@@ -156,7 +166,18 @@ final class ImportSummary {
     this.earliest,
     this.latest,
     this.needsReview = 0,
+    this.autoCategorised = 0,
+    this.needCategory = 0,
+    this.topCategories = const [],
   });
+
+  /// Rows added that arrived with a category / without one.
+  final int autoCategorised;
+  final int needCategory;
+
+  /// Biggest expense categories among the added rows, in the currency with
+  /// the most such rows (never mixes currencies).
+  final List<ImportCategoryTotal> topCategories;
 
   /// PDF statements: rows held back for the user to keep, fix or skip. A real
   /// import refuses to run while a row has no decision.
@@ -278,6 +299,7 @@ class ImportCsvUseCase {
       final seen = <String, int>{};
       var imported = 0;
       var duplicates = 0;
+      final added = <ImportedTxn>[];
       for (final v in valid) {
         final slot = '${v.accountId}|${_ms(v.occurredAt)}';
         final k = '$slot|${_key(v.direction, v.amount, v.merchant)}';
@@ -289,6 +311,7 @@ class ImportCsvUseCase {
         } else {
           if (!dryRun) newIds.add(await _store.insert(v));
           imported++;
+          added.add(v);
         }
       }
       DateTime? earliest;
@@ -310,8 +333,50 @@ class ImportCsvUseCase {
         invalid: invalid,
         invalidByProblem: problems,
         invalidRows: invalidRows,
+        autoCategorised: added.where((v) => v.categoryId != null).length,
+        needCategory: added.where((v) => v.categoryId == null).length,
+        topCategories: _top(added),
       );
     });
+  }
+
+  static List<ImportCategoryTotal> _top(List<ImportedTxn> added) {
+    final spend = [
+      for (final v in added)
+        if (v.direction == TxnDirection.expense && v.categoryId != null) v,
+    ];
+    final perCurrency = <String, int>{};
+    for (final v in spend) {
+      perCurrency.update(
+        v.amount.currency.code,
+        (n) => n + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    if (perCurrency.isEmpty) return const [];
+    final code =
+        (perCurrency.entries.toList()..sort(
+              (a, b) => b.value != a.value
+                  ? b.value.compareTo(a.value)
+                  : a.key.compareTo(b.key),
+            ))
+            .first
+            .key;
+    final totals = <String, Money>{};
+    for (final v in spend) {
+      if (v.amount.currency.code != code) continue;
+      final prev = totals[v.categoryId!];
+      totals[v.categoryId!] = prev == null ? v.amount : prev + v.amount;
+    }
+    final out = totals.entries.toList()
+      ..sort((a, b) {
+        final d = b.value.minor.compareTo(a.value.minor);
+        return d != 0 ? d : a.key.compareTo(b.key);
+      });
+    return [
+      for (final e in out.take(importTopCategories))
+        ImportCategoryTotal(e.key, e.value),
+    ];
   }
 
   static int _ms(DateTime d) => d.toUtc().millisecondsSinceEpoch;

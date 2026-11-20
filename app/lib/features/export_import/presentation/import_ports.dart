@@ -297,6 +297,13 @@ final class CsvImportRunner implements ImportRunner {
       imported: s.imported,
       earliest: s.earliest,
       latest: s.latest,
+      autoCategorised: s.autoCategorised,
+      needReview: s.needCategory,
+      // The done screen shows the localized name of an empty-named line.
+      topCategories: [
+        for (final c in s.topCategories)
+          ImportTopCategory(categoryId: c.categoryId, name: '', total: c.total),
+      ],
     );
   }
 }
