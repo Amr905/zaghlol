@@ -21,6 +21,7 @@ import '../../wealth/domain/approx_view.dart';
 import '../domain/account.dart';
 import 'money_overview_provider.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
 
 /// Shown when there are no balances yet.
 final _zeroEgp = Money(Currency.of('EGP'), 0);
@@ -110,12 +111,19 @@ class MoneyTab extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: ZSpacing.lg),
-            Semantics(
-              header: true,
-              child: Text(
-                l10n.accountsOverviewTitle,
-                style: ZType.display.copyWith(color: c.text),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      l10n.accountsOverviewTitle,
+                      style: ZType.display.copyWith(color: c.text),
+                    ),
+                  ),
+                ),
+                const ZHideAmountsButton(),
+              ],
             ),
             const SizedBox(height: ZSpacing.lg),
             ...overview.when(

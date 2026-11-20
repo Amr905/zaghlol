@@ -21,6 +21,7 @@ import '../../wealth/presentation/asset_format.dart';
 import '../data/zakah_providers.dart';
 import '../data/zakah_repository.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
 
 class ZakahScreen extends ConsumerWidget {
   const ZakahScreen({
@@ -47,6 +48,7 @@ class ZakahScreen extends ConsumerWidget {
       backgroundColor: c.bg,
       appBar: AppBar(
         backgroundColor: c.bg,
+        actions: const [ZHideAmountsButton()],
         title: Semantics(
           header: true,
           child: Text(

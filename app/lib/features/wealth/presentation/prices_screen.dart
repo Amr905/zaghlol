@@ -17,6 +17,7 @@ import '../data/prices_repository.dart';
 import '../domain/price_feed.dart';
 import 'assets_providers.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
 
 class PricesScreen extends ConsumerStatefulWidget {
   const PricesScreen({super.key});
@@ -63,6 +64,7 @@ class _PricesScreenState extends ConsumerState<PricesScreen> {
       backgroundColor: c.bg,
       appBar: AppBar(
         backgroundColor: c.bg,
+        actions: const [ZHideAmountsButton()],
         title: Semantics(
           header: true,
           child: Text(

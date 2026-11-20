@@ -31,6 +31,7 @@ import 'txn_list_providers.dart';
 import 'txn_row.dart';
 import '../../../../core/ui/z_haptics.dart';
 import '../../../../core/settings/settings_providers.dart';
+import '../../../../core/ui/z_hide_amounts_button.dart';
 
 /// How long the search field waits after the last keystroke.
 const Duration txnSearchDebounce = Duration(milliseconds: 250);
@@ -138,6 +139,7 @@ class _State extends ConsumerState<TransactionsListScreen> {
                 : l.transactionsListTitle,
           ),
           actions: [
+            if (!sel.active) const ZHideAmountsButton(),
             if (sel.active)
               TextButton(
                 onPressed: _selectAll,

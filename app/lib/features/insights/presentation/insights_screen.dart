@@ -11,6 +11,7 @@ import '../../budget/presentation/budget_screen.dart';
 import '../../home/presentation/home_widgets.dart';
 import 'charts/charts_screen.dart';
 import '../../recurring/presentation/bills_screen.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
 
 enum InsightsSegment { charts, budget, bills }
 
@@ -64,17 +65,25 @@ class _InsightsScreenState extends State<InsightsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Row(children: [HomeCardFilterChip()]),
-                  Semantics(
-                    header: true,
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.symmetric(
-                        vertical: ZSpacing.sm,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.symmetric(
+                              vertical: ZSpacing.sm,
+                            ),
+                            child: Text(
+                              l.commonNavInsights,
+                              style: ZType.display.copyWith(color: c.text),
+                            ),
+                          ),
+                        ),
                       ),
-                      child: Text(
-                        l.commonNavInsights,
-                        style: ZType.display.copyWith(color: c.text),
-                      ),
-                    ),
+                      // D-67: hides the amounts of Charts, Budget and Bills.
+                      const ZHideAmountsButton(),
+                    ],
                   ),
                   _InsightsTabs(
                     segments: [

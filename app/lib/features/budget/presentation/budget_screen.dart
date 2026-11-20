@@ -24,6 +24,7 @@ import 'budget_view.dart';
 import 'edit_budgets_screen.dart';
 import '../../../core/ui/z_haptics.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/z_hide_amounts_button.dart';
 
 /// Hosts [BudgetScreen] as a pushed route (Home hero tap). The screen itself is
 /// a tab body with no Scaffold, so on its own it renders without Material
@@ -38,7 +39,11 @@ class BudgetRouteScaffold extends StatelessWidget {
     final c = ZColors.of(context);
     return Scaffold(
       backgroundColor: c.bg,
-      appBar: AppBar(backgroundColor: c.bg, title: Text(l.insightsTabsBudget)),
+      appBar: AppBar(
+        backgroundColor: c.bg,
+        title: Text(l.insightsTabsBudget),
+        actions: const [ZHideAmountsButton()],
+      ),
       body: child,
     );
   }

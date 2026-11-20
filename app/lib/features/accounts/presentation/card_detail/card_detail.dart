@@ -35,6 +35,7 @@ import '../edit_card/edit_card_providers.dart' show institutionOptionsProvider;
 import '../edit_card/merge_flow.dart';
 import 'card_detail_providers.dart';
 import '../../../../core/settings/settings_providers.dart';
+import '../../../../core/ui/z_hide_amounts_button.dart';
 
 // ICU select keys of accountsDetailIgnoredBanner.
 const String _platformIos = 'ios';
@@ -127,6 +128,7 @@ class _State extends ConsumerState<CardDetailScreen> {
               child: const BackButtonIcon(),
             ),
             const Spacer(),
+            const ZHideAmountsButton(),
             _Menu(account: account, name: name),
             const SizedBox(width: ZSpacing.sm),
             _RoundBtn(
