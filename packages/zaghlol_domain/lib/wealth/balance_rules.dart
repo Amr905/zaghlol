@@ -53,13 +53,36 @@ int cashSignOfDirection(String direction) => switch (direction) {
   _ => 0,
 };
 
+/// Which figure an anchor was taken from (shown in the line's source text).
+enum AnchorBasis {
+  /// The bank message's balance (for a card: the amount owed).
+  reportedBalance,
+
+  /// An asset account's available balance (no balance in the message).
+  reportedAvailable,
+
+  /// A card's owed amount derived as limit minus available.
+  limitMinusAvailable,
+
+  /// The figure the user typed.
+  userEntered,
+}
+
 /// A known balance a computation starts from.
 final class BalanceAnchor {
   const BalanceAnchor({
     required this.amount,
     required this.asOf,
     required this.userEntered,
+    this.basis,
   });
+
+  /// The figure used; defaults to the balance (or the user's entry).
+  final AnchorBasis? basis;
+
+  AnchorBasis get effectiveBasis =>
+      basis ??
+      (userEntered ? AnchorBasis.userEntered : AnchorBasis.reportedBalance);
 
   /// The balance (asset accounts) or the amount owed (liabilities).
   final Money amount;
@@ -71,9 +94,10 @@ final class BalanceAnchor {
 
 /// The anchor of a pair, or null when there is none ([BalanceSource.unknown]).
 ///
-/// Reported (an `account_balances` row): an asset account uses
-/// [reportedBalance]; a liability uses [reportedBalance] (the posted figure),
-/// else `limit - available` in the same currency, floored at 0. The user's
+/// Reported (an `account_balances` row): both kinds use [reportedBalance]
+/// (the posted figure); without it an asset account falls back to
+/// [reportedAvailable] (many bank messages give only the available balance)
+/// and a liability to `limit - available` in the same currency, floored at 0. The user's
 /// entry competes by instant: the newer one wins, a tie goes to the reported
 /// one. Any figure in another currency is ignored (never converted).
 BalanceAnchor? pickAnchor({
@@ -94,6 +118,17 @@ BalanceAnchor? pickAnchor({
         amount: b,
         asOf: reportedAsOf.toUtc(),
         userEntered: false,
+        basis: AnchorBasis.reportedBalance,
+      );
+    } else if (!isLiability &&
+        b == null &&
+        reportedAvailable != null &&
+        reportedAvailable.currency == currency) {
+      reported = BalanceAnchor(
+        amount: reportedAvailable,
+        asOf: reportedAsOf.toUtc(),
+        userEntered: false,
+        basis: AnchorBasis.reportedAvailable,
       );
     } else if (isLiability &&
         b == null &&
@@ -106,6 +141,7 @@ BalanceAnchor? pickAnchor({
         amount: used.isNegative ? Money(currency, 0) : used,
         asOf: reportedAsOf.toUtc(),
         userEntered: false,
+        basis: AnchorBasis.limitMinusAvailable,
       );
     }
   }
@@ -147,7 +183,11 @@ final class BreakdownLine {
     this.asOf,
     this.sinceCount = 0,
     this.stale = false,
+    this.basis,
   });
+
+  /// The figure the anchor came from (accounts with a figure only).
+  final AnchorBasis? basis;
 
   final BreakdownGroup group;
 
@@ -251,6 +291,7 @@ BreakdownLine resolveAccountLine({
     amount: amount,
     asOf: anchor.asOf,
     sinceCount: totals.count,
+    basis: anchor.effectiveBasis,
     stale: !computed && age > balanceStaleAfterDays,
   );
 }

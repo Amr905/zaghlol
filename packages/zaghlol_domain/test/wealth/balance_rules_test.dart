@@ -54,12 +54,29 @@ void main() {
       expect(a.userEntered, isFalse);
     });
 
-    test('a reported row with a null balance gives no anchor (asset)', () {
+    test('asset with only an available figure anchors on it, own basis', () {
+      final a = pickAnchor(
+        currency: _egp,
+        isLiability: false,
+        reportedAvailable: _m(500),
+        reportedAsOf: _t0,
+      )!;
+      expect(a.amount.minor, 500);
+      expect(a.effectiveBasis, AnchorBasis.reportedAvailable);
+      final both = pickAnchor(
+        currency: _egp,
+        isLiability: false,
+        reportedBalance: _m(700),
+        reportedAvailable: _m(500),
+        reportedAsOf: _t0,
+      )!;
+      expect(both.amount.minor, 700);
+      expect(both.effectiveBasis, AnchorBasis.reportedBalance);
       expect(
         pickAnchor(
           currency: _egp,
           isLiability: false,
-          reportedAvailable: _m(500),
+          reportedAvailable: _m(500, _usd),
           reportedAsOf: _t0,
         ),
         isNull,
@@ -176,16 +193,33 @@ void main() {
     });
 
     test('an asset account never derives from a limit', () {
-      expect(
-        pickAnchor(
-          currency: _egp,
-          isLiability: false,
-          reportedAvailable: _m(1500),
-          creditLimit: _m(2000),
-          reportedAsOf: _t0,
-        ),
-        isNull,
-      );
+      final a = pickAnchor(
+        currency: _egp,
+        isLiability: false,
+        reportedAvailable: _m(1500),
+        creditLimit: _m(2000),
+        reportedAsOf: _t0,
+      )!;
+      expect(a.amount.minor, 1500);
+      expect(a.effectiveBasis, AnchorBasis.reportedAvailable);
+    });
+
+    test('credit basis says which figure was used', () {
+      final owed = pickAnchor(
+        currency: _egp,
+        isLiability: true,
+        reportedBalance: _m(500),
+        reportedAsOf: _t0,
+      )!;
+      expect(owed.effectiveBasis, AnchorBasis.reportedBalance);
+      final derived = pickAnchor(
+        currency: _egp,
+        isLiability: true,
+        reportedAvailable: _m(1500),
+        creditLimit: _m(2000),
+        reportedAsOf: _t0,
+      )!;
+      expect(derived.effectiveBasis, AnchorBasis.limitMinusAvailable);
     });
   });
 
