@@ -273,10 +273,10 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-187](tasks/T-187.md) | Hide amounts in the app (eye toggle, `****`) | PO 11-19 | High | Sonnet | flutter-ui-engineer | — | G | 12 | DONE (merged #77) |
 | [T-188](tasks/T-188.md) | Chart period selector (presets, stepping, custom range) | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | DONE (merged #77) |
 | [T-189](tasks/T-189.md) | Charts review: interaction, comparison and clarity (mockups first) | PO 11-19 | High | Opus→Sonnet | ux-designer → flutter-ui-engineer | T-188 | G | 13 | TODO |
-| [T-190](tasks/T-190.md) | App size: measure and reduce (~150 MB reported) | PO 11-19 | High | Sonnet | native-platform-engineer | — | N | 12 | TODO |
+| [T-190](tasks/T-190.md) | App size: measure and reduce (~150 MB reported) | PO 11-19 | High | Sonnet | native-platform-engineer | — | N | 12 | IN_REVIEW (approved, batch 50; release smoke on a device and OCR/PDF decision open) |
 | [T-191](tasks/T-191.md) | Production trust anchors in release builds (BUG-001) | QA | High* | Opus | flutter-core-engineer | T-140 | A | 13 | BLOCKED |
-| [T-192](tasks/T-192.md) | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | T-175 | Medium | Sonnet | backend-engineer | — | B | 12 | TODO |
-| [T-193](tasks/T-193.md) | Follow-up sweep FU-263 / FU-264 | batches 43–44 | Medium | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 merged | B | 12 | IN_PROGRESS (AC1/2/4 done, batch 49) |
+| [T-192](tasks/T-192.md) | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | T-175 | Medium | Sonnet | backend-engineer | — | B | 12 | IN_PROGRESS (L-5, pins, gitleaks narrowing done in batch 50; L-4 and L-3 sign-off wait on the PO) |
+| [T-193](tasks/T-193.md) | Follow-up sweep FU-263 / FU-264 | batches 43–44 | Medium | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 merged | B | 12 | IN_PROGRESS (AC1–AC4 done, batch 50; AC5 emulator run open) |
 | [T-194](tasks/T-194.md) | Dark-mode quip «يعني تبقى فلوسك والمود؟» | PO 11-19 | Low | Haiku | boilerplate-engineer | — | G | 12 | DONE (merged #77) |
 | [T-195](tasks/T-195.md) | Salary as income: add it manually, use the SMS when it arrives | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | DONE (merged #77) |
 | [T-196](tasks/T-196.md) | Recurring every 1/3/6/12 months becomes a bill automatically | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | DONE (merged #77) |
