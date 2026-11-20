@@ -61,7 +61,15 @@ object NotificationRoutes {
    */
   data class Accepted(val route: String?, val cancelId: Int?)
 
-  fun accept(action: String?, presentedToken: String?, route: String?, cancelId: Int?): Accepted? {
+  fun accept(
+    action: String?,
+    presentedToken: String?,
+    route: String?,
+    cancelId: Int?,
+    launchedFromHistory: Boolean = false,
+  ): Accepted? {
+    // Recents relaunch replays the old intent: never act on it again.
+    if (launchedFromHistory) return null
     if (!NotificationHandOff.token.matches(action, presentedToken)) return null
     return Accepted(clean(route), cancelId)
   }

@@ -2387,6 +2387,18 @@
   "@recurringBillsMarkPaid": {
     "description": "B · glossary «اتدفع»"
   },
+  "notificationMarkPaidConfirmBody": "{name}, due {date}",
+  "@notificationMarkPaidConfirmBody": {
+    "description": "L-1 · names the bill and its due date in the mark-paid confirmation",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "notificationMarkPaidConfirmTitle": "Mark this bill as paid?",
   "@notificationMarkPaidConfirmTitle": {
     "description": "L-1 · confirm before a notification action marks a bill paid"

@@ -89,10 +89,10 @@ class MainActivity : FlutterFragmentActivity() {
         notificationEvents = NotificationsEventsApi(messenger)
         NotificationsRegistration.register(messenger, notifHost)
         // L-1: route and cancel id only from our own trampoline.
-        intent?.let { acceptedNotification(it) }?.let { a ->
-            NotificationRoutes.setLaunchRoute(a.route)
-            dismissActionNotification(a)
-        }
+        // A plain launch (or a Recents relaunch) clears a stale route.
+        val launch = intent?.let { acceptedNotification(it) }
+        NotificationRoutes.setLaunchRoute(launch?.route)
+        launch?.let { dismissActionNotification(it) }
         val store = ShareStores.create(applicationContext)
         shareStore = store
         ShareIntakeHostApi.setUp(messenger, ShareIntakeHost(store))
@@ -161,6 +161,7 @@ class MainActivity : FlutterFragmentActivity() {
                 intent.getStringExtra(NotificationHandOff.EXTRA_TOKEN),
                 intent.getStringExtra(NotificationRoutes.EXTRA_ROUTE),
                 if (cancel == Int.MIN_VALUE) null else cancel,
+                (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0,
             )
         } catch (_: RuntimeException) {
             null
