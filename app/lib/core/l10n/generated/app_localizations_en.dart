@@ -7588,11 +7588,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String networthSrcReportedOwed(String date) {
-    return 'Bank message (amount owed) · $date';
-  }
-
-  @override
   String networthSrcAvailable(String date) {
     return 'Available balance from the bank message · $date';
   }
@@ -7666,4 +7661,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String networthLineA11y(String name, String source) {
     return '$name, $source';
   }
+
+  @override
+  String get networthSrcUnknownCard => 'Unknown — set the limit or the balance';
+
+  @override
+  String get networthEdit => 'Edit balance';
+
+  @override
+  String get networthClear => 'Remove the balance I entered';
+
+  @override
+  String get networthBankPartial => 'Not all accounts';
+
+  @override
+  String get networthCardOwed => 'Amount you owe';
 }

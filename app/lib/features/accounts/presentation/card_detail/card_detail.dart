@@ -670,6 +670,64 @@ class _Header extends StatelessWidget {
           ),
         );
     }
+    final counted = line;
+    final isCard =
+        account.kind == AccountKind.credit || account.kind == AccountKind.bnpl;
+    if (isCard &&
+        counted?.amount != null &&
+        limit != null &&
+        available != null) {
+      // The counted owed amount (limit minus available, plus what was spent
+      // and paid since), with where it comes from.
+      lines
+        ..add(const SizedBox(height: ZSpacing.md))
+        ..add(
+          Row(
+            children: [
+              Text(
+                l.networthCardOwed,
+                style: ZType.body.copyWith(color: c.textMuted),
+              ),
+              const SizedBox(width: ZSpacing.md),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: ZMoneyText(
+                    text: fmt.money(counted!.amount!),
+                    size: ZMoneySize.body,
+                    kind: ZMoneyKind.neutral,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+        ..add(
+          Text(
+            balanceSourceText(l, counted, lang: fmt.lang, digits: fmt.digits),
+            style: ZType.caption.copyWith(color: c.textMuted),
+          ),
+        );
+    }
+    if (counted?.basis == AnchorBasis.userEntered) {
+      lines.add(
+        Consumer(
+          builder: (ctx, ref, _) => TextButton(
+            key: const Key('card-edit-balance'),
+            onPressed: () => showSetBalanceSheet(
+              ctx,
+              ref,
+              accountId: account.id,
+              name: account.label,
+              currency: cur,
+              isLiability: isCard,
+              canClear: true,
+            ),
+            child: Text(l.networthEdit),
+          ),
+        ),
+      );
+    }
     return ZCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

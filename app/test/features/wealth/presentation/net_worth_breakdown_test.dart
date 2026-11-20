@@ -71,7 +71,15 @@ NetWorthBreakdown _fixture() {
       totals: const TxnTotals(cashEffectMinor: -20000, count: 2),
     ),
     _acct('n1', 'NBE', 'debit', 250000, inst: 'nbe', last4: '3333'),
-    _acct('c1', 'CIB Credit', 'credit', 300000, inst: 'cib', last4: '4444'),
+    _acct(
+      'c1',
+      'CIB Credit',
+      'credit',
+      300000,
+      inst: 'cib',
+      last4: '4444',
+      basis: AnchorBasis.limitMinusAvailable,
+    ),
     _acct('u1', 'Vodafone Cash', 'wallet', null),
     _acct('w1', 'Wise', 'multi_currency', 120000, cur: _usd),
     BreakdownLine(
@@ -174,7 +182,10 @@ void main() {
     // sources
     expect(find.textContaining('Bank message'), findsWidgets);
     expect(find.textContaining('Worked out from transactions'), findsOneWidget);
-    expect(find.textContaining('Bank message (amount owed)'), findsOneWidget);
+    expect(
+      find.textContaining('Worked out from limit and available'),
+      findsOneWidget,
+    );
     expect(find.text(l.networthSrcAsset), findsOneWidget);
     expect(find.text(l.networthSrcUnknown), findsOneWidget);
     expect(find.text(l.networthSetBalance), findsOneWidget);
@@ -250,6 +261,105 @@ void main() {
     addTearDown(h.dispose);
     await _pump(t, data: _goldFixture(), hide: h);
     await expectNoAmountDigits(t);
+  });
+
+  testWidgets('a card with no limit is unknown and asks for limit or balance', (
+    t,
+  ) async {
+    final line = _acct('c9', 'Card', 'credit', null, inst: 'x');
+    final data = NetWorthBreakdown(
+      lines: [line],
+      units: buildUnitBreakdowns([line]),
+      worth: computeNetWorth(money: const []),
+    );
+    await _pump(t, data: data);
+    final l = AppLocalizations.of(
+      t.element(find.byType(NetWorthBreakdownScreen)),
+    );
+    expect(find.text(l.networthSrcUnknownCard), findsOneWidget);
+  });
+
+  testWidgets('free note shows when assets are left out', (t) async {
+    final b = _fixture();
+    final withNote = NetWorthBreakdown(
+      lines: b.lines,
+      units: b.units,
+      worth: b.worth,
+      assetsLeftOut: true,
+    );
+    await _pump(t, data: withNote);
+    expect(find.byKey(const Key('networth-free-note')), findsOneWidget);
+  });
+
+  testWidgets('a bank total with an unknown account says it is partial', (
+    t,
+  ) async {
+    final lines = [
+      _acct('a1', 'CIB', 'debit', 1000, inst: 'cib', last4: '1111'),
+      _acct('a2', 'CIB', 'account', 2000, inst: 'cib', last4: '2222'),
+      _acct('a3', 'CIB', 'wallet', null, inst: 'cib', last4: '3333'),
+    ];
+    final data = NetWorthBreakdown(
+      lines: lines,
+      units: buildUnitBreakdowns(lines),
+      worth: computeNetWorth(money: moneyLinesOf(lines)),
+    );
+    await _pump(t, data: data);
+    final l = AppLocalizations.of(
+      t.element(find.byType(NetWorthBreakdownScreen)),
+    );
+    expect(find.text(l.networthBankPartial), findsOneWidget);
+  });
+
+  testWidgets('typo then fix, then clear a typed balance', (t) async {
+    final db = AppDatabase(NativeDatabase.memory(), validateSchema: false);
+    addTearDown(db.close);
+    final typed = resolveAccountLine(
+      accountId: 'u1',
+      label: 'Vodafone Cash',
+      accountKind: 'wallet',
+      currency: _egp,
+      isLiability: false,
+      now: _now,
+      anchor: BalanceAnchor(
+        amount: Money(_egp, 99900),
+        asOf: _t0,
+        userEntered: true,
+      ),
+    );
+    final data = NetWorthBreakdown(
+      lines: [typed],
+      units: buildUnitBreakdowns([typed]),
+      worth: computeNetWorth(money: moneyLinesOf([typed])),
+    );
+    await _pump(t, db: db, data: data);
+    final k = keys.Settings.openingBalances;
+    // typo (with a Unicode minus: refused for a wallet? no: negative is ok)
+    await t.tap(find.byKey(const Key('networth-edit-u1-EGP')));
+    await t.pumpAndSettle();
+    await t.enterText(find.byKey(const Key('networth-amount')), '9999');
+    await t.tap(find.byKey(const Key('networth-save')));
+    await t.pumpAndSettle();
+    expect(
+      k.parse(await SettingsDao(db).read(k.name)).of('u1', 'EGP')!.amount.minor,
+      999900,
+    );
+    // fix
+    await t.tap(find.byKey(const Key('networth-edit-u1-EGP')));
+    await t.pumpAndSettle();
+    await t.enterText(find.byKey(const Key('networth-amount')), '\u221212.5');
+    await t.tap(find.byKey(const Key('networth-save')));
+    await t.pumpAndSettle();
+    expect(
+      k.parse(await SettingsDao(db).read(k.name)).of('u1', 'EGP')!.amount.minor,
+      -1250,
+    );
+    // clear
+    await t.tap(find.byKey(const Key('networth-edit-u1-EGP')));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('networth-clear')));
+    await t.pumpAndSettle();
+    expect(k.parse(await SettingsDao(db).read(k.name)).length, 0);
   });
 
   testWidgets('empty: a note, no sections', (t) async {

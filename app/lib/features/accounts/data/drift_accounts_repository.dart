@@ -44,6 +44,8 @@ class DriftAccountsRepository implements AccountsRepository {
   final AccountsDao _dao;
 
   /// T-199: moves the user-entered balances with a merge (same transaction).
+  /// Optional because only a merge needs it; the one merge caller (the app
+  /// provider) passes it, the ingest factory never merges.
   final SettingsDao? _settings;
   final Clock _now;
   final IdGenerator _newId;

@@ -211,7 +211,13 @@ void main() {
       await account('bank', 'debit');
       await account('card', 'credit', limit: 5000000);
       await reported('bank', egp, 100000, at(1));
-      await reported('card', egp, 60000, at(1)); // owed
+      await reported(
+        'card',
+        egp,
+        null,
+        at(1),
+        available: 4940000,
+      ); // owed 60000
       await tx('card', 'expense', 10000, at(2));
       await tx('bank', 'transfer_out', 30000, at(3), internal: true);
       await tx('card', 'transfer_in', 30000, at(3), internal: true);
@@ -225,7 +231,7 @@ void main() {
 
     test('a card refund lowers what is owed', () async {
       await account('card', 'credit', limit: 5000000);
-      await reported('card', egp, 60000, at(1));
+      await reported('card', egp, null, at(1), available: 4940000);
       await tx('card', 'refund', 2000, at(2));
       expect((await line('card')).amount!.minor, 58000);
     });
@@ -306,18 +312,45 @@ void main() {
       expect(l.basis, AnchorBasis.reportedAvailable);
     });
 
-    test('card: balance preferred, else limit - available', () async {
-      await account('c1', 'credit', limit: 100000);
-      await reported('c1', egp, 25000, at(5), available: 70000);
-      await account('c2', 'credit', limit: 100000);
-      await reported('c2', egp, null, at(5), available: 70000);
-      await account('c3', 'credit'); // no limit
-      await reported('c3', egp, null, at(5), available: 70000);
-      expect((await line('c1')).amount!.minor, 25000);
-      expect((await line('c1')).basis, AnchorBasis.reportedBalance);
-      expect((await line('c2')).amount!.minor, 30000);
-      expect((await line('c2')).basis, AnchorBasis.limitMinusAvailable);
-      expect((await line('c3')).source, BalanceSource.unknown);
+    test(
+      'card: stored balance is never owed; owed = limit - available',
+      () async {
+        // "Avl bal 85,000" stored as balance on a 100,000 limit: owed 15,000.
+        await account('c1', 'credit', limit: 10000000);
+        await reported('c1', egp, 8500000, at(5));
+        await account('c2', 'credit', limit: 10000000);
+        await reported('c2', egp, null, at(5), available: 7000000);
+        await account('c3', 'credit'); // no limit
+        await reported('c3', egp, 7000000, at(5));
+        expect((await line('c1')).amount!.minor, 1500000);
+        expect((await line('c1')).basis, AnchorBasis.limitMinusAvailable);
+        expect((await line('c2')).amount!.minor, 3000000);
+        expect((await line('c3')).source, BalanceSource.unknown);
+        // Spending raises what is owed.
+        await tx('c1', 'expense', 200000, at(6));
+        expect((await line('c1')).amount!.minor, 1700000);
+        // A typed owed amount rescues the card without a limit.
+        await setOpening('c3', Money(egp, 400000), DateTime.utc(2026, 11, 6));
+        expect((await line('c3')).amount!.minor, 400000);
+      },
+    );
+
+    test('a typed balance dated in the future counts as dated now', () async {
+      await account('a', 'debit');
+      await setOpening(
+        'a',
+        Money(egp, 500),
+        now.add(const Duration(days: 365)),
+      );
+      await tx('a', 'expense', 100, now.millisecondsSinceEpoch - 1000);
+      var l = await line('a');
+      expect(l.asOf, now);
+      expect(l.amount!.minor, 500);
+      // A bank message at "now" is not beaten by it.
+      await reported('a', egp, 900, now.millisecondsSinceEpoch);
+      l = await line('a');
+      expect(l.source, BalanceSource.reported);
+      expect(l.amount!.minor, 900);
     });
 
     test('staleness flagged after 30 days, still counted', () async {
@@ -363,7 +396,7 @@ void main() {
       await account('w', 'multi_currency');
       await reported('a', egp, 100000, at(1));
       await reported('b', egp, 50000, at(1));
-      await reported('c', egp, 30000, at(1));
+      await reported('c', egp, null, at(1), available: 8970000);
       await reported('w', usd, 1000, at(1));
       await tx('a', 'expense', 1000, at(2));
       await AssetsDao(db).insert(

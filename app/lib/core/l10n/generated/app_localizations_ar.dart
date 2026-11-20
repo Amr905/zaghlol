@@ -7732,11 +7732,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String networthSrcReportedOwed(String date) {
-    return 'من رسالة البنك (المستحق) · $date';
-  }
-
-  @override
   String networthSrcAvailable(String date) {
     return 'الرصيد المتاح من رسالة البنك · $date';
   }
@@ -7809,4 +7804,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String networthLineA11y(String name, String source) {
     return '$name، $source';
   }
+
+  @override
+  String get networthSrcUnknownCard => 'مش معروف — حط الحد أو الرصيد';
+
+  @override
+  String get networthEdit => 'عدّل الرصيد';
+
+  @override
+  String get networthClear => 'امسح الرصيد اللي حطيته';
+
+  @override
+  String get networthBankPartial => 'مش شامل كل الحسابات';
+
+  @override
+  String get networthCardOwed => 'المستحق عليك';
 }

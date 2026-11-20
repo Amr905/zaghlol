@@ -7355,15 +7355,6 @@
       }
     }
   },
-  "networthSrcReportedOwed": "Bank message (amount owed) · {date}",
-  "@networthSrcReportedOwed": {
-    "description": "L · card owed figure",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "networthSrcAvailable": "Available balance from the bank message · {date}",
   "@networthSrcAvailable": {
     "description": "L",
@@ -7481,5 +7472,25 @@
         "type": "String"
       }
     }
+  },
+  "networthSrcUnknownCard": "Unknown — set the limit or the balance",
+  "@networthSrcUnknownCard": {
+    "description": "L · card with no limit"
+  },
+  "networthEdit": "Edit balance",
+  "@networthEdit": {
+    "description": "B"
+  },
+  "networthClear": "Remove the balance I entered",
+  "@networthClear": {
+    "description": "B"
+  },
+  "networthBankPartial": "Not all accounts",
+  "@networthBankPartial": {
+    "description": "C"
+  },
+  "networthCardOwed": "Amount you owe",
+  "@networthCardOwed": {
+    "description": "L"
   }
 }

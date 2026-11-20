@@ -184,6 +184,18 @@ class NetWorthRepository {
       }
     }
 
+    var assetsLeftOut = false;
+    if (!includeAssets) {
+      assetsLeftOut =
+          (await _assets.live()).isNotEmpty ||
+          (await (_db.select(_db.recurringItems)..where(
+                    (r) =>
+                        r.kind.equals('installment') &
+                        r.status.equals('active'),
+                  ))
+                  .get())
+              .isNotEmpty;
+    }
     final prices = <String, GoldPrice>{};
     for (final symbol in {for (final g in goldLinesOf(lines)) g.symbol}) {
       final p = await _prices.price(symbol, goldCurrency);
@@ -200,6 +212,7 @@ class NetWorthRepository {
       lines: List.unmodifiable(lines),
       units: buildUnitBreakdowns(lines),
       worth: worth,
+      assetsLeftOut: assetsLeftOut,
     );
   }
 
@@ -270,6 +283,7 @@ class NetWorthRepository {
               : DateTime.fromMillisecondsSinceEpoch(row.asOf, isUtc: true),
           userBalance: user?.amount,
           userAsOf: user?.asOf,
+          now: now,
         );
         final totals = anchor == null
             ? const TxnTotals()
@@ -467,7 +481,11 @@ final class NetWorthBreakdown {
     required this.lines,
     required this.units,
     required this.worth,
+    this.assetsLeftOut = false,
   });
+
+  /// Free tier: live assets or installments exist but are not in the figure.
+  final bool assetsLeftOut;
   final List<BreakdownLine> lines;
   final List<UnitBreakdown> units;
   final NetWorth worth;

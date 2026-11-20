@@ -11196,12 +11196,6 @@ abstract class AppLocalizations {
   /// **'من رسالة البنك · {date}'**
   String networthSrcReported(String date);
 
-  /// L · card owed figure
-  ///
-  /// In ar, this message translates to:
-  /// **'من رسالة البنك (المستحق) · {date}'**
-  String networthSrcReportedOwed(String date);
-
   /// L
   ///
   /// In ar, this message translates to:
@@ -11321,6 +11315,36 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{name}، {source}'**
   String networthLineA11y(String name, String source);
+
+  /// L · card with no limit
+  ///
+  /// In ar, this message translates to:
+  /// **'مش معروف — حط الحد أو الرصيد'**
+  String get networthSrcUnknownCard;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'عدّل الرصيد'**
+  String get networthEdit;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'امسح الرصيد اللي حطيته'**
+  String get networthClear;
+
+  /// C
+  ///
+  /// In ar, this message translates to:
+  /// **'مش شامل كل الحسابات'**
+  String get networthBankPartial;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'المستحق عليك'**
+  String get networthCardOwed;
 }
 
 class _AppLocalizationsDelegate

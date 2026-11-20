@@ -17,7 +17,10 @@ String balanceSourceText(
       ? ''
       : ZDateFormat.date(line.asOf!.toLocal(), lang, digits);
   final base = switch (line.source) {
-    BalanceSource.unknown => l.networthSrcUnknown,
+    BalanceSource.unknown =>
+      line.isLiability && line.isAccount
+          ? l.networthSrcUnknownCard
+          : l.networthSrcUnknown,
     BalanceSource.asset => l.networthSrcAsset,
     BalanceSource.installments => l.networthSrcInstallments,
     BalanceSource.computed => l.networthSrcComputed(date()),
@@ -27,10 +30,7 @@ String balanceSourceText(
       AnchorBasis.limitMinusAvailable => l.networthSrcLimitMinusAvailable(
         date(),
       ),
-      _ =>
-        line.isLiability
-            ? l.networthSrcReportedOwed(date())
-            : l.networthSrcReported(date()),
+      _ => l.networthSrcReported(date()),
     },
   };
   return line.stale ? '$base · ${l.networthStale}' : base;

@@ -94,12 +94,15 @@ final class BalanceAnchor {
 
 /// The anchor of a pair, or null when there is none ([BalanceSource.unknown]).
 ///
-/// Reported (an `account_balances` row): both kinds use [reportedBalance]
-/// (the posted figure); without it an asset account falls back to
-/// [reportedAvailable] (many bank messages give only the available balance)
-/// and a liability to `limit - available` in the same currency, floored at 0. The user's
-/// entry competes by instant: the newer one wins, a tie goes to the reported
-/// one. Any figure in another currency is ignored (never converted).
+/// Reported (an `account_balances` row), asset account: [reportedBalance],
+/// else [reportedAvailable] (own basis). Liability (credit, BNPL): the stored
+/// balance is NEVER the owed amount (card messages put "available balance"
+/// wording there); owed = limit - (balance ?? available) in the same
+/// currency, floored at 0, and without a limit there is no reported anchor.
+/// The user's entry (the owed amount for a card) competes by instant: the
+/// newer wins, a tie goes to the reported one; an entry dated after [now] is
+/// treated as dated [now] (it never beats a later bank message). Any figure
+/// in another currency is ignored (never converted).
 BalanceAnchor? pickAnchor({
   required Currency currency,
   required bool isLiability,
@@ -109,49 +112,52 @@ BalanceAnchor? pickAnchor({
   DateTime? reportedAsOf,
   Money? userBalance,
   DateTime? userAsOf,
+  DateTime? now,
 }) {
   BalanceAnchor? reported;
   if (reportedAsOf != null) {
-    final b = reportedBalance;
-    if (b != null && b.currency == currency) {
-      reported = BalanceAnchor(
-        amount: b,
-        asOf: reportedAsOf.toUtc(),
-        userEntered: false,
-        basis: AnchorBasis.reportedBalance,
-      );
-    } else if (!isLiability &&
-        b == null &&
-        reportedAvailable != null &&
-        reportedAvailable.currency == currency) {
-      reported = BalanceAnchor(
-        amount: reportedAvailable,
-        asOf: reportedAsOf.toUtc(),
-        userEntered: false,
-        basis: AnchorBasis.reportedAvailable,
-      );
-    } else if (isLiability &&
-        b == null &&
-        reportedAvailable != null &&
-        creditLimit != null &&
-        reportedAvailable.currency == currency &&
-        creditLimit.currency == currency) {
-      final used = creditLimit - reportedAvailable;
-      reported = BalanceAnchor(
-        amount: used.isNegative ? Money(currency, 0) : used,
-        asOf: reportedAsOf.toUtc(),
-        userEntered: false,
-        basis: AnchorBasis.limitMinusAvailable,
-      );
+    if (!isLiability) {
+      final b = reportedBalance;
+      final av = reportedAvailable;
+      if (b != null && b.currency == currency) {
+        reported = BalanceAnchor(
+          amount: b,
+          asOf: reportedAsOf.toUtc(),
+          userEntered: false,
+          basis: AnchorBasis.reportedBalance,
+        );
+      } else if (b == null && av != null && av.currency == currency) {
+        reported = BalanceAnchor(
+          amount: av,
+          asOf: reportedAsOf.toUtc(),
+          userEntered: false,
+          basis: AnchorBasis.reportedAvailable,
+        );
+      }
+    } else {
+      final avail = reportedBalance ?? reportedAvailable;
+      if (avail != null &&
+          creditLimit != null &&
+          avail.currency == currency &&
+          creditLimit.currency == currency) {
+        final used = creditLimit - avail;
+        reported = BalanceAnchor(
+          amount: used.isNegative ? Money(currency, 0) : used,
+          asOf: reportedAsOf.toUtc(),
+          userEntered: false,
+          basis: AnchorBasis.limitMinusAvailable,
+        );
+      }
     }
   }
   BalanceAnchor? user;
   if (userBalance != null &&
       userAsOf != null &&
       userBalance.currency == currency) {
+    final when = userAsOf.toUtc();
     user = BalanceAnchor(
       amount: userBalance,
-      asOf: userAsOf.toUtc(),
+      asOf: now != null && when.isAfter(now.toUtc()) ? now.toUtc() : when,
       userEntered: true,
     );
   }
@@ -370,6 +376,9 @@ List<UnitBreakdown> buildUnitBreakdowns(Iterable<BreakdownLine> lines) {
             assets = add(assets, v);
           }
         }
+        if ((assets - liabilities).abs() > Money.maxMinor) {
+          throw NetWorthOverflow();
+        }
         return UnitBreakdown(
           unit: u,
           accounts: [
@@ -423,6 +432,9 @@ final class BankGroup {
 
   /// Sum of the lines' known balances in the unit (never across units).
   final int totalMinor;
+
+  /// True when a member has no known balance: the total is not all accounts.
+  bool get isPartial => lines.any((l) => l.isExcluded);
 }
 
 /// Groups account lines of ONE unit by bank, in first-seen order. An account

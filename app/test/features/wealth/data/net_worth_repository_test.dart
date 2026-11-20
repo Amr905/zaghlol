@@ -46,6 +46,7 @@ void main() {
   tearDown(() => db.close());
 
   Future<void> account(String id, String kind, Currency c, int? balance) async {
+    final card = kind == 'credit' || kind == 'bnpl';
     final dao = AccountsDao(db);
     await dao.insert(
       AccountsCompanion.insert(
@@ -53,15 +54,19 @@ void main() {
         kind: kind,
         label: id,
         defaultCurrency: c.code,
+        creditLimitMinor: Value(card ? 10000000 : null),
         createdAt: 1,
         updatedAt: 1,
       ),
     );
+    // T-199: a card's stored balance is the available figure; owed is
+    // limit minus it.
     await dao.upsertBalance(
       accountId: id,
       currency: c,
       asOf: 1,
-      balance: balance == null ? null : Money(c, balance),
+      balance: balance == null || card ? null : Money(c, balance),
+      available: balance == null || !card ? null : Money(c, 10000000 - balance),
     );
   }
 

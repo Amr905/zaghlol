@@ -10,8 +10,9 @@ import 'dart:convert';
 
 import '../money/money.dart';
 
-/// At most this many entries (pairs): the setting is capped at 16 KiB.
-const int maxOpeningBalanceEntries = 200;
+/// At most this many entries (pairs). The setting is capped at 16 KiB; with
+/// the longest ids and amounts an entry is about 100 bytes, so 120 fits.
+const int maxOpeningBalanceEntries = 120;
 
 final class OpeningBalance {
   const OpeningBalance(this.amount, this.asOf);

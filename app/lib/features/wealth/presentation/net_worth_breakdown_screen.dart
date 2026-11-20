@@ -92,6 +92,17 @@ class NetWorthBreakdownScreen extends ConsumerWidget {
                       ),
                     ]
                   : [
+                      if (b.assetsLeftOut)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            bottom: ZSpacing.md,
+                          ),
+                          child: ZBanner(
+                            key: const Key('networth-free-note'),
+                            message: l.networthFreeNote,
+                            tone: ZBannerTone.info,
+                          ),
+                        ),
                       for (final u in b.units)
                         _UnitSection(
                           unit: u,
@@ -182,6 +193,14 @@ class _UnitSection extends ConsumerWidget {
                 for (final bank in banks)
                   _BankBlock(
                     bank: bank,
+                    partial:
+                        bank.institutionCode != null &&
+                        unit.excluded.any(
+                          (e) =>
+                              e.isAccount &&
+                              !e.isLiability &&
+                              e.institutionCode == bank.institutionCode,
+                        ),
                     cur: cur,
                     onOpenTransactions: onOpenTransactions,
                   ),
@@ -282,8 +301,10 @@ class _BankBlock extends ConsumerWidget {
   const _BankBlock({
     required this.bank,
     required this.cur,
+    this.partial = false,
     this.onOpenTransactions,
   });
+  final bool partial;
   final BankGroup bank;
   final Currency? cur;
   final ValueChanged<List<String>>? onOpenTransactions;
@@ -311,7 +332,11 @@ class _BankBlock extends ConsumerWidget {
           button: onOpenTransactions != null,
           label: a11yAmounts(
             l,
-            [l.networthOpenBankA11y(name), ?total].join(', '),
+            [
+              l.networthOpenBankA11y(name),
+              ?total,
+              if (partial) l.networthBankPartial,
+            ].join(', '),
           ),
           excludeSemantics: true,
           child: InkWell(
@@ -340,10 +365,22 @@ class _BankBlock extends ConsumerWidget {
                       ),
                     ),
                     if (total != null)
-                      ZMoneyText(
-                        text: total,
-                        size: ZMoneySize.body,
-                        kind: ZMoneyKind.neutral,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          ZMoneyText(
+                            text: total,
+                            size: ZMoneySize.body,
+                            kind: ZMoneyKind.neutral,
+                          ),
+                          if (partial)
+                            Text(
+                              l.networthBankPartial,
+                              style: ZType.caption.copyWith(
+                                color: c.warningText,
+                              ),
+                            ),
+                        ],
                       ),
                   ],
                 ),
@@ -401,6 +438,10 @@ class _LineRow extends ConsumerWidget {
         ? formatAccountWithCard(line.label, line.last4)
         : line.label;
     final canSet = line.isExcluded && line.isAccount && line.refId != null;
+    final canEdit =
+        line.basis == AnchorBasis.userEntered &&
+        line.isAccount &&
+        line.refId != null;
     return Semantics(
       container: true,
       button: onTap != null,
@@ -458,8 +499,23 @@ class _LineRow extends ConsumerWidget {
                     text: amount,
                     size: ZMoneySize.body,
                     kind: ZMoneyKind.neutral,
-                  )
-                else if (canSet)
+                  ),
+                if (canEdit)
+                  IconButton(
+                    key: Key('networth-edit-${line.refId}-${line.unit}'),
+                    tooltip: l.networthEdit,
+                    onPressed: () => showSetBalanceSheet(
+                      context,
+                      ref,
+                      accountId: line.refId!,
+                      name: name,
+                      currency: Currency.of(line.unit),
+                      isLiability: line.isLiability,
+                      canClear: true,
+                    ),
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                if (amount == null && canSet)
                   TextButton(
                     key: Key('networth-set-${line.refId}-${line.unit}'),
                     onPressed: () => showSetBalanceSheet(
@@ -491,6 +547,7 @@ Future<void> showSetBalanceSheet(
   required String name,
   required Currency currency,
   required bool isLiability,
+  bool canClear = false,
 }) => showZSheet<void>(
   context: context,
   title: AppLocalizations.of(context).networthSheetTitle(name),
@@ -498,6 +555,7 @@ Future<void> showSetBalanceSheet(
     accountId: accountId,
     currency: currency,
     isLiability: isLiability,
+    canClear: canClear,
     ref: ref,
   ),
 );
@@ -508,7 +566,9 @@ class _SetBalanceForm extends StatefulWidget {
     required this.currency,
     required this.isLiability,
     required this.ref,
+    this.canClear = false,
   });
+  final bool canClear;
   final String accountId;
   final Currency currency;
   final bool isLiability;
@@ -530,7 +590,11 @@ class _SetBalanceFormState extends State<_SetBalanceForm> {
   }
 
   Future<void> _save(AppLocalizations l) async {
-    final text = _controller.text.trim();
+    // U+2212 and the dashes read as a minus sign.
+    final text = _controller.text.trim().replaceAll(
+      RegExp('[\u2212\u2012\u2013\u2014]'),
+      '-',
+    );
     final negative = text.startsWith('-');
     final m = MoneyFormat.parseInput(
       negative ? text.substring(1) : text,
@@ -549,6 +613,28 @@ class _SetBalanceFormState extends State<_SetBalanceForm> {
         widget.ref,
         accountId: widget.accountId,
         amount: negative ? -m : m,
+      );
+      if (mounted) Navigator.of(context).pop();
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = l.networthSheetFailed;
+        });
+      }
+    }
+  }
+
+  Future<void> _clear(AppLocalizations l) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await clearOpeningBalance(
+        widget.ref,
+        accountId: widget.accountId,
+        currency: widget.currency,
       );
       if (mounted) Navigator.of(context).pop();
     } on Object {
@@ -598,6 +684,12 @@ class _SetBalanceFormState extends State<_SetBalanceForm> {
           label: l.networthSheetSave,
           onPressed: _busy ? null : () => _save(l),
         ),
+        if (widget.canClear)
+          TextButton(
+            key: const Key('networth-clear'),
+            onPressed: _busy ? null : () => _clear(l),
+            child: Text(l.networthClear),
+          ),
       ],
     );
   }

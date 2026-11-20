@@ -10458,15 +10458,6 @@
       }
     }
   },
-  "networthSrcReportedOwed": "من رسالة البنك (المستحق) · {date}",
-  "@networthSrcReportedOwed": {
-    "description": "L · card owed figure",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "networthSrcAvailable": "الرصيد المتاح من رسالة البنك · {date}",
   "@networthSrcAvailable": {
     "description": "L",
@@ -10584,5 +10575,25 @@
         "type": "String"
       }
     }
+  },
+  "networthSrcUnknownCard": "مش معروف — حط الحد أو الرصيد",
+  "@networthSrcUnknownCard": {
+    "description": "L · card with no limit"
+  },
+  "networthEdit": "عدّل الرصيد",
+  "@networthEdit": {
+    "description": "B"
+  },
+  "networthClear": "امسح الرصيد اللي حطيته",
+  "@networthClear": {
+    "description": "B"
+  },
+  "networthBankPartial": "مش شامل كل الحسابات",
+  "@networthBankPartial": {
+    "description": "C"
+  },
+  "networthCardOwed": "المستحق عليك",
+  "@networthCardOwed": {
+    "description": "L"
   }
 }

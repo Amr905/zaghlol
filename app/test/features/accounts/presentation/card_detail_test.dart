@@ -275,6 +275,39 @@ void main() {
       );
     });
 
+    testWidgets('a card shows the counted owed amount and its source', (
+      t,
+    ) async {
+      final line = resolveAccountLine(
+        accountId: 'a1',
+        label: 'CIB Credit',
+        accountKind: 'credit',
+        currency: egp,
+        isLiability: true,
+        now: _t,
+        anchor: BalanceAnchor(
+          amount: m(1400000),
+          asOf: _t,
+          userEntered: false,
+          basis: AnchorBasis.limitMinusAvailable,
+        ),
+      );
+      await pumpDetail(
+        t,
+        overrides: [
+          ...detailOverrides(),
+          netWorthBreakdownProvider.overrideWith(
+            (ref) async => breakdown(line),
+          ),
+        ],
+      );
+      expect(find.text('Amount you owe'), findsOneWidget);
+      expect(
+        find.textContaining('Worked out from limit and available'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('no balance: unknown text and a set-balance button', (t) async {
       final line = resolveAccountLine(
         accountId: 'a1',

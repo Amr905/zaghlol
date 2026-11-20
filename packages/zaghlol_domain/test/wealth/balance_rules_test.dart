@@ -131,19 +131,76 @@ void main() {
       );
     });
 
-    test('credit: balance (owed) wins over limit - available', () {
+    test('credit: balance is never the owed amount (it is "Avl bal")', () {
+      // limit 2000, stored balance 1500 means 1500 available: owed 500.
       final a = pickAnchor(
         currency: _egp,
         isLiability: true,
-        reportedBalance: _m(500),
+        reportedBalance: _m(1500),
         reportedAvailable: _m(1000),
         creditLimit: _m(2000),
         reportedAsOf: _t0,
       )!;
       expect(a.amount.minor, 500);
+      expect(a.effectiveBasis, AnchorBasis.limitMinusAvailable);
+      // Spending raises owed, never lowers it.
+      final l = _line(
+        anchor: a,
+        liability: true,
+        totals: const TxnTotals(cashEffectMinor: -300, count: 1),
+      );
+      expect(l.amount!.minor, 800);
     });
 
-    test('credit: owed = limit - available when no balance; floored at 0', () {
+    test('credit with a balance but no limit: unknown, not owed', () {
+      expect(
+        pickAnchor(
+          currency: _egp,
+          isLiability: true,
+          reportedBalance: _m(1500),
+          reportedAsOf: _t0,
+        ),
+        isNull,
+      );
+    });
+
+    test('a typed owed amount works as a card anchor without a limit', () {
+      final a = pickAnchor(
+        currency: _egp,
+        isLiability: true,
+        userBalance: _m(700),
+        userAsOf: _t0,
+      )!;
+      expect(a.amount.minor, 700);
+      expect(a.userEntered, isTrue);
+    });
+
+    test('a typed balance dated in the future is dated now', () {
+      final a = pickAnchor(
+        currency: _egp,
+        isLiability: false,
+        userBalance: _m(700),
+        userAsOf: _now.add(const Duration(days: 400)),
+        reportedBalance: _m(5),
+        reportedAsOf: _now.subtract(const Duration(hours: 1)),
+        now: _now,
+      )!;
+      expect(a.asOf, _now);
+      expect(a.amount.minor, 700); // dated now: newer than the bank figure
+      // ...but a bank message dated at/after now still wins.
+      final b = pickAnchor(
+        currency: _egp,
+        isLiability: false,
+        userBalance: _m(700),
+        userAsOf: _now.add(const Duration(days: 400)),
+        reportedBalance: _m(5),
+        reportedAsOf: _now,
+        now: _now,
+      )!;
+      expect(b.amount.minor, 5);
+    });
+
+    test('credit: owed = limit - available; floored at 0', () {
       final used = pickAnchor(
         currency: _egp,
         isLiability: true,
@@ -202,24 +259,6 @@ void main() {
       )!;
       expect(a.amount.minor, 1500);
       expect(a.effectiveBasis, AnchorBasis.reportedAvailable);
-    });
-
-    test('credit basis says which figure was used', () {
-      final owed = pickAnchor(
-        currency: _egp,
-        isLiability: true,
-        reportedBalance: _m(500),
-        reportedAsOf: _t0,
-      )!;
-      expect(owed.effectiveBasis, AnchorBasis.reportedBalance);
-      final derived = pickAnchor(
-        currency: _egp,
-        isLiability: true,
-        reportedAvailable: _m(1500),
-        creditLimit: _m(2000),
-        reportedAsOf: _t0,
-      )!;
-      expect(derived.effectiveBasis, AnchorBasis.limitMinusAvailable);
     });
   });
 

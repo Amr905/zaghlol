@@ -63,12 +63,12 @@ Account _acc(
   creditLimit: limit,
 );
 
-AccountBalance _bal(String id, Currency c, int minor, {int? avail}) =>
+AccountBalance _bal(String id, Currency c, int? minor, {int? avail}) =>
     AccountBalance(
       accountId: id,
       currency: c,
       asOf: _t,
-      balance: Money(c, minor),
+      balance: minor == null ? null : Money(c, minor),
       available: avail == null ? null : Money(c, avail),
     );
 
@@ -116,7 +116,7 @@ final _full = [
       last4: '1234',
       limit: Money(_egp, 2000000),
     ),
-    [_bal('b', _egp, 500000, avail: 1000000)],
+    [_bal('b', _egp, null, avail: 1000000)],
   ),
   AccountWithBalances(_acc('c', 'Wise', kind: AccountKind.multiCurrency), [
     _bal('c', _usd, 120000),
@@ -193,13 +193,14 @@ NetWorthBreakdown _breakdownOf(List<AccountWithBalances> items) {
           institutionCode: i.account.institutionCode,
           last4: i.account.last4,
           isHidden: i.account.isHidden,
-          anchor: b.balance == null
-              ? null
-              : BalanceAnchor(
-                  amount: b.balance!,
-                  asOf: b.asOf,
-                  userEntered: false,
-                ),
+          anchor: pickAnchor(
+            currency: b.currency,
+            isLiability: !i.account.kind.isAsset,
+            reportedBalance: b.balance,
+            reportedAvailable: b.available,
+            creditLimit: i.account.creditLimit,
+            reportedAsOf: b.asOf,
+          ),
         ),
   ];
   return NetWorthBreakdown(
@@ -311,8 +312,8 @@ void main() {
     await _pump(t, repo: _FakeRepo(_full.take(3).toList()));
     final s = AppLocalizations.of(t.element(find.byType(MoneyTab)));
     expect(find.text(s.accountsOverviewHiddenEntry), findsNothing);
-    // EGP 12,400 + 1,000 - 5,000 owed on the card = 8,400; USD kept apart.
-    expect(find.textContaining('8,400'), findsOneWidget);
+    // EGP 12,400 + 1,000 - 10,000 owed on the card = 3,400; USD kept apart.
+    expect(find.textContaining('3,400'), findsOneWidget);
     expect(find.textContaining('1,200'), findsWidgets);
   });
 
@@ -382,6 +383,27 @@ void main() {
         findsWidgets,
       ); // CIB: 10,000 + 5,000
     });
+
+    testWidgets(
+      'bank header total includes a hidden account and flags an unknown one',
+      (t) async {
+        final items = [
+          ...bank.take(2),
+          AccountWithBalances(
+            _acc('h', 'CIB', last4: '5555', hidden: true).copyWithInst('cib'),
+            [_bal('h', _egp, 200000)],
+          ),
+          AccountWithBalances(
+            _acc('u', 'CIB', last4: '6666').copyWithInst('cib'),
+            [_bal('u', _egp, null)],
+          ),
+        ];
+        await _pump(t, repo: _FakeRepo(items));
+        // 10,000 + 5,000 + 2,000 (hidden) = 17,000
+        expect(find.textContaining('17,000'), findsWidgets);
+        expect(find.text('Not all accounts'), findsWidgets);
+      },
+    );
 
     testWidgets('rows say where the balance comes from', (t) async {
       await _pump(t, repo: _FakeRepo(bank));
@@ -479,7 +501,7 @@ void main() {
             kind: AccountKind.credit,
             limit: Money(_egp, 1000000),
           ),
-          [_bal('o', _egp, 0, avail: -200000)],
+          [_bal('o', _egp, null, avail: -200000)],
         ),
       ];
       await _pump(t, repo: _FakeRepo(over));
@@ -505,7 +527,7 @@ void main() {
             kind: AccountKind.credit,
             limit: Money(_egp, 1000000),
           ),
-          [_bal('m', _usd, 0, avail: 50000)],
+          [_bal('m', _usd, null, avail: 50000)],
         ),
       ];
       await _pump(t, repo: _FakeRepo(mixed));

@@ -453,8 +453,11 @@ class _Entry {
 }
 
 class _BankHeaderData {
-  const _BankHeaderData(this.first, this.totals);
+  const _BankHeaderData(this.first, this.totals, this.partial);
   final Account first;
+
+  /// A member has no known balance: the totals are not all accounts.
+  final bool partial;
 
   /// Bank total per currency (sum of its accounts in that currency).
   final List<Money> totals;
@@ -480,19 +483,27 @@ List<_Entry> _withBankHeaders(
   for (final k in order) {
     final members = byBank[k]!;
     if (members.length >= 2 && !k.startsWith('acct:')) {
-      final lines = [for (final m in members) ...?data.lines[m.account.id]];
+      // The same members as the breakdown: every asset account of the bank,
+      // hidden ones included (D-69), unknown ones marking the total partial.
+      final lines = [
+        for (final ls in data.lines.values)
+          for (final l in ls)
+            if (l.institutionCode == k && !l.isLiability) l,
+      ];
       final units = {for (final l in lines) l.unit}.toList()..sort();
       final totals = <Money>[];
+      var partial = false;
       for (final u in units) {
-        final bank = groupByBank(lines.where((l) => l.unit == u));
+        final bank = groupByBank(lines.where((l) => l.unit == u)).single;
+        partial = partial || bank.isPartial;
         final cur = Currency.tryOf(u);
-        if (cur != null &&
-            bank.isNotEmpty &&
-            bank.single.lines.any((l) => l.amount != null)) {
-          totals.add(Money(cur, bank.single.totalMinor));
+        if (cur != null && bank.lines.any((l) => l.amount != null)) {
+          totals.add(Money(cur, bank.totalMinor));
         }
       }
-      out.add(_Entry.header(_BankHeaderData(members.first.account, totals)));
+      out.add(
+        _Entry.header(_BankHeaderData(members.first.account, totals, partial)),
+      );
     }
     for (final m in members) {
       out.add(_Entry.row(m));
@@ -541,6 +552,11 @@ class _BankHeader extends ConsumerWidget {
                       size: ZMoneySize.body,
                       kind: ZMoneyKind.neutral,
                     ),
+                  if (bank.partial)
+                    Text(
+                      l10n.networthBankPartial,
+                      style: ZType.caption.copyWith(color: c.warningText),
+                    ),
                 ],
               ),
             ],
@@ -581,26 +597,17 @@ class _AccountRow extends ConsumerWidget {
     // amounts are hidden; the numbers are masked by _fmt.
     double? usedFraction;
     String? usedPct;
-    if (first != null) {
-      final asOf = l10n.accountsOverviewAsOf(
-        ZDateFormat.date(first.asOf.toLocal(), lang, digits),
-      );
-      sub = line == null
-          ? asOf
-          : balanceSourceText(l10n, line, lang: lang, digits: digits);
-      final limit = account.creditLimit;
-      final isCredit = account.kind == AccountKind.credit;
-      if (isCredit && first.available != null) {
-        final avail = first.available!;
-        if (limit == null || limit.currency != avail.currency) {
-          // No limit, or figures in different currencies: no used figure.
-          primary = _fmt(context, ref, avail);
-        } else {
-          // Over the limit shows used > limit (available below zero); only a
-          // negative "used" is floored.
-          final usedMinor = limit.minor - avail.minor < 0
-              ? 0
-              : limit.minor - avail.minor;
+    final limit = account.creditLimit;
+    final isCredit = account.kind == AccountKind.credit;
+    if (line != null) {
+      // One thing per row: the counted figure and where it comes from. A card
+      // shows what is owed (never the stored "balance", which is the
+      // available figure), with the used/limit bar of T-197.
+      sub = balanceSourceText(l10n, line, lang: lang, digits: digits);
+      final owed = line.amount;
+      if (owed != null) {
+        if (isCredit && limit != null && limit.currency == owed.currency) {
+          final usedMinor = owed.minor < 0 ? 0 : owed.minor;
           primary = l10n.accountsOverviewUsedOf(
             _fmt(context, ref, Money(limit.currency, usedMinor)),
             _fmt(context, ref, limit),
@@ -609,15 +616,17 @@ class _AccountRow extends ConsumerWidget {
               ? (usedMinor > 0 ? 1 : 0)
               : usedMinor / limit.minor;
           usedPct = digits.render('${(usedFraction * 100).round()}%');
+        } else {
+          primary = _fmt(context, ref, owed);
         }
-      } else if (line != null) {
-        if (line.amount != null) primary = _fmt(context, ref, line.amount!);
-      } else if (first.balance != null) {
+      }
+    } else if (first != null) {
+      sub = l10n.accountsOverviewAsOf(
+        ZDateFormat.date(first.asOf.toLocal(), lang, digits),
+      );
+      if (first.balance != null && !isCredit) {
         primary = _fmt(context, ref, first.balance!);
       }
-    } else if (line != null) {
-      sub = balanceSourceText(l10n, line, lang: lang, digits: digits);
-      if (line.amount != null) primary = _fmt(context, ref, line.amount!);
     }
     final dueText = account.kind == AccountKind.credit && due != null
         ? l10n.accountsOverviewDueOn(
