@@ -20,9 +20,13 @@ import 'package:zaghlol/features/home/application/card_filter.dart';
 import 'package:zaghlol/features/accounts/presentation/edit_card/edit_card_providers.dart'
     show accountTxnCountProvider, institutionOptionsProvider;
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/wealth/data/net_worth_repository.dart';
+import 'package:zaghlol/features/wealth/presentation/net_worth_breakdown_providers.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
+
+import '../../../support/hide_amounts_support.dart';
 
 // Nothing on the edit screen touches the repository until Save.
 class _NoRepo implements AccountsRepository {
@@ -146,8 +150,10 @@ Widget host(
   double scale = 1.0,
   bool dark = false,
   List<IgnoreRuleRow> rules = const [],
+  HideAmountsHarness? hideAmounts,
 }) => ProviderScope(
   overrides: [
+    ...(hideAmounts ?? HideAmountsHarness()).overrides,
     txnLookupsProvider.overrideWith((ref) async => lookups),
     ignoreRulesStreamProvider.overrideWith((ref) => Stream.value(rules)),
     ...overrides,
@@ -191,6 +197,7 @@ Future<void> pumpDetail(
   bool dark = false,
   VoidCallback? onSeeAll,
   List<IgnoreRuleRow> rules = const [],
+  HideAmountsHarness? hideAmounts,
 }) async {
   await t.binding.setSurfaceSize(const Size(390, 1400));
   addTearDown(() => t.binding.setSurfaceSize(null));
@@ -202,12 +209,127 @@ Future<void> pumpDetail(
       scale: scale,
       dark: dark,
       rules: rules,
+      hideAmounts: hideAmounts,
     ),
   );
   await t.pumpAndSettle();
 }
 
 void main() {
+  testWidgets('T-187: masking on: card detail shows no digit in any amount', (
+    t,
+  ) async {
+    final h = HideAmountsHarness(hidden: true);
+    addTearDown(h.dispose);
+    await pumpDetail(t, overrides: detailOverrides(), hideAmounts: h);
+    expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
+    await expectNoAmountDigits(t);
+  });
+
+  group('T-199: balance source on the card', () {
+    final debit = Account(
+      id: 'a1',
+      kind: AccountKind.debit,
+      label: 'NBE',
+      defaultCurrency: egp,
+      isHidden: false,
+      isDefaultCash: false,
+      createdAt: _t,
+      updatedAt: _t,
+      institutionCode: 'nbe',
+      last4: '9999',
+    );
+
+    NetWorthBreakdown breakdown(BreakdownLine line) => NetWorthBreakdown(
+      lines: [line],
+      units: buildUnitBreakdowns([line]),
+      worth: computeNetWorth(money: moneyLinesOf([line])),
+    );
+
+    testWidgets('computed balance shows the amount and says it is computed', (
+      t,
+    ) async {
+      final line = resolveAccountLine(
+        accountId: 'a1',
+        label: 'NBE',
+        accountKind: 'debit',
+        currency: egp,
+        isLiability: false,
+        now: _t,
+        anchor: BalanceAnchor(amount: m(100000), asOf: _t, userEntered: false),
+        totals: const TxnTotals(cashEffectMinor: -2500, count: 1),
+      );
+      await pumpDetail(
+        t,
+        overrides: [
+          ...detailOverrides(acc: AccountWithBalances(debit, const [])),
+          netWorthBreakdownProvider.overrideWith(
+            (ref) async => breakdown(line),
+          ),
+        ],
+      );
+      expect(find.textContaining('975'), findsWidgets);
+      expect(
+        find.textContaining('Worked out from transactions'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a card shows the counted owed amount and its source', (
+      t,
+    ) async {
+      final line = resolveAccountLine(
+        accountId: 'a1',
+        label: 'CIB Credit',
+        accountKind: 'credit',
+        currency: egp,
+        isLiability: true,
+        now: _t,
+        anchor: BalanceAnchor(
+          amount: m(1400000),
+          asOf: _t,
+          userEntered: false,
+          basis: AnchorBasis.limitMinusAvailable,
+        ),
+      );
+      await pumpDetail(
+        t,
+        overrides: [
+          ...detailOverrides(),
+          netWorthBreakdownProvider.overrideWith(
+            (ref) async => breakdown(line),
+          ),
+        ],
+      );
+      expect(find.text('Amount you owe'), findsOneWidget);
+      expect(
+        find.textContaining('Worked out from limit and available'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('no balance: unknown text and a set-balance button', (t) async {
+      final line = resolveAccountLine(
+        accountId: 'a1',
+        label: 'NBE',
+        accountKind: 'debit',
+        currency: egp,
+        isLiability: false,
+        now: _t,
+      );
+      await pumpDetail(
+        t,
+        overrides: [
+          ...detailOverrides(acc: AccountWithBalances(debit, const [])),
+          netWorthBreakdownProvider.overrideWith(
+            (ref) async => breakdown(line),
+          ),
+        ],
+      );
+      expect(find.byKey(const Key('card-set-balance')), findsOneWidget);
+    });
+  });
+
   testWidgets('populated: limit, due date, donut total and sections', (
     t,
   ) async {

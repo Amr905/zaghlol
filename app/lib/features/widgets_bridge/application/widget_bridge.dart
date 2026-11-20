@@ -101,7 +101,11 @@ String _languageFor(ui.Locale? pref) {
 
 final widgetBridgeWiringProvider = Provider<void>((ref) {
   final overview = ref.watch(currentCycleOverviewProvider);
-  final hide = ref.watch(hideAmountsWidgetProvider).value ?? false;
+  // D-67: the app-wide eye toggle also hides the widget (OR); it reads as
+  // hidden while it loads (fail closed).
+  final hide =
+      (ref.watch(hideAmountsWidgetProvider).value ?? false) ||
+      ref.watch(hideAmountsProvider);
   final lockOn = ref.watch(appLockEnabledProvider).value ?? false;
   final locked = ref.watch(appLockControllerProvider.select((s) => s.locked));
   final primary = ref.watch(primaryCurrencyProvider).value;

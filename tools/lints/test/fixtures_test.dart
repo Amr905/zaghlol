@@ -19,6 +19,7 @@ void main() {
       'no_ui_string_literals',
       'no_print_outside_debug',
       'safe_exception_required',
+      'no_unmasked_amount',
     });
   });
 

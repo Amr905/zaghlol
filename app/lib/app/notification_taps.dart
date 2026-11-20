@@ -4,13 +4,15 @@
 
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/l10n/generated/app_localizations.dart';
 import '../core/routing/app_router.dart';
 import '../core/routing/app_routes.dart';
 import '../features/notifications/application/notification_providers.dart';
 import '../features/recurring/presentation/bills_providers.dart';
+import '../features/security/domain/app_lock_controller.dart';
 import '../features/notifications/domain/notification_routes.dart';
 import 'app_navigation.dart';
 
@@ -53,15 +55,53 @@ class _NotificationTapLifecycleState
       target,
       router: ref.read(appRouterProvider).go,
       context: rootNavigatorKey.currentContext,
-      markPaid: (id, due) async {
-        try {
-          await ref.read(billsActionsProvider).markPaid(id, expectedDue: due);
-        } catch (_) {
-          // Locked or unavailable: the app is open on the bills; nothing
-          // else to do. Never echo the error.
-        }
-      },
+      markPaid: (id, due) => payAfterGate(
+        waitUnlocked: _waitUnlocked,
+        confirm: _confirmMarkPaid,
+        pay: () async {
+          try {
+            await ref.read(billsActionsProvider).markPaid(id, expectedDue: due);
+          } catch (_) {
+            // Unavailable: the app is open on the bills; nothing else to do.
+            // Never echo the error.
+          }
+        },
+      ),
     );
+  }
+
+  /// Completes when the app lock is open (at once when it is not engaged).
+  Future<bool> _waitUnlocked() {
+    if (!ref.read(appLockControllerProvider).locked) return Future.value(true);
+    final done = Completer<bool>();
+    late final ProviderSubscription<AppLockState> sub;
+    sub = ref.listenManual<AppLockState>(appLockControllerProvider, (_, next) {
+      if (!next.locked && !done.isCompleted) done.complete(true);
+    });
+    return done.future.whenComplete(sub.close);
+  }
+
+  Future<bool> _confirmMarkPaid() async {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null || !context.mounted) return false;
+    final l = AppLocalizations.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.notificationMarkPaidConfirmTitle),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.commonActionCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.recurringBillsMarkPaid),
+          ),
+        ],
+      ),
+    );
+    return ok ?? false;
   }
 
   @override
@@ -77,6 +117,8 @@ void openNotificationTarget(
   Future<void> Function(String id, String dueDate)? markPaid,
 }) {
   switch (target) {
+    case HomeTarget():
+      router(AppRoutes.home);
     case InsightsTarget():
       router(AppRoutes.insights);
     case TransactionTarget(:final id):
@@ -88,4 +130,17 @@ void openNotificationTarget(
     case BackupTarget():
       if (context != null) unawaited(openBackup(context));
   }
+}
+
+/// L-1 (defence in depth): a notification route is an intent from outside
+/// Dart, so it never writes by itself. [pay] runs only after the app lock is
+/// open ([waitUnlocked]) and the user confirms in the app ([confirm]).
+Future<void> payAfterGate({
+  required Future<bool> Function() waitUnlocked,
+  required Future<bool> Function() confirm,
+  required Future<void> Function() pay,
+}) async {
+  if (!await waitUnlocked()) return;
+  if (!await confirm()) return;
+  await pay();
 }

@@ -39,6 +39,7 @@ class AskAnswerTextBuilder {
     required this.l,
     required this.languageCode,
     required this.digits,
+    required this.hidden,
     required this.today,
     required this.categoryNames,
   });
@@ -46,13 +47,20 @@ class AskAnswerTextBuilder {
   final AppLocalizations l;
   final String languageCode;
   final DigitsMode digits;
+
+  /// D-67: amounts show as `****`.
+  final bool hidden;
   final CivilDate today;
 
   /// Category id to localized name.
   final Map<String, String> categoryNames;
 
-  String _money(Money m) =>
-      MoneyFormat.format(m, languageCode: languageCode, digits: digits);
+  String _money(Money m) => MoneyFormat.format(
+    m,
+    languageCode: languageCode,
+    digits: digits,
+    hidden: hidden,
+  );
 
   String _n(int n) => digits.render('$n');
 

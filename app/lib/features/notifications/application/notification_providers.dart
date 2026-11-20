@@ -137,12 +137,20 @@ AppLocalizations notificationL10n(Ref ref) {
 
 String _lang(Ref ref) => notificationL10n(ref).localeName;
 
+/// Whether notification text should mask amounts. Unlike the screens this
+/// does not fail closed while the setting loads: the service redacts by the
+/// awaited setting when it sends (`loadPrefs`), so a cold-start alert for a
+/// user who did not hide never says `****`.
+bool notificationHidden(Ref ref) =>
+    ref.read(hideAmountsAppProvider).value ?? false;
+
 String _money(Ref ref, Money m) {
   final lang = _lang(ref);
   return MoneyFormat.format(
     m,
     languageCode: lang,
     digits: ref.read(digitsModeProvider(lang)),
+    hidden: notificationHidden(ref),
   );
 }
 
@@ -160,7 +168,7 @@ final notificationServiceProvider = FutureProvider<NotificationService>((
   final service = _service(ref, settings, fired);
   // FU-133: when amounts become hidden (the toggle or app lock), alerts
   // already waiting for quiet hours to end are re-scheduled redacted.
-  ref.listen(hideAmountsNotificationsProvider, (prev, next) {
+  void redact(AsyncValue<bool>? _, AsyncValue<bool> next) {
     if (next.value ?? false) {
       unawaited(
         service.redactScheduled().then<void>(
@@ -170,7 +178,11 @@ final notificationServiceProvider = FutureProvider<NotificationService>((
         ),
       );
     }
-  });
+  }
+
+  ref.listen(hideAmountsNotificationsProvider, redact);
+  // D-67: the app-wide eye toggle hides notification amounts too.
+  ref.listen(hideAmountsAppProvider, redact);
   return service;
 }, name: 'notificationServiceProvider');
 
@@ -194,7 +206,10 @@ NotificationService _service(
           startMin: await settings.get(Settings.quietHoursStartMin),
           endMin: await settings.get(Settings.quietHoursEndMin),
         ),
-        hideAmounts: await settings.get(Settings.hideAmountsNotifications),
+        // D-67: the app-wide eye toggle counts as well (OR).
+        hideAmounts:
+            await settings.get(Settings.hideAmountsNotifications) ||
+            await settings.get(Settings.hideAmountsApp),
       );
     },
     markFired:

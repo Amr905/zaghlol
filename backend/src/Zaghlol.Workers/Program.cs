@@ -23,6 +23,20 @@ if (args.Contains(MigrateCommand.Flag, StringComparer.Ordinal))
     return await MigrateCommand.RunAsync(args);
 }
 
+// `dotnet Zaghlol.Workers.dll --generate-keys ...` is the production key tool of the File KMS (T-200): run it once on the server,
+// inside this image, with no network. It writes key files and prints public values only.
+if (args.Contains(FileKeyTool.Flag, StringComparer.Ordinal))
+{
+    return FileKeyTool.Run(args, Console.Out, Console.Error, Environment.CurrentDirectory);
+}
+
+// `dotnet Zaghlol.Workers.dll --openbao-keys ...` is the OpenBao migration tool (T-201): imports the File HMAC and envelope keys
+// into Transit (BYOK), verifies them and prints pins and ring entries. Public values only.
+if (args.Contains(OpenBaoKeyTool.Flag, StringComparer.Ordinal))
+{
+    return OpenBaoKeyTool.Run(args, Console.Out, Console.Error);
+}
+
 Log.Logger = new LoggerConfiguration().ConfigureZaghlol("worker").CreateLogger();
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -62,13 +76,17 @@ builder.Services.AddHostedService<PlayVoidedReconcileService>();
 builder.Services.AddHostedService<PlayExpirySweepService>();
 
 // Apple revocation retry (T-135): token revocations that failed at account deletion, every 15 min for up to 30 days. Needs the Kms:*
-// ring (to open the sealed refresh token) and Accounts:Apple:* (the Sign in with Apple key), like the API.
+// ring (to open the sealed refresh token) and Accounts:Apple:* (the Sign in with Apple key), like the API. With OpenBao (T-201) the
+// worker runs with Kms:Scope=Envelope and an AppRole whose policy allows envelope keys only.
 builder.Services.AddZaghlolKms();
 builder.Services.AddZaghlolAppleRevocationWorker();
 builder.Services.AddHostedService<AppleRevocationRetryService>();
 
 using var host = builder.Build();
+
+// Resolved before RunAsync, which disposes the host and its service provider (BUG-002).
+var exitCode = host.Services.GetRequiredService<HostExitCode>();
 await host.RunAsync();
 
 // Non-zero when a guard stopped the host (FU-023), e.g. a rejected database login.
-return host.Services.GetRequiredService<HostExitCode>().Value;
+return exitCode.Value;

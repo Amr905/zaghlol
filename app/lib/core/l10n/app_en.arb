@@ -568,6 +568,68 @@
   "accountsOverviewNetWorth": "Net worth",
   "accountsOverviewOtherCurrenciesA11y": "Other currencies",
   "accountsOverviewAccountsTitle": "Cards & accounts",
+  "accountsGroupBank": "Bank accounts & debit cards",
+  "@accountsGroupBank": {
+    "description": "T"
+  },
+  "accountsGroupCredit": "Credit cards & pay later",
+  "@accountsGroupCredit": {
+    "description": "T"
+  },
+  "accountsGroupWallets": "Wallets & prepaid",
+  "@accountsGroupWallets": {
+    "description": "T"
+  },
+  "accountsGroupCash": "Cash",
+  "@accountsGroupCash": {
+    "description": "T"
+  },
+  "accountsGroupToggle": "Group by type",
+  "@accountsGroupToggle": {
+    "description": "C"
+  },
+  "accountsOverviewUsedOf": "{used} used of {limit}",
+  "@accountsOverviewUsedOf": {
+    "description": "L",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewUsedBarA11y": "{percent} of your limit used",
+  "@accountsOverviewUsedBarA11y": {
+    "description": "S",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewDueOn": "Due {date}",
+  "@accountsOverviewDueOn": {
+    "description": "C",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsTypeCurrency": "{type} · {currency}",
+  "@accountsTypeCurrency": {
+    "description": "S",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "accountsOverviewCompare": "Compare",
   "accountsOverviewAsOf": "as of {when}",
   "accountsOverviewCreditAvailable": "available of {limit}",
@@ -940,7 +1002,11 @@
   "insightsCoveredEarlier": "Paid from cash withdrawn earlier: {amount}",
   "@insightsCoveredEarlier": {
     "description": "Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "insightsChartTitleCashFlow": "Cash flow",
   "@insightsChartTitleCashFlow": {
@@ -1310,7 +1376,7 @@
       }
     }
   },
-  "insightsExplainCashFlowBasic": "{state, select, short{This cycle you earned {income} and spent {spent}, so you're {gap} over your income. Let's sort it out together.} other{This cycle you earned {income} and spent {spent}, so you saved {saved}. That's {percent} of your income. Well done!}}",
+  "insightsExplainCashFlowBasic": "{state, select, short{Over {now} you earned {income} and spent {spent}, so you're {gap} over your income. Let's sort it out together.} other{Over {now} you earned {income} and spent {spent}, so you saved {saved}. That's {percent} of your income. Well done!}}",
   "@insightsExplainCashFlowBasic": {
     "description": "E · state:select(short/other): short = spent more than earned. No emoji in the short branch",
     "placeholders": {
@@ -1331,6 +1397,9 @@
       },
       "percent": {
         "type": "String"
+      },
+      "now": {
+        "type": "String"
       }
     }
   },
@@ -1349,7 +1418,7 @@
       }
     }
   },
-  "insightsExplainCashFlowDeep": "{trend, select, up{This cycle's net is {delta} better than last cycle.} down{This cycle's net is {delta} lower than last cycle.} other{This cycle's net is about the same as last cycle.}}",
+  "insightsExplainCashFlowDeep": "{trend, select, up{Net over {now} is {delta} better than {prev}.} down{Net over {now} is {delta} lower than {prev}.} other{Net over {now} is about the same as {prev}.}}",
   "@insightsExplainCashFlowDeep": {
     "description": "E · Gold · trend (up = better)",
     "placeholders": {
@@ -1357,6 +1426,12 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "now": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1406,7 +1481,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeep": "{trend, select, up{{category} is up {delta} on last cycle.} down{{category} is down {delta} on last cycle.} other{{category} is about the same as last cycle.}}",
+  "insightsExplainCategoriesDeep": "{trend, select, up{{category} is up {delta} on {prev}.} down{{category} is down {delta} on {prev}.} other{{category} is about the same as {prev}.}}",
   "@insightsExplainCategoriesDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1417,6 +1492,9 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1490,7 +1568,7 @@
       }
     }
   },
-  "insightsExplainRule503020Basic": "{state, select, wantsHigh{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Wants are above the usual rule.} savingsLow{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Savings are below the usual rule.} other{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. That's close to the usual rule.}}",
+  "insightsExplainRule503020Basic": "{state, select, wantsHigh{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Wants are above the usual rule.} savingsLow{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Savings are below the usual rule.} other{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. That's close to the usual rule.}}",
   "@insightsExplainRule503020Basic": {
     "description": "E · state:select(wantsHigh/savingsLow/other). The rule is fifty, thirty, twenty; the chart title carries it",
     "placeholders": {
@@ -1504,6 +1582,9 @@
         "type": "String"
       },
       "savingsPct": {
+        "type": "String"
+      },
+      "now": {
         "type": "String"
       }
     }
@@ -1520,7 +1601,7 @@
       }
     }
   },
-  "insightsExplainRule503020Deep": "{trend, select, up{Savings rose from last cycle to {savingsPct}.} down{Savings fell from last cycle to {savingsPct}.} other{Savings are about the same as last cycle.}}",
+  "insightsExplainRule503020Deep": "{trend, select, up{Savings rose from {prev} to {savingsPct}.} down{Savings fell from {prev} to {savingsPct}.} other{Savings are about the same as {prev}.}}",
   "@insightsExplainRule503020Deep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1528,6 +1609,9 @@
         "type": "String"
       },
       "savingsPct": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1574,7 +1658,7 @@
       }
     }
   },
-  "insightsExplainWeekPatternDeep": "{trend, select, up{Your average on {peakDay} is {amount}, higher than last cycle.} down{Your average on {peakDay} is {amount}, lower than last cycle.} other{Your average on {peakDay} is {amount}, about the same as last cycle.}}",
+  "insightsExplainWeekPatternDeep": "{trend, select, up{Your average on {peakDay} is {amount}, higher than {prev}.} down{Your average on {peakDay} is {amount}, lower than {prev}.} other{Your average on {peakDay} is {amount}, about the same as {prev}.}}",
   "@insightsExplainWeekPatternDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1585,6 +1669,9 @@
         "type": "String"
       },
       "amount": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1634,7 +1721,7 @@
       }
     }
   },
-  "insightsExplainMerchantsDeep": "Your top three merchants take {percent} of your spending. {trend, select, up{{merchant} is up {delta} on last cycle.} down{{merchant} is down {delta} on last cycle.} other{{merchant} is about the same as last cycle.}}",
+  "insightsExplainMerchantsDeep": "Your top three merchants take {percent} of your spending. {trend, select, up{{merchant} is up {delta} on {prev}.} down{{merchant} is down {delta} on {prev}.} other{{merchant} is about the same as {prev}.}}",
   "@insightsExplainMerchantsDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -1648,6 +1735,9 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -1856,7 +1946,7 @@
       }
     }
   },
-  "insightsExplainCardsDeep": "{trend, select, up{{card}'s share of your spending rose since last cycle.} down{{card}'s share of your spending fell since last cycle.} other{{card}'s share of your spending is unchanged since last cycle.}}",
+  "insightsExplainCardsDeep": "{trend, select, up{{card}'s share of your spending rose since {prev}.} down{{card}'s share of your spending fell since {prev}.} other{{card}'s share of your spending is unchanged since {prev}.}}",
   "@insightsExplainCardsDeep": {
     "description": "E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10)",
     "placeholders": {
@@ -1864,6 +1954,9 @@
         "type": "String"
       },
       "card": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -2294,6 +2387,10 @@
   "@recurringBillsMarkPaid": {
     "description": "B · glossary «اتدفع»"
   },
+  "notificationMarkPaidConfirmTitle": "Mark this bill as paid?",
+  "@notificationMarkPaidConfirmTitle": {
+    "description": "L-1 · confirm before a notification action marks a bill paid"
+  },
   "recurringBillsPaid": "Paid ✓",
   "@recurringBillsPaid": {
     "description": "C"
@@ -2402,6 +2499,52 @@
         "type": "String"
       }
     }
+  },
+  "recurringBillsAutoAdded": "Added automatically",
+  "@recurringBillsAutoAdded": {
+    "description": "B · tag on a bill that zaghlol found and added by itself"
+  },
+  "recurringBillsNotABill": "Not a bill",
+  "@recurringBillsNotABill": {
+    "description": "B · one-tap undo on an auto-added bill"
+  },
+  "recurringBillsNotABillDone": "Got it, I won't add {name} again",
+  "@recurringBillsNotABillDone": {
+    "description": "N · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedTitle": "A bill was added",
+  "@notificationsAutoAddedTitle": {
+    "description": "T"
+  },
+  "notificationsAutoAddedOne": "{name} gets charged regularly, so it was added to your bills. Not a bill? Remove it with one tap.",
+  "@notificationsAutoAddedOne": {
+    "description": "N · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedMany": "{count, plural, other{{n} regular charges were added to your bills.}}",
+  "@notificationsAutoAddedMany": {
+    "description": "N · count:int, n · how many bills were added at once (two or more)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedHidden": "A new bill was added to your bills.",
+  "@notificationsAutoAddedHidden": {
+    "description": "N"
   },
   "recurringBillsRowA11y": "{name}, {amount}, {status}",
   "@recurringBillsRowA11y": {
@@ -5678,7 +5821,7 @@
   "@notificationsSettingsDuplicates": {
     "description": "L"
   },
-  "notificationsSettingsRenewals": "Subscription renewals",
+  "notificationsSettingsRenewals": "Auto-added bills",
   "@notificationsSettingsRenewals": {
     "description": "L"
   },
@@ -6208,6 +6351,10 @@
   "settingsPrefsThemeDark": "Dark",
   "@settingsPrefsThemeDark": {
     "description": "C"
+  },
+  "settingsPrefsThemeDarkQuip": "Dark mode? Your money and your mood, both in the dark?",
+  "@settingsPrefsThemeDarkQuip": {
+    "description": "T-194 · Captain Zaghlol snackbar when the user picks Dark theme"
   },
   "settingsPrefsCurrency": "Primary currency",
   "@settingsPrefsCurrency": {
@@ -6751,7 +6898,7 @@
   "@chatMainRoastTag": {
     "description": "S-50 design pass"
   },
-  "insightsChartsSavedFootnote": "You saved {amount} this month ({percent})",
+  "insightsChartsSavedFootnote": "You saved {amount} over {now} ({percent})",
   "@insightsChartsSavedFootnote": {
     "description": "S-20 cash-flow footnote",
     "placeholders": {
@@ -6759,6 +6906,9 @@
         "type": "String"
       },
       "percent": {
+        "type": "String"
+      },
+      "now": {
         "type": "String"
       }
     }
@@ -7043,5 +7193,516 @@
   "importFlowUnavailable": "This source isn't ready yet",
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
+  },
+  "commonAmountsHide": "Hide amounts",
+  "@commonAmountsHide": {
+    "description": "D-67 eye button label and tooltip: hide every amount in the app"
+  },
+  "commonAmountsShow": "Show amounts",
+  "@commonAmountsShow": {
+    "description": "D-67 eye button label and tooltip: show the amounts again"
+  },
+  "commonAmountHidden": "Amount hidden",
+  "@commonAmountHidden": {
+    "description": "D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)"
+  },
+  "settingsPrefsHideAmounts": "Hide amounts in the app",
+  "@settingsPrefsHideAmounts": {
+    "description": "D-67 Preferences switch: hide every amount in the app"
+  },
+  "settingsPrefsHideAmountsHint": "Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.",
+  "@settingsPrefsHideAmountsHint": {
+    "description": "D-67 hint under the hide-amounts switch"
+  },
+  "shareStudioShowAmountsLocked": "Amounts are hidden in the whole app, so the card shows percentages only. Show them with the eye icon first.",
+  "@shareStudioShowAmountsLocked": {
+    "description": "D-67 hint under the disabled Show amounts switch while hiding is on in the whole app"
+  },
+  "salaryExpectedTitle": "Salary — expected",
+  "@salaryExpectedTitle": {
+    "description": "Home row title"
+  },
+  "salaryExpectedSub": "Due on day {day} · not counted until confirmed",
+  "@salaryExpectedSub": {
+    "description": "Home row subtitle · day",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryActionArrived": "It arrived",
+  "@salaryActionArrived": {
+    "description": "Home row button"
+  },
+  "salaryActionNotYet": "Not yet",
+  "@salaryActionNotYet": {
+    "description": "Home row button"
+  },
+  "salaryActionSkip": "Skip this month",
+  "@salaryActionSkip": {
+    "description": "Home row button"
+  },
+  "salaryRecorded": "Salary added",
+  "@salaryRecorded": {
+    "description": "Snackbar"
+  },
+  "salaryErrorGeneric": "Couldn't add the salary. Try again.",
+  "@salaryErrorGeneric": {
+    "description": "Snackbar error"
+  },
+  "salaryFoundTitle": "A payment already arrived",
+  "@salaryFoundTitle": {
+    "description": "Dialog title"
+  },
+  "salaryFoundBody": "An income of {amount} arrived around payday. Is that your salary?",
+  "@salaryFoundBody": {
+    "description": "Dialog body · amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryFoundYes": "Yes, that's it",
+  "@salaryFoundYes": {
+    "description": "Dialog button"
+  },
+  "salaryFoundNo": "No, another income",
+  "@salaryFoundNo": {
+    "description": "Dialog button"
+  },
+  "salaryAddSwitch": "This is a salary",
+  "@salaryAddSwitch": {
+    "description": "Add-income switch"
+  },
+  "salaryAddSwitchHint": "If the bank message arrives later, it is counted once",
+  "@salaryAddSwitchHint": {
+    "description": "Add-income switch hint"
+  },
+  "salaryMergedTitle": "Merged with the salary you added",
+  "@salaryMergedTitle": {
+    "description": "Transaction detail line"
+  },
+  "salaryMergedUndo": "Restore mine",
+  "@salaryMergedUndo": {
+    "description": "Transaction detail button"
+  },
+  "salaryMergedUndone": "Your entry is back",
+  "@salaryMergedUndone": {
+    "description": "Snackbar"
+  },
+  "salaryMergedGone": "Your entry was removed and can't come back",
+  "@salaryMergedGone": {
+    "description": "Snackbar"
+  },
+  "settingsSalaryTitle": "My salary",
+  "@settingsSalaryTitle": {
+    "description": "Settings row and sheet title"
+  },
+  "settingsSalaryUnset": "Add it so Zaghlol can track it",
+  "@settingsSalaryUnset": {
+    "description": "Settings row subtitle"
+  },
+  "settingsSalarySummary": "{amount} · day {day}",
+  "@settingsSalarySummary": {
+    "description": "Settings row subtitle · amount, day",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSalaryAmount": "Amount",
+  "@settingsSalaryAmount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryDay": "Payday (1–28)",
+  "@settingsSalaryDay": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccount": "Lands in",
+  "@settingsSalaryAccount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccountDefault": "Cash",
+  "@settingsSalaryAccountDefault": {
+    "description": "Sheet account choice (default cash account)"
+  },
+  "settingsSalaryRemove": "Remove salary",
+  "@settingsSalaryRemove": {
+    "description": "Sheet button"
+  },
+  "settingsSalaryInvalid": "Enter a valid amount and a day from 1 to 28",
+  "@settingsSalaryInvalid": {
+    "description": "Sheet error"
+  },
+  "notificationsSalaryNudgeTitle": "Did your salary arrive?",
+  "@notificationsSalaryNudgeTitle": {
+    "description": "N"
+  },
+  "notificationsSalaryNudgeBody": "No salary message yet. If it landed, add it from Home in one tap.",
+  "@notificationsSalaryNudgeBody": {
+    "description": "N"
+  },
+  "commonPeriodLastMonth": "Last month",
+  "@commonPeriodLastMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodThisYear": "This year",
+  "@commonPeriodThisYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodSheetTitle": "Chart period",
+  "@insightsChartsPeriodSheetTitle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrev": "Previous period",
+  "@insightsChartsPeriodPrev": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNext": "Next period",
+  "@insightsChartsPeriodNext": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodA11y": "Chart period: {name}, {range}. Double tap to change",
+  "@insightsChartsPeriodA11y": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNeedsCycle": "This chart works on a payday cycle. Pick this cycle or last cycle to see it.",
+  "@insightsChartsPeriodNeedsCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodBudgetNote": "Budget progress always shows the current cycle.",
+  "@insightsChartsPeriodBudgetNote": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsDaysCount": "{count, plural, one{{countText} day} other{{countText} days}}",
+  "@insightsChartsDaysCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsWeeksCount": "{count, plural, one{{countText} week} other{{countText} weeks}}",
+  "@insightsChartsWeeksCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNowThisCycle": "this cycle",
+  "@insightsChartsPeriodNowThisCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastCycle": "the previous cycle",
+  "@insightsChartsPeriodNowLastCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowThisMonth": "this month",
+  "@insightsChartsPeriodNowThisMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastMonth": "the previous month",
+  "@insightsChartsPeriodNowLastMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowMonths": "{count, plural, =1{the last month} other{the last {n} months}}",
+  "@insightsChartsPeriodNowMonths": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNowThisYear": "this year",
+  "@insightsChartsPeriodNowThisYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastYear": "the previous year",
+  "@insightsChartsPeriodNowLastYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowRange": "the period {start} – {end}",
+  "@insightsChartsPeriodNowRange": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevCycleNow": "last cycle",
+  "@insightsChartsPeriodPrevCycleNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonthNow": "last month",
+  "@insightsChartsPeriodPrevMonthNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevYearNow": "last year",
+  "@insightsChartsPeriodPrevYearNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevCycle": "the cycle before",
+  "@insightsChartsPeriodPrevCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonth": "the month before",
+  "@insightsChartsPeriodPrevMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonths": "{count, plural, =1{the month before} other{the {n} months before}}",
+  "@insightsChartsPeriodPrevMonths": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevYear": "the year before",
+  "@insightsChartsPeriodPrevYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevRange": "the period before",
+  "@insightsChartsPeriodPrevRange": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodLastCycles": "Last {n} cycles",
+  "@commonPeriodLastCycles": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCyclesCount": "{count, plural, one{{countText} cycle} other{{countText} cycles}}",
+  "@insightsChartsCyclesCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevSameDays": "the same days of {prev}",
+  "@insightsChartsPeriodPrevSameDays": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "networthTitle": "Where your net worth comes from",
+  "@networthTitle": {
+    "description": "S · breakdown screen title"
+  },
+  "networthOpenA11y": "Open the net worth details",
+  "@networthOpenA11y": {
+    "description": "A · hero tap target"
+  },
+  "networthGroupAccounts": "Your accounts",
+  "@networthGroupAccounts": {
+    "description": "L"
+  },
+  "networthGroupAssets": "Your assets",
+  "@networthGroupAssets": {
+    "description": "L"
+  },
+  "networthGroupLiabilities": "What you owe",
+  "@networthGroupLiabilities": {
+    "description": "L"
+  },
+  "networthGroupExcluded": "Not counted",
+  "@networthGroupExcluded": {
+    "description": "L · lines with no known balance"
+  },
+  "networthNet": "Net",
+  "@networthNet": {
+    "description": "L"
+  },
+  "networthSrcReported": "Bank message · {date}",
+  "@networthSrcReported": {
+    "description": "L · source of a line",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcAvailable": "Available balance from the bank message · {date}",
+  "@networthSrcAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcLimitMinusAvailable": "Worked out from limit and available · {date}",
+  "@networthSrcLimitMinusAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUser": "You entered it · {date}",
+  "@networthSrcUser": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcComputed": "Worked out from transactions since {date}",
+  "@networthSrcComputed": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUnknown": "Unknown — set the balance",
+  "@networthSrcUnknown": {
+    "description": "L · excluded line"
+  },
+  "networthSrcAsset": "Value you entered",
+  "@networthSrcAsset": {
+    "description": "L · asset line"
+  },
+  "networthSrcInstallments": "Installments left",
+  "@networthSrcInstallments": {
+    "description": "L"
+  },
+  "networthStale": "Old",
+  "@networthStale": {
+    "description": "C · stale tag"
+  },
+  "networthSetBalance": "Set balance",
+  "@networthSetBalance": {
+    "description": "B"
+  },
+  "networthSheetTitle": "Balance of {name}",
+  "@networthSheetTitle": {
+    "description": "S · set balance sheet",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSheetAmount": "Balance now",
+  "@networthSheetAmount": {
+    "description": "L"
+  },
+  "networthSheetAmountOwed": "Amount you owe now",
+  "@networthSheetAmountOwed": {
+    "description": "L · card"
+  },
+  "networthSheetHint": "We will work out from this number as new transactions come in.",
+  "@networthSheetHint": {
+    "description": "H"
+  },
+  "networthSheetSave": "Save",
+  "@networthSheetSave": {
+    "description": "B"
+  },
+  "networthSheetInvalid": "Enter a valid amount",
+  "@networthSheetInvalid": {
+    "description": "E"
+  },
+  "networthSheetFailed": "Could not save the balance",
+  "@networthSheetFailed": {
+    "description": "E"
+  },
+  "networthFreeNote": "Assets and installments come with Gold",
+  "@networthFreeNote": {
+    "description": "N"
+  },
+  "networthEmpty": "No balances to count yet",
+  "@networthEmpty": {
+    "description": "S"
+  },
+  "networthOpenBankA11y": "Open the transactions of {name}",
+  "@networthOpenBankA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthLineA11y": "{name}, {source}",
+  "@networthLineA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUnknownCard": "Unknown — set the limit or the balance",
+  "@networthSrcUnknownCard": {
+    "description": "L · card with no limit"
+  },
+  "networthEdit": "Edit balance",
+  "@networthEdit": {
+    "description": "B"
+  },
+  "networthClear": "Remove the balance I entered",
+  "@networthClear": {
+    "description": "B"
+  },
+  "networthBankPartial": "Not all accounts",
+  "@networthBankPartial": {
+    "description": "C"
+  },
+  "networthCardOwed": "Amount you owe",
+  "@networthCardOwed": {
+    "description": "L"
   }
 }

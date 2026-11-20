@@ -22,7 +22,12 @@ import '../../../../core/ui/z_components.dart';
 import '../../../../core/ui/shell/add_sheet.dart'
     show AddAction, closeAddSheetThen;
 import '../../../budget/application/budget_providers.dart';
+import '../../../salary/application/salary_providers.dart';
+import '../../../salary/application/salary_service.dart';
+import '../../../salary/presentation/expected_salary_row.dart'
+    show askSalarySame;
 import '../../data/transactions_providers.dart';
+import '../../../accounts/presentation/account_type.dart';
 import '../../domain/transaction.dart';
 import '../../application/duplicate_finder.dart';
 import '../detail/transaction_detail_screen.dart';
@@ -33,6 +38,7 @@ import '../../../voice/presentation/voice_logger_screen.dart';
 import 'txn_edit_providers.dart';
 import 'txn_form.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/settings/settings_providers.dart';
 
 const int _msPerDay = 86400000;
 
@@ -121,6 +127,10 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
   late final TextEditingController _note;
   late Currency _currency;
   bool _currencyTouched = false;
+
+  /// T-195: the new income is the salary (counted once even when the bank
+  /// message arrives too).
+  bool _salary = false;
   String? _categoryId;
   String? _accountId;
   String? _toAccountId;
@@ -151,6 +161,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     _amount = TextEditingController(
       text: e == null
           ? (pre?.amountText ?? '')
+          // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
           : e.amount.abs().toCanonicalString(),
     );
     _merchant = TextEditingController(
@@ -188,13 +199,18 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
 
   CivilDate _today() => ref.read(todayProvider);
 
+  bool get _salarySelected =>
+      _salary && _type == TxnEditType.income && !_isEdit;
+
   void _revalidate() {
     setState(() {
       _errors = validateForm(
         type: _type,
         amountText: _amount.text,
         currency: _currency,
-        categoryId: _isTransferEdit ? 'n/a' : _categoryId,
+        categoryId: _isTransferEdit
+            ? 'n/a'
+            : (_categoryId ?? (_salarySelected ? 'sys:income' : null)),
         accountId: _accountId,
         toAccountId: _isTransferEdit ? null : _toAccountId,
         date: _date ?? _today(),
@@ -337,7 +353,14 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
             return;
           }
         }
-        await editor.add(legs);
+        if (_salarySelected) {
+          if (!await _saveSalary(legs.first)) {
+            if (mounted) setState(() => _saving = false);
+            return;
+          }
+        } else {
+          await editor.add(legs);
+        }
       }
       ref.invalidate(txnListProvider);
       if (removed.isNotEmpty) {
@@ -359,6 +382,32 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     }
   }
 
+  /// T-195: saves [leg] as the salary. When a received credit already looks
+  /// like it, asks: the same one (it is tied, nothing is added) or another
+  /// income (it is added). False = the user cancelled.
+  Future<bool> _saveSalary(NewTransaction leg) async {
+    final service = await ref.read(salaryServiceProvider.future);
+    final result = await service.recordManual(leg);
+    if (result is SalaryFoundExisting) {
+      if (!mounted) return false;
+      final lang = Localizations.localeOf(context).languageCode;
+      final fmt = TxnFmt(
+        lang,
+        ref.read(digitsModeProvider(lang)),
+        hidden: ref.read(hideAmountsProvider),
+      );
+      final same = await askSalarySame(context, fmt.money(result.amount));
+      if (same == null) return false;
+      if (same) {
+        await service.linkExisting(await service.anchorFor(leg), result.txnId);
+      } else {
+        await service.recordManual(leg, allowDuplicate: true);
+      }
+    }
+    ref.invalidate(expectedSalaryProvider);
+    return true;
+  }
+
   /// S-32: when the same transaction is already saved, show it and let the
   /// user view it or save anyway. False = do not save now.
   Future<bool> _confirmNotDuplicate(NewTransaction leg) async {
@@ -372,7 +421,11 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     if (dup == null || !mounted) return true;
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final fmt = TxnFmt(lang, ref.read(digitsModeProvider(lang)));
+    final fmt = TxnFmt(
+      lang,
+      ref.read(digitsModeProvider(lang)),
+      hidden: ref.read(hideAmountsProvider),
+    );
     final existing = dup;
     final choice = await showDialog<bool>(
       context: context,
@@ -487,7 +540,12 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           for (final a in lk.accounts)
             ZListRow(
               title: accountName(a, fmt),
-              subtitle: a.currencyCode,
+              subtitle: a.kind == null
+                  ? a.currencyCode
+                  : AppLocalizations.of(ctx).accountsTypeCurrency(
+                      accountKindLabel(AppLocalizations.of(ctx), a.kind!),
+                      a.currencyCode,
+                    ),
               onTap: () => Navigator.of(ctx).pop(a.id),
             ),
         ],
@@ -517,7 +575,11 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final fmt = TxnFmt(lang, ref.watch(digitsModeProvider(lang)));
+    final fmt = TxnFmt(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
     final lk = ref.watch(txnLookupsProvider).value;
     final cash = ref.watch(defaultCashAccountIdProvider).value;
     if (_accountId == null && !_isEdit && lk != null) {
@@ -639,6 +701,22 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                       ),
                     ),
                     const SizedBox(height: ZSpacing.lg),
+                  ],
+                  if (_type == TxnEditType.income && !_isEdit) ...[
+                    SwitchListTile.adaptive(
+                      key: const ValueKey('txn-salary-switch'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l.salaryAddSwitch),
+                      subtitle: Text(l.salaryAddSwitchHint),
+                      value: _salary,
+                      onChanged: ZHaptics.onToggle(
+                        (v) => setState(() {
+                          _salary = v;
+                          _touch();
+                        }),
+                      ),
+                    ),
+                    const SizedBox(height: ZSpacing.sm),
                   ],
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

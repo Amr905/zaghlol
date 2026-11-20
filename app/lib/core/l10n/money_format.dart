@@ -6,6 +6,18 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import 'digits_mode.dart';
 
+/// The fixed-length mask for a hidden amount (D-67): the length says nothing
+/// about the size.
+const String kAmountMask = '****';
+
+final RegExp _amountNumber = RegExp(r'[0-9٠-٩]+(?:[,.٬٫][0-9٠-٩]+)*');
+
+/// [text] with every number (either digit script, with its separators)
+/// replaced by [kAmountMask]; sign, currency and bidi marks stay. For text that
+/// was formatted elsewhere and must not show digits.
+String maskAmountText(String text) =>
+    text.replaceAll(_amountNumber, kAmountMask);
+
 abstract final class MoneyFormat {
   static final _fsi = String.fromCharCode(0x2068);
   static final _pdi = String.fromCharCode(0x2069);
@@ -16,10 +28,14 @@ abstract final class MoneyFormat {
   /// `1,234.50 EGP` / `١٬٢٣٤٫٥٠ ج.م`, the whole run bidi-isolated so a
   /// negative sign and the currency never reorder in RTL text.
   /// [withCurrency] false gives the number only (still isolated).
+  ///
+  /// [hidden] (D-67) swaps the digits for [kAmountMask], keeping the sign and
+  /// the currency. It is required so a new call site must decide.
   static String format(
     Money money, {
     required String languageCode,
     required DigitsMode digits,
+    required bool hidden,
     bool withCurrency = true,
     bool dropZeroFraction = false,
   }) {
@@ -31,6 +47,20 @@ abstract final class MoneyFormat {
     final whole = point < 0 ? unsigned : unsigned.substring(0, point);
     var fraction = point < 0 ? '' : unsigned.substring(point + 1);
     if (dropZeroFraction && RegExp(r'^0*$').hasMatch(fraction)) fraction = '';
+
+    if (hidden) {
+      final sign = negative ? '-' : '';
+      final code = money.currency.code;
+      final String shown;
+      if (!withCurrency) {
+        shown = '$sign$kAmountMask';
+      } else if (arabic) {
+        shown = '$sign$kAmountMask ${_arSymbols[code] ?? code}';
+      } else {
+        shown = '$code $sign$kAmountMask';
+      }
+      return '$_fsi$shown$_pdi';
+    }
 
     final groupSep = digits == DigitsMode.arabicIndic ? '٬' : ',';
     final decimalSep = digits == DigitsMode.arabicIndic ? '٫' : '.';

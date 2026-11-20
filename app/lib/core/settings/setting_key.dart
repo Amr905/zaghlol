@@ -133,5 +133,15 @@ final class SettingKey<T> {
         (v) => v == null ? '' : v.toJson(),
       );
 
+  /// T-195: a structured value with its own codec (the salary plan and
+  /// state). [decode] returns null for text it cannot read, which reads as
+  /// [byDefault]; the value must survive [encode] then [decode].
+  static SettingKey<T> custom<T>(
+    String name, {
+    required T byDefault,
+    required T? Function(String stored) decode,
+    required String Function(T value) encode,
+  }) => SettingKey._(name, byDefault, decode, encode);
+
   static final RegExp _slug = RegExp(r'^[a-z0-9_]{1,32}$');
 }

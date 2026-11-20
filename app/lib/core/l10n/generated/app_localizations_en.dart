@@ -2236,6 +2236,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountsOverviewAccountsTitle => 'Cards & accounts';
 
   @override
+  String get accountsGroupBank => 'Bank accounts & debit cards';
+
+  @override
+  String get accountsGroupCredit => 'Credit cards & pay later';
+
+  @override
+  String get accountsGroupWallets => 'Wallets & prepaid';
+
+  @override
+  String get accountsGroupCash => 'Cash';
+
+  @override
+  String get accountsGroupToggle => 'Group by type';
+
+  @override
+  String accountsOverviewUsedOf(String used, String limit) {
+    return '$used used of $limit';
+  }
+
+  @override
+  String accountsOverviewUsedBarA11y(String percent) {
+    return '$percent of your limit used';
+  }
+
+  @override
+  String accountsOverviewDueOn(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String accountsTypeCurrency(String type, String currency) {
+    return '$type · $currency';
+  }
+
+  @override
   String get accountsOverviewCompare => 'Compare';
 
   @override
@@ -3262,12 +3297,13 @@ class AppLocalizationsEn extends AppLocalizations {
     String gap,
     String saved,
     String percent,
+    String now,
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'short':
-          'This cycle you earned $income and spent $spent, so you\'re $gap over your income. Let\'s sort it out together.',
+          'Over $now you earned $income and spent $spent, so you\'re $gap over your income. Let\'s sort it out together.',
       'other':
-          'This cycle you earned $income and spent $spent, so you saved $saved. That\'s $percent of your income. Well done!',
+          'Over $now you earned $income and spent $spent, so you saved $saved. That\'s $percent of your income. Well done!',
     });
     return '$_temp0';
   }
@@ -3288,11 +3324,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String insightsExplainCashFlowDeep(String trend, String delta) {
+  String insightsExplainCashFlowDeep(
+    String trend,
+    String delta,
+    String now,
+    String prev,
+  ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'This cycle\'s net is $delta better than last cycle.',
-      'down': 'This cycle\'s net is $delta lower than last cycle.',
-      'other': 'This cycle\'s net is about the same as last cycle.',
+      'up': 'Net over $now is $delta better than $prev.',
+      'down': 'Net over $now is $delta lower than $prev.',
+      'other': 'Net over $now is about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3323,11 +3364,12 @@ class AppLocalizationsEn extends AppLocalizations {
     String trend,
     String category,
     String delta,
+    String prev,
   ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': '$category is up $delta on last cycle.',
-      'down': '$category is down $delta on last cycle.',
-      'other': '$category is about the same as last cycle.',
+      'up': '$category is up $delta on $prev.',
+      'down': '$category is down $delta on $prev.',
+      'other': '$category is about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3390,14 +3432,15 @@ class AppLocalizationsEn extends AppLocalizations {
     String needsPct,
     String wantsPct,
     String savingsPct,
+    String now,
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'wantsHigh':
-          'This cycle: $needsPct needs, $wantsPct wants, $savingsPct savings. Wants are above the usual rule.',
+          'Over $now: $needsPct needs, $wantsPct wants, $savingsPct savings. Wants are above the usual rule.',
       'savingsLow':
-          'This cycle: $needsPct needs, $wantsPct wants, $savingsPct savings. Savings are below the usual rule.',
+          'Over $now: $needsPct needs, $wantsPct wants, $savingsPct savings. Savings are below the usual rule.',
       'other':
-          'This cycle: $needsPct needs, $wantsPct wants, $savingsPct savings. That\'s close to the usual rule.',
+          'Over $now: $needsPct needs, $wantsPct wants, $savingsPct savings. That\'s close to the usual rule.',
     });
     return '$_temp0';
   }
@@ -3413,11 +3456,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String insightsExplainRule503020Deep(String trend, String savingsPct) {
+  String insightsExplainRule503020Deep(
+    String trend,
+    String savingsPct,
+    String prev,
+  ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'Savings rose from last cycle to $savingsPct.',
-      'down': 'Savings fell from last cycle to $savingsPct.',
-      'other': 'Savings are about the same as last cycle.',
+      'up': 'Savings rose from $prev to $savingsPct.',
+      'down': 'Savings fell from $prev to $savingsPct.',
+      'other': 'Savings are about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3447,12 +3494,12 @@ class AppLocalizationsEn extends AppLocalizations {
     String trend,
     String peakDay,
     String amount,
+    String prev,
   ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'Your average on $peakDay is $amount, higher than last cycle.',
-      'down': 'Your average on $peakDay is $amount, lower than last cycle.',
-      'other':
-          'Your average on $peakDay is $amount, about the same as last cycle.',
+      'up': 'Your average on $peakDay is $amount, higher than $prev.',
+      'down': 'Your average on $peakDay is $amount, lower than $prev.',
+      'other': 'Your average on $peakDay is $amount, about the same as $prev.',
     });
     return '$_temp0';
   }
@@ -3488,11 +3535,12 @@ class AppLocalizationsEn extends AppLocalizations {
     String trend,
     String merchant,
     String delta,
+    String prev,
   ) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': '$merchant is up $delta on last cycle.',
-      'down': '$merchant is down $delta on last cycle.',
-      'other': '$merchant is about the same as last cycle.',
+      'up': '$merchant is up $delta on $prev.',
+      'down': '$merchant is down $delta on $prev.',
+      'other': '$merchant is about the same as $prev.',
     });
     return 'Your top three merchants take $percent of your spending. $_temp0';
   }
@@ -3633,11 +3681,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String insightsExplainCardsDeep(String trend, String card) {
+  String insightsExplainCardsDeep(String trend, String card, String prev) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': '$card\'s share of your spending rose since last cycle.',
-      'down': '$card\'s share of your spending fell since last cycle.',
-      'other': '$card\'s share of your spending is unchanged since last cycle.',
+      'up': '$card\'s share of your spending rose since $prev.',
+      'down': '$card\'s share of your spending fell since $prev.',
+      'other': '$card\'s share of your spending is unchanged since $prev.',
     });
     return '$_temp0';
   }
@@ -3920,6 +3968,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringBillsMarkPaid => 'Mark paid';
 
   @override
+  String get notificationMarkPaidConfirmTitle => 'Mark this bill as paid?';
+
+  @override
   String get recurringBillsPaid => 'Paid ✓';
 
   @override
@@ -3995,6 +4046,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String recurringBillsPaidSnack(String name) {
     return 'Marked $name as paid ✓';
   }
+
+  @override
+  String get recurringBillsAutoAdded => 'Added automatically';
+
+  @override
+  String get recurringBillsNotABill => 'Not a bill';
+
+  @override
+  String recurringBillsNotABillDone(String name) {
+    return 'Got it, I won\'t add $name again';
+  }
+
+  @override
+  String get notificationsAutoAddedTitle => 'A bill was added';
+
+  @override
+  String notificationsAutoAddedOne(String name) {
+    return '$name gets charged regularly, so it was added to your bills. Not a bill? Remove it with one tap.';
+  }
+
+  @override
+  String notificationsAutoAddedMany(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n regular charges were added to your bills.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notificationsAutoAddedHidden =>
+      'A new bill was added to your bills.';
 
   @override
   String recurringBillsRowA11y(String name, String amount, String status) {
@@ -6301,7 +6385,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsSettingsDuplicates => 'Duplicate charges';
 
   @override
-  String get notificationsSettingsRenewals => 'Subscription renewals';
+  String get notificationsSettingsRenewals => 'Auto-added bills';
 
   @override
   String get notificationsSettingsBackup => 'Backup problems';
@@ -6723,6 +6807,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPrefsThemeDark => 'Dark';
+
+  @override
+  String get settingsPrefsThemeDarkQuip =>
+      'Dark mode? Your money and your mood, both in the dark?';
 
   @override
   String get settingsPrefsCurrency => 'Primary currency';
@@ -7162,8 +7250,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatMainRoastTag => 'Roast';
 
   @override
-  String insightsChartsSavedFootnote(String amount, String percent) {
-    return 'You saved $amount this month ($percent)';
+  String insightsChartsSavedFootnote(
+    String amount,
+    String percent,
+    String now,
+  ) {
+    return 'You saved $amount over $now ($percent)';
   }
 
   @override
@@ -7372,4 +7464,370 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importFlowUnavailable => 'This source isn\'t ready yet';
+
+  @override
+  String get commonAmountsHide => 'Hide amounts';
+
+  @override
+  String get commonAmountsShow => 'Show amounts';
+
+  @override
+  String get commonAmountHidden => 'Amount hidden';
+
+  @override
+  String get settingsPrefsHideAmounts => 'Hide amounts in the app';
+
+  @override
+  String get settingsPrefsHideAmountsHint =>
+      'Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.';
+
+  @override
+  String get shareStudioShowAmountsLocked =>
+      'Amounts are hidden in the whole app, so the card shows percentages only. Show them with the eye icon first.';
+
+  @override
+  String get salaryExpectedTitle => 'Salary — expected';
+
+  @override
+  String salaryExpectedSub(String day) {
+    return 'Due on day $day · not counted until confirmed';
+  }
+
+  @override
+  String get salaryActionArrived => 'It arrived';
+
+  @override
+  String get salaryActionNotYet => 'Not yet';
+
+  @override
+  String get salaryActionSkip => 'Skip this month';
+
+  @override
+  String get salaryRecorded => 'Salary added';
+
+  @override
+  String get salaryErrorGeneric => 'Couldn\'t add the salary. Try again.';
+
+  @override
+  String get salaryFoundTitle => 'A payment already arrived';
+
+  @override
+  String salaryFoundBody(String amount) {
+    return 'An income of $amount arrived around payday. Is that your salary?';
+  }
+
+  @override
+  String get salaryFoundYes => 'Yes, that\'s it';
+
+  @override
+  String get salaryFoundNo => 'No, another income';
+
+  @override
+  String get salaryAddSwitch => 'This is a salary';
+
+  @override
+  String get salaryAddSwitchHint =>
+      'If the bank message arrives later, it is counted once';
+
+  @override
+  String get salaryMergedTitle => 'Merged with the salary you added';
+
+  @override
+  String get salaryMergedUndo => 'Restore mine';
+
+  @override
+  String get salaryMergedUndone => 'Your entry is back';
+
+  @override
+  String get salaryMergedGone => 'Your entry was removed and can\'t come back';
+
+  @override
+  String get settingsSalaryTitle => 'My salary';
+
+  @override
+  String get settingsSalaryUnset => 'Add it so Zaghlol can track it';
+
+  @override
+  String settingsSalarySummary(String amount, String day) {
+    return '$amount · day $day';
+  }
+
+  @override
+  String get settingsSalaryAmount => 'Amount';
+
+  @override
+  String get settingsSalaryDay => 'Payday (1–28)';
+
+  @override
+  String get settingsSalaryAccount => 'Lands in';
+
+  @override
+  String get settingsSalaryAccountDefault => 'Cash';
+
+  @override
+  String get settingsSalaryRemove => 'Remove salary';
+
+  @override
+  String get settingsSalaryInvalid =>
+      'Enter a valid amount and a day from 1 to 28';
+
+  @override
+  String get notificationsSalaryNudgeTitle => 'Did your salary arrive?';
+
+  @override
+  String get notificationsSalaryNudgeBody =>
+      'No salary message yet. If it landed, add it from Home in one tap.';
+
+  @override
+  String get commonPeriodLastMonth => 'Last month';
+
+  @override
+  String get commonPeriodThisYear => 'This year';
+
+  @override
+  String get insightsChartsPeriodSheetTitle => 'Chart period';
+
+  @override
+  String get insightsChartsPeriodPrev => 'Previous period';
+
+  @override
+  String get insightsChartsPeriodNext => 'Next period';
+
+  @override
+  String insightsChartsPeriodA11y(String name, String range) {
+    return 'Chart period: $name, $range. Double tap to change';
+  }
+
+  @override
+  String get insightsChartsPeriodNeedsCycle =>
+      'This chart works on a payday cycle. Pick this cycle or last cycle to see it.';
+
+  @override
+  String get insightsChartsPeriodBudgetNote =>
+      'Budget progress always shows the current cycle.';
+
+  @override
+  String insightsChartsDaysCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText days',
+      one: '$countText day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsWeeksCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText weeks',
+      one: '$countText week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsPeriodNowThisCycle => 'this cycle';
+
+  @override
+  String get insightsChartsPeriodNowLastCycle => 'the previous cycle';
+
+  @override
+  String get insightsChartsPeriodNowThisMonth => 'this month';
+
+  @override
+  String get insightsChartsPeriodNowLastMonth => 'the previous month';
+
+  @override
+  String insightsChartsPeriodNowMonths(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'the last $n months',
+      one: 'the last month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsPeriodNowThisYear => 'this year';
+
+  @override
+  String get insightsChartsPeriodNowLastYear => 'the previous year';
+
+  @override
+  String insightsChartsPeriodNowRange(String start, String end) {
+    return 'the period $start – $end';
+  }
+
+  @override
+  String get insightsChartsPeriodPrevCycleNow => 'last cycle';
+
+  @override
+  String get insightsChartsPeriodPrevMonthNow => 'last month';
+
+  @override
+  String get insightsChartsPeriodPrevYearNow => 'last year';
+
+  @override
+  String get insightsChartsPeriodPrevCycle => 'the cycle before';
+
+  @override
+  String get insightsChartsPeriodPrevMonth => 'the month before';
+
+  @override
+  String insightsChartsPeriodPrevMonths(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'the $n months before',
+      one: 'the month before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsChartsPeriodPrevYear => 'the year before';
+
+  @override
+  String get insightsChartsPeriodPrevRange => 'the period before';
+
+  @override
+  String commonPeriodLastCycles(String n) {
+    return 'Last $n cycles';
+  }
+
+  @override
+  String insightsChartsCyclesCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText cycles',
+      one: '$countText cycle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsPeriodPrevSameDays(String prev) {
+    return 'the same days of $prev';
+  }
+
+  @override
+  String get networthTitle => 'Where your net worth comes from';
+
+  @override
+  String get networthOpenA11y => 'Open the net worth details';
+
+  @override
+  String get networthGroupAccounts => 'Your accounts';
+
+  @override
+  String get networthGroupAssets => 'Your assets';
+
+  @override
+  String get networthGroupLiabilities => 'What you owe';
+
+  @override
+  String get networthGroupExcluded => 'Not counted';
+
+  @override
+  String get networthNet => 'Net';
+
+  @override
+  String networthSrcReported(String date) {
+    return 'Bank message · $date';
+  }
+
+  @override
+  String networthSrcAvailable(String date) {
+    return 'Available balance from the bank message · $date';
+  }
+
+  @override
+  String networthSrcLimitMinusAvailable(String date) {
+    return 'Worked out from limit and available · $date';
+  }
+
+  @override
+  String networthSrcUser(String date) {
+    return 'You entered it · $date';
+  }
+
+  @override
+  String networthSrcComputed(String date) {
+    return 'Worked out from transactions since $date';
+  }
+
+  @override
+  String get networthSrcUnknown => 'Unknown — set the balance';
+
+  @override
+  String get networthSrcAsset => 'Value you entered';
+
+  @override
+  String get networthSrcInstallments => 'Installments left';
+
+  @override
+  String get networthStale => 'Old';
+
+  @override
+  String get networthSetBalance => 'Set balance';
+
+  @override
+  String networthSheetTitle(String name) {
+    return 'Balance of $name';
+  }
+
+  @override
+  String get networthSheetAmount => 'Balance now';
+
+  @override
+  String get networthSheetAmountOwed => 'Amount you owe now';
+
+  @override
+  String get networthSheetHint =>
+      'We will work out from this number as new transactions come in.';
+
+  @override
+  String get networthSheetSave => 'Save';
+
+  @override
+  String get networthSheetInvalid => 'Enter a valid amount';
+
+  @override
+  String get networthSheetFailed => 'Could not save the balance';
+
+  @override
+  String get networthFreeNote => 'Assets and installments come with Gold';
+
+  @override
+  String get networthEmpty => 'No balances to count yet';
+
+  @override
+  String networthOpenBankA11y(String name) {
+    return 'Open the transactions of $name';
+  }
+
+  @override
+  String networthLineA11y(String name, String source) {
+    return '$name, $source';
+  }
+
+  @override
+  String get networthSrcUnknownCard => 'Unknown — set the limit or the balance';
+
+  @override
+  String get networthEdit => 'Edit balance';
+
+  @override
+  String get networthClear => 'Remove the balance I entered';
+
+  @override
+  String get networthBankPartial => 'Not all accounts';
+
+  @override
+  String get networthCardOwed => 'Amount you owe';
 }

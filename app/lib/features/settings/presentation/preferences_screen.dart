@@ -15,7 +15,9 @@ import '../../../core/settings/settings_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../budget/application/budget_providers.dart';
+import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../../security/domain/app_lock_controller.dart';
+import '../../salary/presentation/salary_settings.dart';
 import 'settings_widgets.dart';
 
 /// Lock timeouts offered (A-10): at once, 1, 5 and 15 minutes.
@@ -24,6 +26,38 @@ const lockTimeoutChoicesS = [0, 60, 300, 900];
 Future<void> _write<T>(WidgetRef ref, SettingKey<T> key, T value) async {
   final repo = await ref.read(settingsRepositoryProvider.future);
   await repo.set(key, value);
+}
+
+/// Writes the theme and, only for a user pick, shows Captain Zaghlol's dark
+/// mode quip (T-194). Dark, or System while the phone is dark, qualifies; an
+/// OS-driven flip never calls this, so it never shows on its own.
+Future<void> _pickTheme(
+  BuildContext context,
+  WidgetRef ref,
+  ThemePref pref,
+) async {
+  await _write(ref, Settings.theme, pref);
+  if (!context.mounted) return;
+  final dark =
+      pref == ThemePref.dark ||
+      (pref == ThemePref.system &&
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+  if (!dark) return;
+  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          const ZaghlolAvatar(moment: ZaghlolMoment.proud, size: 40),
+          const SizedBox(width: ZSpacing.sm),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).settingsPrefsThemeDarkQuip,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class PreferencesScreen extends ConsumerWidget {
@@ -109,7 +143,7 @@ class PreferencesScreen extends ConsumerWidget {
                   ),
                 ],
                 selected: theme,
-                onChanged: (v) => _write(ref, Settings.theme, v),
+                onChanged: (v) => _pickTheme(context, ref, v),
               ),
             ),
           ],
@@ -157,7 +191,19 @@ class PreferencesScreen extends ConsumerWidget {
         ),
         SettingsSection(
           children: [
+            SettingsSwitchRow(
+              key: const ValueKey('prefs-hide-amounts'),
+              title: t.settingsPrefsHideAmounts,
+              subtitle: t.settingsPrefsHideAmountsHint,
+              value: ref.watch(hideAmountsProvider),
+              onChanged: (v) => _write(ref, Settings.hideAmountsApp, v),
+            ),
+          ],
+        ),
+        SettingsSection(
+          children: [
             const _PaydayRow(),
+            const SalarySettingsRow(),
             _IncomeRow(
               currency: currency ?? Settings.primaryCurrency.defaultValue,
             ),
@@ -331,6 +377,7 @@ class _IncomeRowState extends ConsumerState<_IncomeRow> {
       final lang = Localizations.localeOf(context).languageCode;
       _controller.text = ref
           .read(digitsModeProvider(lang))
+          // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
           .render(stored.toCanonicalString());
     }
     return SettingsControlRow(

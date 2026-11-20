@@ -33,6 +33,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | **M5 — Backend services & Zaghlol Gold** | Install/sync/catalog/flags/prices, purchases & entitlements with one-phone Gold (seat service, attestation, same-iPhone seat keys, trusted time), store notifications, optional sign-in, support path, operator CLI. | 35 |
 | **M6 — Backup, import/export, OCR, settings & security** | Encrypted Drive/iCloud backup & restore, CSV/XLSX/PDF/online statements, OCR, settings, app lock, delete everything. | 19 |
 | **M7 — Flagged features, hardening & launch** | Zakah & ROI behind flags, privacy/perf/a11y/security verification, store release pipelines. | 11 |
+| **M8 — Post-audit improvements** | PO requests of 2026-11-19 (hide amounts, charts, app size, dark-mode quip, salary, recurring bills, card types, bank badges, net-worth breakdown) and the open QA / security bugs; self-hosted key custody. | 15 |
 
 ## M0 — Foundations & spikes
 
@@ -106,7 +107,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
 | [T-058](tasks/T-058.md) | Native Egyptian-speaker review of the copy deck | US-20-1 | Medium | — (human) | external | T-026, T-027, T-028 | C | 2 | TODO |
-| [T-059](tasks/T-059.md) | Compile the 600+ Egyptian merchant seed list (OQ-05) | US-20-1 | Medium | — (human) | external | T-030 | C | 7 | TODO |
+| [T-059](tasks/T-059.md) | Compile the 600+ Egyptian merchant seed list (OQ-05) | US-20-1 | Medium | — (human) | external | T-030 | C | 7 | IN_REVIEW (built, batch 39) |
 | [T-060](tasks/T-060.md) | Android share/paste intake (text, image, PDF, CSV) | US-03-4 | High* | Opus | native-platform-engineer | T-004 | D | 3 | DONE |
 | [T-061](tasks/T-061.md) | iOS Capture Guard (Swift) with config reader | US-04-1 | High* | Opus | native-platform-engineer | T-035, T-009 | E | 6 | DONE |
 | [T-062](tasks/T-062.md) | iOS encrypted spool, host API and background refresh | US-04-1 | High* | Opus | native-platform-engineer | T-004, T-009 | E | 4 | DONE |
@@ -151,7 +152,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-096](tasks/T-096.md) | Subscriptions detection, installments, gameya, card dues and reminders | US-09-2 | High | Sonnet | flutter-core-engineer | T-050, T-094 | A | 8 | DONE |
 | [T-097](tasks/T-097.md) | Contextual setup suggestions (payday, budgets, backup) | US-10-1 | Medium | Sonnet | flutter-core-engineer | T-051, T-049 | A | 9 | DONE |
 | [T-098](tasks/T-098.md) | Mascot trigger policy (shocked, detective, proud, tour guide) | US-10-3 | Medium | Sonnet | flutter-core-engineer | T-051, T-089, T-095 | A | 9 | DONE |
-| [T-099](tasks/T-099.md) | Wire motion-only mascot moments to UI events | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-053, T-088 | G | 4 | TODO |
+| [T-099](tasks/T-099.md) | Wire motion-only mascot moments to UI events | US-10-3 | Medium | Sonnet | flutter-ui-engineer | T-053, T-088 | G | 4 | IN_REVIEW (built, batch 39) |
 | [T-100](tasks/T-100.md) | Duplicate-charge and weekly-summary notifications | US-10-4 | Medium | Sonnet | flutter-core-engineer | T-094, T-046, T-051 | A | 8 | DONE |
 | [T-101](tasks/T-101.md) | Insights shell and Budget S-22 (+ edit budgets) | US-09-1 | Medium | Sonnet | flutter-ui-engineer | T-095, T-087, T-024 | G | 10 | DONE |
 | [T-102](tasks/T-102.md) | Bills & installments S-24 and add/edit recurring item | US-09-2 | Medium | Sonnet | flutter-ui-engineer | T-096, T-087 | G | 10 | DONE |
@@ -199,7 +200,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-134](tasks/T-134.md) | App Store Server Notifications V2 endpoint and reconciliation | US-14-1 | High* | Opus | backend-engineer | T-131 | B | 5 | DONE |
 | [T-135](tasks/T-135.md) | Accounts: Google/Apple ID token sign-in, linking, sign-out, delete, Android Apple callback | US-15-1 | High* | Opus | backend-engineer | T-132, T-182, T-184 | B | 6 | DONE |
 | [T-136](tasks/T-136.md) | Operator auth (OIDC + MFA), roles, audit log and support lookup | US-13-2 | High* | Opus | backend-engineer | T-122 | B | 3 | IN_REVIEW |
-| [T-137](tasks/T-137.md) | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | US-13-2 | High | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | B | 7 | TODO |
+| [T-137](tasks/T-137.md) | zaghlol-ops CLI for catalog, flags, prices, contributions and support, plus support runbook | US-13-2 | High | Sonnet | backend-engineer | T-136, T-186, T-125, T-126, T-127, T-129 | B | 7 | IN_REVIEW (approved, batch 44) |
 | [T-138](tasks/T-138.md) | Backend observability: OpenTelemetry, metrics, dashboards, alert rules | US-21-1 | High | Sonnet | backend-engineer | T-005 | B | 2 | DONE |
 | [T-139](tasks/T-139.md) | Retention purger and log privacy settings | US-13-1 | Medium | Sonnet | backend-engineer | T-122, T-138 | B | 3 | DONE |
 | [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | US-13-1 | High* | Opus | backend-engineer | T-138 | B | 3 | BLOCKED |
@@ -235,7 +236,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-156](tasks/T-156.md) | Bank PDF statement import (CIB, NBE, QNB, Banque Misr) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-033, T-031 | F | 6 | BLOCKED |
 | [T-157](tasks/T-157.md) | Online-bank statement import (Wise, Revolut, Monzo, bunq, N26) | US-17-1 | High | Sonnet | parsing-engine-engineer | T-155, T-071 | F | 10 | BLOCKED |
 | [T-158](tasks/T-158.md) | Import flow S-67 (source, summary, done) | US-17-1 | Medium | Sonnet | flutter-ui-engineer | T-156, T-157, T-155, T-119 | G | 11 | DONE |
-| [T-159](tasks/T-159.md) | Android OCR host (ML Kit Latin + Tesseract Arabic) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | D | 3 | TODO |
+| [T-159](tasks/T-159.md) | Android OCR host (ML Kit Latin + Tesseract Arabic) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | D | 3 | IN_REVIEW (built, batch 39) |
 | [T-160](tasks/T-160.md) | iOS OCR host (Vision) | US-17-2 | High | Sonnet | native-platform-engineer | T-010, T-004 | E | 3 | DONE |
 | [T-161](tasks/T-161.md) | Receipt/screen OCR templates and confirmation screen S-32 | US-17-2 | Medium | Sonnet | parsing-engine-engineer | T-159, T-160, T-033 | F | 6 | DONE |
 | [T-162](tasks/T-162.md) | Settings S-60 incl. privacy info and About | US-18-1 | Medium | Sonnet | flutter-ui-engineer | T-020, T-087, T-115 | G | 10 | DONE |
@@ -256,12 +257,34 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | [T-172](tasks/T-172.md) | Device end-to-end suites (Android killed-app capture, iOS intents, backup, purchases) | US-21-1 | High | Sonnet | test-engineer | T-056, T-067, T-153, T-145, T-147 | A | 11 | TODO |
 | [T-173](tasks/T-173.md) | Performance benchmarks and CI budgets | US-21-1 | Medium | Sonnet | test-engineer | T-033, T-050, T-105, T-048 | A | 12 | DONE |
 | [T-174](tasks/T-174.md) | Accessibility and golden coverage pass (130% text, both themes, screen readers) | US-21-1 | Medium | Sonnet | test-engineer | T-054, T-079, T-162, T-107 | G | 13 | DONE |
-| [T-175](tasks/T-175.md) | Security assessment: MobSF, ZAP, dependency scans, pen test | US-21-1 | High* | Opus | security-privacy-reviewer | T-171, T-140 | A | 12 | TODO |
+| [T-175](tasks/T-175.md) | Security assessment: MobSF, ZAP, dependency scans, pen test | US-21-1 | High* | Opus | security-privacy-reviewer | T-171, T-140 | A | 12 | IN_PROGRESS (pass 1, batch 44) |
 | [T-176](tasks/T-176.md) | Android release pipeline, Play listings, Data safety and SMS declaration package | US-21-1 | High | Sonnet | flutter-core-engineer | T-172, T-171 | A | 12 | TODO |
 | [T-177](tasks/T-177.md) | iOS release pipeline, privacy labels and App Review notes | US-21-1 | High | Sonnet | flutter-core-engineer | T-172, T-171 | A | 12 | TODO |
 
 \* = critical (C4): Opus + security-privacy-reviewer.
 
+
+## M8 — Post-audit improvements
+
+Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dark-mode redesigns are **not** tasks yet: they wait for the PO to pick a design on the design canvas.
+
+| ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| [T-187](tasks/T-187.md) | Hide amounts in the app (eye toggle, `****`) | PO 11-19 | High | Sonnet | flutter-ui-engineer | — | G | 12 | IN_REVIEW (approved, batch 47) |
+| [T-188](tasks/T-188.md) | Chart period selector (presets, stepping, custom range) | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | IN_REVIEW (approved, batch 49) |
+| [T-189](tasks/T-189.md) | Charts review: interaction, comparison and clarity (mockups first) | PO 11-19 | High | Opus→Sonnet | ux-designer → flutter-ui-engineer | T-188 | G | 13 | TODO |
+| [T-190](tasks/T-190.md) | App size: measure and reduce (~150 MB reported) | PO 11-19 | High | Sonnet | native-platform-engineer | — | N | 12 | TODO |
+| [T-191](tasks/T-191.md) | Production trust anchors in release builds (BUG-001) | QA | High* | Opus | flutter-core-engineer | T-140 | A | 13 | BLOCKED |
+| [T-192](tasks/T-192.md) | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | T-175 | Medium | Sonnet | backend-engineer | — | B | 12 | TODO |
+| [T-193](tasks/T-193.md) | Follow-up sweep FU-263 / FU-264 | batches 43–44 | Medium | Sonnet | backend-engineer + flutter-core-engineer | batches 43–44 merged | B | 12 | IN_PROGRESS (AC1/2/4 done, batch 49) |
+| [T-194](tasks/T-194.md) | Dark-mode quip «يعني تبقى فلوسك والمود؟» | PO 11-19 | Low | Haiku | boilerplate-engineer | — | G | 12 | IN_REVIEW (approved, batch 46) |
+| [T-195](tasks/T-195.md) | Salary as income: add it manually, use the SMS when it arrives | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | IN_REVIEW (approved, batch 48) |
+| [T-196](tasks/T-196.md) | Recurring every 1/3/6/12 months becomes a bill automatically | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | IN_REVIEW (approved, batch 47) |
+| [T-197](tasks/T-197.md) | Tell credit cards from debit cards at a glance | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | IN_REVIEW (approved, batch 48) |
+| [T-198](tasks/T-198.md) | Bank badges: real initials and brand colours (not «بنك»), everywhere | PO 11-19 | Medium | Sonnet | flutter-ui-engineer | — | G | 12 | IN_REVIEW (approved, batch 46) |
+| [T-199](tasks/T-199.md) | Net worth breakdown: where the number comes from, balance per bank | PO 11-19 | High | Sonnet (+Opus note) | flutter-core-engineer | — | A | 12 | IN_REVIEW (approved, batch 49) |
+| [T-200](tasks/T-200.md) | Production key files: hardened file KMS (no cloud) | PO 11-20 | High* | Opus | backend-engineer | — | B | 12 | IN_REVIEW (approved) |
+| [T-201](tasks/T-201.md) | Self-hosted OpenBao Transit KMS adapter | PO 11-20 | High* | Opus | backend-engineer | T-200 | B | 13 | IN_REVIEW (approved, batch 46) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

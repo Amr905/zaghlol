@@ -334,7 +334,7 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
 
         var admin = fixture.Endpoints("/admin/v1/");
         Assert.NotEmpty(admin);
-        Assert.All(admin, e => Assert.True(e.Roles.Count == 1 && OperatorRoles.IsKnown(e.Roles[0]), e.Key));
+        Assert.All(admin, e => Assert.True(e.Roles.Count == 1 && (e.Roles[0] == Auth.OperatorRoles.Any || OperatorRoles.IsKnown(e.Roles[0])), e.Key));
     }
 
     /// <summary>A purchase held by one install, in cooldown, with one fresh pending claimant (the support writes' starting point).</summary>

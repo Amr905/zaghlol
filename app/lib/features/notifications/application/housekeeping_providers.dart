@@ -17,6 +17,9 @@ import '../../budget/application/cycle_app_wiring.dart'
 import '../../budget/data/payday_schedule_store.dart' show localToday;
 import '../../capture/application/capture_providers.dart'
     show ingestionPauseGateProvider;
+import '../../recurring/application/notify_auto_added.dart';
+import '../../salary/application/notify_salary_check.dart';
+import '../../salary/application/salary_providers.dart';
 import '../../recurring/application/send_due_reminders.dart';
 import '../../recurring/data/recurring_repository.dart';
 import '../../transactions/application/dangling_links_sweep.dart';
@@ -64,8 +67,13 @@ Future<BudgetAlertService> _budgetAlertService(Ref ref, AppDatabase db) async {
       final l = notificationL10n(ref);
       final lang = l.localeName;
       final digits = ref.read(digitsModeProvider(lang));
-      String money(Money m) =>
-          MoneyFormat.format(m, languageCode: lang, digits: digits);
+      final hidden = notificationHidden(ref);
+      String money(Money m) => MoneyFormat.format(
+        m,
+        languageCode: lang,
+        digits: digits,
+        hidden: hidden,
+      );
       final id = p.spec.categoryId;
       final category = id == null
           ? l.budgetEditOverall
@@ -141,8 +149,63 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
       (
         name: 'recurring_detect',
         run: () async {
-          await (await recurring()).detectAndSuggest(
+          // D-72: chains every 1, 3, 6 or 12 months are added as bills; one
+          // notice per run says so.
+          final added = await (await recurring()).detectAndAutoAdd(
             shouldStop: restoreWaiting,
+          );
+          if (added.isEmpty || restoreWaiting()) return;
+          final now = ref.read(clockProvider)().toUtc().millisecondsSinceEpoch;
+          final today = localToday(now, ref.read(localZoneProvider));
+          final l = notificationL10n(ref);
+          final digits = ref.read(digitsModeProvider(l.localeName));
+          await notifyAutoAdded(
+            added: added,
+            notifications: await ref.read(notificationServiceProvider.future),
+            periodKey: today.toIso(),
+            buildText: (items, base) => AlertRequest(
+              type: base.type,
+              subjectId: base.subjectId,
+              periodKey: base.periodKey,
+              title: l.notificationsAutoAddedTitle,
+              body: items.length == 1
+                  ? l.notificationsAutoAddedOne(items.single.name)
+                  : l.notificationsAutoAddedMany(
+                      items.length,
+                      digits.render('${items.length}'),
+                    ),
+              redactedTitle: l.notificationsAutoAddedTitle,
+              redactedBody: l.notificationsAutoAddedHidden,
+              payload: base.payload,
+            ),
+          );
+        },
+      ),
+      (
+        name: 'salary_check',
+        run: () async {
+          // D-71: tie received salary credits to the expected one, then the
+          // one nudge per payday.
+          if (restoreWaiting()) return;
+          final now = ref.read(clockProvider)().toUtc().millisecondsSinceEpoch;
+          final today = localToday(now, ref.read(localZoneProvider));
+          final l = notificationL10n(ref);
+          await runSalaryCheck(
+            matching: await ref.read(salaryMatchingProvider.future),
+            service: await ref.read(salaryServiceProvider.future),
+            notifications: await ref.read(notificationServiceProvider.future),
+            today: today,
+            shouldStop: restoreWaiting,
+            buildText: (base) => AlertRequest(
+              type: base.type,
+              subjectId: base.subjectId,
+              periodKey: base.periodKey,
+              title: l.notificationsSalaryNudgeTitle,
+              body: l.notificationsSalaryNudgeBody,
+              redactedTitle: l.notificationsSalaryNudgeTitle,
+              redactedBody: l.notificationsSalaryNudgeBody,
+              payload: base.payload,
+            ),
           );
         },
       ),
@@ -190,6 +253,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                       money,
                       languageCode: l.localeName,
                       digits: digits,
+                      hidden: notificationHidden(ref),
                     ),
                   ),
                   redactedTitle: l.notificationsAlertOverdueTitle(r.item.name),
@@ -216,6 +280,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                     money,
                     languageCode: l.localeName,
                     digits: digits,
+                    hidden: notificationHidden(ref),
                   ),
                   digits.render('$days'),
                 ),

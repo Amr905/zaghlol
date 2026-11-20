@@ -17,6 +17,7 @@ import 'core/l10n/date_format.dart';
 import 'core/logging/diag_code.dart';
 import 'core/logging/diag_error_handlers.dart';
 import 'core/logging/diag_logger.dart';
+import 'core/logging/early_error_handlers.dart';
 import 'core/l10n/font_licenses.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
@@ -45,6 +46,10 @@ import 'ingestion/ingestion_runner.dart' show ensureDefaultRegistry;
 import 'ingestion/ingestion_main.dart';
 
 Future<void> main() async {
+  // L-2: first, before anything can fail or print (release builds): errors
+  // become buffered codes and debugPrint is muted, even if the database never
+  // opens. Debug builds keep the normal reporting.
+  installEarlyErrorHandlers();
   WidgetsFlutterBinding.ensureInitialized();
   registerFontLicenses();
   // FU-119: intl date symbols for ar/en before any date is formatted.
@@ -63,7 +68,8 @@ Future<void> main() async {
   }
   // T-047: the UI engine's capture module (drain, Guard config, health) runs
   // in every build; it starts once the database opens.
-  // ignore: missing_provider_scope (the ProviderScope is built inside the AppRestartScope builder)
+  // The ProviderScope is built inside the AppRestartScope builder below.
+  // ignore: riverpod_lint/missing_provider_scope
   runApp(
     AppRestartScope(
       beforeStart: () => _resumeWipe(dbDirectory),
@@ -179,6 +185,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
           .read(diagLoggerProvider.future)
           .then<void>((logger) {
             installDiagErrorHandlers(logger, debugPassThrough: kDebugMode);
+            return flushEarlyErrors(logger);
           })
           .catchError((Object _) {}),
     );

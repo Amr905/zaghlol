@@ -17,6 +17,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import '../../budget/presentation/budget_test_support.dart';
+import '../../../support/hide_amounts_support.dart';
 
 class FixedToday extends TodayNotifier {
   @override
@@ -79,6 +80,7 @@ Future<void> pump(
   Locale locale = const Locale('en'),
   bool dark = false,
   double scale = 1.0,
+  HideAmountsHarness? hideAmounts,
 }) async {
   await initDateFormatting();
   tester.view.physicalSize = const Size(400, 800);
@@ -91,6 +93,7 @@ Future<void> pump(
       dark: dark,
       scale: scale,
       overrides: overrides(e),
+      hideAmounts: hideAmounts,
     ),
   );
   await tester.pump();
@@ -137,6 +140,21 @@ void main() {
       expect(find.textContaining('1,230'), findsNothing);
       expect(find.textContaining('1230'), findsNothing);
       expect(find.textContaining('١٬٢٣٠'), findsNothing);
+    });
+
+    testWidgets('T-187: masking on: the answer shows only masks ($lang)', (
+      tester,
+    ) async {
+      final h = HideAmountsHarness(hidden: true);
+      addTearDown(h.dispose);
+      final e = FakeEngine((_, _) async => spend2());
+      await pump(tester, e, locale: locale, hideAmounts: h);
+      await tester.enterText(find.byType(TextField), 'x');
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('ask-send')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('****'), findsWidgets);
+      await expectNoAmountDigits(tester);
     });
 
     testWidgets('compare answer shows a mini chart ($lang)', (tester) async {

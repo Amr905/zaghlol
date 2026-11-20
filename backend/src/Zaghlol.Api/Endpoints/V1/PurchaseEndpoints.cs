@@ -72,12 +72,12 @@ internal static partial class PurchaseEndpoints
                 }
 
                 if (request.ProductId is not { } productId || !ProductId().IsMatch(productId)
-                    || request.PurchaseToken?.Reveal() is not { Length: > 0 })
+                    || request.PurchaseToken?.Reveal() is not { Length: > 0 and <= PlayStateMapping.MaxTokenLength })
                 {
                     return ApiProblems.Of(StatusCodes.Status400BadRequest, ErrorCodes.ValidationFailed);
                 }
 
-                // A token outside ^[A-Za-z0-9._-]{1,512}$ is a final 422 PURCHASE_TOKEN_INVALID from the verifier, with no Play call.
+                // Over 512 characters (the OpenAPI maxLength) is 400 VALIDATION_FAILED, as in restore (BUG-005). Within the length, a token outside ^[A-Za-z0-9._-]{1,512}$ is a final 422 PURCHASE_TOKEN_INVALID from the verifier, with no Play call.
                 store = PurchaseStore.GooglePlay;
                 purchase = new PlayPurchaseRef(productId, request.PurchaseToken.Value);
                 break;

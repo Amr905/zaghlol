@@ -111,6 +111,10 @@ public interface IEnvelopeCipher
 {
     ValueTask<byte[]> EncryptAsync(ReadOnlyMemory<byte> plain, string context, CancellationToken cancellationToken);
 
-    /// <summary>Throws <see cref="EnvelopeDecryptionException"/> for a malformed, tampered or mis-bound blob.</summary>
+    /// <summary>
+    /// Throws <see cref="EnvelopeDecryptionException"/> for a malformed, tampered or mis-bound blob, and
+    /// <see cref="KmsUnavailableException"/> when the KMS can't answer or the blob names a key reference that isn't configured
+    /// (T-201 review S1: never treat a configuration gap as an unopenable blob).
+    /// </summary>
     ValueTask<byte[]> DecryptAsync(ReadOnlyMemory<byte> blob, string context, CancellationToken cancellationToken);
 }

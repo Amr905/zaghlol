@@ -32,6 +32,7 @@ void main() {
     l: lookupAppLocalizations(Locale(lang)),
     languageCode: lang,
     digits: d,
+    hidden: false,
     today: CivilDate(2026, 11, 15),
     categoryNames: const {},
   ).build(answer).lines.single;

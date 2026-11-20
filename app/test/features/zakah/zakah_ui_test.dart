@@ -22,6 +22,8 @@ import 'package:zaghlol/features/zakah/data/zakah_repository.dart';
 import 'package:zaghlol/features/zakah/presentation/zakah_screen.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../support/hide_amounts_support.dart';
+
 final _now = DateTime.utc(2026, 11, 13, 12);
 final _egp = Currency.of('EGP');
 
@@ -79,12 +81,14 @@ Future<void> pumpZakah(
   bool flag = true,
   bool gold = true,
   double scale = 1.0,
+  HideAmountsHarness? hideAmounts,
 }) async {
   await t.binding.setSurfaceSize(const Size(390, 1400));
   addTearDown(() => t.binding.setSurfaceSize(null));
   await t.pumpWidget(
     ProviderScope(
       overrides: [
+        ...(hideAmounts ?? HideAmountsHarness()).overrides,
         pricesClockProvider.overrideWithValue(() => _now),
         pricesRepositoryProvider.overrideWith((ref) async => env.prices),
         netWorthRepositoryProvider.overrideWith((ref) async => env.repo),
@@ -267,6 +271,26 @@ void main() {
         expect(find.byKey(const Key('zakah-totals')), findsNothing);
       });
 
+      testWidgets('T-187: masking on: nisab, dues and lots show no digit', (
+        t,
+      ) async {
+        final env = await zEnv(t);
+        await seedAssets(env, t);
+        final h = HideAmountsHarness(hidden: true);
+        addTearDown(h.dispose);
+        await pumpZakah(
+          t,
+          env,
+          const ZakahScreen(),
+          locale: loc,
+          hideAmounts: h,
+        );
+        await expectNoAmountDigits(
+          t,
+          allowLines: RegExp(r'^(The nisab is|النصاب)'),
+        );
+      });
+
       testWidgets('populated: per-unit dues, hawl progress, mark paid', (
         t,
       ) async {
@@ -350,6 +374,7 @@ void main() {
     await t.pumpWidget(
       ProviderScope(
         overrides: [
+          ...amountsShown(),
           featureFlagProvider.overrideWith((ref, f) => true),
           entitlementStateProvider.overrideWith(_Gold.new),
           zakahViewProvider.overrideWith((ref) async => throw StateError('x')),

@@ -50,6 +50,7 @@
 | [020](adr/ADR-020-mascot-animation-runtime.md) | Rive state machine from the traced vector rig | Lottie, Flutter-native | Proposed |
 | [021](adr/ADR-021-success-metrics-measurement.md) | Backend aggregate counters + store consoles + CI accuracy (answers OQ-01) | Telemetry | Proposed |
 | [022](adr/ADR-022-backend-architecture.md) | .NET 10 modular monolith + PostgreSQL 17; *amended 2026-11-05:* open third-party bodies, no query logging, `backend/Dockerfile` | Microservices, serverless | Proposed |
+| [023](adr/ADR-023-self-hosted-key-custody.md) | No cloud KMS (D-76): hardened key files now (`Kms:Provider = File`, T-200), self-hosted OpenBao Transit before Gold is sold (`Kms:Provider = OpenBao`, T-201) | Cloud KMS, hardware HSM | Accepted |
 
 ## Change requests raised by this phase (need product-owner approval)
 

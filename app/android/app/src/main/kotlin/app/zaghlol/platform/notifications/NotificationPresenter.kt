@@ -7,7 +7,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import app.zaghlol.MainActivity
 import app.zaghlol.R
 import java.io.File
 
@@ -91,7 +90,7 @@ class NotificationPresenter(private val context: Context) {
           .setContentTitle(m[K_PUBLIC] as? String ?: "")
           .build()
       val tap =
-        Intent(context, MainActivity::class.java)
+        Intent(context, NotificationTapActivity::class.java)
           .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
       NotificationRoutes.clean(m[K_ROUTE] as? String)?.let { tap.putExtra(NotificationRoutes.EXTRA_ROUTE, it) }
       val content =
@@ -127,7 +126,7 @@ class NotificationPresenter(private val context: Context) {
       val (title, route) =
         NotificationRoutes.cleanAction(m[K_ACTION_TITLE] as? String, m[K_ACTION_ROUTE] as? String) ?: return null
       val intent =
-        Intent(context, MainActivity::class.java)
+        Intent(context, NotificationTapActivity::class.java)
           .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
           .putExtra(NotificationRoutes.EXTRA_ROUTE, route)
           .putExtra(NotificationRoutes.EXTRA_CANCEL_ID, m[K_ID] as Int)

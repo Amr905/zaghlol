@@ -33,3 +33,9 @@ Sources: <https://developers.google.com/identity/gsi/web/guides/verify-google-id
 
 ## Checks after filling config
 Outside Development/Testing the API refuses to start if the config is incomplete or the discovery document and JWKS cannot be fetched at boot. A startup warning states the MFA control in force (Advisory mode, or Google). Sign in with `zaghlol-ops`: a token from another tenant/domain, another client, or without an `operators` row gets the single 401 body.
+
+## CLI settings (T-137)
+`zaghlol-ops` reads `ZAGHLOL_OPS_API_URL`, `ZAGHLOL_OPS_ISSUER` and `ZAGHLOL_OPS_CLIENT_ID` (environment or a JSON config file; details in `docs/ops/support-runbook.md` section 2). The redirect URI registered at the IdP must be the loopback `http://localhost` (or `http://127.0.0.1` when `ZAGHLOL_OPS_REDIRECT_HOST=127.0.0.1`); the CLI picks a free port at run time. Google desktop clients may demand a client secret that Google does not treat as confidential: if so, set it only as `ZAGHLOL_OPS_CLIENT_SECRET` in the environment (a config file never accepts it).
+
+## CLI settings (T-137)
+`zaghlol-ops` reads `ZAGHLOL_OPS_API_URL`, `ZAGHLOL_OPS_ISSUER` and `ZAGHLOL_OPS_CLIENT_ID` (environment or a JSON config file; details in `docs/ops/support-runbook.md` section 2). The redirect URI registered at the IdP must be the loopback `http://localhost` (or `http://127.0.0.1` when `ZAGHLOL_OPS_REDIRECT_HOST=127.0.0.1`); the CLI picks a free port at run time. Google desktop clients may demand a client secret that Google does not treat as confidential: if so, set it only as `ZAGHLOL_OPS_CLIENT_SECRET` in the environment (a config file never accepts it).

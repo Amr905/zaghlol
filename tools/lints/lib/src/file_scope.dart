@@ -43,6 +43,14 @@ class FileScope {
       dirs.contains('db') ||
       packageName == 'zaghlol_parsing';
 
+  /// Screens and the logic that builds user-visible text (D-67: amount text
+  /// must go through the shared, maskable formatter).
+  bool get inUiText =>
+      dirs.contains('presentation') || dirs.contains('application');
+
+  /// The one shared money formatter (`core/l10n/money_format.dart`).
+  bool get isMoneyFormatter => isL10n && fileName == 'money_format.dart';
+
   bool get isL10n => dirs.contains('l10n');
 
   /// Files where `print` / `debugPrint` are allowed.

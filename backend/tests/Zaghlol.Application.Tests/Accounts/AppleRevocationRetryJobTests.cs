@@ -121,4 +121,36 @@ public class AppleRevocationRetryJobTests
             return Task.CompletedTask;
         }
     }
+
+    [Fact]
+    public async Task ARowWhoseKeyIsUnavailableIsDeferredAndTheBatchContinues()
+    {
+        var stuck = Add(T0, T0.AddDays(30), blob: Blob("unavailable"));
+        Add(T0, T0.AddDays(30), blob: Blob("refresh-2"));
+        var job = new AppleRevocationRetryJob(store, new UnavailableForVault("unavailable"), apple, clock);
+
+        var run = await job.RunOnceAsync(default);
+
+        Assert.Equal(1, run.Deferred);
+        Assert.Equal(1, run.Revoked);
+        Assert.Equal(0, run.Dropped);
+        var (kept, next, _) = store.Rows[stuck.Id];
+        Assert.Equal(1, kept.Attempts);
+        Assert.Equal(T0 + PendingAppleRevocationPolicy.DelayAfter(1), next);
+        Assert.Equal("refresh-2", Assert.Single(apple.Revoked).Token.Reveal());
+    }
+
+    /// <summary>Throws (as the KMS does when unavailable or the key isn't configured) for one token; opens the others.</summary>
+    private sealed class UnavailableForVault(string failing) : IAppleTokenVault
+    {
+        private readonly IdentityVault inner = new();
+
+        public Task<byte[]> SealAsync(string subject, AppleRefreshToken token, CancellationToken cancellationToken) =>
+            inner.SealAsync(subject, token, cancellationToken);
+
+        public Task<AppleRefreshToken?> OpenAsync(string subject, ReadOnlyMemory<byte> sealedToken, CancellationToken cancellationToken) =>
+            System.Text.Encoding.UTF8.GetString(sealedToken.Span).EndsWith(failing, StringComparison.Ordinal)
+                ? throw new InvalidOperationException("key service unavailable")
+                : inner.OpenAsync(subject, sealedToken, cancellationToken);
+    }
 }

@@ -32,6 +32,29 @@ allKeys = [
     other: PaydaySchedule.single(25).withChange(CivilDate(2026, 11, 10), 1),
   ),
   (key: Settings.incomeTarget, byDefault: null, other: Money(kwd, 1234567)),
+  (
+    key: Settings.salaryPlan,
+    byDefault: null,
+    other: SalaryPlan.tryCreate(
+      amount: Money(kwd, 1234567),
+      day: 25,
+      accountId: 'acc-1',
+    ),
+  ),
+  (
+    key: Settings.openingBalances,
+    byDefault: OpeningBalances.empty,
+    other: OpeningBalances.empty.withEntry(
+      'acc-1',
+      Money(kwd, 1234567),
+      DateTime.utc(2026, 11, 1),
+    ),
+  ),
+  (
+    key: Settings.salaryState,
+    byDefault: SalaryState.empty,
+    other: SalaryState.empty.withSkipped(CivilDate(2026, 11, 25)),
+  ),
   (key: Settings.primaryCurrency, byDefault: egp, other: kwd),
   (key: Settings.approxViewEnabled, byDefault: false, other: true),
   (key: Settings.approxViewTarget, byDefault: egp, other: Currency.of('USD')),
@@ -48,6 +71,8 @@ allKeys = [
   (key: Settings.quietHoursEndMin, byDefault: 480, other: 1439),
   (key: Settings.appLockEnabled, byDefault: false, other: true),
   (key: Settings.appLockTimeoutS, byDefault: 60, other: 0),
+  (key: Settings.hideAmountsApp, byDefault: false, other: true),
+  (key: Settings.moneyGroupByType, byDefault: true, other: false),
   (key: Settings.hideAmountsNotifications, byDefault: false, other: true),
   (key: Settings.hideAmountsWidget, byDefault: false, other: true),
   (key: Settings.hideAmountsShareCards, byDefault: true, other: false),
@@ -268,6 +293,36 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
     expect(seen, [1, 9]);
+  });
+
+  test('T-187: hide_amounts.app survives a restart (new repository, same '
+      'database) and hideAmountsProvider follows it', () async {
+    await repo.set(Settings.hideAmountsApp, true);
+    final restarted = SettingsRepository(SettingsDao(edb.db));
+    expect(await restarted.get(Settings.hideAmountsApp), isTrue);
+
+    final container = ProviderContainer(
+      overrides: [appDatabaseProvider.overrideWith((ref) async => edb.db)],
+    );
+    addTearDown(container.dispose);
+    final seen = <bool>[];
+    container.listen(hideAmountsProvider, (_, next) => seen.add(next));
+    // Fails closed while the setting loads.
+    expect(container.read(hideAmountsProvider), isTrue);
+    for (
+      var i = 0;
+      i < 50 && container.read(hideAmountsAppProvider).isLoading;
+      i++
+    ) {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    expect(container.read(hideAmountsProvider), isTrue);
+    final r = await container.read(settingsRepositoryProvider.future);
+    await r.set(Settings.hideAmountsApp, false);
+    for (var i = 0; i < 50 && container.read(hideAmountsProvider); i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    expect(container.read(hideAmountsProvider), isFalse);
   });
 
   test('no plain preferences anywhere in the app (AC2)', () {

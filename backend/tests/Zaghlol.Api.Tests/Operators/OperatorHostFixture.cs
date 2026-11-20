@@ -178,7 +178,7 @@ public sealed class OperatorHostFixture : IAsyncLifetime
                 services.AddSingleton<ISupportOwnershipCheck>(new PassingOwnership());
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()

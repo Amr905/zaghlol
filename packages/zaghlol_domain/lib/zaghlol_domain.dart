@@ -20,11 +20,14 @@ export 'money/src/allocation.dart' show maxAllocationParts;
 export 'mascot_rules/mascot_rules.dart';
 export 'recurring/recurring_rules.dart';
 export 'roi/roi_assumptions.dart';
+export 'salary/salary_rules.dart';
 export 'roi/roi_rules.dart';
 export 'transfers/offsets.dart';
 export 'transfers/splits.dart';
 export 'transfers/transfer_matching.dart';
+export 'wealth/balance_rules.dart';
 export 'wealth/net_worth.dart';
+export 'wealth/opening_balances.dart';
 export 'zakah/hijri.dart';
 export 'zakah/zakah_engine.dart';
 

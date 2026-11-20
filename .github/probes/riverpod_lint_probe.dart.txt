@@ -1,0 +1,9 @@
+// CI probe (T-193 AC4, FU-263 a): this file breaks a riverpod_lint rule on purpose. It is never part of the app: it is stored as
+// text and copied to app/lib/ only by .github/scripts/check-riverpod-lint-active.sh, which analyzes it, expects the
+// `riverpod_lint/missing_provider_scope` diagnostic, and deletes the copy.
+import 'package:flutter/widgets.dart';
+
+void main() {
+  // No ProviderScope at the root of runApp: riverpod_lint warns (as it did for app/lib/main.dart in BUG-007).
+  runApp(const SizedBox());
+}

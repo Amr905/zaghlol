@@ -8,6 +8,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../insights/presentation/charts/chart_format.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../domain/share_figures.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// The card line for [figure]; the amount variant only when [showAmounts].
 String shareCardText(
@@ -19,7 +20,9 @@ String shareCardText(
   final l = AppLocalizations.of(context);
   final pct = chartPercent(ref, context, figure.percent);
   final amt = chartMoney(ref, context, figure.amount);
-  return switch ((figure.template, showAmounts)) {
+  // D-67: the app-wide eye toggle forces the percentage variant.
+  final withAmounts = showAmounts && !ref.watch(hideAmountsProvider);
+  return switch ((figure.template, withAmounts)) {
     (ShareTemplate.savings, false) => l.shareStudioCardSavings(pct),
     (ShareTemplate.savings, true) => l.shareStudioCardSavingsAmount(amt),
     (ShareTemplate.delivery, false) => l.shareStudioCardDelivery(pct),

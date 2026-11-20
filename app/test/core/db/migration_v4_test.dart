@@ -213,14 +213,25 @@ void main() {
       addTearDown(db.close);
       expect(opened.migratedFrom, 3);
       expect(db.attemptedUpgradeFrom, 3);
-      expect(await userVersionOf(db), 4);
+      // v3 files go on to the current version in the same open (T-196: v5).
+      expect(await userVersionOf(db), appSchemaVersion);
       expect(world.files.migrateTmp.existsSync(), isFalse);
       expect(world.files.migratePart.existsSync(), isFalse);
       expect(await metaValue(db, 'marker'), 'v3');
 
       // Every row of every v3 table, value for value (rebuilt or not).
       for (final t in v3Tables) {
-        expect(await rowsOf(db, t), before[t], reason: t);
+        var rows = await rowsOf(db, t);
+        if (t == 'recurring_items') {
+          // v5 added `auto_added_at`: NULL for every old row.
+          expect([
+            for (final r in rows) r['auto_added_at'],
+          ], everyElement(isNull));
+          rows = [
+            for (final r in rows) {...r}..remove('auto_added_at'),
+          ];
+        }
+        expect(rows, before[t], reason: t);
       }
       // The REAL 5.0 that v3 stored as INTEGER 5 is still an integer.
       expect(
@@ -236,7 +247,7 @@ void main() {
 
       final live = await schemaShapeOf(db);
       expect(sameSchemaShape(live, await freshShape()), isTrue);
-      expect(sameSchemaShape(live, await dumpShape(4)), isTrue);
+      expect(sameSchemaShape(live, await dumpShape(appSchemaVersion)), isTrue);
       expect(await db.customSelect('PRAGMA foreign_key_check').get(), isEmpty);
       // No temp table left behind.
       expect(
@@ -362,7 +373,7 @@ void main() {
       expect(failed.code, DbOpenFailureCode.migrationFailed);
       expect(failed.restored, isTrue);
       expect(failed.fromVersion, 3);
-      expect(failed.toVersion, 4);
+      expect(failed.toVersion, appSchemaVersion);
       await settle(world);
       expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
       expect(world.wipeLog, isEmpty);

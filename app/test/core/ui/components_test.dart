@@ -238,13 +238,13 @@ void main() {
 
     testWidgets('masked mode shows the mask, never the amount', (tester) async {
       await tester.pumpWidget(
-        _app(const ZMoneyText(text: '-450', masked: true, maskedText: '•••')),
+        _app(const ZMoneyText(text: '-450', masked: true)),
       );
       expect(find.textContaining('450'), findsNothing);
-      expect(find.textContaining('•••'), findsOneWidget);
+      expect(find.textContaining('-****'), findsOneWidget);
     });
 
-    testWidgets('FU-045: masked without maskedText still hides the amount', (
+    testWidgets('FU-045: masked with a caller label still hides the amount', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -258,7 +258,7 @@ void main() {
       );
       expect(find.textContaining('450'), findsNothing);
       expect(find.bySemanticsLabel(RegExp('450')), findsNothing);
-      expect(find.textContaining('•••'), findsOneWidget);
+      expect(find.textContaining('-****'), findsOneWidget);
     });
 
     testWidgets('display size shrinks to fit instead of overflowing', (

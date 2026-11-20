@@ -6,6 +6,9 @@
 // run. Each chart runs cold (memo cleared) 7 times after a warm-up; the
 // gate is the 6th fastest (about p85), which ignores one stray GC pause but
 // not a slow query. Synthetic data; the output carries numbers only.
+// T-188 (NFR-PERF-04): the period selector adds the ranges the user can now
+// pick: last 6 months (weekly buckets), last 12 months (monthly buckets) and
+// a two-year custom range, for every chart that follows the period.
 @Tags(['benchmark'])
 library;
 
@@ -14,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/features/insights/data/chart_repository.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/insights/domain/chart_period_selection.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/financial_fixtures.dart';
@@ -117,15 +121,13 @@ void main() {
               ),
             );
       }
-      for (var m = 0; m < 24; m++) {
+      // One snapshot a day for two years (730 rows), so the widened net
+      // worth range reads real rows.
+      for (var i = 0; i < 730; i++) {
+        final day = CivilDate(2025, 1, 1).plusDays(i).toIso();
         await db.customStatement(
           'INSERT INTO networth_snapshots VALUES (?, ?, ?, ?)',
-          [
-            '${2025 + m ~/ 12}-${(m % 12 + 1).toString().padLeft(2, '0')}-24',
-            'EGP',
-            100000 + m,
-            1000,
-          ],
+          [day, 'EGP', 100000 + i, 1000],
         );
       }
     });
@@ -150,7 +152,62 @@ void main() {
         ChartPeriod.cycle(schedule.cycleOn(today.plusDays(-30 * k))),
     ];
 
+    // T-188: the selectable ranges, resolved on the benchmark's "today".
+    ChartPeriod pick(ChartPeriodSelection sel) => sel.resolve(today, schedule);
+    final sixMonths = pick(const ChartPeriodSelection(ChartPreset.last6Months));
+    final twelveMonths = pick(
+      const ChartPeriodSelection(ChartPreset.last12Months),
+    );
+    final twoYears = pick(
+      ChartPeriodSelection.custom(CivilDate(2025, 1, 1), today),
+    );
+    final selectable = <String, ChartPeriod>{
+      'last 6 months': sixMonths,
+      'last 12 months': twelveMonths,
+      '2-year custom': twoYears,
+    };
+
+    // The explainer's previous-period queries (same elapsed days) and the
+    // cash flow total, per range; and the six-cycle trend (default view).
+    final previousOf = <String, ChartPeriod>{
+      for (final e in {
+        'last 12 months': const ChartPeriodSelection(ChartPreset.last12Months),
+        'last 6 months': const ChartPeriodSelection(ChartPreset.last6Months),
+        'this cycle': ChartPeriodSelection.thisCycle,
+      }.entries)
+        e.key: e.value.resolveAll(today, schedule).previous,
+    };
+    final trend = cashFlowBuckets(
+      ChartPeriodSelection.thisCycle.resolveAll(today, schedule),
+      today,
+      schedule,
+    );
+
     final charts = <String, Future<Object?> Function()>{
+      'cashFlow (six-cycle trend)': () => repo.cashFlow(trend, f),
+      for (final e in previousOf.entries) ...{
+        'previous categoryDonut (${e.key})': () =>
+            repo.categoryDonut(e.value, f),
+        'previous topMerchants (${e.key})': () => repo.topMerchants(e.value, f),
+        'previous fiftyThirtyTwenty (${e.key})': () =>
+            repo.fiftyThirtyTwenty(e.value, f),
+        'previous cardsSplit (${e.key})': () => repo.cardsSplit(e.value, f),
+        'previous cashFlow total (${e.key})': () => repo.cashFlow([e.value], f),
+      },
+      for (final e in selectable.entries)
+        'cashFlow total (${e.key})': () => repo.cashFlow([e.value], f),
+      for (final e in selectable.entries) ...{
+        'cashFlow (${e.key}, ${bucketKindFor(e.value).name} buckets)': () =>
+            repo.cashFlow(bucketsOf(e.value, today), f),
+        'categoryDonut (${e.key})': () => repo.categoryDonut(e.value, f),
+        'topMerchants (${e.key})': () => repo.topMerchants(e.value, f),
+        'fiftyThirtyTwenty (${e.key})': () =>
+            repo.fiftyThirtyTwenty(e.value, f),
+        'dayHourPattern (${e.key})': () => repo.dayHourPattern(e.value, f),
+        'cardsSplit (${e.key})': () => repo.cardsSplit(e.value, f),
+        'netWorth (${e.key}, widened)': () =>
+            repo.netWorth(netWorthRange(e.value), 'EGP'),
+      },
       'cashFlow (12 cycles)': () => repo.cashFlow(twelve, f),
       'categoryDonut (cycle)': () => repo.categoryDonut(period, f),
       'categoryDonut (year)': () => repo.categoryDonut(year, f),
@@ -168,6 +225,14 @@ void main() {
       ),
       'personalInflation': () => repo.personalInflationIndex(today, f),
     };
+
+    final nw = await repo.netWorth(netWorthRange(twelveMonths), 'EGP');
+    expect(nw, isA<ChartReady<List<NetWorthPoint>>>());
+    expect(
+      (nw as ChartReady<List<NetWorthPoint>>).data.length,
+      greaterThan(300),
+    );
+    repo.invalidate();
 
     final slow = <String>[];
     for (final e in charts.entries) {

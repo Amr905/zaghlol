@@ -187,6 +187,45 @@ void main() {
       );
     });
 
+    testWidgets('T-187: the hide-amounts switch writes hide_amounts.app', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      await tester.pumpWidget(h.app(const PreferencesScreen()));
+      await settle(tester);
+      final row = find.byKey(const ValueKey('prefs-hide-amounts'));
+      await tester.ensureVisible(row);
+      await tester.pump();
+      await tester.tap(find.descendant(of: row, matching: find.byType(Switch)));
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      expect(
+        await tester.runAsync(() => h.repo.get(Settings.hideAmountsApp)),
+        isTrue,
+      );
+    });
+
+    testWidgets('T-194: picking Dark shows the quip once; Light shows none', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      await tester.pumpWidget(h.app(const PreferencesScreen()));
+      await settle(tester);
+      final t = _t(tester, PreferencesScreen);
+      final quip = find.text(t.settingsPrefsThemeDarkQuip);
+
+      await tester.tap(find.text(t.settingsPrefsThemeLight));
+      await tester.pump();
+      expect(quip, findsNothing);
+
+      await tester.tap(find.text(t.settingsPrefsThemeDark));
+      await tester.pump();
+      expect(quip, findsOneWidget);
+    });
+
     testWidgets('digits row only in Arabic', (tester) async {
       final h = SettingsHarness();
       addTearDown(h.db.close);

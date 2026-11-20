@@ -48,7 +48,7 @@ CREATE TABLE installs (
   token_hash bytea NOT NULL,                   -- SHA-256 of the install token issued at registration
   platform text NOT NULL CHECK (platform IN ('android','ios')),
   app_version text NOT NULL,                   -- no OS version: not on the BR-SYNC-03 allow-list (FU-013)
-  catalog_version integer NOT NULL DEFAULT 0,
+  catalog_version integer NOT NULL DEFAULT 0 CHECK (catalog_version >= 0),  -- ck_installs_catalog_version (BUG-009)
   first_seen_at timestamptz NOT NULL DEFAULT now(),
   last_seen_at timestamptz NOT NULL DEFAULT now(),
   deleted_at timestamptz,                      -- FR-ONB-08 tombstone (row purged after 30 days)

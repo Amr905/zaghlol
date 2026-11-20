@@ -133,6 +133,7 @@ public class AccountsLiveContractTests(AccountsContractFixture fixture) : IClass
     private async Task<string> NewInstallAsync(string platform = "android")
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/installs");
+        request.Headers.Add("Zaghlol-App", "android/1.0.0 (1)");
         request.Headers.Add("Idempotency-Key", Key());
         request.Content = new StringContent("{\"installId\":\"" + Guid.NewGuid().ToString("D") + "\",\"platform\":\"" + platform + "\",\"appVersion\":\"1.0.0\"}", Encoding.UTF8, Json);
         using var response = await fixture.Client.SendAsync(request);

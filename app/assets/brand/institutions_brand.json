@@ -7,12 +7,12 @@
       "acronym": "AAIB"
     },
     "abe": {
-      "brandColor": null,
+      "brandColor": "#00843D",
       "logoAsset": null,
       "acronym": "ABE"
     },
     "abk": {
-      "brandColor": null,
+      "brandColor": "#003B71",
       "logoAsset": null,
       "acronym": "ABK"
     },
@@ -27,56 +27,59 @@
       "acronym": "ADIB"
     },
     "aib": {
-      "brandColor": null,
+      "brandColor": "#00205B",
       "logoAsset": null,
       "acronym": "AIB"
     },
     "aibk": {
-      "brandColor": null,
+      "brandColor": "#7A1F3D",
       "logoAsset": null,
       "acronym": "AIBK"
     },
     "al_baraka": {
-      "brandColor": null,
+      "brandColor": "#00853E",
       "logoAsset": null,
-      "acronym": "ALBARAKA"
+      "acronym": "ALBARAKA",
+      "shortCode": "BRKA"
     },
     "alexbank": {
       "brandColor": "#E30613",
       "logoAsset": null,
-      "acronym": "ALEXBANK"
+      "acronym": "ALEXBANK",
+      "shortCode": "ALEX"
     },
     "alrajhi": {
-      "brandColor": null,
+      "brandColor": "#0054A6",
       "logoAsset": null,
       "acronym": "RJHI"
     },
     "aman": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#E4002B",
+      "logoAsset": null,
+      "acronym": "AMAN"
     },
     "arab_bank": {
-      "brandColor": null,
+      "brandColor": "#0073B7",
       "logoAsset": null,
       "acronym": "AB"
     },
     "attijariwafa": {
-      "brandColor": null,
+      "brandColor": "#EF3E33",
       "logoAsset": null,
       "acronym": "AWB"
     },
     "bank_abc": {
-      "brandColor": null,
+      "brandColor": "#00467F",
       "logoAsset": null,
       "acronym": "ABC"
     },
     "bank_nxt": {
-      "brandColor": null,
+      "brandColor": "#5B2A86",
       "logoAsset": null,
       "acronym": "NXT"
     },
     "banque_du_caire": {
-      "brandColor": null,
+      "brandColor": "#0A5C36",
       "logoAsset": null,
       "acronym": "BDC"
     },
@@ -86,13 +89,14 @@
       "acronym": "BM"
     },
     "blom": {
-      "brandColor": null,
+      "brandColor": "#D71920",
       "logoAsset": null,
       "acronym": "BLOM"
     },
     "bunq": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#1F9E7A",
+      "logoAsset": null,
+      "acronym": "BUNQ"
     },
     "cib": {
       "brandColor": "#0B3C8C",
@@ -106,25 +110,27 @@
     },
     "contact": {
       "brandColor": "#E31E24",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "CONTACT",
+      "shortCode": "CNCT"
     },
     "credit_agricole": {
-      "brandColor": null,
+      "brandColor": "#00794F",
       "logoAsset": null,
       "acronym": "CAE"
     },
     "ealb": {
-      "brandColor": null,
+      "brandColor": "#8A6A2F",
       "logoAsset": null,
       "acronym": "EALB"
     },
     "ebank": {
-      "brandColor": null,
+      "brandColor": "#005EB8",
       "logoAsset": null,
       "acronym": "EBank"
     },
     "egbank": {
-      "brandColor": null,
+      "brandColor": "#B5121B",
       "logoAsset": null,
       "acronym": "EGB"
     },
@@ -140,10 +146,11 @@
     },
     "etisalat_cash": {
       "brandColor": "#6BB43F",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "E&"
     },
     "fabmisr": {
-      "brandColor": null,
+      "brandColor": "#00549F",
       "logoAsset": null,
       "acronym": "FAB"
     },
@@ -153,8 +160,9 @@
       "acronym": "FIB"
     },
     "forsa": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#E8590C",
+      "logoAsset": null,
+      "acronym": "FORSA"
     },
     "hdb": {
       "brandColor": "#1B5E9E",
@@ -162,7 +170,7 @@
       "acronym": "HDB"
     },
     "hdfc": {
-      "brandColor": null,
+      "brandColor": "#004C8F",
       "logoAsset": null,
       "acronym": "HDFC"
     },
@@ -172,13 +180,14 @@
       "acronym": "HSBC"
     },
     "idb": {
-      "brandColor": null,
+      "brandColor": "#00693E",
       "logoAsset": null,
       "acronym": "IDB"
     },
     "instapay": {
       "brandColor": "#6C2C91",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "INSTA"
     },
     "kfh": {
       "brandColor": "#00704A",
@@ -186,8 +195,9 @@
       "acronym": "KFH"
     },
     "liv": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#6B3FD4",
+      "logoAsset": null,
+      "acronym": "LIV"
     },
     "mashreq": {
       "brandColor": "#F26B21",
@@ -195,21 +205,25 @@
       "acronym": "MASH"
     },
     "midbank": {
-      "brandColor": null,
+      "brandColor": "#0A6AA1",
       "logoAsset": null,
-      "acronym": "MIDBANK"
+      "acronym": "MIDBANK",
+      "shortCode": "MID"
     },
     "monzo": {
       "brandColor": "#EB4E5F",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "MONZO"
     },
     "myfawry": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#FFC20E",
+      "logoAsset": null,
+      "acronym": "FAWRY"
     },
     "n26": {
       "brandColor": "#36A18B",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "N26"
     },
     "nbe": {
       "brandColor": "#006A4E",
@@ -222,20 +236,25 @@
       "acronym": "NBK"
     },
     "onebank_yalla": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#C8102E",
+      "logoAsset": null,
+      "acronym": "YALLA"
     },
     "orange_cash": {
       "brandColor": "#FF7900",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "ORANGE",
+      "shortCode": "OC"
     },
     "payoneer": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#FF4800",
+      "logoAsset": null,
+      "acronym": "PYR"
     },
     "paytm": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#00BAF2",
+      "logoAsset": null,
+      "acronym": "PAYTM"
     },
     "qnb": {
       "brandColor": "#8A1538",
@@ -244,59 +263,73 @@
     },
     "revolut": {
       "brandColor": "#0666EB",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "REVOLUT",
+      "shortCode": "REV"
     },
     "saib": {
-      "brandColor": null,
+      "brandColor": "#C8202F",
       "logoAsset": null,
       "acronym": "SAIB"
     },
     "shahry": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#00897B",
+      "logoAsset": null,
+      "acronym": "SHAHRY",
+      "shortCode": "SHRY"
     },
     "souhoola": {
       "brandColor": "#00A3E0",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "SOUHOOLA",
+      "shortCode": "SHL"
     },
     "suez_canal_bank": {
-      "brandColor": null,
+      "brandColor": "#00539B",
       "logoAsset": null,
       "acronym": "SCB"
     },
     "sympl": {
-      "brandColor": null,
-      "logoAsset": null
+      "brandColor": "#D81B60",
+      "logoAsset": null,
+      "acronym": "SYMPL"
     },
     "telda": {
       "brandColor": "#1D1D1F",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "TELDA"
     },
     "united_bank": {
-      "brandColor": null,
+      "brandColor": "#00873E",
       "logoAsset": null,
       "acronym": "UB"
     },
     "valu": {
       "brandColor": "#F26522",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "VALU"
     },
     "vodafone_cash": {
       "brandColor": "#E60000",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "VF CASH",
+      "shortCode": "VFC"
     },
     "warba": {
-      "brandColor": null,
+      "brandColor": "#00843D",
       "logoAsset": null,
       "acronym": "WARBA"
     },
     "we_pay": {
       "brandColor": "#5E2A84",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "WE PAY",
+      "shortCode": "WE"
     },
     "wise": {
       "brandColor": "#2F6F4F",
-      "logoAsset": null
+      "logoAsset": null,
+      "acronym": "WISE"
     }
   }
 }

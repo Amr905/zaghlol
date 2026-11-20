@@ -40,6 +40,8 @@ erDiagram
 - `raw_messages.body_hash` is 64 lowercase hex characters; `transactions.occurred_tz_offset_min` within ±1080; `parse_confidence` NULL or 0..1;
 - `transfer_pairs.in_txn_id <> out_txn_id`; `offset_links.expense_txn_id <> source_txn_id`; extra indexes `ix_offset_source`, `ix_split_expense`.
 
+**Schema v5 (T-196, D-72):** `recurring_items` is rebuilt (SQLite can't widen a CHECK) so `cadence` also allows `quarterly` and `semi_annual`, and gains the nullable `auto_added_at` (epoch ms; set only by automatic detection, cleared when the user edits the item; drives the "added by itself" badge and the one-tap "Not a bill"); new table `recurring_dismissals (dismissal_key PRIMARY KEY, dismissed_at)` holds the keys (`merchant|account|currency`) detection must never add again. It has no foreign key on purpose, so nothing can drop a dismissal. `financial_b.drift`; dump `drift_schema_v5.json`; step `core/db/migrations/v5_recurring_cadence.dart` (same rebuild pattern and row-count check as v4; old rows keep every value, `auto_added_at` NULL). Tests: `migration_v5_test.dart`, `financial_c_constraints_test.dart` (cadence cases, sweeps over both tables), `schema_audit_test.dart`.
+
 **Schema v4 (T-019), the last batch before features start** ("v1 final"): §2.6–2.8 in `app/lib/core/db/schema/financial_c.drift`; dump `drift_schema_v4.json`; step `core/db/migrations/v4_financial_c.dart`. It also rebuilds four v3 tables with stricter CHECKs (T-018 review n-3, n-4; §4 rule 2c): `catalog_merchants`, `catalog_keywords`, `merchant_rules`, `recurring_items`. Rules for every table v4 creates or rebuilds (tested in `test/core/db/financial_c_constraints_test.dart` by sweeps over every column, and in `schema_audit_test.dart`):
 - every INTEGER column is `typeof(x) = 'integer'` (or a 0/1 `IN` list), so a REAL like `1.5` is refused; a rowid alias is an integer by construction;
 - every TEXT column other than ids, FK columns, enums and dates refuses NUL, tested on the bytes (`instr(CAST(x AS BLOB), x'00') = 0`): SQLite's `length()` and `GLOB` stop at the first NUL, so `'EGP' || char(0) || 'x'` passes a `GLOB '[A-Z][A-Z][A-Z]'` alone. Enum (`IN`) and date (`date(x) IS x`) CHECKs compare all bytes. Names and senders also refuse C0/C1 control characters;
@@ -259,11 +261,15 @@ CREATE TABLE recurring_items (                   -- FR-SUB-*
   status TEXT NOT NULL CHECK (status IN ('suggested','active','dismissed','completed')),
   name TEXT NOT NULL, merchant_norm TEXT, account_id TEXT REFERENCES accounts(id),
   amount_minor INTEGER NOT NULL, currency TEXT NOT NULL,
-  cadence TEXT NOT NULL CHECK (cadence IN ('monthly','yearly','weekly','custom_days')), cadence_days INTEGER,
+  cadence TEXT NOT NULL CHECK (cadence IN ('monthly','quarterly','semi_annual','yearly','weekly','custom_days')), cadence_days INTEGER,
   due_day INTEGER, next_due_date TEXT,           -- ISO date, local
   total_count INTEGER, paid_count INTEGER NOT NULL DEFAULT 0,
-  reminder_days INTEGER NOT NULL DEFAULT 3, created_at INTEGER NOT NULL
+  reminder_days INTEGER NOT NULL DEFAULT 3, created_at INTEGER NOT NULL,
+  auto_added_at INTEGER                          -- v5: set when detection added it (D-72); NULL once the user edits it
 );
+-- v5 (T-196): chains the user said "not a bill" about (or deleted); no FK
+CREATE TABLE recurring_dismissals (dismissal_key TEXT PRIMARY KEY,  -- merchant|account|currency
+  dismissed_at INTEGER NOT NULL);
 CREATE TABLE recurring_occurrences (item_id TEXT NOT NULL REFERENCES recurring_items(id) ON DELETE CASCADE,
   due_date TEXT NOT NULL, txn_id TEXT REFERENCES transactions(id) ON DELETE SET NULL, paid_at INTEGER,
   PRIMARY KEY (item_id, due_date));
@@ -341,6 +347,8 @@ CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INT
 -- every preference (FR-ONB-07, FR-BAK-06): language, digits, payday_day, income_target, primary_currency,
 -- approx_view{enabled,target}, theme, notif.*, quiet_hours, app_lock{enabled,timeout_s}, hide_amounts.*,
 -- payday_eras (JSON `[{"from":null|"YYYY-MM-DD","day":1..28}]`, T-051; `payday_day` stays the user-facing value and equals the last era's day),
+-- salary.plan (JSON `{"v":1,"m":minor,"c":"EGP","d":1..28,"a":accountId?}`, T-195: "My salary"; absent = off; the expected salary is derived from it and is never a transaction row),
+-- salary.state (JSON `{"v":1,"e":[{"t":txnId,"k":"c"|"m","a":"YYYY-MM-DD","mt"?,"mm"?,"mc"?}],"s":[skipped paydays],"d":[declined txn ids]}`, T-195: transactions tied to a payday; pruned to 8 / 8 / 16; unreadable text reads as empty; schema stays v5),
 -- contribution_opt_in, scan_depth_months, capture.scan_personal_senders (T-048, bool, default off), setup_progress, paywall_last_shown, … (typed accessors in core/settings)
 
 CREATE TABLE secure_state (key TEXT PRIMARY KEY, value BLOB NOT NULL, updated_at INTEGER NOT NULL);

@@ -58,6 +58,14 @@ class GoldChartCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final title = goldChartTitle(l, chart);
+    // Burn rate and month vs average are about one payday cycle.
+    final period = ref.watch(chartsResolvedPeriodProvider).value;
+    if (period != null && !period.supports(chart)) {
+      return ChartCard(
+        title: title,
+        child: ChartMessage(text: l.insightsChartsPeriodNeedsCycle),
+      );
+    }
     final money = chartMoneyOf(ref, context);
     String pct(int bp) => chartPercentBp(ref, context, bp);
     final lang = Localizations.localeOf(context).languageCode;

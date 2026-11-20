@@ -4,6 +4,12 @@
 // multi-currency account switches every section with currency chips
 // (FR-ACC-06). All numbers are per currency; amounts are ink, never red.
 
+import '../../../wealth/data/net_worth_repository.dart' show NetWorthBreakdown;
+import '../../../wealth/presentation/balance_source_text.dart';
+import '../../../wealth/presentation/net_worth_breakdown_providers.dart';
+import '../../../wealth/presentation/net_worth_breakdown_screen.dart'
+    show showSetBalanceSheet;
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -11,10 +17,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/ui/bank_name_text.dart';
+import '../../../../core/ui/institution_avatar.dart';
 import '../../../../core/l10n/card_number.dart';
 import '../../../../core/db/app_database.dart' show IgnoreRuleRow;
 import '../../../../core/db/daos/capture_controls_dao.dart' show IgnoreChannel;
 import '../../../../core/l10n/date_format.dart';
+import '../../../../core/ui/amount_semantics.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/theme/z_tokens.dart';
@@ -29,10 +37,13 @@ import '../../../transactions/presentation/list/txn_list_providers.dart';
 import '../../../transactions/presentation/list/txn_row.dart';
 import '../../data/accounts_providers.dart';
 import '../../domain/account.dart';
+import '../account_type.dart';
 import '../edit_card/add_card_flow.dart';
 import '../edit_card/edit_card_providers.dart' show institutionOptionsProvider;
 import '../edit_card/merge_flow.dart';
 import 'card_detail_providers.dart';
+import '../../../../core/settings/settings_providers.dart';
+import '../../../../core/ui/z_hide_amounts_button.dart';
 
 // ICU select keys of accountsDetailIgnoredBanner.
 const String _platformIos = 'ios';
@@ -108,7 +119,7 @@ class _State extends ConsumerState<CardDetailScreen> {
     );
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    final fmt = TxnFmt(lang, digits);
+    final fmt = TxnFmt(lang, digits, hidden: ref.watch(hideAmountsProvider));
     final name = formatAccountWithCard(account.label, account.last4);
     final data = ref.watch(
       cardDetailDataProvider((accountId: account.id, currency: cur.code)),
@@ -125,6 +136,7 @@ class _State extends ConsumerState<CardDetailScreen> {
               child: const BackButtonIcon(),
             ),
             const Spacer(),
+            const ZHideAmountsButton(),
             _Menu(account: account, name: name),
             const SizedBox(width: ZSpacing.sm),
             _RoundBtn(
@@ -170,6 +182,8 @@ class _State extends ConsumerState<CardDetailScreen> {
                       style: ZType.headline.copyWith(color: c.text),
                     ),
                   ),
+                  const SizedBox(height: ZSpacing.xs),
+                  AccountTypeChip(kind: account.kind),
                   if (data.value?.nextDue == null &&
                       widget.justAdded &&
                       account.statementDueDay != null)
@@ -228,6 +242,11 @@ class _State extends ConsumerState<CardDetailScreen> {
               .firstWhere((_) => true, orElse: () => null),
           cur: cur,
           fmt: fmt,
+          line: _lineOf(
+            ref.watch(netWorthBreakdownProvider).value,
+            account.id,
+            cur,
+          ),
         ),
         const SizedBox(height: ZSpacing.lg),
         ...data.when(
@@ -456,6 +475,14 @@ class _State extends ConsumerState<CardDetailScreen> {
   }
 }
 
+BreakdownLine? _lineOf(NetWorthBreakdown? b, String accountId, Currency cur) {
+  if (b == null) return null;
+  for (final l in b.lines) {
+    if (l.refId == accountId && l.unit == cur.code && l.isAccount) return l;
+  }
+  return null;
+}
+
 class _Header extends StatelessWidget {
   const _Header({
     this.waiting = false,
@@ -463,7 +490,11 @@ class _Header extends StatelessWidget {
     required this.balance,
     required this.cur,
     required this.fmt,
+    this.line,
   });
+
+  /// T-199: the effective balance of this account in [cur] and its source.
+  final BreakdownLine? line;
 
   final bool waiting;
   final Account account;
@@ -494,6 +525,10 @@ class _Header extends StatelessWidget {
               Expanded(
                 child: Text(
                   l.accountsDetailAvailableOf(kNoValueDash, fmt.money(limit)),
+                  semanticsLabel: a11yAmounts(
+                    l,
+                    l.accountsDetailAvailableOf(kNoValueDash, fmt.money(limit)),
+                  ),
                   textAlign: TextAlign.end,
                   style: ZType.titleSmall.copyWith(color: c.text),
                 ),
@@ -540,6 +575,13 @@ class _Header extends StatelessWidget {
                     fmt.money(available),
                     fmt.money(limit),
                   ),
+                  semanticsLabel: a11yAmounts(
+                    l,
+                    l.accountsDetailAvailableOf(
+                      fmt.money(available),
+                      fmt.money(limit),
+                    ),
+                  ),
                   textAlign: TextAlign.end,
                   style: ZType.titleSmall.copyWith(color: c.text),
                 ),
@@ -570,7 +612,8 @@ class _Header extends StatelessWidget {
             style: ZType.bodySmall.copyWith(color: c.textMuted),
           ),
         );
-    } else if (balance?.balance != null) {
+    } else if (line?.amount != null || balance?.balance != null) {
+      final shown = line?.amount ?? balance!.balance!;
       lines
         ..add(
           Text(
@@ -580,24 +623,108 @@ class _Header extends StatelessWidget {
         )
         ..add(
           ZMoneyText(
-            text: fmt.money(balance!.balance!),
+            text: fmt.money(shown),
             size: ZMoneySize.title,
             kind: ZMoneyKind.neutral,
           ),
         )
         ..add(
           Text(
-            l.accountsDetailAsOf(
-              ZDateFormat.date(balance!.asOf, fmt.lang, fmt.digits),
-            ),
+            line != null
+                ? balanceSourceText(
+                    l,
+                    line!,
+                    lang: fmt.lang,
+                    digits: fmt.digits,
+                  )
+                : l.accountsDetailAsOf(
+                    ZDateFormat.date(balance!.asOf, fmt.lang, fmt.digits),
+                  ),
             style: ZType.caption.copyWith(color: c.textMuted),
           ),
         );
     } else {
+      lines
+        ..add(
+          Text(
+            l.accountsDetailBalanceUnknown,
+            style: ZType.body.copyWith(color: c.textMuted),
+          ),
+        )
+        ..add(
+          Consumer(
+            builder: (ctx, ref, _) => TextButton(
+              key: const Key('card-set-balance'),
+              onPressed: () => showSetBalanceSheet(
+                ctx,
+                ref,
+                accountId: account.id,
+                name: account.label,
+                currency: cur,
+                isLiability:
+                    account.kind == AccountKind.credit ||
+                    account.kind == AccountKind.bnpl,
+              ),
+              child: Text(l.networthSetBalance),
+            ),
+          ),
+        );
+    }
+    final counted = line;
+    final isCard =
+        account.kind == AccountKind.credit || account.kind == AccountKind.bnpl;
+    if (isCard &&
+        counted?.amount != null &&
+        limit != null &&
+        available != null) {
+      // The counted owed amount (limit minus available, plus what was spent
+      // and paid since), with where it comes from.
+      lines
+        ..add(const SizedBox(height: ZSpacing.md))
+        ..add(
+          Row(
+            children: [
+              Text(
+                l.networthCardOwed,
+                style: ZType.body.copyWith(color: c.textMuted),
+              ),
+              const SizedBox(width: ZSpacing.md),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: ZMoneyText(
+                    text: fmt.money(counted!.amount!),
+                    size: ZMoneySize.body,
+                    kind: ZMoneyKind.neutral,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+        ..add(
+          Text(
+            balanceSourceText(l, counted, lang: fmt.lang, digits: fmt.digits),
+            style: ZType.caption.copyWith(color: c.textMuted),
+          ),
+        );
+    }
+    if (counted?.basis == AnchorBasis.userEntered) {
       lines.add(
-        Text(
-          l.accountsDetailBalanceUnknown,
-          style: ZType.body.copyWith(color: c.textMuted),
+        Consumer(
+          builder: (ctx, ref, _) => TextButton(
+            key: const Key('card-edit-balance'),
+            onPressed: () => showSetBalanceSheet(
+              ctx,
+              ref,
+              accountId: account.id,
+              name: account.label,
+              currency: cur,
+              isLiability: isCard,
+              canClear: true,
+            ),
+            child: Text(l.networthEdit),
+          ),
         ),
       );
     }
@@ -916,21 +1043,19 @@ class _BankTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final word = account.label.trim().split(RegExp(r'\s+')).first;
-    return Container(
-      width: 52,
-      height: 52,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
-      child: account.kind == AccountKind.cash
-          ? Icon(Icons.payments_rounded, color: c.primary)
-          : Text(
-              (word.length > 4 ? word.substring(0, 1) : word).toUpperCase(),
-              style: ZType.label.copyWith(
-                color: c.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+    if (account.kind == AccountKind.cash) {
+      return Container(
+        width: 52,
+        height: 52,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(color: c.surfaceAlt, shape: BoxShape.circle),
+        child: Icon(Icons.payments_rounded, color: c.primary),
+      );
+    }
+    return ZInstitutionAvatar(
+      institutionCode: account.institutionCode,
+      label: account.label,
+      size: 52,
     );
   }
 }

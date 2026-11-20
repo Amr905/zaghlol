@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
@@ -22,6 +23,8 @@ import 'package:zaghlol/features/transactions/domain/transaction_repository.dart
 import 'package:zaghlol/features/transactions/presentation/list/transactions_list_screen.dart';
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
+
+import '../../../../support/hide_amounts_support.dart';
 
 final egp = Currency.of('EGP');
 final usd = Currency.of('USD');
@@ -220,9 +223,15 @@ const lookups = TxnLookups(
       id: 'acc1',
       label: 'NBE Visa',
       last4: '4567',
+      kind: AccountKind.credit,
       currencyCode: 'EGP',
     ),
-    TxnAccount(id: 'acc2', label: 'Wallet', currencyCode: 'USD'),
+    TxnAccount(
+      id: 'acc2',
+      label: 'Wallet',
+      kind: AccountKind.wallet,
+      currencyCode: 'USD',
+    ),
   ],
 );
 
@@ -237,8 +246,10 @@ Widget listApp(
   Locale locale = const Locale('en'),
   double textScale = 1.0,
   bool dark = false,
+  HideAmountsHarness? hideAmounts,
 }) => ProviderScope(
   overrides: [
+    ...(hideAmounts ?? HideAmountsHarness()).overrides,
     transactionRepositoryProvider.overrideWith((ref) async => h.repo),
     txnBulkActionsProvider.overrideWith((ref) async => h.actions),
     txnLookupsProvider.overrideWith((ref) async => lookups),

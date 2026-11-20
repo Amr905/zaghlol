@@ -1,6 +1,6 @@
 # Zaghlol (زغلول)
 
-On-device, zero-backend personal finance and SMS expense analyzer for Egypt, with Captain Zaghlol as an Egyptian-Arabic-speaking coach.
+Personal finance and SMS expense analyzer for Egypt in which your financial data never leaves your phone (a small backend handles only purchases, catalog sync, prices and feature flags), with Captain Zaghlol as an Egyptian-Arabic-speaking coach.
 
 - Product spec: `Zaghlol_Feature_and_Product_Specification_v4.docx`
 - How this project is built: `CLAUDE.md` and `docs/workflow/`

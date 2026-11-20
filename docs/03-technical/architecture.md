@@ -6,7 +6,7 @@
 | Version | 0.1 — DRAFT for approval |
 | Phase | 3 — Technical specification |
 | Inputs | SRS v1.2 (`docs/01-requirements/requirements.md`), approved Phase 2 design (`docs/02-design/`) |
-| Decisions | `adr/ADR-001` … `ADR-022` (index in `README.md`) |
+| Decisions | `adr/ADR-001` … `ADR-023` (index in `README.md`) |
 
 ---
 

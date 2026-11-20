@@ -9,24 +9,33 @@ import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/digits_mode.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Locale-bound formatting for one build.
 class HomeFormat {
-  const HomeFormat(this.languageCode, this.digits);
+  const HomeFormat(this.languageCode, this.digits, {required this.hidden});
 
   factory HomeFormat.of(BuildContext context, WidgetRef ref) {
     final lang = Localizations.localeOf(context).languageCode;
-    return HomeFormat(lang, ref.watch(digitsModeProvider(lang)));
+    return HomeFormat(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
   }
 
   final String languageCode;
   final DigitsMode digits;
+
+  /// D-67: amounts show as `****`.
+  final bool hidden;
 
   /// Whole amounts drop the `.00` (mockups 03 / 20).
   String money(Money m) => MoneyFormat.format(
     m,
     languageCode: languageCode,
     digits: digits,
+    hidden: hidden,
     dropZeroFraction: true,
   );
 
@@ -35,6 +44,7 @@ class HomeFormat {
     m,
     languageCode: languageCode,
     digits: digits,
+    hidden: hidden,
     withCurrency: false,
     dropZeroFraction: true,
   );

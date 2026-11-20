@@ -9,6 +9,7 @@ using System.Text.Json.Nodes;
 using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Idempotency;
 using Zaghlol.Application.Sync;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Contract.Tests;
 
@@ -226,6 +227,10 @@ public class SyncLiveContractTests(CatalogContractFixture fixture) : IClassFixtu
         if (app is not null)
         {
             request.Headers.TryAddWithoutValidation("Zaghlol-App", app);
+        }
+        else
+        {
+            request.Options.Set(AppHeaderHandler.Omit, true);
         }
 
         request.Content = new StringContent(body, Encoding.UTF8);

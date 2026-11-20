@@ -106,7 +106,7 @@ public sealed class SyncHostFixture : IAsyncLifetime, IDisposable
         app.MapInstalls();
         app.MapSync();
         await app.StartAsync();
-        Client = app.GetTestClient();
+        Client = new HttpClient(new AppHeaderHandler { InnerHandler = app.GetTestServer().CreateHandler() }) { BaseAddress = new Uri("http://localhost/") };
     }
 
     public async Task DisposeAsync()
@@ -171,6 +171,10 @@ public sealed class SyncHostFixture : IAsyncLifetime, IDisposable
         if (app is not null)
         {
             request.Headers.TryAddWithoutValidation(SyncEndpoints.AppHeader, app);
+        }
+        else
+        {
+            request.Options.Set(AppHeaderHandler.Omit, true);
         }
 
         foreach (var (name, value) in headers ?? new Dictionary<string, string>())

@@ -2984,6 +2984,68 @@
   "@accountsOverviewAccountsTitle": {
     "description": "L"
   },
+  "accountsGroupBank": "حسابات وكروت ديبت",
+  "@accountsGroupBank": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupCredit": "كروت كريدت وتقسيط",
+  "@accountsGroupCredit": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupWallets": "محافظ وكروت مسبقة الدفع",
+  "@accountsGroupWallets": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupCash": "كاش",
+  "@accountsGroupCash": {
+    "description": "T · Money tab section"
+  },
+  "accountsGroupToggle": "رتّب حسب النوع",
+  "@accountsGroupToggle": {
+    "description": "C · Money tab toggle chip: sections by account type"
+  },
+  "accountsOverviewUsedOf": "مستخدم {used} من {limit}",
+  "@accountsOverviewUsedOf": {
+    "description": "L · credit row, used and limit",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewUsedBarA11y": "مستخدم {percent} من الليميت",
+  "@accountsOverviewUsedBarA11y": {
+    "description": "S · credit bar semantics",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsOverviewDueOn": "السداد {date}",
+  "@accountsOverviewDueOn": {
+    "description": "C · credit row, statement due date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsTypeCurrency": "{type} · {currency}",
+  "@accountsTypeCurrency": {
+    "description": "S · account picker subtitle: account type and currency code",
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "accountsOverviewCompare": "قارن",
   "@accountsOverviewCompare": {
     "description": "L · text button, opens S-42"
@@ -4031,7 +4093,11 @@
   "insightsCoveredEarlier": "اتدفع من كاش اتسحب قبل كده: {amount}",
   "@insightsCoveredEarlier": {
     "description": "Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "insightsChartTitleCashFlow": "الداخل والخارج",
   "@insightsChartTitleCashFlow": {
@@ -4401,7 +4467,7 @@
       }
     }
   },
-  "insightsExplainCashFlowBasic": "{state, select, short{الدورة دي دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{الدورة دي دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}",
+  "insightsExplainCashFlowBasic": "{state, select, short{في {now} دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{في {now} دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}",
   "@insightsExplainCashFlowBasic": {
     "description": "E · state:select(short/other): short = spent more than earned. No emoji in the short branch",
     "placeholders": {
@@ -4422,6 +4488,9 @@
       },
       "percent": {
         "type": "String"
+      },
+      "now": {
+        "type": "String"
       }
     }
   },
@@ -4440,7 +4509,7 @@
       }
     }
   },
-  "insightsExplainCashFlowDeep": "{trend, select, up{صافي الدورة دي أحسن من الدورة اللي فاتت بـ {delta}.} down{صافي الدورة دي أقل من الدورة اللي فاتت بـ {delta}.} other{صافي الدورة دي زي الدورة اللي فاتت تقريباً.}}",
+  "insightsExplainCashFlowDeep": "{trend, select, up{صافي {now} أحسن من {prev} بـ {delta}.} down{صافي {now} أقل من {prev} بـ {delta}.} other{صافي {now} زي {prev} تقريباً.}}",
   "@insightsExplainCashFlowDeep": {
     "description": "E · Gold · trend (up = better)",
     "placeholders": {
@@ -4448,6 +4517,12 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "now": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -4497,7 +4572,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeep": "{trend, select, up{{category} زاد عن الدورة اللي فاتت بـ {delta}.} down{{category} قل عن الدورة اللي فاتت بـ {delta}.} other{{category} تقريباً زي الدورة اللي فاتت.}}",
+  "insightsExplainCategoriesDeep": "{trend, select, up{{category} زاد عن {prev} بـ {delta}.} down{{category} قل عن {prev} بـ {delta}.} other{{category} تقريباً زي {prev}.}}",
   "@insightsExplainCategoriesDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -4508,6 +4583,9 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -4581,7 +4659,7 @@
       }
     }
   },
-  "insightsExplainRule503020Basic": "{state, select, wantsHigh{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}",
+  "insightsExplainRule503020Basic": "{state, select, wantsHigh{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}",
   "@insightsExplainRule503020Basic": {
     "description": "E · state:select(wantsHigh/savingsLow/other). The rule is fifty, thirty, twenty; the chart title carries it",
     "placeholders": {
@@ -4595,6 +4673,9 @@
         "type": "String"
       },
       "savingsPct": {
+        "type": "String"
+      },
+      "now": {
         "type": "String"
       }
     }
@@ -4611,7 +4692,7 @@
       }
     }
   },
-  "insightsExplainRule503020Deep": "{trend, select, up{التحويش زاد عن الدورة اللي فاتت لـ {savingsPct}.} down{التحويش نزل عن الدورة اللي فاتت لـ {savingsPct}.} other{التحويش ثابت تقريباً عن الدورة اللي فاتت.}}",
+  "insightsExplainRule503020Deep": "{trend, select, up{التحويش زاد عن {prev} لـ {savingsPct}.} down{التحويش نزل عن {prev} لـ {savingsPct}.} other{التحويش ثابت تقريباً عن {prev}.}}",
   "@insightsExplainRule503020Deep": {
     "description": "E · Gold",
     "placeholders": {
@@ -4619,6 +4700,9 @@
         "type": "String"
       },
       "savingsPct": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -4665,7 +4749,7 @@
       }
     }
   },
-  "insightsExplainWeekPatternDeep": "{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من الدورة اللي فاتت.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من الدورة اللي فاتت.} other{متوسط صرفك يوم {peakDay} {amount}، زي الدورة اللي فاتت تقريباً.}}",
+  "insightsExplainWeekPatternDeep": "{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من {prev}.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من {prev}.} other{متوسط صرفك يوم {peakDay} {amount}، زي {prev} تقريباً.}}",
   "@insightsExplainWeekPatternDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -4676,6 +4760,9 @@
         "type": "String"
       },
       "amount": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -4725,7 +4812,7 @@
       }
     }
   },
-  "insightsExplainMerchantsDeep": "أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن الدورة اللي فاتت بـ {delta}.} down{و{merchant} قل عن الدورة اللي فاتت بـ {delta}.} other{و{merchant} زي الدورة اللي فاتت تقريباً.}}",
+  "insightsExplainMerchantsDeep": "أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن {prev} بـ {delta}.} down{و{merchant} قل عن {prev} بـ {delta}.} other{و{merchant} زي {prev} تقريباً.}}",
   "@insightsExplainMerchantsDeep": {
     "description": "E · Gold",
     "placeholders": {
@@ -4739,6 +4826,9 @@
         "type": "String"
       },
       "delta": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -4947,7 +5037,7 @@
       }
     }
   },
-  "insightsExplainCardsDeep": "{trend, select, up{نصيب {card} من صرفك زاد عن الدورة اللي فاتت.} down{نصيب {card} من صرفك قل عن الدورة اللي فاتت.} other{نصيب {card} من صرفك ثابت عن الدورة اللي فاتت.}}",
+  "insightsExplainCardsDeep": "{trend, select, up{نصيب {card} من صرفك زاد عن {prev}.} down{نصيب {card} من صرفك قل عن {prev}.} other{نصيب {card} من صرفك ثابت عن {prev}.}}",
   "@insightsExplainCardsDeep": {
     "description": "E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10)",
     "placeholders": {
@@ -4955,6 +5045,9 @@
         "type": "String"
       },
       "card": {
+        "type": "String"
+      },
+      "prev": {
         "type": "String"
       }
     }
@@ -5385,6 +5478,10 @@
   "@recurringBillsMarkPaid": {
     "description": "B · glossary «اتدفع»"
   },
+  "notificationMarkPaidConfirmTitle": "تعلّم الفاتورة دي إنها اتدفعت؟",
+  "@notificationMarkPaidConfirmTitle": {
+    "description": "L-1 · confirm before a notification action marks a bill paid"
+  },
   "recurringBillsPaid": "اتدفع ✓",
   "@recurringBillsPaid": {
     "description": "C"
@@ -5493,6 +5590,52 @@
         "type": "String"
       }
     }
+  },
+  "recurringBillsAutoAdded": "اتضافت لوحدها",
+  "@recurringBillsAutoAdded": {
+    "description": "B · tag on a bill that zaghlol found and added by itself"
+  },
+  "recurringBillsNotABill": "مش فاتورة",
+  "@recurringBillsNotABill": {
+    "description": "B · one-tap undo on an auto-added bill"
+  },
+  "recurringBillsNotABillDone": "تمام، مش هضيف {name} تاني",
+  "@recurringBillsNotABillDone": {
+    "description": "N · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedTitle": "ضفتلك فاتورة",
+  "@notificationsAutoAddedTitle": {
+    "description": "T"
+  },
+  "notificationsAutoAddedOne": "لقيت إن {name} بتتخصم كل فترة، فضفتها في الفواتير. لو مش فاتورة شيلها بضغطة.",
+  "@notificationsAutoAddedOne": {
+    "description": "N · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedMany": "{count, plural, =2{لقيت فاتورتين بتتخصم كل فترة وضفتهم في الفواتير.} few{لقيت {n} فواتير بتتخصم كل فترة وضفتهم في الفواتير.} many{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.} other{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.}}",
+  "@notificationsAutoAddedMany": {
+    "description": "N · count:int, n · how many bills were added at once (two or more)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedHidden": "ضفتلك فاتورة جديدة في الفواتير.",
+  "@notificationsAutoAddedHidden": {
+    "description": "N"
   },
   "recurringBillsRowA11y": "{name}، {amount}، {status}",
   "@recurringBillsRowA11y": {
@@ -8781,7 +8924,7 @@
   "@notificationsSettingsDuplicates": {
     "description": "L"
   },
-  "notificationsSettingsRenewals": "تجديد الاشتراكات",
+  "notificationsSettingsRenewals": "فواتير اتضافت لوحدها",
   "@notificationsSettingsRenewals": {
     "description": "L"
   },
@@ -9311,6 +9454,10 @@
   "settingsPrefsThemeDark": "غامق",
   "@settingsPrefsThemeDark": {
     "description": "C"
+  },
+  "settingsPrefsThemeDarkQuip": "يعني تبقى فلوسك والمود؟",
+  "@settingsPrefsThemeDarkQuip": {
+    "description": "T-194 · Captain Zaghlol snackbar when the user picks Dark theme"
   },
   "settingsPrefsCurrency": "العملة الأساسية",
   "@settingsPrefsCurrency": {
@@ -9854,7 +10001,7 @@
   "@chatMainRoastTag": {
     "description": "S-50 design pass"
   },
-  "insightsChartsSavedFootnote": "وفرت {amount} الشهر ده ({percent})",
+  "insightsChartsSavedFootnote": "وفرت {amount} في {now} ({percent})",
   "@insightsChartsSavedFootnote": {
     "description": "S-20 cash-flow footnote",
     "placeholders": {
@@ -9862,6 +10009,9 @@
         "type": "String"
       },
       "percent": {
+        "type": "String"
+      },
+      "now": {
         "type": "String"
       }
     }
@@ -10146,5 +10296,516 @@
   "importFlowUnavailable": "المصدر ده لسه مش جاهز",
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
+  },
+  "commonAmountsHide": "إخفاء المبالغ",
+  "@commonAmountsHide": {
+    "description": "D-67 eye button label and tooltip: hide every amount in the app"
+  },
+  "commonAmountsShow": "إظهار المبالغ",
+  "@commonAmountsShow": {
+    "description": "D-67 eye button label and tooltip: show the amounts again"
+  },
+  "commonAmountHidden": "المبلغ مخفي",
+  "@commonAmountHidden": {
+    "description": "D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)"
+  },
+  "settingsPrefsHideAmounts": "اخفي المبالغ في التطبيق",
+  "@settingsPrefsHideAmounts": {
+    "description": "D-67 Preferences switch: hide every amount in the app"
+  },
+  "settingsPrefsHideAmountsHint": "كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.",
+  "@settingsPrefsHideAmountsHint": {
+    "description": "D-67 hint under the hide-amounts switch"
+  },
+  "shareStudioShowAmountsLocked": "المبالغ مخفية في التطبيق كله، فالكارت هيطلع بالنسب بس. اظهرها من الأيقونة اللي جنب المبالغ.",
+  "@shareStudioShowAmountsLocked": {
+    "description": "D-67 hint under the disabled Show amounts switch while hiding is on in the whole app"
+  },
+  "salaryExpectedTitle": "المرتب — متوقع",
+  "@salaryExpectedTitle": {
+    "description": "Home row title"
+  },
+  "salaryExpectedSub": "ميعاده يوم {day} · مش محسوب لحد ما يتأكد",
+  "@salaryExpectedSub": {
+    "description": "Home row subtitle · day",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryActionArrived": "نزل",
+  "@salaryActionArrived": {
+    "description": "Home row button"
+  },
+  "salaryActionNotYet": "لسه",
+  "@salaryActionNotYet": {
+    "description": "Home row button"
+  },
+  "salaryActionSkip": "تخطي الشهر ده",
+  "@salaryActionSkip": {
+    "description": "Home row button"
+  },
+  "salaryRecorded": "اتسجل المرتب",
+  "@salaryRecorded": {
+    "description": "Snackbar"
+  },
+  "salaryErrorGeneric": "معرفتش أسجل المرتب. جرب تاني.",
+  "@salaryErrorGeneric": {
+    "description": "Snackbar error"
+  },
+  "salaryFoundTitle": "في مبلغ نزل قبل كده",
+  "@salaryFoundTitle": {
+    "description": "Dialog title"
+  },
+  "salaryFoundBody": "في دخل بـ {amount} نزل في ميعاد المرتب. هو ده المرتب؟",
+  "@salaryFoundBody": {
+    "description": "Dialog body · amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "salaryFoundYes": "أيوه، هو ده",
+  "@salaryFoundYes": {
+    "description": "Dialog button"
+  },
+  "salaryFoundNo": "لأ، دخل تاني",
+  "@salaryFoundNo": {
+    "description": "Dialog button"
+  },
+  "salaryAddSwitch": "ده مرتب",
+  "@salaryAddSwitch": {
+    "description": "Add-income switch"
+  },
+  "salaryAddSwitchHint": "لو رسالة البنك وصلت بعد كده، هتتحسب مرة واحدة بس",
+  "@salaryAddSwitchHint": {
+    "description": "Add-income switch hint"
+  },
+  "salaryMergedTitle": "المرتب ده اتدمج مع اللي سجلته",
+  "@salaryMergedTitle": {
+    "description": "Transaction detail line"
+  },
+  "salaryMergedUndo": "رجّع اللي سجلته",
+  "@salaryMergedUndo": {
+    "description": "Transaction detail button"
+  },
+  "salaryMergedUndone": "رجعنا اللي سجلته",
+  "@salaryMergedUndone": {
+    "description": "Snackbar"
+  },
+  "salaryMergedGone": "اللي سجلته اتمسح ومينفعش يرجع",
+  "@salaryMergedGone": {
+    "description": "Snackbar"
+  },
+  "settingsSalaryTitle": "مرتبي",
+  "@settingsSalaryTitle": {
+    "description": "Settings row and sheet title"
+  },
+  "settingsSalaryUnset": "ضيفه وزغلول يتابعه معاك",
+  "@settingsSalaryUnset": {
+    "description": "Settings row subtitle"
+  },
+  "settingsSalarySummary": "{amount} · يوم {day}",
+  "@settingsSalarySummary": {
+    "description": "Settings row subtitle · amount, day",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSalaryAmount": "المبلغ",
+  "@settingsSalaryAmount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryDay": "يوم القبض (١–٢٨)",
+  "@settingsSalaryDay": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccount": "بينزل فين",
+  "@settingsSalaryAccount": {
+    "description": "Sheet field"
+  },
+  "settingsSalaryAccountDefault": "الكاش",
+  "@settingsSalaryAccountDefault": {
+    "description": "Sheet account choice (default cash account)"
+  },
+  "settingsSalaryRemove": "شيل المرتب",
+  "@settingsSalaryRemove": {
+    "description": "Sheet button"
+  },
+  "settingsSalaryInvalid": "اكتب مبلغ صح ويوم من ١ لـ ٢٨",
+  "@settingsSalaryInvalid": {
+    "description": "Sheet error"
+  },
+  "notificationsSalaryNudgeTitle": "المرتب نزل؟",
+  "@notificationsSalaryNudgeTitle": {
+    "description": "N"
+  },
+  "notificationsSalaryNudgeBody": "لسه مجاليش رسالة بالمرتب. لو نزل، سجّله من الرئيسية بضغطة.",
+  "@notificationsSalaryNudgeBody": {
+    "description": "N"
+  },
+  "commonPeriodLastMonth": "الشهر اللي فات",
+  "@commonPeriodLastMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodThisYear": "السنة دي",
+  "@commonPeriodThisYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodSheetTitle": "اختار الفترة",
+  "@insightsChartsPeriodSheetTitle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrev": "الفترة اللي قبلها",
+  "@insightsChartsPeriodPrev": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNext": "الفترة اللي بعدها",
+  "@insightsChartsPeriodNext": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodA11y": "فترة الرسومات: {name}، {range}. دوس مرتين عشان تغيّرها",
+  "@insightsChartsPeriodA11y": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNeedsCycle": "الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.",
+  "@insightsChartsPeriodNeedsCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodBudgetNote": "تقدّم الميزانية بيعرض الدورة الحالية دايماً.",
+  "@insightsChartsPeriodBudgetNote": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsDaysCount": "{count, plural, one{يوم} two{يومين} few{{countText} أيام} other{{countText} يوم}}",
+  "@insightsChartsDaysCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsWeeksCount": "{count, plural, one{أسبوع} two{أسبوعين} few{{countText} أسابيع} other{{countText} أسبوع}}",
+  "@insightsChartsWeeksCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNowThisCycle": "الدورة دي",
+  "@insightsChartsPeriodNowThisCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastCycle": "الدورة اللي فاتت",
+  "@insightsChartsPeriodNowLastCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowThisMonth": "الشهر ده",
+  "@insightsChartsPeriodNowThisMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastMonth": "الشهر اللي فات",
+  "@insightsChartsPeriodNowLastMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowMonths": "{count, plural, =1{آخر شهر} =2{آخر شهرين} few{آخر {n} شهور} many{آخر {n} شهر} other{آخر {n} شهر}}",
+  "@insightsChartsPeriodNowMonths": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodNowThisYear": "السنة دي",
+  "@insightsChartsPeriodNowThisYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowLastYear": "السنة اللي فاتت",
+  "@insightsChartsPeriodNowLastYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodNowRange": "الفترة من {start} لـ {end}",
+  "@insightsChartsPeriodNowRange": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevCycleNow": "الدورة اللي فاتت",
+  "@insightsChartsPeriodPrevCycleNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonthNow": "الشهر اللي فات",
+  "@insightsChartsPeriodPrevMonthNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevYearNow": "السنة اللي فاتت",
+  "@insightsChartsPeriodPrevYearNow": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevCycle": "الدورة اللي قبلها",
+  "@insightsChartsPeriodPrevCycle": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonth": "الشهر اللي قبله",
+  "@insightsChartsPeriodPrevMonth": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevMonths": "{count, plural, =1{الشهر اللي قبله} =2{الشهرين اللي قبلهم} few{الـ{n} شهور اللي قبلهم} many{الـ{n} شهر اللي قبلهم} other{الـ{n} شهر اللي قبلهم}}",
+  "@insightsChartsPeriodPrevMonths": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevYear": "السنة اللي قبلها",
+  "@insightsChartsPeriodPrevYear": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "insightsChartsPeriodPrevRange": "الفترة اللي قبلها",
+  "@insightsChartsPeriodPrevRange": {
+    "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodLastCycles": "آخر {n} دورات",
+  "@commonPeriodLastCycles": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCyclesCount": "{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}",
+  "@insightsChartsCyclesCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevSameDays": "نفس الأيام من {prev}",
+  "@insightsChartsPeriodPrevSameDays": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "networthTitle": "صافي ثروتك جه منين؟",
+  "@networthTitle": {
+    "description": "S · breakdown screen title"
+  },
+  "networthOpenA11y": "افتح تفاصيل صافي الثروة",
+  "@networthOpenA11y": {
+    "description": "A · hero tap target"
+  },
+  "networthGroupAccounts": "حساباتك",
+  "@networthGroupAccounts": {
+    "description": "L"
+  },
+  "networthGroupAssets": "أصولك",
+  "@networthGroupAssets": {
+    "description": "L"
+  },
+  "networthGroupLiabilities": "عليك",
+  "@networthGroupLiabilities": {
+    "description": "L"
+  },
+  "networthGroupExcluded": "مش داخلة في الحساب",
+  "@networthGroupExcluded": {
+    "description": "L · lines with no known balance"
+  },
+  "networthNet": "الصافي",
+  "@networthNet": {
+    "description": "L"
+  },
+  "networthSrcReported": "من رسالة البنك · {date}",
+  "@networthSrcReported": {
+    "description": "L · source of a line",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcAvailable": "الرصيد المتاح من رسالة البنك · {date}",
+  "@networthSrcAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcLimitMinusAvailable": "محسوب من الحد والمتاح · {date}",
+  "@networthSrcLimitMinusAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUser": "أدخلته بإيدك · {date}",
+  "@networthSrcUser": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcComputed": "محسوب من الحركات بعد رصيد {date}",
+  "@networthSrcComputed": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUnknown": "مش معروف — حط الرصيد",
+  "@networthSrcUnknown": {
+    "description": "L · excluded line"
+  },
+  "networthSrcAsset": "قيمة أنت حطيتها",
+  "@networthSrcAsset": {
+    "description": "L · asset line"
+  },
+  "networthSrcInstallments": "أقساط لسه متبقية",
+  "@networthSrcInstallments": {
+    "description": "L"
+  },
+  "networthStale": "قديم",
+  "@networthStale": {
+    "description": "C · stale tag"
+  },
+  "networthSetBalance": "حط الرصيد",
+  "@networthSetBalance": {
+    "description": "B"
+  },
+  "networthSheetTitle": "رصيد {name}",
+  "@networthSheetTitle": {
+    "description": "S · set balance sheet",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSheetAmount": "الرصيد دلوقتي",
+  "@networthSheetAmount": {
+    "description": "L"
+  },
+  "networthSheetAmountOwed": "المستحق عليك دلوقتي",
+  "@networthSheetAmountOwed": {
+    "description": "L · card"
+  },
+  "networthSheetHint": "هنحسب من الرقم ده على الحركات الجاية.",
+  "@networthSheetHint": {
+    "description": "H"
+  },
+  "networthSheetSave": "احفظ",
+  "@networthSheetSave": {
+    "description": "B"
+  },
+  "networthSheetInvalid": "اكتب مبلغ صحيح",
+  "@networthSheetInvalid": {
+    "description": "E"
+  },
+  "networthSheetFailed": "معرفناش نحفظ الرصيد",
+  "@networthSheetFailed": {
+    "description": "E"
+  },
+  "networthFreeNote": "الأصول والأقساط ضمن دهب",
+  "@networthFreeNote": {
+    "description": "N"
+  },
+  "networthEmpty": "لسه مفيش أرصدة تتحسب",
+  "@networthEmpty": {
+    "description": "S"
+  },
+  "networthOpenBankA11y": "افتح حركات {name}",
+  "@networthOpenBankA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthLineA11y": "{name}، {source}",
+  "@networthLineA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUnknownCard": "مش معروف — حط الحد أو الرصيد",
+  "@networthSrcUnknownCard": {
+    "description": "L · card with no limit"
+  },
+  "networthEdit": "عدّل الرصيد",
+  "@networthEdit": {
+    "description": "B"
+  },
+  "networthClear": "امسح الرصيد اللي حطيته",
+  "@networthClear": {
+    "description": "B"
+  },
+  "networthBankPartial": "مش شامل كل الحسابات",
+  "@networthBankPartial": {
+    "description": "C"
+  },
+  "networthCardOwed": "المستحق عليك",
+  "@networthCardOwed": {
+    "description": "L"
   }
 }

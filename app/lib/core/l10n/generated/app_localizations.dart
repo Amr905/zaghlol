@@ -3424,6 +3424,60 @@ abstract class AppLocalizations {
   /// **'كروتك وحساباتك'**
   String get accountsOverviewAccountsTitle;
 
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'حسابات وكروت ديبت'**
+  String get accountsGroupBank;
+
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'كروت كريدت وتقسيط'**
+  String get accountsGroupCredit;
+
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'محافظ وكروت مسبقة الدفع'**
+  String get accountsGroupWallets;
+
+  /// T · Money tab section
+  ///
+  /// In ar, this message translates to:
+  /// **'كاش'**
+  String get accountsGroupCash;
+
+  /// C · Money tab toggle chip: sections by account type
+  ///
+  /// In ar, this message translates to:
+  /// **'رتّب حسب النوع'**
+  String get accountsGroupToggle;
+
+  /// L · credit row, used and limit
+  ///
+  /// In ar, this message translates to:
+  /// **'مستخدم {used} من {limit}'**
+  String accountsOverviewUsedOf(String used, String limit);
+
+  /// S · credit bar semantics
+  ///
+  /// In ar, this message translates to:
+  /// **'مستخدم {percent} من الليميت'**
+  String accountsOverviewUsedBarA11y(String percent);
+
+  /// C · credit row, statement due date
+  ///
+  /// In ar, this message translates to:
+  /// **'السداد {date}'**
+  String accountsOverviewDueOn(String date);
+
+  /// S · account picker subtitle: account type and currency code
+  ///
+  /// In ar, this message translates to:
+  /// **'{type} · {currency}'**
+  String accountsTypeCurrency(String type, String currency);
+
   /// L · text button, opens S-42
   ///
   /// In ar, this message translates to:
@@ -5006,7 +5060,7 @@ abstract class AppLocalizations {
   /// E · state:select(short/other): short = spent more than earned. No emoji in the short branch
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, short{الدورة دي دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{الدورة دي دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}'**
+  /// **'{state, select, short{في {now} دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{في {now} دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}'**
   String insightsExplainCashFlowBasic(
     String state,
     String income,
@@ -5014,6 +5068,7 @@ abstract class AppLocalizations {
     String gap,
     String saved,
     String percent,
+    String now,
   );
 
   /// S · state, category = largest category, target
@@ -5029,8 +5084,13 @@ abstract class AppLocalizations {
   /// E · Gold · trend (up = better)
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{صافي الدورة دي أحسن من الدورة اللي فاتت بـ {delta}.} down{صافي الدورة دي أقل من الدورة اللي فاتت بـ {delta}.} other{صافي الدورة دي زي الدورة اللي فاتت تقريباً.}}'**
-  String insightsExplainCashFlowDeep(String trend, String delta);
+  /// **'{trend, select, up{صافي {now} أحسن من {prev} بـ {delta}.} down{صافي {now} أقل من {prev} بـ {delta}.} other{صافي {now} زي {prev} تقريباً.}}'**
+  String insightsExplainCashFlowDeep(
+    String trend,
+    String delta,
+    String now,
+    String prev,
+  );
 
   /// S · Gold
   ///
@@ -5059,11 +5119,12 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{{category} زاد عن الدورة اللي فاتت بـ {delta}.} down{{category} قل عن الدورة اللي فاتت بـ {delta}.} other{{category} تقريباً زي الدورة اللي فاتت.}}'**
+  /// **'{trend, select, up{{category} زاد عن {prev} بـ {delta}.} down{{category} قل عن {prev} بـ {delta}.} other{{category} تقريباً زي {prev}.}}'**
   String insightsExplainCategoriesDeep(
     String trend,
     String category,
     String delta,
+    String prev,
   );
 
   /// S · Gold
@@ -5109,12 +5170,13 @@ abstract class AppLocalizations {
   /// E · state:select(wantsHigh/savingsLow/other). The rule is fifty, thirty, twenty; the chart title carries it
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, wantsHigh{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}'**
+  /// **'{state, select, wantsHigh{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}'**
   String insightsExplainRule503020Basic(
     String state,
     String needsPct,
     String wantsPct,
     String savingsPct,
+    String now,
   );
 
   /// S
@@ -5126,8 +5188,12 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{التحويش زاد عن الدورة اللي فاتت لـ {savingsPct}.} down{التحويش نزل عن الدورة اللي فاتت لـ {savingsPct}.} other{التحويش ثابت تقريباً عن الدورة اللي فاتت.}}'**
-  String insightsExplainRule503020Deep(String trend, String savingsPct);
+  /// **'{trend, select, up{التحويش زاد عن {prev} لـ {savingsPct}.} down{التحويش نزل عن {prev} لـ {savingsPct}.} other{التحويش ثابت تقريباً عن {prev}.}}'**
+  String insightsExplainRule503020Deep(
+    String trend,
+    String savingsPct,
+    String prev,
+  );
 
   /// S · Gold · percent = the next 5-point step
   ///
@@ -5155,11 +5221,12 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من الدورة اللي فاتت.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من الدورة اللي فاتت.} other{متوسط صرفك يوم {peakDay} {amount}، زي الدورة اللي فاتت تقريباً.}}'**
+  /// **'{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من {prev}.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من {prev}.} other{متوسط صرفك يوم {peakDay} {amount}، زي {prev} تقريباً.}}'**
   String insightsExplainWeekPatternDeep(
     String trend,
     String peakDay,
     String amount,
+    String prev,
   );
 
   /// S · Gold
@@ -5193,12 +5260,13 @@ abstract class AppLocalizations {
   /// E · Gold
   ///
   /// In ar, this message translates to:
-  /// **'أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن الدورة اللي فاتت بـ {delta}.} down{و{merchant} قل عن الدورة اللي فاتت بـ {delta}.} other{و{merchant} زي الدورة اللي فاتت تقريباً.}}'**
+  /// **'أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن {prev} بـ {delta}.} down{و{merchant} قل عن {prev} بـ {delta}.} other{و{merchant} زي {prev} تقريباً.}}'**
   String insightsExplainMerchantsDeep(
     String percent,
     String trend,
     String merchant,
     String delta,
+    String prev,
   );
 
   /// S · Gold
@@ -5320,8 +5388,8 @@ abstract class AppLocalizations {
   /// E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10)
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{نصيب {card} من صرفك زاد عن الدورة اللي فاتت.} down{نصيب {card} من صرفك قل عن الدورة اللي فاتت.} other{نصيب {card} من صرفك ثابت عن الدورة اللي فاتت.}}'**
-  String insightsExplainCardsDeep(String trend, String card);
+  /// **'{trend, select, up{نصيب {card} من صرفك زاد عن {prev}.} down{نصيب {card} من صرفك قل عن {prev}.} other{نصيب {card} من صرفك ثابت عن {prev}.}}'**
+  String insightsExplainCardsDeep(String trend, String card, String prev);
 
   /// S · Gold
   ///
@@ -5704,6 +5772,12 @@ abstract class AppLocalizations {
   /// **'اتدفع'**
   String get recurringBillsMarkPaid;
 
+  /// L-1 · confirm before a notification action marks a bill paid
+  ///
+  /// In ar, this message translates to:
+  /// **'تعلّم الفاتورة دي إنها اتدفعت؟'**
+  String get notificationMarkPaidConfirmTitle;
+
   /// C
   ///
   /// In ar, this message translates to:
@@ -5811,6 +5885,48 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اتسجل إن {name} اتدفع ✓'**
   String recurringBillsPaidSnack(String name);
+
+  /// B · tag on a bill that zaghlol found and added by itself
+  ///
+  /// In ar, this message translates to:
+  /// **'اتضافت لوحدها'**
+  String get recurringBillsAutoAdded;
+
+  /// B · one-tap undo on an auto-added bill
+  ///
+  /// In ar, this message translates to:
+  /// **'مش فاتورة'**
+  String get recurringBillsNotABill;
+
+  /// N · name
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام، مش هضيف {name} تاني'**
+  String recurringBillsNotABillDone(String name);
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'ضفتلك فاتورة'**
+  String get notificationsAutoAddedTitle;
+
+  /// N · name
+  ///
+  /// In ar, this message translates to:
+  /// **'لقيت إن {name} بتتخصم كل فترة، فضفتها في الفواتير. لو مش فاتورة شيلها بضغطة.'**
+  String notificationsAutoAddedOne(String name);
+
+  /// N · count:int, n · how many bills were added at once (two or more)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =2{لقيت فاتورتين بتتخصم كل فترة وضفتهم في الفواتير.} few{لقيت {n} فواتير بتتخصم كل فترة وضفتهم في الفواتير.} many{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.} other{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.}}'**
+  String notificationsAutoAddedMany(int count, String n);
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'ضفتلك فاتورة جديدة في الفواتير.'**
+  String get notificationsAutoAddedHidden;
 
   /// A · status = recurring_bills_dueToday / dueIn / overdue / paid
   ///
@@ -9242,7 +9358,7 @@ abstract class AppLocalizations {
   /// L
   ///
   /// In ar, this message translates to:
-  /// **'تجديد الاشتراكات'**
+  /// **'فواتير اتضافت لوحدها'**
   String get notificationsSettingsRenewals;
 
   /// L
@@ -9858,6 +9974,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'غامق'**
   String get settingsPrefsThemeDark;
+
+  /// T-194 · Captain Zaghlol snackbar when the user picks Dark theme
+  ///
+  /// In ar, this message translates to:
+  /// **'يعني تبقى فلوسك والمود؟'**
+  String get settingsPrefsThemeDarkQuip;
 
   /// L
   ///
@@ -10534,8 +10656,8 @@ abstract class AppLocalizations {
   /// S-20 cash-flow footnote
   ///
   /// In ar, this message translates to:
-  /// **'وفرت {amount} الشهر ده ({percent})'**
-  String insightsChartsSavedFootnote(String amount, String percent);
+  /// **'وفرت {amount} في {now} ({percent})'**
+  String insightsChartsSavedFootnote(String amount, String percent, String now);
 
   /// S-20 cash-flow card caption: number of months shown
   ///
@@ -10835,6 +10957,582 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المصدر ده لسه مش جاهز'**
   String get importFlowUnavailable;
+
+  /// D-67 eye button label and tooltip: hide every amount in the app
+  ///
+  /// In ar, this message translates to:
+  /// **'إخفاء المبالغ'**
+  String get commonAmountsHide;
+
+  /// D-67 eye button label and tooltip: show the amounts again
+  ///
+  /// In ar, this message translates to:
+  /// **'إظهار المبالغ'**
+  String get commonAmountsShow;
+
+  /// D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ مخفي'**
+  String get commonAmountHidden;
+
+  /// D-67 Preferences switch: hide every amount in the app
+  ///
+  /// In ar, this message translates to:
+  /// **'اخفي المبالغ في التطبيق'**
+  String get settingsPrefsHideAmounts;
+
+  /// D-67 hint under the hide-amounts switch
+  ///
+  /// In ar, this message translates to:
+  /// **'كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.'**
+  String get settingsPrefsHideAmountsHint;
+
+  /// D-67 hint under the disabled Show amounts switch while hiding is on in the whole app
+  ///
+  /// In ar, this message translates to:
+  /// **'المبالغ مخفية في التطبيق كله، فالكارت هيطلع بالنسب بس. اظهرها من الأيقونة اللي جنب المبالغ.'**
+  String get shareStudioShowAmountsLocked;
+
+  /// Home row title
+  ///
+  /// In ar, this message translates to:
+  /// **'المرتب — متوقع'**
+  String get salaryExpectedTitle;
+
+  /// Home row subtitle · day
+  ///
+  /// In ar, this message translates to:
+  /// **'ميعاده يوم {day} · مش محسوب لحد ما يتأكد'**
+  String salaryExpectedSub(String day);
+
+  /// Home row button
+  ///
+  /// In ar, this message translates to:
+  /// **'نزل'**
+  String get salaryActionArrived;
+
+  /// Home row button
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه'**
+  String get salaryActionNotYet;
+
+  /// Home row button
+  ///
+  /// In ar, this message translates to:
+  /// **'تخطي الشهر ده'**
+  String get salaryActionSkip;
+
+  /// Snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجل المرتب'**
+  String get salaryRecorded;
+
+  /// Snackbar error
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفتش أسجل المرتب. جرب تاني.'**
+  String get salaryErrorGeneric;
+
+  /// Dialog title
+  ///
+  /// In ar, this message translates to:
+  /// **'في مبلغ نزل قبل كده'**
+  String get salaryFoundTitle;
+
+  /// Dialog body · amount
+  ///
+  /// In ar, this message translates to:
+  /// **'في دخل بـ {amount} نزل في ميعاد المرتب. هو ده المرتب؟'**
+  String salaryFoundBody(String amount);
+
+  /// Dialog button
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه، هو ده'**
+  String get salaryFoundYes;
+
+  /// Dialog button
+  ///
+  /// In ar, this message translates to:
+  /// **'لأ، دخل تاني'**
+  String get salaryFoundNo;
+
+  /// Add-income switch
+  ///
+  /// In ar, this message translates to:
+  /// **'ده مرتب'**
+  String get salaryAddSwitch;
+
+  /// Add-income switch hint
+  ///
+  /// In ar, this message translates to:
+  /// **'لو رسالة البنك وصلت بعد كده، هتتحسب مرة واحدة بس'**
+  String get salaryAddSwitchHint;
+
+  /// Transaction detail line
+  ///
+  /// In ar, this message translates to:
+  /// **'المرتب ده اتدمج مع اللي سجلته'**
+  String get salaryMergedTitle;
+
+  /// Transaction detail button
+  ///
+  /// In ar, this message translates to:
+  /// **'رجّع اللي سجلته'**
+  String get salaryMergedUndo;
+
+  /// Snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'رجعنا اللي سجلته'**
+  String get salaryMergedUndone;
+
+  /// Snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي سجلته اتمسح ومينفعش يرجع'**
+  String get salaryMergedGone;
+
+  /// Settings row and sheet title
+  ///
+  /// In ar, this message translates to:
+  /// **'مرتبي'**
+  String get settingsSalaryTitle;
+
+  /// Settings row subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيفه وزغلول يتابعه معاك'**
+  String get settingsSalaryUnset;
+
+  /// Settings row subtitle · amount, day
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} · يوم {day}'**
+  String settingsSalarySummary(String amount, String day);
+
+  /// Sheet field
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ'**
+  String get settingsSalaryAmount;
+
+  /// Sheet field
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم القبض (١–٢٨)'**
+  String get settingsSalaryDay;
+
+  /// Sheet field
+  ///
+  /// In ar, this message translates to:
+  /// **'بينزل فين'**
+  String get settingsSalaryAccount;
+
+  /// Sheet account choice (default cash account)
+  ///
+  /// In ar, this message translates to:
+  /// **'الكاش'**
+  String get settingsSalaryAccountDefault;
+
+  /// Sheet button
+  ///
+  /// In ar, this message translates to:
+  /// **'شيل المرتب'**
+  String get settingsSalaryRemove;
+
+  /// Sheet error
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب مبلغ صح ويوم من ١ لـ ٢٨'**
+  String get settingsSalaryInvalid;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'المرتب نزل؟'**
+  String get notificationsSalaryNudgeTitle;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مجاليش رسالة بالمرتب. لو نزل، سجّله من الرئيسية بضغطة.'**
+  String get notificationsSalaryNudgeBody;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get commonPeriodLastMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة دي'**
+  String get commonPeriodThisYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار الفترة'**
+  String get insightsChartsPeriodSheetTitle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة اللي قبلها'**
+  String get insightsChartsPeriodPrev;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة اللي بعدها'**
+  String get insightsChartsPeriodNext;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'فترة الرسومات: {name}، {range}. دوس مرتين عشان تغيّرها'**
+  String insightsChartsPeriodA11y(String name, String range);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.'**
+  String get insightsChartsPeriodNeedsCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'تقدّم الميزانية بيعرض الدورة الحالية دايماً.'**
+  String get insightsChartsPeriodBudgetNote;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{يوم} two{يومين} few{{countText} أيام} other{{countText} يوم}}'**
+  String insightsChartsDaysCount(int count, String countText);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{أسبوع} two{أسبوعين} few{{countText} أسابيع} other{{countText} أسبوع}}'**
+  String insightsChartsWeeksCount(int count, String countText);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة دي'**
+  String get insightsChartsPeriodNowThisCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة اللي فاتت'**
+  String get insightsChartsPeriodNowLastCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده'**
+  String get insightsChartsPeriodNowThisMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get insightsChartsPeriodNowLastMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{آخر شهر} =2{آخر شهرين} few{آخر {n} شهور} many{آخر {n} شهر} other{آخر {n} شهر}}'**
+  String insightsChartsPeriodNowMonths(int count, String n);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة دي'**
+  String get insightsChartsPeriodNowThisYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة اللي فاتت'**
+  String get insightsChartsPeriodNowLastYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة من {start} لـ {end}'**
+  String insightsChartsPeriodNowRange(String start, String end);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة اللي فاتت'**
+  String get insightsChartsPeriodPrevCycleNow;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get insightsChartsPeriodPrevMonthNow;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة اللي فاتت'**
+  String get insightsChartsPeriodPrevYearNow;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الدورة اللي قبلها'**
+  String get insightsChartsPeriodPrevCycle;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي قبله'**
+  String get insightsChartsPeriodPrevMonth;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{الشهر اللي قبله} =2{الشهرين اللي قبلهم} few{الـ{n} شهور اللي قبلهم} many{الـ{n} شهر اللي قبلهم} other{الـ{n} شهر اللي قبلهم}}'**
+  String insightsChartsPeriodPrevMonths(int count, String n);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'السنة اللي قبلها'**
+  String get insightsChartsPeriodPrevYear;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'الفترة اللي قبلها'**
+  String get insightsChartsPeriodPrevRange;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر {n} دورات'**
+  String commonPeriodLastCycles(String n);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}'**
+  String insightsChartsCyclesCount(int count, String countText);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'نفس الأيام من {prev}'**
+  String insightsChartsPeriodPrevSameDays(String prev);
+
+  /// S · breakdown screen title
+  ///
+  /// In ar, this message translates to:
+  /// **'صافي ثروتك جه منين؟'**
+  String get networthTitle;
+
+  /// A · hero tap target
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح تفاصيل صافي الثروة'**
+  String get networthOpenA11y;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'حساباتك'**
+  String get networthGroupAccounts;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'أصولك'**
+  String get networthGroupAssets;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'عليك'**
+  String get networthGroupLiabilities;
+
+  /// L · lines with no known balance
+  ///
+  /// In ar, this message translates to:
+  /// **'مش داخلة في الحساب'**
+  String get networthGroupExcluded;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'الصافي'**
+  String get networthNet;
+
+  /// L · source of a line
+  ///
+  /// In ar, this message translates to:
+  /// **'من رسالة البنك · {date}'**
+  String networthSrcReported(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد المتاح من رسالة البنك · {date}'**
+  String networthSrcAvailable(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'محسوب من الحد والمتاح · {date}'**
+  String networthSrcLimitMinusAvailable(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخلته بإيدك · {date}'**
+  String networthSrcUser(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'محسوب من الحركات بعد رصيد {date}'**
+  String networthSrcComputed(String date);
+
+  /// L · excluded line
+  ///
+  /// In ar, this message translates to:
+  /// **'مش معروف — حط الرصيد'**
+  String get networthSrcUnknown;
+
+  /// L · asset line
+  ///
+  /// In ar, this message translates to:
+  /// **'قيمة أنت حطيتها'**
+  String get networthSrcAsset;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'أقساط لسه متبقية'**
+  String get networthSrcInstallments;
+
+  /// C · stale tag
+  ///
+  /// In ar, this message translates to:
+  /// **'قديم'**
+  String get networthStale;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'حط الرصيد'**
+  String get networthSetBalance;
+
+  /// S · set balance sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد {name}'**
+  String networthSheetTitle(String name);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد دلوقتي'**
+  String get networthSheetAmount;
+
+  /// L · card
+  ///
+  /// In ar, this message translates to:
+  /// **'المستحق عليك دلوقتي'**
+  String get networthSheetAmountOwed;
+
+  /// H
+  ///
+  /// In ar, this message translates to:
+  /// **'هنحسب من الرقم ده على الحركات الجاية.'**
+  String get networthSheetHint;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ'**
+  String get networthSheetSave;
+
+  /// E
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب مبلغ صحيح'**
+  String get networthSheetInvalid;
+
+  /// E
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفناش نحفظ الرصيد'**
+  String get networthSheetFailed;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'الأصول والأقساط ضمن دهب'**
+  String get networthFreeNote;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش أرصدة تتحسب'**
+  String get networthEmpty;
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح حركات {name}'**
+  String networthOpenBankA11y(String name);
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}، {source}'**
+  String networthLineA11y(String name, String source);
+
+  /// L · card with no limit
+  ///
+  /// In ar, this message translates to:
+  /// **'مش معروف — حط الحد أو الرصيد'**
+  String get networthSrcUnknownCard;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'عدّل الرصيد'**
+  String get networthEdit;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'امسح الرصيد اللي حطيته'**
+  String get networthClear;
+
+  /// C
+  ///
+  /// In ar, this message translates to:
+  /// **'مش شامل كل الحسابات'**
+  String get networthBankPartial;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'المستحق عليك'**
+  String get networthCardOwed;
 }
 
 class _AppLocalizationsDelegate

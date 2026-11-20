@@ -47,7 +47,7 @@ public sealed class RestoreContractFixture : IAsyncLifetime
                 services.AddSingleton<IPlayIntegrityVerifier>(Integrity);
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()

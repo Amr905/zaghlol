@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Zaghlol.Api.Json;
 using Zaghlol.Domain;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Api.Tests.Installs;
 
@@ -99,7 +100,7 @@ public class ArchitectureTests
 
             builder.ConfigureServices(services => kms.Use(services));
         });
-        using var client = factory.CreateClient();
+        using var client = factory.CreateDefaultClient(new AppHeaderHandler());
 
         var idempotent = factory.Services.GetRequiredService<EndpointDataSource>().Endpoints
             .Where(e => e.Metadata.GetMetadata<Idempotency.IdempotentEndpointMetadata>() is not null)

@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "@stoplight/spectral-cli": "6.15.0"
+  },
+  "overrides": {
+    "lodash": "4.18.1"
   }
 }

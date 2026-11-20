@@ -25,11 +25,14 @@ import '../../../transfers/presentation/link_transfer_sheet.dart';
 import '../../../transfers/presentation/split_sheet.dart';
 import '../detail/transaction_detail_screen.dart';
 import '../edit/transaction_edit_screen.dart';
+import '../../../accounts/presentation/account_type.dart';
 import '../../domain/transaction.dart';
 import 'txn_filter_sheets.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/settings/settings_providers.dart';
+import '../../../../core/ui/z_hide_amounts_button.dart';
 
 /// How long the search field waits after the last keystroke.
 const Duration txnSearchDebounce = Duration(milliseconds: 250);
@@ -97,7 +100,11 @@ class _State extends ConsumerState<TransactionsListScreen> {
 
   TxnFmt _fmt(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
-    return TxnFmt(lang, ref.watch(digitsModeProvider(lang)));
+    return TxnFmt(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
   }
 
   @override
@@ -133,6 +140,7 @@ class _State extends ConsumerState<TransactionsListScreen> {
                 : l.transactionsListTitle,
           ),
           actions: [
+            if (!sel.active) const ZHideAmountsButton(),
             if (sel.active)
               TextButton(
                 onPressed: _selectAll,
@@ -517,7 +525,11 @@ class _FilterBar extends ConsumerWidget {
     final cardsLabel = cards.isEmpty
         ? l.commonCardFilterAll
         : cards.length == 1 && lookups?.account(cards.first) != null
-        ? accountName(lookups!.account(cards.first)!, fmt)
+        ? accountNameWithType(
+            l,
+            accountName(lookups!.account(cards.first)!, fmt),
+            lookups.account(cards.first)!.kind,
+          )
         : l.commonCardFilterCount(cards.length, fmt.count(cards.length));
 
     final currencies = <String>{

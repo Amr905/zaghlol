@@ -89,7 +89,7 @@ public sealed class SigningHostFixture : IAsyncLifetime, IDisposable
         app.UseZaghlolPipeline();
         MapTestEndpoints(app);
         await app.StartAsync();
-        Client = app.GetTestClient();
+        Client = new HttpClient(new AppHeaderHandler { InnerHandler = app.GetTestServer().CreateHandler() }) { BaseAddress = new Uri("http://localhost/") };
     }
 
     public async Task DisposeAsync()
@@ -109,8 +109,10 @@ public sealed class SigningHostFixture : IAsyncLifetime, IDisposable
         Kms.Dispose();
     }
 
-    private static void MapTestEndpoints(WebApplication app)
+    private static void MapTestEndpoints(WebApplication host)
     {
+        // Test-only routes are anonymous: the API's fallback policy authenticates every route by default (T-175 L-6).
+        var app = host.MapGroup(string.Empty).AllowAnonymous();
         app.MapGet("/t/signed", () => TypedResults.Ok(new PlainBody("مرحبا zaghlol", 3))).RequireResponseSignature();
         app.MapGet("/t/signed-empty", () => TypedResults.Ok(new Dictionary<string, string>())).RequireResponseSignature();
         app.MapGet("/t/unsigned", () => TypedResults.Ok(new PlainBody("plain", 1)));

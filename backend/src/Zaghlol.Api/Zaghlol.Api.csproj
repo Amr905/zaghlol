@@ -14,6 +14,8 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Zaghlol.Api.Tests" />
     <InternalsVisibleTo Include="Zaghlol.Contract.Tests" />
+    <!-- T-137: the CLI integration tests run the real API (Program) against the operator CLI. -->
+    <InternalsVisibleTo Include="Zaghlol.Ops.Tests" />
   </ItemGroup>
 
 </Project>

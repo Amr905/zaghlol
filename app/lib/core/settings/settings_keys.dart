@@ -51,6 +51,37 @@ abstract final class Settings {
   /// and equals the last era's day. Written first by `setPayday`.
   static final paydayEras = SettingKey.paydaySchedule('payday_eras');
 
+  // `charts.period` (T-188) is also a setting; its key lives beside its
+  // feature in `features/insights/application/chart_period_providers.dart`.
+
+  /// T-195 (D-71): "My salary" (amount, currency, payday, account); unset
+  /// is null and the feature is off. Not a transaction: the expected salary
+  /// is in no total until a real transaction is tied to it.
+  static final salaryPlan = SettingKey.custom<SalaryPlan?>(
+    'salary.plan',
+    byDefault: null,
+    decode: SalaryPlan.tryFromJson,
+    encode: (v) => v?.toJson() ?? '',
+  );
+
+  /// T-195: the salary matcher's memory (entries tied to a payday, skipped
+  /// paydays, declined merges). Always readable: bad text reads as empty.
+  static final salaryState = SettingKey.custom<SalaryState>(
+    'salary.state',
+    byDefault: SalaryState.empty,
+    decode: SalaryState.fromJson,
+    encode: (v) => v.toJson(),
+  );
+
+  /// T-199 (D-75): balances the user typed per account and currency, each
+  /// with the instant it is true for. Read as empty when unreadable.
+  static final openingBalances = SettingKey.custom<OpeningBalances>(
+    'balance.opening',
+    byDefault: OpeningBalances.empty,
+    decode: OpeningBalances.fromJson,
+    encode: (v) => v.toJson(),
+  );
+
   /// Optional (FR-ONB-03); unset is null.
   static final incomeTarget = SettingKey.optionalMoney('income_target');
 
@@ -147,9 +178,23 @@ abstract final class Settings {
     max: 3600,
   );
 
+  /// T-197 / D-73: the Money tab lists accounts in sections by type (on) or
+  /// as one list (off).
+  static final moneyGroupByType = SettingKey.boolean(
+    'money.group_by_type',
+    byDefault: true,
+  );
+
   // Hide-amounts choices (FR-NTF-03, FR-WID-01; A-26: share cards hide).
   static final hideAmountsNotifications = SettingKey.boolean(
     'hide_amounts.notifications',
+    byDefault: false,
+  );
+
+  /// D-67 / FR-HOME-06: the eye toggle. While on, every amount in the app
+  /// shows as `****`, and notifications, the widget and share cards hide too.
+  static final hideAmountsApp = SettingKey.boolean(
+    'hide_amounts.app',
     byDefault: false,
   );
   static final hideAmountsWidget = SettingKey.boolean(

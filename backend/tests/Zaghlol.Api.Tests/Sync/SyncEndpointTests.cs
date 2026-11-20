@@ -150,6 +150,26 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
         Assert.Equal(1L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.bank_requests WHERE institution_name_norm = $1", bank));
     }
 
+    [Theory]
+    [InlineData("eg", "sms")]
+    [InlineData("EG", "email")]
+    [InlineData("EGY", "sms")]
+    [InlineData("EG", "SMS")]
+    public async Task API048_049_ABankRequestWithAnInvalidCountryOrChannelIsDroppedSilentlyAndTheCallStillUsesTheWindow(string country, string channel)
+    {
+        // BUG-005: the contract says so (OpenAPI BankRequestInput / sync description); it matches how contributions behave.
+        var (_, token) = await fixture.NewInstallAsync();
+        var bank = SyncHostFixture.UniqueName("bank");
+
+        using var first = await fixture.SyncAsync(token, SyncHostFixture.Body(extra: SyncHostFixture.BankRequests((bank, country, channel))));
+        using var second = await fixture.SyncAsync(token, SyncHostFixture.Body());
+
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        Assert.Equal(0, (await ReadAsync(first)).GetProperty("accepted").GetProperty("bankRequests").GetInt32());
+        Assert.Equal(0L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.bank_requests WHERE institution_name_norm = $1", bank));
+        Assert.False((await ReadAsync(second)).TryGetProperty("accepted", out _)); // the window was used: a throttle answer
+    }
+
     // ---- AC3: the signed throttle ----------------------------------------------------------------------------------------
 
     [Fact]

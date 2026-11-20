@@ -22,6 +22,8 @@ import '../data/recurring_repository.dart';
 import 'bill_edit_screen.dart';
 import 'bills_providers.dart';
 import 'bills_view.dart';
+import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// Shown as the zero amount when nothing is due.
 final Currency _zeroCurrency = Currency.of('EGP');
@@ -77,13 +79,17 @@ class _Fmt {
   _Fmt(this.context, WidgetRef ref)
     : lang = Localizations.localeOf(context).languageCode {
     digits = ref.watch(digitsModeProvider(lang));
+    hidden = ref.watch(hideAmountsProvider);
   }
   final BuildContext context;
   final String lang;
   late final DigitsMode digits;
 
+  /// D-67: amounts show as `****`.
+  late final bool hidden;
+
   String money(Money m) => trimZeroFraction(
-    MoneyFormat.format(m, languageCode: lang, digits: digits),
+    MoneyFormat.format(m, languageCode: lang, digits: digits, hidden: hidden),
   );
 
   String num(int n) => digits.render('$n');
@@ -232,7 +238,7 @@ class _Kpi extends StatelessWidget {
       padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
       child: Semantics(
         container: true,
-        label: '$label: $value',
+        label: a11yAmounts(AppLocalizations.of(context), '$label: $value'),
         excludeSemantics: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,6 +282,10 @@ class _SuggestionCard extends ConsumerWidget {
               children: [
                 Text(
                   l.recurringBillsDetected(view.name, f.money(view.amount)),
+                  semanticsLabel: a11yAmounts(
+                    l,
+                    l.recurringBillsDetected(view.name, f.money(view.amount)),
+                  ),
                   style: ZType.body.copyWith(color: c.text),
                 ),
                 const SizedBox(height: ZSpacing.sm),
@@ -371,7 +381,10 @@ class _BillRow extends ConsumerWidget {
     );
     return Semantics(
       container: true,
-      label: l.recurringBillsRowA11y(title, amount, timing) + a11yExtra,
+      label: a11yAmounts(
+        l,
+        l.recurringBillsRowA11y(title, amount, timing) + a11yExtra,
+      ),
       child: InkWell(
         onTap: () => openBillEditor(context, itemId: view.id),
         child: ConstrainedBox(
@@ -456,10 +469,71 @@ class _BillRow extends ConsumerWidget {
                 ),
                 if (view.canMarkPaid && big)
                   Align(alignment: AlignmentDirectional.centerEnd, child: pill),
+                if (view.autoAdded)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
+                    child: Wrap(
+                      spacing: ZSpacing.sm,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _AutoAddedBadge(label: l.recurringBillsAutoAdded),
+                        ZButton(
+                          label: l.recurringBillsNotABill,
+                          variant: ZButtonVariant.text,
+                          onPressed: () async {
+                            final actions = ref.read(billsActionsProvider);
+                            final messenger = ScaffoldMessenger.of(context);
+                            final ok = await actions.notABill(view.id);
+                            if (ok && context.mounted) {
+                              messenger.hideCurrentSnackBar();
+                              messenger.showSnackBar(
+                                SnackBar(
+                                  duration: const Duration(seconds: 6),
+                                  content: Text(
+                                    l.recurringBillsNotABillDone(view.name),
+                                  ),
+                                  action: SnackBarAction(
+                                    label: l.commonActionUndo,
+                                    onPressed: () =>
+                                        actions.undoNotABill(view.id),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "Added by itself" tag on an auto-added bill (T-196, D-72). The word is
+/// the cue; the colour only supports it.
+class _AutoAddedBadge extends StatelessWidget {
+  const _AutoAddedBadge({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.primaryContainer,
+        borderRadius: BorderRadius.circular(ZRadius.pill),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ZSpacing.md,
+          vertical: ZSpacing.xs,
+        ),
+        child: Text(label, style: ZType.caption.copyWith(color: c.primary)),
       ),
     );
   }
@@ -546,6 +620,13 @@ class _Subscriptions extends StatelessWidget {
                       f.money(s.monthly),
                       f.money(s.yearly),
                     ),
+                    semanticsLabel: a11yAmounts(
+                      l,
+                      l.recurringBillsSubRow(
+                        f.money(s.monthly),
+                        f.money(s.yearly),
+                      ),
+                    ),
                     style: ZType.caption.copyWith(color: c.textMuted),
                   ),
                 ],
@@ -555,6 +636,13 @@ class _Subscriptions extends StatelessWidget {
           for (final t in data.subTotals)
             Text(
               l.recurringBillsSubsTotal(f.money(t.monthly), f.money(t.yearly)),
+              semanticsLabel: a11yAmounts(
+                l,
+                l.recurringBillsSubsTotal(
+                  f.money(t.monthly),
+                  f.money(t.yearly),
+                ),
+              ),
               style: ZType.titleSmall.copyWith(color: c.text),
             ),
         ],

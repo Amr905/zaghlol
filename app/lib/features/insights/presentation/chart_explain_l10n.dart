@@ -13,19 +13,34 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
 import '../domain/explanations.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Locale-aware formatting of explanation arguments.
 class ExplainFormat {
-  ExplainFormat.of(BuildContext context, WidgetRef ref, this.categoryName)
-    : l = AppLocalizations.of(context),
-      lang = Localizations.localeOf(context).languageCode,
-      digits = ref.watch(
-        digitsModeProvider(Localizations.localeOf(context).languageCode),
-      );
+  ExplainFormat.of(
+    BuildContext context,
+    WidgetRef ref,
+    this.categoryName, {
+    required this.now,
+    required this.prev,
+  }) : l = AppLocalizations.of(context),
+       lang = Localizations.localeOf(context).languageCode,
+       digits = ref.watch(
+         digitsModeProvider(Localizations.localeOf(context).languageCode),
+       ),
+       hidden = ref.watch(hideAmountsProvider);
 
   final AppLocalizations l;
   final String lang;
   final DigitsMode digits;
+
+  /// D-67: amounts show as `****` (percentages and counts stay).
+  final bool hidden;
+
+  /// T-188: the chosen period and the one before it as phrases ("this
+  /// cycle", "the last 6 months"; "last cycle", "the 6 months before").
+  final String now;
+  final String prev;
 
   /// Category id (null = uncategorized) to its localised name.
   final String Function(String? id) categoryName;
@@ -35,8 +50,10 @@ class ExplainFormat {
       money,
       languageCode: lang,
       digits: digits,
+      hidden: hidden,
     ),
-    UnitAmountArg(:final unit, :final minor) => digits.render('$minor $unit'),
+    UnitAmountArg(:final unit, :final minor) =>
+      hidden ? '$kAmountMask $unit' : digits.render('$minor $unit'),
     PercentArg(:final bp) => digits.render('${(bp + 50) ~/ 100}%'),
     CountArg(:final count) => digits.render('$count'),
     NameArg(:final name) => name,
@@ -85,6 +102,7 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
       a('gap'),
       a('saved'),
       a('percent'),
+      f.now,
     ),
     'insightsExplainCashFlowTip' => l.insightsExplainCashFlowTip(
       a('state'),
@@ -94,6 +112,8 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
     'insightsExplainCashFlowDeep' => l.insightsExplainCashFlowDeep(
       a('trend'),
       a('delta'),
+      f.now,
+      f.prev,
     ),
     'insightsExplainCashFlowDeepTip' => l.insightsExplainCashFlowDeepTip(
       a('target'),
@@ -114,6 +134,7 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
       a('trend'),
       a('category'),
       a('delta'),
+      f.prev,
     ),
     'insightsExplainCategoriesDeepTip' => l.insightsExplainCategoriesDeepTip(
       a('category'),
@@ -143,6 +164,7 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
       a('needsPct'),
       a('wantsPct'),
       a('savingsPct'),
+      f.now,
     ),
     'insightsExplainRule503020Tip' => l.insightsExplainRule503020Tip(
       a('state'),
@@ -151,6 +173,7 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
     'insightsExplainRule503020Deep' => l.insightsExplainRule503020Deep(
       a('trend'),
       a('savingsPct'),
+      f.prev,
     ),
     'insightsExplainRule503020DeepTip' => l.insightsExplainRule503020DeepTip(
       a('percent'),
@@ -170,6 +193,7 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
       a('trend'),
       a('peakDay'),
       a('amount'),
+      f.prev,
     ),
     'insightsExplainWeekPatternDeepTip' => l.insightsExplainWeekPatternDeepTip(
       a('peakDay'),
@@ -191,6 +215,7 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
       a('trend'),
       a('merchant'),
       a('delta'),
+      f.prev,
     ),
     'insightsExplainMerchantsDeepTip' => l.insightsExplainMerchantsDeepTip(
       a('merchant'),
@@ -258,6 +283,7 @@ String renderExplanationLine(ExplainFormat f, ExplanationLine line) {
     'insightsExplainCardsDeep' => l.insightsExplainCardsDeep(
       a('trend'),
       a('card'),
+      f.prev,
     ),
     'insightsExplainCardsDeepTip' => l.insightsExplainCardsDeepTip(
       a('amount'),

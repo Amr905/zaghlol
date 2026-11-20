@@ -16,6 +16,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/theme/z_tokens.dart';
+import '../../../../core/ui/amount_semantics.dart';
 import '../../../../core/ui/z_money_text.dart';
 import '../../domain/chart_models.dart';
 import 'chart_card.dart';
@@ -656,9 +657,12 @@ class CardsBody extends ConsumerWidget {
             button: open != null,
             label: open == null
                 ? null
-                : l.insightsChartDetailCardRowA11y(
-                    k.label,
-                    chartMoney(ref, context, k.spend),
+                : a11yAmounts(
+                    l,
+                    l.insightsChartDetailCardRowA11y(
+                      k.label,
+                      chartMoney(ref, context, k.spend),
+                    ),
                   ),
             excludeSemantics: open != null,
             child: InkWell(

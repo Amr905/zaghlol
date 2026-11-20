@@ -44,7 +44,7 @@ public sealed class ApiFixture : IAsyncLifetime
                 services.AddSingleton<IStartupFilter, FaultInjectionStartupFilter>();
             });
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()

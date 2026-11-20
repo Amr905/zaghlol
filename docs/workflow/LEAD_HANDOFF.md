@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-18 (Cairo) by the Lead session. Update it whenever the state below changes._
+_Last updated: 2026-11-19 (Cairo) by the Lead session. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-263**.
+Next free follow-up number: **FU-270**.
 
 ## Batch 39 (2026-11-18)
 
@@ -183,6 +183,41 @@ Next free follow-up number: **FU-263**.
 ## Batch 41 (2026-11-18)
 
 `batch/2026-11-18-41`: T-156 bank-agnostic PDF statement import (pdfrx, column mapping per bank, settled-only dedupe; stays blocked on real statements), Android share → OCR, T-165 emulator script tightened (debuggable builds may be adb-backed-up on Android 12+; a release-type run is still needed), risky merchant aliases made exact + lint, FU-259 infra/release minors, T-031 public-sample search (no verbatim SMS found; docs/03-technical/sms-public-samples.md). FU-261.
+
+## Batch 43 (2026-11-19): QA audit fixes
+
+An independent QA audit of `main` @ bc5b9d1d (`docs/qa/`) found the app NOT READY for release: never run on a device in the audit, BUG-001 (no production keys), and 19 open board tasks. `batch/2026-11-19-43-qa-fixes` fixes the rest:
+- BUG-002: API and Workers exit 0 on SIGTERM (was 134); process-level test `GracefulShutdownTests`.
+- BUG-003: `GET /admin/v1/bank-requests` (catalog_editor, top 500, distinct installs) and `GET /admin/v1/metrics/daily-active` (any operator, `days` 1–90); a contract test now fails when a spec operation has no route.
+- BUG-004/005: `Zaghlol-App` required (400) on every /v1 app operation; a purchaseToken over 512 chars is 400; bad bank-request country/channel still dropped silently, now documented.
+- BUG-006/008: SRS, status rows (T-059/T-099/T-159 IN_REVIEW), README, phase log.
+- BUG-007: `// ignore: riverpod_lint/missing_provider_scope` (plugin rules are namespaced).
+- BUG-009: `ck_installs_catalog_version`.
+
+This session had **no push access** (the push attach was refused), so the batch was handed to the PO as a git bundle in `C:\Projects\Zaghlol`. Cloud workspace notes: Docker Hub is blocked, so Testcontainers can't pull `postgres:17`; in-process HttpClient calls to 127.0.0.1 need `UseProxy = false`.
+
+## Batch 44 (2026-11-19): T-137 and T-175 pass 1
+
+`batch/2026-11-19-44` (on top of batch 43):
+- **T-137** zaghlol-ops CLI: OIDC auth-code + PKCE loopback (IdP-agnostic; Entra or Google by config), token only in the OS credential store or memory, order ID from a no-echo prompt (no flag/env), a command for every Admin operation (a test fails on a missing one), `docs/ops/support-runbook.md` (one action per alert, R6-1 server rule + break-glass), `docs/ops/privacy-disclosures.md`, `backend/deploy/db/break-glass-unfreeze.sql` (only the sole enabled support_lead; canonical UUID). Waits on the PO for the IdP and the helpdesk/PDPL/retention record.
+- **T-175 pass 1** (`docs/05-reviews/T-175-pass1.md`): 0 Critical, 1 High (= BUG-001), 1 Medium, 6 Low. Fixed here: M-1 (Dependabot, osv-scanner, gitleaks, CycloneDX SBOM in `security-scan.yml`), L-1 (notification taps only via the non-exported `NotificationTapActivity` with a per-process token; mark-paid waits for the lock and asks), L-2 (early error muting), L-3, L-6 (authenticated-by-default fallback policy, anonymous routes = spec `security: []`). Pass 2 needs signed builds, staging and devices.
+- Review: one Opus combined review + one Sonnet delta; two Lead deltas (break-glass F1/F2, test-host routes under the fallback policy).
+
+## 2026-11-19 evening: PO requests → M8, and two designs awaiting a pick
+
+- **New tasks (M8, SRS v1.9 D-67…D-69):** T-187 hide amounts (eye, `****`), T-188 chart period selector, T-189 charts review (mockups for PO sign-off first; Lead review findings and research in the task file), T-190 app size (measure first; ~150 MB reported), T-191 BUG-001 trust anchors (blocked on T-140), T-192 T-175 leftovers, T-193 FU-263/264 sweep. Later the same evening T-194…T-199 (dark-mode quip, salary matching, 1/3/6/12-month bills, credit vs debit, bank badges, net-worth breakdown; SRS v1.10 D-70…D-75). Board now 199 tasks.
+- **Designs, NOT tasks yet (PO asked to agree first):** design canvas "Zaghlol: bottom bar and dark mode options" (claude.ai artifact `7f8c9c63-f72c-433f-a501-8d9bdbed1b3d`): bottom-bar options A (current) … E (Captain Zaghlol hub), each on iOS 26 and Android M3 with a light/dark switch; dark themes 1 Jade Night (current) … 5 Night Garden. When the PO picks, update `docs/02-design/03-navigation.md` / `05-theme-2026.md` and then add the build tasks.
+
+## 2026-11-20: no cloud KMS → T-200 (file keys) now, T-201 (OpenBao) before Gold
+
+PO can't use a cloud provider. D-76 / ADR-023: `Kms:Provider = File` (T-200, merged into `batch/2026-11-19-45-planning`, review APPROVED) runs on a self-hosted Linux server: keys generated with `dotnet Zaghlol.Workers.dll --generate-keys`, bind-mounted read-only, owned by uid 1654, 0400/0500; 15 start-up guards; process non-dumpable. Deployment steps: `deployment.md` §3 "File KMS on a self-hosted server". T-201 (self-hosted OpenBao Transit) must land before Gold is sold to real users; envelope re-wrap decision belongs in its design note.
+
+## Batches 46–48 (2026-11-20, run back to back at the PO's request)
+
+- **46:** T-201 OpenBao Transit KMS, T-198 bank badges, T-194 dark-mode quip.
+- **47:** T-196 recurring 1/3/6/12-month bills (schema v5), T-187 hide amounts (eye + `no_unmasked_amount` lint).
+- **48:** T-195 salary as income (no schema change), T-197 credit vs debit.
+All approved; branches stack: `batch/2026-11-20-48` contains 43–48. **Batch 49** (T-188 chart periods, T-199 net-worth breakdown, T-193 backend/ops/CI part) stacks on it: `batch/2026-11-20-49` contains 43–49. Not pushed (no push access this session); delivered as a git bundle. Before merging: run the CI `app-regen` workflow for goldens (lists in each review), then app-ci / backend-ci / the new `openbao-live` job. Still waiting on the PO: bottom-bar and dark-theme pick (design canvas), T-189 mockups, T-190 (Android build machine), T-191 production keys, bank badge colours/codes.
 
 ## Ready next
 

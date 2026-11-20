@@ -39,6 +39,16 @@
         <receiver
             android:name=".platform.notifications.NotificationAlarmReceiver"
             android:exported="false"/>
+        <!-- L-1: target of every notification PendingIntent. Not exported;
+             no UI. Forwards route and cancel id to MainActivity with a
+             per-process token, which MainActivity requires. -->
+        <activity
+            android:name=".platform.notifications.NotificationTapActivity"
+            android:exported="false"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

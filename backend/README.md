@@ -13,7 +13,7 @@ Never stores user financial data (SRS BR-SYNC-03).
 | `src/Zaghlol.Domain` | Pure domain rules and stable error codes |
 | `src/Zaghlol.Infrastructure` | Logging setup, DI wiring, EF Core model + migrations (`Persistence/`, T-122), KMS abstraction: signer, keyed hasher, envelope cipher (`Kms/`, T-123) |
 | `src/Zaghlol.Workers` | BackgroundService host (no jobs yet; writes a heartbeat file); `--migrate` is the migration job |
-| `src/Zaghlol.Ops` | `zaghlol-ops` operator CLI (stub) |
+| `src/Zaghlol.Ops` | `zaghlol-ops` operator CLI (operator CLI: OIDC auth code + PKCE sign-in, every Admin operation; see `docs/ops/support-runbook.md`) |
 | `tools/dev-keys.sh` | Creates development KMS keys and the matching key-ring config for compose (T-123) |
 | `deploy/db/` | `bootstrap-roles.sql` (roles + schema, run once by an admin), `dev-passwords.sql` (compose only) |
 | `tests/` | xUnit unit tests and Testcontainers PostgreSQL 17 integration tests (schema, CHECKs, grants, readiness) |

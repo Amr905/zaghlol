@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/features/salary/application/salary_providers.dart';
 import 'package:zaghlol/features/settings/presentation/settings_ports.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/app_database_providers.dart';
@@ -41,6 +42,7 @@ class SettingsHarness {
     themeProvider.overrideWith((ref) => Stream.value(ThemePref.system)),
     paydayDayProvider.overrideWith((ref) => Stream.value(payday)),
     incomeTargetProvider.overrideWith((ref) => Stream.value(null)),
+    salaryPlanProvider.overrideWith((ref) => Stream.value(null)),
     primaryCurrencyProvider.overrideWith(
       (ref) => Stream.value(Currency.of('EGP')),
     ),
@@ -48,6 +50,7 @@ class SettingsHarness {
     approxViewTargetProvider.overrideWith(
       (ref) => Stream.value(Currency.of('EGP')),
     ),
+    hideAmountsAppProvider.overrideWith((ref) => Stream.value(false)),
     appLockEnabledProvider.overrideWith((ref) => Stream.value(appLock)),
     appLockTimeoutSProvider.overrideWith((ref) => Stream.value(60)),
     contributionOptInProvider.overrideWith((ref) => Stream.value(contributing)),

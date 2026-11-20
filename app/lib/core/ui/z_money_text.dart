@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/money_format.dart';
 import '../theme/z_tokens.dart';
 
 /// Money direction, driving colour (05-theme-2026 section 3): spending is ink,
@@ -8,10 +10,6 @@ import '../theme/z_tokens.dart';
 enum ZMoneyKind { expense, income, neutral }
 
 enum ZMoneySize { hero, display, title, body, caption }
-
-/// Shown instead of the amount in hide-amounts mode when no [ZMoneyText.maskedText]
-/// is given.
-const String kMaskedAmountFallback = '•••';
 
 /// Placeholder glyph for a figure that is not known yet.
 const String kNoValueDash = '\u2014';
@@ -27,7 +25,6 @@ class ZMoneyText extends StatelessWidget {
     this.size = ZMoneySize.body,
     this.semanticsLabel,
     this.masked = false,
-    this.maskedText,
     this.unit,
   });
 
@@ -36,9 +33,10 @@ class ZMoneyText extends StatelessWidget {
   final ZMoneySize size;
   final String? semanticsLabel;
 
-  /// Hide-amounts mode: renders [maskedText] instead of [text].
+  /// Hide-amounts mode (D-67): the digits of [text] show as [kAmountMask].
+  /// Text that the shared formatter already masked is recognised without
+  /// this flag, so it is only needed when the caller formatted it elsewhere.
   final bool masked;
-  final String? maskedText;
 
   /// Currency label rendered after the number, smaller and muted (mockups
   /// 03 / 20). [text] is then the number only.
@@ -59,8 +57,10 @@ class ZMoneyText extends StatelessWidget {
       ZMoneySize.body => ZType.body,
       ZMoneySize.caption => ZType.caption,
     };
-    // FU-045: a masked amount never falls back to the real figure.
-    final shown = masked ? (maskedText ?? kMaskedAmountFallback) : text;
+    // FU-045: a masked amount never falls back to the real figure. Text the
+    // shared formatter masked already carries the mask; `masked` covers the rest.
+    final hidden = masked || text.contains(kAmountMask);
+    final shown = masked ? maskAmountText(text) : text;
     final isolated = '\u2068$shown\u2069';
     final style = base.copyWith(
       color: color,
@@ -88,9 +88,17 @@ class ZMoneyText extends StatelessWidget {
             style: style,
             maxLines: 1,
           );
+    final hiddenLabel = hidden
+        ? (Localizations.of<AppLocalizations>(
+                context,
+                AppLocalizations,
+              )?.commonAmountHidden ??
+              kAmountMask)
+        : null;
     return Semantics(
       label:
-          (masked ? null : semanticsLabel) ??
+          hiddenLabel ??
+          semanticsLabel ??
           (unitText == null ? shown : '$shown $unitText'),
       excludeSemantics: true,
       child: size == ZMoneySize.display || size == ZMoneySize.hero

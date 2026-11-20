@@ -21,11 +21,16 @@ class BillRowView {
     required this.timing,
     this.paidCount = 0,
     this.totalCount,
+    this.autoAdded = false,
   });
 
   final String id;
   final String name;
   final String kind;
+
+  /// Detection added it by itself (T-196, D-72): shows the badge and the
+  /// one-tap "Not a bill".
+  final bool autoAdded;
   final Money amount;
   final CivilDate due;
 
@@ -100,6 +105,8 @@ int _roundDiv(int a, int b) => (a * 2 + b) ~/ (b * 2);
 Money yearlyOf(Money m, String cadence, int? cadenceDays) {
   final minor = switch (cadence) {
     'monthly' => m.minor * 12,
+    'quarterly' => m.minor * 4,
+    'semi_annual' => m.minor * 2,
     'weekly' => m.minor * 52,
     'custom_days' => _roundDiv(m.minor * 365, cadenceDays ?? 30),
     _ => m.minor,
@@ -143,6 +150,7 @@ BillsViewData buildBillsView(List<RecurringItemRow> items, CivilDate today) {
               : BillTiming.upcoming,
           paidCount: r.paidCount,
           totalCount: r.totalCount,
+          autoAdded: r.autoAddedAt != null,
         ),
       );
       final thisMonth =

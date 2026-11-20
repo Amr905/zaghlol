@@ -23,6 +23,7 @@ import '../../application/bulk_edit.dart';
 import '../../application/refund_matching.dart';
 import '../../application/transfer_pairing.dart';
 import '../../data/transactions_providers.dart';
+import '../../../accounts/domain/account.dart';
 import '../../domain/transaction.dart';
 
 const int _msPerDay = 86400000;
@@ -135,12 +136,16 @@ final class TxnAccount {
     required this.label,
     this.last4,
     this.institutionCode,
+    this.kind,
     required this.currencyCode,
   });
   final String id;
   final String label;
   final String? last4;
   final String? institutionCode;
+
+  /// T-197: the account type for the chip; null where unknown.
+  final AccountKind? kind;
   final String currencyCode;
 }
 
@@ -186,6 +191,7 @@ final txnLookupsProvider = FutureProvider.autoDispose<TxnLookups>((ref) async {
           label: a.label,
           last4: a.last4,
           institutionCode: a.institutionCode,
+          kind: AccountKind.values.where((k) => k.code == a.kind).firstOrNull,
           currencyCode: a.defaultCurrency,
         ),
     ],

@@ -34,7 +34,7 @@ public sealed class InstallsContractFixture : IAsyncLifetime
 
             builder.ConfigureServices(kms.Use);
         });
-        Client = factory.CreateClient();
+        Client = factory.CreateDefaultClient(new AppHeaderHandler());
     }
 
     public async Task DisposeAsync()
@@ -158,6 +158,78 @@ public class InstallsLiveContractTests(InstallsContractFixture fixture) : IClass
         var key = Spec.Root["components"]!["parameters"]!["IdempotencyKey"]!["schema"]!["pattern"]!.GetValue<string>();
         Assert.Equal(IdempotencyKeys.Pattern, key);
     }
+
+    /// <summary>The operations whose spec marks <c>Zaghlol-App</c> as required (the <c>ZaghlolApp</c> parameter reference).</summary>
+    public static TheoryData<string> AppHeaderOperationIds()
+    {
+        var data = new TheoryData<string>();
+        foreach (var operation in Spec.Operations().Where(o => o.Path.StartsWith("/v1/", StringComparison.Ordinal) && RequiresAppHeader(o)))
+        {
+            data.Add(operation.Id);
+        }
+
+        return data;
+    }
+
+    /// <summary>
+    /// BUG-004: every <c>/v1</c> operation that declares the required <c>Zaghlol-App</c> parameter answers <c>400 VALIDATION_FAILED</c>
+    /// when it is absent or malformed (for the install-scoped ones, after authentication succeeds).
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(AppHeaderOperationIds))]
+    public async Task EveryOperationThatRequiresTheAppHeaderRejectsAMissingOrMalformedOne(string operationId)
+    {
+        var operation = Spec.Operations().Single(o => o.Id == operationId);
+        Assert.DoesNotContain('{', operation.Path); // path parameters would need a fixture of their own
+        Assert.True(Declared(operation, "400"), $"{operation.Label} does not declare 400");
+
+        var installId = NewInstallId();
+        using var created = await Post(Body(installId), NewKey());
+        var token = JsonNode.Parse(await created.Content.ReadAsStringAsync())!["installToken"]!.GetValue<string>();
+
+        foreach (var app in new string?[] { null, "android 1.0", "android/1.0.0" })
+        {
+            using var request = new HttpRequestMessage(new HttpMethod(operation.Method.ToUpperInvariant()), operation.Path);
+            request.Options.Set(AppHeaderHandler.Omit, true);
+            if (app is not null)
+            {
+                request.Headers.TryAddWithoutValidation("Zaghlol-App", app);
+            }
+
+            request.Headers.Add(IdempotencyKeys.HeaderName, NewKey());
+            if (operationId != "registerInstall")
+            {
+                request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + token);
+                request.Headers.Add("Zaghlol-Install", installId);
+            }
+
+            if (operation.Body["requestBody"] is not null)
+            {
+                // A schema-valid body, so the only thing wrong with the call is the header (F1 of batch 43).
+                Assert.True(ValidBodies.TryGetValue(operationId, out var valid), $"{operation.Label} takes a body but the test has no valid one for it");
+                request.Content = new StringContent(valid!, Encoding.UTF8, "application/json");
+            }
+
+            using var response = await fixture.Client.SendAsync(request);
+
+            var body = await AssertDeclared(response, operation, HttpStatusCode.BadRequest, "application/problem+json");
+            Assert.Equal("VALIDATION_FAILED", body!["code"]!.GetValue<string>());
+        }
+    }
+
+    /// <summary>Minimal schema-valid request bodies for the operations that take one and require the app header.</summary>
+    private static readonly Dictionary<string, string> ValidBodies = new()
+    {
+        ["registerInstall"] = Body("00000000-0000-4000-8000-000000000001"),
+        ["sync"] = """{"catalogVersion":0,"flagsVersion":0}""",
+        ["verifyPurchase"] = """{"platform":"android","productId":"zaghlol_gold_yearly","purchaseToken":"opaque-token-from-play"}""",
+        ["restorePurchases"] = """{"platform":"android","purchases":[{"productId":"zaghlol_gold_lifetime","purchaseToken":"opaque-token-from-play"}],"attestation":{"type":"play_integrity","token":"AAAAAAAAAAAAAAAAAAAA"}}""",
+        ["signIn"] = """{"provider":"google","idToken":"aaaa.bbbb.cccc","nonce":"AAAAAAAAAAAAAAAAAAAAAA"}""",
+    };
+
+    private static bool RequiresAppHeader(SpecOperation operation) =>
+        operation.Body["parameters"] is JsonArray parameters
+        && parameters.Any(p => p is JsonObject o && o["$ref"]?.GetValue<string>() == "#/components/parameters/ZaghlolApp");
 
     private static bool Declared(SpecOperation operation, string status) =>
         operation.Body["responses"]!.AsObject().ContainsKey(status);

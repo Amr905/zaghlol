@@ -102,6 +102,19 @@ class BillsActions {
     _changed();
   }
 
+  /// "Not a bill": dismisses an auto-added item; [undoNotABill] revives it.
+  Future<bool> notABill(String id) async {
+    final ok = await (await _repo).notABill(id);
+    _changed();
+    return ok;
+  }
+
+  Future<bool> undoNotABill(String id) async {
+    final ok = await (await _repo).undoNotABill(id);
+    _changed();
+    return ok;
+  }
+
   Future<bool> markPaid(String id, {String? expectedDue}) async {
     final ok = await (await _repo).markPaidManual(id, expectedDue: expectedDue);
     _changed();
