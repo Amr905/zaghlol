@@ -59,4 +59,17 @@ class NotificationHandOffTest {
     assertFalse(other.matches(action, token))
     assertTrue(other.value.matches(Regex("[0-9a-f]{32}")))
   }
+
+  @Test
+  fun `a Recents relaunch is ignored even with the token`() {
+    assertNull(NotificationRoutes.accept(action, token, route, 42, launchedFromHistory = true))
+    assertEquals(route, NotificationRoutes.accept(action, token, route, 42)?.route)
+  }
+
+  @Test
+  fun `a plain launch clears a stale launch route`() {
+    NotificationRoutes.setLaunchRoute(route)
+    NotificationRoutes.setLaunchRoute(null)
+    assertNull(NotificationRoutes.takeLaunchRoute())
+  }
 }

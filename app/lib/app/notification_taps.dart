@@ -7,9 +7,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/l10n/date_format.dart';
+import '../core/l10n/locale_providers.dart';
 import '../core/l10n/generated/app_localizations.dart';
 import '../core/routing/app_router.dart';
 import '../core/routing/app_routes.dart';
+
+import 'package:zaghlol_domain/zaghlol_domain.dart' show CivilDate;
+
 import '../features/notifications/application/notification_providers.dart';
 import '../features/recurring/presentation/bills_providers.dart';
 import '../features/security/domain/app_lock_controller.dart';
@@ -57,7 +62,7 @@ class _NotificationTapLifecycleState
       context: rootNavigatorKey.currentContext,
       markPaid: (id, due) => payAfterGate(
         waitUnlocked: _waitUnlocked,
-        confirm: _confirmMarkPaid,
+        confirm: () => _confirmMarkPaid(id, due),
         pay: () async {
           try {
             await ref.read(billsActionsProvider).markPaid(id, expectedDue: due);
@@ -81,25 +86,30 @@ class _NotificationTapLifecycleState
     return done.future.whenComplete(sub.close);
   }
 
-  Future<bool> _confirmMarkPaid() async {
+  Future<bool> _confirmMarkPaid(String id, String dueDate) async {
+    // The bill's name, so the user knows what they are paying. Unknown id:
+    // the dialog still asks, without a name.
+    String? name;
+    try {
+      name = (await ref.read(billItemProvider(id).future))?.name;
+    } catch (_) {
+      name = null;
+    }
     final context = rootNavigatorKey.currentContext;
     if (context == null || !context.mounted) return false;
-    final l = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final digits = ref.read(digitsModeProvider(lang));
+    final due = CivilDate.tryParse(dueDate);
+    final dueText = due == null
+        ? null
+        : ZDateFormat.date(
+            DateTime.utc(due.year, due.month, due.day, 12),
+            lang,
+            digits,
+          );
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l.notificationMarkPaidConfirmTitle),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l.commonActionCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l.recurringBillsMarkPaid),
-          ),
-        ],
-      ),
+      builder: (_) => MarkPaidConfirmDialog(billName: name, dueText: dueText),
     );
     return ok ?? false;
   }
@@ -143,4 +153,36 @@ Future<void> payAfterGate({
   if (!await waitUnlocked()) return;
   if (!await confirm()) return;
   await pay();
+}
+
+/// L-1: the confirmation before a notification action pays a bill. It names
+/// the bill and its due date when they are known.
+class MarkPaidConfirmDialog extends StatelessWidget {
+  const MarkPaidConfirmDialog({super.key, this.billName, this.dueText});
+
+  final String? billName;
+  final String? dueText;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final name = billName;
+    final due = dueText;
+    return AlertDialog(
+      title: Text(l.notificationMarkPaidConfirmTitle),
+      content: name == null || due == null
+          ? null
+          : Text(l.notificationMarkPaidConfirmBody(name, due)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l.commonActionCancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l.recurringBillsMarkPaid),
+        ),
+      ],
+    );
+  }
 }
