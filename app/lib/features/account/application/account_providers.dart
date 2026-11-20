@@ -96,10 +96,9 @@ final class _ServiceAccountActions implements AccountActions {
 
   @override
   Future<AccountStatus> status() async {
-    final claims = await _ref.read(entitlementServiceProvider).cachedClaims();
     return AccountStatus(
       signedIn: await _svc.isSignedIn(),
-      linkedGold: claims?.acct != null,
+      linkedGold: await _svc.linkedGold(),
     );
   }
 

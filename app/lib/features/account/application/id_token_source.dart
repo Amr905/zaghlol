@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../../core/platform/google_sign_in_gate.dart';
 import '../../../core/backend/backend_client.dart'
     show ClientPlatform, SignInRequestProvider;
 import '../../backup/data/drive_auth.dart'
@@ -47,6 +48,9 @@ abstract interface class IdTokenSource {
     SignInRequestProvider provider, {
     required String hashedNonce,
   });
+
+  /// Forgets the provider session (Google); a no-op where there is none.
+  Future<void> signOut();
 }
 
 // ---- Google (google_sign_in 7.x) --------------------------------------------
@@ -64,6 +68,9 @@ abstract interface class GoogleSignInPort {
   /// `authenticate()`; the ID token, or null when the plugin gave none.
   /// Throws [SignInCancelledException] when the user cancelled.
   Future<String?> authenticateIdToken();
+
+  /// `GoogleSignIn.instance.signOut()`: forgets the Google session.
+  Future<void> signOut();
 }
 
 final class PluginGoogleSignInPort implements GoogleSignInPort {
@@ -81,6 +88,9 @@ final class PluginGoogleSignInPort implements GoogleSignInPort {
     serverClientId: serverClientId,
     nonce: nonce,
   );
+
+  @override
+  Future<void> signOut() => _signIn.signOut();
 
   @override
   Future<String?> authenticateIdToken() async {
@@ -130,9 +140,23 @@ final class GoogleIdTokenSource implements IdTokenSource {
     if (provider != SignInRequestProvider.google) {
       throw const SignInProviderException();
     }
-    final run = _tail.then((_) => _attempt(hashedNonce));
+    final run = _tail.then(
+      (_) => GoogleSignInGate.instance.run(
+        () => _attempt(hashedNonce),
+        setsNonce: true,
+      ),
+    );
     _tail = run.then<void>((_) {}, onError: (Object _) {});
     return run;
+  }
+
+  @override
+  Future<void> signOut() async {
+    try {
+      await GoogleSignInGate.instance.run(_port.signOut);
+    } on Object {
+      // Local sign-out must never fail because the plugin did.
+    }
   }
 
   Future<ProviderCredential> _attempt(String hashedNonce) async {
@@ -246,6 +270,9 @@ final class AppleIdTokenSource implements IdTokenSource {
   final String servicesId;
 
   @override
+  Future<void> signOut() async {} // Apple keeps no app-side session.
+
+  @override
   Future<ProviderCredential> obtain(
     SignInRequestProvider provider, {
     required String hashedNonce,
@@ -288,6 +315,12 @@ final class RoutingIdTokenSource implements IdTokenSource {
   RoutingIdTokenSource({required this.google, required this.apple});
   final IdTokenSource google;
   final IdTokenSource apple;
+
+  @override
+  Future<void> signOut() async {
+    await google.signOut();
+    await apple.signOut();
+  }
 
   @override
   Future<ProviderCredential> obtain(

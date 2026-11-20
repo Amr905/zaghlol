@@ -93,6 +93,19 @@ final class AccountService {
     return a != null && a.iid == installId;
   }
 
+  /// True when the cached entitlement names this install and an account
+  /// (FU-189d: a token for another install never counts as linked).
+  Future<bool> linkedGold() async {
+    final String installId;
+    try {
+      installId = await _backend.ensureInstalled();
+    } on BackendFailure {
+      return false;
+    }
+    final claims = await _entitlement.cachedClaims();
+    return claims != null && claims.acct != null && claims.sub == installId;
+  }
+
   Future<SignInOutcome> signIn(
     SignInRequestProvider provider, {
     bool replaceLink = false,
@@ -209,8 +222,10 @@ final class AccountService {
   Future<SignOutOutcome> signOut() async {
     try {
       await _entitlement.signOut();
+      await _tokens.signOut(); // forget the Google session too (FU-189c)
       return const SignedOut(serverConfirmed: true);
     } on BackendFailure {
+      await _tokens.signOut();
       return const SignedOut(serverConfirmed: false);
     }
   }
