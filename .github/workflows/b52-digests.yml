@@ -8,8 +8,10 @@ jobs:
   d:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          for i in postgres:17 otel/opentelemetry-collector-contrib:0.116.1 alpine:3.21; do
-            echo "DIGEST $i $(docker buildx imagetools inspect $i --format '{{.Manifest.Digest}}')"
-            docker buildx imagetools inspect $i | grep -m1 MediaType
-          done
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=$(gh api repos/gitleaks/gitleaks/releases/latest --jq .tag_name); echo "TAG $V"
+          V=${V#v}
+          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_checksums.txt" | grep -a "linux_x64" | sed 's/^/SUM /'
+          curl -fsSL -o g.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${V}/gitleaks_${V}_linux_x64.tar.gz"; sha256sum g.tgz | sed 's/^/ACTUAL /'
