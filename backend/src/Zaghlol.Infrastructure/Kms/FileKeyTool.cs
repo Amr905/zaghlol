@@ -186,13 +186,25 @@ public static class FileKeyTool
     [SupportedOSPlatform("linux")]
     private static void WritePem(string path, ECDsa key, List<string> written)
     {
-        var der = key.ExportPkcs8PrivateKey();
+        // FU-265 C8: every buffer that holds key material is pinned, so the GC cannot leave a copy behind before it is cleared.
+        var der = GC.AllocateArray<byte>(512, pinned: true);
         char[]? chars = null;
         byte[]? bytes = null;
         try
         {
-            chars = PemEncoding.Write("PRIVATE KEY", der);
-            bytes = new byte[chars.Length + 1];
+            if (!key.TryExportPkcs8PrivateKey(der, out var derLength))
+            {
+                throw new CryptographicException();
+            }
+
+            var pem = der.AsSpan(0, derLength);
+            chars = GC.AllocateArray<char>(PemEncoding.GetEncodedSize("PRIVATE KEY".Length, pem.Length), pinned: true);
+            if (!PemEncoding.TryWrite("PRIVATE KEY", pem, chars, out var written2) || written2 != chars.Length)
+            {
+                throw new CryptographicException();
+            }
+
+            bytes = GC.AllocateArray<byte>(chars.Length + 1, pinned: true);
             for (var i = 0; i < chars.Length; i++)
             {
                 bytes[i] = (byte)chars[i];
