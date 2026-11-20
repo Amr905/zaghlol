@@ -717,22 +717,22 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-178b | ui | T-111 hard-coded Arabic comma in English locale | ask/presentation/ask_answer_text.dart:200,250 | none | OPEN |
 | FU-178c | ui | T-111 literal '0' passed to chatAnswerDues bypasses digit mode | ask/presentation/ask_answer_text.dart:150 | none | OPEN |
 | FU-179a | ui | T-163 delete leaves subcategories on archived parent (children hidden, rules/transactions not moved) | categorization/data/categories_admin.dart:240-262 | none | OPEN |
-| FU-179b | ui | T-163 delete leaves budgets rows on the archived category | categorization/data/categories_admin.dart:240-262 | none | OPEN |
-| FU-179c | ui | T-163 delete failure shows generic message without a code | categorization/presentation/categories_screens.dart | none | OPEN |
+| FU-179b | ui | T-163 delete leaves budgets rows on the archived category | categorization/data/categories_admin.dart:240-262 | none | FIXED (batch 51) |
+| FU-179c | ui | T-163 delete failure shows generic message without a code | categorization/presentation/categories_screens.dart | none | OBSOLETE (batch 51): the screen shows a localized generic failure by design; codes are not user copy |
 | FU-180a | core | T-098 defaultEssentialCategoryIds holds bare codes but DB ids are sys:<code>; subcategories unprotected (before first caller) | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:30-39 | none | OPEN |
 | FU-180b | core | T-098 diningSpike shocked pose takes any category; caller must restrict to dining/delivery | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:69 | none | OPEN |
-| FU-181a | ui | T-093 saveSplit applies removals/updates/adds as separate calls, not one transaction | transfers/presentation/split_sheet.dart | none | OPEN |
-| FU-181b | ui | T-093 Undo of unassign does not catch errors; assign_sheet firstWhere can throw | transfers/presentation/split_sheet.dart:131; assign_sheet.dart:91 | none | OPEN |
-| FU-181c | ui | T-093 "mark anyway" hidden (supportsMarkAnyway false, EC-15) | transfers/presentation | none | OPEN |
+| FU-181a | ui | T-093 saveSplit applies removals/updates/adds as separate calls, not one transaction | transfers/presentation/split_sheet.dart | none | FIXED (batch 51) |
+| FU-181b | ui | T-093 Undo of unassign does not catch errors; assign_sheet firstWhere can throw | transfers/presentation/split_sheet.dart:131; assign_sheet.dart:91 | none | FIXED (batch 51) |
+| FU-181c | ui | T-093 "mark anyway" hidden (supportsMarkAnyway false, EC-15) | transfers/presentation | none | OPEN (batch 51: needs PO decision on EC-15 one-sided marker; no use case yet) |
 | FU-182a | native | T-009 Dart spike entrypoints shipped in AOT | app/lib/main.dart; ingestion/spike_channel.dart | none | CLOSED (spike file and entrypoints removed) |
 | FU-182b | native | T-009 RunnerTests Debug-prod has SWIFT_ACTIVE_COMPILATION_CONDITIONS twice | ios/Runner.xcodeproj/project.pbxproj:743,753 | none | OPEN |
-| FU-184a | ui | T-116 animateToPage(indexWhere) not guarded against -1 (unreachable today) | home/presentation/home_screen.dart:299 | none | OPEN |
-| FU-185a | ui | T-114 inflation chart isEmpty is length<2; cards opener hook null until shell wires it | insights/presentation/charts/gold_chart_bodies.dart | none | OPEN |
-| FU-186a | ui | T-084 compare-table Total row uses cardsSplit.spend while cells use donut slices; add repo-level test | accounts/presentation/card_detail/card_detail_providers.dart:189 | none | OPEN |
-| FU-187a | ui | T-057 _ignore with last4 null covers the whole institution while UI reads "this card" | onboarding/presentation/scan_results.dart:261 | none | OPEN |
+| FU-184a | ui | T-116 animateToPage(indexWhere) not guarded against -1 (unreachable today) | home/presentation/home_screen.dart:299 | none | OBSOLETE (batch 51): home_screen.dart already returns on indexWhere < 0 |
+| FU-185a | ui | T-114 inflation chart isEmpty is length<2; cards opener hook null until shell wires it | insights/presentation/charts/gold_chart_bodies.dart | none | OBSOLETE (batch 51): length<2 is right for a line chart and no cards-opener hook remains in insights code |
+| FU-186a | ui | T-084 compare-table Total row uses cardsSplit.spend while cells use donut slices; add repo-level test | accounts/presentation/card_detail/card_detail_providers.dart:189 | none | OPEN (batch 51: needs a chart_repository-level test of cardsSplit vs donut totals) |
+| FU-187a | ui | T-057 _ignore with last4 null covers the whole institution while UI reads "this card" | onboarding/presentation/scan_results.dart:261 | none | FIXED (batch 51) |
 | FU-188a | ui | T-153 restore confirm when replacing existing data (S-66) | backup/presentation/backup_ports.dart; FU-197 | none | CLOSED (FU-197, batch 21) |
 | FU-188b | ui | T-153 restore pause/resume/resyncCatalog no-ops (restore race with capture) | backup/presentation/backup_ports.dart:237-253 | none | CLOSED (WIRE-SVC wired the pause gate, FU-194) |
-| FU-188c | ui | T-153 old-backup deletion after passphrase change not in UI; needs owner confirm | backup/presentation | none | OPEN |
+| FU-188c | ui | T-153 old-backup deletion after passphrase change not in UI; needs owner confirm | backup/presentation | none | OPEN (batch 51: needs owner confirm on deleting old backups) |
 | FU-189a | core | T-147 S-69 reachable (opener override and Settings entry) | app/app_navigation.dart:98 | none | CLOSED (goldSignInOpenerOverride wired) |
 | FU-189b | core | T-147 Drive authorizer GoogleSignIn.initialize without nonce can race the sign-in ID token (fails closed) | account/application/id_token_source.dart:128-150; backup/data/drive_auth.dart:51-63 | none | OPEN |
 | FU-189c | core | T-147 signOut never calls GoogleSignIn.signOut | account/application/account_service.dart:209 | none | OPEN |
@@ -770,8 +770,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-204d | core | T-100 weekly-summary category names read once when provider is built | notifications/application/notification_providers.dart:221-235 | none | OPEN |
 | FU-205a | ui | T-117 Share channel zaghlol/share had no native implementation (major) | share_cards/share_providers.dart:38; ShareImageRegistration.kt; ShareImageHost.swift | none | CLOSED (native hosts added, WIRE-3) |
 | FU-205b | ui | T-117 plaintext share PNG left in tmp/cache after a crash | ShareImageRegistration.kt:55,73 | none | CLOSED (Android sweep at start, ShareImageRegistration.kt); iOS tmp sweep still open |
-| FU-205c | ui | T-117 iOS share sheet: result never called if present does not complete | ios/Runner/ShareImageHost.swift:56 | none | OPEN |
-| FU-205d | ui | T-117 zaghlol/share MethodChannel not documented in platform-channels.md | docs/03-technical/platform-channels.md | none | OPEN |
+| FU-205c | ui | T-117 iOS share sheet: result never called if present does not complete | ios/Runner/ShareImageHost.swift:56 | none | OPEN (batch 51: iOS share-sheet present callback needs a device to verify) |
+| FU-205d | ui | T-117 zaghlol/share MethodChannel not documented in platform-channels.md | docs/03-technical/platform-channels.md | none | FIXED (batch 51) |
 | FU-205e | ui | T-117 share cards screen routed from somewhere | share_cards | none | CLOSED (WIRE-3 share handlers) |
 | FU-206a | native | T-118 widget snapshot stays unmasked on the home screen after app lock until app republishes | widgets_bridge | none | OPEN |
 | FU-206b | native | T-118 days-to-payday does not roll over at midnight until app republishes | widgets_bridge | none | OPEN |
@@ -798,11 +798,11 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-226a | parsing | T-036 build notes say registry unwired / guard_base not generated | docs/04-tasks/tasks/T-036.md:40,44 | none | OPEN |
 | FU-226b | parsing | T-036 sms-spike-device assertion for stagingSms Guard dropped | .github/scripts/sms-spike-device.sh:522 | none | CLOSED (asserts st_guard = 1) |
 | FU-226c | parsing | T-036 stale "T-036 replaces the missing bundled one" doc comment | capture/application/capture_providers.dart:75 | none | CLOSED (comment gone) |
-| FU-229a | ui | T-120 voice partial save then Try again/close: log not counted, _savedKeys cleared (quota bypass) | voice/application/voice_controller.dart:213,239,361 | none | OPEN |
-| FU-229b | ui | T-120 Open settings on mic-denied opens notification page, not app details | voice/application/voice_providers.dart | none | OPEN |
-| FU-229c | ui | T-120 literal emoji appended to localized parsed title | voice/presentation/voice_logger_screen.dart | none | OPEN |
-| FU-229d | ui | T-120 no test picks a different account from the row picker | test/features/voice/voice_logger_test.dart | none | OPEN |
-| FU-229e | ui | T-120 SpeechSupportRegistration.kt double result.success if checkRecognitionSupport throws after timeout armed | android/.../SpeechSupportRegistration.kt:65-83 | none | OPEN |
+| FU-229a | ui | T-120 voice partial save then Try again/close: log not counted, _savedKeys cleared (quota bypass) | voice/application/voice_controller.dart:213,239,361 | none | FIXED (batch 51) |
+| FU-229b | ui | T-120 Open settings on mic-denied opens notification page, not app details | voice/application/voice_providers.dart | none | OPEN (batch 51: needs a native app-details channel; none exists) |
+| FU-229c | ui | T-120 literal emoji appended to localized parsed title | voice/presentation/voice_logger_screen.dart | none | OBSOLETE (batch 51): no literal emoji in voice presentation or ARBs now |
+| FU-229d | ui | T-120 no test picks a different account from the row picker | test/features/voice/voice_logger_test.dart | none | FIXED (batch 51) |
+| FU-229e | ui | T-120 SpeechSupportRegistration.kt double result.success if checkRecognitionSupport throws after timeout armed | android/.../SpeechSupportRegistration.kt:65-83 | none | OBSOLETE (batch 51): probe() wraps answers in a once-only done guard |
 | FU-229f | ui | T-120 on-device recognition fallback and voice account shown (majors F1/F2) | voice | none | CLOSED (fix round batch 24) |
 | FU-230a | parsing | T-161 Scan tile opens picker before saying OCR unavailable on Android | capture/application/scan_providers.dart | task T-159 (Tesseract aar) | OPEN |
 | FU-230b | parsing | T-161 Info.plist lacks NSPhotoLibraryUsageDescription (ITMS-90683 risk) | ios/Runner/Info.plist | device (first TestFlight upload) | OPEN |
@@ -819,21 +819,21 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-234b | core | T-167 unmappable lot dropped silently from nisab test (Z5) | zakah/data/zakah_repository.dart | PO | OPEN |
 | FU-234c | core | T-167 "scholar list" does not match what ships (debts, zakatable flag) (Z2 major) | docs/04-tasks/tasks/T-167.md | none | CLOSED (fix round batch 25) |
 | FU-235a | ui | T-168 "debts deducted" claim in How-it's-calculated (Z1 major) | zakah/presentation/zakah_screen.dart:558 | none | CLOSED (copy fixed, batch 25) |
-| FU-235b | ui | T-168 title and amount joined with hard-coded separator (not RTL-safe) | zakah/presentation/zakah_screen.dart:380 | none | OPEN |
+| FU-235b | ui | T-168 title and amount joined with hard-coded separator (not RTL-safe) | zakah/presentation/zakah_screen.dart:380 | none | OBSOLETE (batch 51): zakah_screen builds lines through l10n placeholders, no hard-coded join |
 | FU-235c | ui | T-168 "partly paid" shown but cannot be entered; l10n keys listed missing | zakah | PO (copy) | OPEN |
 | FU-236a | core | T-169 rule 2 erratum (22,200 vs printed 19,500) recorded in SRS | docs/01-requirements/requirements.md:457 | none | CLOSED |
 | FU-236b | core | T-169 rule 5 transport signal is a guess until a ride-hailing group exists | smart_roi/application/roi_providers.dart | PO | OPEN |
 | FU-236c | core | T-169 legal sign-off on disclaimer (Q-23) before flag on | - | PO | OPEN |
-| FU-237a | ui | T-170 "Not for me" dismissal lasts the session only | smart_roi/application/roi_tips_providers.dart:26 | none | OPEN |
-| FU-237b | ui | T-170 Share opens studio with no ROI template (S-73) | smart_roi/application/roi_tips_providers.dart | none | OPEN |
-| FU-237c | ui | T-170 Tips segment on Ask and badge (roiTipCountProvider) not wired (flag off) | smart_roi | none | OPEN |
+| FU-237a | ui | T-170 "Not for me" dismissal lasts the session only | smart_roi/application/roi_tips_providers.dart:26 | none | OPEN (batch 51: needs a persisted settings key; flag off) |
+| FU-237b | ui | T-170 Share opens studio with no ROI template (S-73) | smart_roi/application/roi_tips_providers.dart | none | OPEN (batch 51: needs the S-73 ROI share template design) |
+| FU-237c | ui | T-170 Tips segment on Ask and badge (roiTipCountProvider) not wired (flag off) | smart_roi | none | OPEN (batch 51: Tips segment/badge wiring behind smartRoi flag, off at launch) |
 | FU-238a | parsing | T-071 Revolut [£€$] had no left boundary (A$/CA$ read as USD) (major) | app/assets/registry/institutions/revolut.json | none | CLOSED (fix round batch 25) |
 | FU-238b | parsing | T-071 fx_conversion field convention only in task notes | docs/03-technical/parsing-engine.md:73 | none | CLOSED (documented) |
 | FU-238c | parsing | T-071 two-leg AC met only at parser level; legs come with T-089 | docs/04-tasks/TASKS.md | none | OPEN |
 | FU-239a | parsing | T-072 alrajhi lazy dot runs backtrack O(n^2) on long non-matching bodies | app/assets/registry/institutions/alrajhi.json:35 | none | OPEN |
 | FU-240a | ui | T-158 CSV import pairing hook not passed to ImportCsvUseCase (blocker) | export_import/presentation/import_ports.dart:331 | none | CLOSED (importPostPersistHook) |
-| FU-240b | ui | T-158 commit returns no autoCategorised/needReview/topCategories; done tiles hidden | export_import/presentation/import_ports.dart:222 | none | OPEN |
-| FU-240c | ui | T-158 export half, target-card Change action and PDF password step not built | export_import/presentation | none | OPEN |
+| FU-240b | ui | T-158 commit returns no autoCategorised/needReview/topCategories; done tiles hidden | export_import/presentation/import_ports.dart:222 | none | OPEN (batch 51: needs ImportCsvUseCase to report per-category stats; data-layer work) |
+| FU-240c | ui | T-158 export half, target-card Change action and PDF password step not built | export_import/presentation | none | OPEN (batch 51: feature, >150 lines: export half screen, target-card Change sheet, PDF password step) |
 | FU-248a | parsing | T-070 registryVersion not bumped | app/assets/registry/registry_manifest.json:3 | none | CLOSED (v4, commit bfb9ef31) |
 | FU-248b | parsing | T-070 sender contact and wallet name Contact are generic guesses | app/assets/guard/guard_base.json:107,408 | PO | OPEN |
 | FU-249a | backend | T-186 detach phase 1 does not run link/source checks | backend/.../Support/SupportActionService.cs | none | CLOSED (commit 08434bf2) |
