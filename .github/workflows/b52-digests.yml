@@ -1,0 +1,15 @@
+name: b52-digests
+on:
+  push:
+    branches: ["ci/b52-digests"]
+permissions:
+  contents: read
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for i in postgres:17 otel/opentelemetry-collector-contrib:0.116.1 alpine:3.21; do
+            echo "DIGEST $i $(docker buildx imagetools inspect $i --format '{{.Manifest.Digest}}')"
+            docker buildx imagetools inspect $i | grep -m1 MediaType
+          done
