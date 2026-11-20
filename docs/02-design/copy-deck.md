@@ -2462,7 +2462,7 @@ Zaghlol's own local alerts (FR-NTF-01). Reimbursement suggestions are in-app onl
 | `notifications_settings_dues` | الأقساط والفواتير | Bills & installments | L |
 | `notifications_settings_dueDays` | `{count, plural, =0{يوم الميعاد نفسه} =1{قبلها بيوم} =2{قبلها بيومين} few{قبلها بـ {n} أيام} many{قبلها بـ {n} يوم} other{قبلها بـ {n} يوم}}` | `{count, plural, =0{On the due day} =1{1 day before} other{{n} days before}}` | L · count:int, n · FR-SUB-04, 0 to 30 |
 | `notifications_settings_duplicates` | حركة اتسجلت مرتين | Duplicate charges | L |
-| `notifications_settings_renewals` | تجديد الاشتراكات | Subscription renewals | L |
+| `notifications_settings_renewals` | فواتير اتضافت لوحدها | Auto-added bills | L |
 | `notifications_settings_backup` | مشاكل النسخة الاحتياطية | Backup problems | L |
 | `notifications_settings_weekly` | ملخص الأسبوع | Weekly summary | L |
 | `notifications_settings_weeklySub` | كل جمعة الصبح | Friday mornings | L · UX-A-07 |

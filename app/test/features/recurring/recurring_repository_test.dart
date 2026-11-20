@@ -58,71 +58,568 @@ void main() {
   Future<RecurringItemRow> item(String id) async =>
       (await RecurringDao(db).itemById(id))!;
 
-  group('detection', () {
+  Future<void> setCategory(String txnId, String category) =>
+      (db.update(db.transactions)..where((t) => t.id.equals(txnId))).write(
+        TransactionsCompanion(
+          categoryId: Value(category),
+          categorySource: const Value('user'),
+        ),
+      );
+
+  /// [count] charges of [minor], [stepMonths] apart, the last one on
+  /// [y]-[m]-[d] (months counted back from it).
+  Future<void> chain(
+    int count,
+    int stepMonths,
+    int y,
+    int m,
+    int d,
+    int minor, {
+    String merchant = 'streamco',
+    String account = 'acc1',
+    String prefix = 't',
+  }) async {
+    for (var i = 0; i < count; i++) {
+      final back = (count - 1 - i) * stepMonths;
+      final idx = y * 12 + (m - 1) - back;
+      await charge(
+        '$prefix${i + 1}',
+        idx ~/ 12,
+        idx % 12 + 1,
+        d,
+        minor,
+        merchant: merchant,
+        account: account,
+      );
+    }
+  }
+
+  Future<List<String>> dismissalKeys() async => [
+    for (final r in await db.select(db.recurringDismissals).get())
+      r.dismissalKey,
+  ];
+
+  group('detection (D-72: added as bills automatically)', () {
     test(
       'FU-256: a restore waiting stops detection before it writes',
       () async {
-        await charge('t1', 2026, 8, 5, 19900);
-        await charge('t2', 2026, 9, 5, 19900);
-        await charge('t3', 2026, 10, 5, 19900);
-        expect(await repo.detectAndSuggest(shouldStop: () => true), isEmpty);
-        expect(
-          await repo.detectAndSuggest(),
-          hasLength(1),
-        ); // next run finds it
+        await chain(3, 1, 2026, 10, 5, 19900);
+        expect(await repo.detectAndAutoAdd(shouldStop: () => true), isEmpty);
+        expect(await repo.detectAndAutoAdd(), hasLength(1)); // next run
       },
     );
 
-    test(
-      'Netflix-like history yields one suggestion and one review item',
-      () async {
-        await charge('t1', 2026, 8, 5, 19900);
-        await charge('t2', 2026, 9, 5, 19900);
-        await charge('t3', 2026, 10, 5, 19900);
-        final ids = await repo.detectAndSuggest();
-        expect(ids, hasLength(1));
-        final row = await item(ids.single);
-        expect(row.status, 'suggested');
-        expect(row.amount, Money(egp, 19900));
-        expect(row.nextDueDate, '2026-11-05');
-        final open = await ReviewItemsDao(db)
-            .open(kind: ReviewKind.subscriptionSuggestion);
-        expect(open, hasLength(1));
-        // Idempotent: a second run adds nothing.
-        expect(await repo.detectAndSuggest(), isEmpty);
-        expect(await ReviewItemsDao(db).countOpen(), 1);
-      },
-    );
+    test('a monthly chain becomes an active, auto-added bill at once, with '
+        'no review item', () async {
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final added = await repo.detectAndAutoAdd();
+      expect(added, hasLength(1));
+      final row = await item(added.single.id);
+      expect(row.status, 'active');
+      expect(row.kind, RecurringKind.subscription);
+      expect(row.cadence, 'monthly');
+      expect(row.amount, Money(egp, 19900));
+      expect(row.nextDueDate, '2026-11-05');
+      expect(row.dueDay, 5);
+      expect(row.autoAddedAt, now.millisecondsSinceEpoch);
+      expect(await ReviewItemsDao(db).countOpen(), 0);
+      expect(await repo.list(), hasLength(1));
+      // Idempotent: a second run adds nothing.
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      expect(await repo.list(), hasLength(1));
+    });
 
-    test('internal transfers and deleted rows are ignored', () async {
-      await charge('t1', 2026, 9, 5, 100);
-      await charge('t2', 2026, 10, 5, 100);
-      await (db.update(db.transactions)..where((t) => t.id.equals('t2'))).write(
+    test('3-, 6- and 12-month chains are added with their cadence and next '
+        'due date', () async {
+      // Quarterly: Feb 10, May 10, Aug 10 -> next Nov 10 (2026).
+      await chain(3, 3, 2026, 8, 10, 30000, merchant: 'insureco');
+      // Every 6 months: 2025-12-31 and 2026-06-30 -> next 2026-12-31.
+      await charge('s1', 2025, 12, 31, 90000, merchant: 'clubco');
+      await charge('s2', 2026, 6, 30, 90000, merchant: 'clubco');
+      // Yearly: 2025-03-03, 2026-03-03 -> next 2027-03-03.
+      await charge('y1', 2025, 3, 3, 250000, merchant: 'domainco');
+      await charge('y2', 2026, 3, 3, 250000, merchant: 'domainco');
+      final added = await repo.detectAndAutoAdd();
+      final byMerchant = {for (final r in added) r.merchantNorm!: r};
+      expect(byMerchant.keys.toSet(), {'insureco', 'clubco', 'domainco'});
+      expect(byMerchant['insureco']!.cadence, 'quarterly');
+      expect(byMerchant['insureco']!.nextDueDate, '2026-11-10');
+      expect(byMerchant['clubco']!.cadence, 'semi_annual');
+      expect(byMerchant['clubco']!.nextDueDate, '2026-12-31');
+      expect(byMerchant['clubco']!.dueDay, 31);
+      expect(byMerchant['domainco']!.cadence, 'yearly');
+      expect(byMerchant['domainco']!.nextDueDate, '2027-03-03');
+      // All show in the bills list without any user action.
+      expect(await repo.list(), hasLength(3));
+    });
+
+    test('near misses add nothing: two monthly charges, irregular gaps, '
+        'varying merchants, a different amount', () async {
+      await chain(2, 1, 2026, 10, 5, 100, merchant: 'two');
+      await charge('i1', 2026, 5, 1, 100, merchant: 'irregular');
+      await charge('i2', 2026, 6, 20, 100, merchant: 'irregular');
+      await charge('i3', 2026, 7, 25, 100, merchant: 'irregular');
+      await charge('i4', 2026, 10, 1, 100, merchant: 'irregular');
+      await charge('v1', 2026, 8, 5, 100, merchant: 'shop one');
+      await charge('v2', 2026, 9, 5, 100, merchant: 'shop two');
+      await charge('v3', 2026, 10, 5, 100, merchant: 'shop three');
+      await charge('p1', 2026, 8, 7, 1000, merchant: 'pricey');
+      await charge('p2', 2026, 9, 7, 2000, merchant: 'pricey');
+      await charge('p3', 2026, 10, 7, 3000, merchant: 'pricey');
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      expect(await repo.list(), isEmpty);
+    });
+
+    test('a stopped plan (last charge long ago) is not added', () async {
+      await chain(3, 1, 2026, 3, 5, 100);
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      await charge('y1', 2024, 12, 1, 100, merchant: 'oldyearly');
+      await charge('y2', 2025, 12, 1, 100, merchant: 'oldyearly');
+      now = DateTime.utc(2026, 12, 20, 12); // next due 2026-12-01 is stale
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      now = DateTime.utc(2026, 12, 8, 12);
+      expect(await repo.detectAndAutoAdd(), hasLength(1));
+    });
+
+    test('currencies never mix: the same merchant in two currencies is two '
+        'chains, and a mixed series is none', () async {
+      await db
+          .into(db.accounts)
+          .insert(account('usdacc', currency: 'USD', last4: '5678'));
+      for (var i = 0; i < 3; i++) {
+        await db
+            .into(db.transactions)
+            .insert(
+              txn(
+                'u$i',
+                accountId: 'usdacc',
+                currency: 'USD',
+                amountMinor: 999,
+                merchantNorm: 'streamco',
+                occurredAt: at(2026, 8 + i, 5),
+              ),
+            );
+      }
+      // Alternating currencies on one account: no chain.
+      await charge('m1', 2026, 8, 9, 100, merchant: 'mixed');
+      await db
+          .into(db.transactions)
+          .insert(
+            txn(
+              'm2',
+              currency: 'USD',
+              amountMinor: 100,
+              merchantNorm: 'mixed',
+              occurredAt: at(2026, 9, 9),
+            ),
+          );
+      await charge('m3', 2026, 10, 9, 100, merchant: 'mixed');
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final added = await repo.detectAndAutoAdd();
+      expect(
+        {for (final r in added) '${r.merchantNorm}/${r.currency}'},
+        {'streamco/USD', 'streamco/EGP'},
+      );
+      expect(
+        added.firstWhere((r) => r.currency == 'USD').amount,
+        Money(Currency.of('USD'), 999),
+      );
+    });
+
+    test('internal transfers, deleted rows and groceries are '
+        'ignored', () async {
+      for (final c in [
+        'sys:groceries',
+        'sys:dining',
+        'sys:rent',
+        'sys:bills',
+      ]) {
+        await db.customStatement(
+          'INSERT INTO categories (id, name_ar, name_en, icon, color, bucket, '
+          "sort) VALUES ('$c', 'x', 'X', 'i', '#000000', 'needs', 1)",
+        );
+      }
+      await chain(3, 1, 2026, 10, 5, 100, merchant: 'internal', prefix: 'i');
+      await (db.update(db.transactions)..where((t) => t.id.equals('i2'))).write(
         const TransactionsCompanion(isInternal: Value(1)),
       );
-      expect(await repo.detectAndSuggest(), isEmpty);
+      await chain(3, 1, 2026, 10, 6, 100, merchant: 'gone', prefix: 'g');
+      await (db.update(db.transactions)..where((t) => t.id.equals('g3'))).write(
+        TransactionsCompanion(deletedAt: Value(now.millisecondsSinceEpoch)),
+      );
+      await chain(3, 1, 2026, 10, 7, 100, merchant: 'grocer', prefix: 'r');
+      for (final id in ['r1', 'r2', 'r3']) {
+        await setCategory(id, 'sys:groceries');
+      }
+      await chain(3, 1, 2026, 10, 8, 100, merchant: 'fun', prefix: 'f');
+      await chain(3, 1, 2026, 10, 11, 100, merchant: 'eatery', prefix: 'd');
+      for (final id in ['d1', 'd2', 'd3']) {
+        await setCategory(id, 'sys:dining'); // dining is not a bill
+      }
+      // Rent and an electricity bill ARE bills; groceries is not.
+      await chain(3, 1, 2026, 10, 9, 500000, merchant: 'landlord', prefix: 'l');
+      for (final id in ['l1', 'l2', 'l3']) {
+        await setCategory(id, 'sys:rent');
+      }
+      await chain(3, 1, 2026, 10, 10, 90000, merchant: 'power co', prefix: 'p');
+      for (final id in ['p1', 'p2', 'p3']) {
+        await setCategory(id, 'sys:bills');
+      }
+      final added = await repo.detectAndAutoAdd();
+      expect(
+        {for (final r in added) r.merchantNorm},
+        {'fun', 'landlord', 'power co'},
+      );
     });
 
-    test('confirm activates and resolves the review item; once only', () async {
-      await charge('t1', 2026, 9, 5, 100);
-      await charge('t2', 2026, 10, 5, 100);
-      final id = (await repo.detectAndSuggest()).single;
-      expect(await repo.confirm(id), isTrue);
-      expect((await item(id)).status, 'active');
-      expect(await ReviewItemsDao(db).countOpen(), 0);
-      expect(await repo.confirm(id), isFalse);
-      expect(await repo.dismiss(id), isFalse);
+    test('an own-account transfer (transfer_out) is never a bill', () async {
+      for (var i = 0; i < 3; i++) {
+        await db
+            .into(db.transactions)
+            .insert(
+              txn(
+                'x$i',
+                direction: 'transfer_out',
+                amountMinor: 500000,
+                merchantNorm: 'savings',
+                occurredAt: at(2026, 8 + i, 1),
+              ),
+            );
+      }
+      expect(await repo.detectAndAutoAdd(), isEmpty);
     });
 
-    test('a dismissed suggestion is never suggested again', () async {
-      await charge('t1', 2026, 9, 5, 100);
-      await charge('t2', 2026, 10, 5, 100);
-      final id = (await repo.detectAndSuggest()).single;
-      expect(await repo.dismiss(id), isTrue);
+    test('a hand-typed item for the merchant (any status) blocks detection, '
+        'also without an account', () async {
+      await repo.addManual(
+        kind: RecurringKind.bill,
+        name: 'StreamCo',
+        amount: Money(egp, 100),
+        dueDay: 5,
+        merchantNorm: 'streamco',
+        nextDue: CivilDate(2026, 11, 5),
+      );
+      await chain(3, 1, 2026, 10, 5, 100);
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+    });
+
+    test('legacy suggested items still confirm and dismiss; a dismissed '
+        'one is never re-added', () async {
+      // A row from the old confirm-first flow.
+      await RecurringDao(db).insertItem(
+        RecurringItemsCompanion.insert(
+          id: 'old1',
+          kind: RecurringKind.subscription,
+          status: RecurringStatus.suggested,
+          name: 'StreamCo',
+          merchantNorm: const Value('streamco'),
+          accountId: const Value('acc1'),
+          amountMinor: 0,
+          currency: 'EGP',
+          cadence: 'monthly',
+          dueDay: const Value(5),
+          nextDueDate: const Value('2026-11-05'),
+          createdAt: 1,
+        ).withAmount(Money(egp, 100)),
+      );
+      expect(await repo.dismiss('old1'), isTrue);
+      expect((await item('old1')).status, 'dismissed');
+      await chain(3, 1, 2026, 10, 5, 100);
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      expect(await repo.confirm('old1'), isFalse);
+    });
+
+    test('Not a bill dismisses the item for good: never re-added, even with '
+        'newer charges; it leaves the list', () async {
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final id = (await repo.detectAndAutoAdd()).single.id;
+      expect(await repo.notABill(id), isTrue);
       expect((await item(id)).status, 'dismissed');
-      await charge('t3', 2026, 11, 5, 100);
-      expect(await repo.detectAndSuggest(), isEmpty);
-      expect(await ReviewItemsDao(db).countOpen(), 0);
+      expect(await repo.list(), isEmpty);
+      expect(await dismissalKeys(), ['streamco|acc1|EGP']);
+      // Runs again, now and after the next charge and a month later.
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      await charge('t4', 2026, 11, 5, 19900);
+      now = DateTime.utc(2026, 12, 1, 12);
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      expect(await repo.list(), isEmpty);
+      // A second tap is a no-op.
+      expect(await repo.notABill(id), isFalse);
+      expect(await dismissalKeys(), hasLength(1));
+      // Another merchant is still detected.
+      await chain(3, 1, 2026, 11, 20, 500, merchant: 'other', prefix: 'o');
+      expect(await repo.detectAndAutoAdd(), hasLength(1));
+    });
+
+    test('Undo of Not a bill revives the item with its occurrences and '
+        'forgets the key; it can be dismissed again', () async {
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final id = (await repo.detectAndAutoAdd()).single.id;
+      await RecurringDao(db).upsertOccurrence(
+        RecurringOccurrencesCompanion.insert(itemId: id, dueDate: '2026-10-05'),
+      );
+      expect(await repo.notABill(id), isTrue);
+      expect(await repo.undoNotABill(id), isTrue);
+      expect((await item(id)).status, 'active');
+      expect((await item(id)).autoAddedAt, isNotNull);
+      expect(await dismissalKeys(), isEmpty);
+      expect(await RecurringDao(db).occurrencesOf(id), hasLength(1));
+      expect(await repo.list(), hasLength(1));
+      expect(await repo.detectAndAutoAdd(), isEmpty); // item blocks its key
+      expect(await repo.undoNotABill(id), isFalse); // already active
+      expect(await repo.notABill(id), isTrue);
+      expect(await dismissalKeys(), hasLength(1));
+    });
+
+    test('Undo never revives an old confirm-first dismissal', () async {
+      await RecurringDao(db).insertItem(
+        RecurringItemsCompanion.insert(
+          id: 'old1',
+          kind: RecurringKind.subscription,
+          status: RecurringStatus.dismissed,
+          name: 'x',
+          merchantNorm: const Value('streamco'),
+          accountId: const Value('acc1'),
+          amountMinor: 0,
+          currency: 'EGP',
+          cadence: 'monthly',
+          createdAt: 1,
+        ).withAmount(Money(egp, 100)),
+      );
+      expect(await repo.undoNotABill('old1'), isFalse);
+      expect((await item('old1')).status, 'dismissed');
+    });
+
+    test('editing the account of an auto-added bill, then detecting, adds no '
+        'duplicate; deleting it afterwards keeps both chains away', () async {
+      await db.into(db.accounts).insert(account('acc2', last4: '5678'));
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final auto = (await repo.detectAndAutoAdd()).single;
+      expect(
+        await repo.updateManual(
+          auto.id,
+          kind: RecurringKind.subscription,
+          name: auto.name,
+          amount: Money(egp, 19900),
+          dueDay: 5,
+          nextDue: CivilDate(2026, 11, 5),
+          accountId: 'acc2',
+        ),
+        isTrue,
+      );
+      expect(await dismissalKeys(), ['streamco|acc1|EGP']);
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      expect(await repo.list(), hasLength(1));
+      expect(await repo.deleteItem(auto.id), isTrue);
+      expect(await dismissalKeys(), hasLength(2));
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+    });
+
+    test('changing the currency of an item also remembers the old key; an '
+        'edit that keeps the key writes nothing', () async {
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final auto = (await repo.detectAndAutoAdd()).single;
+      Future<void> edit(Money amount) => repo.updateManual(
+        auto.id,
+        kind: RecurringKind.subscription,
+        name: 'StreamCo',
+        amount: amount,
+        dueDay: 5,
+        nextDue: CivilDate(2026, 11, 5),
+        accountId: 'acc1',
+      );
+      await edit(Money(egp, 25000));
+      expect(await dismissalKeys(), isEmpty);
+      await edit(Money(Currency.of('USD'), 25000));
+      expect(await dismissalKeys(), ['streamco|acc1|EGP']);
+    });
+
+    test(
+      'changing the kind then deleting still remembers the chain; a '
+      'deleted BNPL installment is never re-added as a subscription',
+      () async {
+        await chain(3, 1, 2026, 10, 5, 19900);
+        final auto = (await repo.detectAndAutoAdd()).single;
+        await repo.updateManual(
+          auto.id,
+          kind: RecurringKind.installment,
+          name: 'StreamCo',
+          amount: Money(egp, 19900),
+          dueDay: 5,
+          nextDue: CivilDate(2026, 11, 5),
+          accountId: 'acc1',
+          totalCount: 12,
+        );
+        expect(await repo.deleteItem(auto.id), isTrue);
+        expect(await dismissalKeys(), ['streamco|acc1|EGP']);
+        expect(await repo.detectAndAutoAdd(), isEmpty);
+        // A hand-added installment with a merchant key, deleted, is the same.
+        final inst = await repo.addManual(
+          kind: RecurringKind.installment,
+          name: 'valU phone',
+          amount: Money(egp, 150000),
+          dueDay: 15,
+          totalCount: 12,
+          merchantNorm: 'valu',
+          accountId: 'acc1',
+          nextDue: CivilDate(2026, 11, 15),
+        );
+        expect(await repo.deleteItem(inst), isTrue);
+        await chain(3, 1, 2026, 10, 15, 150000, merchant: 'valu', prefix: 'v');
+        expect(await repo.detectAndAutoAdd(), isEmpty);
+        expect(await dismissalKeys(), contains('valu|acc1|EGP'));
+      },
+    );
+
+    test('a user subcategory of groceries counts as groceries', () async {
+      for (final c in ['sys:groceries', 'sys:bills']) {
+        await db.customStatement(
+          'INSERT INTO categories (id, name_ar, name_en, icon, color, bucket, '
+          "sort) VALUES ('$c', 'x', 'X', 'i', '#000000', 'needs', 1)",
+        );
+      }
+      for (final (id, parent) in [
+        ('sub1', 'sys:groceries'),
+        ('sub2', 'sub1'),
+        ('sub3', 'sys:bills'),
+      ]) {
+        await db.customStatement(
+          'INSERT INTO categories (id, parent_id, name_ar, name_en, icon, '
+          'color, bucket, sort, is_custom) VALUES '
+          "('$id', '$parent', 'x', 'X', 'i', '#000000', 'needs', 1, 1)",
+        );
+      }
+      await chain(3, 1, 2026, 10, 5, 100, merchant: 'corner shop', prefix: 'a');
+      await chain(3, 1, 2026, 10, 6, 100, merchant: 'deep shop', prefix: 'b');
+      await chain(3, 1, 2026, 10, 7, 100, merchant: 'net co', prefix: 'c');
+      for (final id in ['a1', 'a2', 'a3']) {
+        await setCategory(id, 'sub1');
+      }
+      for (final id in ['b1', 'b2', 'b3']) {
+        await setCategory(id, 'sub2');
+      }
+      for (final id in ['c1', 'c2', 'c3']) {
+        await setCategory(id, 'sub3');
+      }
+      expect(
+        [for (final r in await repo.detectAndAutoAdd()) r.merchantNorm],
+        ['net co'],
+      );
+    });
+
+    test('Not a bill only works on an active auto-added item; editing it '
+        'ends the badge', () async {
+      final manual = await repo.addManual(
+        kind: RecurringKind.subscription,
+        name: 'Mine',
+        amount: Money(egp, 100),
+        dueDay: 5,
+        merchantNorm: 'mine',
+      );
+      expect(await repo.notABill(manual), isFalse);
+      expect(await repo.notABill('nope'), isFalse);
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final auto = (await repo.detectAndAutoAdd()).single;
+      expect(
+        await repo.updateManual(
+          auto.id,
+          kind: RecurringKind.subscription,
+          name: 'StreamCo plus',
+          amount: Money(egp, 19900),
+          dueDay: 5,
+          nextDue: CivilDate(2026, 11, 5),
+          accountId: 'acc1',
+        ),
+        isTrue,
+      );
+      expect((await item(auto.id)).autoAddedAt, isNull);
+      expect(await repo.notABill(auto.id), isFalse);
+    });
+
+    test('deleting a subscription by hand is remembered too', () async {
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final id = (await repo.detectAndAutoAdd()).single.id;
+      expect(await repo.deleteItem(id), isTrue);
+      expect(await dismissalKeys(), ['streamco|acc1|EGP']);
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+      expect(await repo.deleteItem(id), isFalse);
+    });
+
+    test('two repositories on the same database add one bill', () async {
+      await chain(3, 1, 2026, 10, 5, 19900);
+      final other = RecurringRepository(
+        db,
+        clock: () => now,
+        newId: () => 'other${++n}',
+      );
+      final a = await repo.detectAndAutoAdd();
+      final b = await other.detectAndAutoAdd();
+      expect(a.length + b.length, 1);
+      expect(await repo.list(), hasLength(1));
+    });
+
+    test('the look-back is long enough to see a yearly chain twice', () {
+      expect(
+        RecurringRepository.detectionLookbackDays,
+        greaterThanOrEqualTo(740),
+      );
+    });
+  });
+
+  group('cadences after detection', () {
+    test('a quarterly bill: auto-mark pays it and moves it 3 months on '
+        '(month end clamps)', () async {
+      await chain(3, 3, 2026, 8, 31, 30000, merchant: 'insureco');
+      now = DateTime.utc(2026, 9, 1, 12);
+      final id = (await repo.detectAndAutoAdd()).single.id;
+      expect((await item(id)).nextDueDate, '2026-11-30');
+      expect((await item(id)).dueDay, 31);
+      await charge('pay', 2026, 11, 29, 30000, merchant: 'insureco');
+      now = DateTime.utc(2026, 11, 27, 12);
+      expect(await repo.autoMarkPaid(), hasLength(1));
+      expect((await item(id)).nextDueDate, '2027-02-28');
+    });
+
+    test('markPaidManual moves quarterly, semi-annual and yearly items by '
+        'their cycle', () async {
+      for (final (cad, due, next) in <(RecurrenceCadence, String, String)>[
+        (RecurrenceCadence.quarterly, '2026-11-30', '2027-02-28'),
+        (RecurrenceCadence.semiAnnual, '2026-08-31', '2027-02-28'),
+        (RecurrenceCadence.yearly, '2028-02-29', '2029-02-28'),
+      ]) {
+        final id = await repo.addManual(
+          kind: RecurringKind.bill,
+          name: cad.code,
+          amount: Money(egp, 100),
+          dueDay: CivilDate.tryParse(due)!.day,
+          cadence: cad,
+          merchantNorm: 'm ${cad.code.replaceAll('_', ' ')}',
+          nextDue: CivilDate.tryParse(due),
+        );
+        expect(await repo.markPaidManual(id), isTrue, reason: cad.code);
+        expect((await item(id)).nextDueDate, next, reason: cad.code);
+      }
+    });
+
+    test('reminders reach quarterly, semi-annual and yearly items', () async {
+      for (final cad in [
+        RecurrenceCadence.quarterly,
+        RecurrenceCadence.semiAnnual,
+        RecurrenceCadence.yearly,
+      ]) {
+        await repo.addManual(
+          kind: RecurringKind.bill,
+          name: cad.code,
+          amount: Money(egp, 100),
+          dueDay: 16,
+          cadence: cad,
+          merchantNorm: 'r ${cad.code.replaceAll('_', ' ')}',
+          nextDue: CivilDate(2026, 11, 16),
+        );
+      }
+      expect(await repo.dueReminders(), hasLength(3));
+      now = DateTime.utc(2026, 11, 19, 12);
+      expect(await repo.overdueReminders(), hasLength(3));
     });
   });
 
@@ -347,10 +844,28 @@ void main() {
     });
 
     test('dismissed and suggested items never remind', () async {
-      await charge('t1', 2026, 10, 20, 100);
-      await charge('t2', 2026, 11, 19, 100);
-      await repo.detectAndSuggest();
-      now = DateTime.utc(2026, 12, 17, 12);
+      for (final status in [
+        RecurringStatus.suggested,
+        RecurringStatus.dismissed,
+      ]) {
+        await RecurringDao(db).insertItem(
+          RecurringItemsCompanion.insert(
+            id: status,
+            kind: RecurringKind.subscription,
+            status: status,
+            name: 'x',
+            merchantNorm: Value(status),
+            accountId: const Value('acc1'),
+            amountMinor: 0,
+            currency: 'EGP',
+            cadence: 'monthly',
+            dueDay: const Value(20),
+            nextDueDate: const Value('2026-11-20'),
+            createdAt: 1,
+          ).withAmount(Money(egp, 100)),
+        );
+      }
+      now = DateTime.utc(2026, 11, 18, 12);
       expect(await repo.dueReminders(), isEmpty);
     });
   });

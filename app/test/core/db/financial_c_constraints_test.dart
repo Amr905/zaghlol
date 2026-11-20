@@ -10,7 +10,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/db_errors.dart';
 
 import 'financial_b_constraints_test.dart'
-    show check, foreignKey, insertSql, isoDay, letters, unique, validRow;
+    show
+        check,
+        foreignKey,
+        insertSql,
+        isoDay,
+        letters,
+        notNull,
+        unique,
+        validRow;
 import 'financial_fixtures.dart';
 
 /// The tables v4 creates.
@@ -31,6 +39,10 @@ const List<String> v4NewTables = [
   'undo_batches',
   'diag_log',
 ];
+
+/// The tables v5 (T-196) adds. `recurring_items` is also rebuilt in v5 (wider
+/// cadence CHECK, new `auto_added_at`).
+const List<String> v5NewTables = ['recurring_dismissals'];
 
 /// The v3 tables v4 rebuilds with stricter CHECKs.
 const List<String> v4RebuiltTables = [
@@ -207,8 +219,12 @@ List<Map<String, String>> variants(String table, int n) => switch (table) {
       'total_count': '12',
       'paid_count': '2',
       'reminder_days': '3',
+      'auto_added_at': '$t0',
     },
     {...validRow(table, n), 'cadence': "'custom_days'", 'cadence_days': '14'},
+  ],
+  'recurring_dismissals' => [
+    {'dismissal_key': "'shop|acc$n|EGP'", 'dismissed_at': '$t0'},
   ],
   _ => throw ArgumentError.value(table),
 };
@@ -499,6 +515,29 @@ final List<Case> cases = [
   c('catalog_merchants', 'version REAL', {'version': '1.5'}, check),
   c('catalog_merchants', 'version 2.0 (stored as 2)', {'version': '2.0'}, null),
   c('recurring_items', 'due day REAL', {'due_day': '1.5'}, check),
+  // v5 (T-196): the two new cadences, and nothing else new.
+  c('recurring_items', 'cadence quarterly', {'cadence': "'quarterly'"}, null),
+  c('recurring_items', 'cadence semi_annual', {
+    'cadence': "'semi_annual'",
+  }, null),
+  c('recurring_items', 'cadence semi-annual spelled with a dash', {
+    'cadence': "'semi-annual'",
+  }, check),
+  c('recurring_items', 'cadence every_3_months', {
+    'cadence': "'every_3_months'",
+  }, check),
+  c('recurring_items', 'auto_added_at REAL', {'auto_added_at': '1.5'}, check),
+  c('recurring_items', 'auto_added_at NULL', {'auto_added_at': 'NULL'}, null),
+  c('recurring_dismissals', 'key too short', {'dismissal_key': "'ab'"}, check),
+  c('recurring_dismissals', 'key with NUL', {
+    'dismissal_key': "'a|' || char(0) || '|b'",
+  }, check),
+  c('recurring_dismissals', 'dismissed_at REAL', {
+    'dismissed_at': '1.5',
+  }, check),
+  c('recurring_dismissals', 'dismissed_at missing', {
+    'dismissed_at': null,
+  }, notNull),
   c('recurring_items', 'reminder days REAL', {'reminder_days': '2.5'}, check),
   c('merchant_rules', 'counterparty with NUL', {
     'match_kind': "'counterparty'",
@@ -591,7 +630,7 @@ void main() {
         row.containsKey('"$col"') ? '"$col"' : col;
 
     var m = 5000;
-    for (final table in [...v4NewTables, ...v4RebuiltTables]) {
+    for (final table in [...v4NewTables, ...v4RebuiltTables, ...v5NewTables]) {
       test('$table: the variants set every column', () async {
         final cols = await columnsOf(table);
         final set = {

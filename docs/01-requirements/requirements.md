@@ -398,8 +398,8 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 ### 7.11 Subscriptions & BNPL / installments (SUB)
 | ID | Requirement | Pri | Tier | Acceptance criteria |
 |----|-------------|-----|------|---------------------|
-| FR-SUB-01 | Detect recurring subscriptions from transaction history (BR-SUB-01). | M | F | User confirms or dismisses detected subscriptions. |
-| FR-SUB-02 | Show monthly cost and ×12 annual cost per subscription and total. | M | F | — |
+| FR-SUB-01 | Detect recurring subscriptions from transaction history (BR-SUB-01). | M | F | Detected 1/3/6/12-month chains are added automatically with a one-tap "Not a bill" undo (D-72); only older suggestions still use confirm or dismiss. |
+| FR-SUB-02 | Show monthly cost and annual cost (amount × cycles per year: ×12 monthly, ×4 every 3 months, ×2 every 6 months, ×1 yearly) per subscription and total. | M | F | — |
 | FR-SUB-03 | Track installments (valU, Sympl, Souhoola, etc.), credit card due payments and gameya: amount, due day, paid/remaining count. | M | F | Spec Screen 10. Gameya entered manually (A-17). |
 | FR-SUB-04 | Reminder 3 days before each due date (configurable). | M | F | — |
 | FR-SUB-05 | Mark an installment paid automatically when a matching payment is captured. | S | F | — |
@@ -672,8 +672,8 @@ Canonical screen set: the spec's §13 16-screen set, with §5 content mapped ont
 - **BR-MAS-03** Detective: duplicate POS debit (same merchant, amount, card within 10 minutes (A-34)), subscription renewal detected, or self-transfer paired.
 
 ### Subscriptions & installments
-- **BR-SUB-01** A subscription is suggested when the same merchant is charged a similar amount (±10%) at roughly monthly intervals (25–35 days) at least 2 times (A-35).
-- **BR-SUB-02** Annualized cost = monthly cost × 12.
+- **BR-SUB-01** *(D-72, 2026-11-20)* A charge that repeats every 1, 3, 6 or 12 months (same merchant, account and currency, amount within ±10%, gaps of 25–35, 84–97, 176–189 or 360–371 days) is detected and added as a bill automatically, with a one-tap undo ("Not a bill", never re-added). Minimum chain: 3 charges for monthly and 3-month, 2 for 6- and 12-month. A chain whose next due date is more than 10 days past is skipped. Charges in groceries, dining, transport, cash and income (and a user subcategory of those) and transfers are not scanned; rent, bills, utilities, installments, education, insurance, subscriptions and InstaPay payments are (A-35).
+- **BR-SUB-02** Annualized cost = cost of one charge × charges per year: ×12 monthly, ×4 every 3 months, ×2 every 6 months, ×1 yearly (weekly ×52).
 - **BR-SUB-03** Reminder default: 3 days before due date.
 
 ### Wealth

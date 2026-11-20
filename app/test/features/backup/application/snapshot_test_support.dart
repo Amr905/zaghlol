@@ -24,7 +24,7 @@ import '../../../core/db/db_open_harness.dart';
 import '../../../core/db/financial_b_constraints_test.dart' as fb show validRow;
 import '../../../core/db/financial_c_constraints_test.dart'
     as fc
-    show v4NewTables, variants;
+    show v4NewTables, v5NewTables, variants;
 import '../../../core/db/financial_fixtures.dart';
 import '../../../core/db/financial_schema_constraints_test.dart'
     as fa
@@ -147,7 +147,7 @@ Future<void> populateSource(AppDatabase db) async {
       'recurring_occurrences',
     ])
       insertSql(t, fb.validRow(t, 1)),
-    for (final t in fc.v4NewTables)
+    for (final t in [...fc.v4NewTables, ...fc.v5NewTables])
       for (final v in fc.variants(t, 1)) insertSql(t, v),
     'INSERT INTO catalog_meta (id, version, applied_at, signature_kid) '
         "VALUES (1, 7, $t0, 'kid-a')",

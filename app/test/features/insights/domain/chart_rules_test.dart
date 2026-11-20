@@ -66,6 +66,10 @@ void main() {
       expect(annualCost(hundred, RecurrenceCadence.yearly).minor, 10000);
       expect(annualCost(hundred, RecurrenceCadence.weekly).minor, 520000);
     });
+    test('T-196: every 3 months x4, every 6 months x2', () {
+      expect(annualCost(hundred, RecurrenceCadence.quarterly).minor, 40000);
+      expect(annualCost(hundred, RecurrenceCadence.semiAnnual).minor, 20000);
+    });
     test('custom days: x365/N rounded half up', () {
       expect(
         annualCost(hundred, RecurrenceCadence.customDays, days: 10).minor,

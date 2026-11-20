@@ -23,6 +23,7 @@ import 'package:zaghlol/features/backup/crypto/backup_keys.dart';
 
 import '../../../core/db/db_open_harness.dart';
 import '../../../core/db/schema_v3_database.dart';
+import '../../../core/db/schema_v4_database.dart';
 import 'snapshot_test_support.dart';
 
 Matcher snapCode(BackupSnapshotErrorCode c) => throwsA(
@@ -276,6 +277,49 @@ void main() {
         .getSingle();
     expect(n.read<int>('n'), v3Txns);
     expect(v3Txns, greaterThan(0));
+  });
+
+  test('older snapshot (schema v4) is migrated on restore', () async {
+    final file = await craftBackup(
+      a,
+      keysA,
+      headerSchema: 4,
+      prepareSnapshot: (snap, kSnap) async {
+        final v4 = File('${snap.parent.path}/v4.db');
+        await makeV4File(v4, seed: 99);
+        final src = openRaw(v4, keyOf(99));
+        final dst = openRaw(snap, kSnap);
+        dst.execute('PRAGMA journal_mode = DELETE');
+        await src.backup(dst, nPage: -1).drain<void>();
+        src.close();
+        for (final t in deviceTables.reversed) {
+          final exists = dst.select(
+            'SELECT 1 FROM sqlite_schema WHERE name = ?',
+            [t],
+          );
+          if (exists.isNotEmpty) dst.execute('DELETE FROM "$t"');
+        }
+        dst.close();
+      },
+    );
+    final v4Txns = await _countIn(
+      keyOf(99),
+      (dir) => makeV4File(File('${dir.path}/x.db'), seed: 99),
+      'transactions',
+    );
+    final outcome = await b.service().restore(bytesStream(file), passphrase);
+    expect(outcome.schemaVersion, 4);
+    expect(await userVersionOf(b.db), appSchemaVersion);
+    final n = await b.db
+        .customSelect('SELECT count(*) AS n FROM transactions')
+        .getSingle();
+    expect(n.read<int>('n'), v4Txns);
+    expect(v4Txns, greaterThan(0));
+    // v5 added the dismissals table: present and empty after the restore.
+    final d = await b.db
+        .customSelect('SELECT count(*) AS n FROM recurring_dismissals')
+        .getSingle();
+    expect(d.read<int>('n'), 0);
   });
 
   group('refusals leave the live database untouched', () {

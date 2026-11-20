@@ -15,6 +15,7 @@ import 'fts_options.dart';
 import 'migrations/v2_financial_a.dart';
 import 'migrations/v3_financial_b.dart';
 import 'migrations/v4_financial_c.dart';
+import 'migrations/v5_recurring_cadence.dart';
 import 'schema/app_schema.dart';
 import 'schema/app_schema.steps.dart';
 import 'schema_shape.dart';
@@ -52,7 +53,7 @@ class AppDatabase extends AppSchema {
   int? get attemptedUpgradeFrom => _upgradeFrom;
 
   /// The version steps, `from` → `to` (T-017: v1 → v2; T-018: v2 → v3;
-  /// T-019: v3 → v4).
+  /// T-019: v3 → v4; T-196: v4 → v5).
   /// Any other pair is refused before anything runs. Runs inside the upgrade
   /// transaction set up by [migration]; tests override this
   /// (FakeNextDatabase).
@@ -68,6 +69,7 @@ class AppDatabase extends AppSchema {
         from1To2: (m, _) => _from1To2(),
         from2To3: (m, _) => _from2To3(),
         from3To4: (m, _) => _from3To4(),
+        from4To5: (m, _) => _from4To5(),
       ),
     );
   }
@@ -123,6 +125,34 @@ class AppDatabase extends AppSchema {
       }
     }
     for (final (_, sql) in v4AddedObjects) {
+      await customStatement(sql);
+    }
+  }
+
+  /// v4 → v5 (T-196): the frozen statements of
+  /// migrations/v5_recurring_cadence.dart. `recurring_items` is rebuilt (wider
+  /// cadence CHECK, new `auto_added_at`) with the same row-count check as
+  /// [_from3To4]; then the new table is created.
+  Future<void> _from4To5() async {
+    const r = v5RecurringRebuild;
+    final cols = r.columns.map((c) => '"$c"').join(', ');
+    await customStatement(r.createTemp);
+    await customStatement(
+      'INSERT INTO "${r.temp}" ($cols) SELECT $cols FROM "${r.table}"',
+    );
+    final counts = await customSelect(
+      'SELECT (SELECT count(*) FROM "${r.table}") AS a, '
+      '(SELECT count(*) FROM "${r.temp}") AS b',
+    ).getSingle();
+    if (counts.read<int>('a') != counts.read<int>('b')) {
+      throw DbMigrationException(DbMigrationException.rowCountMismatch);
+    }
+    await customStatement('DROP TABLE "${r.table}"');
+    await customStatement('ALTER TABLE "${r.temp}" RENAME TO "${r.table}"');
+    for (final sql in r.indexes) {
+      await customStatement(sql);
+    }
+    for (final (_, sql) in v5AddedObjects) {
       await customStatement(sql);
     }
   }

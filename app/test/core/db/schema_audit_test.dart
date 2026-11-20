@@ -72,6 +72,7 @@ const Map<String, String> daoOf = {
   'cycle_summaries': 'daos/cycle_summaries_dao.dart',
   'recurring_items': 'daos/recurring_dao.dart',
   'recurring_occurrences': 'daos/recurring_dao.dart',
+  'recurring_dismissals': 'daos/recurring_dao.dart',
   'assets': 'daos/assets_dao.dart',
   'zakah_ledger': 'daos/assets_dao.dart',
   'price_quotes': 'daos/prices_dao.dart',

@@ -6,6 +6,7 @@ import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/features/notifications/data/notification_service.dart';
 import 'package:zaghlol/features/notifications/domain/notification_types.dart';
 import 'package:zaghlol/features/notifications/domain/quiet_hours.dart';
+import 'package:zaghlol/features/recurring/application/notify_auto_added.dart';
 import 'package:zaghlol/features/recurring/application/send_due_reminders.dart';
 import 'package:zaghlol/features/recurring/data/recurring_repository.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -103,6 +104,90 @@ void main() {
     expect(gw.shown.single.title, 'A payment is due'); // redacted
     expect(NotificationType.upcomingDue.kind, 'due');
   });
+
+  test(
+    'T-196: one notice per run for any number of added bills; a second '
+    'notice the same day shows nothing; nothing added, nothing sent',
+    () async {
+      var n = 0;
+      final repo = RecurringRepository(
+        db,
+        clock: () => DateTime.utc(2026, 11, 13, 12),
+        newId: () => 'id${++n}',
+      );
+      for (final m in ['alpha', 'beta']) {
+        for (var i = 0; i < 3; i++) {
+          await db
+              .into(db.transactions)
+              .insert(
+                txn(
+                  '$m$i',
+                  amountMinor: 5000,
+                  merchantNorm: m,
+                  occurredAt: DateTime.utc(
+                    2026,
+                    8 + i,
+                    5,
+                    12,
+                  ).millisecondsSinceEpoch,
+                ),
+              );
+        }
+      }
+      final fired = <String>{};
+      final gw = _Gateway();
+      final service = NotificationService(
+        gateway: gw,
+        loadPrefs: () async => NotificationPrefs(
+          typeEnabled: (_) => true,
+          quietHours: const QuietHours(enabled: false, startMin: 0, endMin: 0),
+          hideAmounts: true,
+        ),
+        markFired: ({
+          required kind,
+          required subjectId,
+          required periodKey,
+          required threshold,
+          required at,
+        }) async => fired.add('$kind|$subjectId|$periodKey|$threshold'),
+        unmarkFired: ({
+          required kind,
+          required subjectId,
+          required periodKey,
+          required threshold,
+        }) async {},
+        now: () => DateTime.utc(2026, 11, 13, 12),
+      );
+      AlertRequest text(List<RecurringItemRow> items, AlertRequest b) =>
+          AlertRequest(
+            type: b.type,
+            subjectId: b.subjectId,
+            periodKey: b.periodKey,
+            title: 'Bills added',
+            body: '${items.length} added',
+            redactedTitle: 'Bills added',
+            redactedBody: 'Open Zaghlol',
+            payload: b.payload,
+          );
+      Future<bool> send(List<RecurringItemRow> added) => notifyAutoAdded(
+        added: added,
+        notifications: service,
+        buildText: text,
+        periodKey: '2026-11-13',
+      );
+      expect(await send(const []), isFalse);
+      final added = await repo.detectAndAutoAdd();
+      expect(added, hasLength(2));
+      expect(await send(added), isTrue);
+      expect(gw.shown, hasLength(1)); // one notice, not one per bill
+      expect(gw.shown.single.payload, '/insights');
+      expect(await send(added), isFalse); // same day: deduped
+      expect(gw.shown, hasLength(1));
+      expect(fired.single, startsWith('renewal|auto_added|2026-11-13'));
+      // The next run finds nothing new, so there is nothing to announce.
+      expect(await repo.detectAndAutoAdd(), isEmpty);
+    },
+  );
 
   group('PO OVERDUE-REMINDERS', () {
     Future<

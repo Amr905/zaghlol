@@ -1,6 +1,8 @@
-// T-096: recurring money (FR-SUB-*, BR-SUB-*). Detection only ever writes a
-// `suggested` item plus a review item; the user confirms or dismisses.
-// Auto-mark links a payment to an occurrence in one transaction, with an
+// T-096: recurring money (FR-SUB-*, BR-SUB-*). T-196 (D-72): detection adds a
+// chain that repeats every 1, 3, 6 or 12 months as an active, auto-added
+// bill; "Not a bill" removes it and writes a dismissal key so it is never
+// added again. Items left `suggested` by the old flow still use confirm and
+// dismiss. Auto-mark links a payment to an occurrence in one transaction, with an
 // `INSERT OR IGNORE` on the occurrence key so two engines have one winner.
 // Amounts are Money (integer minor units, one currency per item). Nothing
 // here logs, and review payloads carry ids only.
@@ -98,9 +100,9 @@ class RecurringRepository {
   final Clock _clock;
   final IdGenerator _newId;
 
-  /// History scanned by detection (a year of charges holds any monthly chain
-  /// that is still running).
-  static const int detectionLookbackDays = 400;
+  /// History scanned by detection: long enough to see a 12-month chain twice
+  /// (2 x 365 days plus the matching window).
+  static const int detectionLookbackDays = 760;
   static const int maxChargesScanned = 20000;
   static const int maxCatchUpPerItem = 24;
 
@@ -114,14 +116,17 @@ class RecurringRepository {
     );
   }
 
-  // ---- detection (BR-SUB-01) ----
+  // ---- detection (BR-SUB-01, D-72) ----
 
-  /// Scans posted expenses and queues a `subscription_suggestion` review
-  /// item (with a `suggested` item behind it) for each new chain. Idempotent:
-  /// a merchant/account/currency that already has any subscription item, in
-  /// any status (so a dismissed one stays dismissed), is skipped. Returns the
-  /// ids of the items it created.
-  Future<List<String>> detectAndSuggest({
+  /// Scans posted expenses and adds every new chain that repeats every 1, 3,
+  /// 6 or 12 months as an active `subscription` item with `auto_added_at`
+  /// set. Idempotent: a merchant/account/currency that already has any item
+  /// (in any status), or is in `recurring_dismissals`, is skipped; so is a
+  /// merchant and currency a hand-typed item names without an account.
+  /// Transfers between own accounts and charges in groceries, dining,
+  /// transport, cash or income (or their subcategories) are not scanned. Returns the rows it created (the caller sends the single
+  /// notice).
+  Future<List<RecurringItemRow>> detectAndAutoAdd({
     bool Function()? shouldStop,
   }) => guardWrite(
     () => _db.transaction(() async {
@@ -140,6 +145,19 @@ class RecurringRepository {
                 ..orderBy([(t) => OrderingTerm.desc(t.occurredAt)])
                 ..limit(maxChargesScanned))
               .get();
+      // A user subcategory counts as its top-level category.
+      final parents = {
+        for (final c in await _db.select(_db.categories).get())
+          if (c.parentId != null) c.id: c.parentId!,
+      };
+      String? top(String? id) {
+        var cur = id;
+        for (var i = 0; i < 5 && cur != null && parents.containsKey(cur); i++) {
+          cur = parents[cur];
+        }
+        return cur;
+      }
+
       final charges = <RecurringCharge>[];
       for (final t in rows) {
         charges.add(
@@ -150,22 +168,24 @@ class RecurringRepository {
             amount: t.amount,
             date: CivilDate.fromLocalMs(t.occurredAt, t.occurredTzOffsetMin),
             displayName: t.merchantRaw,
+            categoryId: top(t.categoryId),
           ),
         );
       }
-      final existing =
-          await (_db.select(_db.recurringItems)..where(
-                (r) =>
-                    r.kind.equals(RecurringKind.subscription) &
-                    r.merchantNorm.isNotNull(),
-              ))
-              .get();
+      final existing = await (_db.select(
+        _db.recurringItems,
+      )..where((r) => r.merchantNorm.isNotNull())).get();
       final exclude = {
         for (final e in existing)
           recurringKey(e.merchantNorm!, e.accountId ?? '', e.currency),
+        ...await _recurring.dismissalKeys(),
       };
-      final created = <String>[];
-      for (final s in detectSubscriptions(charges, exclude: exclude)) {
+      final created = <RecurringItemRow>[];
+      for (final c in detectRecurring(
+        charges,
+        today: _today,
+        exclude: exclude,
+      )) {
         // FU-256: a restore asked for the gate; the rest is found next run
         // (detection is idempotent).
         if (shouldStop?.call() ?? false) break;
@@ -174,29 +194,80 @@ class RecurringRepository {
           RecurringItemsCompanion.insert(
             id: id,
             kind: RecurringKind.subscription,
-            status: RecurringStatus.suggested,
-            name: s.name,
-            merchantNorm: Value(s.merchantNorm),
-            accountId: Value(s.accountId),
+            status: RecurringStatus.active,
+            name: c.name,
+            merchantNorm: Value(c.merchantNorm),
+            accountId: Value(c.accountId),
             amountMinor: 0,
-            currency: s.amount.currency.code,
-            cadence: 'monthly',
-            dueDay: Value(s.dueDay),
-            nextDueDate: Value(s.nextDue.toIso()),
+            currency: c.amount.currency.code,
+            cadence: c.cadence.code,
+            dueDay: Value(c.dueDay),
+            nextDueDate: Value(c.nextDue.toIso()),
+            autoAddedAt: Value(_now),
             createdAt: _now,
-          ).withAmount(s.amount),
+          ).withAmount(c.amount),
         );
-        await _reviews.insert(
-          id: _newId(),
-          kind: ReviewKind.subscriptionSuggestion,
-          payload: {'itemId': id, 'chain': s.chargeIds.length},
-          createdAt: _now,
-        );
-        created.add(id);
+        final row = await _recurring.itemById(id);
+        if (row != null) created.add(row);
       }
       return created;
     }),
   );
+
+  /// "Not a bill" (one tap on an auto-added item): the item becomes
+  /// `dismissed` (kept, so [undoNotABill] loses nothing, even its paid
+  /// occurrences) and its key is recorded, so detection never adds that chain
+  /// again. False unless the item is active and was added by detection.
+  Future<bool> notABill(String id) => guardWrite(
+    () => _db.transaction(() async {
+      final item = await _recurring.itemById(id);
+      if (item == null ||
+          item.status != RecurringStatus.active ||
+          item.autoAddedAt == null ||
+          item.merchantNorm == null) {
+        return false;
+      }
+      await _remember(item);
+      await _recurring.updateItem(
+        id,
+        const RecurringItemsCompanion(status: Value(RecurringStatus.dismissed)),
+      );
+      return true;
+    }),
+  );
+
+  /// The Undo of [notABill]: the item is active again and its key is
+  /// forgotten. Only for an item [notABill] dismissed (the old confirm-first
+  /// dismissals never carry `auto_added_at`, so they are never revived).
+  Future<bool> undoNotABill(String id) => guardWrite(
+    () => _db.transaction(() async {
+      final item = await _recurring.itemById(id);
+      if (item == null ||
+          item.status != RecurringStatus.dismissed ||
+          item.autoAddedAt == null ||
+          item.merchantNorm == null) {
+        return false;
+      }
+      await _recurring.forgetDismissal(
+        recurringKey(item.merchantNorm!, item.accountId ?? '', item.currency),
+      );
+      await _recurring.updateItem(
+        id,
+        const RecurringItemsCompanion(status: Value(RecurringStatus.active)),
+      );
+      return true;
+    }),
+  );
+
+  /// Writes the dismissal key of [item] (never twice).
+  Future<void> _remember(RecurringItemRow item) async {
+    final merchant = item.merchantNorm;
+    if (merchant == null) return;
+    await _recurring.rememberDismissal(
+      recurringKey(merchant, item.accountId ?? '', item.currency),
+      at: _now,
+    );
+  }
 
   /// The user confirms a suggestion: the item becomes `active` and its review
   /// item is resolved. False when it was not `suggested` any more.
@@ -347,34 +418,55 @@ class RecurringRepository {
         (cadenceDays == null || (cadenceDays >= 1 && cadenceDays <= 3660));
     if (!ok) throw RecurringException(RecurringException.invalid);
     final changed = await guardWrite(
-      () => _recurring.updateItem(
-        id,
-        RecurringItemsCompanion(
-          kind: Value(kind),
-          name: Value(n),
-          accountId: Value(accountId),
-          currency: Value(amount.currency.code),
-          cadence: Value(_cadenceCode(cadence)),
-          cadenceDays: Value(cadenceDays),
-          dueDay: Value(dueDay),
-          nextDueDate: Value(nextDue.toIso()),
-          totalCount: Value(totalCount),
-          paidCount: Value(paidCount),
-          reminderDays: Value(reminderDays),
-          status: Value(
-            totalCount != null && paidCount >= totalCount
-                ? RecurringStatus.completed
-                : RecurringStatus.active,
-          ),
-        ).withAmount(amount),
-      ),
+      () => _db.transaction(() async {
+        // T-196: a changed key (account or currency) would let detection add
+        // the same chain again as a duplicate: remember the old key.
+        final before = await _recurring.itemById(id);
+        if (before != null &&
+            before.merchantNorm != null &&
+            ((before.accountId ?? '') != (accountId ?? '') ||
+                before.currency != amount.currency.code)) {
+          await _remember(before);
+        }
+        return _recurring.updateItem(
+          id,
+          RecurringItemsCompanion(
+            kind: Value(kind),
+            name: Value(n),
+            accountId: Value(accountId),
+            currency: Value(amount.currency.code),
+            cadence: Value(_cadenceCode(cadence)),
+            cadenceDays: Value(cadenceDays),
+            dueDay: Value(dueDay),
+            nextDueDate: Value(nextDue.toIso()),
+            totalCount: Value(totalCount),
+            paidCount: Value(paidCount),
+            reminderDays: Value(reminderDays),
+            // The user has looked at it: no more badge or undo (T-196).
+            autoAddedAt: const Value(null),
+            status: Value(
+              totalCount != null && paidCount >= totalCount
+                  ? RecurringStatus.completed
+                  : RecurringStatus.active,
+            ),
+          ).withAmount(amount),
+        );
+      }),
     );
     return changed > 0;
   }
 
-  /// Deletes a manual or suggested item and its occurrences.
-  Future<bool> deleteItem(String id) async =>
-      await guardWrite(() => _recurring.deleteItem(id)) > 0;
+  /// Deletes an item and its occurrences. A deleted item with a merchant key
+  /// (any kind, BNPL installments included) is remembered (dismissal key), so
+  /// detection does not bring it back the next night (T-196).
+  Future<bool> deleteItem(String id) => guardWrite(
+    () => _db.transaction(() async {
+      final item = await _recurring.itemById(id);
+      if (item == null) return false;
+      await _remember(item); // any kind with a merchant key
+      return await _recurring.deleteItem(id) > 0;
+    }),
+  );
 
   /// "Mark paid" by hand: counts the occurrence due on the item's next date
   /// (no linked transaction) and moves the item on, like an auto-mark. False
@@ -669,20 +761,10 @@ class RecurringRepository {
             .get(),
   );
 
-  static String _cadenceCode(RecurrenceCadence c) => switch (c) {
-    RecurrenceCadence.monthly => 'monthly',
-    RecurrenceCadence.yearly => 'yearly',
-    RecurrenceCadence.weekly => 'weekly',
-    RecurrenceCadence.customDays => 'custom_days',
-  };
+  static String _cadenceCode(RecurrenceCadence c) => c.code;
 
-  static RecurrenceCadence? _cadenceOf(String code) => switch (code) {
-    'monthly' => RecurrenceCadence.monthly,
-    'yearly' => RecurrenceCadence.yearly,
-    'weekly' => RecurrenceCadence.weekly,
-    'custom_days' => RecurrenceCadence.customDays,
-    _ => null,
-  };
+  static RecurrenceCadence? _cadenceOf(String code) =>
+      RecurrenceCadence.fromCode(code);
 }
 
 final recurringRepositoryProvider = FutureProvider<RecurringRepository>((

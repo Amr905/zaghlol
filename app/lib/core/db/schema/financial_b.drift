@@ -184,7 +184,8 @@ CREATE TABLE recurring_items (
     CHECK (typeof(amount_minor) = 'integer' AND amount_minor BETWEEN 0 AND 9007199254740991),
   currency TEXT NOT NULL
     CHECK (currency GLOB '[A-Z][A-Z][A-Z]' AND instr(CAST(currency AS BLOB), x'00') = 0),
-  cadence TEXT NOT NULL CHECK (cadence IN ('monthly', 'yearly', 'weekly', 'custom_days')),
+  cadence TEXT NOT NULL
+    CHECK (cadence IN ('monthly', 'quarterly', 'semi_annual', 'yearly', 'weekly', 'custom_days')),
   cadence_days INTEGER
     CHECK (cadence_days IS NULL OR (typeof(cadence_days) = 'integer' AND cadence_days BETWEEN 1 AND 3660)),
   due_day INTEGER CHECK (due_day IS NULL OR (typeof(due_day) = 'integer' AND due_day BETWEEN 1 AND 31)),
@@ -197,11 +198,24 @@ CREATE TABLE recurring_items (
   reminder_days INTEGER NOT NULL DEFAULT 3
     CHECK (typeof(reminder_days) = 'integer' AND reminder_days BETWEEN 0 AND 60),
   created_at INTEGER NOT NULL CHECK (typeof(created_at) = 'integer'),
+  -- T-196 (v5): set (epoch ms) only when detection added the item by itself
+  -- (D-72); cleared when the user edits it. Drives the "added by itself"
+  -- badge and the one-tap undo.
+  auto_added_at INTEGER CHECK (auto_added_at IS NULL OR typeof(auto_added_at) = 'integer'),
   CHECK ((cadence = 'custom_days') = (cadence_days IS NOT NULL))
 ) AS RecurringItemRow;
 
 CREATE INDEX ix_recurring_due ON recurring_items (next_due_date) WHERE status = 'active';
 CREATE INDEX ix_recurring_account ON recurring_items (account_id) WHERE account_id IS NOT NULL;
+
+-- T-196 (v5, D-72): chains the user said "not a bill" about (or deleted by
+-- hand). `dismissal_key` is merchant|account|currency (recurringKey); detection never
+-- adds a chain whose key is here. No foreign key: nothing can drop it.
+CREATE TABLE recurring_dismissals (
+  dismissal_key TEXT NOT NULL PRIMARY KEY
+    CHECK (length(dismissal_key) BETWEEN 3 AND 200 AND instr(CAST(dismissal_key AS BLOB), x'00') = 0),
+  dismissed_at INTEGER NOT NULL CHECK (typeof(dismissed_at) = 'integer')
+) AS RecurringDismissalRow;
 
 CREATE TABLE recurring_occurrences (
   item_id TEXT NOT NULL REFERENCES recurring_items(id) ON DELETE CASCADE,
