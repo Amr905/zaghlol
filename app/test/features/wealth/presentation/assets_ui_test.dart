@@ -211,7 +211,7 @@ void main() {
           final h = HideAmountsHarness(hidden: true);
           addTearDown(h.dispose);
           await _pump(t, env, _section(), locale: loc, hideAmounts: h);
-          expectNoAmountDigits(t);
+          await expectNoAmountDigits(t);
           expect(find.textContaining('90,000'), findsNothing);
           expect(find.textContaining('٩٠٬٠٠٠'), findsNothing);
           await _pump(
@@ -221,7 +221,7 @@ void main() {
             locale: loc,
             hideAmounts: h,
           );
-          expectNoAmountDigits(t);
+          await expectNoAmountDigits(t);
         },
       );
 

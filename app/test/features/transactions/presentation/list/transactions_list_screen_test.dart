@@ -269,6 +269,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
+        await expectNoMaskGlyphInSemantics(tester);
         final amounts = <String>[
           for (final w in tester.widgetList<ZMoneyText>(
             find.byType(ZMoneyText),

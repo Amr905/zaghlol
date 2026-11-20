@@ -24,7 +24,7 @@ matched by name (see the rule notes below).
 | `no_print_outside_debug` | `print(...)` and `debugPrint(...)` | all `lib/` files except debug-only files |
 | `safe_exception_required` | classes that are an `Exception` or `Error` but not a `SafeException` | files in a `parsing/` or `db/` directory, or in package `zaghlol_parsing` |
 
-| `no_unmasked_amount` | `MoneyFormat.format(...)` without a `hidden:` argument or with the literal `hidden: false`; `NumberFormat(...)` / `NumberFormat.x(...)` outside `l10n/`; `.toStringAsFixed(`, `.toStringAsPrecision(`, `.toCanonicalString()` in `presentation/` and `application/` | all `lib/` files; `core/l10n/money_format.dart` (the shared formatter) is exempt |
+| `no_unmasked_amount` | `MoneyFormat.format(...)` without a `hidden:` argument or with the literal `hidden: false`; `NumberFormat(...)` / `NumberFormat.x(...)` outside `l10n/`; `.toStringAsFixed(`, `.toStringAsPrecision(`, `.toCanonicalString()`, and minor-unit fields (`x.minor`, `netMinor`, `quantityMilli`) interpolated into a string or `.toString()`'d, in `presentation/` and `application/`; `hidden:` with a literal `false` (also in parentheses) | all `lib/` files; `core/l10n/money_format.dart` (the shared formatter) is exempt |
 
 Only files under `lib/` are linted (tests, tools and generated code are skipped:
 `*.g.dart`, `*.freezed.dart`, `generated/`).

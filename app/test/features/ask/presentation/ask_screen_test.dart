@@ -154,7 +154,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('ask-send')));
       await tester.pumpAndSettle();
       expect(find.textContaining('****'), findsWidgets);
-      expectNoAmountDigits(tester);
+      await expectNoAmountDigits(tester);
     });
 
     testWidgets('compare answer shows a mini chart ($lang)', (tester) async {

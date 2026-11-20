@@ -940,11 +940,7 @@
   "insightsCoveredEarlier": "Paid from cash withdrawn earlier: {amount}",
   "@insightsCoveredEarlier": {
     "description": "Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
+    "placeholders": { "amount": { "type": "String" } }
   },
   "insightsChartTitleCashFlow": "Cash flow",
   "@insightsChartTitleCashFlow": {
@@ -7075,5 +7071,9 @@
   "settingsPrefsHideAmountsHint": "Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.",
   "@settingsPrefsHideAmountsHint": {
     "description": "D-67 hint under the hide-amounts switch"
+  },
+  "shareStudioShowAmountsLocked": "Amounts are hidden in the whole app, so the card shows percentages only. Show them with the eye icon first.",
+  "@shareStudioShowAmountsLocked": {
+    "description": "D-67 hint under the disabled Show amounts switch while hiding is on in the whole app"
   }
 }

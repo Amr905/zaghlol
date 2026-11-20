@@ -137,13 +137,20 @@ AppLocalizations notificationL10n(Ref ref) {
 
 String _lang(Ref ref) => notificationL10n(ref).localeName;
 
+/// Whether notification text should mask amounts. Unlike the screens this
+/// does not fail closed while the setting loads: the service redacts by the
+/// awaited setting when it sends (`loadPrefs`), so a cold-start alert for a
+/// user who did not hide never says `****`.
+bool notificationHidden(Ref ref) =>
+    ref.read(hideAmountsAppProvider).value ?? false;
+
 String _money(Ref ref, Money m) {
   final lang = _lang(ref);
   return MoneyFormat.format(
     m,
     languageCode: lang,
     digits: ref.read(digitsModeProvider(lang)),
-    hidden: ref.read(hideAmountsProvider),
+    hidden: notificationHidden(ref),
   );
 }
 

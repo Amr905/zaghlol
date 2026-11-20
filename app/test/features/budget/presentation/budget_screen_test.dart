@@ -54,6 +54,7 @@ void budgetHiddenTests() {
         hideAmounts: h,
       );
       await tester.pumpAndSettle();
+      await expectNoMaskGlyphInSemantics(tester);
       final amounts = <String>[
         for (final w in tester.widgetList<Text>(find.byType(Text)))
           if (RegExp(r'EGP|USD|ج\.م').hasMatch(w.data ?? '') ||

@@ -16,6 +16,7 @@ import '../../../../core/l10n/card_number.dart';
 import '../../../../core/db/app_database.dart' show IgnoreRuleRow;
 import '../../../../core/db/daos/capture_controls_dao.dart' show IgnoreChannel;
 import '../../../../core/l10n/date_format.dart';
+import '../../../../core/ui/amount_semantics.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/theme/z_tokens.dart';
@@ -498,6 +499,10 @@ class _Header extends StatelessWidget {
               Expanded(
                 child: Text(
                   l.accountsDetailAvailableOf(kNoValueDash, fmt.money(limit)),
+                  semanticsLabel: a11yAmounts(
+                    l,
+                    l.accountsDetailAvailableOf(kNoValueDash, fmt.money(limit)),
+                  ),
                   textAlign: TextAlign.end,
                   style: ZType.titleSmall.copyWith(color: c.text),
                 ),
@@ -543,6 +548,13 @@ class _Header extends StatelessWidget {
                   l.accountsDetailAvailableOf(
                     fmt.money(available),
                     fmt.money(limit),
+                  ),
+                  semanticsLabel: a11yAmounts(
+                    l,
+                    l.accountsDetailAvailableOf(
+                      fmt.money(available),
+                      fmt.money(limit),
+                    ),
                   ),
                   textAlign: TextAlign.end,
                   style: ZType.titleSmall.copyWith(color: c.text),

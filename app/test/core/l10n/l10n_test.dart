@@ -9,6 +9,7 @@ import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
 import 'package:zaghlol/core/l10n/money_format.dart';
+import 'package:zaghlol/core/ui/amount_semantics.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -251,6 +252,26 @@ void main() {
       expect(maskAmountText('EGP 1,234.50'), 'EGP ****');
       expect(maskAmountText('+450 EGP'), '+**** EGP');
       expect(maskAmountText('no number'), 'no number');
+    });
+
+    test('a11yAmounts says "amount hidden" for every masked form', () {
+      for (final lang in ['ar', 'en']) {
+        final l = lookupAppLocalizations(Locale(lang));
+        for (final d in [DigitsMode.western, DigitsMode.arabicIndic]) {
+          for (final minor in [-45000, 45000]) {
+            final amount = MoneyFormat.format(
+              Money(Currency.of('EGP'), minor),
+              languageCode: lang,
+              digits: d,
+              hidden: true,
+            );
+            final out = a11yAmounts(l, 'Carrefour, $amount, card');
+            expect(out.contains('*'), isFalse, reason: out);
+            expect(out, contains(l.commonAmountHidden));
+          }
+        }
+        expect(a11yAmounts(l, '24 g, 450'), '24 g, 450');
+      }
     });
   });
 }

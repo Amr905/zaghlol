@@ -194,7 +194,7 @@ class PreferencesScreen extends ConsumerWidget {
               key: const ValueKey('prefs-hide-amounts'),
               title: t.settingsPrefsHideAmounts,
               subtitle: t.settingsPrefsHideAmountsHint,
-              value: ref.watch(hideAmountsAppProvider).value ?? false,
+              value: ref.watch(hideAmountsProvider),
               onChanged: (v) => _write(ref, Settings.hideAmountsApp, v),
             ),
           ],

@@ -22,6 +22,7 @@ import '../data/zakah_providers.dart';
 import '../data/zakah_repository.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/ui/z_hide_amounts_button.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 class ZakahScreen extends ConsumerWidget {
   const ZakahScreen({
@@ -339,6 +340,10 @@ class _NisabCard extends ConsumerWidget {
           const SizedBox(height: ZSpacing.xs),
           Text(
             l10n.zakahMainNisabInfo(grams, digits.render('24'), value),
+            semanticsLabel: a11yAmounts(
+              l10n,
+              l10n.zakahMainNisabInfo(grams, digits.render('24'), value),
+            ),
             style: ZType.bodySmall.copyWith(color: c.textMuted),
           ),
         ],
@@ -366,18 +371,24 @@ class _Totals extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final u in units)
-            Text(
-              l10n.zakahMainDue(
-                nativeText(
-                  l10n,
-                  u,
-                  view.result.dueByUnit[u]!,
-                  lang,
-                  digits,
-                  hidden: ref.watch(hideAmountsProvider),
-                ),
-              ),
-              style: ZType.titleSmall.copyWith(color: c.text),
+            Builder(
+              builder: (context) {
+                final line = l10n.zakahMainDue(
+                  nativeText(
+                    l10n,
+                    u,
+                    view.result.dueByUnit[u]!,
+                    lang,
+                    digits,
+                    hidden: ref.watch(hideAmountsProvider),
+                  ),
+                );
+                return Text(
+                  line,
+                  semanticsLabel: a11yAmounts(l10n, line),
+                  style: ZType.titleSmall.copyWith(color: c.text),
+                );
+              },
             ),
         ],
       ),
@@ -488,7 +499,10 @@ class _LotCard extends ConsumerWidget {
     };
     return Semantics(
       container: true,
-      label: l10n.zakahMainLotA11y(title, status ?? '', dueLine ?? ''),
+      label: a11yAmounts(
+        l10n,
+        l10n.zakahMainLotA11y(title, status ?? '', dueLine ?? ''),
+      ),
       excludeSemantics: true,
       child: ZCard(
         key: Key('zakah-lot-${lot.lot.id}'),

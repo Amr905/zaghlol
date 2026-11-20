@@ -26,7 +26,6 @@ import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import '../domain/notification_types.dart';
 import 'housekeeping.dart';
 import 'notification_providers.dart';
-import '../../../core/settings/settings_providers.dart';
 
 /// The budget alert service with its l10n text. The category names are read
 /// once per call (the text builder is synchronous).
@@ -65,7 +64,7 @@ Future<BudgetAlertService> _budgetAlertService(Ref ref, AppDatabase db) async {
       final l = notificationL10n(ref);
       final lang = l.localeName;
       final digits = ref.read(digitsModeProvider(lang));
-      final hidden = ref.read(hideAmountsProvider);
+      final hidden = notificationHidden(ref);
       String money(Money m) => MoneyFormat.format(
         m,
         languageCode: lang,
@@ -196,7 +195,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                       money,
                       languageCode: l.localeName,
                       digits: digits,
-                      hidden: ref.read(hideAmountsProvider),
+                      hidden: notificationHidden(ref),
                     ),
                   ),
                   redactedTitle: l.notificationsAlertOverdueTitle(r.item.name),
@@ -223,7 +222,7 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
                     money,
                     languageCode: l.localeName,
                     digits: digits,
-                    hidden: ref.read(hideAmountsProvider),
+                    hidden: notificationHidden(ref),
                   ),
                   digits.render('$days'),
                 ),

@@ -16,6 +16,7 @@ import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
 import '../../domain/transaction.dart';
 import 'txn_list_providers.dart';
+import '../../../../core/ui/amount_semantics.dart';
 
 /// Locale-aware formatting shared by the rows and headers.
 final class TxnFmt {
@@ -137,12 +138,9 @@ class TxnRow extends StatelessWidget {
       container: true,
       selected: selected,
       onLongPress: onLongPress,
-      label: l.transactionsRowLabelA11y(
-        amountText,
-        cardName,
-        catName,
-        title,
-        time,
+      label: a11yAmounts(
+        l,
+        l.transactionsRowLabelA11y(amountText, cardName, catName, title, time),
       ),
       excludeSemantics: true,
       onTap: onTap,

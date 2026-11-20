@@ -10877,6 +10877,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.'**
   String get settingsPrefsHideAmountsHint;
+
+  /// D-67 hint under the disabled Show amounts switch while hiding is on in the whole app
+  ///
+  /// In ar, this message translates to:
+  /// **'المبالغ مخفية في التطبيق كله، فالكارت هيطلع بالنسب بس. اظهرها من الأيقونة اللي جنب المبالغ.'**
+  String get shareStudioShowAmountsLocked;
 }
 
 class _AppLocalizationsDelegate

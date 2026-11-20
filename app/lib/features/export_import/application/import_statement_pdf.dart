@@ -385,6 +385,7 @@ class ImportStatementPdfUseCase {
   /// Built from storage terms (minor + currency), never from source text.
   static String _key(TxnDirection d, Money amount) {
     final s = amount.toStorage();
+    // ignore: no_unmasked_amount - duplicate-detection key, never shown
     return '${d.code}|${s.minor}|${s.currency}';
   }
 }

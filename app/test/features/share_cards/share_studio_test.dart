@@ -42,13 +42,14 @@ Future<void> pumpStudio(
   List<Currency>? currencies,
   ShareSheet? sheet,
   bool failFigures = false,
+  HideAmountsHarness? hideAmounts,
 }) async {
   await tester.binding.setSurfaceSize(const Size(390, 900));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        ...amountsShown(),
+        ...(hideAmounts ?? HideAmountsHarness()).overrides,
         chartsCurrenciesProvider.overrideWith(
           (ref) async => currencies ?? [_egp],
         ),
@@ -95,6 +96,19 @@ void main() {
       );
     });
   }
+
+  testWidgets('T-187: the switch is disabled and off while amounts are hidden '
+      'app-wide, with a hint', (t) async {
+    final h = HideAmountsHarness(hidden: true);
+    addTearDown(h.dispose);
+    await pumpStudio(t, hideAmounts: h);
+    final sw = t.widget<Switch>(find.byType(Switch));
+    expect(sw.onChanged, isNull);
+    expect(sw.value, isFalse);
+    final l = AppLocalizations.of(t.element(find.byType(Switch)));
+    expect(find.text(l.shareStudioShowAmountsLocked), findsOneWidget);
+    expect(find.textContaining('12,345'), findsNothing);
+  });
 
   testWidgets('switch is off by default', (t) async {
     await pumpStudio(t);

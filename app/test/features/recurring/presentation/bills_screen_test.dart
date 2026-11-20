@@ -113,7 +113,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expectNoAmountDigits(tester, allowLines: RegExp(r'Payment \d of'));
+        await expectNoAmountDigits(
+          tester,
+          allowLines: RegExp(r'Payment \d of'),
+        );
       });
 
       testWidgets('timeline renders without overflow $lang x$scale', (

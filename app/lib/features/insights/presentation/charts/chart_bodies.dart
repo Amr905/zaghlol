@@ -11,6 +11,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../core/ui/amount_semantics.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_money_text.dart';
@@ -564,12 +565,18 @@ class BudgetBody extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l.budgetOverviewOverall(
-            chartMoney(ref, context, view.spent),
-            chartMoney(ref, context, view.limit!),
-          ),
-          style: ZType.body.copyWith(color: c.text),
+        Builder(
+          builder: (context) {
+            final overall = l.budgetOverviewOverall(
+              chartMoney(ref, context, view.spent),
+              chartMoney(ref, context, view.limit!),
+            );
+            return Text(
+              overall,
+              semanticsLabel: a11yAmounts(l, overall),
+              style: ZType.body.copyWith(color: c.text),
+            );
+          },
         ),
         const SizedBox(height: ZSpacing.xs),
         _Bar(fraction: (view.percent ?? 0).clamp(0, 100) / 100),

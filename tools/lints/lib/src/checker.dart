@@ -199,8 +199,7 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
           node.methodName.offset,
           'MoneyFormat.format without `hidden:`; pass hideAmountsProvider.',
         );
-      } else if (hidden.expression is BooleanLiteral &&
-          !(hidden.expression as BooleanLiteral).value) {
+      } else if (_isFalseLiteral(hidden.expression)) {
         _report(
           ruleNoUnmaskedAmount,
           node.methodName.offset,
@@ -221,6 +220,18 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
     }
     if (scope.inUiText &&
         target != null &&
+        name == 'toString' &&
+        _readsMinorUnits(target)) {
+      _report(
+        ruleNoUnmaskedAmount,
+        node.methodName.offset,
+        'minor units printed with toString bypass the shared amount '
+        'formatter; use MoneyFormat.format (hide amounts).',
+      );
+      return;
+    }
+    if (scope.inUiText &&
+        target != null &&
         (name == 'toStringAsFixed' ||
             name == 'toStringAsPrecision' ||
             name == 'toCanonicalString')) {
@@ -231,6 +242,44 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
         'MoneyFormat.format (hide amounts).',
       );
     }
+  }
+
+  static bool _isFalseLiteral(Expression e) {
+    var x = e;
+    while (x is ParenthesizedExpression) {
+      x = x.expression;
+    }
+    return x is BooleanLiteral && !x.value;
+  }
+
+  static final RegExp _minorUnitName = RegExp(
+    r'(?:^|\.)\w*(?:[mM]inor|Milli)$',
+  );
+
+  /// Source of a minor-unit property read (`m.minor`, `row.netMinor`,
+  /// `a.quantityMilli`), or null.
+  static bool _readsMinorUnits(Expression e) {
+    if (e is ParenthesizedExpression) return _readsMinorUnits(e.expression);
+    if (e is PrefixedIdentifier) return _minorUnitName.hasMatch(e.toSource());
+    if (e is PropertyAccess) return _minorUnitName.hasMatch(e.toSource());
+    if (e is BinaryExpression) {
+      return _readsMinorUnits(e.leftOperand) ||
+          _readsMinorUnits(e.rightOperand);
+    }
+    return false;
+  }
+
+  @override
+  void visitInterpolationExpression(InterpolationExpression node) {
+    if (scope.inUiText && _readsMinorUnits(node.expression)) {
+      _report(
+        ruleNoUnmaskedAmount,
+        node.offset,
+        'minor units interpolated into text bypass the shared amount '
+        'formatter; use MoneyFormat.format (hide amounts).',
+      );
+    }
+    super.visitInterpolationExpression(node);
   }
 
   @override

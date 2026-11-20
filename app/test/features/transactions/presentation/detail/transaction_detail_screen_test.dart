@@ -32,7 +32,7 @@ void main() {
       hideAmounts: hide,
     );
     expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
-    expectNoAmountDigits(tester, allowLines: RegExp('SYNTHETIC'));
+    await expectNoAmountDigits(tester, allowLines: RegExp('SYNTHETIC'));
   });
 
   testWidgets('shows amount, merchant, category, card and fields (en)', (

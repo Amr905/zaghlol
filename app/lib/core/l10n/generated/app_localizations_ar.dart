@@ -7538,4 +7538,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settingsPrefsHideAmountsHint =>
       'كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.';
+
+  @override
+  String get shareStudioShowAmountsLocked =>
+      'المبالغ مخفية في التطبيق كله، فالكارت هيطلع بالنسب بس. اظهرها من الأيقونة اللي جنب المبالغ.';
 }

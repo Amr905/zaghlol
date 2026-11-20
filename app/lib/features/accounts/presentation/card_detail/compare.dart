@@ -15,6 +15,7 @@ import '../../../transactions/presentation/list/txn_list_providers.dart';
 import '../../../transactions/presentation/list/txn_row.dart';
 import 'card_detail_providers.dart';
 import '../../../../core/settings/settings_providers.dart';
+import '../../../../core/ui/amount_semantics.dart';
 
 const double _labelWidth = 120;
 const double _cellWidth = 104;
@@ -155,10 +156,13 @@ class CompareCardsScreen extends ConsumerWidget {
                             : fmt.money(card.byCategory[id]!),
                         semantics: card.byCategory[id] == null
                             ? null
-                            : l.accountsCompareCellA11y(
-                                fmt.money(card.byCategory[id]!),
-                                card.label,
-                                catName(id),
+                            : a11yAmounts(
+                                l,
+                                l.accountsCompareCellA11y(
+                                  fmt.money(card.byCategory[id]!),
+                                  card.label,
+                                  catName(id),
+                                ),
                               ),
                         onTap: card.byCategory[id] == null || onOpenCell == null
                             ? null

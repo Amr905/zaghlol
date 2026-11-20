@@ -7395,4 +7395,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsPrefsHideAmountsHint =>
       'Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.';
+
+  @override
+  String get shareStudioShowAmountsLocked =>
+      'Amounts are hidden in the whole app, so the card shows percentages only. Show them with the eye icon first.';
 }

@@ -285,7 +285,10 @@ void main() {
           locale: loc,
           hideAmounts: h,
         );
-        expectNoAmountDigits(t, allowLines: RegExp(r'^(The nisab is|النصاب)'));
+        await expectNoAmountDigits(
+          t,
+          allowLines: RegExp(r'^(The nisab is|النصاب)'),
+        );
       });
 
       testWidgets('populated: per-unit dues, hawl progress, mark paid', (

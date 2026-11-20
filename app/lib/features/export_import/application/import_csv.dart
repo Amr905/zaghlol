@@ -319,6 +319,7 @@ class ImportCsvUseCase {
   /// Built from storage terms, never from source text.
   static String _key(TxnDirection d, Money amount, String? merchant) {
     final s = amount.toStorage();
+    // ignore: no_unmasked_amount - duplicate-detection key, never shown
     return '${d.code}|${s.minor}|${s.currency}|${merchant ?? ''}';
   }
 

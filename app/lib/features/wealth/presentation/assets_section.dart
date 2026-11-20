@@ -19,6 +19,7 @@ import '../../gold/application/gating.dart';
 import 'asset_format.dart';
 import 'assets_providers.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 class AssetsSection extends ConsumerWidget {
   const AssetsSection({
@@ -245,7 +246,10 @@ class _GoldUnits extends ConsumerWidget {
       padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
       child: Semantics(
         container: true,
-        label: l10n.wealthOverviewUnitsA11y(lines.join(', ')),
+        label: a11yAmounts(
+          l10n,
+          l10n.wealthOverviewUnitsA11y(lines.join(', ')),
+        ),
         excludeSemantics: true,
         child: Wrap(
           spacing: ZSpacing.sm,
@@ -339,11 +343,14 @@ class _AssetRow extends ConsumerWidget {
           trailing = money(Money.fromStorage(v, a.currency!));
         }
     }
-    final semantics = [
-      l10n.wealthOverviewAssetRowA11y(title, trailing ?? sub ?? ''),
-      if (estimated) l10n.wealthOverviewManualValue,
-      if (view.goldStale) l10n.commonBadgeStaleA11y,
-    ].join(', ');
+    final semantics = a11yAmounts(
+      l10n,
+      [
+        l10n.wealthOverviewAssetRowA11y(title, trailing ?? sub ?? ''),
+        if (estimated) l10n.wealthOverviewManualValue,
+        if (view.goldStale) l10n.commonBadgeStaleA11y,
+      ].join(', '),
+    );
     return Semantics(
       container: true,
       label: semantics,

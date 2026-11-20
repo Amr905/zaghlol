@@ -195,6 +195,7 @@ void main() {
       addTearDown(h.dispose);
       await _pump(t, repo: _FakeRepo(_full), locale: loc, hideAmounts: h);
       expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
+      await expectNoMaskGlyphInSemantics(t);
       final amounts = <String>[
         for (final w in t.widgetList<ZMoneyText>(find.byType(ZMoneyText)))
           '${w.text} ${w.unit ?? ''}',

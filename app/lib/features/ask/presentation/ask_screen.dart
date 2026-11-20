@@ -18,6 +18,7 @@ import '../domain/ask_models.dart';
 import 'ask_answer_text.dart';
 import 'ask_chat_controller.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// The category id to localized name map the answers need.
 final askCategoryNamesProvider =
@@ -326,7 +327,10 @@ class _MessageView extends ConsumerWidget {
       mood: answer is AskRoastAnswer
           ? ZaghlolMoment.shocked
           : ZaghlolMoment.proud,
-      semanticsLabel: l.chatMainZaghlolA11y(content.lines.join(' ')),
+      semanticsLabel: a11yAmounts(
+        l,
+        l.chatMainZaghlolA11y(content.lines.join(' ')),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

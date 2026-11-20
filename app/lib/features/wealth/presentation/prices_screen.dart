@@ -18,6 +18,7 @@ import '../domain/price_feed.dart';
 import 'assets_providers.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/ui/z_hide_amounts_button.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 class PricesScreen extends ConsumerStatefulWidget {
   const PricesScreen({super.key});
@@ -201,9 +202,12 @@ class _PricesScreenState extends ConsumerState<PricesScreen> {
             if (r.value != null)
               Semantics(
                 container: true,
-                label: l10n.wealthPricesCurrencyRowA11y(
-                  r.currency.code,
-                  money(r.value!),
+                label: a11yAmounts(
+                  l10n,
+                  l10n.wealthPricesCurrencyRowA11y(
+                    r.currency.code,
+                    money(r.value!),
+                  ),
                 ),
                 excludeSemantics: true,
                 child: Text(
@@ -266,7 +270,10 @@ class _GoldRow extends ConsumerWidget {
                 container: true,
                 label: priceText == null
                     ? l10n.commonKaratLabel(karat)
-                    : l10n.wealthPricesGoldRowA11y(karat, priceText!),
+                    : a11yAmounts(
+                        l10n,
+                        l10n.wealthPricesGoldRowA11y(karat, priceText!),
+                      ),
                 excludeSemantics: true,
                 child: Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,

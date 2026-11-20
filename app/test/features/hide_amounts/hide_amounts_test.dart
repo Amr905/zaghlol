@@ -7,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
+import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/features/notifications/application/notification_providers.dart';
 import 'package:zaghlol/core/ui/z_hide_amounts_button.dart';
 import 'package:zaghlol/core/ui/z_money_text.dart';
 import 'package:zaghlol/features/ask/domain/ask_models.dart';
@@ -29,29 +31,6 @@ final _digit = RegExp(r'[0-9٠-٩]');
 const _ar = Locale('ar', 'EG');
 const _en = Locale('en');
 
-/// Every `ZMoneyText` string and every other `Text` that carries a currency.
-List<String> _amountStrings(WidgetTester tester) {
-  final out = <String>[];
-  for (final w in tester.widgetList<ZMoneyText>(find.byType(ZMoneyText))) {
-    out.add('${w.text} ${w.unit ?? ''}');
-  }
-  for (final w in tester.widgetList<Text>(find.byType(Text))) {
-    final t = w.data ?? w.textSpan?.toPlainText() ?? '';
-    if (RegExp(r'EGP|USD|ج\.م').hasMatch(t)) out.add(t);
-  }
-  return out;
-}
-
-void _expectNoDigitInAmounts(WidgetTester tester) {
-  final amounts = _amountStrings(tester);
-  expect(amounts, isNotEmpty, reason: 'the screen shows amounts');
-  for (final a in amounts) {
-    // Percentages may stay (FR-HOME-06); digits of an amount may not.
-    final noPercent = a.replaceAll(RegExp(r'[0-9٠-٩]+\s*%'), '');
-    expect(_digit.hasMatch(noPercent), isFalse, reason: 'amount widget: $a');
-  }
-}
-
 Widget _app(Widget child, HideAmountsHarness h, {Locale locale = _en}) =>
     ProviderScope(
       overrides: h.overrides,
@@ -65,6 +44,24 @@ Widget _app(Widget child, HideAmountsHarness h, {Locale locale = _en}) =>
     );
 
 void main() {
+  test('notification text does not mask while the setting still loads', () {
+    final shown = Provider<bool>(notificationHidden);
+    final loading = ProviderContainer(
+      overrides: [
+        hideAmountsAppProvider.overrideWith(
+          (ref) => const Stream<bool>.empty(),
+        ),
+      ],
+    );
+    addTearDown(loading.dispose);
+    expect(loading.read(shown), isFalse);
+    expect(
+      loading.read(hideAmountsProvider),
+      isTrue,
+      reason: 'screens fail closed',
+    );
+  });
+
   group('eye button', () {
     for (final locale in [_en, _ar]) {
       final tag = locale.languageCode;
@@ -173,7 +170,7 @@ void main() {
           value: model(),
           hideAmounts: h,
         );
-        _expectNoDigitInAmounts(tester);
+        await expectNoAmountDigits(tester);
         expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
       });
     }
@@ -194,7 +191,7 @@ void main() {
       await tester.tap(find.byKey(const Key('hide-amounts-toggle')));
       await tester.pump();
       await tester.pump();
-      _expectNoDigitInAmounts(tester);
+      await expectNoAmountDigits(tester);
       expect(find.textContaining('314'), findsNothing);
       await tester.tap(find.byKey(const Key('hide-amounts-toggle')));
       await tester.pump();
@@ -223,7 +220,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(BarChart), findsOneWidget);
         expect(find.byType(PieChart), findsOneWidget);
-        _expectNoDigitInAmounts(tester);
+        await expectNoAmountDigits(tester);
         // None of the synthetic figures (1,000 / 600 / 30,000 / 18,500 ...)
         // appears in any text or semantics label, in either digit script.
         final figure = RegExp(

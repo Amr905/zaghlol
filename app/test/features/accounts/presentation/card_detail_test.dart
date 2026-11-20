@@ -221,7 +221,7 @@ void main() {
     addTearDown(h.dispose);
     await pumpDetail(t, overrides: detailOverrides(), hideAmounts: h);
     expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
-    expectNoAmountDigits(t);
+    await expectNoAmountDigits(t);
   });
 
   testWidgets('populated: limit, due date, donut total and sections', (

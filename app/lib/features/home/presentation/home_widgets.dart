@@ -22,6 +22,7 @@ import 'home_format.dart';
 import '../../../core/ui/bank_name_text.dart';
 import '../../../core/ui/z_haptics.dart';
 import '../../../core/ui/z_hide_amounts_button.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// Accounts for the card filter sheet and the filter chip label.
 final homeAccountsProvider = FutureProvider<List<Account>>((ref) async {
@@ -224,7 +225,7 @@ class _Kpi extends StatelessWidget {
       borderRadius: BorderRadius.circular(ZRadius.md),
       child: Semantics(
         container: true,
-        label: '$label, $text',
+        label: a11yAmounts(AppLocalizations.of(context), '$label, $text'),
         excludeSemantics: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

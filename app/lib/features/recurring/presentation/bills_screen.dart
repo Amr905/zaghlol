@@ -23,6 +23,7 @@ import 'bill_edit_screen.dart';
 import 'bills_providers.dart';
 import 'bills_view.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// Shown as the zero amount when nothing is due.
 final Currency _zeroCurrency = Currency.of('EGP');
@@ -237,7 +238,7 @@ class _Kpi extends StatelessWidget {
       padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
       child: Semantics(
         container: true,
-        label: '$label: $value',
+        label: a11yAmounts(AppLocalizations.of(context), '$label: $value'),
         excludeSemantics: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,6 +282,10 @@ class _SuggestionCard extends ConsumerWidget {
               children: [
                 Text(
                   l.recurringBillsDetected(view.name, f.money(view.amount)),
+                  semanticsLabel: a11yAmounts(
+                    l,
+                    l.recurringBillsDetected(view.name, f.money(view.amount)),
+                  ),
                   style: ZType.body.copyWith(color: c.text),
                 ),
                 const SizedBox(height: ZSpacing.sm),
@@ -376,7 +381,10 @@ class _BillRow extends ConsumerWidget {
     );
     return Semantics(
       container: true,
-      label: l.recurringBillsRowA11y(title, amount, timing) + a11yExtra,
+      label: a11yAmounts(
+        l,
+        l.recurringBillsRowA11y(title, amount, timing) + a11yExtra,
+      ),
       child: InkWell(
         onTap: () => openBillEditor(context, itemId: view.id),
         child: ConstrainedBox(
@@ -551,6 +559,13 @@ class _Subscriptions extends StatelessWidget {
                       f.money(s.monthly),
                       f.money(s.yearly),
                     ),
+                    semanticsLabel: a11yAmounts(
+                      l,
+                      l.recurringBillsSubRow(
+                        f.money(s.monthly),
+                        f.money(s.yearly),
+                      ),
+                    ),
                     style: ZType.caption.copyWith(color: c.textMuted),
                   ),
                 ],
@@ -560,6 +575,13 @@ class _Subscriptions extends StatelessWidget {
           for (final t in data.subTotals)
             Text(
               l.recurringBillsSubsTotal(f.money(t.monthly), f.money(t.yearly)),
+              semanticsLabel: a11yAmounts(
+                l,
+                l.recurringBillsSubsTotal(
+                  f.money(t.monthly),
+                  f.money(t.yearly),
+                ),
+              ),
               style: ZType.titleSmall.copyWith(color: c.text),
             ),
         ],

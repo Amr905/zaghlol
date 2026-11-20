@@ -22,6 +22,7 @@ import '../domain/account.dart';
 import 'money_overview_provider.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/ui/z_hide_amounts_button.dart';
+import '../../../core/ui/amount_semantics.dart';
 
 /// Shown when there are no balances yet.
 final _zeroEgp = Money(Currency.of('EGP'), 0);
@@ -206,7 +207,7 @@ class _Hero extends ConsumerWidget {
           ),
           const SizedBox(height: ZSpacing.sm),
           Semantics(
-            label: _fmt(context, ref, totals[firstCur]),
+            label: a11yAmounts(l10n, _fmt(context, ref, totals[firstCur])),
             excludeSemantics: true,
             child: FittedBox(
               fit: BoxFit.scaleDown,
@@ -246,7 +247,7 @@ class _Hero extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(ZRadius.pill),
                     ),
                     child: Semantics(
-                      label: _fmt(context, ref, totals[cur]),
+                      label: a11yAmounts(l10n, _fmt(context, ref, totals[cur])),
                       excludeSemantics: true,
                       child: Text(
                         '\u2068${_fmt(context, ref, totals[cur])}\u2069',
@@ -412,7 +413,7 @@ class _AccountRow extends ConsumerWidget {
     return Semantics(
       container: true,
       button: onTap != null,
-      label: semantics,
+      label: a11yAmounts(l10n, semantics),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/ui/z_money_text.dart';
@@ -72,7 +73,11 @@ List<String> amountStrings(WidgetTester tester) => [
 /// Fails when an amount widget shows a digit (percentages may stay).
 /// A karat label is not an amount; [allowLines] names public constants (the
 /// nisab threshold) that may keep their digits.
-void expectNoAmountDigits(WidgetTester tester, {RegExp? allowLines}) {
+Future<void> expectNoAmountDigits(
+  WidgetTester tester, {
+  RegExp? allowLines,
+}) async {
+  await expectNoMaskGlyphInSemantics(tester);
   final amounts = amountStrings(tester);
   expect(amounts, isNotEmpty, reason: 'the screen shows amounts');
   for (final a in amounts) {
@@ -85,4 +90,35 @@ void expectNoAmountDigits(WidgetTester tester, {RegExp? allowLines}) {
         .replaceAll(RegExp(r'عيار\s*[0-9٠-٩]+'), '');
     expect(_digitRe.hasMatch(noPct), isFalse, reason: 'amount widget: $a');
   }
+}
+
+/// A screen reader says "amount hidden", never the `****` glyphs (AC 7).
+Future<void> expectNoMaskGlyphInSemantics(WidgetTester tester) async {
+  final handle = tester.ensureSemantics();
+  // Turning semantics on needs a frame that re-lays out the tree.
+  await tester.pumpAndSettle();
+  final labels = <String>[];
+  void walk(SemanticsNode n) {
+    labels
+      ..add(n.label)
+      ..add(n.value)
+      ..add(n.tooltip);
+    n.visitChildren((SemanticsNode c) {
+      walk(c);
+      return true;
+    });
+  }
+
+  walk(tester.getSemantics(find.byType(MaterialApp)));
+  handle.dispose();
+  expect(
+    labels.where((l) => l.isNotEmpty),
+    isNotEmpty,
+    reason: 'semantics tree read',
+  );
+  final bad = {
+    for (final l in labels)
+      if (l.contains('****')) l,
+  };
+  expect(bad, isEmpty, reason: 'semantics label with the mask glyphs');
 }
