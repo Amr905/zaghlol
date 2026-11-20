@@ -361,25 +361,6 @@ void main() {
     expect(await r.outbox.load(), isEmpty);
   });
 
-  test(
-    'FU-165a active without an entitlement is final after a few tries',
-    () async {
-      final r = _Rig();
-      await r.started();
-      r.backend.onVerify = (_, _, n) async =>
-          verifyAnswer(r.h, n, withToken: false);
-      await r.store.deliver(paid(_tokenSentinel));
-      expect((await r.outbox.load()).single.stage, OutboxStage.queued);
-      for (var i = 0; i < 3; i++) {
-        r.h.clock.wall += day;
-        await r.service.retryDue();
-      }
-      expect((await r.outbox.load()).single.stage, OutboxStage.rejected);
-      expect(r.last, isA<PurchaseInvalid>());
-      expect(r.store.completed, isEmpty);
-    },
-  );
-
   group('iOS seat keys on verify (R4-1, T-179)', () {
     test('element 0 only, challenge = SHA-256(signedTransaction), signed once '
         'and resent byte-identical', () async {

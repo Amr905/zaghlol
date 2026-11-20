@@ -679,7 +679,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-164a | native | T-044 SMS revocation kills the process, so onPermissionChanged only via next-start getCapabilities; note in AC map | capture/CaptureRuntime.kt:296-301 | none | FIXED (batch 51) |
 | FU-164b | native | T-044 detach() drops pending callbacks silently; add comment | capture/UiPermissions.kt:58 | none | OBSOLETE (batch 51): FU-164b comment already in detach() |
 | FU-164c | native | T-044 POST_NOTIFICATIONS request needs an owner task | capture/UiPermissions.kt | none (unowned) | OPEN |
-| FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | FIXED (batch 51): active with no entitlement is rejected after 3 tries |
+| FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | OPEN (batch 51 review: needs the 145-2 typed outcome; a dead branch was reverted) |
 | FU-165b | core | T-145 uncaught PlatformException from _store.complete / _seats.prove in _onUpdates/_attempt | gold/application/purchase.dart:84,163 | none | OBSOLETE (batch 51): PlatformException caught around complete/prove |
 | FU-165c | core | T-145 restore proof.token!/keyId!/assertion! TypeError on incomplete proof | gold/application/restore.dart:216,235 | none | OBSOLETE (batch 51): restore no longer force-unwraps proof fields |
 | FU-165d | core | T-145 no native wake-up: purchase retry only if user opens app within 3 days; needs purchase-retry-worker and PO call | gold/application/purchase.dart | PO | OPEN |

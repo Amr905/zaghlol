@@ -54,3 +54,7 @@ OBSOLETE spot-check: I checked 11 of the 58 OBSOLETE closures against the code: 
 | backend-ci | APPROVED |
 
 Follow-up row for the minors: **FU-273**. It covers the purchase.dart doc-comment order, the effect of 189c sign-out on Drive backup, the ungated delete-everything sign-out, the gate singleton note, the missing FU-155a/181a rollback tests, and the voice `countOne` edge case.
+
+## Lead delta check (core, FU-165a)
+
+The dead `entitlement == null && attempts >= 3` branch in `purchase.dart` and its test (`purchase_test.dart`, "FU-165a active without an entitlement is final after a few tries") are removed; `purchase.dart` is now identical to batch 50. FU-165a is back to OPEN: it needs the T-145 145-2 typed outcome (complete the purchase, offer Restore) as a C4 billing task, while a holder's token that fails local evaluation still fails closed. `flutter test test/features/gold/application/purchase_test.dart`: 21 pass. Core lane: **APPROVED** after this delta (FU-165a not claimed).
