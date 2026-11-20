@@ -284,6 +284,24 @@ enum RecurrenceCadence {
     yearly => 12,
     weekly || customDays => null,
   };
+
+  /// The stored value of `recurring_items.cadence`.
+  String get code => switch (this) {
+    monthly => 'monthly',
+    quarterly => 'quarterly',
+    semiAnnual => 'semi_annual',
+    yearly => 'yearly',
+    weekly => 'weekly',
+    customDays => 'custom_days',
+  };
+
+  /// The cadence stored as [code]; null for an unknown value.
+  static RecurrenceCadence? fromCode(String code) {
+    for (final c in values) {
+      if (c.code == code) return c;
+    }
+    return null;
+  }
 }
 
 /// The due date after [from] (the date just paid or charged). Monthly,

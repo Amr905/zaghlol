@@ -13949,7 +13949,7 @@ class RecurringItems extends Table
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL CHECK (cadence IN (\'monthly\', \'yearly\', \'weekly\', \'custom_days\'))',
+    $customConstraints: 'NOT NULL CHECK (cadence IN (\'monthly\', \'quarterly\', \'semi_annual\', \'yearly\', \'weekly\', \'custom_days\'))',
   );
   static const VerificationMeta _cadenceDaysMeta = const VerificationMeta(
     'cadenceDays',
@@ -14029,6 +14029,18 @@ class RecurringItems extends Table
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL CHECK (typeof(created_at) = \'integer\')',
   );
+  static const VerificationMeta _autoAddedAtMeta = const VerificationMeta(
+    'autoAddedAt',
+  );
+  late final GeneratedColumn<int> autoAddedAt = GeneratedColumn<int>(
+    'auto_added_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'CHECK (auto_added_at IS NULL OR typeof(auto_added_at) = \'integer\')',
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -14047,6 +14059,7 @@ class RecurringItems extends Table
     paidCount,
     reminderDays,
     createdAt,
+    autoAddedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -14184,6 +14197,15 @@ class RecurringItems extends Table
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('auto_added_at')) {
+      context.handle(
+        _autoAddedAtMeta,
+        autoAddedAt.isAcceptableOrUnknown(
+          data['auto_added_at']!,
+          _autoAddedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -14257,6 +14279,10 @@ class RecurringItems extends Table
         DriftSqlType.int,
         data['${effectivePrefix}created_at'],
       )!,
+      autoAddedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}auto_added_at'],
+      ),
     );
   }
 
@@ -14291,6 +14317,11 @@ class RecurringItemRow extends DataClass
   final int paidCount;
   final int reminderDays;
   final int createdAt;
+
+  /// T-196 (v5): set (epoch ms) only when detection added the item by itself
+  /// (D-72); cleared when the user edits it. Drives the "added by itself"
+  /// badge and the one-tap undo.
+  final int? autoAddedAt;
   const RecurringItemRow({
     required this.id,
     required this.kind,
@@ -14308,6 +14339,7 @@ class RecurringItemRow extends DataClass
     required this.paidCount,
     required this.reminderDays,
     required this.createdAt,
+    this.autoAddedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -14340,6 +14372,9 @@ class RecurringItemRow extends DataClass
     map['paid_count'] = Variable<int>(paidCount);
     map['reminder_days'] = Variable<int>(reminderDays);
     map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || autoAddedAt != null) {
+      map['auto_added_at'] = Variable<int>(autoAddedAt);
+    }
     return map;
   }
 
@@ -14373,6 +14408,9 @@ class RecurringItemRow extends DataClass
       paidCount: Value(paidCount),
       reminderDays: Value(reminderDays),
       createdAt: Value(createdAt),
+      autoAddedAt: autoAddedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(autoAddedAt),
     );
   }
 
@@ -14398,6 +14436,7 @@ class RecurringItemRow extends DataClass
       paidCount: serializer.fromJson<int>(json['paid_count']),
       reminderDays: serializer.fromJson<int>(json['reminder_days']),
       createdAt: serializer.fromJson<int>(json['created_at']),
+      autoAddedAt: serializer.fromJson<int?>(json['auto_added_at']),
     );
   }
   @override
@@ -14420,6 +14459,7 @@ class RecurringItemRow extends DataClass
       'paid_count': serializer.toJson<int>(paidCount),
       'reminder_days': serializer.toJson<int>(reminderDays),
       'created_at': serializer.toJson<int>(createdAt),
+      'auto_added_at': serializer.toJson<int?>(autoAddedAt),
     };
   }
 
@@ -14440,6 +14480,7 @@ class RecurringItemRow extends DataClass
     int? paidCount,
     int? reminderDays,
     int? createdAt,
+    Value<int?> autoAddedAt = const Value.absent(),
   }) => RecurringItemRow(
     id: id ?? this.id,
     kind: kind ?? this.kind,
@@ -14457,6 +14498,7 @@ class RecurringItemRow extends DataClass
     paidCount: paidCount ?? this.paidCount,
     reminderDays: reminderDays ?? this.reminderDays,
     createdAt: createdAt ?? this.createdAt,
+    autoAddedAt: autoAddedAt.present ? autoAddedAt.value : this.autoAddedAt,
   );
   RecurringItemRow copyWithCompanion(RecurringItemsCompanion data) {
     return RecurringItemRow(
@@ -14488,6 +14530,9 @@ class RecurringItemRow extends DataClass
           ? data.reminderDays.value
           : this.reminderDays,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      autoAddedAt: data.autoAddedAt.present
+          ? data.autoAddedAt.value
+          : this.autoAddedAt,
     );
   }
 
@@ -14509,7 +14554,8 @@ class RecurringItemRow extends DataClass
           ..write('totalCount: $totalCount, ')
           ..write('paidCount: $paidCount, ')
           ..write('reminderDays: $reminderDays, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('autoAddedAt: $autoAddedAt')
           ..write(')'))
         .toString();
   }
@@ -14532,6 +14578,7 @@ class RecurringItemRow extends DataClass
     paidCount,
     reminderDays,
     createdAt,
+    autoAddedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -14552,7 +14599,8 @@ class RecurringItemRow extends DataClass
           other.totalCount == this.totalCount &&
           other.paidCount == this.paidCount &&
           other.reminderDays == this.reminderDays &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.autoAddedAt == this.autoAddedAt);
 }
 
 class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
@@ -14572,6 +14620,7 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
   final Value<int> paidCount;
   final Value<int> reminderDays;
   final Value<int> createdAt;
+  final Value<int?> autoAddedAt;
   final Value<int> rowid;
   const RecurringItemsCompanion({
     this.id = const Value.absent(),
@@ -14590,6 +14639,7 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
     this.paidCount = const Value.absent(),
     this.reminderDays = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.autoAddedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RecurringItemsCompanion.insert({
@@ -14609,6 +14659,7 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
     this.paidCount = const Value.absent(),
     this.reminderDays = const Value.absent(),
     required int createdAt,
+    this.autoAddedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        kind = Value(kind),
@@ -14635,6 +14686,7 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
     Expression<int>? paidCount,
     Expression<int>? reminderDays,
     Expression<int>? createdAt,
+    Expression<int>? autoAddedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -14654,6 +14706,7 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
       if (paidCount != null) 'paid_count': paidCount,
       if (reminderDays != null) 'reminder_days': reminderDays,
       if (createdAt != null) 'created_at': createdAt,
+      if (autoAddedAt != null) 'auto_added_at': autoAddedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -14675,6 +14728,7 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
     Value<int>? paidCount,
     Value<int>? reminderDays,
     Value<int>? createdAt,
+    Value<int?>? autoAddedAt,
     Value<int>? rowid,
   }) {
     return RecurringItemsCompanion(
@@ -14694,6 +14748,7 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
       paidCount: paidCount ?? this.paidCount,
       reminderDays: reminderDays ?? this.reminderDays,
       createdAt: createdAt ?? this.createdAt,
+      autoAddedAt: autoAddedAt ?? this.autoAddedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -14749,6 +14804,9 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
     if (createdAt.present) {
       map['created_at'] = Variable<int>(createdAt.value);
     }
+    if (autoAddedAt.present) {
+      map['auto_added_at'] = Variable<int>(autoAddedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -14774,6 +14832,243 @@ class RecurringItemsCompanion extends UpdateCompanion<RecurringItemRow> {
           ..write('paidCount: $paidCount, ')
           ..write('reminderDays: $reminderDays, ')
           ..write('createdAt: $createdAt, ')
+          ..write('autoAddedAt: $autoAddedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class RecurringDismissals extends Table
+    with TableInfo<RecurringDismissals, RecurringDismissalRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  RecurringDismissals(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dismissalKeyMeta = const VerificationMeta(
+    'dismissalKey',
+  );
+  late final GeneratedColumn<String> dismissalKey = GeneratedColumn<String>(
+    'dismissal_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY CHECK (length(dismissal_key) BETWEEN 3 AND 200 AND instr(CAST(dismissal_key AS BLOB), X\'00\') = 0)',
+  );
+  static const VerificationMeta _dismissedAtMeta = const VerificationMeta(
+    'dismissedAt',
+  );
+  late final GeneratedColumn<int> dismissedAt = GeneratedColumn<int>(
+    'dismissed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (typeof(dismissed_at) = \'integer\')',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [dismissalKey, dismissedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'recurring_dismissals';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RecurringDismissalRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('dismissal_key')) {
+      context.handle(
+        _dismissalKeyMeta,
+        dismissalKey.isAcceptableOrUnknown(
+          data['dismissal_key']!,
+          _dismissalKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dismissalKeyMeta);
+    }
+    if (data.containsKey('dismissed_at')) {
+      context.handle(
+        _dismissedAtMeta,
+        dismissedAt.isAcceptableOrUnknown(
+          data['dismissed_at']!,
+          _dismissedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dismissedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {dismissalKey};
+  @override
+  RecurringDismissalRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecurringDismissalRow(
+      dismissalKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dismissal_key'],
+      )!,
+      dismissedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}dismissed_at'],
+      )!,
+    );
+  }
+
+  @override
+  RecurringDismissals createAlias(String alias) {
+    return RecurringDismissals(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class RecurringDismissalRow extends DataClass
+    implements Insertable<RecurringDismissalRow> {
+  final String dismissalKey;
+  final int dismissedAt;
+  const RecurringDismissalRow({
+    required this.dismissalKey,
+    required this.dismissedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['dismissal_key'] = Variable<String>(dismissalKey);
+    map['dismissed_at'] = Variable<int>(dismissedAt);
+    return map;
+  }
+
+  RecurringDismissalsCompanion toCompanion(bool nullToAbsent) {
+    return RecurringDismissalsCompanion(
+      dismissalKey: Value(dismissalKey),
+      dismissedAt: Value(dismissedAt),
+    );
+  }
+
+  factory RecurringDismissalRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecurringDismissalRow(
+      dismissalKey: serializer.fromJson<String>(json['dismissal_key']),
+      dismissedAt: serializer.fromJson<int>(json['dismissed_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'dismissal_key': serializer.toJson<String>(dismissalKey),
+      'dismissed_at': serializer.toJson<int>(dismissedAt),
+    };
+  }
+
+  RecurringDismissalRow copyWith({String? dismissalKey, int? dismissedAt}) =>
+      RecurringDismissalRow(
+        dismissalKey: dismissalKey ?? this.dismissalKey,
+        dismissedAt: dismissedAt ?? this.dismissedAt,
+      );
+  RecurringDismissalRow copyWithCompanion(RecurringDismissalsCompanion data) {
+    return RecurringDismissalRow(
+      dismissalKey: data.dismissalKey.present
+          ? data.dismissalKey.value
+          : this.dismissalKey,
+      dismissedAt: data.dismissedAt.present
+          ? data.dismissedAt.value
+          : this.dismissedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringDismissalRow(')
+          ..write('dismissalKey: $dismissalKey, ')
+          ..write('dismissedAt: $dismissedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(dismissalKey, dismissedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecurringDismissalRow &&
+          other.dismissalKey == this.dismissalKey &&
+          other.dismissedAt == this.dismissedAt);
+}
+
+class RecurringDismissalsCompanion
+    extends UpdateCompanion<RecurringDismissalRow> {
+  final Value<String> dismissalKey;
+  final Value<int> dismissedAt;
+  final Value<int> rowid;
+  const RecurringDismissalsCompanion({
+    this.dismissalKey = const Value.absent(),
+    this.dismissedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecurringDismissalsCompanion.insert({
+    required String dismissalKey,
+    required int dismissedAt,
+    this.rowid = const Value.absent(),
+  }) : dismissalKey = Value(dismissalKey),
+       dismissedAt = Value(dismissedAt);
+  static Insertable<RecurringDismissalRow> custom({
+    Expression<String>? dismissalKey,
+    Expression<int>? dismissedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (dismissalKey != null) 'dismissal_key': dismissalKey,
+      if (dismissedAt != null) 'dismissed_at': dismissedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecurringDismissalsCompanion copyWith({
+    Value<String>? dismissalKey,
+    Value<int>? dismissedAt,
+    Value<int>? rowid,
+  }) {
+    return RecurringDismissalsCompanion(
+      dismissalKey: dismissalKey ?? this.dismissalKey,
+      dismissedAt: dismissedAt ?? this.dismissedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (dismissalKey.present) {
+      map['dismissal_key'] = Variable<String>(dismissalKey.value);
+    }
+    if (dismissedAt.present) {
+      map['dismissed_at'] = Variable<int>(dismissedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringDismissalsCompanion(')
+          ..write('dismissalKey: $dismissalKey, ')
+          ..write('dismissedAt: $dismissedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -17888,6 +18183,9 @@ abstract class _$AppSchema extends GeneratedDatabase {
     'ix_recurring_account',
     'CREATE INDEX ix_recurring_account ON recurring_items (account_id) WHERE account_id IS NOT NULL',
   );
+  late final RecurringDismissals recurringDismissals = RecurringDismissals(
+    this,
+  );
   late final RecurringOccurrences recurringOccurrences = RecurringOccurrences(
     this,
   );
@@ -18047,6 +18345,7 @@ abstract class _$AppSchema extends GeneratedDatabase {
     recurringItems,
     ixRecurringDue,
     ixRecurringAccount,
+    recurringDismissals,
     recurringOccurrences,
     ixRecurringOccTxn,
     splitParticipants,
@@ -28283,6 +28582,7 @@ typedef $RecurringItemsCreateCompanionBuilder =
       Value<int> paidCount,
       Value<int> reminderDays,
       required int createdAt,
+      Value<int?> autoAddedAt,
       Value<int> rowid,
     });
 typedef $RecurringItemsUpdateCompanionBuilder =
@@ -28303,6 +28603,7 @@ typedef $RecurringItemsUpdateCompanionBuilder =
       Value<int> paidCount,
       Value<int> reminderDays,
       Value<int> createdAt,
+      Value<int?> autoAddedAt,
       Value<int> rowid,
     });
 
@@ -28430,6 +28731,11 @@ class $RecurringItemsFilterComposer
 
   ColumnFilters<int> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get autoAddedAt => $composableBuilder(
+    column: $table.autoAddedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -28566,6 +28872,11 @@ class $RecurringItemsOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get autoAddedAt => $composableBuilder(
+    column: $table.autoAddedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $AccountsOrderingComposer get accountId {
     final $AccountsOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -28655,6 +28966,11 @@ class $RecurringItemsAnnotationComposer
 
   GeneratedColumn<int> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get autoAddedAt => $composableBuilder(
+    column: $table.autoAddedAt,
+    builder: (column) => column,
+  );
 
   $AccountsAnnotationComposer get accountId {
     final $AccountsAnnotationComposer composer = $composerBuilder(
@@ -28752,6 +29068,7 @@ class $RecurringItemsTableManager
                 Value<int> paidCount = const Value.absent(),
                 Value<int> reminderDays = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
+                Value<int?> autoAddedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RecurringItemsCompanion(
                 id: id,
@@ -28770,6 +29087,7 @@ class $RecurringItemsTableManager
                 paidCount: paidCount,
                 reminderDays: reminderDays,
                 createdAt: createdAt,
+                autoAddedAt: autoAddedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -28790,6 +29108,7 @@ class $RecurringItemsTableManager
                 Value<int> paidCount = const Value.absent(),
                 Value<int> reminderDays = const Value.absent(),
                 required int createdAt,
+                Value<int?> autoAddedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RecurringItemsCompanion.insert(
                 id: id,
@@ -28808,6 +29127,7 @@ class $RecurringItemsTableManager
                 paidCount: paidCount,
                 reminderDays: reminderDays,
                 createdAt: createdAt,
+                autoAddedAt: autoAddedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -28898,6 +29218,168 @@ typedef $RecurringItemsProcessedTableManager =
       (RecurringItemRow, $RecurringItemsReferences),
       RecurringItemRow,
       PrefetchHooks Function({bool accountId, bool recurringOccurrencesRefs})
+    >;
+typedef $RecurringDismissalsCreateCompanionBuilder =
+    RecurringDismissalsCompanion Function({
+      required String dismissalKey,
+      required int dismissedAt,
+      Value<int> rowid,
+    });
+typedef $RecurringDismissalsUpdateCompanionBuilder =
+    RecurringDismissalsCompanion Function({
+      Value<String> dismissalKey,
+      Value<int> dismissedAt,
+      Value<int> rowid,
+    });
+
+class $RecurringDismissalsFilterComposer
+    extends Composer<_$AppSchema, RecurringDismissals> {
+  $RecurringDismissalsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get dismissalKey => $composableBuilder(
+    column: $table.dismissalKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dismissedAt => $composableBuilder(
+    column: $table.dismissedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $RecurringDismissalsOrderingComposer
+    extends Composer<_$AppSchema, RecurringDismissals> {
+  $RecurringDismissalsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get dismissalKey => $composableBuilder(
+    column: $table.dismissalKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get dismissedAt => $composableBuilder(
+    column: $table.dismissedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $RecurringDismissalsAnnotationComposer
+    extends Composer<_$AppSchema, RecurringDismissals> {
+  $RecurringDismissalsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get dismissalKey => $composableBuilder(
+    column: $table.dismissalKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get dismissedAt => $composableBuilder(
+    column: $table.dismissedAt,
+    builder: (column) => column,
+  );
+}
+
+class $RecurringDismissalsTableManager
+    extends
+        RootTableManager<
+          _$AppSchema,
+          RecurringDismissals,
+          RecurringDismissalRow,
+          $RecurringDismissalsFilterComposer,
+          $RecurringDismissalsOrderingComposer,
+          $RecurringDismissalsAnnotationComposer,
+          $RecurringDismissalsCreateCompanionBuilder,
+          $RecurringDismissalsUpdateCompanionBuilder,
+          (
+            RecurringDismissalRow,
+            BaseReferences<
+              _$AppSchema,
+              RecurringDismissals,
+              RecurringDismissalRow
+            >,
+          ),
+          RecurringDismissalRow,
+          PrefetchHooks Function()
+        > {
+  $RecurringDismissalsTableManager(_$AppSchema db, RecurringDismissals table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $RecurringDismissalsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $RecurringDismissalsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $RecurringDismissalsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> dismissalKey = const Value.absent(),
+                Value<int> dismissedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RecurringDismissalsCompanion(
+                dismissalKey: dismissalKey,
+                dismissedAt: dismissedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String dismissalKey,
+                required int dismissedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => RecurringDismissalsCompanion.insert(
+                dismissalKey: dismissalKey,
+                dismissedAt: dismissedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<RecurringDismissals, RecurringDismissalRow>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppSchema,
+                    RecurringDismissals,
+                    RecurringDismissalRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $RecurringDismissalsProcessedTableManager =
+    ProcessedTableManager<
+      _$AppSchema,
+      RecurringDismissals,
+      RecurringDismissalRow,
+      $RecurringDismissalsFilterComposer,
+      $RecurringDismissalsOrderingComposer,
+      $RecurringDismissalsAnnotationComposer,
+      $RecurringDismissalsCreateCompanionBuilder,
+      $RecurringDismissalsUpdateCompanionBuilder,
+      (
+        RecurringDismissalRow,
+        BaseReferences<_$AppSchema, RecurringDismissals, RecurringDismissalRow>,
+      ),
+      RecurringDismissalRow,
+      PrefetchHooks Function()
     >;
 typedef $RecurringOccurrencesCreateCompanionBuilder =
     RecurringOccurrencesCompanion Function({
@@ -31435,6 +31917,8 @@ class $AppSchemaManager {
       $CycleSummariesTableManager(_db, _db.cycleSummaries);
   $RecurringItemsTableManager get recurringItems =>
       $RecurringItemsTableManager(_db, _db.recurringItems);
+  $RecurringDismissalsTableManager get recurringDismissals =>
+      $RecurringDismissalsTableManager(_db, _db.recurringDismissals);
   $RecurringOccurrencesTableManager get recurringOccurrences =>
       $RecurringOccurrencesTableManager(_db, _db.recurringOccurrences);
   $SplitParticipantsTableManager get splitParticipants =>

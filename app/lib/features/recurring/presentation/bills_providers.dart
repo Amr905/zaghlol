@@ -102,6 +102,13 @@ class BillsActions {
     _changed();
   }
 
+  /// "Not a bill": removes an auto-added item for good.
+  Future<bool> notABill(String id) async {
+    final ok = await (await _repo).notABill(id);
+    _changed();
+    return ok;
+  }
+
   Future<bool> markPaid(String id, {String? expectedDue}) async {
     final ok = await (await _repo).markPaidManual(id, expectedDue: expectedDue);
     _changed();

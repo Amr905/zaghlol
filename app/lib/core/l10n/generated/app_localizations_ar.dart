@@ -4095,6 +4095,41 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get recurringBillsAutoAdded => 'اتضافت لوحدها';
+
+  @override
+  String get recurringBillsNotABill => 'مش فاتورة';
+
+  @override
+  String recurringBillsNotABillDone(String name) {
+    return 'تمام، مش هضيف $name تاني';
+  }
+
+  @override
+  String get notificationsAutoAddedTitle => 'ضفتلك فاتورة';
+
+  @override
+  String notificationsAutoAddedOne(String name) {
+    return 'لقيت إن $name بتتخصم كل فترة، فضفتها في الفواتير. لو مش فاتورة شيلها بضغطة.';
+  }
+
+  @override
+  String notificationsAutoAddedMany(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'لقيت $n فاتورة بتتخصم كل فترة وضفتهم في الفواتير.',
+      many: 'لقيت $n فاتورة بتتخصم كل فترة وضفتهم في الفواتير.',
+      few: 'لقيت $n فواتير بتتخصم كل فترة وضفتهم في الفواتير.',
+      two: 'لقيت فاتورتين بتتخصم كل فترة وضفتهم في الفواتير.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notificationsAutoAddedHidden => 'ضفتلك فاتورة جديدة في الفواتير.';
+
+  @override
   String recurringBillsRowA11y(String name, String amount, String status) {
     return '$name، $amount، $status';
   }

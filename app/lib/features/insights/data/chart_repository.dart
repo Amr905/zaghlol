@@ -770,13 +770,9 @@ class ChartRepository {
     ];
   }
 
-  RecurrenceCadence _cadence(RecurringItemRow r) => switch (r.cadence) {
-    'monthly' => RecurrenceCadence.monthly,
-    'yearly' => RecurrenceCadence.yearly,
-    'weekly' => RecurrenceCadence.weekly,
-    'custom_days' => RecurrenceCadence.customDays,
-    _ => throw const FormatException('RECURRING_ROW_CORRUPT'),
-  };
+  RecurrenceCadence _cadence(RecurringItemRow r) =>
+      RecurrenceCadence.fromCode(r.cadence) ??
+      (throw const FormatException('RECURRING_ROW_CORRUPT'));
 
   // ------------------------------------------------ 8 installment timeline
 

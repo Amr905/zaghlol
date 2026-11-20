@@ -21,6 +21,12 @@ class FakeActions implements BillsActions {
   @override
   Future<void> dismiss(String id) async => calls.add('dismiss:$id');
   @override
+  Future<bool> notABill(String id) async {
+    calls.add('notABill:$id');
+    return true;
+  }
+
+  @override
   Future<bool> markPaid(String id, {String? expectedDue}) async {
     calls.add('paid:$id');
     return true;
@@ -42,6 +48,7 @@ BillRowView bill(
   int days, {
   int paid = 0,
   int? total,
+  bool autoAdded = false,
 }) {
   final due = CivilDate(2026, 11, 13).plusDays(days);
   return BillRowView(
@@ -58,6 +65,7 @@ BillRowView bill(
         : BillTiming.upcoming,
     paidCount: paid,
     totalCount: total,
+    autoAdded: autoAdded,
   );
 }
 
@@ -66,7 +74,7 @@ BillsViewData full() => BillsViewData(
   upcoming: [
     bill('late', 'installment', 1000, -2, paid: 2, total: 6),
     bill('card', 'card_due', 1450, 2),
-    bill('gym', 'subscription', 750, 7),
+    bill('gym', 'subscription', 750, 7, autoAdded: true),
     bill('gam', 'gameya', 2000, 9, paid: 1, total: 10),
   ],
   subscriptions: [
@@ -149,6 +157,41 @@ void main() {
     expect(fake.calls, ['accept:sug', 'dismiss:sug', 'paid:late']);
     expect(find.text('Marked late as paid ✓'), findsOneWidget);
   });
+
+  for (final locale in const [Locale('ar', 'EG'), Locale('en')]) {
+    final en = locale.languageCode == 'en';
+    testWidgets('T-196: an auto-added bill shows the badge and one-tap '
+        'Not a bill (${locale.languageCode})', (tester) async {
+      final fake = FakeActions();
+      await tester.binding.setSurfaceSize(const Size(390, 2600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        harness(
+          const BillsScreen(),
+          locale: locale,
+          overrides: [
+            billsDataProvider.overrideWith((ref) async => full()),
+            billsActionsProvider.overrideWithValue(fake),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      final badge = en ? 'Added automatically' : 'اتضافت لوحدها';
+      final undo = en ? 'Not a bill' : 'مش فاتورة';
+      // Only the auto-added row (gym) has them.
+      expect(find.text(badge), findsOneWidget);
+      expect(find.text(undo), findsOneWidget);
+      await tester.tap(find.text(undo));
+      await tester.pumpAndSettle();
+      expect(fake.calls, ['notABill:gym']);
+      expect(
+        find.text(
+          en ? "Got it, I won't add gym again" : 'تمام، مش هضيف gym تاني',
+        ),
+        findsOneWidget,
+      );
+    });
+  }
 
   testWidgets('FU-217a: a bill row reads once, the pill stays a button', (
     tester,

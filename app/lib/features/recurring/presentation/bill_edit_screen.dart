@@ -112,12 +112,9 @@ class _BillFormState extends ConsumerState<BillForm> {
     _paid = TextEditingController(text: '${r?.paidCount ?? 0}');
     _total = TextEditingController(text: r?.totalCount?.toString() ?? '');
     _currency = r?.currency ?? 'EGP';
-    _cadence = switch (r?.cadence) {
-      'yearly' => RecurrenceCadence.yearly,
-      'weekly' => RecurrenceCadence.weekly,
-      'custom_days' => RecurrenceCadence.customDays,
-      _ => RecurrenceCadence.monthly,
-    };
+    _cadence =
+        RecurrenceCadence.fromCode(r?.cadence ?? '') ??
+        RecurrenceCadence.monthly;
     _cadenceDays = r?.cadenceDays;
     _due = r == null ? null : CivilDate.tryParse(r.nextDueDate ?? '');
     _remind = r?.reminderDays ?? defaultReminderDays;
@@ -268,6 +265,8 @@ class _BillFormState extends ConsumerState<BillForm> {
     ];
     final cadences = [
       (RecurrenceCadence.monthly, l.commonCadenceMonthly),
+      (RecurrenceCadence.quarterly, l.commonCadenceQuarterly),
+      (RecurrenceCadence.semiAnnual, l.commonCadenceSemiannual),
       (RecurrenceCadence.weekly, l.commonCadenceWeekly),
       (RecurrenceCadence.yearly, l.commonCadenceYearly),
     ];

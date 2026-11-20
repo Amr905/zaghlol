@@ -17,6 +17,7 @@ import '../../budget/application/cycle_app_wiring.dart'
 import '../../budget/data/payday_schedule_store.dart' show localToday;
 import '../../capture/application/capture_providers.dart'
     show ingestionPauseGateProvider;
+import '../../recurring/application/notify_auto_added.dart';
 import '../../recurring/application/send_due_reminders.dart';
 import '../../recurring/data/recurring_repository.dart';
 import '../../transactions/application/dangling_links_sweep.dart';
@@ -141,8 +142,35 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
       (
         name: 'recurring_detect',
         run: () async {
-          await (await recurring()).detectAndSuggest(
+          // D-72: chains every 1, 3, 6 or 12 months are added as bills; one
+          // notice per run says so.
+          final added = await (await recurring()).detectAndAutoAdd(
             shouldStop: restoreWaiting,
+          );
+          if (added.isEmpty || restoreWaiting()) return;
+          final now = ref.read(clockProvider)().toUtc().millisecondsSinceEpoch;
+          final today = localToday(now, ref.read(localZoneProvider));
+          final l = notificationL10n(ref);
+          final digits = ref.read(digitsModeProvider(l.localeName));
+          await notifyAutoAdded(
+            added: added,
+            notifications: await ref.read(notificationServiceProvider.future),
+            periodKey: today.toIso(),
+            buildText: (items, base) => AlertRequest(
+              type: base.type,
+              subjectId: base.subjectId,
+              periodKey: base.periodKey,
+              title: l.notificationsAutoAddedTitle,
+              body: items.length == 1
+                  ? l.notificationsAutoAddedOne(items.single.name)
+                  : l.notificationsAutoAddedMany(
+                      items.length,
+                      digits.render('${items.length}'),
+                    ),
+              redactedTitle: l.notificationsAutoAddedTitle,
+              redactedBody: l.notificationsAutoAddedHidden,
+              payload: base.payload,
+            ),
           );
         },
       ),

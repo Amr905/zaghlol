@@ -456,10 +456,64 @@ class _BillRow extends ConsumerWidget {
                 ),
                 if (view.canMarkPaid && big)
                   Align(alignment: AlignmentDirectional.centerEnd, child: pill),
+                if (view.autoAdded)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
+                    child: Wrap(
+                      spacing: ZSpacing.sm,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _AutoAddedBadge(label: l.recurringBillsAutoAdded),
+                        ZButton(
+                          label: l.recurringBillsNotABill,
+                          variant: ZButtonVariant.text,
+                          onPressed: () async {
+                            final ok = await ref
+                                .read(billsActionsProvider)
+                                .notABill(view.id);
+                            if (ok && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l.recurringBillsNotABillDone(view.name),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "Added by itself" tag on an auto-added bill (T-196, D-72). The word is
+/// the cue; the colour only supports it.
+class _AutoAddedBadge extends StatelessWidget {
+  const _AutoAddedBadge({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.primaryContainer,
+        borderRadius: BorderRadius.circular(ZRadius.pill),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ZSpacing.md,
+          vertical: ZSpacing.xs,
+        ),
+        child: Text(label, style: ZType.caption.copyWith(color: c.primary)),
       ),
     );
   }

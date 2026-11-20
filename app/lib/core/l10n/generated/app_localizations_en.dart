@@ -4000,6 +4000,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get recurringBillsAutoAdded => 'Added automatically';
+
+  @override
+  String get recurringBillsNotABill => 'Not a bill';
+
+  @override
+  String recurringBillsNotABillDone(String name) {
+    return 'Got it, I won\'t add $name again';
+  }
+
+  @override
+  String get notificationsAutoAddedTitle => 'A bill was added';
+
+  @override
+  String notificationsAutoAddedOne(String name) {
+    return '$name gets charged regularly, so it was added to your bills. Not a bill? Remove it with one tap.';
+  }
+
+  @override
+  String notificationsAutoAddedMany(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n regular charges were added to your bills.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notificationsAutoAddedHidden =>
+      'A new bill was added to your bills.';
+
+  @override
   String recurringBillsRowA11y(String name, String amount, String status) {
     return '$name, $amount, $status';
   }

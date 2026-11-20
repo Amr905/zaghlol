@@ -64,12 +64,16 @@ int medianMinor(List<int> values) {
 int isoWeekday(int epochDay) => ((epochDay + 3) % 7 + 7) % 7 + 1;
 
 /// The cost over twelve months of one charge every [cadence] (BR-SUB-02:
-/// monthly x12). Weekly x52; a custom cycle of N days is amount x 365 / N,
+/// monthly x12, every 3 months x4, every 6 months x2). Weekly x52; a custom cycle of N days is amount x 365 / N,
 /// rounded half up.
 Money annualCost(Money amount, RecurrenceCadence cadence, {int? days}) {
   switch (cadence) {
     case RecurrenceCadence.monthly:
       return amount.times(12);
+    case RecurrenceCadence.quarterly:
+      return amount.times(4);
+    case RecurrenceCadence.semiAnnual:
+      return amount.times(2);
     case RecurrenceCadence.yearly:
       return amount;
     case RecurrenceCadence.weekly:

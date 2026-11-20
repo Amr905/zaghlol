@@ -5818,6 +5818,48 @@ abstract class AppLocalizations {
   /// **'اتسجل إن {name} اتدفع ✓'**
   String recurringBillsPaidSnack(String name);
 
+  /// B · tag on a bill that zaghlol found and added by itself
+  ///
+  /// In ar, this message translates to:
+  /// **'اتضافت لوحدها'**
+  String get recurringBillsAutoAdded;
+
+  /// B · one-tap undo on an auto-added bill
+  ///
+  /// In ar, this message translates to:
+  /// **'مش فاتورة'**
+  String get recurringBillsNotABill;
+
+  /// N · name
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام، مش هضيف {name} تاني'**
+  String recurringBillsNotABillDone(String name);
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'ضفتلك فاتورة'**
+  String get notificationsAutoAddedTitle;
+
+  /// N · name
+  ///
+  /// In ar, this message translates to:
+  /// **'لقيت إن {name} بتتخصم كل فترة، فضفتها في الفواتير. لو مش فاتورة شيلها بضغطة.'**
+  String notificationsAutoAddedOne(String name);
+
+  /// N · count:int, n · how many bills were added at once (two or more)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =2{لقيت فاتورتين بتتخصم كل فترة وضفتهم في الفواتير.} few{لقيت {n} فواتير بتتخصم كل فترة وضفتهم في الفواتير.} many{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.} other{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.}}'**
+  String notificationsAutoAddedMany(int count, String n);
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'ضفتلك فاتورة جديدة في الفواتير.'**
+  String get notificationsAutoAddedHidden;
+
   /// A · status = recurring_bills_dueToday / dueIn / overdue / paid
   ///
   /// In ar, this message translates to:

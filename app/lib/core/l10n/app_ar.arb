@@ -5498,6 +5498,52 @@
       }
     }
   },
+  "recurringBillsAutoAdded": "اتضافت لوحدها",
+  "@recurringBillsAutoAdded": {
+    "description": "B · tag on a bill that zaghlol found and added by itself"
+  },
+  "recurringBillsNotABill": "مش فاتورة",
+  "@recurringBillsNotABill": {
+    "description": "B · one-tap undo on an auto-added bill"
+  },
+  "recurringBillsNotABillDone": "تمام، مش هضيف {name} تاني",
+  "@recurringBillsNotABillDone": {
+    "description": "N · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedTitle": "ضفتلك فاتورة",
+  "@notificationsAutoAddedTitle": {
+    "description": "T"
+  },
+  "notificationsAutoAddedOne": "لقيت إن {name} بتتخصم كل فترة، فضفتها في الفواتير. لو مش فاتورة شيلها بضغطة.",
+  "@notificationsAutoAddedOne": {
+    "description": "N · name",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedMany": "{count, plural, =2{لقيت فاتورتين بتتخصم كل فترة وضفتهم في الفواتير.} few{لقيت {n} فواتير بتتخصم كل فترة وضفتهم في الفواتير.} many{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.} other{لقيت {n} فاتورة بتتخصم كل فترة وضفتهم في الفواتير.}}",
+  "@notificationsAutoAddedMany": {
+    "description": "N · count:int, n · how many bills were added at once (two or more)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationsAutoAddedHidden": "ضفتلك فاتورة جديدة في الفواتير.",
+  "@notificationsAutoAddedHidden": {
+    "description": "N"
+  },
   "recurringBillsRowA11y": "{name}، {amount}، {status}",
   "@recurringBillsRowA11y": {
     "description": "A · status = recurring_bills_dueToday / dueIn / overdue / paid",
