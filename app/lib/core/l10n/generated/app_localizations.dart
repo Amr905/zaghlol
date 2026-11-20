@@ -10925,6 +10925,174 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المبالغ مخفية في التطبيق كله، فالكارت هيطلع بالنسب بس. اظهرها من الأيقونة اللي جنب المبالغ.'**
   String get shareStudioShowAmountsLocked;
+
+  /// Home row title
+  ///
+  /// In ar, this message translates to:
+  /// **'المرتب — متوقع'**
+  String get salaryExpectedTitle;
+
+  /// Home row subtitle · day
+  ///
+  /// In ar, this message translates to:
+  /// **'ميعاده يوم {day} · مش محسوب لحد ما يتأكد'**
+  String salaryExpectedSub(String day);
+
+  /// Home row button
+  ///
+  /// In ar, this message translates to:
+  /// **'نزل'**
+  String get salaryActionArrived;
+
+  /// Home row button
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه'**
+  String get salaryActionNotYet;
+
+  /// Home row button
+  ///
+  /// In ar, this message translates to:
+  /// **'تخطي الشهر ده'**
+  String get salaryActionSkip;
+
+  /// Snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجل المرتب'**
+  String get salaryRecorded;
+
+  /// Snackbar error
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفتش أسجل المرتب. جرب تاني.'**
+  String get salaryErrorGeneric;
+
+  /// Dialog title
+  ///
+  /// In ar, this message translates to:
+  /// **'في مبلغ نزل قبل كده'**
+  String get salaryFoundTitle;
+
+  /// Dialog body · amount
+  ///
+  /// In ar, this message translates to:
+  /// **'في دخل بـ {amount} نزل في ميعاد المرتب. هو ده المرتب؟'**
+  String salaryFoundBody(String amount);
+
+  /// Dialog button
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه، هو ده'**
+  String get salaryFoundYes;
+
+  /// Dialog button
+  ///
+  /// In ar, this message translates to:
+  /// **'لأ، دخل تاني'**
+  String get salaryFoundNo;
+
+  /// Add-income switch
+  ///
+  /// In ar, this message translates to:
+  /// **'ده مرتب'**
+  String get salaryAddSwitch;
+
+  /// Add-income switch hint
+  ///
+  /// In ar, this message translates to:
+  /// **'لو رسالة البنك وصلت بعد كده، هتتحسب مرة واحدة بس'**
+  String get salaryAddSwitchHint;
+
+  /// Transaction detail line
+  ///
+  /// In ar, this message translates to:
+  /// **'المرتب ده اتدمج مع اللي سجلته'**
+  String get salaryMergedTitle;
+
+  /// Transaction detail button
+  ///
+  /// In ar, this message translates to:
+  /// **'رجّع اللي سجلته'**
+  String get salaryMergedUndo;
+
+  /// Snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'رجعنا اللي سجلته'**
+  String get salaryMergedUndone;
+
+  /// Snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي سجلته اتمسح ومينفعش يرجع'**
+  String get salaryMergedGone;
+
+  /// Settings row and sheet title
+  ///
+  /// In ar, this message translates to:
+  /// **'مرتبي'**
+  String get settingsSalaryTitle;
+
+  /// Settings row subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيفه وزغلول يتابعه معاك'**
+  String get settingsSalaryUnset;
+
+  /// Settings row subtitle · amount, day
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} · يوم {day}'**
+  String settingsSalarySummary(String amount, String day);
+
+  /// Sheet field
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ'**
+  String get settingsSalaryAmount;
+
+  /// Sheet field
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم القبض (١–٢٨)'**
+  String get settingsSalaryDay;
+
+  /// Sheet field
+  ///
+  /// In ar, this message translates to:
+  /// **'بينزل فين'**
+  String get settingsSalaryAccount;
+
+  /// Sheet account choice (default cash account)
+  ///
+  /// In ar, this message translates to:
+  /// **'الكاش'**
+  String get settingsSalaryAccountDefault;
+
+  /// Sheet button
+  ///
+  /// In ar, this message translates to:
+  /// **'شيل المرتب'**
+  String get settingsSalaryRemove;
+
+  /// Sheet error
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب مبلغ صح ويوم من ١ لـ ٢٨'**
+  String get settingsSalaryInvalid;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'المرتب نزل؟'**
+  String get notificationsSalaryNudgeTitle;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مجاليش رسالة بالمرتب. لو نزل، سجّله من الرئيسية بضغطة.'**
+  String get notificationsSalaryNudgeBody;
 }
 
 class _AppLocalizationsDelegate

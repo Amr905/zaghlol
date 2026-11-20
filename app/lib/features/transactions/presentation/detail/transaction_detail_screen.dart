@@ -6,6 +6,7 @@
 // shown in ink, never red. The raw message ("How Zaghlol read this") is
 // sensitive: shown on screen only, never logged.
 
+import '../../../salary/presentation/salary_merged_banner.dart';
 import '../../../categorization/presentation/category_visuals.dart';
 
 import 'package:flutter/foundation.dart';
@@ -621,6 +622,7 @@ class _Body extends StatelessWidget {
               onAction: counterpart == null ? null : onUnlink,
             ),
           ),
+        SalaryMergedBanner(txnId: t.id),
         Column(
           children: [
             ZCategoryTile(

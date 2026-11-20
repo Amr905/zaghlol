@@ -17,6 +17,7 @@ import '../../../core/ui/z_components.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../../security/domain/app_lock_controller.dart';
+import '../../salary/presentation/salary_settings.dart';
 import 'settings_widgets.dart';
 
 /// Lock timeouts offered (A-10): at once, 1, 5 and 15 minutes.
@@ -202,6 +203,7 @@ class PreferencesScreen extends ConsumerWidget {
         SettingsSection(
           children: [
             const _PaydayRow(),
+            const SalarySettingsRow(),
             _IncomeRow(
               currency: currency ?? Settings.primaryCurrency.defaultValue,
             ),

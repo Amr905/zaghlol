@@ -12,6 +12,11 @@ final class InsightsTarget extends NotificationTarget {
   const InsightsTarget();
 }
 
+/// The Home tab (the salary nudge).
+final class HomeTarget extends NotificationTarget {
+  const HomeTarget();
+}
+
 /// One transaction (duplicate-charge alerts).
 final class TransactionTarget extends NotificationTarget {
   const TransactionTarget(this.id);
@@ -39,6 +44,8 @@ final _date = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 NotificationTarget? notificationTargetFor(String? route) {
   if (route == null || route.length > 96) return null;
   switch (route) {
+    case '/home':
+      return const HomeTarget();
     case '/budget':
     case '/insights':
       return const InsightsTarget();

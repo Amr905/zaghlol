@@ -51,6 +51,25 @@ abstract final class Settings {
   /// and equals the last era's day. Written first by `setPayday`.
   static final paydayEras = SettingKey.paydaySchedule('payday_eras');
 
+  /// T-195 (D-71): "My salary" (amount, currency, payday, account); unset
+  /// is null and the feature is off. Not a transaction: the expected salary
+  /// is in no total until a real transaction is tied to it.
+  static final salaryPlan = SettingKey.custom<SalaryPlan?>(
+    'salary.plan',
+    byDefault: null,
+    decode: SalaryPlan.tryFromJson,
+    encode: (v) => v?.toJson() ?? '',
+  );
+
+  /// T-195: the salary matcher's memory (entries tied to a payday, skipped
+  /// paydays, declined merges). Always readable: bad text reads as empty.
+  static final salaryState = SettingKey.custom<SalaryState>(
+    'salary.state',
+    byDefault: SalaryState.empty,
+    decode: SalaryState.fromJson,
+    encode: (v) => v.toJson(),
+  );
+
   /// Optional (FR-ONB-03); unset is null.
   static final incomeTarget = SettingKey.optionalMoney('income_target');
 

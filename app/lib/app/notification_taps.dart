@@ -117,6 +117,8 @@ void openNotificationTarget(
   Future<void> Function(String id, String dueDate)? markPaid,
 }) {
   switch (target) {
+    case HomeTarget():
+      router(AppRoutes.home);
     case InsightsTarget():
       router(AppRoutes.insights);
     case TransactionTarget(:final id):

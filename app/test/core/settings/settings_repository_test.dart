@@ -32,6 +32,20 @@ allKeys = [
     other: PaydaySchedule.single(25).withChange(CivilDate(2026, 11, 10), 1),
   ),
   (key: Settings.incomeTarget, byDefault: null, other: Money(kwd, 1234567)),
+  (
+    key: Settings.salaryPlan,
+    byDefault: null,
+    other: SalaryPlan.tryCreate(
+      amount: Money(kwd, 1234567),
+      day: 25,
+      accountId: 'acc-1',
+    ),
+  ),
+  (
+    key: Settings.salaryState,
+    byDefault: SalaryState.empty,
+    other: SalaryState.empty.withSkipped(CivilDate(2026, 11, 25)),
+  ),
   (key: Settings.primaryCurrency, byDefault: egp, other: kwd),
   (key: Settings.approxViewEnabled, byDefault: false, other: true),
   (key: Settings.approxViewTarget, byDefault: egp, other: Currency.of('USD')),
