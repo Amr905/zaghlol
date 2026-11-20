@@ -15,6 +15,7 @@ BACKEND="$REPO/backend"
 WORKER="$BACKEND/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll"
 TESTS="$BACKEND/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj"
 NAME="zaghlol-openbao-live"
+NET="zaghlol-openbao-live-kms"
 ADDR="https://127.0.0.1:8200"
 W="$(mktemp -d /tmp/zaghlol-openbao.XXXXXX)"
 chmod 0700 "$W"
@@ -25,6 +26,7 @@ umask 077
 cleanup() {
   docker logs "$NAME" >"$W/openbao.log" 2>&1 || true
   docker rm -f "$NAME" >/dev/null 2>&1 || true
+  docker network rm "$NET" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
@@ -66,19 +68,20 @@ openssl x509 -req -in "$W/server.csr" -CA "$W/tls/ca.pem" -CAkey "$W/ca-key.pem"
 # Hex, no newline: a raw 32-byte key could start or end with a white-space byte that the file:// reader may trim.
 openssl rand -hex 32 | tr -d '\n' >"$W/unseal/unseal.key"
 cp "$BACKEND/deploy/openbao/openbao.hcl" "$W/config/openbao.hcl"
-# The CI container is reached on 127.0.0.1 (published port), not the "openbao" network name.
-sed -i 's#^api_addr .*#api_addr     = "https://127.0.0.1:8200"#; s#^cluster_addr .*#cluster_addr = "https://127.0.0.1:8201"#' "$W/config/openbao.hcl"
+# Unchanged production config: other containers use https://openbao:8200 (network alias), the in-container CLI and the
+# tests (published port) use 127.0.0.1. Same certificate names as the runbook (deployment.md §3 step 1).
 chmod 0400 "$W"/tls/* "$W/unseal/unseal.key"
 chmod 0755 "$W/config"
 chmod 0644 "$W/config/openbao.hcl"
 echo "::endgroup::"
 
 echo "::group::start OpenBao ($IMAGE) with the production configuration"
-docker run -d --name "$NAME" --user "$(id -u):$(id -g)" --cap-drop ALL --security-opt no-new-privileges:true \
+docker network create "$NET" >/dev/null
+docker run -d --name "$NAME" --network "$NET" --network-alias openbao --user "$(id -u):$(id -g)" \
+  --cap-drop ALL --security-opt no-new-privileges:true --read-only --tmpfs /tmp \
   -p 127.0.0.1:8200:8200 -e HOME=/tmp \
   -v "$W/config:/openbao/config:ro" -v "$W/tls:/openbao/tls:ro" -v "$W/unseal:/openbao/unseal:ro" \
-  -v "$W/data:/openbao/data" -v "$W/audit:/openbao/audit" -v "$W/out:/out" \
-  -v "$BACKEND/deploy/openbao:/setup:ro" \
+  -v "$W/data:/openbao/data" -v "$W/audit:/openbao/audit" \
   --entrypoint bao "$IMAGE" server -config=/openbao/config/openbao.hcl >/dev/null
 for _ in $(seq 1 30); do
   code=$(curl -s -o /dev/null -w '%{http_code}' --cacert "$W/tls/ca.pem" "$ADDR/v1/sys/health" || true)
@@ -93,15 +96,21 @@ bao operator init -recovery-shares=1 -recovery-threshold=1 -format=json >"$W/ini
 BAO_TOKEN="$(jq -r .root_token "$W/init.json")"
 export BAO_TOKEN
 wait_active
-docker exec -e BAO_ADDR="$ADDR" -e BAO_CACERT=/openbao/tls/ca.pem -e HOME=/tmp -e BAO_TOKEN="$BAO_TOKEN" \
-  -e ZAGHLOL_KIDS="s2027a e2027a" -e ZAGHLOL_ENVELOPE_KEYS="envelope-2027" -e ZAGHLOL_LEGACY_ENVELOPE_KEYS="envelope" \
-  -e ZAGHLOL_BOUND_CIDRS="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" \
-  "$NAME" sh /setup/setup.sh apply /out
+# As in the runbook (deployment.md §3 step 3): a one-off container of the image on the kms network, BAO_ADDR by name.
+setup() {
+  docker run --rm --network "$NET" --user "$(id -u):$(id -g)" --read-only --tmpfs /tmp -e HOME=/tmp \
+    -e BAO_ADDR=https://openbao:8200 -e BAO_CACERT=/tls/ca.pem -e BAO_TOKEN="$BAO_TOKEN" \
+    -e ZAGHLOL_KIDS="s2027a e2027a" -e ZAGHLOL_ENVELOPE_KEYS="envelope-2027" -e ZAGHLOL_LEGACY_ENVELOPE_KEYS="envelope" \
+    -e ZAGHLOL_BOUND_CIDRS="${1-10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}" \
+    -v "$W/tls/ca.pem:/tls/ca.pem:ro" -v "$BACKEND/deploy/openbao:/setup:ro" -v "$W/out:/setup-out" \
+    --entrypoint sh "$IMAGE" /setup/setup.sh apply /setup-out
+}
+# S2: without bound CIDRs the set-up refuses.
+if setup "" >"$W/unbound.log" 2>&1; then echo "setup.sh accepted empty ZAGHLOL_BOUND_CIDRS" >&2; exit 1; fi
+grep -q "ZAGHLOL_BOUND_CIDRS is required" "$W/unbound.log"
+setup
 # setup.sh is re-runnable: a second run changes nothing and keeps the secret-ids.
-docker exec -e BAO_ADDR="$ADDR" -e BAO_CACERT=/openbao/tls/ca.pem -e HOME=/tmp -e BAO_TOKEN="$BAO_TOKEN" \
-  -e ZAGHLOL_KIDS="s2027a e2027a" -e ZAGHLOL_ENVELOPE_KEYS="envelope-2027" -e ZAGHLOL_LEGACY_ENVELOPE_KEYS="envelope" \
-  -e ZAGHLOL_BOUND_CIDRS="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" \
-  "$NAME" sh /setup/setup.sh apply /out | grep "secret-id kept" >/dev/null
+setup | grep "secret-id kept" >/dev/null
 for role in api worker; do
   mkdir -p "$W/creds/$role"
   cp "$W/out/$role/role-id" "$W/out/$role/secret-id" "$W/creds/$role/"

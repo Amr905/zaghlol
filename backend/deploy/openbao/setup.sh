@@ -5,7 +5,8 @@
 #   setup.sh policy api|worker|keytool   print one policy (HCL) from the key lists below; needs no server
 #   setup.sh apply <out-dir>             create the mount, keys, policies, AppRoles, credentials and the key-tool token
 #
-# Runs inside the OpenBao container (the bao CLI), with BAO_ADDR, BAO_CACERT and an admin BAO_TOKEN in the environment.
+# Runs in a one-off container of the OpenBao image on the kms network (the bao CLI; deployment.md §3 step 3), with
+# BAO_ADDR=https://openbao:8200, BAO_CACERT and an admin BAO_TOKEN in the environment, and a writable <out-dir> mount.
 # Re-runnable: keys are never re-created or changed (Transit's create is a no-op on an existing key, and the type is
 # checked), roles and policies are rewritten, an existing secret-id file is kept. Nothing secret is printed: role-id,
 # secret-id and the key-tool token go to files under <out-dir> (umask 077).
@@ -16,7 +17,8 @@
 #   ZAGHLOL_HMAC_KEYS             hmac keys, imported by the key tool from the File keys (default "seat audit install-pepper")
 #   ZAGHLOL_ENVELOPE_KEYS         aes256-gcm96 envelope keys, created here (e.g. "envelope-2027")
 #   ZAGHLOL_LEGACY_ENVELOPE_KEYS  File envelope keys imported as file-<name>, decrypt only (e.g. "envelope"; may be empty)
-#   ZAGHLOL_BOUND_CIDRS           comma-separated CIDRs the AppRole secret-ids and tokens are bound to (the stack network)
+#   ZAGHLOL_BOUND_CIDRS           comma-separated CIDRs the AppRole secret-ids and tokens are bound to (the stack network);
+#                                 required by apply (review S2): unbound credentials would work from anywhere
 #   ZAGHLOL_AUDIT_FILE            only if no audit device is declared in openbao.hcl and API creation is allowed (CI)
 set -eu
 
@@ -147,10 +149,7 @@ ensure_key() {
 role() {
   name="$1"
   set -- token_policies="$name" token_no_default_policy=true token_type=service token_ttl=1h token_max_ttl=4h \
-    secret_id_num_uses=0 secret_id_ttl=0
-  if [ -n "$BOUND_CIDRS" ]; then
-    set -- "$@" secret_id_bound_cidrs="$BOUND_CIDRS" token_bound_cidrs="$BOUND_CIDRS"
-  fi
+    secret_id_num_uses=0 secret_id_ttl=0 secret_id_bound_cidrs="$BOUND_CIDRS" token_bound_cidrs="$BOUND_CIDRS"
   bao write "auth/approle/role/$name" "$@" >/dev/null
   echo "approle: $name"
 }
@@ -172,6 +171,7 @@ credentials() {
 apply() {
   out="$1"
   umask 077
+  [ -n "$BOUND_CIDRS" ] || die "ZAGHLOL_BOUND_CIDRS is required (the kms network, e.g. 172.30.53.0/24): secret-ids and tokens must be bound to it"
   mkdir -p "$out"
 
   bao status >/dev/null 2>&1 || die "OpenBao is sealed, uninitialised or unreachable (bao status)"

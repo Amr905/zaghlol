@@ -22,7 +22,7 @@ services:
       - /etc/zaghlol/openbao/unseal:/openbao/unseal:ro
       - /var/lib/zaghlol/openbao/data:/openbao/data
       - /var/lib/zaghlol/openbao/audit:/openbao/audit
-      - ./deploy/openbao:/setup:ro
+      # No permanent /setup mount: setup.sh runs once in a separate one-off container (deployment.md §3 step 3).
     read_only: true
     tmpfs:
       - /tmp
@@ -33,7 +33,8 @@ services:
     networks: [kms]
     restart: unless-stopped
     healthcheck:
-      # 200 = unsealed and active; anything else (sealed 503, uninitialised 501) is unhealthy.
+      # 200 = unsealed and active; anything else (sealed 503, uninitialised 501) is unhealthy. The server certificate carries
+      # IP:127.0.0.1 next to DNS:openbao for this check (deployment.md §3 step 1); other containers use https://openbao:8200.
       test: ["CMD", "bao", "status", "-address=https://127.0.0.1:8200", "-ca-cert=/openbao/tls/ca.pem"]
       interval: 10s
       timeout: 5s

@@ -4,7 +4,9 @@
 ui            = false
 disable_mlock = true # required with raft storage; run the host without swap or with encrypted swap (deployment.md §3)
 
-# Reachable only on the stack's private network (no published port). The certificate's names must include "openbao".
+# Reachable only on the stack's private network (no published port). The server certificate's names must be
+# DNS:openbao (how the api, worker and setup reach it) and IP:127.0.0.1 (the healthcheck and operator commands inside
+# the container); deployment.md §3 step 1 has the openssl commands. CI uses the same names.
 api_addr     = "https://openbao:8200"
 cluster_addr = "https://openbao:8201"
 
@@ -21,7 +23,8 @@ listener "tcp" {
   tls_min_version = "tls12"
 }
 
-# Auto-unseal with a 32-byte key file (OpenBao >= 2.4), written as 64 hex characters with no newline
+# Auto-unseal with a 32-byte key file (OpenBao >= 2.4); the file is owned by OpenBao's uid 1655, mode 0400, in a folder
+# only root controls, written as 64 hex characters with no newline
 # (openssl rand -hex 32 | tr -d '\n'); a raw binary key could be broken by white-space trimming. The file is root-controlled on the host, readable only by the
 # OpenBao container's user, never mounted into the api or worker; two offline encrypted copies (deployment.md §3).
 # Rotation: write the new key to a new file, set it as current_key with a new id, move the old one to previous_key, restart.
