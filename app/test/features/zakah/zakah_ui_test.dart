@@ -81,13 +81,14 @@ Future<void> pumpZakah(
   bool flag = true,
   bool gold = true,
   double scale = 1.0,
+  HideAmountsHarness? hideAmounts,
 }) async {
   await t.binding.setSurfaceSize(const Size(390, 1400));
   addTearDown(() => t.binding.setSurfaceSize(null));
   await t.pumpWidget(
     ProviderScope(
       overrides: [
-        ...amountsShown(),
+        ...(hideAmounts ?? HideAmountsHarness()).overrides,
         pricesClockProvider.overrideWithValue(() => _now),
         pricesRepositoryProvider.overrideWith((ref) async => env.prices),
         netWorthRepositoryProvider.overrideWith((ref) async => env.repo),
@@ -268,6 +269,23 @@ void main() {
         expect(find.text(l10n.zakahMainNisabNotReached), findsOneWidget);
         expect(find.byKey(const Key('zakah-below')), findsOneWidget);
         expect(find.byKey(const Key('zakah-totals')), findsNothing);
+      });
+
+      testWidgets('T-187: masking on: nisab, dues and lots show no digit', (
+        t,
+      ) async {
+        final env = await zEnv(t);
+        await seedAssets(env, t);
+        final h = HideAmountsHarness(hidden: true);
+        addTearDown(h.dispose);
+        await pumpZakah(
+          t,
+          env,
+          const ZakahScreen(),
+          locale: loc,
+          hideAmounts: h,
+        );
+        expectNoAmountDigits(t, allowLines: RegExp(r'^(The nisab is|النصاب)'));
       });
 
       testWidgets('populated: per-unit dues, hawl progress, mark paid', (

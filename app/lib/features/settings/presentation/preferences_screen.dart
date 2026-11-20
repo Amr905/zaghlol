@@ -190,6 +190,17 @@ class PreferencesScreen extends ConsumerWidget {
         ),
         SettingsSection(
           children: [
+            SettingsSwitchRow(
+              key: const ValueKey('prefs-hide-amounts'),
+              title: t.settingsPrefsHideAmounts,
+              subtitle: t.settingsPrefsHideAmountsHint,
+              value: ref.watch(hideAmountsAppProvider).value ?? false,
+              onChanged: (v) => _write(ref, Settings.hideAmountsApp, v),
+            ),
+          ],
+        ),
+        SettingsSection(
+          children: [
             const _PaydayRow(),
             _IncomeRow(
               currency: currency ?? Settings.primaryCurrency.defaultValue,

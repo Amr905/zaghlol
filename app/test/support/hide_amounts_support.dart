@@ -4,7 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/ui/z_money_text.dart';
 import 'package:zaghlol/core/settings/setting_key.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
@@ -52,3 +55,34 @@ class HideAmountsHarness {
 /// Overrides that read as "amounts shown" without a database; for tests of
 /// screens that are not about hiding.
 List<Override> amountsShown() => HideAmountsHarness().overrides;
+
+final _digitRe = RegExp(r'[0-9٠-٩]');
+
+/// Strings of every amount widget on screen: `ZMoneyText` and any `Text` that
+/// carries a currency or a gold unit.
+List<String> amountStrings(WidgetTester tester) => [
+  for (final w in tester.widgetList<ZMoneyText>(find.byType(ZMoneyText)))
+    '${w.text} ${w.unit ?? ''}',
+  for (final w in tester.widgetList<Text>(find.byType(Text)))
+    if (RegExp(r'EGP|USD|ج\.م|جم\b|\bg\b|جرام|عملة|coin')
+        .hasMatch(w.data ?? w.textSpan?.toPlainText() ?? ''))
+      w.data ?? w.textSpan!.toPlainText(),
+];
+
+/// Fails when an amount widget shows a digit (percentages may stay).
+/// A karat label is not an amount; [allowLines] names public constants (the
+/// nisab threshold) that may keep their digits.
+void expectNoAmountDigits(WidgetTester tester, {RegExp? allowLines}) {
+  final amounts = amountStrings(tester);
+  expect(amounts, isNotEmpty, reason: 'the screen shows amounts');
+  for (final a in amounts) {
+    if (allowLines != null && allowLines.hasMatch(a)) continue;
+    final noPct = a
+        .replaceAll(RegExp(r'[0-9٠-٩]+(?:[.٫][0-9٠-٩]+)?\s*[%٪]'), '')
+        .replaceAll(RegExp(r'[0-9٠-٩]+\s*K\b'), '')
+        .replaceAll(RegExp(r'[A-Za-z]{3,9} [0-9]{1,2}, [0-9]{4}'), '')
+        .replaceAll(RegExp(r'[0-9٠-٩]{1,2} \S+ [0-9٠-٩]{4}'), '')
+        .replaceAll(RegExp(r'عيار\s*[0-9٠-٩]+'), '');
+    expect(_digitRe.hasMatch(noPct), isFalse, reason: 'amount widget: $a');
+  }
+}

@@ -7388,4 +7388,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonAmountHidden => 'Amount hidden';
+
+  @override
+  String get settingsPrefsHideAmounts => 'Hide amounts in the app';
+
+  @override
+  String get settingsPrefsHideAmountsHint =>
+      'Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.';
 }

@@ -7531,4 +7531,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get commonAmountHidden => 'المبلغ مخفي';
+
+  @override
+  String get settingsPrefsHideAmounts => 'اخفي المبالغ في التطبيق';
+
+  @override
+  String get settingsPrefsHideAmountsHint =>
+      'كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.';
 }

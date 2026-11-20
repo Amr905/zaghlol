@@ -81,9 +81,10 @@ Widget _app(
   required double textScale,
   required bool dark,
   GlobalKey<NavigatorState>? navigatorKey,
+  HideAmountsHarness? hideAmounts,
 }) => ProviderScope(
   overrides: [
-    ...amountsShown(),
+    ...(hideAmounts ?? HideAmountsHarness()).overrides,
     txnLookupsProvider.overrideWith((ref) async => lookups),
     paydayScheduleProvider.overrideWith(
       (ref) async => PaydaySchedule.single(1),
@@ -126,6 +127,7 @@ Future<void> pumpDetail(
   double textScale = 1.0,
   bool dark = false,
   String id = 'a',
+  HideAmountsHarness? hideAmounts,
 }) async {
   await tester.binding.setSurfaceSize(const Size(390, 844));
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -158,6 +160,7 @@ Future<void> pumpDetail(
           ),
         ),
       ),
+      hideAmounts: hideAmounts,
       locale: locale,
       textScale: textScale,
       dark: dark,

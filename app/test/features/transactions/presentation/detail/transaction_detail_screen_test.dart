@@ -11,6 +11,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../detail_edit_harness.dart';
 import '../list/list_harness.dart';
+import '../../../../support/hide_amounts_support.dart';
 
 void main() {
   setUpAll(initDateFormatting);
@@ -18,6 +19,21 @@ void main() {
   Harness h() => Harness(FakeRepo([txnRec('a'), txnRec('b')]));
   AsyncValue<TxnDetail?> ok(TransactionRecord r, {String? raw}) =>
       AsyncData(detailOf(r, raw: raw));
+
+  testWidgets('T-187: masking on: the amount and the eye in the top bar', (
+    tester,
+  ) async {
+    final hide = HideAmountsHarness(hidden: true);
+    addTearDown(hide.dispose);
+    await pumpDetail(
+      tester,
+      h(),
+      detail: ok(txnRec('a'), raw: 'SYNTHETIC BANK: purchase 450.00 EGP'),
+      hideAmounts: hide,
+    );
+    expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
+    expectNoAmountDigits(tester, allowLines: RegExp('SYNTHETIC'));
+  });
 
   testWidgets('shows amount, merchant, category, card and fields (en)', (
     tester,

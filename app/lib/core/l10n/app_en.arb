@@ -7067,5 +7067,13 @@
   "commonAmountHidden": "Amount hidden",
   "@commonAmountHidden": {
     "description": "D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)"
+  },
+  "settingsPrefsHideAmounts": "Hide amounts in the app",
+  "@settingsPrefsHideAmounts": {
+    "description": "D-67 Preferences switch: hide every amount in the app"
+  },
+  "settingsPrefsHideAmountsHint": "Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.",
+  "@settingsPrefsHideAmountsHint": {
+    "description": "D-67 hint under the hide-amounts switch"
   }
 }

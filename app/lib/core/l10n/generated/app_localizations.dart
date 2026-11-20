@@ -10865,6 +10865,18 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المبلغ مخفي'**
   String get commonAmountHidden;
+
+  /// D-67 Preferences switch: hide every amount in the app
+  ///
+  /// In ar, this message translates to:
+  /// **'اخفي المبالغ في التطبيق'**
+  String get settingsPrefsHideAmounts;
+
+  /// D-67 hint under the hide-amounts switch
+  ///
+  /// In ar, this message translates to:
+  /// **'كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.'**
+  String get settingsPrefsHideAmountsHint;
 }
 
 class _AppLocalizationsDelegate

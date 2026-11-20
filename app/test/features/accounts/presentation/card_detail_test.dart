@@ -148,9 +148,10 @@ Widget host(
   double scale = 1.0,
   bool dark = false,
   List<IgnoreRuleRow> rules = const [],
+  HideAmountsHarness? hideAmounts,
 }) => ProviderScope(
   overrides: [
-    ...amountsShown(),
+    ...(hideAmounts ?? HideAmountsHarness()).overrides,
     txnLookupsProvider.overrideWith((ref) async => lookups),
     ignoreRulesStreamProvider.overrideWith((ref) => Stream.value(rules)),
     ...overrides,
@@ -194,6 +195,7 @@ Future<void> pumpDetail(
   bool dark = false,
   VoidCallback? onSeeAll,
   List<IgnoreRuleRow> rules = const [],
+  HideAmountsHarness? hideAmounts,
 }) async {
   await t.binding.setSurfaceSize(const Size(390, 1400));
   addTearDown(() => t.binding.setSurfaceSize(null));
@@ -205,12 +207,23 @@ Future<void> pumpDetail(
       scale: scale,
       dark: dark,
       rules: rules,
+      hideAmounts: hideAmounts,
     ),
   );
   await t.pumpAndSettle();
 }
 
 void main() {
+  testWidgets('T-187: masking on: card detail shows no digit in any amount', (
+    t,
+  ) async {
+    final h = HideAmountsHarness(hidden: true);
+    addTearDown(h.dispose);
+    await pumpDetail(t, overrides: detailOverrides(), hideAmounts: h);
+    expect(find.byKey(const Key('hide-amounts-toggle')), findsOneWidget);
+    expectNoAmountDigits(t);
+  });
+
   testWidgets('populated: limit, due date, donut total and sections', (
     t,
   ) async {
