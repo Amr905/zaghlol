@@ -42,3 +42,16 @@ final appLockTimeoutSProvider = settingProvider(Settings.appLockTimeoutS);
 final contributionOptInProvider = settingProvider(Settings.contributionOptIn);
 final scanDepthMonthsProvider = settingProvider(Settings.scanDepthMonths);
 final setupProgressProvider = settingProvider(Settings.setupProgress);
+
+/// The raw `hide_amounts.app` setting (D-67).
+final hideAmountsAppProvider = settingProvider(Settings.hideAmountsApp);
+
+/// Whether amounts are hidden now. Fails closed: while the setting loads or
+/// cannot be read the amounts stay hidden, so a restart never flashes real
+/// numbers to someone the phone is shown to.
+final hideAmountsProvider = Provider<bool>(
+  (ref) => ref
+      .watch(hideAmountsAppProvider)
+      .when(data: (v) => v, loading: () => true, error: (_, _) => true),
+  name: 'hideAmountsProvider',
+);

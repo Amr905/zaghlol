@@ -33,6 +33,7 @@ import '../../../voice/presentation/voice_logger_screen.dart';
 import 'txn_edit_providers.dart';
 import 'txn_form.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/settings/settings_providers.dart';
 
 const int _msPerDay = 86400000;
 
@@ -372,7 +373,11 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     if (dup == null || !mounted) return true;
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final fmt = TxnFmt(lang, ref.read(digitsModeProvider(lang)));
+    final fmt = TxnFmt(
+      lang,
+      ref.read(digitsModeProvider(lang)),
+      hidden: ref.read(hideAmountsProvider),
+    );
     final existing = dup;
     final choice = await showDialog<bool>(
       context: context,
@@ -517,7 +522,11 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final fmt = TxnFmt(lang, ref.watch(digitsModeProvider(lang)));
+    final fmt = TxnFmt(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
     final lk = ref.watch(txnLookupsProvider).value;
     final cash = ref.watch(defaultCashAccountIdProvider).value;
     if (_accountId == null && !_isEdit && lk != null) {

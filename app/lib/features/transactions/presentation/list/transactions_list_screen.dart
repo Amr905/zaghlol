@@ -30,6 +30,7 @@ import 'txn_filter_sheets.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/settings/settings_providers.dart';
 
 /// How long the search field waits after the last keystroke.
 const Duration txnSearchDebounce = Duration(milliseconds: 250);
@@ -97,7 +98,11 @@ class _State extends ConsumerState<TransactionsListScreen> {
 
   TxnFmt _fmt(BuildContext context) {
     final lang = Localizations.localeOf(context).languageCode;
-    return TxnFmt(lang, ref.watch(digitsModeProvider(lang)));
+    return TxnFmt(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
   }
 
   @override

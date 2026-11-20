@@ -28,6 +28,7 @@ import '../application/voice_controller.dart';
 import '../application/voice_models.dart';
 import '../application/voice_providers.dart';
 import '../../../core/ui/z_haptics.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Opens S-31 full screen over the current route.
 Future<void> showVoiceLogger(BuildContext context) =>
@@ -488,7 +489,11 @@ class _Parsed extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final fmt = TxnFmt(lang, ref.watch(digitsModeProvider(lang)));
+    final fmt = TxnFmt(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
     final lookups = ref.watch(txnLookupsProvider).value;
     final ctrl = ref.read(voiceControllerProvider.notifier);
     final count = state.drafts.length;

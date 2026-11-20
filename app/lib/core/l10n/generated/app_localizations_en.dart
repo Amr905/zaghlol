@@ -7379,4 +7379,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importFlowUnavailable => 'This source isn\'t ready yet';
+
+  @override
+  String get commonAmountsHide => 'Hide amounts';
+
+  @override
+  String get commonAmountsShow => 'Show amounts';
+
+  @override
+  String get commonAmountHidden => 'Amount hidden';
 }

@@ -940,7 +940,11 @@
   "insightsCoveredEarlier": "Paid from cash withdrawn earlier: {amount}",
   "@insightsCoveredEarlier": {
     "description": "Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)",
-    "placeholders": { "amount": { "type": "String" } }
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "insightsChartTitleCashFlow": "Cash flow",
   "@insightsChartTitleCashFlow": {
@@ -7051,5 +7055,17 @@
   "importFlowUnavailable": "This source isn't ready yet",
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
+  },
+  "commonAmountsHide": "Hide amounts",
+  "@commonAmountsHide": {
+    "description": "D-67 eye button label and tooltip: hide every amount in the app"
+  },
+  "commonAmountsShow": "Show amounts",
+  "@commonAmountsShow": {
+    "description": "D-67 eye button label and tooltip: show the amounts again"
+  },
+  "commonAmountHidden": "Amount hidden",
+  "@commonAmountHidden": {
+    "description": "D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)"
   }
 }

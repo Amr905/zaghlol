@@ -20,6 +20,7 @@ import '../../wealth/data/approx_view_providers.dart';
 import '../../wealth/domain/approx_view.dart';
 import '../domain/account.dart';
 import 'money_overview_provider.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Shown when there are no balances yet.
 final _zeroEgp = Money(Currency.of('EGP'), 0);
@@ -158,6 +159,7 @@ String _fmt(BuildContext context, WidgetRef ref, Money m) {
     m,
     languageCode: lang,
     digits: ref.watch(digitsModeProvider(lang)),
+    hidden: ref.watch(hideAmountsProvider),
     dropZeroFraction: true,
   );
 }
@@ -206,6 +208,7 @@ class _Hero extends ConsumerWidget {
                   totals[firstCur],
                   languageCode: lang,
                   digits: ref.watch(digitsModeProvider(lang)),
+                  hidden: ref.watch(hideAmountsProvider),
                   withCurrency: false,
                   dropZeroFraction: true,
                 ),

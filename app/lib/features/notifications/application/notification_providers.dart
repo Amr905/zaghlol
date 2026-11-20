@@ -143,6 +143,7 @@ String _money(Ref ref, Money m) {
     m,
     languageCode: lang,
     digits: ref.read(digitsModeProvider(lang)),
+    hidden: ref.read(hideAmountsProvider),
   );
 }
 
@@ -160,7 +161,7 @@ final notificationServiceProvider = FutureProvider<NotificationService>((
   final service = _service(ref, settings, fired);
   // FU-133: when amounts become hidden (the toggle or app lock), alerts
   // already waiting for quiet hours to end are re-scheduled redacted.
-  ref.listen(hideAmountsNotificationsProvider, (prev, next) {
+  void redact(AsyncValue<bool>? _, AsyncValue<bool> next) {
     if (next.value ?? false) {
       unawaited(
         service.redactScheduled().then<void>(
@@ -170,7 +171,11 @@ final notificationServiceProvider = FutureProvider<NotificationService>((
         ),
       );
     }
-  });
+  }
+
+  ref.listen(hideAmountsNotificationsProvider, redact);
+  // D-67: the app-wide eye toggle hides notification amounts too.
+  ref.listen(hideAmountsAppProvider, redact);
   return service;
 }, name: 'notificationServiceProvider');
 
@@ -194,7 +199,10 @@ NotificationService _service(
           startMin: await settings.get(Settings.quietHoursStartMin),
           endMin: await settings.get(Settings.quietHoursEndMin),
         ),
-        hideAmounts: await settings.get(Settings.hideAmountsNotifications),
+        // D-67: the app-wide eye toggle counts as well (OR).
+        hideAmounts:
+            await settings.get(Settings.hideAmountsNotifications) ||
+            await settings.get(Settings.hideAmountsApp),
       );
     },
     markFired:

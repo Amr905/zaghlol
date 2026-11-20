@@ -20,6 +20,7 @@ import '../../gold/application/gating.dart';
 import '../../wealth/presentation/asset_format.dart';
 import '../data/zakah_providers.dart';
 import '../data/zakah_repository.dart';
+import '../../../core/settings/settings_providers.dart';
 
 class ZakahScreen extends ConsumerWidget {
   const ZakahScreen({
@@ -237,19 +238,26 @@ String nativeText(
   String unit,
   int amount,
   String lang,
-  DigitsMode digits,
-) {
+  DigitsMode digits, {
+  required bool hidden,
+}) {
   if (unit == GoldSymbols.coin) {
     final n = amount ~/ 1000;
-    return l10n.wealthOverviewUnitCoins(n, digits.render('$n'));
+    return l10n.wealthOverviewUnitCoins(
+      n,
+      hidden ? kAmountMask : digits.render('$n'),
+    );
   }
   if (GoldSymbols.isGold(unit)) {
-    return l10n.commonUnitGrams(formatMilli(amount, digits));
+    return l10n.commonUnitGrams(
+      hidden ? kAmountMask : formatMilli(amount, digits),
+    );
   }
   return MoneyFormat.format(
     Money.fromStorage(amount, unit),
     languageCode: lang,
     digits: digits,
+    hidden: hidden,
   );
 }
 
@@ -300,6 +308,7 @@ class _NisabCard extends ConsumerWidget {
       r.nisab!,
       languageCode: lang,
       digits: digits,
+      hidden: ref.watch(hideAmountsProvider),
     );
     return ZCard(
       key: const Key('zakah-nisab'),
@@ -357,7 +366,14 @@ class _Totals extends ConsumerWidget {
           for (final u in units)
             Text(
               l10n.zakahMainDue(
-                nativeText(l10n, u, view.result.dueByUnit[u]!, lang, digits),
+                nativeText(
+                  l10n,
+                  u,
+                  view.result.dueByUnit[u]!,
+                  lang,
+                  digits,
+                  hidden: ref.watch(hideAmountsProvider),
+                ),
               ),
               style: ZType.titleSmall.copyWith(color: c.text),
             ),
@@ -372,9 +388,21 @@ class _LotCard extends ConsumerWidget {
   final ZakahView view;
   final ZakahLotView lot;
 
-  String _title(AppLocalizations l10n, String lang, DigitsMode digits) {
+  String _title(
+    AppLocalizations l10n,
+    String lang,
+    DigitsMode digits,
+    bool hidden,
+  ) {
     final l = lot.lot;
-    final amount = nativeText(l10n, l.unit, l.amount, lang, digits);
+    final amount = nativeText(
+      l10n,
+      l.unit,
+      l.amount,
+      lang,
+      digits,
+      hidden: hidden,
+    );
     switch (l.kind) {
       case ZakahLotKind.gold:
         if (l.unit == GoldSymbols.coin) {
@@ -400,7 +428,8 @@ class _LotCard extends ConsumerWidget {
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
     final r = lot.result;
-    final title = _title(l10n, lang, digits);
+    final hidden = ref.watch(hideAmountsProvider);
+    final title = _title(l10n, lang, digits, hidden);
     final due = r.status == ZakahLotStatus.due;
     final total = view.rules.hawlDays;
     final String hawl;
@@ -428,12 +457,24 @@ class _LotCard extends ConsumerWidget {
     String? cost;
     if (due && r.dueNative > 0) {
       dueLine = l10n.zakahMainDue(
-        nativeText(l10n, lot.lot.unit, r.dueNative, lang, digits),
+        nativeText(
+          l10n,
+          lot.lot.unit,
+          r.dueNative,
+          lang,
+          digits,
+          hidden: hidden,
+        ),
       );
       final k = r.costOfDue;
       if (k != null && k.currency != lot.lot.unit.toCurrencyOrNull) {
         cost = l10n.zakahMainDueCost(
-          MoneyFormat.format(k, languageCode: lang, digits: digits),
+          MoneyFormat.format(
+            k,
+            languageCode: lang,
+            digits: digits,
+            hidden: hidden,
+          ),
         );
       }
     }

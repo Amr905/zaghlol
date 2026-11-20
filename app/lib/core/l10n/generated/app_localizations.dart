@@ -10847,6 +10847,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المصدر ده لسه مش جاهز'**
   String get importFlowUnavailable;
+
+  /// D-67 eye button label and tooltip: hide every amount in the app
+  ///
+  /// In ar, this message translates to:
+  /// **'إخفاء المبالغ'**
+  String get commonAmountsHide;
+
+  /// D-67 eye button label and tooltip: show the amounts again
+  ///
+  /// In ar, this message translates to:
+  /// **'إظهار المبالغ'**
+  String get commonAmountsShow;
+
+  /// D-67 screen-reader text for an amount that is hidden (replaces the masked glyphs)
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ مخفي'**
+  String get commonAmountHidden;
 }
 
 class _AppLocalizationsDelegate

@@ -23,6 +23,7 @@ import 'budget_providers_ui.dart';
 import 'budget_view.dart';
 import 'edit_budgets_screen.dart';
 import '../../../core/ui/z_haptics.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Hosts [BudgetScreen] as a pushed route (Home hero tap). The screen itself is
 /// a tab body with no Scaffold, so on its own it renders without Material
@@ -185,6 +186,7 @@ String _money(WidgetRef ref, BuildContext context, Money m) {
       m,
       languageCode: lang,
       digits: ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
     ),
   );
 }

@@ -14,6 +14,7 @@ import '../../../../core/ui/z_components.dart';
 import '../../../transactions/presentation/list/txn_list_providers.dart';
 import '../../../transactions/presentation/list/txn_row.dart';
 import 'card_detail_providers.dart';
+import '../../../../core/settings/settings_providers.dart';
 
 const double _labelWidth = 120;
 const double _cellWidth = 104;
@@ -90,7 +91,11 @@ class CompareCardsScreen extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final fmt = TxnFmt(lang, ref.watch(digitsModeProvider(lang)));
+    final fmt = TxnFmt(
+      lang,
+      ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
+    );
     final lookups = ref.watch(txnLookupsProvider).value;
     String catName(String? id) {
       final cat = lookups?.category(id);

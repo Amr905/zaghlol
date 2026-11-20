@@ -33,6 +33,7 @@ import '../../data/review_repository.dart' show ReviewException;
 import 'review_models.dart';
 import 'review_providers.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/settings/settings_providers.dart';
 
 class ReviewScreen extends ConsumerStatefulWidget {
   const ReviewScreen({super.key});
@@ -458,9 +459,13 @@ Widget _amountLine(
 
 String _money(BuildContext context, Money m) {
   final lang = Localizations.localeOf(context).languageCode;
-  final digits = ProviderScope.containerOf(context)
-      .read(digitsModeProvider(lang));
-  return MoneyFormat.format(m, languageCode: lang, digits: digits);
+  final container = ProviderScope.containerOf(context);
+  return MoneyFormat.format(
+    m,
+    languageCode: lang,
+    digits: container.read(digitsModeProvider(lang)),
+    hidden: container.read(hideAmountsProvider),
+  );
 }
 
 /// Everything a one-tap Confirm stores beyond the guess line: the kind,

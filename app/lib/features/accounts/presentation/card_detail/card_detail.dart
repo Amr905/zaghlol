@@ -34,6 +34,7 @@ import '../edit_card/add_card_flow.dart';
 import '../edit_card/edit_card_providers.dart' show institutionOptionsProvider;
 import '../edit_card/merge_flow.dart';
 import 'card_detail_providers.dart';
+import '../../../../core/settings/settings_providers.dart';
 
 // ICU select keys of accountsDetailIgnoredBanner.
 const String _platformIos = 'ios';
@@ -109,7 +110,7 @@ class _State extends ConsumerState<CardDetailScreen> {
     );
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    final fmt = TxnFmt(lang, digits);
+    final fmt = TxnFmt(lang, digits, hidden: ref.watch(hideAmountsProvider));
     final name = formatAccountWithCard(account.label, account.last4);
     final data = ref.watch(
       cardDetailDataProvider((accountId: account.id, currency: cur.code)),

@@ -12,12 +12,15 @@ import '../../transactions/application/reimbursements.dart';
 import '../../transactions/application/transfer_pairing.dart';
 
 final class TransfersFmt {
-  const TransfersFmt(this.lang, this.digits);
+  const TransfersFmt(this.lang, this.digits, {required this.hidden});
   final String lang;
   final DigitsMode digits;
 
+  /// D-67: amounts show as `****`.
+  final bool hidden;
+
   String money(Money m) =>
-      MoneyFormat.format(m, languageCode: lang, digits: digits);
+      MoneyFormat.format(m, languageCode: lang, digits: digits, hidden: hidden);
   String date(DateTime d) => ZDateFormat.date(d, lang, digits);
   String count(int n) => digits.render('$n');
 

@@ -8,11 +8,16 @@ import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import 'transfers_format.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Locale-aware formatter for the current language and digit setting.
 TransfersFmt transfersFmtOf(BuildContext context, WidgetRef ref) {
   final lang = Localizations.localeOf(context).languageCode;
-  return TransfersFmt(lang, ref.watch(digitsModeProvider(lang)));
+  return TransfersFmt(
+    lang,
+    ref.watch(digitsModeProvider(lang)),
+    hidden: ref.watch(hideAmountsProvider),
+  );
 }
 
 /// Loading skeleton, shown while a sheet's data is read.

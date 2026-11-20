@@ -97,6 +97,7 @@ WidgetSnapshot buildWidgetSnapshot(WidgetSnapshotInput i) {
           safe,
           languageCode: i.languageCode,
           digits: i.digits,
+          hidden: masked,
         );
   final days = overview.daysRemaining;
   return WidgetSnapshot(

@@ -19,12 +19,15 @@ import 'txn_list_providers.dart';
 
 /// Locale-aware formatting shared by the rows and headers.
 final class TxnFmt {
-  const TxnFmt(this.lang, this.digits);
+  const TxnFmt(this.lang, this.digits, {required this.hidden});
   final String lang;
   final DigitsMode digits;
 
+  /// D-67: amounts show as `****`.
+  final bool hidden;
+
   String money(Money m) =>
-      MoneyFormat.format(m, languageCode: lang, digits: digits);
+      MoneyFormat.format(m, languageCode: lang, digits: digits, hidden: hidden);
   String count(int n) => digits.render('$n');
 }
 

@@ -6,6 +6,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/l10n/money_format.dart';
+import '../../../../core/settings/settings_providers.dart';
 
 String chartMoney(WidgetRef ref, BuildContext context, Money m) {
   final lang = Localizations.localeOf(context).languageCode;
@@ -14,6 +15,7 @@ String chartMoney(WidgetRef ref, BuildContext context, Money m) {
       m,
       languageCode: lang,
       digits: ref.watch(digitsModeProvider(lang)),
+      hidden: ref.watch(hideAmountsProvider),
     ),
   );
 }

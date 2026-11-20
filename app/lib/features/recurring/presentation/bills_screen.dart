@@ -22,6 +22,7 @@ import '../data/recurring_repository.dart';
 import 'bill_edit_screen.dart';
 import 'bills_providers.dart';
 import 'bills_view.dart';
+import '../../../core/settings/settings_providers.dart';
 
 /// Shown as the zero amount when nothing is due.
 final Currency _zeroCurrency = Currency.of('EGP');
@@ -77,13 +78,17 @@ class _Fmt {
   _Fmt(this.context, WidgetRef ref)
     : lang = Localizations.localeOf(context).languageCode {
     digits = ref.watch(digitsModeProvider(lang));
+    hidden = ref.watch(hideAmountsProvider);
   }
   final BuildContext context;
   final String lang;
   late final DigitsMode digits;
 
+  /// D-67: amounts show as `****`.
+  late final bool hidden;
+
   String money(Money m) => trimZeroFraction(
-    MoneyFormat.format(m, languageCode: lang, digits: digits),
+    MoneyFormat.format(m, languageCode: lang, digits: digits, hidden: hidden),
   );
 
   String num(int n) => digits.render('$n');

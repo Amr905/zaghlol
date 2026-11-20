@@ -7522,4 +7522,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get importFlowUnavailable => 'المصدر ده لسه مش جاهز';
+
+  @override
+  String get commonAmountsHide => 'إخفاء المبالغ';
+
+  @override
+  String get commonAmountsShow => 'إظهار المبالغ';
+
+  @override
+  String get commonAmountHidden => 'المبلغ مخفي';
 }

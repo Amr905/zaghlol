@@ -18,6 +18,7 @@ import '../../../core/ui/z_components.dart';
 import '../../gold/application/gating.dart';
 import 'asset_format.dart';
 import 'assets_providers.dart';
+import '../../../core/settings/settings_providers.dart';
 
 class AssetsSection extends ConsumerWidget {
   const AssetsSection({
@@ -261,8 +262,13 @@ class _AssetRow extends ConsumerWidget {
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    String money(Money m) =>
-        MoneyFormat.format(m, languageCode: lang, digits: digits);
+    final hidden = ref.watch(hideAmountsProvider);
+    String money(Money m) => MoneyFormat.format(
+      m,
+      languageCode: lang,
+      digits: digits,
+      hidden: hidden,
+    );
     final a = view.row;
     final cur = a.currency == null ? null : Currency.tryOf(a.currency!);
 

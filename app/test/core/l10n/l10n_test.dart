@@ -21,6 +21,7 @@ String fmt(String code, int minor, String lang, DigitsMode d) =>
       Money(Currency.of(code), minor),
       languageCode: lang,
       digits: d,
+      hidden: false,
     ).replaceAll(_fsi, '').replaceAll(_pdi, '');
 
 void main() {
@@ -94,6 +95,7 @@ void main() {
         Money(Currency.of('EGP'), -450),
         languageCode: 'ar',
         digits: DigitsMode.arabicIndic,
+        hidden: false,
       );
       expect(s.startsWith(_fsi), isTrue);
       expect(s.endsWith(_pdi), isTrue);
