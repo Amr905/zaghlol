@@ -102,6 +102,43 @@ public class SecretPromptTests
         Assert.Null(input.Value);
     }
 
+    [Fact]
+    public void ControlCCancelsTheOrderIdPrompt()
+    {
+        using var output = new StringWriter();
+        var keys = new Queue<ConsoleKeyInfo>(
+        [
+            new ConsoleKeyInfo('G', ConsoleKey.G, true, false, false),
+            new ConsoleKeyInfo('\u0003', ConsoleKey.C, false, false, true),
+        ]);
+
+        var input = new SecretPrompt(new QueueKeys(keys), output).ReadOrderId();
+
+        Assert.Equal(PromptStatus.Cancelled, input.Status);
+        Assert.Null(input.Value);
+    }
+
+    [Fact]
+    public void TheEmailPromptShowsWhatIsTypedAndReturnsIt()
+    {
+        using var output = new StringWriter();
+
+        var input = new SecretPrompt(new ScriptedKeys("a@b.eg"), output).ReadEmail();
+
+        Assert.Equal(PromptStatus.Ok, input.Status);
+        Assert.Equal("a@b.eg", input.Value);
+    }
+
+    [Fact]
+    public void TheEmailPromptRefusesRedirectedInputAndCancelsOnEscape()
+    {
+        using var output = new StringWriter();
+        Assert.Equal(PromptStatus.NotInteractive, new SecretPrompt(new ScriptedKeys("a@b.eg", interactive: false), output).ReadEmail().Status);
+
+        var keys = new Queue<ConsoleKeyInfo>([new ConsoleKeyInfo('\u001b', ConsoleKey.Escape, false, false, false)]);
+        Assert.Equal(PromptStatus.Cancelled, new SecretPrompt(new QueueKeys(keys), output).ReadEmail().Status);
+    }
+
     private sealed class QueueKeys(Queue<ConsoleKeyInfo> keys) : IKeySource
     {
         public bool IsInteractive => true;

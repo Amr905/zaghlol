@@ -33,13 +33,23 @@ internal sealed partial class AdminApiClient(OpsConfig config, HttpClient http, 
     public async Task EnsureTokenAsync(CancellationToken cancellationToken) =>
         _ = await tokens.GetAsync(openBrowser, cancellationToken).ConfigureAwait(false);
 
+    /// <summary>
+    /// The base URL's path is kept (FU-264 F6): an API behind <c>https://host/api/</c> is called at <c>https://host/api/admin/v1/...</c>.
+    /// <c>new Uri(base, "/admin/...")</c> would replace the path. The base has no query, fragment or credentials (checked at load).
+    /// </summary>
+    internal static Uri Endpoint(Uri baseUrl, string pathAndQuery)
+    {
+        var prefix = baseUrl.AbsoluteUri.TrimEnd('/');
+        return new Uri(prefix + "/" + pathAndQuery.TrimStart('/'));
+    }
+
     public async Task<ApiResponse> SendAsync(HttpMethod method, string pathAndQuery, byte[]? jsonBody, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(method);
         ArgumentException.ThrowIfNullOrEmpty(pathAndQuery);
 
         var token = await tokens.GetAsync(openBrowser, cancellationToken).ConfigureAwait(false);
-        using var request = new HttpRequestMessage(method, new Uri(config.ApiUrl, pathAndQuery));
+        using var request = new HttpRequestMessage(method, Endpoint(config.ApiUrl, pathAndQuery));
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/problem+json"));

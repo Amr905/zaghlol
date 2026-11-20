@@ -1625,7 +1625,7 @@ paths:
         Role `catalog_editor`. Aggregated counts per institution: submissions are grouped by normalized
         institution name, country and channel, and `count` is the number of distinct installs that asked (never
         a repeat from one install). Ordered by `count` descending, then `lastRequestedAt` descending (ties
-        beyond that by name and country). At most 500 entries are returned, so the least requested institutions
+        beyond that by name, country and channel name, ascending). At most 500 entries are returned, so the least requested institutions
         are cut off when more exist. No query parameters; `Cache-Control: no-store`.
       x-required-roles: [catalog_editor]
       security:

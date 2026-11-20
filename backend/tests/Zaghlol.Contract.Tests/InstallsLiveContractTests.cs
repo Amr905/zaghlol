@@ -203,13 +203,29 @@ public class InstallsLiveContractTests(InstallsContractFixture fixture) : IClass
                 request.Headers.Add("Zaghlol-Install", installId);
             }
 
-            request.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+            if (operation.Body["requestBody"] is not null)
+            {
+                // A schema-valid body, so the only thing wrong with the call is the header (F1 of batch 43).
+                Assert.True(ValidBodies.TryGetValue(operationId, out var valid), $"{operation.Label} takes a body but the test has no valid one for it");
+                request.Content = new StringContent(valid!, Encoding.UTF8, "application/json");
+            }
+
             using var response = await fixture.Client.SendAsync(request);
 
             var body = await AssertDeclared(response, operation, HttpStatusCode.BadRequest, "application/problem+json");
             Assert.Equal("VALIDATION_FAILED", body!["code"]!.GetValue<string>());
         }
     }
+
+    /// <summary>Minimal schema-valid request bodies for the operations that take one and require the app header.</summary>
+    private static readonly Dictionary<string, string> ValidBodies = new()
+    {
+        ["registerInstall"] = Body("00000000-0000-4000-8000-000000000001"),
+        ["sync"] = """{"catalogVersion":0,"flagsVersion":0}""",
+        ["verifyPurchase"] = """{"platform":"android","productId":"zaghlol_gold_yearly","purchaseToken":"opaque-token-from-play"}""",
+        ["restorePurchases"] = """{"platform":"android","purchases":[{"productId":"zaghlol_gold_lifetime","purchaseToken":"opaque-token-from-play"}],"attestation":{"type":"play_integrity","token":"AAAAAAAAAAAAAAAAAAAA"}}""",
+        ["signIn"] = """{"provider":"google","idToken":"aaaa.bbbb.cccc","nonce":"AAAAAAAAAAAAAAAAAAAAAA"}""",
+    };
 
     private static bool RequiresAppHeader(SpecOperation operation) =>
         operation.Body["parameters"] is JsonArray parameters

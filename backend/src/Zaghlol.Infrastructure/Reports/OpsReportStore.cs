@@ -29,6 +29,7 @@ internal sealed class OpsReportStore(IZaghlolDbContextFactory contexts, TimeProv
             .ThenByDescending(x => x.Last)
             .ThenBy(x => x.InstitutionNameNorm)
             .ThenBy(x => x.Country)
+            .ThenBy(x => x.Channel)
             .Take(OpsReportRules.MaxBankRequestItems)
             .ToListAsync(cancellationToken);
         return [.. rows.Select(x => new BankRequestRankView(

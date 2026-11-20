@@ -14,7 +14,24 @@ internal sealed class ConsoleKeySource : IKeySource
 {
     public bool IsInteractive => !Console.IsInputRedirected;
 
-    public ConsoleKeyInfo ReadKey() => Console.ReadKey(intercept: true);
+    /// <summary>
+    /// Ctrl-C is delivered as a key while the prompt waits (FU-264 F3): without <c>TreatControlCAsInput</c> it only raises
+    /// <c>CancelKeyPress</c> and <c>ReadKey</c> keeps blocking until Enter. The previous setting is restored after every key, so the
+    /// rest of the CLI keeps the normal Ctrl-C handler.
+    /// </summary>
+    public ConsoleKeyInfo ReadKey()
+    {
+        var previous = Console.TreatControlCAsInput;
+        Console.TreatControlCAsInput = true;
+        try
+        {
+            return Console.ReadKey(intercept: true);
+        }
+        finally
+        {
+            Console.TreatControlCAsInput = previous;
+        }
+    }
 }
 
 internal enum PromptStatus
@@ -28,6 +45,9 @@ internal enum PromptStatus
 /// <summary>What the order-ID prompt produced. <see cref="Value"/> is the caller's to clear; it is never a string.</summary>
 internal sealed record OrderIdInput(PromptStatus Status, char[]? Value);
 
+/// <summary>What the e-mail prompt produced. Not a secret, but it came from a prompt so it never reached shell history or <c>ps</c>.</summary>
+internal sealed record EmailInput(PromptStatus Status, string? Value);
+
 /// <summary>Reads the store order ID (D-57). There is no other way to give it to the CLI.</summary>
 internal interface ISecretPrompt
 {
@@ -35,6 +55,12 @@ internal interface ISecretPrompt
     bool IsInteractive { get; }
 
     OrderIdInput ReadOrderId();
+
+    /// <summary>
+    /// A user's e-mail address for <c>support lookup</c> (FU-264 F4), typed at a prompt with the text shown, so it never lands in shell
+    /// history or the process list.
+    /// </summary>
+    EmailInput ReadEmail();
 }
 
 /// <summary>
@@ -50,6 +76,64 @@ internal sealed class SecretPrompt(IKeySource keys, TextWriter prompt) : ISecret
     public const int MinLength = 6;
 
     public const int MaxLength = 64;
+
+    public const int MaxEmailLength = 254;
+
+    public EmailInput ReadEmail()
+    {
+        if (!keys.IsInteractive)
+        {
+            return new EmailInput(PromptStatus.NotInteractive, null);
+        }
+
+        prompt.Write("User e-mail address: ");
+        prompt.Flush();
+        var text = new System.Text.StringBuilder();
+        var invalid = false;
+        while (true)
+        {
+            var key = keys.ReadKey();
+            if (key.Key == ConsoleKey.Enter)
+            {
+                break;
+            }
+
+            if (key.Key == ConsoleKey.Escape || (key.Key == ConsoleKey.C && (key.Modifiers & ConsoleModifiers.Control) != 0))
+            {
+                prompt.WriteLine();
+                return new EmailInput(PromptStatus.Cancelled, null);
+            }
+
+            if (key.Key == ConsoleKey.Backspace)
+            {
+                if (text.Length > 0)
+                {
+                    text.Length--;
+                    prompt.Write("\b \b");
+                }
+
+                continue;
+            }
+
+            var c = key.KeyChar;
+            if (char.IsControl(c) || c == '\0')
+            {
+                continue;
+            }
+
+            if (text.Length == MaxEmailLength || c > '~' || c <= ' ')
+            {
+                invalid = true;
+                continue;
+            }
+
+            text.Append(c);
+            prompt.Write(c);
+        }
+
+        prompt.WriteLine();
+        return invalid || text.Length == 0 ? new EmailInput(PromptStatus.BadFormat, null) : new EmailInput(PromptStatus.Ok, text.ToString());
+    }
 
     public OrderIdInput ReadOrderId()
     {

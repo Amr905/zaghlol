@@ -47,14 +47,14 @@ internal sealed partial class WindowsCredentialStore : ITokenStore
         return Task.FromResult<string?>(builder.Length == 0 ? null : builder.ToString());
     }
 
-    public Task<bool> WriteAsync(string key, string value, CancellationToken cancellationToken)
+    public async Task<bool> WriteAsync(string key, string value, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(value);
 
         var bytes = Encoding.UTF8.GetBytes(value);
         if (bytes.Length == 0 || bytes.Length > ChunkBytes * MaxChunks)
         {
-            return Task.FromResult(false);
+            return false;
         }
 
         DeleteAll(key);
@@ -64,11 +64,19 @@ internal sealed partial class WindowsCredentialStore : ITokenStore
             if (!WriteChunk(Target(key, i), part))
             {
                 DeleteAll(key);
-                return Task.FromResult(false);
+                return false;
             }
         }
 
-        return Task.FromResult(true);
+        // "Stored and read back" (ITokenStore.WriteAsync, FU-264 F8): a value that does not come back equal is removed, so a
+        // half-working store is never reported as holding the token.
+        if (!string.Equals(await ReadAsync(key, cancellationToken).ConfigureAwait(false), value, StringComparison.Ordinal))
+        {
+            DeleteAll(key);
+            return false;
+        }
+
+        return true;
     }
 
     public Task<bool> DeleteAsync(string key, CancellationToken cancellationToken) => Task.FromResult(DeleteAll(key));

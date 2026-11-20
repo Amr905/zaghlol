@@ -42,6 +42,21 @@ public sealed class FileKmsWorkerTests : IDisposable
         AssertNoKeyMaterial(keys, output);
     }
 
+    /// <summary>
+    /// BUG-002 / FU-263 F8: the worker's copy of the exit-code read (resolved before <c>RunAsync</c> disposes the host) is covered
+    /// here; SIGTERM, as Docker and Kubernetes send it, ends the real process with exit code 0 and no disposed-provider error.
+    /// </summary>
+    [WorkerLinuxFact]
+    public async Task TheWorkerExitsZeroOnSigterm()
+    {
+        var (_, settings) = await GenerateAsync("Production");
+
+        var (code, output) = await RunWorkerAsync(root, "Production", settings, until: "KMS key ring verified", sigterm: true);
+
+        Assert.True(code == 0, $"exit code {code}: {output}");
+        Assert.DoesNotContain("ObjectDisposedException", output, StringComparison.Ordinal);
+    }
+
     [WorkerLinuxFact]
     public async Task AGroupReadableKeyStopsTheWorker()
     {
@@ -125,6 +140,13 @@ public sealed class FileKmsWorkerTests : IDisposable
     /// <summary>Starts the worker binary with Production-complete settings plus <paramref name="kms"/> (also used by T-201).</summary>
     internal static async Task<(bool Exited, string Output)> RunWorkerAsync(string root, string environment, Dictionary<string, string> kms, string? until)
     {
+        var (code, output) = await RunWorkerAsync(root, environment, kms, until, sigterm: false);
+        return (code is not null, output);
+    }
+
+    /// <summary>Same, returning the exit code (null when it was killed); with <paramref name="sigterm"/> sends SIGTERM once <paramref name="until"/> appears and waits for a clean exit.</summary>
+    internal static async Task<(int? Code, string Output)> RunWorkerAsync(string root, string environment, Dictionary<string, string> kms, string? until, bool sigterm)
+    {
         using var appleKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         var env = new Dictionary<string, string>(kms, StringComparer.Ordinal)
         {
@@ -157,8 +179,7 @@ public sealed class FileKmsWorkerTests : IDisposable
 
         // The content root is the working directory: keep it apart from the key folder (guard G8).
         var workingDirectory = Directory.CreateDirectory(Path.Combine(root, "run")).FullName;
-        var (code, output) = await RunAsync([], env, workingDirectory, until, TimeSpan.FromSeconds(90));
-        return (code is not null, output);
+        return await RunAsync([], env, workingDirectory, until, TimeSpan.FromSeconds(90), sigterm);
     }
 
     /// <summary>
@@ -184,7 +205,8 @@ public sealed class FileKmsWorkerTests : IDisposable
         Dictionary<string, string> environment,
         string workingDirectory,
         string? until,
-        TimeSpan timeout)
+        TimeSpan timeout,
+        bool sigterm = false)
     {
         var start = new ProcessStartInfo("dotnet")
         {
@@ -243,6 +265,22 @@ public sealed class FileKmsWorkerTests : IDisposable
         {
             await exit;
             code = process.ExitCode;
+        }
+        else if (sigterm && finished == seen.Task)
+        {
+            using var kill = Process.Start("kill", ["-TERM", process.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)])!;
+            await kill.WaitForExitAsync();
+            using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            try
+            {
+                await process.WaitForExitAsync(limit.Token);
+                code = process.ExitCode;
+            }
+            catch (OperationCanceledException)
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync();
+            }
         }
         else
         {

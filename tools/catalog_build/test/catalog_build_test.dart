@@ -341,7 +341,7 @@ void main() {
       addTearDown(() => dir.deleteSync(recursive: true));
       final key = File('${dir.path}/prod.json')
         ..writeAsStringSync(
-          '{"kid":"s2026a","d":"nZbg9AqqNwREn0tWmsTKd5DdIcXTXbXTFlakZwfjIkY"}',
+          '{"kid":"s9999z","d":"AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA"}',
         );
       final err = StringBuffer();
       final code = await runCatalogBuild(

@@ -38,6 +38,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     public const string KnownTestKeyMessage = "A File KMS key is a key committed to the repository (test vector, fixture or development seed key) or is degenerate.";
     public const string FingerprintMessage = "A File KMS key does not match its Kms:File:Fingerprints:<name> pin (missing, malformed or a different key).";
     public const string OtherEnvironmentMessage = "A File KMS key is listed in Kms:File:OtherEnvironmentFingerprints: keys of another environment are refused.";
+    public const string OtherEnvironmentKeyMessage = "A File KMS key file matches a fingerprint in Kms:File:OtherEnvironmentFingerprints: keys of another environment are refused.";
     public const string OtherEnvironmentUnsetMessage = "Outside Development and Testing, Kms:File:OtherEnvironmentFingerprints must list the other environment's fingerprints, or Kms:File:NoOtherEnvironment must be true.";
     public const string OtherEnvironmentMalformedMessage = "Kms:File:OtherEnvironmentFingerprints entries must be 64 lower-case hex characters.";
     public const string NotDumpableMessage = "Outside Development and Testing, the File KMS could not mark the process non-dumpable (prctl PR_SET_DUMPABLE); keys would be exposed to core dumps.";
@@ -424,9 +425,11 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
             throw new KmsConfigurationException(KnownTestKeyMessage);
         }
 
+        // G12, second line (FU-265 C3): the key actually read from disk, whatever its pin says. Its own message, so a test can tell
+        // it from the settings-level check in CheckOtherEnvironmentSettings (a pinned fingerprint that is on the list).
         if (settings.FileOtherEnvironmentFingerprints.Contains(fingerprint))
         {
-            throw new KmsConfigurationException(OtherEnvironmentMessage);
+            throw new KmsConfigurationException(OtherEnvironmentKeyMessage);
         }
 
         var pinned = settings.FileFingerprints.GetValueOrDefault(keyRef[Prefix.Length..]);
@@ -440,7 +443,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     private static ECDsa LoadEc(string directory, string keyRef, uint euid)
     {
         var (buffer, length) = ReadChecked(Path.Combine(directory, keyRef[Prefix.Length..] + ".pem"), euid);
-        var chars = new char[length];
+        var chars = GC.AllocateArray<char>(length, pinned: true); // FU-265 C8: pinned, so no stray copy before it is cleared
         var key = ECDsa.Create();
         try
         {

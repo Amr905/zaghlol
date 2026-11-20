@@ -520,6 +520,19 @@ public sealed class FileKmsTests : IDisposable
     }
 
     [LinuxFact]
+    public async Task G12_AKeyFileThatMatchesTheOtherEnvironmentsListIsRefusedWhateverItsPinSays()
+    {
+        // The settings-level check looks at the pins; this one at the bytes read from disk. The pin is wrong on purpose, so only the
+        // per-key check can name the problem (it runs before the pin comparison).
+        var settings = keys.Settings();
+        settings["Kms:File:NoOtherEnvironment"] = null;
+        settings["Kms:File:OtherEnvironmentFingerprints:0"] = settings["Kms:File:Fingerprints:envelope"];
+        settings["Kms:File:Fingerprints:envelope"] = new string('b', 64);
+
+        await RefusedAsync("Production", settings, FileKms.OtherEnvironmentKeyMessage);
+    }
+
+    [LinuxFact]
     public async Task G12_AStagingKeyCopiedIntoProductionIsRefused()
     {
         // Staging's key set; production config lists staging's fingerprints, and its own pins were copied too.
