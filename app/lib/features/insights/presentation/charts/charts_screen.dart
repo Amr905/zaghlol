@@ -9,57 +9,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
-import '../../../../core/ui/z_chip.dart';
 import '../../../../core/ui/z_currency_switcher.dart';
-import '../../../../core/l10n/locale_providers.dart';
 import '../../../budget/presentation/budget_providers_ui.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../../gold/application/gating.dart';
 import '../../application/chart_gate.dart';
 import '../../domain/chart_models.dart';
+import '../../domain/chart_period_selection.dart';
 import '../chart_detail.dart';
 import 'chart_bodies.dart';
 import 'chart_card.dart';
+import 'chart_period_bar.dart';
+import 'chart_period_text.dart';
 import 'chart_format.dart';
 import 'charts_providers.dart';
 import 'gold_chart_card.dart';
 import 'locked_chart_card.dart';
-
-/// "This cycle" / "Last cycle" selector (mockup 07).
-class _PeriodChip extends ConsumerWidget {
-  const _PeriodChip();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = AppLocalizations.of(context);
-    final last = ref.watch(chartsPeriodProvider);
-    String name(bool v) =>
-        v ? l.commonPeriodLastCycle : l.commonPeriodThisCycle;
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
-      child: Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: PopupMenuButton<bool>(
-          key: const Key('charts-period'),
-          tooltip: name(last),
-          initialValue: last,
-          onSelected: (v) =>
-              ref.read(chartsPeriodProvider.notifier).select(lastCycle: v),
-          itemBuilder: (_) => [
-            for (final v in const [false, true])
-              PopupMenuItem<bool>(value: v, child: Text(name(v))),
-          ],
-          child: ExcludeSemantics(
-            child: ZChip(
-              label: name(last),
-              icon: Icons.keyboard_arrow_down_rounded,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class ChartsScreen extends ConsumerWidget {
   const ChartsScreen({super.key});
@@ -72,7 +37,7 @@ class ChartsScreen extends ConsumerWidget {
       loading: () => ListView(
         padding: _padding,
         children: [
-          const _PeriodChip(),
+          const ChartPeriodBar(),
           ChartSkeleton(title: l.insightsChartTitleCashFlow),
           ChartSkeleton(title: l.insightsChartTitleCategories),
         ],
@@ -80,7 +45,7 @@ class ChartsScreen extends ConsumerWidget {
       error: (_, _) => ListView(
         padding: _padding,
         children: [
-          const _PeriodChip(),
+          const ChartPeriodBar(),
           ChartError(
             title: l.insightsTabsCharts,
             onRetry: () => ref.invalidate(chartsCurrenciesProvider),
@@ -97,7 +62,7 @@ class ChartsScreen extends ConsumerWidget {
         return ListView(
           padding: _padding,
           children: [
-            const _PeriodChip(),
+            const ChartPeriodBar(),
             if (list.length > 1)
               Padding(
                 padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
@@ -165,6 +130,9 @@ class _CashFlowCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final title = l.insightsChartTitleCashFlow;
+    final periodResolved = ref.watch(chartsResolvedPeriodProvider).value;
+    final periodText = ChartPeriodText.of(context, ref);
+    final bucketKind = periodResolved?.bucketKind ?? ChartBucketKind.month;
     return ref
         .watch(cashFlowChartProvider(code))
         .when(
@@ -176,29 +144,23 @@ class _CashFlowCard extends ConsumerWidget {
           data: (r) => switch (r) {
             ChartReady(:final data) => ChartCard(
               title: title,
-              meta: l.insightsChartsMonthsCount(
-                data.length,
-                ref
-                    .watch(
-                      digitsModeProvider(
-                        Localizations.localeOf(context).languageCode,
-                      ),
-                    )
-                    .render('${data.length}'),
-              ),
-              footnote: CashFlowBody.footnote(
-                l,
-                (m) => chartMoney(ref, context, m),
-                (p) => chartPercent(ref, context, p),
-                data,
-              ),
+              meta: periodText.bucketCount(bucketKind, data.length),
+              footnote: periodResolved == null
+                  ? null
+                  : CashFlowBody.footnote(
+                      l,
+                      (m) => chartMoney(ref, context, m),
+                      (p) => chartPercent(ref, context, p),
+                      data,
+                      periodText.now(periodResolved),
+                    ),
               trailing: _ExplainButton(chart: ChartId.cashFlow, code: code),
               summary: CashFlowBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),
                 data,
               ),
-              child: CashFlowBody(points: data),
+              child: CashFlowBody(points: data, bucketKind: bucketKind),
             ),
             ChartNotEnoughData() => ChartCard(
               title: title,
@@ -327,8 +289,12 @@ class _BudgetCard extends ConsumerWidget {
                 child: ChartMessage(text: l.budgetOverviewEmptyTitle),
               );
             }
+            final current =
+                ref.watch(chartsResolvedPeriodProvider).value?.isCurrentCycle ??
+                true;
             return ChartCard(
               title: title,
+              footnote: current ? null : l.insightsChartsPeriodBudgetNote,
               summary: BudgetBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),

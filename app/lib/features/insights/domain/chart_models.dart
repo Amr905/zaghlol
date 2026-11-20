@@ -157,6 +157,15 @@ final class CashFlowPoint {
   final bool isPartial;
 
   Money get net => income - spend;
+
+  /// The whole period as one point (T-188): the sum of [points] (one
+  /// currency, in order and at least one). Partial when the first one is.
+  static CashFlowPoint total(List<CashFlowPoint> points) => CashFlowPoint(
+    period: ChartPeriod(points.first.period.from, points.last.period.to),
+    income: points.skip(1).fold(points.first.income, (a, p) => a + p.income),
+    spend: points.skip(1).fold(points.first.spend, (a, p) => a + p.spend),
+    isPartial: points.first.isPartial,
+  );
 }
 
 // ---------------------------------------------------------- 2 category donut

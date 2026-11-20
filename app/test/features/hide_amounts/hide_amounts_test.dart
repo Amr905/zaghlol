@@ -288,7 +288,13 @@ void main() {
         _app(
           Consumer(
             builder: (context, ref, _) {
-              f = ExplainFormat.of(context, ref, (id) => id ?? '');
+              f = ExplainFormat.of(
+                context,
+                ref,
+                (id) => id ?? '',
+                now: 'this cycle',
+                prev: 'last cycle',
+              );
               return const SizedBox();
             },
           ),

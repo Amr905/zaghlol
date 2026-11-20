@@ -11,12 +11,15 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../core/l10n/date_format.dart';
+import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/ui/amount_semantics.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_money_text.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../domain/chart_models.dart';
+import '../../domain/chart_period_selection.dart';
 import '../../../categorization/presentation/category_tile.dart';
 import '../../../../core/db/app_database.dart' show CategoryRow;
 import '../../../../core/ui/z_card.dart';
@@ -31,8 +34,16 @@ bool _rtl(BuildContext context) =>
 
 /// Income, spend and saved bars per cycle, with the month under each group.
 class CashFlowBody extends ConsumerWidget {
-  const CashFlowBody({super.key, required this.points});
+  const CashFlowBody({
+    super.key,
+    required this.points,
+    this.bucketKind = ChartBucketKind.month,
+  });
   final List<CashFlowPoint> points;
+
+  /// What one bar is (T-188): a day, a week or a month. Sets the label under
+  /// the bar and how dense the bars and labels are.
+  final ChartBucketKind bucketKind;
 
   /// The a11y summary for [points] (latest bucket).
   static String summary(
@@ -40,7 +51,7 @@ class CashFlowBody extends ConsumerWidget {
     String Function(Money) money,
     List<CashFlowPoint> points,
   ) {
-    final p = points.last;
+    final p = CashFlowPoint.total(points);
     return l.insightsChartA11yCashFlow(
       money(p.income),
       money(p.spend),
@@ -56,20 +67,23 @@ class CashFlowBody extends ConsumerWidget {
     return net < 0 ? -r : r;
   }
 
-  /// "You saved X this month (38%)": the footnote of the latest bucket.
+  /// "You saved X over this cycle (38%)": the footnote of the whole period.
+  /// [now] is the period as a phrase (`ChartPeriodText.now`).
   static String footnote(
     AppLocalizations l,
     String Function(Money) money,
     String Function(int) percent,
     List<CashFlowPoint> points,
+    String now,
   ) {
-    final last = points.last;
+    final last = CashFlowPoint.total(points);
     final pct = last.income.minor > 0
         ? savedPercent(last.net.minor, last.income.minor)
         : null;
     return l.insightsChartsSavedFootnote(
       money(last.net),
       pct == null ? '' : percent(pct),
+      now,
     );
   }
 
@@ -82,10 +96,37 @@ class CashFlowBody extends ConsumerWidget {
     final maxY = points
         .map((p) => math.max(p.income.minor, p.spend.minor))
         .fold<int>(1, math.max);
-    String month(CashFlowPoint p) {
-      final d = p.period.to;
-      return DateFormat.MMMM(lang).format(DateTime(d.year, d.month));
+    final digits = ref.watch(digitsModeProvider(lang));
+    String label(CashFlowPoint p) {
+      switch (bucketKind) {
+        case ChartBucketKind.day:
+          return digits.render('${p.period.from.day}');
+        case ChartBucketKind.week:
+          final d = p.period.from;
+          return ZDateFormat.dayMonth(
+            DateTime(d.year, d.month, d.day),
+            lang,
+            digits,
+          );
+        case ChartBucketKind.month:
+          final d = p.period.to;
+          return DateFormat.MMMM(lang).format(DateTime(d.year, d.month));
+      }
     }
+
+    // Few bars: income, spent and saved side by side, wide. Many bars
+    // (days, weeks, a long range of months): income and spent only, thin,
+    // with a label under about every sixth bar.
+    final n = shown.length;
+    final dense = n > 12;
+    final labelEvery = n <= 8 ? 1 : (n / 6).ceil();
+    final rodWidth = n <= 6
+        ? 10.0
+        : n <= 12
+        ? 7.0
+        : n <= 31
+        ? 4.0
+        : 3.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,10 +152,14 @@ class CashFlowBody extends ConsumerWidget {
                       getTitlesWidget: (v, meta) => SideTitleWidget(
                         meta: meta,
                         space: ZSpacing.sm,
-                        child: Text(
-                          month(shown[v.toInt()]),
-                          style: ZType.caption.copyWith(color: c.textMuted),
-                        ),
+                        child: v.toInt() % labelEvery == 0
+                            ? Text(
+                                label(shown[v.toInt()]),
+                                style: ZType.caption.copyWith(
+                                  color: c.textMuted,
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
                     ),
                   ),
@@ -124,17 +169,21 @@ class CashFlowBody extends ConsumerWidget {
                   for (var i = 0; i < shown.length; i++)
                     BarChartGroupData(
                       x: i,
-                      barsSpace: 3,
+                      barsSpace: dense ? 1 : 3,
                       barRods: [
                         for (final (value, color) in [
                           (shown[i].income.minor, ZChartColors.income),
                           (shown[i].spend.minor, ZChartColors.spend),
-                          (math.max(0, shown[i].net.minor), ZChartColors.saved),
+                          if (!dense)
+                            (
+                              math.max(0, shown[i].net.minor),
+                              ZChartColors.saved,
+                            ),
                         ])
                           BarChartRodData(
                             toY: value.toDouble(),
                             color: color,
-                            width: 10,
+                            width: rodWidth,
                             borderRadius: BorderRadius.circular(ZRadius.sm / 2),
                           ),
                       ],
@@ -154,7 +203,11 @@ class CashFlowBody extends ConsumerWidget {
               label: l.insightsLegendIncome,
             ),
             LegendItem(color: ZChartColors.spend, label: l.insightsLegendSpent),
-            LegendItem(color: ZChartColors.saved, label: l.insightsLegendSaved),
+            if (!dense)
+              LegendItem(
+                color: ZChartColors.saved,
+                label: l.insightsLegendSaved,
+              ),
           ],
         ),
       ],
