@@ -466,4 +466,41 @@ void main() {
       },
     );
   });
+
+  group('FU-240b done-screen stats', () {
+    test('categorised / uncategorised and top categories', () async {
+      store = FakeStore(categories: {'c1', 'c2', 'c3', 'c4'});
+      uc = ImportCsvUseCase(store);
+      final s = await uc.run(
+        raw(
+          hdr() +
+              line(date: '2026-02-01T10:00:00.000Z', amount: '100', cat: 'c1') +
+              line(date: '2026-02-01T10:01:00.000Z', amount: '50', cat: 'c1') +
+              line(date: '2026-02-01T10:02:00.000Z', amount: '120', cat: 'c2') +
+              line(date: '2026-02-01T10:03:00.000Z', amount: '10', cat: 'c3') +
+              line(date: '2026-02-01T10:04:00.000Z', amount: '5', cat: 'c4') +
+              line(date: '2026-02-01T10:05:00.000Z', amount: '30') +
+              line(
+                date: '2026-02-01T10:06:00.000Z',
+                type: 'income',
+                amount: '999',
+                cat: 'c4',
+              ),
+        ),
+      );
+      expect(s.imported, 7);
+      expect(s.autoCategorised, 6);
+      expect(s.needCategory, 1);
+      expect(s.topCategories.map((c) => c.categoryId), ['c1', 'c2', 'c3']);
+      expect(s.topCategories.first.total.minor, 15000);
+    });
+
+    test('duplicates and dry runs of nothing new report zero', () async {
+      await uc.run(raw(hdr() + line(cat: 'c1')));
+      final again = await uc.run(raw(hdr() + line(cat: 'c1')));
+      expect(again.duplicates, 1);
+      expect(again.autoCategorised, 0);
+      expect(again.topCategories, isEmpty);
+    });
+  });
 }
