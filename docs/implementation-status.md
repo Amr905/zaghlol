@@ -642,19 +642,19 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-150b | ui | T-083 _AssetsPlaceholder shipped; confirm gated until assets task | accounts/presentation/money_tab.dart | none | CLOSED (placeholder no longer in money_tab; T-121 assets landed) |
 | FU-153a | ui | T-079 bulk delete: hooks run after commit; a hook failure leaves Undo ids only (rethrown at end) | transactions/application/bulk_actions.dart:70-90 | none | CLOSED (FU-132: every id gets its turn, batch id kept) |
 | FU-153b | ui | T-079 Undo onPressed has no mounted check before ref.invalidate | transactions/presentation/list/transactions_list_screen.dart | none | CLOSED (mounted guards at :323,:340, explorer fix a2fb84f0) |
-| FU-151a | core | T-091 repairForNewAmount event built from txnId only; counterpart cycle refreshes late | transactions/application/reimbursements.dart:375 | none | OPEN |
-| FU-151b | core | T-091 removeParticipant runs outside inTransaction and does not check the expense is live | transactions/application/reimbursements.dart:183 | none | OPEN |
+| FU-151a | core | T-091 repairForNewAmount event built from txnId only; counterpart cycle refreshes late | transactions/application/reimbursements.dart:375 | none | OBSOLETE (batch 51): event now carries both ends of every dropped link |
+| FU-151b | core | T-091 removeParticipant runs outside inTransaction and does not check the expense is live | transactions/application/reimbursements.dart:183 | none | OBSOLETE (batch 51): removeParticipant already runs in inTransaction and checks the expense is live |
 | FU-151c | core | T-091 EC-40 repair wired into DriftTransactionRepository.edit | transactions/data/drift_transaction_repository.dart:157 | none | CLOSED (reviewed in batch 17b: repair runs in the edit transaction) |
-| FU-152a | core | T-105 chart memo not invalidated on category/account edits | insights/data/chart_repository.dart:78-96 | none | OPEN |
+| FU-152a | core | T-105 chart memo not invalidated on category/account edits | insights/data/chart_repository.dart:78-96 | none | OBSOLETE (batch 51): watchEdits() invalidates the memo on categories/accounts edits |
 | FU-152b | core | T-105 weekday/hour math on epoch ms before 1970 | insights/data/chart_repository.dart:482 | none | CLOSED (nit, dates validated 2000+, no action) |
 | FU-149a | core | T-113 credit/bnpl balance taken as amount owed; confirm stored meaning (limit vs debt) and pin sign convention in a test | wealth/data/net_worth_repository.dart:135-144 | PO (confirm meaning) | OPEN |
 | FU-149b | core | T-113 unit with zero assets and liabilities omitted from snapshot (chart gap) | wealth/domain/net_worth.dart:199 | none | OPEN |
-| FU-149c | core | T-113 isGold uses startsWith('XAU'); use explicit symbol set | wealth/domain/net_worth.dart:46 | none | OPEN |
-| FU-154a | core | T-155 existingAt reads limit 500 and compares unsanitised merchantRaw (duplicate import risk) | export_import/data/drift_csv_import_store.dart:58 | none | OPEN |
-| FU-154b | core | T-155 DB constraint failure surfaces as raw store exception, not an ImportCsvException code | export_import/application/import_csv.dart:169-222 | none | OPEN |
-| FU-154c | core | T-155 imported refunds link only after categorization sets merchant_norm | export_import/application/import_csv.dart | none | OPEN |
+| FU-149c | core | T-113 isGold uses startsWith('XAU'); use explicit symbol set | wealth/domain/net_worth.dart:46 | none | OBSOLETE (batch 51): GoldSymbols.isGold uses an explicit symbol set |
+| FU-154a | core | T-155 existingAt reads limit 500 and compares unsanitised merchantRaw (duplicate import risk) | export_import/data/drift_csv_import_store.dart:58 | none | OBSOLETE (batch 51): existingBetween pages all rows and compares sanitised text |
+| FU-154b | core | T-155 DB constraint failure surfaces as raw store exception, not an ImportCsvException code | export_import/application/import_csv.dart:169-222 | none | OBSOLETE (batch 51): store failures map to ImportCsvException.storeFailed |
+| FU-154c | core | T-155 imported refunds link only after categorization sets merchant_norm | export_import/application/import_csv.dart | none | OBSOLETE (batch 51): onImported hook runs pairing/refund matching after commit |
 | FU-155a | ui | T-101 budget saver delete/update/insert not in one DB transaction | budget/application/budget_saver.dart:36-46 | none | OPEN |
-| FU-156a | core | T-106 second copy of essential-category set differs from domain copy (transport_work, utilities, installments vs work_transport) | insights/application/explanations.dart:258 | none | OPEN |
+| FU-156a | core | T-106 second copy of essential-category set differs from domain copy (transport_work, utilities, installments vs work_transport) | insights/application/explanations.dart:258 | none | OBSOLETE (batch 51): explanations.dart uses the domain defaultEssentialCategoryIds |
 | FU-157a | parsing | T-110 ask engine catches Exception only, so an Error escapes the "never throws" contract | ask/application/ask_engine.dart:72,120 | none | OPEN |
 | FU-157b | parsing | T-110 "budget left" uses categoryDonut total; confirm equals Home/budget net-spend | ask/application/ask_engine.dart:351-365 | none | OPEN |
 | FU-157c | parsing | T-110 unknownTarget guard may reject balance questions with filler words not in the stop list | packages/zaghlol_parsing/lib/chat/ask_parser.dart | none | OPEN |
@@ -666,10 +666,10 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-159b | ui | T-085 confirm copy does not say the newer balance replaces the older | accounts/presentation/merge_flow.dart | PO (copy) | OPEN |
 | FU-160a | ui | T-162 confirmed delete with null wipe provider does nothing silently; wipe() error not caught | settings/presentation/privacy_screen.dart:200-224 | none | CLOSED (wipe in try/catch at :224, provider wired by T-166) |
 | FU-160b | ui | T-162 D-55 Gold-on-Android warning before Delete everything | settings/presentation/privacy_screen.dart:162 | none | CLOSED (EC-69 warning present) |
-| FU-161a | core | T-143 one bad row deletes every gathered row (contributions and bank requests) | catalog_sync/application/sync_orchestrator.dart:446-455 | none | OPEN |
+| FU-161a | core | T-143 one bad row deletes every gathered row (contributions and bank requests) | catalog_sync/application/sync_orchestrator.dart:446-455 | none | OBSOLETE (batch 51): only the bad row is deleted now |
 | FU-161b | core | T-143 contributions queued before opt-out are sent after re-opt-in; confirm purge rule | catalog_sync/application/sync_orchestrator.dart:376 | PO | OPEN |
-| FU-161c | core | T-143 allowDevKeys/allowInsecureLocalhost use !kReleaseMode, so profile builds accept dev keys; use kDebugMode | catalog_sync/application/sync_providers.dart:94 | none | OPEN |
-| FU-161d | core | T-143 "user rule never overridden" has no orchestrator-level test | test/features/catalog_sync | none | OPEN |
+| FU-161c | core | T-143 allowDevKeys/allowInsecureLocalhost use !kReleaseMode, so profile builds accept dev keys; use kDebugMode | catalog_sync/application/sync_providers.dart:94 | none | OBSOLETE (batch 51): uses kDebugMode |
+| FU-161d | core | T-143 "user rule never overridden" has no orchestrator-level test | test/features/catalog_sync | none | OBSOLETE (batch 51): orchestrator test with categorySource user exists (sync_orchestrator_test.dart:336) |
 | FU-162a | native | T-178 iOS key replace does delete then add (old keyId lost if add fails); use SecItemUpdate with add fallback | ios/Runner/Platform/Attestation/AttestationHost.swift:107-110 | none | OPEN |
 | FU-162b | native | T-178 device ACs (Play token decode, App Attest verify, user-CA proxy release vs debug) not run | docs/05-reviews (T-178 device report not yet written) | device | OPEN |
 | FU-162c | native | T-178 network_security_config comment says dart:io "never trusts user CAs" flatly; confirm on device | android/app/src/main/res/xml/network_security_config.xml:7 | device | OPEN |
@@ -680,10 +680,10 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-164b | native | T-044 detach() drops pending callbacks silently; add comment | capture/UiPermissions.kt:58 | none | OPEN |
 | FU-164c | native | T-044 POST_NOTIFICATIONS request needs an owner task | capture/UiPermissions.kt | none (unowned) | OPEN |
 | FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | OPEN |
-| FU-165b | core | T-145 uncaught PlatformException from _store.complete / _seats.prove in _onUpdates/_attempt | gold/application/purchase.dart:84,163 | none | OPEN |
-| FU-165c | core | T-145 restore proof.token!/keyId!/assertion! TypeError on incomplete proof | gold/application/restore.dart:216,235 | none | OPEN |
+| FU-165b | core | T-145 uncaught PlatformException from _store.complete / _seats.prove in _onUpdates/_attempt | gold/application/purchase.dart:84,163 | none | OBSOLETE (batch 51): PlatformException caught around complete/prove |
+| FU-165c | core | T-145 restore proof.token!/keyId!/assertion! TypeError on incomplete proof | gold/application/restore.dart:216,235 | none | OBSOLETE (batch 51): restore no longer force-unwraps proof fields |
 | FU-165d | core | T-145 no native wake-up: purchase retry only if user opens app within 3 days; needs purchase-retry-worker and PO call | gold/application/purchase.dart | PO | OPEN |
-| FU-165e | core | T-145 verified entry whose purchase is gone (refunded) stays in outbox forever; add age-out | gold/application/purchase.dart:155 | none | OPEN |
+| FU-165e | core | T-145 verified entry whose purchase is gone (refunded) stays in outbox forever; add age-out | gold/application/purchase.dart:155 | none | OBSOLETE (batch 51): verified entries age out after outboxMaxAge |
 | FU-165f | core | T-145 device items: StoreKit-config test, release user-CA check, sandbox purchases | gold | device | OPEN |
 | FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | OPEN |
 | FU-166b | ui | T-146 paywallTriggerOverride and goldLinkOpener wired in root | app/app_navigation.dart:96-100 | none | CLOSED (WIRE-NAV, FU-195) |
@@ -691,9 +691,9 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-167a | native | T-151 one quota error on any old file blocks every later iCloud backup | backup/application/icloud_backup_service.dart:109 | none | OPEN |
 | FU-167b | native | T-151 manual device test steps 1-6 and PO portal setup pending | docs/04-tasks/tasks/T-151.md | device; PO (portal) | OPEN |
 | FU-168a | core | T-152 keep and Gold check read entitlementStateProvider before first evaluate (manual backup could prune a Gold user to 1) | backup/application/schedule.dart:136,228,257 | none | CLOSED (pendingVerification keeps 5 and skips reconcile, Lead delta check batch 18) |
-| FU-168b | core | T-152 icloudBackupDestinationProvider still null; add ICloudBackupDestination mapping uploaded to confirmed | backup/application/schedule_providers.dart:41 | none | OPEN |
-| FU-168c | core | T-152 backupAppVersionProvider writes 0.0.0 into backup headers; bind to package_info | backup/application/schedule_providers.dart:39 | none | OPEN |
-| FU-168d | core | T-152 isScheduleDue: lastSuccess in the future (clock moved back) means never due | backup/application/schedule.dart:83-100 | none | OPEN |
+| FU-168b | core | T-152 icloudBackupDestinationProvider still null; add ICloudBackupDestination mapping uploaded to confirmed | backup/application/schedule_providers.dart:41 | none | OBSOLETE (batch 51): icloudBackupDestinationProvider maps ICloudBackupDestination on iOS |
+| FU-168c | core | T-152 backupAppVersionProvider writes 0.0.0 into backup headers; bind to package_info | backup/application/schedule_providers.dart:39 | none | OBSOLETE (batch 51): bound to kClientAppVersion |
+| FU-168d | core | T-152 isScheduleDue: lastSuccess in the future (clock moved back) means never due | backup/application/schedule.dart:83-100 | none | OBSOLETE (batch 51): future lastSuccess is treated as due |
 | FU-168e | core | T-152 WorkManager/BGProcessing binding, alert sink, reminder keys are inert seams | backup/application/schedule.dart | none | OPEN |
 | FU-169a | ui | T-107 locked previews shown to Gold users | insights/presentation/charts/charts_screen.dart:131 | none | CLOSED (decideChart(...).allowed skips the lock card) |
 | FU-169b | ui | T-107 percent computed through double (net*100/income).round() | insights/presentation/charts/chart_bodies.dart:59 | none | OPEN |
@@ -719,8 +719,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-179a | ui | T-163 delete leaves subcategories on archived parent (children hidden, rules/transactions not moved) | categorization/data/categories_admin.dart:240-262 | none | OPEN |
 | FU-179b | ui | T-163 delete leaves budgets rows on the archived category | categorization/data/categories_admin.dart:240-262 | none | OPEN |
 | FU-179c | ui | T-163 delete failure shows generic message without a code | categorization/presentation/categories_screens.dart | none | OPEN |
-| FU-180a | core | T-098 defaultEssentialCategoryIds holds bare codes but DB ids are sys:<code>; subcategories unprotected (before first caller) | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:30-39 | none | OPEN |
-| FU-180b | core | T-098 diningSpike shocked pose takes any category; caller must restrict to dining/delivery | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:69 | none | OPEN |
+| FU-180a | core | T-098 defaultEssentialCategoryIds holds bare codes but DB ids are sys:<code>; subcategories unprotected (before first caller) | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:30-39 | none | OBSOLETE (batch 51): _isEssential also matches the code without the sys: prefix |
+| FU-180b | core | T-098 diningSpike shocked pose takes any category; caller must restrict to dining/delivery | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:69 | none | OBSOLETE (batch 51): diningSpike restricts to diningSpikeCategoryCodes |
 | FU-181a | ui | T-093 saveSplit applies removals/updates/adds as separate calls, not one transaction | transfers/presentation/split_sheet.dart | none | OPEN |
 | FU-181b | ui | T-093 Undo of unassign does not catch errors; assign_sheet firstWhere can throw | transfers/presentation/split_sheet.dart:131; assign_sheet.dart:91 | none | OPEN |
 | FU-181c | ui | T-093 "mark anyway" hidden (supportsMarkAnyway false, EC-15) | transfers/presentation | none | OPEN |
@@ -736,7 +736,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-189a | core | T-147 S-69 reachable (opener override and Settings entry) | app/app_navigation.dart:98 | none | CLOSED (goldSignInOpenerOverride wired) |
 | FU-189b | core | T-147 Drive authorizer GoogleSignIn.initialize without nonce can race the sign-in ID token (fails closed) | account/application/id_token_source.dart:128-150; backup/data/drive_auth.dart:51-63 | none | OPEN |
 | FU-189c | core | T-147 signOut never calls GoogleSignIn.signOut | account/application/account_service.dart:209 | none | OPEN |
-| FU-189d | core | T-147 AccountStatus.linkedGold reads claims.acct without sub==installId check (wording only) | account/application/account_providers.dart:95-101 | none | OPEN |
+| FU-189d | core | T-147 AccountStatus.linkedGold reads claims.acct without sub==installId check (wording only) | account/application/account_providers.dart:95-101 | none | OBSOLETE (batch 51): cachedClaims already verifies sub == this install (wording only) |
 | FU-190a | parsing | T-164 paste field has no autocorrect/enableSuggestions off | capture/presentation/template_builder_screen.dart | none | OPEN |
 | FU-190b | parsing | T-164 unsalted SHA-256 hash; pipeline registration, re-parse hook, route unwired | capture/application/template_builder.dart | none | CLOSED (re-parse hook wired in WIRE-SVC; hash as the task asks) |
 | FU-191a | native | T-160 iOS OCR path check allowed only NSHomeDirectory, spool in App Group | ios/Runner/Platform/OCR/OcrHost.swift:141,193 | none | CLOSED (FU-198, batch 20) |
@@ -763,10 +763,10 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-202f | core | T-166 full device sandbox scan and seat-key element-1 check not run | docs/05-reviews | device | OPEN |
 | FU-202g | core | T-166 WipeMarker writes atomically (temp, flush, rename) | security/application/delete_everything.dart:123-130 | none | CLOSED (D-1, atomic write) |
 | FU-202h | core | T-166 marker read I/O error is never counted or dropped (harmless) | security/application/delete_everything.dart:237 | none | OPEN |
-| FU-203a | core | T-092 _dismissedFx uses payload LIKE '%"id"%' scan | transfers/application (TransferPairingUseCase._dismissedFx) | none | OPEN |
+| FU-203a | core | T-092 _dismissedFx uses payload LIKE '%"id"%' scan | transfers/application (TransferPairingUseCase._dismissedFx) | none | OBSOLETE (batch 51): LIKE scans only dismissed fx-suggestion rows, a small bounded set |
 | FU-204a | core | T-100 duplicate/weekly/backup alerts not instantiated anywhere | notifications/application/notification_providers.dart:267 | none | CLOSED (providers wired, WIRE-2) |
 | FU-204b | core | T-100 detector not restricted to POS channel (rule as implemented) | notifications/domain | none | CLOSED (rule as implemented, accepted) |
-| FU-204c | core | T-100 first launch runs the weekly summary at once; not anchored to a weekday | notifications/application/notification_providers.dart:256 | none | OPEN |
+| FU-204c | core | T-100 first launch runs the weekly summary at once; not anchored to a weekday | notifications/application/notification_providers.dart:256 | none | OBSOLETE (batch 51): weekly summary is Friday-anchored (PO WEEKLY-FRIDAY) |
 | FU-204d | core | T-100 weekly-summary category names read once when provider is built | notifications/application/notification_providers.dart:221-235 | none | OPEN |
 | FU-205a | ui | T-117 Share channel zaghlol/share had no native implementation (major) | share_cards/share_providers.dart:38; ShareImageRegistration.kt; ShareImageHost.swift | none | CLOSED (native hosts added, WIRE-3) |
 | FU-205b | ui | T-117 plaintext share PNG left in tmp/cache after a crash | ShareImageRegistration.kt:55,73 | none | CLOSED (Android sweep at start, ShareImageRegistration.kt); iOS tmp sweep still open |
