@@ -670,14 +670,14 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-161b | core | T-143 contributions queued before opt-out are sent after re-opt-in; confirm purge rule | catalog_sync/application/sync_orchestrator.dart:376 | PO | OPEN |
 | FU-161c | core | T-143 allowDevKeys/allowInsecureLocalhost use !kReleaseMode, so profile builds accept dev keys; use kDebugMode | catalog_sync/application/sync_providers.dart:94 | none | OPEN |
 | FU-161d | core | T-143 "user rule never overridden" has no orchestrator-level test | test/features/catalog_sync | none | OPEN |
-| FU-162a | native | T-178 iOS key replace does delete then add (old keyId lost if add fails); use SecItemUpdate with add fallback | ios/Runner/Platform/Attestation/AttestationHost.swift:107-110 | none | OPEN |
+| FU-162a | native | T-178 iOS key replace does delete then add (old keyId lost if add fails); use SecItemUpdate with add fallback | ios/Runner/Platform/Attestation/AttestationHost.swift:107-110 | none | OBSOLETE (batch 51): replace() already uses update with add fallback |
 | FU-162b | native | T-178 device ACs (Play token decode, App Attest verify, user-CA proxy release vs debug) not run | docs/05-reviews (T-178 device report not yet written) | device | OPEN |
 | FU-162c | native | T-178 network_security_config comment says dart:io "never trusts user CAs" flatly; confirm on device | android/app/src/main/res/xml/network_security_config.xml:7 | device | OPEN |
 | FU-163a | native | T-179 transient Secure Enclave error deletes an earlier-install key after 3 tries | ios/Runner/SeatKeyStore.swift:189,329 | device | OPEN |
-| FU-163b | native | T-179 BackendStateStore failure inside _prepare propagates instead of the "no keys" fallback | gold/application/seat_keys.dart:134 | none | OPEN |
+| FU-163b | native | T-179 BackendStateStore failure inside _prepare propagates instead of the "no keys" fallback | gold/application/seat_keys.dart:134 | none | OBSOLETE (batch 51): _prepare already catches and returns null |
 | FU-163c | native | T-179 R-19 reinstall and Delete-everything device ACs not run | docs/05-reviews (T-179 device report not yet written) | device | OPEN |
-| FU-164a | native | T-044 SMS revocation kills the process, so onPermissionChanged only via next-start getCapabilities; note in AC map | capture/CaptureRuntime.kt:296-301 | none | OPEN |
-| FU-164b | native | T-044 detach() drops pending callbacks silently; add comment | capture/UiPermissions.kt:58 | none | OPEN |
+| FU-164a | native | T-044 SMS revocation kills the process, so onPermissionChanged only via next-start getCapabilities; note in AC map | capture/CaptureRuntime.kt:296-301 | none | FIXED (batch 51) |
+| FU-164b | native | T-044 detach() drops pending callbacks silently; add comment | capture/UiPermissions.kt:58 | none | OBSOLETE (batch 51): FU-164b comment already in detach() |
 | FU-164c | native | T-044 POST_NOTIFICATIONS request needs an owner task | capture/UiPermissions.kt | none (unowned) | OPEN |
 | FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | OPEN |
 | FU-165b | core | T-145 uncaught PlatformException from _store.complete / _seats.prove in _onUpdates/_attempt | gold/application/purchase.dart:84,163 | none | OPEN |
@@ -688,7 +688,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | OPEN |
 | FU-166b | ui | T-146 paywallTriggerOverride and goldLinkOpener wired in root | app/app_navigation.dart:96-100 | none | CLOSED (WIRE-NAV, FU-195) |
 | FU-166c | ui | T-146 tampered-clock copy "set clock to automatic" missing | gold/application/gold_messages.dart | PO (copy) | OPEN |
-| FU-167a | native | T-151 one quota error on any old file blocks every later iCloud backup | backup/application/icloud_backup_service.dart:109 | none | OPEN |
+| FU-167a | native | T-151 one quota error on any old file blocks every later iCloud backup | backup/application/icloud_backup_service.dart:109 | none | OBSOLETE (batch 51): only the newest backup gates on quotaExceeded |
 | FU-167b | native | T-151 manual device test steps 1-6 and PO portal setup pending | docs/04-tasks/tasks/T-151.md | device; PO (portal) | OPEN |
 | FU-168a | core | T-152 keep and Gold check read entitlementStateProvider before first evaluate (manual backup could prune a Gold user to 1) | backup/application/schedule.dart:136,228,257 | none | CLOSED (pendingVerification keeps 5 and skips reconcile, Lead delta check batch 18) |
 | FU-168b | core | T-152 icloudBackupDestinationProvider still null; add ICloudBackupDestination mapping uploaded to confirmed | backup/application/schedule_providers.dart:41 | none | OPEN |
@@ -725,7 +725,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-181b | ui | T-093 Undo of unassign does not catch errors; assign_sheet firstWhere can throw | transfers/presentation/split_sheet.dart:131; assign_sheet.dart:91 | none | OPEN |
 | FU-181c | ui | T-093 "mark anyway" hidden (supportsMarkAnyway false, EC-15) | transfers/presentation | none | OPEN |
 | FU-182a | native | T-009 Dart spike entrypoints shipped in AOT | app/lib/main.dart; ingestion/spike_channel.dart | none | CLOSED (spike file and entrypoints removed) |
-| FU-182b | native | T-009 RunnerTests Debug-prod has SWIFT_ACTIVE_COMPILATION_CONDITIONS twice | ios/Runner.xcodeproj/project.pbxproj:743,753 | none | OPEN |
+| FU-182b | native | T-009 RunnerTests Debug-prod has SWIFT_ACTIVE_COMPILATION_CONDITIONS twice | ios/Runner.xcodeproj/project.pbxproj:743,753 | none | OBSOLETE (batch 51): no config has the setting twice in project.pbxproj |
 | FU-184a | ui | T-116 animateToPage(indexWhere) not guarded against -1 (unreachable today) | home/presentation/home_screen.dart:299 | none | OPEN |
 | FU-185a | ui | T-114 inflation chart isEmpty is length<2; cards opener hook null until shell wires it | insights/presentation/charts/gold_chart_bodies.dart | none | OPEN |
 | FU-186a | ui | T-084 compare-table Total row uses cardsSplit.spend while cells use donut slices; add repo-level test | accounts/presentation/card_detail/card_detail_providers.dart:189 | none | OPEN |
@@ -742,11 +742,11 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-191a | native | T-160 iOS OCR path check allowed only NSHomeDirectory, spool in App Group | ios/Runner/Platform/OCR/OcrHost.swift:141,193 | none | CLOSED (FU-198, batch 20) |
 | FU-191b | native | T-160 iOS spool key provider provisioned | ios/Runner/Platform/OCR/OcrHost.swift:57 | none | CLOSED (SharedSpoolKeyProvider, FU-198) |
 | FU-192a | native | T-061 two Keychain items named spool_key_v1 (Guard own group vs shared) | ios/Runner/Guard/GuardUserCipher.swift:43 | none | CLOSED (FU-196; same shared item) |
-| FU-192b | native | T-061 GuardBaseSource.mirror never called | ios/Runner/Guard/GuardBaseSource.swift | none | OPEN |
+| FU-192b | native | T-061 GuardBaseSource.mirror never called | ios/Runner/Guard/GuardBaseSource.swift | none | OBSOLETE (batch 51): mirror() called from CaptureGuardRuntime.mirrorBaseInBackground at launch |
 | FU-193a | native | T-062 KeychainSpoolCipher caches key; another process replacing the item breaks reads (re-read ladder) | ios/Shared/SpoolCipher.swift | none | CLOSED (reloadKey, FU-196) |
 | FU-193b | native | T-062 releaseHeldIfVersionChanged never called | ios/Runner/AppDelegate.swift:25 | none | CLOSED (called at launch) |
 | FU-193c | native | T-062 Dart never calls registerBackgroundRefresh (chain never starts) | app/pigeons/capture_api.dart | none | CLOSED (T-066 schedules at start and resume) |
-| FU-193d | native | T-062 platform-channels.md section 1.3 Write row still says .atomic | docs/03-technical/platform-channels.md | none | OPEN |
+| FU-193d | native | T-062 platform-channels.md section 1.3 Write row still says .atomic | docs/03-technical/platform-channels.md | none | OBSOLETE (batch 51): platform-channels.md 1.3 Write row no longer says .atomic |
 | FU-193e | native | T-062 headless engine registers every plugin including sign-in and IAP | ios/Runner/Platform/Capture/HeadlessIngestion.swift:85 | none | OPEN |
 | FU-199a | native | T-063 reloadKey returns .changed when nothing cached | ios/Shared/SpoolCipher.swift:60 | none | CLOSED (returns .unchanged) |
 | FU-199b | native | T-063 AC "run while app closed" device step (iOS 17 and 26) not run | docs/04-tasks/tasks/T-063.md | device | OPEN |
@@ -777,9 +777,9 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-206b | native | T-118 days-to-payday does not roll over at midnight until app republishes | widgets_bridge | none | OPEN |
 | FU-206c | native | T-118 widgetBridgeWiringProvider/widgetCopyProvider wired in shell; clear() in delete flow | widgets_bridge/widget_bridge.dart:102 | none | CLOSED (WIRE-2) |
 | FU-207a | native | T-064 shortcutInstall still the TODO placeholder URL | app/app_config.dart:15 | PO (FU-212) | OPEN |
-| FU-207b | native | T-064 unreadable IntentRunLog reports "never ran" and flags after 7 days | ios/Runner/Capture/IntentRunLog.swift:51 | none | OPEN |
+| FU-207b | native | T-064 unreadable IntentRunLog reports "never ran" and flags after 7 days | ios/Runner/Capture/IntentRunLog.swift:51 | none | OBSOLETE (batch 51): readIfReadable() distinguishes unreadable from never ran |
 | FU-207c | native | T-064 users without Apple Pay are flagged on the Wallet automation for good | capture/domain/ios_shortcut_checker.dart | none | CLOSED (PO T-064: Wallet rule neverRan or not flagged, batch 21) |
-| FU-207d | native | T-064 shortcutSetupReportProvider has no consumer naming the flagged automation | capture/application | none | OPEN |
+| FU-207d | native | T-064 shortcutSetupReportProvider has no consumer naming the flagged automation | capture/application | none | OBSOLETE (batch 51): ios_setup.dart consumes the report and flags the automation row |
 | FU-208a | test | T-171 allow-list does not see headers dart:io adds (user-agent, host) | core/backend/transport.dart:82 | none | OBSOLETE (batch 51): IoBackendTransport sets userAgent=null; Host is the destination itself |
 | FU-208b | test | T-171 source guard gaps (print (x) with space; // inside string; .m/.h not scanned) | test/privacy/source_guards_test.dart:58,82 | none | OBSOLETE (batch 51): guard handles // inside strings and scans .m/.h/.mm |
 | FU-208c | test | T-171 F1 sign-out reaches server | core/backend | none | CLOSED (Lead delta check batch 20) |
