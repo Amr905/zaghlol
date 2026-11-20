@@ -36,6 +36,7 @@ class FakeAdmin implements CategoriesAdmin {
   List<CategoryItem> items;
   final List<String> deleted = [];
   final List<String> created = [];
+  bool failDelete = false;
 
   @override
   Future<List<CategoryItem>> list() async => items;
@@ -75,6 +76,11 @@ class FakeAdmin implements CategoriesAdmin {
     String id, {
     required String replacementId,
   }) async {
+    if (failDelete) {
+      throw const CategoriesAdminException(
+        CategoriesAdminException.replacementRequired,
+      );
+    }
     deleted.add('$id->$replacementId');
     items = [
       for (final c in items)
@@ -352,6 +358,31 @@ void main() {
     await t.tap(confirm);
     await settle(t);
     expect(admin.deleted, ['sub1->sys:food']);
+  });
+
+  testWidgets('FU-179c: delete failure shows the support code', (t) async {
+    final h = SettingsHarness();
+    addTearDown(h.db.close);
+    final admin = FakeAdmin([food, sub])..failDelete = true;
+    await t.pumpWidget(
+      host(h, const CategoryEditScreen(categoryId: 'sub1'), admin: admin),
+    );
+    await settle(t);
+    setGold(t, true);
+    await settle(t);
+    await t.ensureVisible(find.text('Delete category'));
+    await t.tap(find.text('Delete category'));
+    await settle(t);
+    await t.tap(find.byType(DropdownButtonFormField<String>));
+    await settle(t);
+    await t.tap(find.text('Food').last);
+    await settle(t);
+    await t.tap(find.widgetWithText(TextButton, 'Delete and move'));
+    await settle(t);
+    expect(
+      find.textContaining(CategoriesAdminException.replacementRequired),
+      findsOneWidget,
+    );
   });
 
   testWidgets('downgrade: existing custom category readable, not editable', (

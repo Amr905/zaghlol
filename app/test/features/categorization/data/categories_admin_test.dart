@@ -144,4 +144,32 @@ void main() {
       expect((await admin.list()).map((x) => x.id), isNot(contains(c.id)));
     },
   );
+
+  test('delete frees children and drops budgets of the category', () async {
+    final p = await admin.create(
+      name: 'Trips',
+      bucket: 'wants',
+      icon: 'travel',
+      color: '#0F7A55',
+    );
+    final child = await admin.create(
+      name: 'Hotels',
+      bucket: 'wants',
+      icon: 'travel',
+      color: '#0F7A55',
+      parentId: p.id,
+    );
+    await db.customStatement(
+      'INSERT INTO budgets (id, category_id, currency, limit_minor, period, '
+      "created_at) VALUES ('b1', '${p.id}', 'EGP', 1000, 'cycle', 1)",
+    );
+    await db.customStatement(
+      'INSERT INTO fired_alerts (kind, subject_id, period_key, threshold, '
+      "fired_at) VALUES ('budget', 'b1', 'k', 80, 1)",
+    );
+    await admin.deleteWithReplacement(p.id, replacementId: 'sys:food');
+    expect((await admin.list()).map((x) => x.id), contains(child.id));
+    expect(await db.select(db.budgets).get(), isEmpty);
+    expect(await db.select(db.firedAlerts).get(), isEmpty);
+  });
 }

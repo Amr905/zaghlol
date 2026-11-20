@@ -65,8 +65,9 @@ void main() {
 
   group('HomeCardActions.enableAppLock (FU-130)', () {
     Future<(SettingsRepository, EnableLockResult)> run(
-      EnableLockResult result,
-    ) async {
+      EnableLockResult result, {
+      bool throws = false,
+    }) async {
       final db = AppDatabase(NativeDatabase.memory(), validateSchema: false);
       addTearDown(db.close);
       final repo = SettingsRepository(SettingsDao(db));
@@ -74,12 +75,18 @@ void main() {
         overrides: [
           appDatabaseProvider.overrideWith((ref) async => db),
           settingsRepositoryProvider.overrideWith((ref) async => repo),
-          appLockControllerProvider.overrideWith(() => _FakeLock(result)),
+          appLockControllerProvider.overrideWith(
+            () => _FakeLock(result, throws: throws),
+          ),
         ],
       );
       addTearDown(c.dispose);
-      final r = await c.read(homeCardActionsProvider).enableAppLock('x');
-      return (repo, r);
+      try {
+        final r = await c.read(homeCardActionsProvider).enableAppLock('x');
+        return (repo, r);
+      } on StateError {
+        return (repo, EnableLockResult.failed);
+      }
     }
 
     test('enabled hides amounts and spends the offer', () async {
@@ -90,6 +97,11 @@ void main() {
         await repo.get(Settings.setupSuggestionsHandled),
         contains(appLockOfferSlug),
       );
+    });
+
+    test('a throwing enable restores the hide-amounts setting', () async {
+      final (repo, _) = await run(EnableLockResult.enabled, throws: true);
+      expect(await repo.get(Settings.hideAmountsNotifications), isFalse);
     });
 
     for (final bad in [EnableLockResult.notSecure, EnableLockResult.failed]) {
@@ -103,8 +115,12 @@ void main() {
 }
 
 class _FakeLock extends AppLockController {
-  _FakeLock(this.result);
+  _FakeLock(this.result, {this.throws = false});
   final EnableLockResult result;
+  final bool throws;
   @override
-  Future<EnableLockResult> enable(String reason) async => result;
+  Future<EnableLockResult> enable(String reason) async {
+    if (throws) throw StateError('x');
+    return result;
+  }
 }

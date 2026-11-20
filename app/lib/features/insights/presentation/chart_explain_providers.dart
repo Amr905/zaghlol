@@ -36,7 +36,9 @@ typedef ChartExplainKey = ({ChartId chart, String code});
 typedef ExplainOutcome = ({Explanation explanation, NotEnoughReason? reason});
 
 /// Real catalog ids of essential categories (Q-25): rows in the needs and
-/// obligations buckets. Tips never target them.
+/// obligations buckets. Tips never target them. The set follows the bucket,
+/// so a user-made category placed in needs/obligations counts as essential
+/// (intended: the bucket is the user's own statement).
 final essentialCategoryIdsProvider = FutureProvider<Set<String>>((ref) async {
   final rows = await ref.watch(categoryRowsProvider.future);
   return {

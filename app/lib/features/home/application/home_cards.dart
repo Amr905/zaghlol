@@ -130,17 +130,30 @@ class HomeCardActions {
   /// Turns app lock on (OS check first). Also hides amounts in notifications
   /// (FU-130). The offer is then spent. Returns the result for the UI.
   Future<EnableLockResult> enableAppLock(String reason) async {
-    final r = await _ref
-        .read(appLockControllerProvider.notifier)
-        .enable(reason);
-    if (r == EnableLockResult.enabled) {
-      final repo = await _ref.read(settingsRepositoryProvider.future);
-      await repo.set(Settings.hideAmountsNotifications, true);
+    // FU-172b: hide amounts first, so a later failed write can never leave
+    // the lock on with amounts visible; undo it when the lock is not enabled.
+    final repo = await _ref.read(settingsRepositoryProvider.future);
+    final before = await repo.get(Settings.hideAmountsNotifications);
+    await repo.set(Settings.hideAmountsNotifications, true);
+    final EnableLockResult r;
+    try {
+      r = await _ref.read(appLockControllerProvider.notifier).enable(reason);
+    } on Object {
+      await repo.set(Settings.hideAmountsNotifications, before);
+      rethrow;
+    }
+    if (r != EnableLockResult.enabled) {
+      await repo.set(Settings.hideAmountsNotifications, before);
+      return r;
+    }
+    try {
       final now = await repo.get(Settings.setupSuggestionsHandled);
       await repo.set(Settings.setupSuggestionsHandled, {
         ...now,
         appLockOfferSlug,
       });
+    } on Object {
+      // The lock is on and amounts are hidden; the offer may show once more.
     }
     return r;
   }
