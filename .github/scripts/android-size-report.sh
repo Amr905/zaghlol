@@ -15,7 +15,11 @@ rec "android.$FLAVOR.debug_universal_apk" "$(size "$T/debug-universal.apk")"
 rec "android.$FLAVOR.release_universal_apk" "$(size "$T/release-universal.apk")"
 for f in "$T"/split/*.apk; do
   abi=$(basename "$f" | grep -oE 'arm64-v8a|armeabi-v7a|x86_64')
-  [ -n "$abi" ] && rec "android.$FLAVOR.release_split_apk.$abi" "$(size "$f")"
+  [ -n "$abi" ] || continue
+  rec "android.$FLAVOR.release_split_apk.$abi" "$(size "$f")"
+  # apkanalyzer's download-size is the compressed (gzip) estimate of what Play sends for this APK.
+  dl=$("$APKANALYZER" apk download-size "$f" 2>/dev/null || true)
+  [[ "$dl" =~ ^[0-9]+$ ]] && rec "android.$FLAVOR.apk_download_estimate.$abi" "$dl"
 done
 rec "android.$FLAVOR.release_aab" "$(size "$T/release.aab")"
 rec "android.$FLAVOR.release_aab_arm64_only" "$(size "$T/release-arm64.aab")"
@@ -29,6 +33,7 @@ for abi in arm64-v8a armeabi-v7a x86_64; do
   if java -jar "$JAR" build-apks --bundle="$T/release.aab" --output="$apks" --overwrite \
        --ks="$T/tools/size.jks" --ks-pass=pass:sizepass --ks-key-alias=size --key-pass=pass:sizepass > "$OUT/bundletool-build-$abi.log" 2>&1; then
     java -jar "$JAR" get-size total --apks="$apks" --device-spec="$spec" > "$OUT/bundletool-size-$abi.csv" 2>> "$OUT/bundletool-build-$abi.log"
+    echo "bundletool get-size ($abi):"; cat "$OUT/bundletool-size-$abi.csv"; tail -n 3 "$OUT/bundletool-build-$abi.log"
     max=$(tail -n 1 "$OUT/bundletool-size-$abi.csv" | cut -d, -f2)
     [[ "$max" =~ ^[0-9]+$ ]] && rec "android.$FLAVOR.play_download.$abi" "$max"
   else
