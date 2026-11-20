@@ -23,6 +23,7 @@ import '../../../../core/ui/shell/add_sheet.dart'
     show AddAction, closeAddSheetThen;
 import '../../../budget/application/budget_providers.dart';
 import '../../data/transactions_providers.dart';
+import '../../../accounts/presentation/account_type.dart';
 import '../../domain/transaction.dart';
 import '../../application/duplicate_finder.dart';
 import '../detail/transaction_detail_screen.dart';
@@ -493,7 +494,9 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           for (final a in lk.accounts)
             ZListRow(
               title: accountName(a, fmt),
-              subtitle: a.currencyCode,
+              subtitle: a.kind == null
+                  ? a.currencyCode
+                  : '${accountKindLabel(AppLocalizations.of(ctx), a.kind!)} \u00b7 ${a.currencyCode}',
               onTap: () => Navigator.of(ctx).pop(a.id),
             ),
         ],

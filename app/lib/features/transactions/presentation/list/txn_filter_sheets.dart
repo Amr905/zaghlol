@@ -8,6 +8,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
+import '../../../accounts/presentation/account_type.dart';
 import '../../domain/transaction.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
@@ -245,7 +246,7 @@ Future<Set<String>?> showCardsSheet(
           for (final a in accounts)
             _option(
               ctx,
-              title: accountName(a, fmt),
+              title: accountNameWithType(l, accountName(a, fmt), a.kind),
               on: picked.contains(a.id),
               onTap: () => setState(() {
                 picked = picked.contains(a.id)
@@ -315,7 +316,7 @@ Future<String?> showBulkAccountSheet(
       children: [
         for (final a in accounts)
           ZListRow(
-            title: accountName(a, fmt),
+            title: accountNameWithType(l, accountName(a, fmt), a.kind),
             onTap: () => Navigator.of(ctx).pop(a.id),
           ),
       ],

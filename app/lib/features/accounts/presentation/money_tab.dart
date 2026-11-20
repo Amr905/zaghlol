@@ -308,20 +308,18 @@ class _AccountsSection extends ConsumerWidget {
     final c = ZColors.of(context);
     final grouped = ref.watch(moneyGroupByTypeProvider).value ?? true;
     final due = ref.watch(cardDueDatesProvider).value ?? const {};
-    final sections = <(AccountGroup?, List<AccountWithBalances>)>[
-      if (grouped)
-        for (final g in AccountGroup.values)
-          if (data.visible.any((a) => accountGroupOf(a.account.kind) == g))
-            (
-              g,
-              [
-                for (final a in data.visible)
-                  if (accountGroupOf(a.account.kind) == g) a,
-              ],
-            )
-          else
-            (null, data.visible),
-    ];
+    final sections = <(AccountGroup?, List<AccountWithBalances>)>[];
+    if (grouped) {
+      for (final g in AccountGroup.values) {
+        final items = [
+          for (final a in data.visible)
+            if (accountGroupOf(a.account.kind) == g) a,
+        ];
+        if (items.isNotEmpty) sections.add((g, items));
+      }
+    } else {
+      sections.add((null, data.visible));
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

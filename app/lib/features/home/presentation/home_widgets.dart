@@ -15,6 +15,7 @@ import '../../../core/ui/z_money_text.dart';
 import '../../../core/ui/z_sheet.dart';
 import '../../accounts/data/accounts_providers.dart';
 import '../../accounts/domain/account.dart';
+import '../../accounts/presentation/account_type.dart';
 import '../../transactions/domain/transaction.dart';
 import '../application/card_filter.dart';
 import '../application/home_read_model.dart';
@@ -480,10 +481,13 @@ class HomeCardFilterChip extends ConsumerWidget {
     final filter = ref.watch(cardFilterProvider);
     final accounts = ref.watch(homeAccountsProvider).value ?? const [];
     final names = homeFilterNames(accounts, filter);
+    final single = filter.length == 1
+        ? accounts.where((a) => a.id == filter.first).firstOrNull
+        : null;
     final label = filter.isEmpty
         ? l.commonCardFilterAll
         : (filter.length == 1 && names.length == 1
-              ? names.first
+              ? accountNameWithType(l, names.first, single?.kind)
               : l.commonCardFilterCount(
                   filter.length,
                   HomeFormat.of(context, ref).count(filter.length),
@@ -706,6 +710,10 @@ class HomeCardFilterSheet extends ConsumerWidget {
           CheckboxListTile(
             value: filter.contains(a.id),
             title: Text(formatAccountWithCard(a.label, a.last4)),
+            subtitle: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: AccountTypeChip(kind: a.kind),
+            ),
             onChanged: (_) =>
                 ref.read(cardFilterProvider.notifier).toggle(a.id),
           ),

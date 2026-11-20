@@ -20,6 +20,7 @@ class _Repo implements SettingsRepository {
 
   @override
   Future<void> set<T>(SettingKey<T> key, T value) async {
+    _harness.writes[key.name] = value;
     if (key.name == Settings.hideAmountsApp.name) {
       _harness.value = value as bool;
     }
@@ -33,6 +34,9 @@ class HideAmountsHarness {
   HideAmountsHarness({bool hidden = false}) : _value = hidden;
 
   bool _value;
+
+  /// Every setting written through the fake repository, by key name.
+  final writes = <String, Object?>{};
   final _controller = StreamController<bool>.broadcast();
 
   bool get value => _value;
