@@ -6213,6 +6213,10 @@
   "@settingsPrefsThemeDark": {
     "description": "C"
   },
+  "settingsPrefsThemeDarkQuip": "Dark mode? Your money and your mood, both in the dark?",
+  "@settingsPrefsThemeDarkQuip": {
+    "description": "T-194 · Captain Zaghlol snackbar when the user picks Dark theme"
+  },
   "settingsPrefsCurrency": "Primary currency",
   "@settingsPrefsCurrency": {
     "description": "L"

@@ -9316,6 +9316,10 @@
   "@settingsPrefsThemeDark": {
     "description": "C"
   },
+  "settingsPrefsThemeDarkQuip": "يعني تبقى فلوسك والمود؟",
+  "@settingsPrefsThemeDarkQuip": {
+    "description": "T-194 · Captain Zaghlol snackbar when the user picks Dark theme"
+  },
   "settingsPrefsCurrency": "العملة الأساسية",
   "@settingsPrefsCurrency": {
     "description": "L"

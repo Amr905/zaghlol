@@ -187,6 +187,25 @@ void main() {
       );
     });
 
+    testWidgets('T-194: picking Dark shows the quip once; Light shows none', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      await tester.pumpWidget(h.app(const PreferencesScreen()));
+      await settle(tester);
+      final t = _t(tester, PreferencesScreen);
+      final quip = find.text(t.settingsPrefsThemeDarkQuip);
+
+      await tester.tap(find.text(t.settingsPrefsThemeLight));
+      await tester.pump();
+      expect(quip, findsNothing);
+
+      await tester.tap(find.text(t.settingsPrefsThemeDark));
+      await tester.pump();
+      expect(quip, findsOneWidget);
+    });
+
     testWidgets('digits row only in Arabic', (tester) async {
       final h = SettingsHarness();
       addTearDown(h.db.close);

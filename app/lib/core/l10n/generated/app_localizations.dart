@@ -9865,6 +9865,12 @@ abstract class AppLocalizations {
   /// **'غامق'**
   String get settingsPrefsThemeDark;
 
+  /// T-194 · Captain Zaghlol snackbar when the user picks Dark theme
+  ///
+  /// In ar, this message translates to:
+  /// **'يعني تبقى فلوسك والمود؟'**
+  String get settingsPrefsThemeDarkQuip;
+
   /// L
   ///
   /// In ar, this message translates to:
