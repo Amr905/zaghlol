@@ -235,6 +235,16 @@ void main() {
     expect(s.customTo, chartsToday);
   });
 
+  testWidgets('default: six cycles, caption says so, three rods per bar', (
+    tester,
+  ) async {
+    await _pump(tester);
+    expect(find.text('6 cycles'), findsOneWidget);
+    final chart = tester.widget<BarChart>(find.byType(BarChart));
+    expect(chart.data.barGroups, hasLength(6));
+    expect(chart.data.barGroups.first.barRods, hasLength(3));
+  });
+
   testWidgets('cash flow caption and bars follow the bucket size', (
     tester,
   ) async {
@@ -251,8 +261,17 @@ void main() {
           isPartial: false,
         ),
     ];
-    await _pump(tester, overrides: chartOverrides(cashFlow: ChartReady(days)));
+    await _pump(
+      tester,
+      overrides: chartOverrides(
+        cashFlow: ChartReady(days),
+        selection: const ChartPeriodSelection(ChartPreset.thisMonth),
+      ),
+    );
     expect(find.text('17 days'), findsOneWidget);
+    // Month cue on the first bar and on day 1 (F7).
+    expect(find.text('Oct 25'), findsOneWidget);
+    expect(find.text('Nov 1'), findsOneWidget);
     final chart = tester.widget<BarChart>(find.byType(BarChart));
     // Dense: income and spent only.
     expect(chart.data.barGroups.first.barRods, hasLength(2));

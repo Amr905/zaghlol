@@ -98,13 +98,14 @@ final previousBurnChartProvider =
         );
       }
       final repo = await ref.watch(chartRepositoryProvider.future);
+      // The whole earlier cycle, read up to the same day as now (to-date).
       final prev = Cycle(
-        start: resolved.previous.from,
-        end: resolved.previous.to,
+        start: resolved.previousFull.from,
+        end: resolved.previousFull.to,
       );
       return repo.burnCurve(
         prev,
-        prev.end,
+        resolved.previous.to,
         ChartFilter(currency: Currency.of(code)),
       );
     }, name: 'previousBurnChartProvider');

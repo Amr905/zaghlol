@@ -10602,5 +10602,35 @@
   "insightsChartsPeriodPrevRange": "الفترة اللي قبلها",
   "@insightsChartsPeriodPrevRange": {
     "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodLastCycles": "آخر {n} دورات",
+  "@commonPeriodLastCycles": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCyclesCount": "{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}",
+  "@insightsChartsCyclesCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevSameDays": "نفس الأيام من {prev}",
+  "@insightsChartsPeriodPrevSameDays": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
   }
 }

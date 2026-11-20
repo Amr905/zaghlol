@@ -121,15 +121,13 @@ void main() {
               ),
             );
       }
-      for (var m = 0; m < 24; m++) {
+      // One snapshot a day for two years (730 rows), so the widened net
+      // worth range reads real rows.
+      for (var i = 0; i < 730; i++) {
+        final day = CivilDate(2025, 1, 1).plusDays(i).toIso();
         await db.customStatement(
           'INSERT INTO networth_snapshots VALUES (?, ?, ?, ?)',
-          [
-            '${2025 + m ~/ 12}-${(m % 12 + 1).toString().padLeft(2, '0')}-24',
-            'EGP',
-            100000 + m,
-            1000,
-          ],
+          [day, 'EGP', 100000 + i, 1000],
         );
       }
     });
@@ -169,7 +167,35 @@ void main() {
       '2-year custom': twoYears,
     };
 
+    // The explainer's previous-period queries (same elapsed days) and the
+    // cash flow total, per range; and the six-cycle trend (default view).
+    final previousOf = <String, ChartPeriod>{
+      for (final e in {
+        'last 12 months': const ChartPeriodSelection(ChartPreset.last12Months),
+        'last 6 months': const ChartPeriodSelection(ChartPreset.last6Months),
+        'this cycle': ChartPeriodSelection.thisCycle,
+      }.entries)
+        e.key: e.value.resolveAll(today, schedule).previous,
+    };
+    final trend = cashFlowBuckets(
+      ChartPeriodSelection.thisCycle.resolveAll(today, schedule),
+      today,
+      schedule,
+    );
+
     final charts = <String, Future<Object?> Function()>{
+      'cashFlow (six-cycle trend)': () => repo.cashFlow(trend, f),
+      for (final e in previousOf.entries) ...{
+        'previous categoryDonut (${e.key})': () =>
+            repo.categoryDonut(e.value, f),
+        'previous topMerchants (${e.key})': () => repo.topMerchants(e.value, f),
+        'previous fiftyThirtyTwenty (${e.key})': () =>
+            repo.fiftyThirtyTwenty(e.value, f),
+        'previous cardsSplit (${e.key})': () => repo.cardsSplit(e.value, f),
+        'previous cashFlow total (${e.key})': () => repo.cashFlow([e.value], f),
+      },
+      for (final e in selectable.entries)
+        'cashFlow total (${e.key})': () => repo.cashFlow([e.value], f),
       for (final e in selectable.entries) ...{
         'cashFlow (${e.key}, ${bucketKindFor(e.value).name} buckets)': () =>
             repo.cashFlow(bucketsOf(e.value, today), f),
@@ -199,6 +225,14 @@ void main() {
       ),
       'personalInflation': () => repo.personalInflationIndex(today, f),
     };
+
+    final nw = await repo.netWorth(netWorthRange(twelveMonths), 'EGP');
+    expect(nw, isA<ChartReady<List<NetWorthPoint>>>());
+    expect(
+      (nw as ChartReady<List<NetWorthPoint>>).data.length,
+      greaterThan(300),
+    );
+    repo.invalidate();
 
     final slow = <String>[];
     for (final e in charts.entries) {

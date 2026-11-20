@@ -11317,6 +11317,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الفترة اللي قبلها'**
   String get insightsChartsPeriodPrevRange;
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر {n} دورات'**
+  String commonPeriodLastCycles(String n);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}'**
+  String insightsChartsCyclesCount(int count, String countText);
+
+  /// S-20 chart period (T-188)
+  ///
+  /// In ar, this message translates to:
+  /// **'نفس الأيام من {prev}'**
+  String insightsChartsPeriodPrevSameDays(String prev);
 }
 
 class _AppLocalizationsDelegate

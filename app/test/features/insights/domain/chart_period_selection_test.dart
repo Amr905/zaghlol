@@ -251,15 +251,45 @@ void main() {
   });
 
   group('resolveAll', () {
-    test('previous is the period one step back; flags follow', () {
+    test('previous is the same elapsed days of the period before (F2)', () {
       final r = ChartPeriodSelection.thisCycle.resolveAll(d(2026, 11, 10), p25);
       expect(r.period, p(d(2026, 10, 25), d(2026, 11, 24)));
-      expect(r.previous, p(d(2026, 9, 25), d(2026, 10, 24)));
+      // 17 days elapsed: 25 Oct .. 10 Nov against 25 Sep .. 11 Oct.
+      expect(r.previous, p(d(2026, 9, 25), d(2026, 10, 11)));
+      expect(r.previousFull, p(d(2026, 9, 25), d(2026, 10, 24)));
+      expect(r.previousCapped, isTrue);
       expect(r.cycle, Cycle(start: d(2026, 10, 25), end: d(2026, 11, 24)));
       expect(r.isCurrentCycle, isTrue);
       expect(r.canStepForward, isFalse);
       expect(r.canStepBack, isTrue);
     });
+
+    test(
+      'capping covers month, rolling and year; closed periods are whole',
+      () {
+        final today = d(2026, 11, 20);
+        final m = const ChartPeriodSelection(ChartPreset.thisMonth)
+            .resolveAll(today, p25);
+        expect(m.previous, p(d(2026, 10, 1), d(2026, 10, 20)));
+        final r = const ChartPeriodSelection(ChartPreset.last3Months)
+            .resolveAll(today, p25);
+        expect(r.period, p(d(2026, 9, 1), d(2026, 11, 20)));
+        expect(r.previous.lengthDays, r.period.lengthDays);
+        expect(r.previous.from, d(2026, 6, 1));
+        final y = const ChartPeriodSelection(ChartPreset.thisYear)
+            .resolveAll(today, p25);
+        expect(y.previous, p(d(2025, 1, 1), d(2025, 11, 20)));
+        final last = const ChartPeriodSelection(ChartPreset.lastMonth)
+            .resolveAll(today, p25);
+        expect(last.previous, p(d(2026, 9, 1), d(2026, 9, 30)));
+        expect(last.previousCapped, isFalse);
+        final back = const ChartPeriodSelection(
+          ChartPreset.thisCycle,
+          offset: 1,
+        ).resolveAll(today, p25);
+        expect(back.previousCapped, isFalse);
+      },
+    );
 
     test('a relative preset follows the date (re-resolves)', () {
       const s = ChartPeriodSelection(ChartPreset.thisMonth);
@@ -400,6 +430,105 @@ void main() {
       );
       final two = p(d(2024, 11, 1), d(2026, 11, 10));
       expect(netWorthRange(two), two);
+    });
+  });
+
+  group('six cycles (F1)', () {
+    test('resolves to six cycles ending at the current one; steps by six', () {
+      const s = ChartPeriodSelection(ChartPreset.last6Cycles);
+      final today = d(2026, 11, 10);
+      expect(res(s, today), p(d(2026, 5, 25), d(2026, 11, 24)));
+      expect(res(s.stepped(1), today), p(d(2025, 11, 25), d(2026, 5, 24)));
+      expect(s.canStepForward(today, p25), isFalse);
+      expect(s.stepped(1).canStepForward(today, p25), isTrue);
+    });
+
+    test(
+      'cash flow buckets: one per cycle, six, ending at the chosen cycle',
+      () {
+        final today = d(2026, 11, 10);
+        for (final sel in const [
+          ChartPeriodSelection.thisCycle,
+          ChartPeriodSelection(ChartPreset.last6Cycles),
+        ]) {
+          final r = sel.resolveAll(today, p25);
+          final b = cashFlowBuckets(r, today, p25);
+          expect(b, hasLength(6), reason: sel.encode());
+          expect(b.last, p(d(2026, 10, 25), d(2026, 11, 24)));
+          expect(b.first.from, d(2026, 5, 25));
+          for (var i = 1; i < b.length; i++) {
+            expect(b[i].from, b[i - 1].to.plusDays(1));
+          }
+          expect(r.bucketKind, ChartBucketKind.cycle);
+        }
+        // A stepped cycle ends the trend at that cycle.
+        final back = const ChartPeriodSelection(ChartPreset.lastCycle)
+            .resolveAll(today, p25);
+        expect(
+          cashFlowBuckets(back, today, p25).last,
+          p(d(2026, 9, 25), d(2026, 10, 24)),
+        );
+        // Other kinds use day/week/month buckets.
+        final month = const ChartPeriodSelection(ChartPreset.thisMonth)
+            .resolveAll(today, p25);
+        expect(cashFlowBuckets(month, today, p25), hasLength(10));
+      },
+    );
+
+    test('codec round trip', () {
+      const s = ChartPeriodSelection(ChartPreset.last6Cycles, offset: 2);
+      expect(ChartPeriodSelection.tryDecode(s.encode()), s);
+    });
+  });
+
+  group('payday limits and custom clamp (F4, F6)', () {
+    test(
+      'payday above 28 does not exist: eras refuse it, resolve falls to 1',
+      () {
+        for (final day in [29, 30, 31]) {
+          expect(() => PaydayEra(null, day), throwsArgumentError);
+          expect(() => PaydaySchedule.single(day), throwsArgumentError);
+          final s = PaydaySchedule.resolve(
+            erasJson: null,
+            paydayDay: day,
+            today: d(2026, 2, 28),
+          );
+          expect(
+            res(ChartPeriodSelection.thisCycle, d(2026, 2, 28), s),
+            p(d(2026, 2, 1), d(2026, 2, 28)),
+          );
+        }
+      },
+    );
+
+    test('payday 28 in 28-, 29- and 30-day months keeps cycles contiguous', () {
+      final s = PaydaySchedule.single(28);
+      for (final today in [
+        d(2026, 2, 27),
+        d(2024, 2, 29),
+        d(2026, 4, 30),
+        d(2026, 3, 1),
+      ]) {
+        final c = res(ChartPeriodSelection.thisCycle, today, s);
+        final next = res(
+          const ChartPeriodSelection(ChartPreset.thisCycle, offset: -1),
+          today,
+          s,
+        );
+        expect(next.from, c.to.plusDays(1));
+        expect(c.contains(today), isTrue);
+      }
+    });
+
+    test('a custom range stepped forward never ends after today', () {
+      final today = d(2026, 11, 10);
+      final s = ChartPeriodSelection.custom(d(2026, 10, 1), d(2026, 10, 31));
+      final f = s.stepped(-1); // Nov 1 .. Nov 30
+      expect(res(f, today), p(d(2026, 11, 1), today));
+      final r = f.resolveAll(today, p25);
+      expect(r.canStepForward, isFalse);
+      // Compared with the same elapsed days of the range before.
+      expect(r.previous.lengthDays, 10);
     });
   });
 }

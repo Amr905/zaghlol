@@ -230,7 +230,14 @@ class _ChartSection extends ConsumerWidget {
                   bare: true,
                   title: title,
                   contextLine: _contextLine(l, code, periodLabel),
-                  summary: CashFlowBody.summary(l, money0, data),
+                  summary: CashFlowBody.summary(
+                    l,
+                    money0,
+                    cashFlowPeriodPoints(
+                      ref.watch(cashFlowTotalProvider(code)),
+                      data,
+                    ),
+                  ),
                   child: CashFlowBody(points: data, bucketKind: bucketKind),
                 ),
                 ChartNotEnoughData() => empty(r),

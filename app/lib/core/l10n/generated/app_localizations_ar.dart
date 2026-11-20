@@ -7848,4 +7848,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get insightsChartsPeriodPrevRange => 'الفترة اللي قبلها';
+
+  @override
+  String commonPeriodLastCycles(String n) {
+    return 'آخر $n دورات';
+  }
+
+  @override
+  String insightsChartsCyclesCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText دورة',
+      few: '$countText دورات',
+      two: 'دورتين',
+      one: 'دورة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsPeriodPrevSameDays(String prev) {
+    return 'نفس الأيام من $prev';
+  }
 }

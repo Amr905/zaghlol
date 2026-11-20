@@ -60,6 +60,9 @@ class ChartPeriodText {
   String presetName(ChartPreset preset) => switch (preset) {
     ChartPreset.thisCycle => l.commonPeriodThisCycle,
     ChartPreset.lastCycle => l.commonPeriodLastCycle,
+    ChartPreset.last6Cycles => l.commonPeriodLastCycles(
+      digits.render('${ChartPeriodSelection.cyclesPerBlock}'),
+    ),
     ChartPreset.thisMonth => l.commonPeriodThisMonth,
     ChartPreset.lastMonth => l.commonPeriodLastMonth,
     ChartPreset.last3Months => l.commonPeriodLastMonths(3, digits.render('3')),
@@ -89,6 +92,8 @@ class ChartPeriodText {
       case ChartPeriodKind.cycle:
         if (back == 0) return l.insightsChartsPeriodNowThisCycle;
         if (back == 1) return l.insightsChartsPeriodNowLastCycle;
+      case ChartPeriodKind.cycles:
+        break;
       case ChartPeriodKind.month:
         if (back == 0) return l.insightsChartsPeriodNowThisMonth;
         if (back == 1) return l.insightsChartsPeriodNowLastMonth;
@@ -109,6 +114,13 @@ class ChartPeriodText {
   /// The period before it, as a phrase: "last cycle" next to the current
   /// one, "the cycle before" otherwise.
   String prev(ResolvedChartPeriod r) {
+    final phrase = _prevPhrase(r);
+    return r.previousCapped
+        ? l.insightsChartsPeriodPrevSameDays(phrase)
+        : phrase;
+  }
+
+  String _prevPhrase(ResolvedChartPeriod r) {
     final s = r.selection;
     final first = s.periodsBack == 0;
     switch (s.kind) {
@@ -116,6 +128,8 @@ class ChartPeriodText {
         return first
             ? l.insightsChartsPeriodPrevCycleNow
             : l.insightsChartsPeriodPrevCycle;
+      case ChartPeriodKind.cycles:
+        return l.insightsChartsPeriodPrevRange;
       case ChartPeriodKind.month:
         return first
             ? l.insightsChartsPeriodPrevMonthNow
@@ -139,6 +153,7 @@ class ChartPeriodText {
       ChartBucketKind.day => l.insightsChartsDaysCount(count, text),
       ChartBucketKind.week => l.insightsChartsWeeksCount(count, text),
       ChartBucketKind.month => l.insightsChartsMonthsCount(count, text),
+      ChartBucketKind.cycle => l.insightsChartsCyclesCount(count, text),
     };
   }
 }

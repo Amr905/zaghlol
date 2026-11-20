@@ -7416,7 +7416,7 @@
   "@insightsChartsPeriodNowThisCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodNowLastCycle": "last cycle",
+  "insightsChartsPeriodNowLastCycle": "the previous cycle",
   "@insightsChartsPeriodNowLastCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7424,7 +7424,7 @@
   "@insightsChartsPeriodNowThisMonth": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodNowLastMonth": "last month",
+  "insightsChartsPeriodNowLastMonth": "the previous month",
   "@insightsChartsPeriodNowLastMonth": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7444,7 +7444,7 @@
   "@insightsChartsPeriodNowThisYear": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodNowLastYear": "last year",
+  "insightsChartsPeriodNowLastYear": "the previous year",
   "@insightsChartsPeriodNowLastYear": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7499,5 +7499,35 @@
   "insightsChartsPeriodPrevRange": "the period before",
   "@insightsChartsPeriodPrevRange": {
     "description": "S-20 chart period (T-188)"
+  },
+  "commonPeriodLastCycles": "Last {n} cycles",
+  "@commonPeriodLastCycles": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCyclesCount": "{count, plural, one{{countText} cycle} other{{countText} cycles}}",
+  "@insightsChartsCyclesCount": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "countText": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodPrevSameDays": "the same days of {prev}",
+  "@insightsChartsPeriodPrevSameDays": {
+    "description": "S-20 chart period (T-188)",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
   }
 }

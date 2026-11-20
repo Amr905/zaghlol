@@ -97,20 +97,32 @@ class CashFlowBody extends ConsumerWidget {
         .map((p) => math.max(p.income.minor, p.spend.minor))
         .fold<int>(1, math.max);
     final digits = ref.watch(digitsModeProvider(lang));
+    // Day bars carry a month cue ("25 Oct") on the first bar and on day 1,
+    // so a cycle that spans two months reads clearly (F7).
+    bool cue(CashFlowPoint p) =>
+        bucketKind == ChartBucketKind.day &&
+        (identical(p, points.first) || p.period.from.day == 1);
     String label(CashFlowPoint p) {
+      final d = p.period.from;
       switch (bucketKind) {
         case ChartBucketKind.day:
-          return digits.render('${p.period.from.day}');
+          return cue(p)
+              ? ZDateFormat.dayMonth(
+                  DateTime(d.year, d.month, d.day),
+                  lang,
+                  digits,
+                )
+              : digits.render('${d.day}');
         case ChartBucketKind.week:
-          final d = p.period.from;
           return ZDateFormat.dayMonth(
             DateTime(d.year, d.month, d.day),
             lang,
             digits,
           );
         case ChartBucketKind.month:
-          final d = p.period.to;
-          return DateFormat.MMMM(lang).format(DateTime(d.year, d.month));
+        case ChartBucketKind.cycle:
+          final e = p.period.to;
+          return DateFormat.MMMM(lang).format(DateTime(e.year, e.month));
       }
     }
 
@@ -120,6 +132,16 @@ class CashFlowBody extends ConsumerWidget {
     final n = shown.length;
     final dense = n > 12;
     final labelEvery = n <= 8 ? 1 : (n / 6).ceil();
+    // A cue bar always has its label; the regular ones near it give way.
+    bool showLabel(int i) {
+      if (cue(shown[i])) return true;
+      if (i % labelEvery != 0) return false;
+      for (var j = i - 2; j <= i + 2; j++) {
+        if (j >= 0 && j < n && cue(shown[j])) return false;
+      }
+      return true;
+    }
+
     final rodWidth = n <= 6
         ? 10.0
         : n <= 12
@@ -152,7 +174,7 @@ class CashFlowBody extends ConsumerWidget {
                       getTitlesWidget: (v, meta) => SideTitleWidget(
                         meta: meta,
                         space: ZSpacing.sm,
-                        child: v.toInt() % labelEvery == 0
+                        child: showLabel(v.toInt())
                             ? Text(
                                 label(shown[v.toInt()]),
                                 style: ZType.caption.copyWith(

@@ -7632,13 +7632,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsChartsPeriodNowThisCycle => 'this cycle';
 
   @override
-  String get insightsChartsPeriodNowLastCycle => 'last cycle';
+  String get insightsChartsPeriodNowLastCycle => 'the previous cycle';
 
   @override
   String get insightsChartsPeriodNowThisMonth => 'this month';
 
   @override
-  String get insightsChartsPeriodNowLastMonth => 'last month';
+  String get insightsChartsPeriodNowLastMonth => 'the previous month';
 
   @override
   String insightsChartsPeriodNowMonths(int count, String n) {
@@ -7655,7 +7655,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsChartsPeriodNowThisYear => 'this year';
 
   @override
-  String get insightsChartsPeriodNowLastYear => 'last year';
+  String get insightsChartsPeriodNowLastYear => 'the previous year';
 
   @override
   String insightsChartsPeriodNowRange(String start, String end) {
@@ -7693,4 +7693,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insightsChartsPeriodPrevRange => 'the period before';
+
+  @override
+  String commonPeriodLastCycles(String n) {
+    return 'Last $n cycles';
+  }
+
+  @override
+  String insightsChartsCyclesCount(int count, String countText) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countText cycles',
+      one: '$countText cycle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsPeriodPrevSameDays(String prev) {
+    return 'the same days of $prev';
+  }
 }

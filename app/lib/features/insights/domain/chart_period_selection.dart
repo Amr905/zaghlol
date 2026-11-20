@@ -11,6 +11,9 @@ import 'chart_models.dart';
 enum ChartPreset {
   thisCycle,
   lastCycle,
+
+  /// Six payday cycles ending at the current one (T-188 review F1).
+  last6Cycles,
   thisMonth,
   lastMonth,
   last3Months,
@@ -21,10 +24,10 @@ enum ChartPreset {
 }
 
 /// How a preset moves when stepped.
-enum ChartPeriodKind { cycle, month, rolling, year, custom }
+enum ChartPeriodKind { cycle, cycles, month, rolling, year, custom }
 
 /// The bucket size of a chart that plots over time.
-enum ChartBucketKind { day, week, month }
+enum ChartBucketKind { day, week, month, cycle }
 
 /// How a chart relates to the chosen period.
 enum ChartPeriodSupport {
@@ -90,6 +93,9 @@ final class ChartPeriodSelection {
     return ChartPeriodSelection._custom(from, to, offset);
   }
 
+  /// Cycles in the trend preset and in the cash flow trend.
+  static const int cyclesPerBlock = 6;
+
   static const ChartPeriodSelection thisCycle = ChartPeriodSelection(
     ChartPreset.thisCycle,
   );
@@ -101,6 +107,7 @@ final class ChartPeriodSelection {
 
   ChartPeriodKind get kind => switch (preset) {
     ChartPreset.thisCycle || ChartPreset.lastCycle => ChartPeriodKind.cycle,
+    ChartPreset.last6Cycles => ChartPeriodKind.cycles,
     ChartPreset.thisMonth || ChartPreset.lastMonth => ChartPeriodKind.month,
     ChartPreset.last3Months ||
     ChartPreset.last6Months ||
@@ -151,6 +158,20 @@ final class ChartPeriodSelection {
           c = schedule.after(c);
         }
         return ChartPeriod.cycle(c);
+      case ChartPeriodKind.cycles:
+        // A block of six cycles; one step moves by six cycles.
+        var end = schedule.cycleOn(today);
+        for (var i = 0; i < offset * cyclesPerBlock; i++) {
+          end = schedule.before(end);
+        }
+        for (var i = 0; i > offset * cyclesPerBlock; i--) {
+          end = schedule.after(end);
+        }
+        var start = end;
+        for (var i = 1; i < cyclesPerBlock; i++) {
+          start = schedule.before(start);
+        }
+        return ChartPeriod(start.start, end.end);
       case ChartPeriodKind.month:
         final idx = _monthIndex(today) - periodsBack;
         return ChartPeriod.month(idx ~/ 12, idx % 12 + 1);
@@ -169,7 +190,12 @@ final class ChartPeriodSelection {
         final from = customFrom!;
         final to = customTo!;
         final shift = -offset * (to.difference(from) + 1);
-        return ChartPeriod(from.plusDays(shift), to.plusDays(shift));
+        // Stepped forward, a range never ends after today (F6).
+        final start = from.plusDays(shift);
+        final end = to.plusDays(shift);
+        // (A range that starts after today cannot be stepped to; it is left
+        // as it is rather than inverted.)
+        return ChartPeriod(start, end > today && start <= today ? today : end);
     }
   }
 
@@ -190,14 +216,27 @@ final class ChartPeriodSelection {
 
   /// The selection resolved on [today]: the period, the previous period of
   /// the same kind and what stepping can do.
-  ResolvedChartPeriod resolveAll(CivilDate today, PaydaySchedule schedule) =>
-      ResolvedChartPeriod._(
-        selection: this,
-        period: resolve(today, schedule),
-        previous: stepped(1).resolve(today, schedule),
-        canStepBack: canStepBack(today, schedule),
-        canStepForward: canStepForward(today, schedule),
-      );
+  ResolvedChartPeriod resolveAll(CivilDate today, PaydaySchedule schedule) {
+    final period = resolve(today, schedule);
+    final full = stepped(1).resolve(today, schedule);
+    // An open period (it contains today) is compared with the same elapsed
+    // days of the one before, to-date against to-date (F2).
+    var previous = full;
+    if (period.from <= today && period.to >= today) {
+      final elapsed = today.difference(period.from) + 1;
+      if (elapsed < full.lengthDays) {
+        previous = ChartPeriod(full.from, full.from.plusDays(elapsed - 1));
+      }
+    }
+    return ResolvedChartPeriod._(
+      selection: this,
+      period: period,
+      previous: previous,
+      previousFull: full,
+      canStepBack: canStepBack(today, schedule),
+      canStepForward: canStepForward(today, schedule),
+    );
+  }
 
   /// Storage text: `<preset>|<offset>|<from>|<to>` (dates only for custom).
   String encode() =>
@@ -257,6 +296,7 @@ final class ResolvedChartPeriod {
     required this.selection,
     required this.period,
     required this.previous,
+    required this.previousFull,
     required this.canStepBack,
     required this.canStepForward,
   });
@@ -264,9 +304,16 @@ final class ResolvedChartPeriod {
   final ChartPeriodSelection selection;
   final ChartPeriod period;
 
-  /// The period one step back: the previous cycle, month, block of months,
-  /// year, or a custom range's own length earlier (FR-CHT-08 compares with it).
+  /// The period one step back (cycle, month, block of months, year, or a
+  /// custom range's own length earlier), as compared with: when the current
+  /// period is still open it is cut to the same number of elapsed days.
   final ChartPeriod previous;
+
+  /// The same period without the cut (the whole earlier cycle, month...).
+  final ChartPeriod previousFull;
+
+  /// [previous] is only the first days of [previousFull].
+  bool get previousCapped => previous != previousFull;
   final bool canStepBack;
   final bool canStepForward;
 
@@ -282,7 +329,12 @@ final class ResolvedChartPeriod {
   Cycle? get cycle =>
       isCycle ? Cycle(start: period.from, end: period.to) : null;
 
-  ChartBucketKind get bucketKind => bucketKindFor(period);
+  /// One bar per payday cycle for the cycle presets (the trend), else by
+  /// the length of the period.
+  ChartBucketKind get bucketKind =>
+      kind == ChartPeriodKind.cycle || kind == ChartPeriodKind.cycles
+      ? ChartBucketKind.cycle
+      : bucketKindFor(period);
 
   /// How the chart [chart] treats this period.
   bool supports(ChartId chart) =>
@@ -322,6 +374,8 @@ List<ChartPeriod> bucketsOf(ChartPeriod p, CivilDate today) {
         final e = s.plusDays(6);
         out.add(ChartPeriod(s, e > p.to ? p.to : e));
       }
+    case ChartBucketKind.cycle: // never from bucketKindFor; see cashFlowBuckets
+      out.add(p);
     case ChartBucketKind.month:
       var s = p.from;
       while (s <= p.to) {
@@ -348,4 +402,22 @@ ChartPeriod netWorthRange(ChartPeriod p) {
     _monthIndex(p.to) - (ChartPeriodLimits.netWorthMinMonths - 1),
   );
   return ChartPeriod(p.from < minStart ? p.from : minStart, p.to);
+}
+
+/// The cash flow bars (F1). A single cycle or the six-cycle preset shows the
+/// six cycles ending at that cycle (payday aligned, as before T-188); any
+/// other period uses day, week or month buckets.
+List<ChartPeriod> cashFlowBuckets(
+  ResolvedChartPeriod r,
+  CivilDate today,
+  PaydaySchedule schedule,
+) {
+  if (r.bucketKind != ChartBucketKind.cycle) return bucketsOf(r.period, today);
+  var c = schedule.cycleOn(r.period.to);
+  final out = <ChartPeriod>[ChartPeriod.cycle(c)];
+  for (var i = 1; i < ChartPeriodSelection.cyclesPerBlock; i++) {
+    c = schedule.before(c);
+    out.insert(0, ChartPeriod.cycle(c));
+  }
+  return out;
 }

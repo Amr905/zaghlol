@@ -47,20 +47,31 @@ class ChartsCurrency extends Notifier<String?> {
   void select(String code) => state = code;
 }
 
-/// Income and spend per bucket (days, weeks or months by the period's
-/// length, design note §2).
+/// Income and spend per bucket: six cycles for a cycle period, else days,
+/// weeks or months by the period's length (design note §2).
 final cashFlowChartProvider =
     FutureProvider.family<ChartResult<List<CashFlowPoint>>, String>((
       ref,
       code,
     ) async {
       final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
+      final schedule = await ref.watch(paydayScheduleProvider.future);
       final repo = await ref.watch(chartRepositoryProvider.future);
       return repo.cashFlow(
-        bucketsOf(resolved.period, ref.watch(todayProvider)),
+        cashFlowBuckets(resolved, ref.watch(todayProvider), schedule),
         _filter(code),
       );
     }, name: 'cashFlowChartProvider');
+
+/// The points the footnote and the text summary describe: the whole chosen
+/// period (a cycle period draws six cycles but speaks about the chosen one).
+List<CashFlowPoint> cashFlowPeriodPoints(
+  AsyncValue<ChartResult<List<CashFlowPoint>>> total,
+  List<CashFlowPoint> drawn,
+) => switch (total.value) {
+  ChartReady<List<CashFlowPoint>>(:final data) when data.isNotEmpty => data,
+  _ => drawn,
+};
 
 /// One point for the whole period (the footnote and the explainer).
 final cashFlowTotalProvider =

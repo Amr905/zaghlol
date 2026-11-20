@@ -39,9 +39,19 @@ class FakeChartPeriodSelection extends ChartPeriodSelectionNotifier {
   }
 }
 
-/// The default cycle (25 Oct, 17 days in): one point per day, as the cash
-/// flow chart draws a one-cycle period (T-188).
+/// The default view: six months of cycle points (T-188 keeps the trend).
 List<CashFlowPoint> cashFlowPoints() => [
+  for (var m = 5; m <= 10; m++)
+    CashFlowPoint(
+      period: ChartPeriod.month(2026, m),
+      income: egpM(30000),
+      spend: egpM(18000 + m * 500),
+      isPartial: false,
+    ),
+];
+
+/// One point per day (17 days of a month period).
+List<CashFlowPoint> dailyCashFlowPoints() => [
   for (var i = 0; i < 17; i++)
     CashFlowPoint(
       period: ChartPeriod(

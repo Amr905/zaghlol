@@ -20,6 +20,7 @@ import 'chart_period_text.dart';
 const List<ChartPreset> chartPresetOrder = [
   ChartPreset.thisCycle,
   ChartPreset.lastCycle,
+  ChartPreset.last6Cycles,
   ChartPreset.thisMonth,
   ChartPreset.lastMonth,
   ChartPreset.last3Months,

@@ -140,7 +140,17 @@ void main() {
     }
 
     final cycle = await points(ChartPeriodSelection.thisCycle);
-    expect(cycle, hasLength(17)); // 25 Oct .. today, one per day
+    expect(cycle, hasLength(6)); // the trend: six cycles ending at this one
+    expect(cycle.last.period.key, '2026-10-25..2026-11-24');
+    expect(cycle.last.spend.minor, 150000);
+    final trend = await points(
+      const ChartPeriodSelection(ChartPreset.last6Cycles),
+    );
+    expect(trend.map((p) => p.period.key), cycle.map((p) => p.period.key));
+    final month = await points(
+      const ChartPeriodSelection(ChartPreset.thisMonth),
+    );
+    expect(month, hasLength(10)); // 1 Nov .. today, a bar per day
     final six = await points(
       const ChartPeriodSelection(ChartPreset.last6Months),
     );
@@ -150,8 +160,12 @@ void main() {
       const ChartPeriodSelection(ChartPreset.last12Months),
     );
     expect(year, hasLength(12)); // Dec 2025 .. Nov 2026, one per month
-    expect(CashFlowPoint.total(cycle).spend.minor, 150000);
-    expect(CashFlowPoint.total(cycle).income.minor, 3000000);
+    // The footnote and the explainer speak about the chosen cycle only.
+    final c = await opened(ChartPeriodSelection.thisCycle);
+    final total = await c.read(cashFlowTotalProvider('EGP').future);
+    final one = (total as ChartReady<List<CashFlowPoint>>).data.single;
+    expect(one.spend.minor, 150000);
+    expect(one.income.minor, 3000000);
     expect(CashFlowPoint.total(year).spend.minor, 820000);
     expect(CashFlowPoint.total(six).spend.minor, 750000);
   });
@@ -208,8 +222,55 @@ void main() {
   test('the previous period behind the comparison is one step back', () async {
     final c = await opened(const ChartPeriodSelection(ChartPreset.last3Months));
     final r = await c.read(chartsResolvedPeriodProvider.future);
-    expect(r.previous.key, '2026-06-01..2026-08-31');
+    // 71 days elapsed (1 Sep .. 10 Nov): the same days of 1 Jun .. 31 Aug.
+    expect(r.previous.key, '2026-06-01..2026-08-10');
     final prev = await c.read(previousDonutChartProvider('EGP').future);
     expect((prev as ChartReady<CategoryDonut>).data.total.minor, 400000);
   });
+
+  test(
+    'rows near midnight belong to their own local day at +120 and +180 (F4)',
+    () async {
+      final db = edb.db;
+      Future<void> at(
+        String id,
+        int major,
+        CivilDate day,
+        int hour,
+        int min,
+        int offset,
+      ) => db.customStatement(
+        'INSERT INTO transactions (id, account_id, source, direction, '
+        'amount_minor, currency, occurred_at, occurred_tz_offset_min, '
+        'merchant_raw, merchant_norm, is_internal, category_source, '
+        "created_at, updated_at) VALUES (?, 'acc1', 'sms', 'expense', ?, "
+        "'EGP', ?, ?, 'Late', 'late', 0, 'none', 0, 0)",
+        [
+          id,
+          major * 100,
+          day.epochDay * 86400000 + (hour * 60 + min - offset) * 60000,
+          offset,
+        ],
+      );
+      // Same UTC instant (21:30 on 24 Oct): local 23:30 on the 24th at +120,
+      // local 00:30 on the 25th at +180 (summer time).
+      await at('n1', 22, CivilDate(2026, 10, 24), 23, 30, 120);
+      await at('n2', 11, CivilDate(2026, 10, 25), 0, 30, 180);
+      expect(
+        await donutTotal(await opened(ChartPeriodSelection.thisCycle), 'EGP'),
+        150000 + 1100,
+      );
+      expect(
+        await donutTotal(
+          await opened(const ChartPeriodSelection(ChartPreset.lastCycle)),
+          'EGP',
+        ),
+        200000 + 2200,
+      );
+      // Last day of the cycle at 23:30 (+120) stays in it.
+      await at('n3', 7, CivilDate(2026, 11, 24), 23, 30, 120);
+      final c = await opened(ChartPeriodSelection.thisCycle);
+      expect(await donutTotal(c, 'EGP'), 150000 + 1100 + 700);
+    },
+  );
 }

@@ -133,6 +133,7 @@ class _CashFlowCard extends ConsumerWidget {
     final periodResolved = ref.watch(chartsResolvedPeriodProvider).value;
     final periodText = ChartPeriodText.of(context, ref);
     final bucketKind = periodResolved?.bucketKind ?? ChartBucketKind.month;
+    final total = ref.watch(cashFlowTotalProvider(code));
     return ref
         .watch(cashFlowChartProvider(code))
         .when(
@@ -151,14 +152,14 @@ class _CashFlowCard extends ConsumerWidget {
                       l,
                       (m) => chartMoney(ref, context, m),
                       (p) => chartPercent(ref, context, p),
-                      data,
+                      cashFlowPeriodPoints(total, data),
                       periodText.now(periodResolved),
                     ),
               trailing: _ExplainButton(chart: ChartId.cashFlow, code: code),
               summary: CashFlowBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),
-                data,
+                cashFlowPeriodPoints(total, data),
               ),
               child: CashFlowBody(points: data, bucketKind: bucketKind),
             ),
