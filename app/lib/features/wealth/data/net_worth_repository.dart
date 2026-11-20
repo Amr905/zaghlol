@@ -285,6 +285,7 @@ class NetWorthRepository {
             anchor: anchor,
             totals: totals,
             institutionCode: a.institutionCode,
+            last4: a.last4,
             isHidden: a.isHidden != 0,
           ),
         );

@@ -16,6 +16,7 @@ import '../../../core/l10n/money_format.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../wealth/presentation/assets_section.dart';
+import '../../wealth/presentation/balance_source_text.dart';
 import '../../wealth/data/approx_view_providers.dart';
 import '../../wealth/domain/approx_view.dart';
 import '../domain/account.dart';
@@ -43,7 +44,11 @@ class MoneyTab extends ConsumerWidget {
     this.onAddAsset,
     this.onOpenPrices,
     this.onOpenZakah,
+    this.onOpenNetWorth,
   });
+
+  /// The net worth figure opens its breakdown (T-199).
+  final VoidCallback? onOpenNetWorth;
 
   /// Add account (S-43).
   final VoidCallback? onAdd;
@@ -143,7 +148,7 @@ class MoneyTab extends ConsumerWidget {
               data: (data) => data.isEmpty
                   ? [_Empty(onAdd: onAdd)]
                   : [
-                      _Hero(totals: data.totals),
+                      _Hero(totals: data.totals, onTap: onOpenNetWorth),
                       const SizedBox(height: ZSpacing.xl),
                       _AccountsSection(
                         data: data,
@@ -179,8 +184,9 @@ String _fmt(BuildContext context, WidgetRef ref, Money m) {
 }
 
 class _Hero extends ConsumerWidget {
-  const _Hero({required this.totals});
+  const _Hero({required this.totals, this.onTap});
   final MultiCurrencyTotal totals;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -190,7 +196,7 @@ class _Hero extends ConsumerWidget {
     final firstCur = currencies.isEmpty ? _zeroEgp.currency : currencies.first;
     final approx = ref.watch(approxViewProvider(totals)).value;
     final lang = Localizations.localeOf(context).languageCode;
-    return Container(
+    final card = Container(
       padding: const EdgeInsetsDirectional.all(ZSpacing.xl),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(ZRadius.hero),
@@ -288,6 +294,16 @@ class _Hero extends ConsumerWidget {
             ),
           ],
         ],
+      ),
+    );
+    if (onTap == null) return card;
+    return Semantics(
+      hint: l10n.networthOpenA11y,
+      child: InkWell(
+        key: const Key('money-hero-tap'),
+        borderRadius: BorderRadius.circular(ZRadius.hero),
+        onTap: onTap,
+        child: card,
       ),
     );
   }
@@ -390,7 +406,11 @@ class _AccountsSection extends ConsumerWidget {
               borderRadius: BorderRadius.circular(ZRadius.card),
               child: Column(
                 children: [
-                  for (var i = 0; i < items.length; i++) ...[
+                  for (final (i, entry) in _withBankHeaders(
+                    items,
+                    data,
+                    withHeaders: group != null && group != AccountGroup.credit,
+                  ).indexed) ...[
                     if (i > 0)
                       Divider(
                         height: 1,
@@ -399,13 +419,17 @@ class _AccountsSection extends ConsumerWidget {
                         indent: ZSpacing.lg,
                         endIndent: ZSpacing.lg + 56,
                       ),
-                    _AccountRow(
-                      item: items[i],
-                      due: due[items[i].account.id],
-                      onTap: onOpenAccount == null
-                          ? null
-                          : () => onOpenAccount!(items[i].account),
-                    ),
+                    if (entry.header != null)
+                      _BankHeader(bank: entry.header!)
+                    else
+                      _AccountRow(
+                        item: entry.item!,
+                        lines: data.lines[entry.item!.account.id] ?? const [],
+                        due: due[entry.item!.account.id],
+                        onTap: onOpenAccount == null
+                            ? null
+                            : () => onOpenAccount!(entry.item!.account),
+                      ),
                   ],
                 ],
               ),
@@ -420,9 +444,124 @@ class _AccountsSection extends ConsumerWidget {
   }
 }
 
+/// One entry of a section: a bank header or an account row.
+class _Entry {
+  const _Entry.header(this.header) : item = null;
+  const _Entry.row(this.item) : header = null;
+  final _BankHeaderData? header;
+  final AccountWithBalances? item;
+}
+
+class _BankHeaderData {
+  const _BankHeaderData(this.first, this.totals);
+  final Account first;
+
+  /// Bank total per currency (sum of its accounts in that currency).
+  final List<Money> totals;
+}
+
+/// T-199: accounts of one bank sit together under a header with the bank's
+/// total per currency (never summed across currencies). A bank with a single
+/// account in the section gets no header.
+List<_Entry> _withBankHeaders(
+  List<AccountWithBalances> items,
+  MoneyOverview data, {
+  required bool withHeaders,
+}) {
+  if (!withHeaders) return [for (final i in items) _Entry.row(i)];
+  final order = <String>[];
+  final byBank = <String, List<AccountWithBalances>>{};
+  for (final i in items) {
+    final key = i.account.institutionCode ?? 'acct:${i.account.id}';
+    if (!byBank.containsKey(key)) order.add(key);
+    byBank.putIfAbsent(key, () => []).add(i);
+  }
+  final out = <_Entry>[];
+  for (final k in order) {
+    final members = byBank[k]!;
+    if (members.length >= 2 && !k.startsWith('acct:')) {
+      final lines = [for (final m in members) ...?data.lines[m.account.id]];
+      final units = {for (final l in lines) l.unit}.toList()..sort();
+      final totals = <Money>[];
+      for (final u in units) {
+        final bank = groupByBank(lines.where((l) => l.unit == u));
+        final cur = Currency.tryOf(u);
+        if (cur != null &&
+            bank.isNotEmpty &&
+            bank.single.lines.any((l) => l.amount != null)) {
+          totals.add(Money(cur, bank.single.totalMinor));
+        }
+      }
+      out.add(_Entry.header(_BankHeaderData(members.first.account, totals)));
+    }
+    for (final m in members) {
+      out.add(_Entry.row(m));
+    }
+  }
+  return out;
+}
+
+class _BankHeader extends ConsumerWidget {
+  const _BankHeader({required this.bank});
+  final _BankHeaderData bank;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = ZColors.of(context);
+    final l10n = AppLocalizations.of(context);
+    final amounts = [for (final m in bank.totals) _fmt(context, ref, m)];
+    return Semantics(
+      container: true,
+      header: true,
+      label: a11yAmounts(l10n, [bank.first.label, ...amounts].join(', ')),
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: ZSpacing.lg,
+          vertical: ZSpacing.sm,
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
+          child: Row(
+            key: const Key('money-bank-header'),
+            children: [
+              Expanded(
+                child: BankNameText(
+                  name: bank.first.label,
+                  institutionCode: bank.first.institutionCode,
+                  style: ZType.label.copyWith(color: c.textMuted),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final a in amounts)
+                    ZMoneyText(
+                      text: a,
+                      size: ZMoneySize.body,
+                      kind: ZMoneyKind.neutral,
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AccountRow extends ConsumerWidget {
-  const _AccountRow({required this.item, this.due, this.onTap});
+  const _AccountRow({
+    required this.item,
+    this.lines = const [],
+    this.due,
+    this.onTap,
+  });
   final AccountWithBalances item;
+
+  /// The effective balance lines of the account (T-199), by currency.
+  final List<BreakdownLine> lines;
   final CivilDate? due;
   final VoidCallback? onTap;
 
@@ -434,6 +573,7 @@ class _AccountRow extends ConsumerWidget {
     final digits = ref.watch(digitsModeProvider(lang));
     final account = item.account;
     final first = item.balances.isEmpty ? null : item.balances.first;
+    final line = lines.isEmpty ? null : lines.first;
 
     String? primary;
     String? sub;
@@ -445,7 +585,9 @@ class _AccountRow extends ConsumerWidget {
       final asOf = l10n.accountsOverviewAsOf(
         ZDateFormat.date(first.asOf.toLocal(), lang, digits),
       );
-      sub = asOf;
+      sub = line == null
+          ? asOf
+          : balanceSourceText(l10n, line, lang: lang, digits: digits);
       final limit = account.creditLimit;
       final isCredit = account.kind == AccountKind.credit;
       if (isCredit && first.available != null) {
@@ -468,9 +610,14 @@ class _AccountRow extends ConsumerWidget {
               : usedMinor / limit.minor;
           usedPct = digits.render('${(usedFraction * 100).round()}%');
         }
+      } else if (line != null) {
+        if (line.amount != null) primary = _fmt(context, ref, line.amount!);
       } else if (first.balance != null) {
         primary = _fmt(context, ref, first.balance!);
       }
+    } else if (line != null) {
+      sub = balanceSourceText(l10n, line, lang: lang, digits: digits);
+      if (line.amount != null) primary = _fmt(context, ref, line.amount!);
     }
     final dueText = account.kind == AccountKind.credit && due != null
         ? l10n.accountsOverviewDueOn(
@@ -481,7 +628,7 @@ class _AccountRow extends ConsumerWidget {
             ),
           )
         : null;
-    final extra = item.balances.length - 1;
+    final extra = (lines.isEmpty ? item.balances.length : lines.length) - 1;
     final label = formatAccountWithCard(account.label, account.last4);
     final semantics = [
       label,

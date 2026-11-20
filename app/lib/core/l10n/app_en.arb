@@ -7317,5 +7317,169 @@
   "notificationsSalaryNudgeBody": "No salary message yet. If it landed, add it from Home in one tap.",
   "@notificationsSalaryNudgeBody": {
     "description": "N"
+  },
+  "networthTitle": "Where your net worth comes from",
+  "@networthTitle": {
+    "description": "S · breakdown screen title"
+  },
+  "networthOpenA11y": "Open the net worth details",
+  "@networthOpenA11y": {
+    "description": "A · hero tap target"
+  },
+  "networthGroupAccounts": "Your accounts",
+  "@networthGroupAccounts": {
+    "description": "L"
+  },
+  "networthGroupAssets": "Your assets",
+  "@networthGroupAssets": {
+    "description": "L"
+  },
+  "networthGroupLiabilities": "What you owe",
+  "@networthGroupLiabilities": {
+    "description": "L"
+  },
+  "networthGroupExcluded": "Not counted",
+  "@networthGroupExcluded": {
+    "description": "L · lines with no known balance"
+  },
+  "networthNet": "Net",
+  "@networthNet": {
+    "description": "L"
+  },
+  "networthSrcReported": "Bank message · {date}",
+  "@networthSrcReported": {
+    "description": "L · source of a line",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcReportedOwed": "Bank message (amount owed) · {date}",
+  "@networthSrcReportedOwed": {
+    "description": "L · card owed figure",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcAvailable": "Available balance from the bank message · {date}",
+  "@networthSrcAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcLimitMinusAvailable": "Worked out from limit and available · {date}",
+  "@networthSrcLimitMinusAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUser": "You entered it · {date}",
+  "@networthSrcUser": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcComputed": "Worked out from transactions since {date}",
+  "@networthSrcComputed": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUnknown": "Unknown — set the balance",
+  "@networthSrcUnknown": {
+    "description": "L · excluded line"
+  },
+  "networthSrcAsset": "Value you entered",
+  "@networthSrcAsset": {
+    "description": "L · asset line"
+  },
+  "networthSrcInstallments": "Installments left",
+  "@networthSrcInstallments": {
+    "description": "L"
+  },
+  "networthStale": "Old",
+  "@networthStale": {
+    "description": "C · stale tag"
+  },
+  "networthSetBalance": "Set balance",
+  "@networthSetBalance": {
+    "description": "B"
+  },
+  "networthSheetTitle": "Balance of {name}",
+  "@networthSheetTitle": {
+    "description": "S · set balance sheet",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSheetAmount": "Balance now",
+  "@networthSheetAmount": {
+    "description": "L"
+  },
+  "networthSheetAmountOwed": "Amount you owe now",
+  "@networthSheetAmountOwed": {
+    "description": "L · card"
+  },
+  "networthSheetHint": "We will work out from this number as new transactions come in.",
+  "@networthSheetHint": {
+    "description": "H"
+  },
+  "networthSheetSave": "Save",
+  "@networthSheetSave": {
+    "description": "B"
+  },
+  "networthSheetInvalid": "Enter a valid amount",
+  "@networthSheetInvalid": {
+    "description": "E"
+  },
+  "networthSheetFailed": "Could not save the balance",
+  "@networthSheetFailed": {
+    "description": "E"
+  },
+  "networthFreeNote": "Assets and installments come with Gold",
+  "@networthFreeNote": {
+    "description": "N"
+  },
+  "networthEmpty": "No balances to count yet",
+  "@networthEmpty": {
+    "description": "S"
+  },
+  "networthOpenBankA11y": "Open the transactions of {name}",
+  "@networthOpenBankA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthLineA11y": "{name}, {source}",
+  "@networthLineA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
   }
 }

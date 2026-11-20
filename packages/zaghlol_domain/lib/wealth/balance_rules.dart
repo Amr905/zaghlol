@@ -184,7 +184,11 @@ final class BreakdownLine {
     this.sinceCount = 0,
     this.stale = false,
     this.basis,
+    this.last4,
   });
+
+  /// The card's last digits (accounts only); display only.
+  final String? last4;
 
   /// The figure the anchor came from (accounts with a figure only).
   final AnchorBasis? basis;
@@ -242,6 +246,7 @@ BreakdownLine resolveAccountLine({
   BalanceAnchor? anchor,
   TxnTotals totals = const TxnTotals(),
   String? institutionCode,
+  String? last4,
   bool isHidden = false,
 }) {
   final group = isLiability
@@ -257,6 +262,7 @@ BreakdownLine resolveAccountLine({
       institutionCode: institutionCode,
       accountKind: accountKind,
       isHidden: isHidden,
+      last4: last4,
     );
   }
   Money amount;
@@ -292,6 +298,7 @@ BreakdownLine resolveAccountLine({
     asOf: anchor.asOf,
     sinceCount: totals.count,
     basis: anchor.effectiveBasis,
+    last4: last4,
     stale: !computed && age > balanceStaleAfterDays,
   );
 }
