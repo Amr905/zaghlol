@@ -1,16 +1,23 @@
 // T-096: pure rules for recurring money (domain-algorithms §6, BR-SUB-01..03,
 // FR-SUB-05). No Flutter, no database. Amounts are Money (integer minor
 // units, one currency per comparison); dates are local civil dates
-// (CivilDate), so no zone arithmetic happens here. Detection only suggests:
-// the app layer turns a suggestion into a review item and never activates it
-// by itself.
+// (CivilDate), so no zone arithmetic happens here. T-196 (D-72): a chain that
+// repeats every 1, 3, 6 or 12 months is returned as a detection and the app
+// layer adds it as an active bill (with an undo); BR-SUB-01's confirm-first
+// rule no longer applies to these cadences.
 
 import '../budget/civil_date.dart';
+import '../mascot_rules/mascot_rules.dart'
+    show categoryCode, defaultEssentialCategoryIds;
 import '../money/money.dart';
 
-/// Chain rule (BR-SUB-01): consecutive charges 25..35 days apart.
+/// Chain rule (BR-SUB-01): consecutive monthly charges 25..35 days apart.
 const int subscriptionMinGapDays = 25;
 const int subscriptionMaxGapDays = 35;
+
+/// T-196: a chain whose next due date is more than this many days in the
+/// past has stopped (cancelled plan) and is not added.
+const int staleChainGraceDays = 10;
 
 /// Chain rule: each charge within 10% of the one before it.
 const int subscriptionAmountToleranceBp = 1000;
@@ -32,6 +39,7 @@ final class RecurringCharge {
     required this.amount,
     required this.date,
     this.displayName,
+    this.categoryId,
   });
 
   final String id;
@@ -46,14 +54,18 @@ final class RecurringCharge {
   /// Local civil date of the charge.
   final CivilDate date;
   final String? displayName;
+
+  /// The charge's category id (`sys:rent` or `rent`), when it has one.
+  final String? categoryId;
 }
 
-/// A suggestion for the review queue (never an active item).
-final class SubscriptionSuggestion {
-  const SubscriptionSuggestion({
+/// A detected chain (T-196): the app layer adds it as an active bill.
+final class RecurringChain {
+  const RecurringChain({
     required this.merchantNorm,
     required this.accountId,
     required this.name,
+    required this.cadence,
     required this.amount,
     required this.annualCost,
     required this.dueDay,
@@ -61,18 +73,21 @@ final class SubscriptionSuggestion {
     required this.chargeIds,
   });
 
+  /// monthly, quarterly, semiAnnual or yearly.
+  final RecurrenceCadence cadence;
+
   final String merchantNorm;
   final String accountId;
   final String name;
 
-  /// The latest charge: the expected monthly amount.
+  /// The latest charge: the expected amount of one cycle.
   final Money amount;
 
-  /// amount × 12 (BR-SUB-02).
+  /// amount × cycles per year (BR-SUB-02: 12, 4, 2 or 1).
   final Money annualCost;
   final int dueDay;
 
-  /// The latest charge's date plus one month (day clamped to month end).
+  /// The latest charge's date plus one cycle (day clamped to month end).
   final CivilDate nextDue;
 
   /// The chain, oldest first.
@@ -93,21 +108,68 @@ bool withinBp(int a, int b, int reference, int bp) {
       BigInt.from(reference) * BigInt.from(bp);
 }
 
-/// Finds subscription candidates (BR-SUB-01). Charges are grouped by
-/// (merchant, account, currency) and sorted by date; the suggestion is the
-/// chain of ≥ 2 charges that ends at the group's latest charge. A longer old
-/// chain that has since stopped (the latest charge breaks the pattern) yields
-/// nothing. Groups whose key is in [exclude] (`merchant|account|currency`,
-/// see [recurringKey]) are skipped: that is how an existing, confirmed or
-/// dismissed item stays quiet. Zero amounts and unstorable merchant keys are
-/// ignored. Output order is by merchant, account, currency.
-List<SubscriptionSuggestion> detectSubscriptions(
+/// One detectable cadence: the gap window between consecutive charges and
+/// the shortest chain that counts (T-196). The windows do not overlap, so the
+/// latest gap decides the cadence.
+final class _Window {
+  const _Window(this.cadence, this.minGap, this.maxGap, this.minChain);
+  final RecurrenceCadence cadence;
+  final int minGap;
+  final int maxGap;
+  final int minChain;
+}
+
+const List<_Window> _windows = [
+  _Window(
+    RecurrenceCadence.monthly,
+    subscriptionMinGapDays,
+    subscriptionMaxGapDays,
+    3,
+  ),
+  _Window(RecurrenceCadence.quarterly, 84, 97, 3),
+  _Window(RecurrenceCadence.semiAnnual, 176, 189, 2),
+  _Window(RecurrenceCadence.yearly, 360, 371, 2),
+];
+
+_Window? _windowFor(int gap) {
+  for (final w in _windows) {
+    if (gap >= w.minGap && gap <= w.maxGap) return w;
+  }
+  return null;
+}
+
+bool _isEssential(String? categoryId, Set<String> essential) =>
+    categoryId != null &&
+    (essential.contains(categoryId) ||
+        essential.contains(categoryCode(categoryId)));
+
+/// Finds charges that repeat every 1, 3, 6 or 12 months (BR-SUB-01 widened
+/// by D-72). Charges are grouped by (merchant, account, currency), so a chain
+/// never mixes currencies or accounts, and sorted by date; the result is the
+/// chain that ends at the group's latest charge: gaps inside the window of
+/// the latest gap and amounts within 10% of the previous charge. A chain
+/// needs 3 charges for monthly and 3-month, 2 for 6- and 12-month. A longer
+/// old chain that has since stopped, or one whose next due date is more than
+/// [staleChainGraceDays] before [today], yields nothing. Charges in an
+/// essential category are ignored.
+///
+/// Groups whose key is in [exclude] (`merchant|account|currency`, see
+/// [recurringKey]) are skipped: that is how an existing, dismissed or undone
+/// item stays quiet; an entry with an empty account (`merchant||currency`)
+/// blocks that merchant and currency on every account. Zero amounts and
+/// unstorable merchant keys are ignored. Output order is by merchant,
+/// account, currency.
+List<RecurringChain> detectRecurring(
   Iterable<RecurringCharge> charges, {
+  required CivilDate today,
   Set<String> exclude = const {},
+  Set<String> essentialCategoryIds = defaultEssentialCategoryIds,
 }) {
   final groups = <String, List<RecurringCharge>>{};
   for (final c in charges) {
-    if (!c.amount.isPositive || !isStorableMerchantNorm(c.merchantNorm)) {
+    if (!c.amount.isPositive ||
+        !isStorableMerchantNorm(c.merchantNorm) ||
+        _isEssential(c.categoryId, essentialCategoryIds)) {
       continue;
     }
     groups
@@ -118,22 +180,33 @@ List<SubscriptionSuggestion> detectSubscriptions(
         .add(c);
   }
   final keys = groups.keys.toList()..sort();
-  final out = <SubscriptionSuggestion>[];
+  final out = <RecurringChain>[];
   for (final key in keys) {
-    if (exclude.contains(key)) continue;
     final list = groups[key]!
       ..sort((a, b) {
         final d = a.date.compareTo(b.date);
         return d != 0 ? d : a.id.compareTo(b.id);
       });
+    final head = list.last;
+    if (exclude.contains(key) ||
+        exclude.contains(
+          recurringKey(head.merchantNorm, '', head.amount.currency.code),
+        )) {
+      continue;
+    }
+    if (list.length < 2) continue;
+    final w = _windowFor(
+      list[list.length - 1].date.difference(list[list.length - 2].date),
+    );
+    if (w == null) continue;
     // Walk backwards from the latest charge while the chain holds.
     var start = list.length - 1;
     while (start > 0) {
       final prev = list[start - 1];
       final cur = list[start];
       final gap = cur.date.difference(prev.date);
-      if (gap < subscriptionMinGapDays ||
-          gap > subscriptionMaxGapDays ||
+      if (gap < w.minGap ||
+          gap > w.maxGap ||
           !withinBp(
             cur.amount.minor,
             prev.amount.minor,
@@ -145,23 +218,21 @@ List<SubscriptionSuggestion> detectSubscriptions(
       start--;
     }
     final chain = list.sublist(start);
-    if (chain.length < 2) continue;
+    if (chain.length < w.minChain) continue;
     final last = chain.last;
     final anchor = _anchorDay(chain);
-    final name = _name(last.displayName, last.merchantNorm);
+    final next = advanceDue(last.date, cadence: w.cadence, dueDay: anchor);
+    if (next.difference(today) < -staleChainGraceDays) continue;
     out.add(
-      SubscriptionSuggestion(
+      RecurringChain(
         merchantNorm: last.merchantNorm,
         accountId: last.accountId,
-        name: name,
+        name: _name(last.displayName, last.merchantNorm),
+        cadence: w.cadence,
         amount: last.amount,
-        annualCost: last.amount.times(12),
+        annualCost: last.amount.times(12 ~/ w.cadence.monthsPerCycle!),
         dueDay: anchor,
-        nextDue: advanceDue(
-          last.date,
-          cadence: RecurrenceCadence.monthly,
-          dueDay: anchor,
-        ),
+        nextDue: next,
         chargeIds: [for (final c in chain) c.id],
       ),
     );
@@ -197,10 +268,26 @@ String _name(String? display, String norm) {
   return cut.replaceAll('\u0000', '');
 }
 
-enum RecurrenceCadence { monthly, yearly, weekly, customDays }
+enum RecurrenceCadence {
+  monthly,
+  quarterly,
+  semiAnnual,
+  yearly,
+  weekly,
+  customDays;
 
-/// The due date after [from] (the date just paid or charged). Monthly and
-/// yearly keep the anchor day [dueDay] and clamp it to short months
+  /// Calendar months between two charges; null for weekly and custom days.
+  int? get monthsPerCycle => switch (this) {
+    monthly => 1,
+    quarterly => 3,
+    semiAnnual => 6,
+    yearly => 12,
+    weekly || customDays => null,
+  };
+}
+
+/// The due date after [from] (the date just paid or charged). Monthly,
+/// quarterly, semi-annual and yearly keep the anchor day [dueDay] and clamp it to short months
 /// (due day 29..31 → Feb 28/29, Apr 30). [customDays] needs [days] ≥ 1.
 CivilDate advanceDue(
   CivilDate from, {
@@ -215,11 +302,12 @@ CivilDate advanceDue(
       if (days == null || days < 1) throw ArgumentError('invalid cadence');
       return from.plusDays(days);
     case RecurrenceCadence.monthly:
-      final y = from.month == 12 ? from.year + 1 : from.year;
-      final m = from.month == 12 ? 1 : from.month + 1;
-      return _clamped(y, m, dueDay ?? from.day);
+    case RecurrenceCadence.quarterly:
+    case RecurrenceCadence.semiAnnual:
     case RecurrenceCadence.yearly:
-      return _clamped(from.year + 1, from.month, dueDay ?? from.day);
+      final months = cadence.monthsPerCycle!;
+      final index = from.year * 12 + (from.month - 1) + months;
+      return _clamped(index ~/ 12, index % 12 + 1, dueDay ?? from.day);
   }
 }
 
