@@ -75,21 +75,24 @@ jobs:
         run: |
           FL="dev${FLAVOR#prod}"
           flutter build apk --debug --flavor "$FL" > "$RUNNER_TEMP/out/build-debug.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-debug.log"; exit 1; }
-          cp "build/app/outputs/flutter-apk/app-${FL}-debug.apk" "$RUNNER_TEMP/debug-universal.apk"
+          ls -l build/app/outputs/flutter-apk/
+          cp "$(ls build/app/outputs/flutter-apk/*-debug.apk | head -n 1)" "$RUNNER_TEMP/debug-universal.apk"
       - name: Release universal APK (what app-ci builds)
         working-directory: app
         run: |
           flutter build apk --release --flavor "$FLAVOR" > "$RUNNER_TEMP/out/build-release-universal.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-universal.log"; exit 1; }
-          cp "build/app/outputs/flutter-apk/app-${FLAVOR}-release.apk" "$RUNNER_TEMP/release-universal.apk"
+          ls -l build/app/outputs/flutter-apk/
+          cp "$(ls build/app/outputs/flutter-apk/*-release.apk | head -n 1)" "$RUNNER_TEMP/release-universal.apk"
           find build/app/outputs/mapping -name mapping.txt -exec ls -l {} \; | tee "$RUNNER_TEMP/out/r8-mapping-present-universal.txt"
       - name: Release per-ABI APKs (side-load), obfuscated
         working-directory: app
         run: |
           mkdir -p "$RUNNER_TEMP/sym-apk"
+          rm -f build/app/outputs/flutter-apk/*.apk
           flutter build apk --release --split-per-abi --flavor "$FLAVOR" ${TP:+--target-platform $TP} \
             --obfuscate --split-debug-info="$RUNNER_TEMP/sym-apk" > "$RUNNER_TEMP/out/build-release-split.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-split.log"; exit 1; }
           mkdir -p "$RUNNER_TEMP/split"
-          cp build/app/outputs/flutter-apk/app-*-"$FLAVOR"-release.apk "$RUNNER_TEMP/split/" 2>/dev/null || cp build/app/outputs/flutter-apk/*.apk "$RUNNER_TEMP/split/"
+          cp build/app/outputs/flutter-apk/*-release.apk "$RUNNER_TEMP/split/"
           ls -l "$RUNNER_TEMP/split"
       - name: Release AAB (all ABIs), obfuscated
         working-directory: app
@@ -97,7 +100,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/sym-aab"
           flutter build appbundle --release --flavor "$FLAVOR" ${TP:+--target-platform $TP} \
             --obfuscate --split-debug-info="$RUNNER_TEMP/sym-aab" > "$RUNNER_TEMP/out/build-release-aab.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-aab.log"; exit 1; }
-          cp "build/app/outputs/bundle/${FLAVOR}Release/app-${FLAVOR}-release.aab" "$RUNNER_TEMP/release.aab"
+          ls -l build/app/outputs/bundle/*/
+          cp "$(ls build/app/outputs/bundle/*/*.aab | head -n 1)" "$RUNNER_TEMP/release.aab"
           find build/app/outputs/mapping -name mapping.txt -exec ls -l {} \; | tee "$RUNNER_TEMP/out/r8-mapping-present-aab.txt"
       # --analyze-size cannot be combined with --obfuscate / --split-debug-info, so this
       # build is not obfuscated (symbol names only; sizes of libs/dex/assets are comparable).
@@ -106,7 +110,7 @@ jobs:
         run: |
           flutter build appbundle --release --flavor "$FLAVOR" --target-platform android-arm64 --analyze-size > "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log"; exit 1; }
           tail -n 60 "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log"
-          cp "build/app/outputs/bundle/${FLAVOR}Release/app-${FLAVOR}-release.aab" "$RUNNER_TEMP/release-arm64.aab"
+          cp "$(ls build/app/outputs/bundle/*/*.aab | head -n 1)" "$RUNNER_TEMP/release-arm64.aab"
           cp build/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
           cp ~/.flutter-devtools/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
       - name: Report
@@ -123,7 +127,7 @@ jobs:
 
   ios:
     name: ios prod
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.ios }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.ios) || contains(github.event.head_commit.message, '[ios]') }}
     runs-on: macos-15
     timeout-minutes: 90
     steps:
