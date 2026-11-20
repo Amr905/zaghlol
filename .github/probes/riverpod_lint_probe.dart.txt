@@ -1,5 +1,5 @@
 // CI probe (T-193 AC4, FU-263 a): this file breaks riverpod_lint rules on purpose. It is never part of the app: it is stored as
-// text and copied to app/lib/ only by .github/scripts/check-riverpod-lint-active.sh, which runs `flutter analyze`, expects a
+// text and copied to app/lib/ only by .github/scripts/check-riverpod-lint-active.sh, which runs `dart analyze`, expects a
 // riverpod_lint diagnostic on this file, and deletes the copy.
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
