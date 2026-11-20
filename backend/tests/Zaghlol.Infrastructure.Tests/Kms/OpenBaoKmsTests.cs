@@ -348,6 +348,54 @@ public sealed class OpenBaoKmsTests : IAsyncLifetime
         Assert.Equal(before + 1, bed.Stub.Logins);
     }
 
+    [LinuxTheory]
+    [InlineData("group-readable")]
+    [InlineData("missing")]
+    public async Task C2_ACredentialThatCanNotBeReadAtLoginIsUnavailable(string fault)
+    {
+        await using var services = await StartedAsync();
+        var secretId = Path.Combine(bed.ApiCredentials, OpenBaoKms.SecretIdFile);
+        File.SetUnixFileMode(bed.ApiCredentials, FileKmsKeySet.Mode0700);
+        if (fault == "missing")
+        {
+            File.Delete(secretId);
+        }
+        else
+        {
+            File.SetUnixFileMode(secretId, FileKmsKeySet.Mode0400 | UnixFileMode.GroupRead);
+        }
+
+        bed.Stub.RevokeAllTokens();
+
+        // A 503 path (KmsUnavailableException), not a configuration error that would surface as a 500.
+        await Assert.ThrowsAsync<KmsUnavailableException>(() => services.GetRequiredService<IKeyedHasher>().HmacSha256Async(KeyedHashKey.Audit, "x"u8.ToArray(), CancellationToken.None).AsTask());
+    }
+
+    [LinuxFact]
+    public async Task APersistentDenialDoesNotCauseALoginStorm()
+    {
+        await using var services = await StartedAsync();
+        var before = bed.Stub.Logins;
+        bed.Stub.SetPolicy("zaghlol-api", "path \"transit/keys/x\" {\n  capabilities = [\"read\"]\n}\n");
+        var hasher = services.GetRequiredService<IKeyedHasher>();
+
+        var failures = await Task.WhenAll(Enumerable.Range(0, 32).Select(_ => Task.Run(async () =>
+        {
+            try
+            {
+                await hasher.HmacSha256Async(KeyedHashKey.Audit, "x"u8.ToArray(), CancellationToken.None);
+                return false;
+            }
+            catch (KmsUnavailableException)
+            {
+                return true;
+            }
+        })));
+
+        Assert.All(failures, Assert.True);
+        Assert.True(bed.Stub.Logins - before <= 1, $"logins after the denial: {bed.Stub.Logins - before}");
+    }
+
     [LinuxFact]
     public async Task AnExpiringTokenIsRenewedBeforeItLapses()
     {

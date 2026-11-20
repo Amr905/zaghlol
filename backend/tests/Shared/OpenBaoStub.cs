@@ -68,6 +68,9 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
 
     public int Logins => Volatile.Read(ref logins);
 
+    /// <summary>Every client token this stub issued (login or <see cref="CreateToken"/>), for the log sentinels.</summary>
+    public ConcurrentQueue<string> IssuedTokens { get; } = new();
+
     public static async Task<OpenBaoStub> StartAsync(TestCa? ca = null)
     {
         var stub = new OpenBaoStub(ca ?? new TestCa("zaghlol-test-openbao-ca"));
@@ -175,6 +178,7 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
     {
         var token = "s." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(12));
         tokens[token] = (policyNames, null);
+        IssuedTokens.Enqueue(token);
         return token;
     }
 
@@ -274,6 +278,7 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
         Interlocked.Increment(ref logins);
         var token = "s." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(12));
         tokens[token] = (role.Policies, DateTimeOffset.UtcNow.AddSeconds(TokenTtlSeconds));
+        IssuedTokens.Enqueue(token);
         await Json(context, 200, new JsonObject
         {
             ["auth"] = new JsonObject
@@ -664,7 +669,8 @@ internal sealed class TestCa : IDisposable
         request.CertificateExtensions.Add(X509AuthorityKeyIdentifierExtension.CreateFromCertificate(Certificate, true, false));
         var serial = RandomNumberGenerator.GetBytes(16);
         serial[0] &= 0x7F;
-        using var issued = request.Create(Certificate, DateTimeOffset.UtcNow.AddMinutes(-5), DateTimeOffset.UtcNow.AddDays(1), serial);
+        // Inside the CA's own validity (a leaf "now + 1 day" computed a moment after the CA's could end after it: flaky).
+        using var issued = request.Create(Certificate, Certificate.NotBefore.AddMinutes(1), Certificate.NotAfter.AddMinutes(-1), serial);
         using var withKey = issued.CopyWithPrivateKey(leafKey);
         return X509CertificateLoader.LoadPkcs12(withKey.Export(X509ContentType.Pfx), null);
     }

@@ -66,7 +66,7 @@ internal sealed class OpenBaoTestBed : IAsyncDisposable
 
     /// <summary>Text that must never reach a log, an exception or tool output: credentials, tokens and every File key.</summary>
     public IEnumerable<string> Sentinels =>
-        FileKeys.Sentinels.Concat([ApiRole.SecretId, WorkerRole.SecretId, ApiRole.RoleId, File.ReadAllText(ToolTokenFile).Trim()]);
+        FileKeys.Sentinels.Concat([ApiRole.SecretId, WorkerRole.SecretId, ApiRole.RoleId, File.ReadAllText(ToolTokenFile).Trim()]).Concat(Stub.IssuedTokens);
 
     public static async Task<OpenBaoTestBed> CreateAsync(bool import = true)
     {

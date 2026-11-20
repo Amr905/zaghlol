@@ -109,6 +109,9 @@ internal sealed class OpenBaoClient : IDisposable
 
     private const string TokenHeader = "X-Vault-Token";
 
+    /// <summary>A refused token triggers at most one forced login per this interval (no login storm on a policy denial).</summary>
+    internal static readonly TimeSpan ForcedLoginInterval = TimeSpan.FromSeconds(5);
+
     private readonly HttpClient http;
     private readonly Uri apiBase;
     private readonly Func<OpenBaoCredentials> credentials;
@@ -117,6 +120,7 @@ internal sealed class OpenBaoClient : IDisposable
     private readonly bool fixedToken;
     private Session? session;
     private int logins;
+    private long lastForcedLogin = long.MinValue;
 
     /// <param name="address">The server address (validated by the caller); requests go to <c>&lt;address&gt;/v1/…</c>.</param>
     /// <param name="handler">The transport; <see cref="CreateHandler"/> in production, owned and disposed by this client.</param>
@@ -211,8 +215,7 @@ internal sealed class OpenBaoClient : IDisposable
         }
 
         answer.Dispose();
-        Invalidate(token);
-        token = await TokenAsync(cancellationToken).ConfigureAwait(false);
+        token = await RenewAfterRefusalAsync(token, cancellationToken).ConfigureAwait(false);
         answer = await SendRawAsync(method, path, body, token, cancellationToken).ConfigureAwait(false);
         if (answer.Status == HttpStatusCode.Forbidden)
         {
@@ -371,8 +374,13 @@ internal sealed class OpenBaoClient : IDisposable
     private string? Valid(Session? candidate) =>
         candidate is not null && (candidate.RefreshAt is null || clock.GetUtcNow() < candidate.RefreshAt) ? candidate.Token : null;
 
-    /// <summary>Drops the session only if it still holds the token that was refused (another caller may have renewed it).</summary>
-    private void Invalidate(string refusedToken)
+    /// <summary>
+    /// After a <c>403</c> with <paramref name="refusedToken"/> (review nit: single flight, no login storm): if another caller
+    /// already renewed the session, use its token; if a login is in flight, wait for it; otherwise force one login, but at most
+    /// once per <see cref="ForcedLoginInterval"/>. A token that is refused again within the interval means the policy denies
+    /// the call: unavailable, without another login.
+    /// </summary>
+    private async Task<string> RenewAfterRefusalAsync(string refusedToken, CancellationToken cancellationToken)
     {
         if (fixedToken)
         {
@@ -380,16 +388,39 @@ internal sealed class OpenBaoClient : IDisposable
         }
 
         var current = Volatile.Read(ref session);
-        if (current is not null && string.Equals(current.Token, refusedToken, StringComparison.Ordinal))
+        if (current is null || !string.Equals(current.Token, refusedToken, StringComparison.Ordinal))
         {
-            Interlocked.CompareExchange(ref session, null, current);
+            return await TokenAsync(cancellationToken).ConfigureAwait(false);
         }
+
+        var now = clock.GetTimestamp();
+        var last = Interlocked.Read(ref lastForcedLogin);
+        if ((last != long.MinValue && clock.GetElapsedTime(last, now) < ForcedLoginInterval)
+            || Interlocked.CompareExchange(ref lastForcedLogin, now, last) != last)
+        {
+            throw new OpenBaoUnavailableException();
+        }
+
+        Interlocked.CompareExchange(ref session, null, current);
+        return await TokenAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<Session> LoginAsync(CancellationToken cancellationToken)
     {
         Interlocked.Increment(ref logins);
-        var login = credentials();
+
+        // Review C2: at start a bad credential refuses the start (OpenBaoKms.Create reads them first); at run time a read that
+        // fails (a secret-id being replaced, a mode briefly wrong) is an outage, 503 with Retry-After, not a 500.
+        OpenBaoCredentials login;
+        try
+        {
+            login = credentials();
+        }
+        catch (KmsConfigurationException)
+        {
+            throw new OpenBaoUnavailableException();
+        }
+
         using var answer = await SendRawAsync(
             HttpMethod.Post,
             "auth/approle/login",
