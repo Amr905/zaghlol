@@ -24,6 +24,8 @@ import '../../../../core/ui/shell/add_sheet.dart'
 import '../../../budget/application/budget_providers.dart';
 import '../../../salary/application/salary_providers.dart';
 import '../../../salary/application/salary_service.dart';
+import '../../../salary/presentation/expected_salary_row.dart'
+    show askSalarySame;
 import '../../data/transactions_providers.dart';
 import '../../domain/transaction.dart';
 import '../../application/duplicate_finder.dart';
@@ -385,26 +387,9 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     final result = await service.recordManual(leg);
     if (result is SalaryFoundExisting) {
       if (!mounted) return false;
-      final l = AppLocalizations.of(context);
       final lang = Localizations.localeOf(context).languageCode;
       final fmt = TxnFmt(lang, ref.read(digitsModeProvider(lang)));
-      final same = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l.salaryFoundTitle),
-          content: Text(l.salaryFoundBody(fmt.money(result.amount))),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(l.salaryFoundNo),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(l.salaryFoundYes),
-            ),
-          ],
-        ),
-      );
+      final same = await askSalarySame(context, fmt.money(result.amount));
       if (same == null) return false;
       if (same) {
         await service.linkExisting(await service.anchorFor(leg), result.txnId);

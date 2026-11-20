@@ -46,7 +46,7 @@ class _ExpectedSalaryRowState extends ConsumerState<ExpectedSalaryRow> {
       var result = await service.confirmReceived(e.payday, today: today);
       if (result is SalaryFoundExisting) {
         if (!mounted) return;
-        final same = await _askSame(l, format.money(result.amount));
+        final same = await askSalarySame(context, format.money(result.amount));
         if (same == null) return;
         if (same) {
           await service.linkExisting(e.payday, result.txnId);
@@ -71,26 +71,6 @@ class _ExpectedSalaryRowState extends ConsumerState<ExpectedSalaryRow> {
     }
   }
 
-  Future<bool?> _askSame(AppLocalizations l, String amount) => showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l.salaryFoundTitle),
-      content: Text(l.salaryFoundBody(amount)),
-      actions: [
-        TextButton(
-          key: const ValueKey('salary-found-no'),
-          onPressed: () => Navigator.of(ctx).pop(false),
-          child: Text(l.salaryFoundNo),
-        ),
-        TextButton(
-          key: const ValueKey('salary-found-yes'),
-          onPressed: () => Navigator.of(ctx).pop(true),
-          child: Text(l.salaryFoundYes),
-        ),
-      ],
-    ),
-  );
-
   Future<void> _skip(ExpectedSalary e) async {
     if (_busy) return;
     final service = await ref.read(salaryServiceProvider.future);
@@ -108,6 +88,49 @@ class _ExpectedSalaryRowState extends ConsumerState<ExpectedSalaryRow> {
       onArrived: () => _arrived(e),
       onNotYet: () => setState(() => _hiddenFor = e.payday),
       onSkip: () => _skip(e),
+    );
+  }
+}
+
+/// "Is that your salary?": true = the same one (tie it), false = another
+/// income (add it), null = cancelled.
+Future<bool?> askSalarySame(BuildContext context, String amount) =>
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => SalaryFoundDialog(
+        amount: amount,
+        onAnswer: (v) => Navigator.of(ctx).pop(v),
+      ),
+    );
+
+class SalaryFoundDialog extends StatelessWidget {
+  const SalaryFoundDialog({
+    super.key,
+    required this.amount,
+    required this.onAnswer,
+  });
+
+  final String amount;
+  final ValueChanged<bool> onAnswer;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l.salaryFoundTitle),
+      content: Text(l.salaryFoundBody(amount)),
+      actions: [
+        TextButton(
+          key: const ValueKey('salary-found-no'),
+          onPressed: () => onAnswer(false),
+          child: Text(l.salaryFoundNo),
+        ),
+        TextButton(
+          key: const ValueKey('salary-found-yes'),
+          onPressed: () => onAnswer(true),
+          child: Text(l.salaryFoundYes),
+        ),
+      ],
     );
   }
 }
@@ -166,19 +189,19 @@ class ExpectedSalaryCard extends ConsumerWidget {
                         l.salaryExpectedTitle,
                         style: t.titleMedium?.copyWith(color: c.text),
                       ),
+                      ZMoneyText(
+                        text: format.number(expected.amount),
+                        unit: format.currency(expected.amount),
+                        kind: ZMoneyKind.neutral,
+                        size: ZMoneySize.title,
+                        semanticsLabel: format.money(expected.amount),
+                      ),
                       Text(
                         l.salaryExpectedSub(format.count(expected.payday.day)),
                         style: t.bodyMedium?.copyWith(color: c.textMuted),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: ZSpacing.sm),
-                ZMoneyText(
-                  text: format.number(expected.amount),
-                  unit: format.currency(expected.amount),
-                  kind: ZMoneyKind.neutral,
-                  semanticsLabel: format.money(expected.amount),
                 ),
               ],
             ),
