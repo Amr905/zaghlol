@@ -75,7 +75,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       case PurchaseGold():
         _set(_Notice.success);
         unawaited(Navigator.of(context).maybePop(true));
-      case PurchaseSeatHeldElsewhere():
+      case PurchaseSeatHeldElsewhere() || PurchaseVerifiedNoSeat():
         _set(_Notice.none, message: GoldMessage.fromPurchase(o));
       case PurchasePending():
         _set(_Notice.pending);
@@ -227,7 +227,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               const SizedBox(height: ZSpacing.md),
             ],
             if (_message != null) ...[
-              GoldMessageCard(message: _message!, onRetry: _restore),
+              GoldMessageCard(
+                message: _message!,
+                onRetry: _restore,
+                onRestore: _restore,
+              ),
               const SizedBox(height: ZSpacing.md),
             ],
             if (info.supportNoticePending && !_noticeDismissed) ...[
