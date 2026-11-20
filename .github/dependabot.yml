@@ -51,6 +51,11 @@ updates:
       actions-all:
         patterns: ["*"]
 
+  - package-ecosystem: docker-compose
+    directory: /backend/deploy/openbao
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 1
+
   - package-ecosystem: docker
     directory: /backend
     schedule: { interval: weekly, day: monday }
