@@ -162,11 +162,10 @@ class RecurringRepository {
       final existing = await (_db.select(
         _db.recurringItems,
       )..where((r) => r.merchantNorm.isNotNull())).get();
-      final dismissed = await _db.select(_db.recurringDismissals).get();
       final exclude = {
         for (final e in existing)
           recurringKey(e.merchantNorm!, e.accountId ?? '', e.currency),
-        for (final d in dismissed) d.dismissalKey,
+        ...await _recurring.dismissalKeys(),
       };
       final created = <RecurringItemRow>[];
       for (final c in detectRecurring(
@@ -224,16 +223,9 @@ class RecurringRepository {
   Future<void> _remember(RecurringItemRow item) async {
     final merchant = item.merchantNorm;
     if (merchant == null) return;
-    await _db.customInsert(
-      'INSERT OR IGNORE INTO recurring_dismissals '
-      '(dismissal_key, dismissed_at) VALUES (?1, ?2)',
-      variables: [
-        Variable<String>(
-          recurringKey(merchant, item.accountId ?? '', item.currency),
-        ),
-        Variable<int>(_now),
-      ],
-      updates: {_db.recurringDismissals},
+    await _recurring.rememberDismissal(
+      recurringKey(merchant, item.accountId ?? '', item.currency),
+      at: _now,
     );
   }
 

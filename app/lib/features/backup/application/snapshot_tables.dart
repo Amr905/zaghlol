@@ -35,6 +35,7 @@ const List<String> backedUpTables = [
   'cycle_summaries',
   'recurring_items',
   'recurring_occurrences',
+  'recurring_dismissals', // T-196: "Not a bill" decisions travel with the user
   'assets',
   'price_quotes',
   'fx_rates',

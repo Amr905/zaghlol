@@ -60,6 +60,27 @@ class RecurringDao {
     () => (_db.delete(_db.recurringItems)..where((r) => r.id.equals(id))).go(),
   );
 
+  /// T-196: remembers that the chain [key] (`merchant|account|currency`, see
+  /// `recurringKey`) is not a bill, so detection never adds it again. Writing
+  /// a key twice keeps the first time.
+  Future<void> rememberDismissal(String key, {required int at}) => guardWrite(
+    () => _db
+        .into(_db.recurringDismissals)
+        .insert(
+          RecurringDismissalsCompanion.insert(
+            dismissalKey: key,
+            dismissedAt: at,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        ),
+  );
+
+  /// Every remembered chain key.
+  Future<Set<String>> dismissalKeys() async => {
+    for (final r in await _db.select(_db.recurringDismissals).get())
+      r.dismissalKey,
+  };
+
   /// Inserts or updates the occurrence (item, due date).
   Future<void> upsertOccurrence(RecurringOccurrencesCompanion row) =>
       guardWrite(
