@@ -468,14 +468,21 @@ class _BillRow extends ConsumerWidget {
                           label: l.recurringBillsNotABill,
                           variant: ZButtonVariant.text,
                           onPressed: () async {
-                            final ok = await ref
-                                .read(billsActionsProvider)
-                                .notABill(view.id);
+                            final actions = ref.read(billsActionsProvider);
+                            final messenger = ScaffoldMessenger.of(context);
+                            final ok = await actions.notABill(view.id);
                             if (ok && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.hideCurrentSnackBar();
+                              messenger.showSnackBar(
                                 SnackBar(
+                                  duration: const Duration(seconds: 6),
                                   content: Text(
                                     l.recurringBillsNotABillDone(view.name),
+                                  ),
+                                  action: SnackBarAction(
+                                    label: l.commonActionUndo,
+                                    onPressed: () =>
+                                        actions.undoNotABill(view.id),
                                   ),
                                 ),
                               );

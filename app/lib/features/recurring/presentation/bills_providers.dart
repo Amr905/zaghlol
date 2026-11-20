@@ -102,9 +102,15 @@ class BillsActions {
     _changed();
   }
 
-  /// "Not a bill": removes an auto-added item for good.
+  /// "Not a bill": dismisses an auto-added item; [undoNotABill] revives it.
   Future<bool> notABill(String id) async {
     final ok = await (await _repo).notABill(id);
+    _changed();
+    return ok;
+  }
+
+  Future<bool> undoNotABill(String id) async {
+    final ok = await (await _repo).undoNotABill(id);
     _changed();
     return ok;
   }

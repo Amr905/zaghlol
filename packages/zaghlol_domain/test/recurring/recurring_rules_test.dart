@@ -309,7 +309,7 @@ void main() {
     });
 
     test('rent, electricity, installments, insurance, subscriptions ARE '
-        'added; groceries, dining, rides, fuel, cash are not', () {
+        'added; groceries, dining, transport, cash, income are not', () {
       RecurringCharge withCat(String id, CivilDate d, String? cat) =>
           RecurringCharge(
             id: id,
@@ -335,6 +335,7 @@ void main() {
         'sys:insurance',
         'sys:subscriptions',
         'sys:entertainment',
+        'sys:instapay', // rent and bills are often paid by InstaPay
         null,
       ]) {
         expect(detect(three(cat)), hasLength(1), reason: '$cat');
@@ -342,10 +343,7 @@ void main() {
       for (final cat in [
         'sys:groceries',
         'dining',
-        'sys:delivery',
         'sys:transport',
-        'sys:ride_hailing',
-        'sys:fuel',
         'sys:cash',
         'sys:income',
       ]) {

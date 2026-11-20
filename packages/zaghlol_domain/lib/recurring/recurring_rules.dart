@@ -137,21 +137,17 @@ _Window? _windowFor(int gap) {
   return null;
 }
 
-/// Categories where the same merchant repeating is coincidence, not a bill
-/// (D-72, PO 2026-11-20): shopping trips, eating out, rides, fuel, cash
-/// withdrawals, transfers and income. Rent, utilities, bills, installments,
-/// education, insurance and subscriptions are NOT here: they must auto-add.
+/// Seeded categories where the same merchant repeating is coincidence, not
+/// a bill (D-72): shopping trips, eating out and delivery, rides and fuel,
+/// cash withdrawals, income. Rent, utilities, bills, installments, education,
+/// insurance, subscriptions and InstaPay payments are NOT here: they must
+/// auto-add. Every entry is a seeded category code (a test checks it); the
+/// app passes a subcategory as its top-level code.
 const Set<String> nonRecurringCategoryIds = {
   'groceries',
   'dining',
-  'delivery',
-  'food_delivery',
   'transport',
-  'ride_hailing',
-  'fuel',
   'cash',
-  'cash_withdrawal',
-  'instapay',
   'income',
 };
 

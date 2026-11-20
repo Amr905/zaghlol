@@ -27,6 +27,12 @@ class FakeActions implements BillsActions {
   }
 
   @override
+  Future<bool> undoNotABill(String id) async {
+    calls.add('undoNotABill:$id');
+    return true;
+  }
+
+  @override
   Future<bool> markPaid(String id, {String? expectedDue}) async {
     calls.add('paid:$id');
     return true;
@@ -190,6 +196,10 @@ void main() {
         ),
         findsOneWidget,
       );
+      // The snackbar offers Undo, which revives the bill.
+      await tester.tap(find.text(en ? 'Undo' : 'تراجع'));
+      await tester.pumpAndSettle();
+      expect(fake.calls, ['notABill:gym', 'undoNotABill:gym']);
     });
   }
 

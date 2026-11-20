@@ -75,6 +75,13 @@ class RecurringDao {
         ),
   );
 
+  /// Forgets a chain key (the Undo of "Not a bill").
+  Future<void> forgetDismissal(String key) => guardWrite(
+    () => (_db.delete(
+      _db.recurringDismissals,
+    )..where((d) => d.dismissalKey.equals(key))).go(),
+  );
+
   /// Every remembered chain key.
   Future<Set<String>> dismissalKeys() async => {
     for (final r in await _db.select(_db.recurringDismissals).get())
