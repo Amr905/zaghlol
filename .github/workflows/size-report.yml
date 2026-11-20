@@ -28,6 +28,8 @@ env:
   # Keep equal to FLUTTER_VERSION in app-ci.yml.
   FLUTTER_VERSION: '3.47.9'
   BUNDLETOOL_VERSION: '1.18.1'
+  # ABIs of the shipped release (T-190: no x86_64). Empty = all three (the pre-T-190 reference).
+  TP: ''
 
 jobs:
   android:
@@ -84,7 +86,7 @@ jobs:
         working-directory: app
         run: |
           mkdir -p "$RUNNER_TEMP/sym-apk"
-          flutter build apk --release --split-per-abi --flavor "$FLAVOR" \
+          flutter build apk --release --split-per-abi --flavor "$FLAVOR" ${TP:+--target-platform $TP} \
             --obfuscate --split-debug-info="$RUNNER_TEMP/sym-apk" > "$RUNNER_TEMP/out/build-release-split.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-split.log"; exit 1; }
           mkdir -p "$RUNNER_TEMP/split"
           cp build/app/outputs/flutter-apk/app-*-"$FLAVOR"-release.apk "$RUNNER_TEMP/split/" 2>/dev/null || cp build/app/outputs/flutter-apk/*.apk "$RUNNER_TEMP/split/"
@@ -93,16 +95,16 @@ jobs:
         working-directory: app
         run: |
           mkdir -p "$RUNNER_TEMP/sym-aab"
-          flutter build appbundle --release --flavor "$FLAVOR" \
+          flutter build appbundle --release --flavor "$FLAVOR" ${TP:+--target-platform $TP} \
             --obfuscate --split-debug-info="$RUNNER_TEMP/sym-aab" > "$RUNNER_TEMP/out/build-release-aab.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-aab.log"; exit 1; }
           cp "build/app/outputs/bundle/${FLAVOR}Release/app-${FLAVOR}-release.aab" "$RUNNER_TEMP/release.aab"
           find build/app/outputs/mapping -name mapping.txt -exec ls -l {} \; | tee "$RUNNER_TEMP/out/r8-mapping-present-aab.txt"
+      # --analyze-size cannot be combined with --obfuscate / --split-debug-info, so this
+      # build is not obfuscated (symbol names only; sizes of libs/dex/assets are comparable).
       - name: Release AAB arm64 with --analyze-size
         working-directory: app
         run: |
-          mkdir -p "$RUNNER_TEMP/sym-a64"
-          flutter build appbundle --release --flavor "$FLAVOR" --target-platform android-arm64 --analyze-size \
-            --obfuscate --split-debug-info="$RUNNER_TEMP/sym-a64" > "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log"; exit 1; }
+          flutter build appbundle --release --flavor "$FLAVOR" --target-platform android-arm64 --analyze-size > "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log"; exit 1; }
           tail -n 60 "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log"
           cp "build/app/outputs/bundle/${FLAVOR}Release/app-${FLAVOR}-release.aab" "$RUNNER_TEMP/release-arm64.aab"
           cp build/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
@@ -141,17 +143,26 @@ jobs:
           cache: true
       - name: Resolve workspace
         run: flutter pub get --enforce-lockfile
-      - name: IPA with --analyze-size (unsigned, obfuscated)
+      # --analyze-size cannot be combined with --obfuscate: build once for the breakdown,
+      # then the obfuscated release-like IPA that the sizes are taken from.
+      - name: IPA with --analyze-size (unsigned, not obfuscated)
         working-directory: app
         run: |
           mkdir -p "$RUNNER_TEMP/out" "$RUNNER_TEMP/sym-ios"
-          if ! flutter build ipa --release --flavor prod --no-codesign --analyze-size \
+          if ! flutter build ipa --release --flavor prod --no-codesign --analyze-size > "$RUNNER_TEMP/out/build-ios-analyze.log" 2>&1; then
+            tail -n 60 "$RUNNER_TEMP/out/build-ios-analyze.log"; exit 1
+          fi
+          tail -n 80 "$RUNNER_TEMP/out/build-ios-analyze.log"
+          cp build/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
+          cp ~/.flutter-devtools/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
+      - name: IPA obfuscated (unsigned, the size measured)
+        working-directory: app
+        run: |
+          if ! flutter build ipa --release --flavor prod --no-codesign \
               --obfuscate --split-debug-info="$RUNNER_TEMP/sym-ios" > "$RUNNER_TEMP/out/build-ios.log" 2>&1; then
             tail -n 60 "$RUNNER_TEMP/out/build-ios.log"; exit 1
           fi
-          tail -n 60 "$RUNNER_TEMP/out/build-ios.log"
-          cp build/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
-          cp ~/.flutter-devtools/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
+          tail -n 8 "$RUNNER_TEMP/out/build-ios.log"
           ARCHIVE=build/ios/archive/Runner.xcarchive
           APP=$(ls -d "$ARCHIVE"/Products/Applications/*.app | head -n 1)
           rm -rf "$RUNNER_TEMP/ipa" && mkdir -p "$RUNNER_TEMP/ipa/Payload"
