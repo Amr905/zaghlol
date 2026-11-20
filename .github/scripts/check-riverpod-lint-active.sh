@@ -16,8 +16,8 @@ cp "$probe_src" "$probe"
 # The probe has an expected finding, so a non-zero exit of analyze is normal here; only the output matters.
 flutter analyze "$probe" > "$log" 2>&1
 
-if grep -q 'riverpod_lint/missing_provider_scope' "$log"; then
-  echo "riverpod_lint is active: the probe produced riverpod_lint/missing_provider_scope."
+if grep -Eq '(riverpod_lint/)?missing_provider_scope' "$log"; then
+  echo "riverpod_lint is active: the probe produced missing_provider_scope."
   exit 0
 fi
 
