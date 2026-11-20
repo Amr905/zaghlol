@@ -120,6 +120,14 @@ void main() {
       expect(sw.elapsedMilliseconds, lessThan(1000));
     }, tags: 'benchmark');
 
+    test('FU-157c: courtesy filler words do not make a balance question unknownTarget', () {
+      for (final q in ['what is my balance, thanks', 'my balance pls']) {
+        final r = parseAskQuestion(q, entities: entities);
+        expect(r, isA<AskUnderstood>(), reason: q);
+        expect((r as AskUnderstood).intent, AskIntent.accountBalance);
+      }
+    });
+
     test('word cap: cues after the cap are ignored', () {
       final q = '${List.filled(maxAskTokens, 'ايه').join(' ')} صرفت';
       expect(parseAskQuestion(q), isA<AskUnrecognized>());

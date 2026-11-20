@@ -655,9 +655,9 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-154c | core | T-155 imported refunds link only after categorization sets merchant_norm | export_import/application/import_csv.dart | none | OPEN |
 | FU-155a | ui | T-101 budget saver delete/update/insert not in one DB transaction | budget/application/budget_saver.dart:36-46 | none | OPEN |
 | FU-156a | core | T-106 second copy of essential-category set differs from domain copy (transport_work, utilities, installments vs work_transport) | insights/application/explanations.dart:258 | none | OPEN |
-| FU-157a | parsing | T-110 ask engine catches Exception only, so an Error escapes the "never throws" contract | ask/application/ask_engine.dart:72,120 | none | OPEN |
-| FU-157b | parsing | T-110 "budget left" uses categoryDonut total; confirm equals Home/budget net-spend | ask/application/ask_engine.dart:351-365 | none | OPEN |
-| FU-157c | parsing | T-110 unknownTarget guard may reject balance questions with filler words not in the stop list | packages/zaghlol_parsing/lib/chat/ask_parser.dart | none | OPEN |
+| FU-157a | parsing | T-110 ask engine catches Exception only, so an Error escapes the "never throws" contract | ask/application/ask_engine.dart:72,120 | none | FIXED (batch 51): catch is `on Object` in ask() and askChip() (already in tree) |
+| FU-157b | parsing | T-110 "budget left" uses categoryDonut total; confirm equals Home/budget net-spend | ask/application/ask_engine.dart:351-365 | none | OPEN (batch 51): donut total and cycle budgetSpent use separate SQL; needs a seeded-DB differential test across insights+budget, not a parsing fix |
+| FU-157c | parsing | T-110 unknownTarget guard may reject balance questions with filler words not in the stop list | packages/zaghlol_parsing/lib/chat/ask_parser.dart | none | FIXED (batch 51): thanks/thank/thx/pls/plz added to ask stop words; test in ask_parser_test.dart |
 | FU-158a | ui | T-080 EC-40 repair event dropped in onAmountChange; cycle/budget views stale until next event | transactions/data/transactions_providers.dart:56 | none | OPEN |
 | FU-158b | ui | T-080 EC-40 notice reuses transfersAssignErrorExceedsExpense; add transactionsEditLinksRemoved | transactions/presentation/edit/transaction_edit_screen.dart | PO (copy) | OPEN |
 | FU-158c | ui | T-080 currency chip change on an edit with no links silently re-denominates the row | transactions/presentation/edit/transaction_edit_screen.dart:122 | none | OPEN |
@@ -737,7 +737,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-189b | core | T-147 Drive authorizer GoogleSignIn.initialize without nonce can race the sign-in ID token (fails closed) | account/application/id_token_source.dart:128-150; backup/data/drive_auth.dart:51-63 | none | OPEN |
 | FU-189c | core | T-147 signOut never calls GoogleSignIn.signOut | account/application/account_service.dart:209 | none | OPEN |
 | FU-189d | core | T-147 AccountStatus.linkedGold reads claims.acct without sub==installId check (wording only) | account/application/account_providers.dart:95-101 | none | OPEN |
-| FU-190a | parsing | T-164 paste field has no autocorrect/enableSuggestions off | capture/presentation/template_builder_screen.dart | none | OPEN |
+| FU-190a | parsing | T-164 paste field has no autocorrect/enableSuggestions off | capture/presentation/template_builder_screen.dart | none | OBSOLETE (batch 51): both paste fields already set autocorrect:false, enableSuggestions:false |
 | FU-190b | parsing | T-164 unsalted SHA-256 hash; pipeline registration, re-parse hook, route unwired | capture/application/template_builder.dart | none | CLOSED (re-parse hook wired in WIRE-SVC; hash as the task asks) |
 | FU-191a | native | T-160 iOS OCR path check allowed only NSHomeDirectory, spool in App Group | ios/Runner/Platform/OCR/OcrHost.swift:141,193 | none | CLOSED (FU-198, batch 20) |
 | FU-191b | native | T-160 iOS spool key provider provisioned | ios/Runner/Platform/OCR/OcrHost.swift:57 | none | CLOSED (SharedSpoolKeyProvider, FU-198) |
@@ -780,22 +780,22 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-207b | native | T-064 unreadable IntentRunLog reports "never ran" and flags after 7 days | ios/Runner/Capture/IntentRunLog.swift:51 | none | OPEN |
 | FU-207c | native | T-064 users without Apple Pay are flagged on the Wallet automation for good | capture/domain/ios_shortcut_checker.dart | none | CLOSED (PO T-064: Wallet rule neverRan or not flagged, batch 21) |
 | FU-207d | native | T-064 shortcutSetupReportProvider has no consumer naming the flagged automation | capture/application | none | OPEN |
-| FU-208a | test | T-171 allow-list does not see headers dart:io adds (user-agent, host) | core/backend/transport.dart:82 | none | OPEN |
-| FU-208b | test | T-171 source guard gaps (print (x) with space; // inside string; .m/.h not scanned) | test/privacy/source_guards_test.dart:58,82 | none | OPEN (print-space part closed by FU-215; // in string and .m/.h not scanned) |
+| FU-208a | test | T-171 allow-list does not see headers dart:io adds (user-agent, host) | core/backend/transport.dart:82 | none | OBSOLETE (batch 51): IoBackendTransport sets userAgent=null; Host is the destination itself |
+| FU-208b | test | T-171 source guard gaps (print (x) with space; // inside string; .m/.h not scanned) | test/privacy/source_guards_test.dart:58,82 | none | OBSOLETE (batch 51): guard handles // inside strings and scans .m/.h/.mm |
 | FU-208c | test | T-171 F1 sign-out reaches server | core/backend | none | CLOSED (Lead delta check batch 20) |
-| FU-209a | test | T-173 benchmark job can block on a flake (no retry) | .github/workflows/app-ci.yml:231-250 | none | OPEN |
+| FU-209a | test | T-173 benchmark job can block on a flake (no retry) | .github/workflows/app-ci.yml:231-250 | none | OBSOLETE (batch 51): perf job retries the app benchmark step once |
 | FU-209b | test | T-173 passphrase_test lessThan(50) untagged timing assertion | test/features/backup/crypto/passphrase_test.dart:199 | none | CLOSED (FU-214, batch 21) |
-| FU-209c | test | T-173 --tags benchmark also reruns the 50k FTS benchmark db-platform gates | .github/workflows/app-ci.yml:250 | none | OPEN |
+| FU-209c | test | T-173 --tags benchmark also reruns the 50k FTS benchmark db-platform gates | .github/workflows/app-ci.yml:250 | none | OBSOLETE (batch 51): perf job now runs `benchmark && !db-platform` |
 | FU-210a | docs | T-082 no minors recorded in batch reports | - | none | CLOSED (nothing to track) |
 | FU-216a | ui | T-067 skip handlers fire recordSetupSkip unawaited then onFinish (no race today) | onboarding/presentation/ios_setup.dart | none | CLOSED (no action per review) |
-| FU-217a | test | T-174 bills row wrapped in Semantics container and ZCard merge may read twice | bills/presentation/bills_screen.dart:266 | none | OPEN |
+| FU-217a | test | T-174 bills row wrapped in Semantics container and ZCard merge may read twice | bills/presentation/bills_screen.dart:266 | none | OBSOLETE (batch 51): fixed earlier, test in bills_screen_test.dart (FU-217a) |
 | FU-217b | test | T-174 manual TalkBack/VoiceOver label audit on a device | - | device | OPEN |
-| FU-220a | parsing | T-037 (registry-wide) hsbc/kfh/citibank isAvailableLimit is per template: debit message ending Avl Bal inferred credit | app/assets/registry/institutions/hsbc.json:43,63; kfh.json; citibank.json | none | OPEN |
+| FU-220a | parsing | T-037 (registry-wide) hsbc/kfh/citibank isAvailableLimit is per template: debit message ending Avl Bal inferred credit | app/assets/registry/institutions/hsbc.json:43,63; kfh.json; citibank.json | none | OPEN (batch 51): needs real/PO wording for debit messages ending Avl Bal; no template change without samples |
 | FU-220b | parsing | T-037 Avl Limit tail captured as balance in EN templates (M-1 major) | app/assets/registry/institutions/*.json | none | CLOSED (fixed in batch 22 fix round) |
 | FU-221a | parsing | T-068 NBE purchase templates cite a PO sample that does not exist | app/assets/registry/institutions/nbe.json | none | CLOSED (tagged synthetic-unverified) |
 | FU-221b | parsing | T-068 foreign-only FX templates captured balance in the wrong currency (S1 major) | institutions/{nbe,cib,banque_misr,qnb}.json | none | CLOSED (fix ff96db40) |
 | FU-222a | parsing | T-069 foreign-only purchase makes a second USD account for an EGP card (resolve by institution+last4) | ingestion/application/ingest_raw_messages.dart | PO (how foreign-only is stored) | OPEN |
-| FU-226a | parsing | T-036 build notes say registry unwired / guard_base not generated | docs/04-tasks/tasks/T-036.md:40,44 | none | OPEN |
+| FU-226a | parsing | T-036 build notes say registry unwired / guard_base not generated | docs/04-tasks/tasks/T-036.md:40,44 | none | OBSOLETE (batch 51): T-036 build notes already say registry is wired and guard_base generated |
 | FU-226b | parsing | T-036 sms-spike-device assertion for stagingSms Guard dropped | .github/scripts/sms-spike-device.sh:522 | none | CLOSED (asserts st_guard = 1) |
 | FU-226c | parsing | T-036 stale "T-036 replaces the missing bundled one" doc comment | capture/application/capture_providers.dart:75 | none | CLOSED (comment gone) |
 | FU-229a | ui | T-120 voice partial save then Try again/close: log not counted, _savedKeys cleared (quota bypass) | voice/application/voice_controller.dart:213,239,361 | none | OPEN |
@@ -807,7 +807,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-230a | parsing | T-161 Scan tile opens picker before saying OCR unavailable on Android | capture/application/scan_providers.dart | task T-159 (Tesseract aar) | OPEN |
 | FU-230b | parsing | T-161 Info.plist lacks NSPhotoLibraryUsageDescription (ITMS-90683 risk) | ios/Runner/Info.plist | device (first TestFlight upload) | OPEN |
 | FU-230c | parsing | T-161 shared PDF/CSV discarded when no navigator context; shown as not available | capture/application/shared_items_lifecycle.dart:119-130 | task T-158 | OPEN |
-| FU-230d | parsing | T-161 OcrHost.sealImageNow standardizedFileURL does not resolve symlinks | ios/Runner/Platform/OCR/OcrHost.swift | none | OPEN |
+| FU-230d | parsing | T-161 OcrHost.sealImageNow standardizedFileURL does not resolve symlinks | ios/Runner/Platform/OCR/OcrHost.swift | none | OBSOLETE (batch 51): sealImageNow already uses resolvingSymlinksInPath (OcrHost.swift:318) |
 | FU-230e | parsing | T-161 prefilled last-4 account lost on new item (major F7) | transactions/presentation/edit/transaction_edit_screen.dart:161 | none | CLOSED (fix round batch 24) |
 | FU-233a | backend | T-135 lock order not one global order (sign-in attach subset vs restore) | backend/.../Accounts/SignInService.cs:210-219; AccountStores.cs:61-66 | none | CLOSED (obsolete batch 51: LockPurchasesAsync already locks the union of both sets in one ascending id order, AccountStores.cs:69-73; the attach subset is re-locked inside it) |
 | FU-233b | backend | T-135 permanent Apple revoke failure blocks account deletion; pending-revocation queue | backend/.../AccountLifecycleService.cs:64-70 | PO | CLOSED (PendingAppleRevocationStore added, batch 25 fix) |
@@ -829,8 +829,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-237c | ui | T-170 Tips segment on Ask and badge (roiTipCountProvider) not wired (flag off) | smart_roi | none | OPEN |
 | FU-238a | parsing | T-071 Revolut [£€$] had no left boundary (A$/CA$ read as USD) (major) | app/assets/registry/institutions/revolut.json | none | CLOSED (fix round batch 25) |
 | FU-238b | parsing | T-071 fx_conversion field convention only in task notes | docs/03-technical/parsing-engine.md:73 | none | CLOSED (documented) |
-| FU-238c | parsing | T-071 two-leg AC met only at parser level; legs come with T-089 | docs/04-tasks/TASKS.md | none | OPEN |
-| FU-239a | parsing | T-072 alrajhi lazy dot runs backtrack O(n^2) on long non-matching bodies | app/assets/registry/institutions/alrajhi.json:35 | none | OPEN |
+| FU-238c | parsing | T-071 two-leg AC met only at parser level; legs come with T-089 | docs/04-tasks/TASKS.md | none | OBSOLETE (batch 51): legs delivered by T-089 (DONE, batch 12) |
+| FU-239a | parsing | T-072 alrajhi lazy dot runs backtrack O(n^2) on long non-matching bodies | app/assets/registry/institutions/alrajhi.json:35 | none | OBSOLETE (batch 51): alrajhi patterns bounded; test/ingestion/alrajhi_backtrack_test.dart exists |
 | FU-240a | ui | T-158 CSV import pairing hook not passed to ImportCsvUseCase (blocker) | export_import/presentation/import_ports.dart:331 | none | CLOSED (importPostPersistHook) |
 | FU-240b | ui | T-158 commit returns no autoCategorised/needReview/topCategories; done tiles hidden | export_import/presentation/import_ports.dart:222 | none | OPEN |
 | FU-240c | ui | T-158 export half, target-card Change action and PDF password step not built | export_import/presentation | none | OPEN |
