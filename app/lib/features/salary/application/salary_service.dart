@@ -201,6 +201,8 @@ class SalaryService {
   Future<void> linkExisting(CivilDate payday, String txnId) =>
       _txns.inTransaction(() async {
         final state = await _settings.get(Settings.salaryState);
+        // Already tied (for instance a manual row): keep it as it is.
+        if (state.entryOf(txnId) != null) return;
         await _settings.set(
           Settings.salaryState,
           state.withEntry(
@@ -224,7 +226,17 @@ class SalaryService {
     bool loose = false,
   }) {
     return _txns.inTransaction(() async {
-      if (!allowDuplicate) {
+      if (allowDuplicate) {
+        // "Another income": remember it for every received credit that looks
+        // like this salary, so reconcile never ties it to the new row later.
+        var state = await _settings.get(Settings.salaryState);
+        for (var i = 0; i < 20; i++) {
+          final other = await _findReceived(anchor, txn.amount, loose: loose);
+          if (other == null) break;
+          state = state.withDeclined(other.txnId);
+          await _settings.set(Settings.salaryState, state);
+        }
+      } else {
         final found =
             await _findTied(anchor) ??
             await _findReceived(anchor, txn.amount, loose: loose);
@@ -251,7 +263,8 @@ class SalaryService {
       final r = await _db
           .customSelect(
             'SELECT amount_minor, currency FROM transactions WHERE id = ?1 '
-            "AND deleted_at IS NULL AND status = 'posted'",
+            "AND deleted_at IS NULL AND status = 'posted' "
+            "AND direction IN ('income', 'transfer_in') AND is_internal = 0",
             variables: [Variable.withString(e.txnId)],
             readsFrom: {_db.transactions},
           )
@@ -365,7 +378,8 @@ class SalaryService {
       final r = await _db
           .customSelect(
             'SELECT 1 AS x FROM transactions WHERE id = ?1 '
-            "AND deleted_at IS NULL AND status = 'posted'",
+            "AND deleted_at IS NULL AND status = 'posted' "
+            "AND direction IN ('income', 'transfer_in') AND is_internal = 0",
             variables: [Variable.withString(e.txnId)],
             readsFrom: {_db.transactions},
           )

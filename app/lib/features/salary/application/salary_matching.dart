@@ -246,7 +246,8 @@ class SalaryMatching {
       final r = await _db
           .customSelect(
             'SELECT amount_minor, currency FROM transactions '
-            "WHERE id = ?1 AND deleted_at IS NULL AND status = 'posted'",
+            "WHERE id = ?1 AND deleted_at IS NULL AND status = 'posted' "
+            "AND direction IN ('income', 'transfer_in') AND is_internal = 0",
             variables: [Variable.withString(e.txnId)],
             readsFrom: {_db.transactions},
           )

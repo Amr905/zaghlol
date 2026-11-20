@@ -7,7 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart' hide Settings;
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/categories_dao.dart';
+import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
+import 'package:zaghlol/core/settings/settings_keys.dart';
+import 'package:zaghlol/core/settings/settings_repository.dart';
 import 'package:zaghlol/features/budget/data/cycle_repository.dart';
 import 'package:zaghlol/features/ingestion/data/device_local_zone.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_ports.dart';
@@ -547,5 +550,77 @@ void main() {
       expect(await service.expected(payday), isNull);
       expect(await incomes(egp), [3000000]);
     });
+  });
+
+  group('review fixes', () {
+    NewTransaction leg() => NewTransaction(
+      accountId: 'acc1',
+      direction: TxnDirection.income,
+      amount: Money(egp, tenK),
+      occurredAt: DateTime.fromMillisecondsSinceEpoch(
+        payday.epochDay * day + 10 * 3600000,
+        isUtc: true,
+      ),
+      occurredTzOffsetMin: 120,
+    );
+
+    test('F1 add flow: "another income" survives reconcile', () async {
+      await setPlan();
+      await sms('s1', tenK, payday);
+      expect(await service.recordManual(leg()), isA<SalaryFoundExisting>());
+      await service.recordManual(leg(), allowDuplicate: true);
+      expect(await incomes(egp), [tenK, tenK]);
+      await matching.reconcile(today: payday.plusDays(1));
+      expect(await arrive('s1'), SalaryMatchStatus.none);
+      expect(await incomes(egp), [tenK, tenK]);
+    });
+
+    test('F1 "It arrived" flow: "another income" survives reconcile', () async {
+      await setPlan(minor: 5000000);
+      await sms('s1', 3000000, payday);
+      final r = await service.confirmReceived(payday, today: payday);
+      expect(r, isA<SalaryFoundExisting>());
+      await service.confirmReceived(
+        payday,
+        today: payday,
+        allowDuplicate: true,
+      );
+      expect(await incomes(egp), [5000000, 3000000]);
+      await matching.reconcile(today: payday.plusDays(1));
+      expect(await incomes(egp), [5000000, 3000000]);
+    });
+
+    test('F2 linkExisting keeps a manual entry manual', () async {
+      await setPlan();
+      final man = await manual();
+      await service.linkExisting(payday, man);
+      final state = await SettingsRepository(SettingsDao(db))
+          .get(Settings.salaryState);
+      expect(state.entryOf(man)!.captured, isFalse);
+      await sms('s1', tenK, payday);
+      expect(await arrive('s1'), SalaryMatchStatus.merged);
+      expect(await incomes(egp), [tenK]);
+    });
+
+    test(
+      'F3 a tied row edited to an expense or internal reopens the payday',
+      () async {
+        await setPlan();
+        final id = await manual();
+        expect(await service.expected(payday), isNull);
+        await db.customStatement(
+          "UPDATE transactions SET direction = 'expense' WHERE id = '$id'",
+        );
+        expect((await service.expected(payday))?.payday, payday);
+        await db.customStatement(
+          "UPDATE transactions SET direction = 'income', is_internal = 1 "
+          "WHERE id = '$id'",
+        );
+        expect((await service.expected(payday))?.payday, payday);
+        // And an SMS is not merged into a row that no longer counts as income.
+        await sms('s1', tenK, payday);
+        expect(await arrive('s1'), SalaryMatchStatus.tagged);
+      },
+    );
   });
 }
