@@ -15,6 +15,8 @@ import 'package:zaghlol/features/transfers/presentation/transfers_port.dart';
 import 'package:zaghlol/features/transfers/presentation/transfers_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../support/hide_amounts_support.dart';
+
 final egp = Currency.of('EGP');
 final usd = Currency.of('USD');
 Money e(int minor) => Money(egp, minor);
@@ -211,6 +213,7 @@ Future<void> pumpSheet(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...amountsShown(),
         transfersSheetPortProvider.overrideWith((ref) async => port),
         digitsModeProvider.overrideWith(
           (ref, lang) => DigitsMode.resolve(DigitsPref.auto, lang),

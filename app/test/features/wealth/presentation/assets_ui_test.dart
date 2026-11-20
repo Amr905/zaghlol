@@ -19,6 +19,8 @@ import 'package:zaghlol/features/wealth/presentation/assets_section.dart';
 import 'package:zaghlol/features/wealth/presentation/prices_screen.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../support/hide_amounts_support.dart';
+
 final _now = DateTime.utc(2026, 11, 13, 12);
 final _egp = Currency.of('EGP');
 
@@ -87,6 +89,7 @@ Future<void> _pump(
   await t.pumpWidget(
     ProviderScope(
       overrides: [
+        ...amountsShown(),
         pricesClockProvider.overrideWithValue(() => _now),
         pricesRepositoryProvider.overrideWith((ref) async => env.prices),
         netWorthRepositoryProvider.overrideWith((ref) async => env.repo),

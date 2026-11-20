@@ -92,12 +92,14 @@ class _Lock extends AppLockController {
 void main() {
   late FakeWidgetHost host;
   late StreamController<bool> hide;
+  late StreamController<bool> appHide;
   late StreamController<bool> lockOn;
   late NotifierProvider<_Ov, CycleOverview> ovState;
 
   ProviderContainer make({bool locked = false}) {
     host = FakeWidgetHost();
     hide = StreamController<bool>();
+    appHide = StreamController<bool>()..add(false);
     lockOn = StreamController<bool>();
     ovState = NotifierProvider<_Ov, CycleOverview>(_Ov.new);
     final c = ProviderContainer(
@@ -105,6 +107,7 @@ void main() {
         widgetBridgeHostProvider.overrideWithValue(host),
         widgetCopyProvider.overrideWith((ref, lang) => copy),
         hideAmountsWidgetProvider.overrideWith((ref) => hide.stream),
+        hideAmountsAppProvider.overrideWith((ref) => appHide.stream),
         appLockEnabledProvider.overrideWith((ref) => lockOn.stream),
         appLockControllerProvider.overrideWith(() => _Lock(locked)),
         primaryCurrencyProvider.overrideWith((ref) => Stream.value(egp)),
@@ -119,6 +122,7 @@ void main() {
     addTearDown(() {
       c.dispose();
       hide.close();
+      appHide.close();
       lockOn.close();
     });
     c.listen(widgetBridgeWiringProvider, (_, _) {});
@@ -152,6 +156,16 @@ void main() {
     lockOn.add(false);
     await pastDebounce();
     expect(host.sent.single.primaryText, '•••/day');
+    expect(host.sent.map((s) => s.primaryText).join(), isNot(contains('314')));
+  });
+
+  test('T-187: the app-wide hide toggle masks the widget too', () async {
+    make();
+    hide.add(false);
+    appHide.add(true);
+    lockOn.add(false);
+    await pastDebounce();
+    expect(host.sent.last.primaryText, '•••/day');
     expect(host.sent.map((s) => s.primaryText).join(), isNot(contains('314')));
   });
 

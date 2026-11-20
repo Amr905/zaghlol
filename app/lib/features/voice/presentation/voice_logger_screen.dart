@@ -933,6 +933,7 @@ class _ItemRow extends ConsumerWidget {
       title: l.voiceLoggerEditA11y,
       builder: (ctx) => _EditForm(
         initialText: draft.text,
+        // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
         initialAmount: draft.hasAmount ? draft.amount!.toCanonicalString() : '',
         currency: currency,
       ),

@@ -364,6 +364,7 @@ class _IncomeRowState extends ConsumerState<_IncomeRow> {
       final lang = Localizations.localeOf(context).languageCode;
       _controller.text = ref
           .read(digitsModeProvider(lang))
+          // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
           .render(stored.toCanonicalString());
     }
     return SettingsControlRow(

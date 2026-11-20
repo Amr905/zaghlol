@@ -23,6 +23,7 @@ import 'package:zaghlol/features/transactions/presentation/edit/txn_edit_provide
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 
 import 'list/list_harness.dart';
+import '../../../support/hide_amounts_support.dart';
 
 /// Records what the editor was asked to store.
 class FakeEditor implements TxnEditorPort {
@@ -82,6 +83,7 @@ Widget _app(
   GlobalKey<NavigatorState>? navigatorKey,
 }) => ProviderScope(
   overrides: [
+    ...amountsShown(),
     txnLookupsProvider.overrideWith((ref) async => lookups),
     paydayScheduleProvider.overrideWith(
       (ref) async => PaydaySchedule.single(1),

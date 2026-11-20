@@ -14,6 +14,7 @@ import 'package:zaghlol/features/share_cards/presentation/share_studio_screen.da
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../support/golden_matrix.dart';
+import '../../support/hide_amounts_support.dart';
 
 final _egp = Currency.of('EGP');
 Money _m(int minor) => Money(_egp, minor);
@@ -47,6 +48,7 @@ Future<void> pumpStudio(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...amountsShown(),
         chartsCurrenciesProvider.overrideWith(
           (ref) async => currencies ?? [_egp],
         ),

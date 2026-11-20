@@ -187,6 +187,7 @@ class _FormState extends ConsumerState<_Form> {
   /// parse.
   String _text(BudgetRow? r) => r == null
       ? ''
+      // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
       : Money.fromStorage(r.limitMinor, r.currency).toCanonicalString();
 
   @override

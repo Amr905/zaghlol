@@ -13,6 +13,7 @@ import 'package:zaghlol/features/budget/presentation/budget_screen.dart';
 import 'package:zaghlol/features/budget/presentation/budget_view.dart';
 
 import 'budget_test_support.dart';
+import '../../../support/hide_amounts_support.dart';
 
 const locales = [Locale('ar', 'EG'), Locale('en')];
 
@@ -22,6 +23,7 @@ Future<void> pump(
   Override data, {
   double scale = 1.0,
   bool dark = false,
+  HideAmountsHarness? hideAmounts,
 }) async {
   await initDateFormatting();
   await tester.binding.setSurfaceSize(const Size(390, 900));
@@ -33,9 +35,40 @@ Future<void> pump(
       scale: scale,
       dark: dark,
       overrides: [data],
+      hideAmounts: hideAmounts,
     ),
   );
   await tester.pump();
+}
+
+void budgetHiddenTests() {
+  for (final locale in locales) {
+    testWidgets('T-187 ${locale.languageCode}: masking on: no digit in any '
+        'amount', (tester) async {
+      final h = HideAmountsHarness(hidden: true);
+      addTearDown(h.dispose);
+      await pump(
+        tester,
+        locale,
+        ok(data([egpView(), usdView()])),
+        hideAmounts: h,
+      );
+      await tester.pumpAndSettle();
+      final amounts = <String>[
+        for (final w in tester.widgetList<Text>(find.byType(Text)))
+          if (RegExp(r'EGP|USD|ج\.م').hasMatch(w.data ?? '') ||
+              (w.textSpan?.toPlainText() ?? '').contains(
+                RegExp(r'EGP|USD|ج\.م'),
+              ))
+            w.data ?? w.textSpan!.toPlainText(),
+      ];
+      expect(amounts, isNotEmpty);
+      for (final a in amounts) {
+        final noPct = a.replaceAll(RegExp(r'[0-9٠-٩]+\s*%'), '');
+        expect(RegExp(r'[0-9٠-٩]').hasMatch(noPct), isFalse, reason: a);
+      }
+    });
+  }
 }
 
 Override ok(BudgetScreenData d) =>
@@ -45,6 +78,7 @@ AppLocalizations l10n(WidgetTester tester) =>
     AppLocalizations.of(tester.element(find.byType(BudgetScreen)));
 
 void main() {
+  budgetHiddenTests();
   for (final locale in locales) {
     final tag = locale.languageCode;
 

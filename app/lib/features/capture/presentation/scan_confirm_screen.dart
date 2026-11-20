@@ -168,6 +168,7 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
       type: d.direction == TxnDirection.income
           ? TxnEditType.income
           : TxnEditType.expense,
+      // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
       amountText: d.amount.toCanonicalString(),
       currency: d.amount.currency,
       merchant: d.party,

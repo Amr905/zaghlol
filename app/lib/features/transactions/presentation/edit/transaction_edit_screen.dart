@@ -152,6 +152,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     _amount = TextEditingController(
       text: e == null
           ? (pre?.amountText ?? '')
+          // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
           : e.amount.abs().toCanonicalString(),
     );
     _merchant = TextEditingController(

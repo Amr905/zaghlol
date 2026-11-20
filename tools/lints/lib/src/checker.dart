@@ -165,7 +165,85 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
       );
     }
     _checkPrint(node);
+    _checkUnmaskedAmount(node);
     super.visitMethodInvocation(node);
+  }
+
+  // Rule 5: no_unmasked_amount (D-67, hide amounts).
+  //
+  // Every amount shown to the user is built by `MoneyFormat.format`, which
+  // masks it while the eye toggle is on. The rule fires on:
+  //  - `MoneyFormat.format(...)` without a `hidden:` argument, or with the
+  //    literal `hidden: false` (pass the real setting);
+  //  - `NumberFormat(...)` / `NumberFormat.xxx(...)` outside l10n/ (a second
+  //    way to format an amount that nothing can mask);
+  //  - in presentation/ and application/ files: `.toStringAsFixed(`,
+  //    `.toStringAsPrecision(` and `.toCanonicalString()` (the raw number as
+  //    text). A text field the user types the number into is allowed with
+  //    `// ignore: no_unmasked_amount - <why>`.
+  // Types are not resolved, so the check is by name.
+
+  void _checkUnmaskedAmount(MethodInvocation node) {
+    if (scope.isMoneyFormatter) return;
+    final name = node.methodName.name;
+    final target = node.target;
+    if (target is SimpleIdentifier && target.name == 'MoneyFormat') {
+      if (name != 'format') return;
+      NamedExpression? hidden;
+      for (final a in node.argumentList.arguments) {
+        if (a is NamedExpression && a.name.label.name == 'hidden') hidden = a;
+      }
+      if (hidden == null) {
+        _report(
+          ruleNoUnmaskedAmount,
+          node.methodName.offset,
+          'MoneyFormat.format without `hidden:`; pass hideAmountsProvider.',
+        );
+      } else if (hidden.expression is BooleanLiteral &&
+          !(hidden.expression as BooleanLiteral).value) {
+        _report(
+          ruleNoUnmaskedAmount,
+          node.methodName.offset,
+          '`hidden: false` always shows the amount; pass hideAmountsProvider.',
+        );
+      }
+      return;
+    }
+    if (!scope.isL10n &&
+        ((target is SimpleIdentifier && target.name == 'NumberFormat') ||
+            (target == null && name == 'NumberFormat'))) {
+      _report(
+        ruleNoUnmaskedAmount,
+        node.methodName.offset,
+        'NumberFormat bypasses the shared amount formatter (hide amounts).',
+      );
+      return;
+    }
+    if (scope.inUiText &&
+        target != null &&
+        (name == 'toStringAsFixed' ||
+            name == 'toStringAsPrecision' ||
+            name == 'toCanonicalString')) {
+      _report(
+        ruleNoUnmaskedAmount,
+        node.methodName.offset,
+        '$name prints a number outside the shared amount formatter; use '
+        'MoneyFormat.format (hide amounts).',
+      );
+    }
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    final type = node.constructorName.type.toSource();
+    if (!scope.isL10n && type == 'NumberFormat') {
+      _report(
+        ruleNoUnmaskedAmount,
+        node.offset,
+        'NumberFormat bypasses the shared amount formatter (hide amounts).',
+      );
+    }
+    super.visitInstanceCreationExpression(node);
   }
 
   // Outside the strict scope: amount-named variables and functions whose

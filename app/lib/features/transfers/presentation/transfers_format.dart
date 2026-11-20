@@ -25,6 +25,7 @@ final class TransfersFmt {
   String count(int n) => digits.render('$n');
 
   /// Text for an amount field: canonical digits in the user's script.
+  // ignore: no_unmasked_amount - edit field prefill, the user is editing the number
   String input(Money m) => digits.render(m.toCanonicalString());
 
   /// Exact parse of typed text (any digit script); null when empty,

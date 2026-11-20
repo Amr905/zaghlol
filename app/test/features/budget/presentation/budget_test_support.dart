@@ -14,6 +14,8 @@ import 'package:zaghlol/features/budget/domain/budget_progress.dart';
 import 'package:zaghlol/features/budget/presentation/budget_view.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../support/hide_amounts_support.dart';
+
 final egp = Currency.of('EGP');
 final usd = Currency.of('USD');
 
@@ -96,8 +98,10 @@ Widget harness(
   bool dark = false,
   double scale = 1.0,
   List<Override> overrides = const [],
+  HideAmountsHarness? hideAmounts,
 }) => ProviderScope(
   overrides: [
+    ...(hideAmounts ?? HideAmountsHarness()).overrides,
     digitsModeProvider.overrideWith(
       (ref, lang) => DigitsMode.resolve(DigitsPref.auto, lang),
     ),

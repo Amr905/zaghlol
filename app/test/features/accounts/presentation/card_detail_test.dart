@@ -24,6 +24,8 @@ import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../support/hide_amounts_support.dart';
+
 // Nothing on the edit screen touches the repository until Save.
 class _NoRepo implements AccountsRepository {
   @override
@@ -148,6 +150,7 @@ Widget host(
   List<IgnoreRuleRow> rules = const [],
 }) => ProviderScope(
   overrides: [
+    ...amountsShown(),
     txnLookupsProvider.overrideWith((ref) async => lookups),
     ignoreRulesStreamProvider.overrideWith((ref) => Stream.value(rules)),
     ...overrides,

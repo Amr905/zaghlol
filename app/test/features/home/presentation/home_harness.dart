@@ -18,6 +18,8 @@ import 'package:zaghlol/features/home/presentation/home_widgets.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../support/hide_amounts_support.dart';
+
 final egp = Currency.of('EGP');
 final usd = Currency.of('USD');
 
@@ -132,9 +134,11 @@ Widget homeApp({
   HomeActions? actions,
   bool withShell = false,
   List<Override> extraOverrides = const [],
+  HideAmountsHarness? hideAmounts,
 }) {
   return ProviderScope(
     overrides: [
+      ...(hideAmounts ?? HideAmountsHarness()).overrides,
       homeModelProvider.overrideWith((ref) => future ?? Future.value(value)),
       homeAccountsProvider.overrideWith((ref) async => accounts),
       homePaydaySetProvider.overrideWith((ref) => true),
@@ -209,6 +213,7 @@ Future<void> pumpHome(
   HomeActions? actions,
   bool withShell = false,
   List<Override> extraOverrides = const [],
+  HideAmountsHarness? hideAmounts,
 }) async {
   await initDateFormatting();
   await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -227,6 +232,7 @@ Future<void> pumpHome(
       actions: actions,
       withShell: withShell,
       extraOverrides: extraOverrides,
+      hideAmounts: hideAmounts,
     ),
   );
   if (settle) {

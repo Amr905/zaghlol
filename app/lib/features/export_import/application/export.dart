@@ -67,8 +67,10 @@ List<String> exportRow(TransactionRecord t) {
     neutralizeFormula(t.accountId),
     t.direction.code,
     t.status.code,
+    // ignore: no_unmasked_amount - the exported file is user-initiated and exact; a screen that previews these rows must mask them (D-67)
     t.amount.toCanonicalString(),
     t.amount.currency.code,
+    // ignore: no_unmasked_amount - same: exact value in the exported file
     orig?.toCanonicalString() ?? '',
     orig?.currency.code ?? '',
     neutralizeFormula(t.merchantRaw ?? ''),

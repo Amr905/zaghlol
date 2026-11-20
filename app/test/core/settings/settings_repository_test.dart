@@ -48,6 +48,7 @@ allKeys = [
   (key: Settings.quietHoursEndMin, byDefault: 480, other: 1439),
   (key: Settings.appLockEnabled, byDefault: false, other: true),
   (key: Settings.appLockTimeoutS, byDefault: 60, other: 0),
+  (key: Settings.hideAmountsApp, byDefault: false, other: true),
   (key: Settings.hideAmountsNotifications, byDefault: false, other: true),
   (key: Settings.hideAmountsWidget, byDefault: false, other: true),
   (key: Settings.hideAmountsShareCards, byDefault: true, other: false),
@@ -268,6 +269,36 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
     expect(seen, [1, 9]);
+  });
+
+  test('T-187: hide_amounts.app survives a restart (new repository, same '
+      'database) and hideAmountsProvider follows it', () async {
+    await repo.set(Settings.hideAmountsApp, true);
+    final restarted = SettingsRepository(SettingsDao(edb.db));
+    expect(await restarted.get(Settings.hideAmountsApp), isTrue);
+
+    final container = ProviderContainer(
+      overrides: [appDatabaseProvider.overrideWith((ref) async => edb.db)],
+    );
+    addTearDown(container.dispose);
+    final seen = <bool>[];
+    container.listen(hideAmountsProvider, (_, next) => seen.add(next));
+    // Fails closed while the setting loads.
+    expect(container.read(hideAmountsProvider), isTrue);
+    for (
+      var i = 0;
+      i < 50 && container.read(hideAmountsAppProvider).isLoading;
+      i++
+    ) {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    expect(container.read(hideAmountsProvider), isTrue);
+    final r = await container.read(settingsRepositoryProvider.future);
+    await r.set(Settings.hideAmountsApp, false);
+    for (var i = 0; i < 50 && container.read(hideAmountsProvider); i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    expect(container.read(hideAmountsProvider), isFalse);
   });
 
   test('no plain preferences anywhere in the app (AC2)', () {

@@ -1,6 +1,6 @@
 # zaghlol_lints (T-002)
 
-Four project rules, run as a command-line checker over `lib/` trees:
+Five project rules, run as a command-line checker over `lib/` trees:
 
 ```
 cd tools/lints && dart run bin/zaghlol_lints.dart ../../app ../../packages/zaghlol_parsing
@@ -23,6 +23,8 @@ matched by name (see the rule notes below).
 | `no_ui_string_literals` | string literals containing letters | inside methods named `build`, and any method, getter or function returning a widget (`Widget`, `PreferredSizeWidget`, `Widget?`, `List<Widget>`), including closures within them |
 | `no_print_outside_debug` | `print(...)` and `debugPrint(...)` | all `lib/` files except debug-only files |
 | `safe_exception_required` | classes that are an `Exception` or `Error` but not a `SafeException` | files in a `parsing/` or `db/` directory, or in package `zaghlol_parsing` |
+
+| `no_unmasked_amount` | `MoneyFormat.format(...)` without a `hidden:` argument or with the literal `hidden: false`; `NumberFormat(...)` / `NumberFormat.x(...)` outside `l10n/`; `.toStringAsFixed(`, `.toStringAsPrecision(`, `.toCanonicalString()` in `presentation/` and `application/` | all `lib/` files; `core/l10n/money_format.dart` (the shared formatter) is exempt |
 
 Only files under `lib/` are linted (tests, tools and generated code are skipped:
 `*.g.dart`, `*.freezed.dart`, `generated/`).
@@ -95,3 +97,16 @@ that count as throwable: `Exception`, `Error` and the core subclasses
   scoping, money names, Arabic text and digits, and supertype following.
 - `test/file_scope_test.dart` and `test/string_allowlist_test.dart` cover the
   pure helpers.
+
+## no_unmasked_amount (T-187, D-67)
+
+Every amount shown to the user goes through `MoneyFormat.format`, which masks it
+(`****`, sign and currency kept) while the eye toggle is on. The rule keeps a new
+screen from bypassing that: format amounts with `MoneyFormat.format(..., hidden:
+ref.watch(hideAmountsProvider))`. A text field the user types the number into, or
+the exact value in a user-initiated export, is allowed with a reason:
+
+```dart
+// ignore: no_unmasked_amount - edit field prefill, the user is editing the number
+text: e.amount.toCanonicalString(),
+```

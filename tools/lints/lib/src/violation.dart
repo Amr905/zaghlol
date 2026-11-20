@@ -3,6 +3,7 @@ const String ruleNoDoubleMoney = 'no_double_money';
 const String ruleNoUiStringLiterals = 'no_ui_string_literals';
 const String ruleNoPrintOutsideDebug = 'no_print_outside_debug';
 const String ruleSafeExceptionRequired = 'safe_exception_required';
+const String ruleNoUnmaskedAmount = 'no_unmasked_amount';
 
 /// One reported problem.
 class Violation {
