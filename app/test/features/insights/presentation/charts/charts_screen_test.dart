@@ -1,6 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
 import 'package:flutter_test/flutter_test.dart';
@@ -199,6 +198,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Oct 25 – Nov 24'), findsOneWidget);
     expect(button('charts-period-next').onPressed, isNull);
+  });
+
+  testWidgets('RTL: previous sits on the right, the chevrons mirror', (
+    tester,
+  ) async {
+    await _pump(tester, locale: _ar);
+    final prev = tester.getCenter(find.byKey(const Key('charts-period-prev')));
+    final next = tester.getCenter(find.byKey(const Key('charts-period-next')));
+    expect(prev.dx, greaterThan(next.dx));
+    expect(
+      tester.getSize(find.byKey(const Key('charts-period-prev'))).shortestSide,
+      greaterThanOrEqualTo(44),
+    );
+    // Arabic digits in the range, Gregorian month names.
+    expect(find.textContaining('٢٥'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('custom range from the picker is clamped and applied', (
+    tester,
+  ) async {
+    FakeChartPeriodSelection.last = null;
+    await _pump(tester);
+    await tester.tap(find.byKey(const Key('charts-period')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('charts-period-custom')));
+    await tester.pumpAndSettle();
+    // The Material range picker opens; confirm its default range.
+    await tester.tap(find.text(_l(tester).commonActionDone));
+    await tester.pumpAndSettle();
+    final s = FakeChartPeriodSelection.last!;
+    expect(s.preset, ChartPreset.custom);
+    expect(s.customFrom, CivilDate(2026, 10, 25));
+    // This cycle ends on 24 Nov, after today: the picker opens cut at today.
+    expect(s.customTo, chartsToday);
   });
 
   testWidgets('cash flow caption and bars follow the bucket size', (

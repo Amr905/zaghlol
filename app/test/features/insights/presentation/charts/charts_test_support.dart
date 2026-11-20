@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
 import 'package:zaghlol/features/budget/presentation/budget_providers_ui.dart';
-import 'package:zaghlol/features/insights/application/chart_period_providers.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol/features/insights/domain/chart_period_selection.dart';
 import 'package:zaghlol/features/insights/presentation/chart_explain_providers.dart';

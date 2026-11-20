@@ -140,18 +140,7 @@ Future<void> showChartPeriodSheet(BuildContext context, WidgetRef ref) async {
             ChartPeriodLimits.earliest.day,
           ),
           lastDate: DateTime(today.year, today.month, today.day),
-          initialDateRange: DateTimeRange(
-            start: DateTime(
-              resolved.period.from.year,
-              resolved.period.from.month,
-              resolved.period.from.day,
-            ),
-            end: DateTime(
-              resolved.period.to.year,
-              resolved.period.to.month,
-              resolved.period.to.day,
-            ),
-          ),
+          initialDateRange: _initialRange(resolved.period, today),
           helpText: l.transactionsListRangeTitle,
           saveText: l.commonActionDone,
         );
@@ -163,6 +152,17 @@ Future<void> showChartPeriodSheet(BuildContext context, WidgetRef ref) async {
   if (picked != null) {
     await ref.read(chartPeriodSelectionProvider.notifier).select(picked);
   }
+}
+
+/// What the picker opens on: the current period, cut at [today] (the picker
+/// refuses a range that ends after its last date).
+DateTimeRange _initialRange(ChartPeriod period, CivilDate today) {
+  final to = period.to > today ? today : period.to;
+  final from = period.from > to ? to : period.from;
+  return DateTimeRange(
+    start: DateTime(from.year, from.month, from.day),
+    end: DateTime(to.year, to.month, to.day),
+  );
 }
 
 /// The custom selection for a picked [range]: never after [today], and the
