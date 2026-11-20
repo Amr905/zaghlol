@@ -5,8 +5,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- T-201: the in-process OpenBao stub (OpenBaoStub) is a Kestrel server over TLS. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- T-182 design note section 8: no test support in production assemblies. -->
     <Compile Include="..\Shared\TestSupportExclusion.cs" Link="Shared\TestSupportExclusion.cs" />
+    <!-- T-201: the worker binary against the OpenBao stub, after the T-200 migration. -->
+    <Compile Include="..\Shared\FileKmsKeySet.cs" Link="Shared\FileKmsKeySet.cs" />
+    <Compile Include="..\Shared\OpenBaoStub.cs" Link="Shared\OpenBaoStub.cs" />
+    <Compile Include="..\Shared\OpenBaoTestBed.cs" Link="Shared\OpenBaoTestBed.cs" />
+    <None Include="..\..\deploy\openbao\setup.sh" Link="openbao\setup.sh" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

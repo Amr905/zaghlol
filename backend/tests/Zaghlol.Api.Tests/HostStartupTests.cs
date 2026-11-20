@@ -17,7 +17,7 @@ public class HostStartupTests
     public void TheApiRefusesToStartWithTheLocalKmsOutsideDevelopment(string environment)
     {
         using var kms = FakeKms.CreateDefault();
-        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+        WebApplicationFactory<Program> Factory() => new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment(environment);
             builder.UseSetting("ConnectionStrings:App", Unreachable);
@@ -31,7 +31,7 @@ public class HostStartupTests
             }
         });
 
-        var error = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
+        var error = ApiStartRefusal.Expect(Factory, static f => f.CreateClient());
 
         Assert.Contains(Chain(error), e => e is KmsConfigurationException && e.Message.Contains("Development and Testing", StringComparison.Ordinal));
     }
@@ -39,13 +39,13 @@ public class HostStartupTests
     [Fact]
     public void TheApiRefusesToStartWithoutAKeyRing()
     {
-        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+        static WebApplicationFactory<Program> Factory() => new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting("ConnectionStrings:App", Unreachable);
             builder.UseSetting("ConnectionStrings:Admin", Unreachable);
         });
 
-        var error = Assert.ThrowsAny<Exception>(() => factory.CreateClient());
+        var error = ApiStartRefusal.Expect(Factory, static f => f.CreateClient());
 
         Assert.Contains(Chain(error), e => e is KmsConfigurationException);
     }

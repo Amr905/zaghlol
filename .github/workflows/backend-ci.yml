@@ -70,6 +70,35 @@ jobs:
           path: test-results/*.trx
           if-no-files-found: ignore
 
+  # T-201: the OpenBao Transit KMS adapter against a real OpenBao with the production configuration (raft, static seal,
+  # TLS, audit), set up by backend/deploy/openbao/setup.sh and migrated from T-200 File keys; restart, seal and stop phases.
+  openbao-live:
+    name: OpenBao Transit KMS (live)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # TODO(Lead): pin the digest (ghcr.io/openbao/openbao:2.7.2@sha256:...); ghcr.io is not reachable from the build
+      # environment, so only the tag is pinned. Keep in step with backend/deploy/openbao/docker-compose.openbao.yml.
+      OPENBAO_IMAGE: ghcr.io/openbao/openbao:2.7.2
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build
+        working-directory: backend
+        run: |
+          dotnet build Zaghlol.sln -c Release || { echo "::error title=dotnet build::Build failed."; exit 1; }
+
+      - name: Pull OpenBao
+        run: docker pull "$OPENBAO_IMAGE"
+
+      - name: OpenBao live tests (start, setup, import, restart, seal, stop)
+        run: |
+          bash backend/tools/openbao-live.sh || { echo "::error title=OpenBao live::The OpenBao live tests failed; see the step log."; exit 1; }
+
   openapi-lint:
     name: OpenAPI lint (Spectral)
     runs-on: ubuntu-latest
