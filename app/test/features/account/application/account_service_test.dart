@@ -21,6 +21,10 @@ const _jws = 'eyJhbGciOiJFUzI1NiJ9.eyJzeW50aGV0aWMiOnRydWV9.c2ln';
 final class _Tokens implements IdTokenSource {
   final List<String> hashed = [];
   Object? error;
+  int signOuts = 0;
+  @override
+  Future<void> signOut() async => signOuts++;
+
   @override
   Future<ProviderCredential> obtain(
     SignInRequestProvider provider, {
@@ -125,6 +129,32 @@ void main() {
         expect(r.tokens.hashed[i], isNot(raws[i]));
       }
     });
+  });
+
+  group('FU-189', () {
+    test('signOut also signs the Google session out (189c)', () async {
+      final r = _Rig();
+      r.backend.onSignIn = (req, n) async => _ok(r.h, n);
+      await r.service.signIn(SignInRequestProvider.google);
+      r.h.backend.onSignOut = (n) async =>
+          throw BackendFailure(BackendFailureKind.offline);
+      await r.service.signOut();
+      expect(r.tokens.signOuts, 1);
+    });
+
+    test(
+      'linkedGold rejects an acct whose sub is another install (189d)',
+      () async {
+        final r = _Rig();
+        r.backend.onSignIn = (req, n) async => _ok(r.h, n);
+        await r.service.signIn(SignInRequestProvider.google);
+        expect(await r.service.linkedGold(), isTrue);
+        r.h.store.values[BackendStateKeys.entitlementToken] = utf8.encode(
+          r.h.token(entClaims(sub: installB, iatMs: t0, acct: 'acct-1')),
+        );
+        expect(await r.service.linkedGold(), isFalse);
+      },
+    );
   });
 
   group('outcomes', () {

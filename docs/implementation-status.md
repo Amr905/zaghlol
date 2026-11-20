@@ -679,7 +679,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-164a | native | T-044 SMS revocation kills the process, so onPermissionChanged only via next-start getCapabilities; note in AC map | capture/CaptureRuntime.kt:296-301 | none | OPEN |
 | FU-164b | native | T-044 detach() drops pending callbacks silently; add comment | capture/UiPermissions.kt:58 | none | OPEN |
 | FU-164c | native | T-044 POST_NOTIFICATIONS request needs an owner task | capture/UiPermissions.kt | none (unowned) | OPEN |
-| FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | OPEN |
+| FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | FIXED (batch 51): active with no entitlement is rejected after 3 tries |
 | FU-165b | core | T-145 uncaught PlatformException from _store.complete / _seats.prove in _onUpdates/_attempt | gold/application/purchase.dart:84,163 | none | OBSOLETE (batch 51): PlatformException caught around complete/prove |
 | FU-165c | core | T-145 restore proof.token!/keyId!/assertion! TypeError on incomplete proof | gold/application/restore.dart:216,235 | none | OBSOLETE (batch 51): restore no longer force-unwraps proof fields |
 | FU-165d | core | T-145 no native wake-up: purchase retry only if user opens app within 3 days; needs purchase-retry-worker and PO call | gold/application/purchase.dart | PO | OPEN |
@@ -694,7 +694,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-168b | core | T-152 icloudBackupDestinationProvider still null; add ICloudBackupDestination mapping uploaded to confirmed | backup/application/schedule_providers.dart:41 | none | OBSOLETE (batch 51): icloudBackupDestinationProvider maps ICloudBackupDestination on iOS |
 | FU-168c | core | T-152 backupAppVersionProvider writes 0.0.0 into backup headers; bind to package_info | backup/application/schedule_providers.dart:39 | none | OBSOLETE (batch 51): bound to kClientAppVersion |
 | FU-168d | core | T-152 isScheduleDue: lastSuccess in the future (clock moved back) means never due | backup/application/schedule.dart:83-100 | none | OBSOLETE (batch 51): future lastSuccess is treated as due |
-| FU-168e | core | T-152 WorkManager/BGProcessing binding, alert sink, reminder keys are inert seams | backup/application/schedule.dart | none | OPEN |
+| FU-168e | core | T-152 WorkManager/BGProcessing binding, alert sink, reminder keys are inert seams | backup/application/schedule.dart | none | OPEN (WorkManager/BGProcessing binding is native code; alert sink already bound) |
 | FU-169a | ui | T-107 locked previews shown to Gold users | insights/presentation/charts/charts_screen.dart:131 | none | CLOSED (decideChart(...).allowed skips the lock card) |
 | FU-169b | ui | T-107 percent computed through double (net*100/income).round() | insights/presentation/charts/chart_bodies.dart:59 | none | OPEN |
 | FU-170a | ui | T-108 essential set follows the bucket, so user-made needs category becomes essential (document) | insights/application/chart_explain_providers.dart:34 | none | OPEN |
@@ -734,9 +734,9 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-188b | ui | T-153 restore pause/resume/resyncCatalog no-ops (restore race with capture) | backup/presentation/backup_ports.dart:237-253 | none | CLOSED (WIRE-SVC wired the pause gate, FU-194) |
 | FU-188c | ui | T-153 old-backup deletion after passphrase change not in UI; needs owner confirm | backup/presentation | none | OPEN |
 | FU-189a | core | T-147 S-69 reachable (opener override and Settings entry) | app/app_navigation.dart:98 | none | CLOSED (goldSignInOpenerOverride wired) |
-| FU-189b | core | T-147 Drive authorizer GoogleSignIn.initialize without nonce can race the sign-in ID token (fails closed) | account/application/id_token_source.dart:128-150; backup/data/drive_auth.dart:51-63 | none | OPEN |
-| FU-189c | core | T-147 signOut never calls GoogleSignIn.signOut | account/application/account_service.dart:209 | none | OPEN |
-| FU-189d | core | T-147 AccountStatus.linkedGold reads claims.acct without sub==installId check (wording only) | account/application/account_providers.dart:95-101 | none | OBSOLETE (batch 51): cachedClaims already verifies sub == this install (wording only) |
+| FU-189b | core | T-147 Drive authorizer GoogleSignIn.initialize without nonce can race the sign-in ID token (fails closed) | account/application/id_token_source.dart:128-150; backup/data/drive_auth.dart:51-63 | none | FIXED (batch 51): shared GoogleSignInGate serializes sign-in/Drive; Drive re-initializes after a nonce session |
+| FU-189c | core | T-147 signOut never calls GoogleSignIn.signOut | account/application/account_service.dart:209 | none | FIXED (batch 51): signOut calls IdTokenSource.signOut -> GoogleSignIn.signOut |
+| FU-189d | core | T-147 AccountStatus.linkedGold reads claims.acct without sub==installId check (wording only) | account/application/account_providers.dart:95-101 | none | FIXED (batch 51): AccountService.linkedGold checks sub == installId; test added |
 | FU-190a | parsing | T-164 paste field has no autocorrect/enableSuggestions off | capture/presentation/template_builder_screen.dart | none | OPEN |
 | FU-190b | parsing | T-164 unsalted SHA-256 hash; pipeline registration, re-parse hook, route unwired | capture/application/template_builder.dart | none | CLOSED (re-parse hook wired in WIRE-SVC; hash as the task asks) |
 | FU-191a | native | T-160 iOS OCR path check allowed only NSHomeDirectory, spool in App Group | ios/Runner/Platform/OCR/OcrHost.swift:141,193 | none | CLOSED (FU-198, batch 20) |
@@ -758,16 +758,16 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-202a | core | T-166 failing step re-runs destructive resume on every launch (major) | security/application/delete_everything.dart:203-213 | none | CLOSED (capped, fix round batch 20) |
 | FU-202b | core | T-166 iOS wipe keeps in-process caches (cipher key, Guard snapshot) | ios/Runner/Platform/Capture/IosCaptureHost.swift:285 | none | CLOSED (caches dropped, batch 23 FU-native) |
 | FU-202c | core | T-166 widgets keep last figure after wipe | IosCaptureHost.swift:290 | none | CLOSED (reloadAllTimelines) |
-| FU-202d | core | T-166 Android wipe deletes the marker during native clear (acceptable; optionally skip wipe_pending) | android capture wipe | none | OPEN |
+| FU-202d | core | T-166 Android wipe deletes the marker during native clear (acceptable; optionally skip wipe_pending) | android capture wipe | none | OPEN (needs a Kotlin change in LocalDataWiper, not testable without an Android build) |
 | FU-202e | core | T-166 privacyDeleteBackupsKept and privacyDeleteFailed missing from copy deck | docs/02-design/copy-deck.md | PO (copy) | OPEN |
 | FU-202f | core | T-166 full device sandbox scan and seat-key element-1 check not run | docs/05-reviews | device | OPEN |
 | FU-202g | core | T-166 WipeMarker writes atomically (temp, flush, rename) | security/application/delete_everything.dart:123-130 | none | CLOSED (D-1, atomic write) |
-| FU-202h | core | T-166 marker read I/O error is never counted or dropped (harmless) | security/application/delete_everything.dart:237 | none | OPEN |
+| FU-202h | core | T-166 marker read I/O error is never counted or dropped (harmless) | security/application/delete_everything.dart:237 | none | OBSOLETE (batch 51): unreadable marker is counted and dropped at maxResumes, tested in delete_everything_test |
 | FU-203a | core | T-092 _dismissedFx uses payload LIKE '%"id"%' scan | transfers/application (TransferPairingUseCase._dismissedFx) | none | OBSOLETE (batch 51): LIKE scans only dismissed fx-suggestion rows, a small bounded set |
 | FU-204a | core | T-100 duplicate/weekly/backup alerts not instantiated anywhere | notifications/application/notification_providers.dart:267 | none | CLOSED (providers wired, WIRE-2) |
 | FU-204b | core | T-100 detector not restricted to POS channel (rule as implemented) | notifications/domain | none | CLOSED (rule as implemented, accepted) |
 | FU-204c | core | T-100 first launch runs the weekly summary at once; not anchored to a weekday | notifications/application/notification_providers.dart:256 | none | OBSOLETE (batch 51): weekly summary is Friday-anchored (PO WEEKLY-FRIDAY) |
-| FU-204d | core | T-100 weekly-summary category names read once when provider is built | notifications/application/notification_providers.dart:221-235 | none | OPEN |
+| FU-204d | core | T-100 weekly-summary category names read once when provider is built | notifications/application/notification_providers.dart:221-235 | none | OBSOLETE (batch 51): run path invalidates the alert provider; existing FU-204d test covers rename |
 | FU-205a | ui | T-117 Share channel zaghlol/share had no native implementation (major) | share_cards/share_providers.dart:38; ShareImageRegistration.kt; ShareImageHost.swift | none | CLOSED (native hosts added, WIRE-3) |
 | FU-205b | ui | T-117 plaintext share PNG left in tmp/cache after a crash | ShareImageRegistration.kt:55,73 | none | CLOSED (Android sweep at start, ShareImageRegistration.kt); iOS tmp sweep still open |
 | FU-205c | ui | T-117 iOS share sheet: result never called if present does not complete | ios/Runner/ShareImageHost.swift:56 | none | OPEN |
@@ -815,7 +815,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-233d | backend | T-135 null vault.OpenAsync deletes account with no record | backend/.../AccountLifecycleService.cs:69 | none | OPEN |
 | FU-233e | backend | T-135 worker requires all Accounts:* config in Production (D1, before go-live) | backend/src/Zaghlol.Workers/Program.cs:64-68 | hosting go-live | OPEN |
 | FU-233f | backend | T-135 PendingAppleRevocationStore.ListDue lacks SKIP LOCKED (one worker replica documented) | backend/.../PendingAppleRevocationStore.cs:14-18 | hosting | OPEN |
-| FU-234a | core | T-167 percent hand-assembled with Latin % in zakah screen (Z3) | zakah/presentation/zakah_screen.dart:541 | none | OPEN |
+| FU-234a | core | T-167 percent hand-assembled with Latin % in zakah screen (Z3) | zakah/presentation/zakah_screen.dart:541 | none | FIXED (batch 51): uses formatBp (digit-mode percent sign); zakah goldens change, regenerate in CI |
 | FU-234b | core | T-167 unmappable lot dropped silently from nisab test (Z5) | zakah/data/zakah_repository.dart | PO | OPEN |
 | FU-234c | core | T-167 "scholar list" does not match what ships (debts, zakatable flag) (Z2 major) | docs/04-tasks/tasks/T-167.md | none | CLOSED (fix round batch 25) |
 | FU-235a | ui | T-168 "debts deducted" claim in How-it's-calculated (Z1 major) | zakah/presentation/zakah_screen.dart:558 | none | CLOSED (copy fixed, batch 25) |

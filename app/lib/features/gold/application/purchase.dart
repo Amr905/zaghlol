@@ -44,6 +44,10 @@ const Duration pendingPoll = Duration(minutes: 15);
 
 /// An outbox entry still unverified after this long is dropped (the store has
 /// long since refunded or finished it).
+/// Verify answers of `active` without any entitlement tolerated before the
+/// entry is rejected (FU-165a).
+const int maxNoEntitlementAttempts = 3;
+
 const Duration outboxMaxAge = Duration(days: 14);
 
 String _b64u(List<int> b) => base64Url.encode(b).replaceAll('=', '');
@@ -265,6 +269,13 @@ final class PurchaseService {
         } else if (gold && r.entitlement != null) {
           await _verified(e, live);
           _emit(const PurchaseGold());
+        } else if (r.entitlement == null &&
+            e.attempts >= maxNoEntitlementAttempts) {
+          // The server keeps answering "active" with no entitlement for
+          // this purchase (a non-holder re-verify): final, not 14 days of
+          // retries.
+          await _reject(e);
+          _emit(const PurchaseInvalid());
         } else {
           // "active" without an entitlement this app could verify: fail
           // closed. No Gold, no acknowledgement; try again later.
