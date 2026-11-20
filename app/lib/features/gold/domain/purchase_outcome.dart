@@ -23,6 +23,15 @@ final class PurchaseSeatHeldElsewhere extends PurchaseOutcome {
   final DateTime? nextMoveAt;
 }
 
+/// FU-165a (batch-18a 145-2): the backend verified the payment (`active`,
+/// `seatHeldElsewhere: false`), but its signed token shows this install holds
+/// no seat for it: a re-verify from a phone that no longer holds it, or onto a
+/// vacant seat. The store purchase is completed; no Gold. T-146 offers
+/// Restore.
+final class PurchaseVerifiedNoSeat extends PurchaseOutcome {
+  const PurchaseVerifiedNoSeat();
+}
+
 /// The store (cash payment, Ask to Buy) or the backend reports the purchase
 /// as pending. No Gold; BR-GOLD-05.
 final class PurchasePending extends PurchaseOutcome {

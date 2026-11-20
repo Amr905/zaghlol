@@ -150,6 +150,34 @@ Future<void> main() async {
         expect(find.text(t.commonActionSignIn), findsOneWidget);
       });
 
+      testWidgets('FU-165a verified without a seat here offers Restore', (
+        tester,
+      ) async {
+        final a = FakeGoldActions();
+        await pumpGold(
+          tester,
+          goldApp(
+            const PaywallScreen(),
+            overrides: goldOverrides(a),
+            lang: lang,
+          ),
+        );
+        a.ctl.add(const PurchaseVerifiedNoSeat());
+        await tester.pump();
+        await tester.pump();
+        expect(find.text(t.goldSeatVerifiedNoSeatTitle), findsOneWidget);
+        expect(find.text(t.goldSeatVerifiedNoSeatBody), findsOneWidget);
+        final restore = find.descendant(
+          of: find.byType(GoldMessageCard),
+          matching: find.text(t.goldSeatRestoreAction),
+        );
+        expect(restore, findsOneWidget);
+        await tester.tap(restore);
+        await tester.pump();
+        await tester.pump();
+        expect(a.restores, 1);
+      });
+
       testWidgets('gold success closes the paywall with true', (tester) async {
         final a = FakeGoldActions();
         bool? result;

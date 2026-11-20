@@ -9217,6 +9217,18 @@ abstract class AppLocalizations {
   /// **'لو عايزه على الموبايل ده، استرجع مشترياتك أو سجّل دخول.'**
   String get goldSeatMovedUserBody;
 
+  /// T · FU-165a: purchase verified, but Gold is not on this phone (re-verify from a phone without the seat)
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعتك اتأكدت، بس الجولد مش على الموبايل ده'**
+  String get goldSeatVerifiedNoSeatTitle;
+
+  /// S · action gold_seat_restoreAction
+  ///
+  /// In ar, this message translates to:
+  /// **'لو عايزه هنا، دوس استرجع مشترياتك.'**
+  String get goldSeatVerifiedNoSeatBody;
+
   /// T · movedBy: support (D-57(f))
   ///
   /// In ar, this message translates to:

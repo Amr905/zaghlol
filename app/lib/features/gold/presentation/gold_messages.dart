@@ -29,6 +29,7 @@ enum GoldMessageKind {
   tampered,
   heldElsewhere,
   heldElsewhereAccount,
+  verifiedNoSeat,
   supportNotice,
 }
 
@@ -60,6 +61,9 @@ final class GoldMessage {
       accountRequired
           ? const GoldMessage(GoldMessageKind.heldElsewhereAccount)
           : GoldMessage(GoldMessageKind.heldElsewhere, nextMoveAt: nextMoveAt),
+    PurchaseVerifiedNoSeat() => const GoldMessage(
+      GoldMessageKind.verifiedNoSeat,
+    ),
     _ => null,
   };
 
@@ -102,7 +106,7 @@ class GoldMessageCard extends ConsumerWidget {
   /// False on S-69 itself, where the sign-in buttons are right below.
   final bool showSignIn;
 
-  /// Offered on `movedUser`.
+  /// Offered on `movedUser` and `verifiedNoSeat`.
   final VoidCallback? onRestore;
 
   /// Offered on attestation help.
@@ -165,6 +169,10 @@ class GoldMessageCard extends ConsumerWidget {
         t.goldSeatAccountRequiredTitle,
         t.goldSeatHeldElsewhereAccount,
       ),
+      GoldMessageKind.verifiedNoSeat => (
+        t.goldSeatVerifiedNoSeatTitle,
+        t.goldSeatVerifiedNoSeatBody,
+      ),
       GoldMessageKind.supportNotice => (
         t.goldSeatSupportNoticeTitle,
         t.goldSeatSupportNoticeBody,
@@ -212,7 +220,8 @@ class GoldMessageCard extends ConsumerWidget {
               spacing: ZSpacing.sm,
               runSpacing: ZSpacing.sm,
               children: [
-                if (message.kind == GoldMessageKind.movedUser &&
+                if ((message.kind == GoldMessageKind.movedUser ||
+                        message.kind == GoldMessageKind.verifiedNoSeat) &&
                     onRestore != null)
                   ZButton(
                     label: t.goldSeatRestoreAction,

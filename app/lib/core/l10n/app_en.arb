@@ -5711,6 +5711,14 @@
   "@goldSeatMovedUserBody": {
     "description": "S · actions gold_seat_restoreAction, common_action_signIn"
   },
+  "goldSeatVerifiedNoSeatTitle": "Payment confirmed, but Gold isn't on this phone",
+  "@goldSeatVerifiedNoSeatTitle": {
+    "description": "T · FU-165a: purchase verified, but Gold is not on this phone (re-verify from a phone without the seat)"
+  },
+  "goldSeatVerifiedNoSeatBody": "To use it here, restore your purchases.",
+  "@goldSeatVerifiedNoSeatBody": {
+    "description": "S · action gold_seat_restoreAction"
+  },
   "goldSeatMovedSupportTitle": "Support moved Gold to another phone",
   "@goldSeatMovedSupportTitle": {
     "description": "T · movedBy: support (D-57(f))"

@@ -549,6 +549,37 @@ final class EntitlementService {
     SignedBody Function(T response) toBody,
   ) => _anchor.run(request, onResponse: (r) => handleBody(toBody(r)));
 
+  /// FU-165a (batch-18a 145-2, backend-api §4.3 `seatHeldElsewhere`): true
+  /// only when [token] proves that this install holds **no** entitling seat,
+  /// so an `active` verify answer carrying it is the backend's final answer
+  /// for a re-verify from a non-holder or onto a vacant seat.
+  ///
+  /// The token must verify against the entitlement keys, name this install
+  /// (R5-1), keep the lifetime rule, lie within its lifetime by trusted time
+  /// (not `tampered`, `hw < graceUntil`, `iat` not in the future) and have a
+  /// status below `paused` in the backend's order (`moved`, `refunded`,
+  /// `expired`, `none`): the token's status is the best of the install's
+  /// purchases, so an active purchase held here would make it `active`,
+  /// `grace` or `paused`. Anything else is false (fail closed). Grants
+  /// nothing and stores nothing.
+  Future<bool> provesNoSeat(String token) async {
+    final c = parseEntitlementToken(token, _keys);
+    if (c == null) return false;
+    final installId = await _backend.installId();
+    if (installId == null || c.sub != installId) return false;
+    if (!const {'moved', 'refunded', 'expired', 'none'}.contains(c.status)) {
+      return false;
+    }
+    if (c.exp > c.iat + 3 * 86400 ||
+        c.graceUntil > c.exp + 4 * 86400 ||
+        c.graceUntil < c.exp) {
+      return false;
+    }
+    final ts = await _time.peek();
+    if (ts == null || ts.tampered) return false;
+    return ts.hw < c.graceUntilMs && c.iatMs <= ts.hw + _iatSlackMs;
+  }
+
   // ---- support notice (R4-7(2), R5-7) ----
 
   Future<bool> hasPendingSupportNotice() async {
