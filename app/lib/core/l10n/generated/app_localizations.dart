@@ -11335,6 +11335,204 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'نفس الأيام من {prev}'**
   String insightsChartsPeriodPrevSameDays(String prev);
+
+  /// S · breakdown screen title
+  ///
+  /// In ar, this message translates to:
+  /// **'صافي ثروتك جه منين؟'**
+  String get networthTitle;
+
+  /// A · hero tap target
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح تفاصيل صافي الثروة'**
+  String get networthOpenA11y;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'حساباتك'**
+  String get networthGroupAccounts;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'أصولك'**
+  String get networthGroupAssets;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'عليك'**
+  String get networthGroupLiabilities;
+
+  /// L · lines with no known balance
+  ///
+  /// In ar, this message translates to:
+  /// **'مش داخلة في الحساب'**
+  String get networthGroupExcluded;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'الصافي'**
+  String get networthNet;
+
+  /// L · source of a line
+  ///
+  /// In ar, this message translates to:
+  /// **'من رسالة البنك · {date}'**
+  String networthSrcReported(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد المتاح من رسالة البنك · {date}'**
+  String networthSrcAvailable(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'محسوب من الحد والمتاح · {date}'**
+  String networthSrcLimitMinusAvailable(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخلته بإيدك · {date}'**
+  String networthSrcUser(String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'محسوب من الحركات بعد رصيد {date}'**
+  String networthSrcComputed(String date);
+
+  /// L · excluded line
+  ///
+  /// In ar, this message translates to:
+  /// **'مش معروف — حط الرصيد'**
+  String get networthSrcUnknown;
+
+  /// L · asset line
+  ///
+  /// In ar, this message translates to:
+  /// **'قيمة أنت حطيتها'**
+  String get networthSrcAsset;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'أقساط لسه متبقية'**
+  String get networthSrcInstallments;
+
+  /// C · stale tag
+  ///
+  /// In ar, this message translates to:
+  /// **'قديم'**
+  String get networthStale;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'حط الرصيد'**
+  String get networthSetBalance;
+
+  /// S · set balance sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'رصيد {name}'**
+  String networthSheetTitle(String name);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد دلوقتي'**
+  String get networthSheetAmount;
+
+  /// L · card
+  ///
+  /// In ar, this message translates to:
+  /// **'المستحق عليك دلوقتي'**
+  String get networthSheetAmountOwed;
+
+  /// H
+  ///
+  /// In ar, this message translates to:
+  /// **'هنحسب من الرقم ده على الحركات الجاية.'**
+  String get networthSheetHint;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ'**
+  String get networthSheetSave;
+
+  /// E
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب مبلغ صحيح'**
+  String get networthSheetInvalid;
+
+  /// E
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفناش نحفظ الرصيد'**
+  String get networthSheetFailed;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'الأصول والأقساط ضمن دهب'**
+  String get networthFreeNote;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش أرصدة تتحسب'**
+  String get networthEmpty;
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح حركات {name}'**
+  String networthOpenBankA11y(String name);
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}، {source}'**
+  String networthLineA11y(String name, String source);
+
+  /// L · card with no limit
+  ///
+  /// In ar, this message translates to:
+  /// **'مش معروف — حط الحد أو الرصيد'**
+  String get networthSrcUnknownCard;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'عدّل الرصيد'**
+  String get networthEdit;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'امسح الرصيد اللي حطيته'**
+  String get networthClear;
+
+  /// C
+  ///
+  /// In ar, this message translates to:
+  /// **'مش شامل كل الحسابات'**
+  String get networthBankPartial;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'المستحق عليك'**
+  String get networthCardOwed;
 }
 
 class _AppLocalizationsDelegate

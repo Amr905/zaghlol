@@ -40,6 +40,7 @@ import '../features/transfers/presentation/assign_sheet.dart';
 import '../features/transfers/presentation/link_transfer_sheet.dart';
 import '../features/transfers/presentation/split_sheet.dart';
 import 'app_config.dart';
+import '../features/wealth/presentation/net_worth_breakdown_screen.dart';
 import 'app_screens.dart';
 import 'home_mascot_slot.dart';
 
@@ -235,6 +236,16 @@ Widget _moneyTab(BuildContext context) => MoneyTab(
   onAddAsset: () => unawaited(_screens(context).addAsset(context)),
   onOpenPrices: () => unawaited(_screens(context).prices(context)),
   onOpenZakah: () => unawaited(_screens(context).zakah(context)),
+  onOpenNetWorth: () => unawaited(
+    openNetWorthBreakdown(
+      context,
+      onOpenTransactions: (ids) {
+        // T-199: a bank or account opens its transactions (S-11).
+        _container(context).read(cardFilterProvider.notifier).setAll(ids);
+        unawaited(context.push(AppRoutes.transactions));
+      },
+    ),
+  ),
 );
 
 Future<void> openCardDetailFor(

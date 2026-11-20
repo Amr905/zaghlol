@@ -7714,4 +7714,120 @@ class AppLocalizationsEn extends AppLocalizations {
   String insightsChartsPeriodPrevSameDays(String prev) {
     return 'the same days of $prev';
   }
+
+  @override
+  String get networthTitle => 'Where your net worth comes from';
+
+  @override
+  String get networthOpenA11y => 'Open the net worth details';
+
+  @override
+  String get networthGroupAccounts => 'Your accounts';
+
+  @override
+  String get networthGroupAssets => 'Your assets';
+
+  @override
+  String get networthGroupLiabilities => 'What you owe';
+
+  @override
+  String get networthGroupExcluded => 'Not counted';
+
+  @override
+  String get networthNet => 'Net';
+
+  @override
+  String networthSrcReported(String date) {
+    return 'Bank message · $date';
+  }
+
+  @override
+  String networthSrcAvailable(String date) {
+    return 'Available balance from the bank message · $date';
+  }
+
+  @override
+  String networthSrcLimitMinusAvailable(String date) {
+    return 'Worked out from limit and available · $date';
+  }
+
+  @override
+  String networthSrcUser(String date) {
+    return 'You entered it · $date';
+  }
+
+  @override
+  String networthSrcComputed(String date) {
+    return 'Worked out from transactions since $date';
+  }
+
+  @override
+  String get networthSrcUnknown => 'Unknown — set the balance';
+
+  @override
+  String get networthSrcAsset => 'Value you entered';
+
+  @override
+  String get networthSrcInstallments => 'Installments left';
+
+  @override
+  String get networthStale => 'Old';
+
+  @override
+  String get networthSetBalance => 'Set balance';
+
+  @override
+  String networthSheetTitle(String name) {
+    return 'Balance of $name';
+  }
+
+  @override
+  String get networthSheetAmount => 'Balance now';
+
+  @override
+  String get networthSheetAmountOwed => 'Amount you owe now';
+
+  @override
+  String get networthSheetHint =>
+      'We will work out from this number as new transactions come in.';
+
+  @override
+  String get networthSheetSave => 'Save';
+
+  @override
+  String get networthSheetInvalid => 'Enter a valid amount';
+
+  @override
+  String get networthSheetFailed => 'Could not save the balance';
+
+  @override
+  String get networthFreeNote => 'Assets and installments come with Gold';
+
+  @override
+  String get networthEmpty => 'No balances to count yet';
+
+  @override
+  String networthOpenBankA11y(String name) {
+    return 'Open the transactions of $name';
+  }
+
+  @override
+  String networthLineA11y(String name, String source) {
+    return '$name, $source';
+  }
+
+  @override
+  String get networthSrcUnknownCard => 'Unknown — set the limit or the balance';
+
+  @override
+  String get networthEdit => 'Edit balance';
+
+  @override
+  String get networthClear => 'Remove the balance I entered';
+
+  @override
+  String get networthBankPartial => 'Not all accounts';
+
+  @override
+  String get networthCardOwed => 'Amount you owe';
 }

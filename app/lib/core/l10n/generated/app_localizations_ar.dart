@@ -7871,4 +7871,119 @@ class AppLocalizationsAr extends AppLocalizations {
   String insightsChartsPeriodPrevSameDays(String prev) {
     return 'نفس الأيام من $prev';
   }
+
+  @override
+  String get networthTitle => 'صافي ثروتك جه منين؟';
+
+  @override
+  String get networthOpenA11y => 'افتح تفاصيل صافي الثروة';
+
+  @override
+  String get networthGroupAccounts => 'حساباتك';
+
+  @override
+  String get networthGroupAssets => 'أصولك';
+
+  @override
+  String get networthGroupLiabilities => 'عليك';
+
+  @override
+  String get networthGroupExcluded => 'مش داخلة في الحساب';
+
+  @override
+  String get networthNet => 'الصافي';
+
+  @override
+  String networthSrcReported(String date) {
+    return 'من رسالة البنك · $date';
+  }
+
+  @override
+  String networthSrcAvailable(String date) {
+    return 'الرصيد المتاح من رسالة البنك · $date';
+  }
+
+  @override
+  String networthSrcLimitMinusAvailable(String date) {
+    return 'محسوب من الحد والمتاح · $date';
+  }
+
+  @override
+  String networthSrcUser(String date) {
+    return 'أدخلته بإيدك · $date';
+  }
+
+  @override
+  String networthSrcComputed(String date) {
+    return 'محسوب من الحركات بعد رصيد $date';
+  }
+
+  @override
+  String get networthSrcUnknown => 'مش معروف — حط الرصيد';
+
+  @override
+  String get networthSrcAsset => 'قيمة أنت حطيتها';
+
+  @override
+  String get networthSrcInstallments => 'أقساط لسه متبقية';
+
+  @override
+  String get networthStale => 'قديم';
+
+  @override
+  String get networthSetBalance => 'حط الرصيد';
+
+  @override
+  String networthSheetTitle(String name) {
+    return 'رصيد $name';
+  }
+
+  @override
+  String get networthSheetAmount => 'الرصيد دلوقتي';
+
+  @override
+  String get networthSheetAmountOwed => 'المستحق عليك دلوقتي';
+
+  @override
+  String get networthSheetHint => 'هنحسب من الرقم ده على الحركات الجاية.';
+
+  @override
+  String get networthSheetSave => 'احفظ';
+
+  @override
+  String get networthSheetInvalid => 'اكتب مبلغ صحيح';
+
+  @override
+  String get networthSheetFailed => 'معرفناش نحفظ الرصيد';
+
+  @override
+  String get networthFreeNote => 'الأصول والأقساط ضمن دهب';
+
+  @override
+  String get networthEmpty => 'لسه مفيش أرصدة تتحسب';
+
+  @override
+  String networthOpenBankA11y(String name) {
+    return 'افتح حركات $name';
+  }
+
+  @override
+  String networthLineA11y(String name, String source) {
+    return '$name، $source';
+  }
+
+  @override
+  String get networthSrcUnknownCard => 'مش معروف — حط الحد أو الرصيد';
+
+  @override
+  String get networthEdit => 'عدّل الرصيد';
+
+  @override
+  String get networthClear => 'امسح الرصيد اللي حطيته';
+
+  @override
+  String get networthBankPartial => 'مش شامل كل الحسابات';
+
+  @override
+  String get networthCardOwed => 'المستحق عليك';
 }

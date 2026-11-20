@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_initializing_formals
+
 // T-045: the Drift-backed [AccountsRepository]. Validates input before it
 // reaches SQL, lets the schema's unique indexes pick the one winner of a
 // concurrent create, runs merge in one database transaction, and surfaces
@@ -10,6 +12,8 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../../core/db/daos/accounts_dao.dart';
+import '../../../core/db/daos/settings_dao.dart';
+import '../../../core/settings/settings_keys.dart' as keys;
 import '../../../core/db/db_errors.dart';
 import '../../../core/db/money_columns.dart';
 import '../../transactions/data/drift_transaction_repository.dart'
@@ -28,11 +32,21 @@ const int maxInstitutionRunes = 32;
 const int _maxMergeHops = 8;
 
 class DriftAccountsRepository implements AccountsRepository {
-  DriftAccountsRepository(this._dao, {Clock? clock, IdGenerator? newId})
-    : _now = clock ?? DateTime.now,
-      _newId = newId ?? newUuidV4;
+  DriftAccountsRepository(
+    this._dao, {
+    Clock? clock,
+    IdGenerator? newId,
+    SettingsDao? settings,
+  }) : _settings = settings,
+       _now = clock ?? DateTime.now,
+       _newId = newId ?? newUuidV4;
 
   final AccountsDao _dao;
+
+  /// T-199: moves the user-entered balances with a merge (same transaction).
+  /// Optional because only a merge needs it; the one merge caller (the app
+  /// provider) passes it, the ingest factory never merges.
+  final SettingsDao? _settings;
   final Clock _now;
   final IdGenerator _newId;
 
@@ -272,6 +286,15 @@ class DriftAccountsRepository implements AccountsRepository {
           await _dao.moveBalance(sourceId, targetId, b.currency);
         } else {
           await _dao.deleteBalance(sourceId, b.currency);
+        }
+      }
+      final settings = _settings;
+      if (settings != null) {
+        final key = keys.Settings.openingBalances;
+        final before = key.parse(await settings.read(key.name));
+        final after = before.moveAccount(sourceId, targetId);
+        if (!identical(before, after)) {
+          await settings.write(key.name, key.format(after), at: now);
         }
       }
       final changed = await _dao.updateById(

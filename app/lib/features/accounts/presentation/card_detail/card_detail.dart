@@ -4,6 +4,12 @@
 // multi-currency account switches every section with currency chips
 // (FR-ACC-06). All numbers are per currency; amounts are ink, never red.
 
+import '../../../wealth/data/net_worth_repository.dart' show NetWorthBreakdown;
+import '../../../wealth/presentation/balance_source_text.dart';
+import '../../../wealth/presentation/net_worth_breakdown_providers.dart';
+import '../../../wealth/presentation/net_worth_breakdown_screen.dart'
+    show showSetBalanceSheet;
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -236,6 +242,11 @@ class _State extends ConsumerState<CardDetailScreen> {
               .firstWhere((_) => true, orElse: () => null),
           cur: cur,
           fmt: fmt,
+          line: _lineOf(
+            ref.watch(netWorthBreakdownProvider).value,
+            account.id,
+            cur,
+          ),
         ),
         const SizedBox(height: ZSpacing.lg),
         ...data.when(
@@ -464,6 +475,14 @@ class _State extends ConsumerState<CardDetailScreen> {
   }
 }
 
+BreakdownLine? _lineOf(NetWorthBreakdown? b, String accountId, Currency cur) {
+  if (b == null) return null;
+  for (final l in b.lines) {
+    if (l.refId == accountId && l.unit == cur.code && l.isAccount) return l;
+  }
+  return null;
+}
+
 class _Header extends StatelessWidget {
   const _Header({
     this.waiting = false,
@@ -471,7 +490,11 @@ class _Header extends StatelessWidget {
     required this.balance,
     required this.cur,
     required this.fmt,
+    this.line,
   });
+
+  /// T-199: the effective balance of this account in [cur] and its source.
+  final BreakdownLine? line;
 
   final bool waiting;
   final Account account;
@@ -589,7 +612,8 @@ class _Header extends StatelessWidget {
             style: ZType.bodySmall.copyWith(color: c.textMuted),
           ),
         );
-    } else if (balance?.balance != null) {
+    } else if (line?.amount != null || balance?.balance != null) {
+      final shown = line?.amount ?? balance!.balance!;
       lines
         ..add(
           Text(
@@ -599,24 +623,108 @@ class _Header extends StatelessWidget {
         )
         ..add(
           ZMoneyText(
-            text: fmt.money(balance!.balance!),
+            text: fmt.money(shown),
             size: ZMoneySize.title,
             kind: ZMoneyKind.neutral,
           ),
         )
         ..add(
           Text(
-            l.accountsDetailAsOf(
-              ZDateFormat.date(balance!.asOf, fmt.lang, fmt.digits),
-            ),
+            line != null
+                ? balanceSourceText(
+                    l,
+                    line!,
+                    lang: fmt.lang,
+                    digits: fmt.digits,
+                  )
+                : l.accountsDetailAsOf(
+                    ZDateFormat.date(balance!.asOf, fmt.lang, fmt.digits),
+                  ),
             style: ZType.caption.copyWith(color: c.textMuted),
           ),
         );
     } else {
+      lines
+        ..add(
+          Text(
+            l.accountsDetailBalanceUnknown,
+            style: ZType.body.copyWith(color: c.textMuted),
+          ),
+        )
+        ..add(
+          Consumer(
+            builder: (ctx, ref, _) => TextButton(
+              key: const Key('card-set-balance'),
+              onPressed: () => showSetBalanceSheet(
+                ctx,
+                ref,
+                accountId: account.id,
+                name: account.label,
+                currency: cur,
+                isLiability:
+                    account.kind == AccountKind.credit ||
+                    account.kind == AccountKind.bnpl,
+              ),
+              child: Text(l.networthSetBalance),
+            ),
+          ),
+        );
+    }
+    final counted = line;
+    final isCard =
+        account.kind == AccountKind.credit || account.kind == AccountKind.bnpl;
+    if (isCard &&
+        counted?.amount != null &&
+        limit != null &&
+        available != null) {
+      // The counted owed amount (limit minus available, plus what was spent
+      // and paid since), with where it comes from.
+      lines
+        ..add(const SizedBox(height: ZSpacing.md))
+        ..add(
+          Row(
+            children: [
+              Text(
+                l.networthCardOwed,
+                style: ZType.body.copyWith(color: c.textMuted),
+              ),
+              const SizedBox(width: ZSpacing.md),
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: ZMoneyText(
+                    text: fmt.money(counted!.amount!),
+                    size: ZMoneySize.body,
+                    kind: ZMoneyKind.neutral,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+        ..add(
+          Text(
+            balanceSourceText(l, counted, lang: fmt.lang, digits: fmt.digits),
+            style: ZType.caption.copyWith(color: c.textMuted),
+          ),
+        );
+    }
+    if (counted?.basis == AnchorBasis.userEntered) {
       lines.add(
-        Text(
-          l.accountsDetailBalanceUnknown,
-          style: ZType.body.copyWith(color: c.textMuted),
+        Consumer(
+          builder: (ctx, ref, _) => TextButton(
+            key: const Key('card-edit-balance'),
+            onPressed: () => showSetBalanceSheet(
+              ctx,
+              ref,
+              accountId: account.id,
+              name: account.label,
+              currency: cur,
+              isLiability: isCard,
+              canClear: true,
+            ),
+            child: Text(l.networthEdit),
+          ),
         ),
       );
     }

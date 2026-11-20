@@ -10632,5 +10632,180 @@
         "type": "String"
       }
     }
+  },
+  "networthTitle": "صافي ثروتك جه منين؟",
+  "@networthTitle": {
+    "description": "S · breakdown screen title"
+  },
+  "networthOpenA11y": "افتح تفاصيل صافي الثروة",
+  "@networthOpenA11y": {
+    "description": "A · hero tap target"
+  },
+  "networthGroupAccounts": "حساباتك",
+  "@networthGroupAccounts": {
+    "description": "L"
+  },
+  "networthGroupAssets": "أصولك",
+  "@networthGroupAssets": {
+    "description": "L"
+  },
+  "networthGroupLiabilities": "عليك",
+  "@networthGroupLiabilities": {
+    "description": "L"
+  },
+  "networthGroupExcluded": "مش داخلة في الحساب",
+  "@networthGroupExcluded": {
+    "description": "L · lines with no known balance"
+  },
+  "networthNet": "الصافي",
+  "@networthNet": {
+    "description": "L"
+  },
+  "networthSrcReported": "من رسالة البنك · {date}",
+  "@networthSrcReported": {
+    "description": "L · source of a line",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcAvailable": "الرصيد المتاح من رسالة البنك · {date}",
+  "@networthSrcAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcLimitMinusAvailable": "محسوب من الحد والمتاح · {date}",
+  "@networthSrcLimitMinusAvailable": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUser": "أدخلته بإيدك · {date}",
+  "@networthSrcUser": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcComputed": "محسوب من الحركات بعد رصيد {date}",
+  "@networthSrcComputed": {
+    "description": "L",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUnknown": "مش معروف — حط الرصيد",
+  "@networthSrcUnknown": {
+    "description": "L · excluded line"
+  },
+  "networthSrcAsset": "قيمة أنت حطيتها",
+  "@networthSrcAsset": {
+    "description": "L · asset line"
+  },
+  "networthSrcInstallments": "أقساط لسه متبقية",
+  "@networthSrcInstallments": {
+    "description": "L"
+  },
+  "networthStale": "قديم",
+  "@networthStale": {
+    "description": "C · stale tag"
+  },
+  "networthSetBalance": "حط الرصيد",
+  "@networthSetBalance": {
+    "description": "B"
+  },
+  "networthSheetTitle": "رصيد {name}",
+  "@networthSheetTitle": {
+    "description": "S · set balance sheet",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSheetAmount": "الرصيد دلوقتي",
+  "@networthSheetAmount": {
+    "description": "L"
+  },
+  "networthSheetAmountOwed": "المستحق عليك دلوقتي",
+  "@networthSheetAmountOwed": {
+    "description": "L · card"
+  },
+  "networthSheetHint": "هنحسب من الرقم ده على الحركات الجاية.",
+  "@networthSheetHint": {
+    "description": "H"
+  },
+  "networthSheetSave": "احفظ",
+  "@networthSheetSave": {
+    "description": "B"
+  },
+  "networthSheetInvalid": "اكتب مبلغ صحيح",
+  "@networthSheetInvalid": {
+    "description": "E"
+  },
+  "networthSheetFailed": "معرفناش نحفظ الرصيد",
+  "@networthSheetFailed": {
+    "description": "E"
+  },
+  "networthFreeNote": "الأصول والأقساط ضمن دهب",
+  "@networthFreeNote": {
+    "description": "N"
+  },
+  "networthEmpty": "لسه مفيش أرصدة تتحسب",
+  "@networthEmpty": {
+    "description": "S"
+  },
+  "networthOpenBankA11y": "افتح حركات {name}",
+  "@networthOpenBankA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "networthLineA11y": "{name}، {source}",
+  "@networthLineA11y": {
+    "description": "A",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "networthSrcUnknownCard": "مش معروف — حط الحد أو الرصيد",
+  "@networthSrcUnknownCard": {
+    "description": "L · card with no limit"
+  },
+  "networthEdit": "عدّل الرصيد",
+  "@networthEdit": {
+    "description": "B"
+  },
+  "networthClear": "امسح الرصيد اللي حطيته",
+  "@networthClear": {
+    "description": "B"
+  },
+  "networthBankPartial": "مش شامل كل الحسابات",
+  "@networthBankPartial": {
+    "description": "C"
+  },
+  "networthCardOwed": "المستحق عليك",
+  "@networthCardOwed": {
+    "description": "L"
   }
 }

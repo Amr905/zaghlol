@@ -25,7 +25,9 @@ export 'roi/roi_rules.dart';
 export 'transfers/offsets.dart';
 export 'transfers/splits.dart';
 export 'transfers/transfer_matching.dart';
+export 'wealth/balance_rules.dart';
 export 'wealth/net_worth.dart';
+export 'wealth/opening_balances.dart';
 export 'zakah/hijri.dart';
 export 'zakah/zakah_engine.dart';
 
