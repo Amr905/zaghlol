@@ -154,31 +154,34 @@ class DriftTransfersSheetPort implements TransfersSheetPort {
     List<SplitEdit> edits,
     Set<String> removedIds,
   ) async {
-    // Shrinks and removals first so the sum cap never trips mid-way.
-    for (final id in removedIds) {
-      await _reimbursements.removeParticipant(id);
-    }
-    final current = {
-      for (final p in await SplitParticipantsDao(_db).forExpense(expenseId))
-        p.id: p.shareMinor,
-    };
-    final changes =
-        [
-          for (final e in edits)
-            if (e.id != null && current[e.id] != e.shareMinor) e,
-        ]..sort(
-          (a, b) => (a.shareMinor - current[a.id]!).compareTo(
-            b.shareMinor - current[b.id]!,
-          ),
-        );
-    for (final e in changes) {
-      await _reimbursements.updateShare(e.id!, e.shareMinor);
-    }
-    for (final e in edits) {
-      if (e.id == null) {
-        await _reimbursements.addParticipant(expenseId, e.name, e.shareMinor);
+    // One transaction so a mid-way failure leaves the split untouched.
+    await _db.transaction(() async {
+      // Shrinks and removals first so the sum cap never trips mid-way.
+      for (final id in removedIds) {
+        await _reimbursements.removeParticipant(id);
       }
-    }
+      final current = {
+        for (final p in await SplitParticipantsDao(_db).forExpense(expenseId))
+          p.id: p.shareMinor,
+      };
+      final changes =
+          [
+            for (final e in edits)
+              if (e.id != null && current[e.id] != e.shareMinor) e,
+          ]..sort(
+            (a, b) => (a.shareMinor - current[a.id]!).compareTo(
+              b.shareMinor - current[b.id]!,
+            ),
+          );
+      for (final e in changes) {
+        await _reimbursements.updateShare(e.id!, e.shareMinor);
+      }
+      for (final e in edits) {
+        if (e.id == null) {
+          await _reimbursements.addParticipant(expenseId, e.name, e.shareMinor);
+        }
+      }
+    });
   }
 
   // ------------------------------------------------------------- Mode B

@@ -89,7 +89,9 @@ class _AssignSheetState extends ConsumerState<AssignSheet> {
     for (final id in _picked) {
       final m = _parsed(id, d, f);
       if (m == null) return l.transfersSplitErrorShareZero;
-      final room = d.candidates.firstWhere((c) => c.expenseId == id).room;
+      final cand = d.candidates.where((c) => c.expenseId == id).firstOrNull;
+      if (cand == null) return l.transfersSplitErrorShareZero;
+      final room = cand.room;
       if (m.minor > room.minor) return l.transfersAssignErrorExceedsExpense;
       sum += m.minor;
     }

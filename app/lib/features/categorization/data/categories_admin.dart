@@ -266,6 +266,27 @@ class DriftCategoriesAdmin implements CategoriesAdmin {
         ],
         updates: {_db.merchantRules},
       );
+      // Budgets on the archived category: drop those that would collide with
+      // an existing replacement budget (UNIQUE category/currency/period),
+      // re-point the rest.
+      await _db.customUpdate(
+        'DELETE FROM budgets WHERE category_id = ?1 AND EXISTS ('
+        'SELECT 1 FROM budgets b2 WHERE b2.category_id = ?2 '
+        'AND b2.currency = budgets.currency AND b2.period = budgets.period)',
+        variables: [
+          Variable.withString(id),
+          Variable.withString(replacementId),
+        ],
+        updates: {_db.budgets},
+      );
+      await _db.customUpdate(
+        'UPDATE budgets SET category_id = ?1 WHERE category_id = ?2',
+        variables: [
+          Variable.withString(replacementId),
+          Variable.withString(id),
+        ],
+        updates: {_db.budgets},
+      );
       await _dao.setArchived(id, archived: true);
       return moved;
     });
