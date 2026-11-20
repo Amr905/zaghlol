@@ -71,7 +71,12 @@ public class EnvelopeAndHashTests
         {
             var tampered = blob.ToArray();
             tampered[i] ^= 0x01;
-            await Assert.ThrowsAsync<EnvelopeDecryptionException>(async () => await cipher.DecryptAsync(tampered, Context, CancellationToken.None));
+
+            // The key-reference header (length byte and name) may now name an unconfigured key: that is "unavailable", never a
+            // plaintext (T-201 review S1). Every other byte is a decryption failure.
+            var inKeyRef = i >= 1 && i < 2 + blob[1];
+            var error = await Assert.ThrowsAnyAsync<Exception>(async () => await cipher.DecryptAsync(tampered, Context, CancellationToken.None));
+            Assert.True(error is EnvelopeDecryptionException || (inKeyRef && error is KmsUnavailableException), $"byte {i}: {error.GetType().Name}");
         }
 
         foreach (var length in new[] { 0, 1, 2, 10, blob.Length - 1 })
@@ -101,12 +106,13 @@ public class EnvelopeAndHashTests
             Assert.Equal("fake:envelope-2", Encoding.ASCII.GetString(fresh, 2, fresh[1]));
         }
 
-        // Once the old key is dropped from configuration, its envelopes are refused before any KMS call.
+        // Once the old key is dropped from configuration, its envelopes are refused before any KMS call, as "unavailable"
+        // (T-201 review S1): a configuration gap is not proof the blob is unopenable, so callers keep the row.
         kms.PreviousEnvelopeKeyRefs.Clear();
         await using (var services = kms.BuildServices())
         {
             var calls = kms.Calls;
-            await Assert.ThrowsAsync<EnvelopeDecryptionException>(async () =>
+            await Assert.ThrowsAsync<KmsUnavailableException>(async () =>
                 await services.GetRequiredService<IEnvelopeCipher>().DecryptAsync(old, Context, CancellationToken.None));
             Assert.Equal(calls, kms.Calls);
         }

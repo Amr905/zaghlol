@@ -62,10 +62,18 @@ internal sealed class EnvelopeCipher(KmsSettings settings, IDataKeyProvider prov
     public async ValueTask<byte[]> DecryptAsync(ReadOnlyMemory<byte> blob, string context, CancellationToken cancellationToken)
     {
         var aad = AssociatedData(context);
-        if (!TryParse(blob, out var keyRef, out var wrapped, out var nonceOffset)
-            || !settings.EnvelopeDecryptKeyRefs.Contains(keyRef, StringComparer.Ordinal))
+        if (!TryParse(blob, out var keyRef, out var wrapped, out var nonceOffset))
         {
             throw new EnvelopeDecryptionException();
+        }
+
+        // T-201 review S1: a key reference this process isn't configured for is not proof that the blob can't be opened
+        // (e.g. Kms:Envelope:PreviousKeyRefs forgotten at a provider switch). Callers delete rows that fail to decrypt (T-135),
+        // so this is "unavailable": the row is kept and retried, and the metric alerts. No KMS call is made.
+        if (!settings.EnvelopeDecryptKeyRefs.Contains(keyRef, StringComparer.Ordinal))
+        {
+            KmsMetrics.KmsUnavailable("data_key");
+            throw new KmsUnavailableException();
         }
 
         DataKey dataKey;
