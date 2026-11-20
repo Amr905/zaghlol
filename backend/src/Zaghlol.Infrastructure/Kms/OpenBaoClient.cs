@@ -88,7 +88,6 @@ internal sealed class OpenBaoAnswer : IDisposable
     {
         json?.Dispose();
         CryptographicOperations.ZeroMemory(buffer);
-        ArrayPool<byte>.Shared.Return(buffer);
     }
 
     private JsonElement? Object(string name) =>
@@ -251,15 +250,34 @@ internal sealed class OpenBaoClient : IDisposable
                 throw new OpenBaoUnavailableException();
             }
 
-            var buffer = ArrayPool<byte>.Shared.Rent(MaxResponseBytes + 1);
+            // Owned (not pooled) buffers: an answer may hold a data key, and a pooled array could be handed to someone else
+            // while a cancelled read is still unwinding. Grown by doubling up to the cap; each outgrown buffer is zeroed.
+            var buffer = new byte[4096];
             var length = 0;
             try
             {
                 await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-                int read;
-                while (length <= MaxResponseBytes
-                    && (read = await stream.ReadAsync(buffer.AsMemory(length, MaxResponseBytes + 1 - length), cancellationToken).ConfigureAwait(false)) > 0)
+                while (true)
                 {
+                    if (length == buffer.Length)
+                    {
+                        if (buffer.Length > MaxResponseBytes)
+                        {
+                            throw new OpenBaoUnavailableException();
+                        }
+
+                        var larger = new byte[Math.Min(buffer.Length * 2, MaxResponseBytes + 1)];
+                        buffer.AsSpan(0, length).CopyTo(larger);
+                        CryptographicOperations.ZeroMemory(buffer);
+                        buffer = larger;
+                    }
+
+                    var read = await stream.ReadAsync(buffer.AsMemory(length), cancellationToken).ConfigureAwait(false);
+                    if (read == 0)
+                    {
+                        break;
+                    }
+
                     length += read;
                 }
 
@@ -271,7 +289,6 @@ internal sealed class OpenBaoClient : IDisposable
             catch
             {
                 CryptographicOperations.ZeroMemory(buffer);
-                ArrayPool<byte>.Shared.Return(buffer);
                 throw;
             }
 
@@ -296,7 +313,6 @@ internal sealed class OpenBaoClient : IDisposable
             if (content is not null)
             {
                 CryptographicOperations.ZeroMemory(content.AsSpan(0, contentLength));
-                ArrayPool<byte>.Shared.Return(content);
             }
         }
     }
@@ -320,8 +336,7 @@ internal sealed class OpenBaoClient : IDisposable
         }
 
         var length = output.WrittenCount;
-        var buffer = ArrayPool<byte>.Shared.Rent(length);
-        output.WrittenSpan.CopyTo(buffer);
+        var buffer = output.WrittenSpan.ToArray();
 
         // ArrayBufferWriter.Clear zeroes the written bytes.
         output.Clear();

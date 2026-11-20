@@ -183,9 +183,7 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         RequireFullScope();
         var role = Role(keyRef, KeyKind.Signing);
         var info = await ReadKeyAsync(role.TransitName, cancellationToken).ConfigureAwait(false);
-        using var key = info.PublicKey ?? throw new OpenBaoUnavailableException();
-        var q = key.ExportParameters(includePrivateParameters: false).Q;
-        return [0x04, .. q.X!, .. q.Y!];
+        return info.PublicKeyPoint ?? throw new OpenBaoUnavailableException();
     }
 
     public async ValueTask<byte[]> HmacSha256Async(string keyRef, ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
@@ -280,19 +278,15 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (var role in roles.Values.Where(r => scope == KmsScope.Full || r.Kind is KeyKind.Envelope or KeyKind.LegacyEnvelope))
         {
-            KeyInfo info;
             string fingerprint;
             try
             {
-                info = await KmsCall.RunAsync(policy, clock, "public_key", ct => new ValueTask<KeyInfo>(ReadKeyAsync(role.TransitName, ct)), cancellationToken);
-                using (info.PublicKey)
-                {
-                    CheckAttributes(role, info);
-                    fingerprint = role.Kind == KeyKind.Signing
-                        ? Convert.ToHexStringLower(SHA256.HashData(info.PublicKey!.ExportSubjectPublicKeyInfo()))
-                        : Convert.ToHexStringLower(await KmsCall.RunAsync(
-                            policy, clock, "hmac", ct => new ValueTask<byte[]>(TransitHmacAsync(role.TransitName, PinLabel, ct)), cancellationToken));
-                }
+                var info = await KmsCall.RunAsync(policy, clock, "public_key", ct => new ValueTask<KeyInfo>(ReadKeyAsync(role.TransitName, ct)), cancellationToken);
+                CheckAttributes(role, info);
+                fingerprint = role.Kind == KeyKind.Signing
+                    ? info.PublicKeyFingerprint!
+                    : Convert.ToHexStringLower(await KmsCall.RunAsync(
+                        policy, clock, "hmac", ct => new ValueTask<byte[]>(TransitHmacAsync(role.TransitName, PinLabel, ct)), cancellationToken));
             }
             catch (KmsUnavailableException)
             {
@@ -546,7 +540,7 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
 
         if (!string.Equals(info.Type, expected, StringComparison.Ordinal)
             || (role.Kind == KeyKind.Hmac && info.KeySize != 32)
-            || (role.Kind == KeyKind.Signing && info.PublicKey is null))
+            || (role.Kind == KeyKind.Signing && info.PublicKeyPoint is null))
         {
             throw new KmsConfigurationException(KeyTypeMessage);
         }
@@ -639,7 +633,7 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         var keySize = data.TryGetProperty("key_size", out var k) && k.TryGetInt32(out var size) ? size : 0;
         var softDeleted = data.TryGetProperty("soft_deleted", out var sd) && sd.ValueKind == JsonValueKind.True;
 
-        ECDsa? publicKey = null;
+        (byte[] Point, string Fingerprint)? publicKey = null;
         if (type == "ecdsa-p256"
             && data.TryGetProperty("keys", out var keys)
             && keys.ValueKind == JsonValueKind.Object
@@ -652,37 +646,32 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         }
 
         // A missing flag is read as set (fail closed).
-        return new KeyInfo(type, Flag(data, "exportable"), Flag(data, "allow_plaintext_backup"), Flag(data, "deletion_allowed"), softDeleted, latest, keySize, publicKey);
+        return new KeyInfo(type, Flag(data, "exportable"), Flag(data, "allow_plaintext_backup"), Flag(data, "deletion_allowed"), softDeleted, latest, keySize, publicKey?.Point, publicKey?.Fingerprint);
     }
 
-    private static ECDsa ParsePublicKey(string pem)
+    /// <summary>A named P-256 public key in PEM → its X9.63 point and the T-200 fingerprint (SHA-256 of the SPKI).</summary>
+    private static (byte[] Point, string Fingerprint) ParsePublicKey(string pem)
     {
         if (pem.Length > 4096 || !PemEncoding.TryFind(pem, out var fields) || !pem.AsSpan()[fields.Label].SequenceEqual("PUBLIC KEY"))
         {
             throw new OpenBaoUnavailableException();
         }
 
-        var key = ECDsa.Create();
+        using var key = ECDsa.Create();
         try
         {
             key.ImportFromPem(pem);
-            var curve = key.ExportParameters(includePrivateParameters: false).Curve;
-            if (!curve.IsNamed || !string.Equals(curve.Oid?.Value, P256Oid, StringComparison.Ordinal))
+            var parameters = key.ExportParameters(includePrivateParameters: false);
+            if (!parameters.Curve.IsNamed || !string.Equals(parameters.Curve.Oid?.Value, P256Oid, StringComparison.Ordinal))
             {
                 throw new OpenBaoUnavailableException();
             }
 
-            return key;
+            return ([0x04, .. parameters.Q.X!, .. parameters.Q.Y!], Convert.ToHexStringLower(SHA256.HashData(key.ExportSubjectPublicKeyInfo())));
         }
         catch (Exception ex) when (ex is ArgumentException or CryptographicException)
         {
-            key.Dispose();
             throw new OpenBaoUnavailableException();
-        }
-        catch
-        {
-            key.Dispose();
-            throw;
         }
     }
 
@@ -709,7 +698,8 @@ internal sealed class OpenBaoKms : IKmsBackend, IDisposable
         bool SoftDeleted,
         int LatestVersion,
         int KeySize,
-        ECDsa? PublicKey);
+        byte[]? PublicKeyPoint,
+        string? PublicKeyFingerprint);
 }
 
 /// <summary>

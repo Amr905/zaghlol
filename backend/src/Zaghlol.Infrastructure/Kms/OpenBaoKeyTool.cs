@@ -170,9 +170,7 @@ public static class OpenBaoKeyTool
             foreach (var kid in request.Kids)
             {
                 var info = await CheckAsync(kms, new OpenBaoKms.KeyRole(kid, OpenBaoKms.KeyKind.Signing), ct);
-                using var key = info.PublicKey!;
-                var q = key.ExportParameters(includePrivateParameters: false).Q;
-                var jwk = EcPublicJwk.FromX963([0x04, .. q.X!, .. q.Y!]);
+                var jwk = EcPublicJwk.FromX963(info.PublicKeyPoint!);
                 var prefix = string.Create(CultureInfo.InvariantCulture, $"Signing__Keys__{index++}__");
                 lines.Add(prefix + "Kid=" + kid);
                 lines.Add(prefix + "Purpose=" + (kid[0] == 's' ? "Sync" : "Entitlement"));
@@ -182,12 +180,12 @@ public static class OpenBaoKeyTool
                 lines.Add(prefix + "PublicJwk__Crv=" + jwk.Crv);
                 lines.Add(prefix + "PublicJwk__X=" + jwk.X);
                 lines.Add(prefix + "PublicJwk__Y=" + jwk.Y);
-                lines.Add("Kms__OpenBao__Fingerprints__" + ShellName(kid) + "=" + Convert.ToHexStringLower(SHA256.HashData(key.ExportSubjectPublicKeyInfo())));
+                lines.Add("Kms__OpenBao__Fingerprints__" + ShellName(kid) + "=" + info.PublicKeyFingerprint);
             }
 
             foreach (var name in request.Envelopes)
             {
-                using var info = new Disposer(await CheckAsync(kms, new OpenBaoKms.KeyRole(name, OpenBaoKms.KeyKind.Envelope), ct));
+                _ = await CheckAsync(kms, new OpenBaoKms.KeyRole(name, OpenBaoKms.KeyKind.Envelope), ct);
                 lines.Add("Kms__OpenBao__Fingerprints__" + ShellName(name) + "=" + Convert.ToHexStringLower(await kms.TransitHmacAsync(name, OpenBaoKms.PinLabel, ct)));
             }
         }
@@ -299,16 +297,8 @@ public static class OpenBaoKeyTool
     private static async Task<OpenBaoKms.KeyInfo> CheckAsync(OpenBaoKms kms, OpenBaoKms.KeyRole role, CancellationToken ct)
     {
         var info = await kms.ReadKeyAsync(role.TransitName, ct);
-        try
-        {
-            OpenBaoKms.CheckAttributes(role, info);
-            return info;
-        }
-        catch
-        {
-            info.PublicKey?.Dispose();
-            throw;
-        }
+        OpenBaoKms.CheckAttributes(role, info);
+        return info;
     }
 
     /// <summary>A File-format wrap of a random test key, made here, must open in Transit: the import is the File KEK.</summary>
@@ -535,9 +525,4 @@ public static class OpenBaoKeyTool
         List<string> ImportEnvelope,
         List<string> Kids,
         List<string> Envelopes);
-
-    private readonly struct Disposer(OpenBaoKms.KeyInfo info) : IDisposable
-    {
-        public void Dispose() => info.PublicKey?.Dispose();
-    }
 }
