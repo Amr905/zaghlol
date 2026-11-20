@@ -19,7 +19,7 @@ Rules: roles are assigned to named people only, never to a shared or service acc
 
 ### 2.1 Setup (once per workstation)
 1. Install the build of `zaghlol-ops` for the OS (Windows, macOS, Linux).
-2. Set the three public settings, as environment variables or in a JSON file (`--config FILE`, `ZAGHLOL_OPS_CONFIG`, or `~/.config/zaghlol-ops/config.json`; `%APPDATA%\zaghlol-ops\config.json` on Windows): `ZAGHLOL_OPS_API_URL` (`https://...`), `ZAGHLOL_OPS_ISSUER` (the IdP issuer, `https`), `ZAGHLOL_OPS_CLIENT_ID` (the `zaghlol-ops` client). Values come from `docs/03-technical/operator-idp-setup.md` for the IdP chosen (**PO to confirm: Entra or Google, T-136 Q1**). Optional: `ZAGHLOL_OPS_SCOPES`, `ZAGHLOL_OPS_TOKEN_USE` (`id_token` is the default and the only choice for Google), `ZAGHLOL_OPS_REDIRECT_HOST` (`localhost`, or `127.0.0.1` if the IdP app is registered that way), `ZAGHLOL_OPS_TOKEN_CACHE` (`os` or `memory`), and `ZAGHLOL_OPS_CLIENT_SECRET` (environment only; needed only if Google's desktop client type asks for one, which Google does not treat as confidential). The file never accepts a secret.
+2. Set the three public settings, as environment variables or in a JSON file (`--config FILE`, `ZAGHLOL_OPS_CONFIG`, or `~/.config/zaghlol-ops/config.json`; `%APPDATA%\zaghlol-ops\config.json` on Windows): `ZAGHLOL_OPS_API_URL` (`https://...`; a path such as `https://host/api/` is kept, so the CLI calls `https://host/api/admin/v1/...`), `ZAGHLOL_OPS_ISSUER` (the IdP issuer, `https`), `ZAGHLOL_OPS_CLIENT_ID` (the `zaghlol-ops` client). Values come from `docs/03-technical/operator-idp-setup.md` for the IdP chosen (**PO to confirm: Entra or Google, T-136 Q1**). Optional: `ZAGHLOL_OPS_SCOPES`, `ZAGHLOL_OPS_TOKEN_USE` (`id_token` is the default and the only choice for Google), `ZAGHLOL_OPS_REDIRECT_HOST` (`localhost`, or `127.0.0.1` if the IdP app is registered that way), `ZAGHLOL_OPS_TOKEN_CACHE` (`os` or `memory`), and `ZAGHLOL_OPS_CLIENT_SECRET` (environment only; needed only if Google's desktop client type asks for one, which Google does not treat as confidential). The file never accepts a secret.
 3. Run `zaghlol-ops login`. The browser opens the IdP's page (authorization code with PKCE and a loopback redirect; there is no device-code flow). Complete the sign-in, with the security key for `support_agent` and `support_lead`.
 4. Run `zaghlol-ops status`: it shows the settings, the token store in use and whether a token is stored. It never prints the token.
 
@@ -40,7 +40,7 @@ The token (valid at most 60 minutes, no refresh token) is kept in the OS credent
 | `bank-requests list` | adminListBankRequests | catalog_editor |
 | `flags get <key>`, `flags set <key> --value ...` | adminGetFlag, adminPutFlag | flags_admin |
 | `prices override ...` | adminOverridePrice | prices_admin |
-| `support lookup --install UUID` or `--email ADDRESS` | adminLookupEntitlement | support_viewer |
+| `support lookup --install UUID` or `support lookup --email` (the address is typed at a prompt, never on the command line, so it stays out of shell history and `ps`) | adminLookupEntitlement | support_viewer |
 | `support move`, `support detach` | adminMoveSeat, adminDetachPurchase | support_agent |
 | `support unfreeze` | adminUnfreezePurchase | support_lead |
 | `metrics daily-active [--days N]` | adminDailyActive | any operator role |
@@ -129,7 +129,7 @@ Alert rules are in `backend/deploy/observability/alerts/seats.yaml`. Alerts carr
 
 ## 9. Quarterly review of operator roles (R3-9, R6-1)
 
-Every quarter the support lead and the product owner review the operator list and record the result (a dated ticket or page, kept with the IdP evidence). Run as `ops_ro`:
+Every quarter the support lead and the product owner review the operator list and record the result (a dated ticket or page, kept with the IdP evidence). Run it as `migrator` (the schema owner, by the database administrator), because the read-only login `zaghlol_ops_ro` is break-glass only and has no credentials until T-140 decides the read path (when it does, use that):
 
 ```sql
 SELECT id, display_name, roles, disabled_at FROM zaghlol.operators ORDER BY display_name;

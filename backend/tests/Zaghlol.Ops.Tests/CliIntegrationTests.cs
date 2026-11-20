@@ -98,7 +98,8 @@ public class CliIntegrationTests(CliApiFixture fixture) : IClassFixture<CliApiFi
         var (purchase, holder, claimant, email) = await fixture.SeedMovableAsync();
         var byInstall = await Json(env, "support", "lookup", "--install", holder.ToString());
         Assert.NotNull(byInstall["status"]);
-        await Ok(env, "support", "lookup", "--email", email);
+        env.Type(email); // --email asks at the prompt (FU-264 F4); the address is never an argument
+        await Ok(env, "support", "lookup", "--email");
         Assert.Equal(2, await fixture.AuditAsync("support_lookup", operatorId));
 
         // Support writes with the no-echo prompt (adminMoveSeat, adminDetachPurchase).
