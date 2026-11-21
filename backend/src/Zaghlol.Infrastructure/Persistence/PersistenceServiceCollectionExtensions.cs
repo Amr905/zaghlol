@@ -65,10 +65,10 @@ public static class PersistenceServiceCollectionExtensions
         var names = string.Join(", ", required.Select(r => $"ConnectionStrings:{DatabaseRoles.ConnectionStringName(r)}"));
 
         services.AddOptions<DatabaseConnectionOptions>()
-            .Configure<IConfiguration, IHostEnvironment>((options, configuration, environment) =>
+            .Configure<IConfiguration, IServiceProvider>((options, configuration, provider) =>
             {
                 options.Settings = DatabaseSettings.From(configuration);
-                options.IsProduction = environment.IsProduction();
+                options.IsProduction = provider.GetService<IHostEnvironment>()?.IsProduction() ?? false;
                 foreach (var role in required)
                 {
                     options.ConnectionStrings[role] = configuration.GetConnectionString(DatabaseRoles.ConnectionStringName(role));

@@ -89,6 +89,7 @@ public sealed class OpenBaoHostStartupTests : IAsyncLifetime, IDisposable
         {
             ["ConnectionStrings:App"] = Unreachable,
             ["ConnectionStrings:Admin"] = Unreachable,
+            ["Database:AllowInsecureTransport"] = "true", // T-207: the Production TLS guard is covered by DatabaseSettingsTests
             ["Purchases:Google:PackageName"] = "app.zaghlol",
             ["Purchases:Google:CredentialSource"] = "ApplicationDefault",
             ["Purchases:Google:Rtdn:Audience"] = "https://api.zaghlol.app/v1/notifications/google",

@@ -152,6 +152,7 @@ public sealed class FileKmsWorkerTests : IDisposable
         {
             ["DOTNET_ENVIRONMENT"] = environment,
             ["ConnectionStrings__Worker"] = Unreachable,
+            ["Database__AllowInsecureTransport"] = "true", // T-207: the Production TLS guard is covered by DatabaseSettingsTests
             ["Purchases__Google__PackageName"] = "app.zaghlol",
             ["Purchases__Google__CredentialSource"] = "ApplicationDefault",
             ["Purchases__Google__Rtdn__Audience"] = "https://api.zaghlol.app/v1/notifications/google",
