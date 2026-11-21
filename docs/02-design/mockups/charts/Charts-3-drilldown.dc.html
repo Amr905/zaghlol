@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>3 · Tapping a slice or place opens its transactions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F7A55}a:hover{color:#0B5E43}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F3FBF7; font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif" dir="rtl">
+<div style="padding: 52px 16px 120px 16px; display: flex; flex-direction: column; gap: 14px"><div style="display: flex; align-items: center; gap: 10px"><a href="Charts-2-interaction.dc.html" aria-label="back" style="width: 44px; height: 44px; border-radius: 22px; background: #E5F5EC; color: #0F2A20; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></a><div style="font-size: 22px; font-weight: 700; color: #0F2A20">أكل وشرب</div></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="height: 34px; padding: 0 12px; border-radius: 17px; background: #D7F3E5; color: #0F2A20; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600">أكل وشرب <span style="color: #4D695C">✕</span></span><span style="height: 34px; padding: 0 12px; border-radius: 17px; background: #D7F3E5; color: #0F2A20; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600">الشهر ده <span style="color: #4D695C">✕</span></span><span style="height: 34px; padding: 0 12px; border-radius: 17px; background: #D7F3E5; color: #0F2A20; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600">كل الكروت <span style="color: #4D695C">✕</span></span></div><div style="display: flex; align-items: baseline; justify-content: space-between"><div><span style="font-size: 30px; font-weight: 700; color: #0F2A20">٥٬٤٠٠</span> <span style="font-size: 14px; color: #4D695C">ج.م</span></div><div style="font-size: 13px; color: #4D695C">٢٣ حركة · <span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: #FFF1E0; color: #B45309; font-size: 12px; font-weight: 600; unicode-bidi: isolate">▲ ١٢٪</span></div></div>
+<div style="background: #FFFFFF; border-radius: 24px; overflow: hidden"><div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; ">
+<div style="width: 40px; height: 40px; border-radius: 20px; background: #E5F5EC; color: #0F7A55; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"></path></svg></div>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; color: #0F2A20">طلبات</div><div style="font-size: 12px; color: #4D695C">النهارده ٢:١٠ م</div></div>
+<div style="font-size: 15px; font-weight: 600; color: #0F2A20; direction: ltr; unicode-bidi: isolate">−٢٨٥ <span style="font-size: 11px; color: #4D695C">ج.م</span></div></div><div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid #E3F1E9;">
+<div style="width: 40px; height: 40px; border-radius: 20px; background: #E5F5EC; color: #0F7A55; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"></path></svg></div>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; color: #0F2A20">كارفور المعادي</div><div style="font-size: 12px; color: #4D695C">أمس</div></div>
+<div style="font-size: 15px; font-weight: 600; color: #0F2A20; direction: ltr; unicode-bidi: isolate">−٤٥٠ <span style="font-size: 11px; color: #4D695C">ج.م</span></div></div><div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid #E3F1E9;">
+<div style="width: 40px; height: 40px; border-radius: 20px; background: #E5F5EC; color: #0F7A55; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"></path></svg></div>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; color: #0F2A20">كوستا</div><div style="font-size: 12px; color: #4D695C">الأربع</div></div>
+<div style="font-size: 15px; font-weight: 600; color: #0F2A20; direction: ltr; unicode-bidi: isolate">−١٢٠ <span style="font-size: 11px; color: #4D695C">ج.م</span></div></div><div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid #E3F1E9;">
+<div style="width: 40px; height: 40px; border-radius: 20px; background: #E5F5EC; color: #0F7A55; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"></path></svg></div>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; color: #0F2A20">طلبات</div><div style="font-size: 12px; color: #4D695C">الأربع</div></div>
+<div style="font-size: 15px; font-weight: 600; color: #0F2A20; direction: ltr; unicode-bidi: isolate">−٣١٠ <span style="font-size: 11px; color: #4D695C">ج.م</span></div></div><div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid #E3F1E9;">
+<div style="width: 40px; height: 40px; border-radius: 20px; background: #E5F5EC; color: #0F7A55; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"></path></svg></div>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; color: #0F2A20">مطعم أبو شقرة</div><div style="font-size: 12px; color: #4D695C">الاتنين</div></div>
+<div style="font-size: 15px; font-weight: 600; color: #0F2A20; direction: ltr; unicode-bidi: isolate">−٦٤٠ <span style="font-size: 11px; color: #4D695C">ج.م</span></div></div><div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid #E3F1E9;">
+<div style="width: 40px; height: 40px; border-radius: 20px; background: #E5F5EC; color: #0F7A55; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"></path></svg></div>
+<div style="flex-grow: 1"><div style="font-size: 15px; font-weight: 600; color: #0F2A20">بقالة الحاج</div><div style="font-size: 12px; color: #4D695C">الأحد</div></div>
+<div style="font-size: 15px; font-weight: 600; color: #0F2A20; direction: ltr; unicode-bidi: isolate">−٩٥ <span style="font-size: 11px; color: #4D695C">ج.م</span></div></div></div></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
