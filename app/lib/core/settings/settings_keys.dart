@@ -259,6 +259,18 @@ abstract final class Settings {
     max: 999999999999999,
   );
 
+  /// FU-166a (A-22): when the app last raised an unsolicited Gold prompt
+  /// (epoch ms UTC); null: never. Drives the one-a-week cap.
+  static final upsellLastShown = SettingKey.optionalInteger(
+    'upsell_last_shown',
+    min: 0,
+    max: 999999999999999,
+  );
+
+  /// FU-237a: the Smart ROI tips the user dismissed ("Not for me"), as
+  /// `<currency>_<rule>` slugs in lower case.
+  static final roiDismissedTips = SettingKey.slugSet('roi_dismissed_tips');
+
   /// T-066 (EC-14): the iOS "your Shortcuts went quiet" nudge is hidden until
   /// this time (epoch ms UTC) after the user dismissed it; null: not snoozed.
   static final iosNudgeSnoozedUntil = SettingKey.optionalInteger(

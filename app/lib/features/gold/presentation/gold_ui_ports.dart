@@ -8,6 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../../core/backend/backend_client.dart' show ClientPlatform;
+import '../../../core/settings/settings_keys.dart';
+import '../../../core/settings/settings_providers.dart';
+import '../../../core/settings/settings_repository.dart';
 import '../application/entitlement.dart';
 import '../application/gold_providers.dart';
 import '../application/gold_store.dart';
@@ -175,8 +178,28 @@ final class MemoryUpsellCapStore implements UpsellCapStore {
   Future<void> markShown(DateTime at) async => _at = at;
 }
 
+/// Persists the cap in the encrypted settings (`upsell_last_shown`).
+final class SettingsUpsellCapStore implements UpsellCapStore {
+  SettingsUpsellCapStore(this._repo);
+  final Future<SettingsRepository> _repo;
+
+  @override
+  Future<DateTime?> lastShown() async {
+    final ms = await (await _repo).get(Settings.upsellLastShown);
+    return ms == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+  }
+
+  @override
+  Future<void> markShown(DateTime at) async => (await _repo).set(
+    Settings.upsellLastShown,
+    at.toUtc().millisecondsSinceEpoch,
+  );
+}
+
 final upsellCapStoreProvider = Provider<UpsellCapStore>(
-  (ref) => MemoryUpsellCapStore(),
+  (ref) => SettingsUpsellCapStore(ref.watch(settingsRepositoryProvider.future)),
   name: 'upsellCapStoreProvider',
 );
 

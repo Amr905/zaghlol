@@ -7,12 +7,12 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/misc_daos.dart';
+import '../../../core/platform/app_settings.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../categorization/data/categorizer_ports.dart';
 import '../../categorization/data/rules_providers.dart';
 import '../../gold/application/gating.dart';
-import '../../notifications/application/notification_providers.dart';
 import '../data/speech_to_text_port.dart';
 import 'speech_port.dart';
 import 'voice_models.dart';
@@ -100,7 +100,7 @@ final voiceLeftProvider = FutureProvider.autoDispose<(int, int)?>((ref) async {
 /// "Open settings" of the mic-denied explainer.
 final voiceOpenSettingsProvider = Provider<Future<void> Function()>(
   (ref) =>
-      () => ref.read(openNotificationSettingsProvider)(),
+      () => ref.read(openAppSettingsProvider)(),
   name: 'voiceOpenSettingsProvider',
 );
 

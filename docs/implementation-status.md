@@ -685,7 +685,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-165d | core | T-145 no native wake-up: purchase retry only if user opens app within 3 days; needs purchase-retry-worker and PO call | gold/application/purchase.dart | PO | OPEN |
 | FU-165e | core | T-145 verified entry whose purchase is gone (refunded) stays in outbox forever; add age-out | gold/application/purchase.dart:155 | none | OBSOLETE (batch 51): verified entries age out after outboxMaxAge |
 | FU-165f | core | T-145 device items: StoreKit-config test, release user-CA check, sandbox purchases | gold | device | OPEN |
-| FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | OPEN (batch 51: needs encrypted prefs store plus a first caller; not UI-only) |
+| FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | FIXED (batch 53: settings-backed cap store `upsell_last_shown`; first caller: voice limit prompt via unsolicitedPaywallProvider) |
 | FU-166b | ui | T-146 paywallTriggerOverride and goldLinkOpener wired in root | app/app_navigation.dart:96-100 | none | CLOSED (WIRE-NAV, FU-195) |
 | FU-166c | ui | T-146 tampered-clock copy "set clock to automatic" missing | gold/application/gold_messages.dart | PO (copy) | OPEN (batch 51: PO copy) |
 | FU-167a | native | T-151 one quota error on any old file blocks every later iCloud backup | backup/application/icloud_backup_service.dart:109 | none | OBSOLETE (batch 51): only the newest backup gates on quotaExceeded |
@@ -703,7 +703,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-172a | ui | T-104 real HomeCardActions.enableAppLock test (FU-130 privacy property) | test/features/home/application | none | CLOSED (added in batch 18 fix round, Lead delta check) |
 | FU-172b | ui | T-104 two writes after enable not guarded; second throw leaves lock on, amounts visible | home/application/home_cards.dart:132-146 | none | FIXED (batch 51) |
 | FU-172c | ui | T-104 app-lock offer does not mention hidden notification amounts | core/l10n/app_en.arb:345 | PO (copy) | OPEN (batch 51: PO copy) |
-| FU-172d | ui | T-104 salary-credit and backup-exists providers are stubs (payday and backup cards off) | home/application/home_cards.dart:28 | none | OPEN (batch 51: salary/backup sources are core work (FU-144)) |
+| FU-172d | ui | T-104 salary-credit and backup-exists providers are stubs (payday and backup cards off) | home/application/home_cards.dart:28 | none | FIXED (batch 53: salary credit from salary.plan/state, backup-exists from backupExistsProvider) |
 | FU-173a | ui | T-081 throwing deferred job in closed.then unhandled; item stays hidden | ingestion/presentation/review/review_screen.dart:84-88 | none | FIXED (batch 51) |
 | FU-173b | ui | T-081 categorize edits transaction and resolves item in two calls (not atomic) | ingestion/presentation/review | none | OBSOLETE (batch 51): not atomic but idempotent; failure re-shows the item and a retry converges |
 | FU-174a | ui | T-086 re-scan offer after un-ignoring overwrites the saved scan depth | settings/presentation/capture_settings_screen.dart:497-503 | none | OBSOLETE (batch 51): rescan(depthMonths: null) never saves depth |
@@ -799,7 +799,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-226b | parsing | T-036 sms-spike-device assertion for stagingSms Guard dropped | .github/scripts/sms-spike-device.sh:522 | none | CLOSED (asserts st_guard = 1) |
 | FU-226c | parsing | T-036 stale "T-036 replaces the missing bundled one" doc comment | capture/application/capture_providers.dart:75 | none | CLOSED (comment gone) |
 | FU-229a | ui | T-120 voice partial save then Try again/close: log not counted, _savedKeys cleared (quota bypass) | voice/application/voice_controller.dart:213,239,361 | none | FIXED (batch 51) |
-| FU-229b | ui | T-120 Open settings on mic-denied opens notification page, not app details | voice/application/voice_providers.dart | none | OPEN (batch 51: needs a native app-details channel; none exists) |
+| FU-229b | ui | T-120 Open settings on mic-denied opens notification page, not app details | voice/application/voice_providers.dart | none | FIXED (batch 53: zaghlol/app_settings channel, Android app details / iOS openSettingsURLString) |
 | FU-229c | ui | T-120 literal emoji appended to localized parsed title | voice/presentation/voice_logger_screen.dart | none | OBSOLETE (batch 51): no literal emoji in voice presentation or ARBs now |
 | FU-229d | ui | T-120 no test picks a different account from the row picker | test/features/voice/voice_logger_test.dart | none | FIXED (batch 51) |
 | FU-229e | ui | T-120 SpeechSupportRegistration.kt double result.success if checkRecognitionSupport throws after timeout armed | android/.../SpeechSupportRegistration.kt:65-83 | none | OBSOLETE (batch 51): probe() wraps answers in a once-only done guard |
@@ -824,7 +824,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-236a | core | T-169 rule 2 erratum (22,200 vs printed 19,500) recorded in SRS | docs/01-requirements/requirements.md:457 | none | CLOSED |
 | FU-236b | core | T-169 rule 5 transport signal is a guess until a ride-hailing group exists | smart_roi/application/roi_providers.dart | PO | OPEN |
 | FU-236c | core | T-169 legal sign-off on disclaimer (Q-23) before flag on | - | PO | OPEN |
-| FU-237a | ui | T-170 "Not for me" dismissal lasts the session only | smart_roi/application/roi_tips_providers.dart:26 | none | OPEN (batch 51: needs a persisted settings key; flag off) |
+| FU-237a | ui | T-170 "Not for me" dismissal lasts the session only | smart_roi/application/roi_tips_providers.dart:26 | none | FIXED (batch 53: dismissals persisted in `roi_dismissed_tips`) |
 | FU-237b | ui | T-170 Share opens studio with no ROI template (S-73) | smart_roi/application/roi_tips_providers.dart | none | OPEN (batch 51: needs the S-73 ROI share template design) |
 | FU-237c | ui | T-170 Tips segment on Ask and badge (roiTipCountProvider) not wired (flag off) | smart_roi | none | OPEN (batch 51: Tips segment/badge wiring behind smartRoi flag, off at launch) |
 | FU-238a | parsing | T-071 Revolut [£€$] had no left boundary (A$/CA$ read as USD) (major) | app/assets/registry/institutions/revolut.json | none | CLOSED (fix round batch 25) |
