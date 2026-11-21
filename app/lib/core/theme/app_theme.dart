@@ -1,13 +1,20 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
 import 'z_tokens.dart';
 
 /// Builds the Material themes from the Mint Fresh / True Black tokens.
 abstract final class ZaghlolTheme {
-  // Built once: the switch theme holds closures, so two builds never compare
-  // equal and MaterialApp would animate between "different" themes.
-  static final ThemeData light = _build(ZColors.light);
-  static final ThemeData dark = _build(ZColors.dark);
+  // Cached per platform: the switch theme holds closures, so two builds never
+  // compare equal and MaterialApp would keep animating between "different"
+  // themes. ThemeData captures the target platform, so the cache is keyed on it.
+  static ThemeData get light => _cached(ZColors.light, dark: false);
+  static ThemeData get dark => _cached(ZColors.dark, dark: true);
+
+  static final Map<(bool, TargetPlatform), ThemeData> _cache = {};
+
+  static ThemeData _cached(ZColors c, {required bool dark}) =>
+      _cache.putIfAbsent((dark, defaultTargetPlatform), () => _build(c));
 
   static ThemeData _build(ZColors c) {
     final scheme = ColorScheme(
