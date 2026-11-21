@@ -84,7 +84,7 @@ jobs:
           echo "lock=$lock" >> "$GITHUB_OUTPUT"
           echo "goldens=$goldens" >> "$GITHUB_OUTPUT"
           echo "targets: lock=$lock goldens=$goldens"
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Install Flutter (pinned tag, verified commit)
@@ -125,7 +125,7 @@ jobs:
         env:
           LOCK: ${{ steps.targets.outputs.lock }}
           GOLDENS: ${{ steps.targets.outputs.goldens }}
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: regen-output
           path: ${{ runner.temp }}/out
@@ -158,11 +158,11 @@ jobs:
       # is not a fast-forward and fails instead of clobbering newer work.
       # No credentials are persisted in .git/config; the token is handed only to
       # the final push step.
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: regen-output
           path: ${{ runner.temp }}/in
