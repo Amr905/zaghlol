@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,6 +21,13 @@ import '../features/recurring/presentation/bills_providers.dart';
 import '../features/security/domain/app_lock_controller.dart';
 import '../features/notifications/domain/notification_routes.dart';
 import 'app_navigation.dart';
+
+/// Debug builds only (T-193 AC5 device run): a marker line with no data in it
+/// (a target type name, a boolean). `kDebugMode` is a compile-time constant,
+/// so release builds drop it.
+void _probe(String line) {
+  if (kDebugMode) debugPrint('NOTIF_PROBE $line');
+}
 
 class NotificationTapLifecycle extends ConsumerStatefulWidget {
   const NotificationTapLifecycle({super.key, required this.child});
@@ -43,6 +51,7 @@ class _NotificationTapLifecycleState
     // After the first frame, so the router and navigator exist.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final route = await source.takeLaunchRoute();
+      _probe('launch route=${route != null}');
       if (mounted && route != null) _open(route);
     });
   }
@@ -56,6 +65,7 @@ class _NotificationTapLifecycleState
   void _open(String route) {
     final target = notificationTargetFor(route);
     if (target == null) return;
+    _probe('open ${target.runtimeType}');
     openNotificationTarget(
       target,
       router: ref.read(appRouterProvider).go,
@@ -65,7 +75,10 @@ class _NotificationTapLifecycleState
         confirm: () => _confirmMarkPaid(id, due),
         pay: () async {
           try {
-            await ref.read(billsActionsProvider).markPaid(id, expectedDue: due);
+            final ok = await ref
+                .read(billsActionsProvider)
+                .markPaid(id, expectedDue: due);
+            _probe('paid ok=$ok');
           } catch (_) {
             // Unavailable: the app is open on the bills; nothing else to do.
             // Never echo the error.
@@ -107,10 +120,12 @@ class _NotificationTapLifecycleState
             lang,
             digits,
           );
+    _probe('confirm shown');
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => MarkPaidConfirmDialog(billName: name, dueText: dueText),
     );
+    _probe('confirm answer=${ok ?? false}');
     return ok ?? false;
   }
 

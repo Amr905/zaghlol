@@ -17,6 +17,10 @@ if [ -n "${T165_ONLY:-}" ]; then
   # T-165: backup-exclusion evidence only (no flows, no explorer).
   exec bash "$(dirname "$0")/t165-backup-emu.sh"
 fi
+if [ -n "${NOTIF_ONLY:-}" ]; then
+  # T-193 AC5: forged notification intents versus real taps (notif-intents.sh).
+  exec bash "$(dirname "$0")/notif-intents.sh"
+fi
 cd "$(dirname "$0")/../../app"
 
 pull_files() {
