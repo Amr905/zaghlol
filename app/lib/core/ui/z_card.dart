@@ -29,9 +29,7 @@ class ZCard extends StatelessWidget {
         color: color ?? c.surface,
         borderRadius: radius,
         // True Black: elevation is a surface step plus an outline.
-        border: c.brightness == Brightness.dark
-            ? Border.all(color: c.outline)
-            : null,
+        border: c.flatBorder,
         boxShadow: [
           BoxShadow(
             color: c.shadow,
@@ -234,9 +232,7 @@ class ZHeroCard extends StatelessWidget {
           colors: [c.heroFrom, c.heroTo],
         ),
         // True Black: flat surface card with an outline border.
-        border: c.brightness == Brightness.dark
-            ? Border.all(color: c.outline)
-            : null,
+        border: c.flatBorder,
         boxShadow: [
           BoxShadow(
             color: c.shadow,

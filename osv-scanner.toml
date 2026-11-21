@@ -1,7 +1,7 @@
 # osv-scanner config for the FULL Gradle graph scan (security-scan.yml, job osv-full-graph, non-blocking).
 # FU-272 (batch 52). Every advisory below is in build tooling or test tooling only: the blocking osv-release job scans the
 # Android prod release runtime classpaths (prodSmsReleaseRuntimeClasspath, prodNoSmsReleaseRuntimeClasspath) with NO ignores and
-# found 0 advisories in 140 packages. Re-triage when ignoreUntil passes (the entry then re-appears in the log); drop an entry
+# found 0 advisories in 142 packages. Re-triage when ignoreUntil passes (the entry then re-appears in the log); drop an entry
 # when AGP / the tool bump removes the package. Do not add an advisory here without checking it is absent from the release scan.
 
 [[IgnoredVulns]]

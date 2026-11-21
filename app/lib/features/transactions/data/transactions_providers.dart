@@ -56,6 +56,7 @@ final transactionRepositoryProvider = FutureProvider<TransactionRepository>((
     newId: ref.watch(idGeneratorProvider),
     // EC-40: runs inside the edit's own transaction, before the write.
     onAmountChange: repairs.onAmountChange,
+    onRollback: repairs.discard,
   );
   // WIRE-2: after a manual add, the reimbursement suggestion (T-092) and the
   // duplicate-charge check (T-100).

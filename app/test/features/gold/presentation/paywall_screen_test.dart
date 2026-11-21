@@ -424,6 +424,22 @@ Future<void> main() async {
       now = now.add(const Duration(days: 30));
       expect(await cap.tryShow(isGold: true), isFalse);
     });
+
+    test('FU-275: Gold never counts or marks a prompt', () async {
+      final store = MemoryUpsellCapStore();
+      final cap = UpsellCap(store, () => DateTime.utc(2026, 11, 1));
+      expect(await cap.tryShow(isGold: true), isFalse);
+      expect(await store.lastShown(), isNull);
+    });
+
+    test('FU-275: two simultaneous checks let only one through', () async {
+      final cap = UpsellCap(MemoryUpsellCapStore(), () => DateTime.utc(2026));
+      final r = await Future.wait([
+        cap.tryShow(isGold: false),
+        cap.tryShow(isGold: false),
+      ]);
+      expect(r.where((x) => x), hasLength(1));
+    });
   });
 
   testWidgets('a gate opens the paywall through the trigger override', (

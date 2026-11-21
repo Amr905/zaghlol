@@ -20,6 +20,9 @@ final class AmountRepairEvents {
     return r.removedLinkIds;
   }
 
+  /// The edit rolled back: its repair never happened, so drop the event.
+  void discard() => _pending.clear();
+
   /// After the edit committed: publishes what the repair changed (the cycles
   /// and accounts of the removed links), so budgets and Home refresh.
   void flush(DomainEventBus bus) {

@@ -223,6 +223,9 @@ class _Stat extends StatelessWidget {
 
 /// The localized name of a category the runner reported by id only.
 String _categoryTitle(WidgetRef ref, String? id, String lang) {
-  final cat = ref.watch(txnLookupsProvider).value?.category(id);
+  final lookups = ref.watch(txnLookupsProvider);
+  // Placeholder while the lookups load, never a blank title.
+  if (lookups.isLoading) return '…';
+  final cat = lookups.value?.category(id);
   return cat == null ? '' : categoryName(cat, lang);
 }
