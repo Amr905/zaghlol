@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,6 +21,7 @@ import '../features/recurring/presentation/bills_providers.dart';
 import '../features/security/domain/app_lock_controller.dart';
 import '../features/notifications/domain/notification_routes.dart';
 import 'app_navigation.dart';
+import 'notification_taps_debug.dart';
 
 class NotificationTapLifecycle extends ConsumerStatefulWidget {
   const NotificationTapLifecycle({super.key, required this.child});
@@ -39,11 +41,13 @@ class _NotificationTapLifecycleState
   void initState() {
     super.initState();
     final source = ref.read(notificationTapSourceProvider);
-    _sub = source.taps.listen(_open);
+    _sub = source.taps.listen((r) => unawaited(_open(r)));
     // After the first frame, so the router and navigator exist.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final route = await source.takeLaunchRoute();
-      if (mounted && route != null) _open(route);
+      notifProbe('launch route=${route != null}');
+      if (kDebugMode) unawaited(debugPostColdFixtures(ref));
+      if (mounted && route != null) unawaited(_open(route));
     });
   }
 
@@ -53,9 +57,19 @@ class _NotificationTapLifecycleState
     super.dispose();
   }
 
-  void _open(String route) {
+  /// A tap event can arrive before the root navigator exists (the system
+  /// restored the old task after process death and delivered the tap to it as a
+  /// new intent): wait for the navigator (bounded, ~10 s) instead of dropping it.
+  Future<void> _open(String route) async {
     final target = notificationTargetFor(route);
     if (target == null) return;
+    for (var i = 0; i < 100 && rootNavigatorKey.currentContext == null; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
+    }
+    notifProbe(
+      'open ${target.runtimeType} ctx=${rootNavigatorKey.currentContext != null}',
+    );
     openNotificationTarget(
       target,
       router: ref.read(appRouterProvider).go,
@@ -65,7 +79,10 @@ class _NotificationTapLifecycleState
         confirm: () => _confirmMarkPaid(id, due),
         pay: () async {
           try {
-            await ref.read(billsActionsProvider).markPaid(id, expectedDue: due);
+            final ok = await ref
+                .read(billsActionsProvider)
+                .markPaid(id, expectedDue: due);
+            notifProbe('paid ok=$ok');
           } catch (_) {
             // Unavailable: the app is open on the bills; nothing else to do.
             // Never echo the error.
@@ -96,7 +113,10 @@ class _NotificationTapLifecycleState
       name = null;
     }
     final context = rootNavigatorKey.currentContext;
-    if (context == null || !context.mounted) return false;
+    if (context == null || !context.mounted) {
+      notifProbe('confirm: no context');
+      return false;
+    }
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.read(digitsModeProvider(lang));
     final due = CivilDate.tryParse(dueDate);
@@ -107,10 +127,12 @@ class _NotificationTapLifecycleState
             lang,
             digits,
           );
+    notifProbe('confirm shown');
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => MarkPaidConfirmDialog(billName: name, dueText: dueText),
     );
+    notifProbe('confirm answer=${ok ?? false}');
     return ok ?? false;
   }
 
