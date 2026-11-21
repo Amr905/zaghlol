@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       allow_placeholders:
-        description: 'Publish even if {{PLACEHOLDER}} values are still in the pages (draft preview only)'
+        description: 'Draft preview: {{PLACEHOLDER}} values allowed, the site is uploaded as an artifact and NOT published'
         type: boolean
         default: false
 
@@ -51,9 +51,29 @@ jobs:
             exit 1
           fi
 
+  # Draft preview (placeholders allowed) is never deployed to the production Pages environment: it is only uploaded as a
+  # downloadable artifact. Deploying needs every placeholder filled.
+  preview:
+    name: draft preview (artifact only)
+    needs: check
+    if: ${{ inputs.allow_placeholders }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Stage site (without the README)
+        run: mkdir _site && cp -R site/. _site/ && rm -f _site/README.md
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: site-draft-preview
+          path: _site
+          retention-days: 3
+
   deploy:
     name: deploy to GitHub Pages
     needs: check
+    if: ${{ !inputs.allow_placeholders }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

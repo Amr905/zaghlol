@@ -127,6 +127,7 @@ EntitlementState goldForTest() {
 }
 
 void main() {
+  exportColumnConstantsTest();
   test('CSV has BOM, ISO dates, dot decimals, currency per row, Arabic', () {
     final bytes = encodeCsv([
       exportHeader,
@@ -272,5 +273,14 @@ void main() {
     expect(r[0], "'=HYPERLINK(\"x\")");
     expect(r[3], "'+a1");
     expect(r[11], "'@c");
+  });
+}
+
+void exportColumnConstantsTest() {
+  test('preview column constants match the header', () {
+    expect(exportHeader[exportColDate], 'date_utc');
+    expect(exportHeader[exportColAmount], 'amount');
+    expect(exportHeader[exportColCurrency], 'currency');
+    expect(exportHeader[exportColMerchant], 'merchant');
   });
 }

@@ -30,6 +30,11 @@ const int _maxTokenChars = 16384;
 const int _iatSlackMs = 10 * 60 * 1000;
 
 /// A cached token this old (by trusted time) is refreshed when online.
+/// Token lifetime rule (D-60), the one copy: `exp <= iat + 3 d`,
+/// `graceUntil <= exp + 4 d`.
+const int tokenMaxLifetimeSeconds = 3 * 86400;
+const int tokenMaxGraceSeconds = 4 * 86400;
+
 const Duration entitlementRefreshAge = Duration(hours: 12);
 
 /// `secure_state` key of the support notice: `p` pending, `d` dismissed.
@@ -168,7 +173,9 @@ EntitlementClaims? parseEntitlementToken(
   }
   if (status == 'active' || status == 'grace') {
     // Lifetime rule (D-60): exp <= iat + 3 d, graceUntil = exp + 4 d at most.
-    if (exp > iat + 3 * 86400 || grace > exp + 4 * 86400 || grace < exp) {
+    if (exp > iat + tokenMaxLifetimeSeconds ||
+        grace > exp + tokenMaxGraceSeconds ||
+        grace < exp) {
       return null;
     }
   }
@@ -570,8 +577,8 @@ final class EntitlementService {
     if (!const {'moved', 'refunded', 'expired', 'none'}.contains(c.status)) {
       return false;
     }
-    if (c.exp > c.iat + 3 * 86400 ||
-        c.graceUntil > c.exp + 4 * 86400 ||
+    if (c.exp > c.iat + tokenMaxLifetimeSeconds ||
+        c.graceUntil > c.exp + tokenMaxGraceSeconds ||
         c.graceUntil < c.exp) {
       return false;
     }

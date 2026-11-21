@@ -29,6 +29,23 @@ Future<void> main() async {
   for (final lang in ['en', 'ar']) {
     final t = tr(lang);
     group('paywall $lang', () {
+      testWidgets('charts benefit hidden while charts are open to Free', (
+        tester,
+      ) async {
+        final a = FakeGoldActions();
+        await pumpGold(
+          tester,
+          goldApp(
+            const PaywallScreen(),
+            overrides: goldOverrides(a),
+            lang: lang,
+          ),
+        );
+        expect(GoldGate.chartsOpenToFree, isTrue);
+        expect(find.text(t.goldPaywallBenefitCharts), findsNothing);
+        expect(find.text(t.goldPaywallBenefitExport), findsOneWidget);
+      });
+
       testWidgets(
         'ready: store prices only, yearly preselected, renewal line',
         (tester) async {
@@ -423,6 +440,22 @@ Future<void> main() async {
       expect(await cap.tryShow(isGold: false), isTrue);
       now = now.add(const Duration(days: 30));
       expect(await cap.tryShow(isGold: true), isFalse);
+    });
+
+    test('FU-275: Gold never counts or marks a prompt', () async {
+      final store = MemoryUpsellCapStore();
+      final cap = UpsellCap(store, () => DateTime.utc(2026, 11, 1));
+      expect(await cap.tryShow(isGold: true), isFalse);
+      expect(await store.lastShown(), isNull);
+    });
+
+    test('FU-275: two simultaneous checks let only one through', () async {
+      final cap = UpsellCap(MemoryUpsellCapStore(), () => DateTime.utc(2026));
+      final r = await Future.wait([
+        cap.tryShow(isGold: false),
+        cap.tryShow(isGold: false),
+      ]);
+      expect(r.where((x) => x), hasLength(1));
     });
   });
 

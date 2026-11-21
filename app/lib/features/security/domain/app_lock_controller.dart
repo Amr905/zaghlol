@@ -77,8 +77,8 @@ final appLockWriterProvider = Provider<Future<void> Function(bool)>(
 
 enum EnableLockResult { enabled, notSecure, failed, canceled }
 
-/// True while the app is in the background (paused/hidden/detached) with the
-/// lock enabled. The widget bridge masks the home-screen widget at once on
+/// True while the app is in the background (paused/hidden/detached),
+/// regardless of the lock (the bridge checks the lock). The widget bridge masks the home-screen widget at once on
 /// this (FU-206a), before the lock timeout engages.
 class AppBackgroundedNotifier extends Notifier<bool> {
   @override

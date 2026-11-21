@@ -7,13 +7,13 @@ Plain HTML + one CSS file. No scripts, external fonts, analytics or trackers (CI
 | `/` | Landing | — |
 | `/privacy/` | Privacy policy (standard Arabic + English) | `AppLinks.privacy` |
 | `/terms/` | Terms of use (standard Arabic + English) | `AppLinks.terms` |
-| `/support/` | FAQ + contact (Egyptian Arabic + English) | none yet (support contact in the app) |
+| `/support/` | FAQ + contact (Egyptian Arabic + English) | `AppLinks.support` (defined, not yet opened from a screen) |
 | `/subscription/` | How to cancel in Play / App Store | `AppLinks.manageSubscription` |
 | `/get/` | Store buttons | `AppLinks.storePage` |
 
 ## Before publishing
 
-1. **Legal review** of `privacy/` and `terms/` (PDPL 151/2020, Consumer Protection Law 181/2018, store rules). The texts follow `docs/06-release/play-data-safety.md`, `app-store-privacy.md`, `docs/03-technical/security-model.md` §2/§2a and SRS BR-SYNC-03; the contradictions found while drafting are listed in the batch-54 report and in `docs/workflow/PO_DECISIONS.md` Part 2 (FU-195-legal).
+1. **Legal review** of `privacy/` and `terms/` (PDPL 151/2020, Consumer Protection Law 181/2018, store rules). The texts follow `docs/06-release/play-data-safety.md`, `app-store-privacy.md`, `docs/03-technical/security-model.md` §2/§2a and SRS BR-SYNC-03; the contradictions found while drafting and how each was resolved are in `docs/06-release/privacy-consistency.md` (linked from `docs/workflow/PO_DECISIONS.md` Part 2, FU-195-legal).
 2. **Fill the placeholders** (search for `{{`): `COMPANY_NAME`, `COMPANY_ADDRESS`, `COMMERCIAL_REGISTRY`, `CONTACT_EMAIL`, `SUPPORT_EMAIL`, `DPO`, `EFFECTIVE_DATE`, `HOSTING_LOCATION`, `PURCHASE_RETENTION`, `BANK_REQUEST_RETENTION`, `HELPDESK_PROVIDER`, `TICKET_RETENTION`, `MIN_AGE`, `PREVAILING_LANGUAGE`, `JURISDICTION_CITY`, `PRICE_MONTHLY`, `PRICE_YEARLY`, `PRICE_LIFETIME`, `SUPPORT_RESPONSE_TIME`, `PLAY_STORE_URL`, `APP_STORE_URL`, and the reviewer notes `LEGAL_BASIS_REVIEW`, `LIFETIME_DEFINITION_REVIEW`, `LIABILITY_REVIEW`, `ZAKAH_REVIEW_BODY` (replace with final text or delete).
 3. **Check the in-app paths** named in the support FAQ (e.g. where the support code is shown) against the current build.
 4. **Remove the draft banner**: in `assets/site.css` replace the `.draft-banner { … }` rule with `.draft-banner { display: none; }` (or delete the `<div class="draft-banner">` lines).
