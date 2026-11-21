@@ -46,6 +46,12 @@ const List<String> exportHeader = [
   'note',
 ];
 
+/// Positions in [exportHeader] the preview table reads.
+const int exportColDate = 1;
+const int exportColAmount = 6;
+const int exportColCurrency = 7;
+const int exportColMerchant = 10;
+
 /// Neutralises a cell that a spreadsheet could read as a formula: a leading
 /// `=`, `+`, `-`, `@`, tab or CR gets a leading apostrophe. Applied only to
 /// free text, never to amounts (which are generated from [Money]).

@@ -18,6 +18,10 @@ abstract final class AppLinks {
   static const String terms = 'https://zaghlol.app/terms';
   static const String privacy = 'https://zaghlol.app/privacy';
   static const String manageSubscription = 'https://zaghlol.app/subscription';
+
+  /// FU-195: the support page (FAQ + contact, `site/support/`). Not yet
+  /// opened from any screen; the privacy policy and store listings point here.
+  static const String support = 'https://zaghlol.app/support';
 }
 
 /// Opens an external URL. The default does nothing (tests, other hosts); the

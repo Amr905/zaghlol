@@ -17,6 +17,7 @@ paths = [
   # Synthetic test vectors / example values that trip generic-api-key or jwt (T-192: named files, not whole test trees).
   '''^backend/openapi/zaghlol\-v1\.yaml$''',
   '''^backend/tests/Zaghlol\.Contract\.Tests/vectors/jws\-es256\-v1\.json$''',
+  '''^app/test/features/export_import/presentation/import_target_password_test\.dart$''',  # synthetic PDF password, PO-approved 2026-11-22
   '''^backend/tests/Zaghlol\.Contract\.Tests/vectors/seat\-key\-hash\-v1\.json$''',
   '''^backend/tests/Zaghlol\.Contract\.Tests/vectors/restore\-binding\-v1\.json$''',
   '''^backend/tests/Zaghlol\.Infrastructure\.Tests/Observability/ZaghlolJsonFormatterTests\.cs$''',

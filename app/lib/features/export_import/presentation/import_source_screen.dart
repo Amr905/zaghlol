@@ -20,6 +20,7 @@ import 'import_done_screen.dart';
 import 'import_labels.dart';
 import 'import_ports.dart';
 import 'import_summary_sheet.dart';
+import 'statement_mapping_step.dart';
 
 class ImportSourceScreen extends ConsumerStatefulWidget {
   const ImportSourceScreen({
@@ -57,26 +58,62 @@ class _State extends ConsumerState<ImportSourceScreen> {
     final picked = await ref.read(importFilePickerProvider).pick(source.kind);
     if (picked == null || !mounted) return;
     setState(() => _busy = true);
+    // The PDF password lives in this local only: asked for when the runner
+    // says the file is protected, passed down per call, never put in state,
+    // logs or storage, and dropped when the flow ends.
+    String? password;
+    ImportTargetCard? target;
     try {
       final runner = await ref.read(importRunnerProvider.future);
-      final preview = await runner.preview(source.id, picked);
+      var wrong = false;
+      ImportPreview? preview;
+      while (preview == null) {
+        try {
+          preview = await runner.preview(source.id, picked, password: password);
+        } on ImportFlowException catch (e) {
+          final needs =
+              e.kind == ImportFailureKind.passwordRequired ||
+              e.kind == ImportFailureKind.wrongPassword;
+          if (!needs) rethrow;
+          if (!mounted) return;
+          setState(() => _busy = false);
+          final asked = await askStatementPassword(
+            context,
+            _passwordLabels(AppLocalizations.of(context)),
+            wrong: wrong || e.kind == ImportFailureKind.wrongPassword,
+          );
+          if (asked == null || asked.isEmpty || !mounted) {
+            if (mounted) setState(() => _busy = false);
+            return;
+          }
+          password = asked;
+          wrong = true;
+          setState(() => _busy = true);
+        }
+      }
       if (!mounted) return;
       setState(() => _busy = false);
       final go = await showImportSummarySheet(
         context,
         preview: preview,
         targetCardName: widget.targetCardName,
+        onTargetChanged: runner.supportsTargetCard ? (c) => target = c : null,
       );
       if (go != true || !mounted) return;
       setState(() => _busy = true);
-      final outcome = await runner.commit(source.id, picked);
+      final outcome = await runner.commit(
+        source.id,
+        picked,
+        password: password,
+        targetCardId: target?.id,
+      );
       if (!mounted) return;
       setState(() => _busy = false);
       await Navigator.of(context).pushReplacement<void, void>(
         MaterialPageRoute<void>(
           builder: (_) => ImportDoneScreen(
             outcome: outcome,
-            cardName: widget.targetCardName,
+            cardName: target?.name ?? widget.targetCardName,
             onReview: widget.onReview,
             onOpenCard: widget.onOpenCard,
           ),
@@ -119,7 +156,19 @@ class _State extends ConsumerState<ImportSourceScreen> {
     ImportFailureKind.wrongType => l.exportsImportWrongType,
     ImportFailureKind.unsupported => l.exportsImportUnsupportedTitle,
     ImportFailureKind.failed => l.exportsImportFailed,
+    ImportFailureKind.passwordRequired ||
+    ImportFailureKind.wrongPassword => l.exportsImportPasswordWrong,
   };
+
+  StatementPasswordLabels _passwordLabels(AppLocalizations l) =>
+      StatementPasswordLabels(
+        title: l.exportsImportPasswordTitle,
+        body: l.exportsImportPasswordBody,
+        fieldLabel: l.exportsImportPasswordLabel,
+        wrongHint: l.exportsImportPasswordWrong,
+        confirm: l.commonActionContinue,
+        cancel: l.commonActionCancel,
+      );
 
   @override
   Widget build(BuildContext context) {

@@ -29,19 +29,41 @@ class FakeRunner implements ImportRunner {
   ImportFailureKind? failure;
   ImportOutcome? outcome;
   int commits = 0;
+  @override
+  bool supportsTargetCard = true;
+  String? requirePassword;
+  final previewPasswords = <String?>[];
+  String? lastTargetCardId;
 
   @override
   Future<ImportPreview> preview(
     ImportSourceId id,
-    PickedImportFile file,
-  ) async {
+    PickedImportFile file, {
+    String? password,
+  }) async {
+    previewPasswords.add(password);
+    final need = requirePassword;
+    if (need != null) {
+      if (password == null) {
+        throw const ImportFlowException(ImportFailureKind.passwordRequired);
+      }
+      if (password != need) {
+        throw const ImportFlowException(ImportFailureKind.wrongPassword);
+      }
+    }
     if (failure != null) throw ImportFlowException(failure!);
     return preview_!;
   }
 
   @override
-  Future<ImportOutcome> commit(ImportSourceId id, PickedImportFile file) async {
+  Future<ImportOutcome> commit(
+    ImportSourceId id,
+    PickedImportFile file, {
+    String? password,
+    String? targetCardId,
+  }) async {
     commits++;
+    lastTargetCardId = targetCardId;
     return outcome ?? const ImportOutcome(imported: 0);
   }
 }

@@ -323,13 +323,14 @@ into `BACKEND_IMAGE` by `deploy.sh`, which also keeps the previous one in `BACKE
 ### Day-to-day
 
 - **Upgrade the backend:** run the workflow again (it migrates first, N-1 compatible, then recreates api and worker). A failed smoke test puts the
-  previous digest back automatically; migrations are never reversed (expand/contract, section 3). To redeploy a known digest, give `image_digest`.
+  previous digest back automatically; migrations are never reversed (expand/contract, section 3). To redeploy a known digest, give `image_digest`; redeploying the running digest keeps the last different digest as the rollback target. The build job alone holds `packages: write`; the ssh deploy job has `contents: read` and pulls with the optional `GHCR_PULL_TOKEN` secret (only for a private package).
 - **Upgrade Postgres/Caddy/other images:** `./pin-images.sh`, review the diff, edit `production.env`, `./compose.sh pull && ./compose.sh up -d`. A Postgres major upgrade
   needs a dump/restore (`backup/restore.sh`), not a tag bump.
 - **Backups (`backup/`).** `zaghlol-backup.timer` runs nightly at 02:30 UTC: `pg_dump` (custom format), a base backup, a `pg_switch_wal`, retention of 15 days, then an `rsync` over
   ssh with a pinned host key to `OFFSITE_TARGET`. `archive_command` copies each WAL segment to `/var/lib/zaghlol/backup/wal` (at least every 5 minutes), which `backup.sh` mirrors
   off-server too: 14-day point-in-time recovery, RPO of about 5 minutes for a lost disk if the last WAL reached the target (otherwise the previous nightly run). A failed run mails `ALERT_EMAIL` and logs
   to the journal. Backups hold no financial data (it never reaches the server) but do hold install hashes and contributions: keep the target encrypted and private, and keep key material out of it.
+  A record deleted from the database (an account, an install, a purchase link) therefore stays in older backups for up to 15 days (local) and until the mirror drops it (off-server); it is not restored into a live database after a restore without replaying the deletions, so re-run the retention purger and any pending erasure after every restore.
   The mirror deletes off-server what local retention drops: give the target its own snapshots or an append-only mode if ransomware on this host is a concern.
 - **Restore** (`backup/restore.sh`, drill in `backup/restore-drill.md`): `dump` into a scratch database, `live` to replace the live schema from a dump, `pitr <base> "<UTC time>"` to rebuild the cluster.
   A new server needs runbook steps 1 to 5, the offline key backups, then `restore.sh pitr`.

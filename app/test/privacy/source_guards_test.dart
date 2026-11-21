@@ -53,6 +53,9 @@ const Map<String, String> loggingAllowed = {
   // Dev-flavour SMS spike: logs a code and a duration only (T-008).
   'android/app/src/devSms/kotlin/app/zaghlol/spike/sms/SpikeLog.kt':
       'codes only, dev flavour',
+  // T-193 AC5 device run: `kDebugMode`-only marker lines (a route type name,
+  // a boolean), never data; compiled out of release builds.
+  'lib/app/notification_taps_debug.dart': 'debug-only, no data',
 };
 
 final RegExp loggingCall = RegExp(

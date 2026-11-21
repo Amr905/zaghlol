@@ -14,7 +14,7 @@
 
 Tracking: **No**. Zaghlol does not track users (no ad or analytics SDKs, no data sharing for tracking).
 
-Data **not collected** (stays on the phone): SMS/message content, transactions, amounts, balances, budgets, assets, contacts, location, photos (Share/OCR and PDF stay local), audio and speech (on-device recognition).
+Data **not collected** (stays on the phone): SMS/message content, transactions, amounts, balances, budgets, assets, contacts, location, photos (Share/OCR and PDF stay local), audio and speech recordings. Voice entry (T-120) uses Apple's speech recognizer, on-device first; if on-device Egyptian Arabic recognition isn't available, Apple's server-based recognition may be used **only after the user's explicit consent** (D-42, ADR-010): the audio then goes to Apple under Apple's terms, never to Zaghlol's server, and the app keeps none of it. Draft answer "not collected" (Apple is the processor of its own service; confirm with legal), and the privacy policy and the `NSSpeechRecognitionUsageDescription` text must say it.
 
 Data collected by Zaghlol's backend:
 
@@ -22,8 +22,9 @@ Data collected by Zaghlol's backend:
 |---|---|---|---|---|
 | Identifiers > Device ID | Anonymous install ID; App Attest assertion (D-45) | Not linked to the user's identity (random ID, no account needed). For signed-in users the account token links to the account: declare as linked for those users (confirm) | No | App functionality |
 | Purchases > Purchase history | Purchase transaction identifiers for Gold verification and restore | Linked for signed-in users, otherwise not (matches `deployment.md` section 2) | No | App functionality |
-| Contact info > Email address | Optional Sign in with Apple / Google ID-token claim | Linked, optional | No | App functionality (account) |
-| Other data | Opt-in merchant contributions; "Request my bank" (institution, country, channel) | Not linked | No | App functionality |
+| Contact info > Email address | Optional Sign in with Apple / Google ID-token `email` claim (may be an Apple private relay address); stored in `accounts.email` for support lookup until the account is deleted; audit rows keep a keyed pseudonym 1 year (NFR-PRIV-07) | Linked, optional | No | App functionality (account) |
+| Identifiers > User ID | The provider subject ID from the same optional sign-in; stored until the account is deleted | Linked, optional | No | App functionality (account) |
+| Other data | Opt-in merchant contributions (normalized merchant text, **institution code**, system category; BR-SYNC-04); "Request my bank" (institution, country, channel) | Not linked | No | App functionality |
 | Usage / diagnostics | none collected | | | |
 
 ## Disclosures that the privacy notice and the privacy details must state (security-model section 2a, T-137)
@@ -41,7 +42,8 @@ Data collected by Zaghlol's backend:
 - **Sign in with Apple** is offered wherever Google sign-in is offered; sign-in is optional and exists only to carry Gold across devices.
 - **Account deletion** is in-app: Settings > Account > Delete account (FR-ACCT-04); "Delete everything" erases on-device data.
 - **Gold** is sold through StoreKit 2 (monthly, yearly, lifetime); entitlement is verified by our server. A sandbox demo path: demo Apple ID credentials to be supplied by the PO.
-- Face ID is used only for the optional app lock (`NSFaceIDUsageDescription`); microphone and speech recognition only for voice entry, on device.
+- Face ID is used only for the optional app lock (`NSFaceIDUsageDescription`); microphone and speech recognition only for voice entry, on device first; Apple's server-based recognition only after the user explicitly agrees (D-42).
+- Privacy policy: `https://zaghlol.app/privacy`; support: `https://zaghlol.app/support` (drafts in `site/`, pending legal review).
 - Encryption: standard TLS and on-device AES via system and bundled libraries; export compliance answers to be completed by the PO (`ITSAppUsesNonExemptEncryption`).
 - No tracking, no third-party analytics or advertising SDKs.
 

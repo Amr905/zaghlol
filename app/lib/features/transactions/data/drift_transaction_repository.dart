@@ -59,6 +59,7 @@ class DriftTransactionRepository implements TransactionRepository {
     Clock? clock,
     IdGenerator? newId,
     this._onAmountChange,
+    this._onRollback,
   }) : _now = clock ?? DateTime.now,
        _newId = newId ?? newUuidV4;
 
@@ -66,6 +67,9 @@ class DriftTransactionRepository implements TransactionRepository {
   final Clock _now;
   final IdGenerator _newId;
   final AmountChangeHook? _onAmountChange;
+
+  /// Called when an edit's transaction rolled back (discard held events).
+  final void Function()? _onRollback;
 
   int _nowMs() => _now().toUtc().millisecondsSinceEpoch;
 
@@ -152,6 +156,19 @@ class DriftTransactionRepository implements TransactionRepository {
       _requireOffset(edit.occurredTzOffsetMin!);
     }
     final now = _nowMs();
+    try {
+      return await _editInTransaction(id, edit, now);
+    } on Object {
+      _onRollback?.call();
+      rethrow;
+    }
+  }
+
+  Future<EditOutcome> _editInTransaction(
+    String id,
+    TransactionEdit edit,
+    int now,
+  ) {
     return _dao.inTransaction(() async {
       final current = await _dao.byId(id);
       if (current == null || current.deletedAt != null) _notFound();

@@ -10,6 +10,7 @@ name: backend-deploy-server
 #   secret   DEPLOY_KNOWN_HOSTS   the server's pinned host key line(s): `ssh-keyscan -t ed25519 <host>`, verified by hand
 #   variable DEPLOY_HOST          server DNS name or IP
 #   variable DEPLOY_USER          optional, default zaghlol-deploy
+#   secret   GHCR_PULL_TOKEN      optional, read:packages token; needed only if the GHCR package is private
 #   variable DEPLOY_API_DOMAIN    the API's public DNS name (same as API_DOMAIN on the server), for the external smoke test
 # Order: build image -> push to GHCR by digest -> ship backend/deploy to the server -> deploy.sh (pull, migrate, restart,
 # smoke on the server, roll back to the previous digest on failure) -> smoke from the runner.
@@ -24,7 +25,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 concurrency:
   group: backend-deploy-server
@@ -34,16 +34,18 @@ env:
   DOCKER_BUILDKIT: "1"
 
 jobs:
-  deploy:
-    name: build, push by digest, deploy to the server
+  # Only this job can write packages; it has no environment secrets and no ssh key.
+  build:
+    name: build and push the image (by digest)
     runs-on: ubuntu-latest
-    environment: backend-production
-    timeout-minutes: 45
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      ref: ${{ steps.image.outputs.ref }}
     env:
       ENABLED: ${{ vars.BACKEND_SERVER_DEPLOY_ENABLED }}
-      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
-      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
-      DEPLOY_API_DOMAIN: ${{ vars.DEPLOY_API_DOMAIN }}
       INPUT_DIGEST: ${{ inputs.image_digest }}
     steps:
       - name: Refuse unless server deploys are enabled
@@ -52,11 +54,10 @@ jobs:
             echo "::error title=Server deploy disabled::Set the repository variable BACKEND_SERVER_DEPLOY_ENABLED=true (docs/03-technical/deployment.md, self-hosted runbook)."
             exit 1
           fi
-          for v in DEPLOY_HOST DEPLOY_API_DOMAIN; do
-            if [ -z "${!v}" ]; then echo "::error title=Missing variable::$v is not set in the backend-production environment."; exit 1; fi
-          done
 
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
 
       - name: Build and push the image (by digest)
         id: image
@@ -81,6 +82,30 @@ jobs:
           case "$ref" in "$repo"@sha256:*) ;; *) echo "::error::could not read the pushed digest"; exit 1 ;; esac
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
           echo "Deploying $ref" >> "$GITHUB_STEP_SUMMARY"
+
+  # The ssh deploy job gets read-only contents and waits for the environment's reviewer. It cannot write packages.
+  deploy:
+    name: deploy to the server
+    needs: build
+    runs-on: ubuntu-latest
+    environment: backend-production
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      DEPLOY_API_DOMAIN: ${{ vars.DEPLOY_API_DOMAIN }}
+    steps:
+      - name: Require the environment variables
+        run: |
+          for v in DEPLOY_HOST DEPLOY_API_DOMAIN; do
+            if [ -z "${!v}" ]; then echo "::error title=Missing variable::$v is not set in the backend-production environment."; exit 1; fi
+          done
+
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
 
       - name: Prepare ssh (pinned host key, no trust on first use)
         env:
@@ -115,8 +140,9 @@ jobs:
 
       - name: Deploy on the server (migrate, restart, smoke, roll back on failure)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REF: ${{ steps.image.outputs.ref }}
+          # Optional read:packages token for a private GHCR package. Empty = the package is public.
+          GH_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          REF: ${{ needs.build.outputs.ref }}
         run: |
           set -euo pipefail
           # REF is built from our own pushed digest (or a validated input), and is meant to expand on this side.

@@ -16,8 +16,17 @@ final class UpsellCap {
 
   /// True, and records the prompt, when none was shown in the last week.
   /// Gold users never see one.
-  Future<bool> tryShow({required bool isGold}) async {
-    if (isGold) return false;
+  Future<bool> tryShow({required bool isGold}) {
+    if (isGold) return Future.value(false);
+    // Serialised: a second caller waits for the first check-and-mark.
+    final run = _tail.then((_) => _check());
+    _tail = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
+  Future<void> _tail = Future<void>.value();
+
+  Future<bool> _check() async {
     final now = _now();
     final last = await _store.lastShown();
     if (last != null && now.difference(last) < upsellInterval) return false;

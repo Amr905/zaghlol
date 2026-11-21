@@ -167,7 +167,11 @@ void main() {
         expect(runner.commits, 0);
       });
 
-      for (final kind in ImportFailureKind.values) {
+      for (final kind in [
+        ImportFailureKind.wrongType,
+        ImportFailureKind.unsupported,
+        ImportFailureKind.failed,
+      ]) {
         testWidgets('error ${kind.name} shows a banner', (t) async {
           runner.failure = kind;
           final l = await pump(t);
@@ -176,7 +180,7 @@ void main() {
           final text = switch (kind) {
             ImportFailureKind.wrongType => l.exportsImportWrongType,
             ImportFailureKind.unsupported => l.exportsImportUnsupportedTitle,
-            ImportFailureKind.failed => l.exportsImportFailed,
+            _ => l.exportsImportFailed,
           };
           expect(find.text(text), findsOneWidget);
           expect(runner.commits, 0);

@@ -171,6 +171,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
 Next free follow-up number: **FU-284**
+Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
 

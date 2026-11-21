@@ -31,6 +31,12 @@ set_var() {
 
 previous=$(get_var BACKEND_IMAGE)
 case "$previous" in *"$ZERO"*) previous="" ;; esac
+# Redeploying the running image must not make "previous" equal "current": keep the last different digest for rollback.
+if [ "$previous" = "$IMAGE" ]; then
+  previous=$(get_var BACKEND_IMAGE_PREVIOUS)
+  case "$previous" in *"$ZERO"*) previous="" ;; esac
+  [ "$previous" != "$IMAGE" ] || previous=""
+fi
 
 # Pull with a throwaway docker config so a token on stdin never stays on the server.
 if [ ! -t 0 ]; then

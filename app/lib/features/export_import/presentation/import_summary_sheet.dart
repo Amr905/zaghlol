@@ -17,6 +17,7 @@ Future<bool?> showImportSummarySheet(
   BuildContext context, {
   required ImportPreview preview,
   String? targetCardName,
+  ValueChanged<ImportTargetCard>? onTargetChanged,
 }) => showModalBottomSheet<bool>(
   context: context,
   isScrollControlled: true,
@@ -31,22 +32,69 @@ Future<bool?> showImportSummarySheet(
     duration: ZMotion.sheet,
     curve: ZMotion.curve,
   ),
-  builder: (_) =>
-      ImportSummarySheet(preview: preview, targetCardName: targetCardName),
+  builder: (_) => ImportSummarySheet(
+    preview: preview,
+    targetCardName: targetCardName,
+    onTargetChanged: onTargetChanged,
+  ),
 );
 
-class ImportSummarySheet extends ConsumerWidget {
+class ImportSummarySheet extends ConsumerStatefulWidget {
   const ImportSummarySheet({
     super.key,
     required this.preview,
     this.targetCardName,
+    this.onTargetChanged,
   });
 
   final ImportPreview preview;
   final String? targetCardName;
 
+  /// Called when the user picks another target card. The "Change" action
+  /// shows only for a single-card import with more than one card to pick.
+  final ValueChanged<ImportTargetCard>? onTargetChanged;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ImportSummarySheet> createState() => _SheetState();
+}
+
+class _SheetState extends ConsumerState<ImportSummarySheet> {
+  ImportTargetCard? _picked;
+
+  Future<void> _change(List<ImportTargetCard> cards, String? current) async {
+    final l = AppLocalizations.of(context);
+    final pick = await showZSheet<ImportTargetCard>(
+      context: context,
+      title: l.importFlowTargetChange,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final card in cards)
+            ZListRow(
+              key: ValueKey('importTarget_${card.id}'),
+              title: card.name,
+              trailing: card.name == current
+                  ? Icon(
+                      Icons.check,
+                      color: ZColors.of(ctx).primary,
+                      semanticLabel: card.name,
+                    )
+                  : null,
+              onTap: () => Navigator.of(ctx).pop(card),
+            ),
+          const SizedBox(height: ZSpacing.lg),
+        ],
+      ),
+    );
+    if (pick == null || !mounted) return;
+    setState(() => _picked = pick);
+    widget.onTargetChanged?.call(pick);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = widget.preview;
+    final targetCardName = widget.targetCardName;
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
@@ -61,7 +109,10 @@ class ImportSummarySheet extends ConsumerWidget {
             ZDateFormat.date(p.latest!, lang, digits),
           )
         : null;
-    final card = p.targetCardName ?? targetCardName;
+    final card = _picked?.name ?? p.targetCardName ?? targetCardName;
+    final cards = ref.watch(importTargetCardsProvider).value ?? const [];
+    final canChange =
+        widget.onTargetChanged != null && cards.length > 1 && card != null;
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsetsDirectional.fromSTEB(
@@ -163,9 +214,27 @@ class ImportSummarySheet extends ConsumerWidget {
               if (card != null) ...[
                 const SizedBox(height: ZSpacing.md),
                 ZCard(
-                  child: Text(
-                    l.importFlowTarget(card),
-                    style: ZType.titleSmall.copyWith(color: c.text),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l.importFlowTarget(card),
+                          style: ZType.titleSmall.copyWith(color: c.text),
+                        ),
+                      ),
+                      if (canChange)
+                        TextButton(
+                          key: const ValueKey('importTargetChange'),
+                          style: TextButton.styleFrom(
+                            minimumSize: const Size(
+                              ZSpacing.minTarget,
+                              ZSpacing.minTarget,
+                            ),
+                          ),
+                          onPressed: () => _change(cards, card),
+                          child: Text(l.importFlowTargetChange),
+                        ),
+                    ],
                   ),
                 ),
               ],

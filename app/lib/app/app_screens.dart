@@ -16,6 +16,7 @@ import '../features/accounts/presentation/edit_card/add_card_flow.dart';
 import '../features/ask/presentation/ask_screen.dart';
 import '../features/backup/presentation/backup_screen.dart';
 import '../features/backup/presentation/restore_screen.dart';
+import '../features/export_import/presentation/export_screen.dart';
 import '../features/export_import/presentation/import_source_screen.dart';
 import '../features/budget/presentation/budget_screen.dart';
 import '../features/capture/presentation/capture_settings_screen.dart';
@@ -62,6 +63,7 @@ final class AppScreens {
     this.backup = _backup,
     this.restore = _restore,
     this.importFlow = _importFlow,
+    this.exportMain = _exportMain,
     this.captureSettings = _captureSettings,
     this.notificationsSettings = _notificationsSettings,
     this.templateBuilder = _templateBuilder,
@@ -131,6 +133,14 @@ final class AppScreens {
     VoidCallback? onOpenCard,
   })
   importFlow;
+
+  /// S-67 export half: "Export & import" from Settings. [onOpenImport]
+  /// opens the import flow.
+  final Future<void> Function(
+    BuildContext context, {
+    required VoidCallback onOpenImport,
+  })
+  exportMain;
   final Future<void> Function(
     BuildContext context, {
     required void Function({required bool regrantDue}) onRestored,
@@ -292,6 +302,11 @@ Future<void> _backup(
   c,
   (_) => BackupScreen(onOpenRestore: onOpenRestore, iCloudAvailable: iCloud),
 );
+
+Future<void> _exportMain(
+  BuildContext c, {
+  required VoidCallback onOpenImport,
+}) => pushScreen<void>(c, (_) => ExportScreen(onOpenImport: onOpenImport));
 
 Future<void> _importFlow(
   BuildContext c, {
