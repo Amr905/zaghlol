@@ -154,7 +154,7 @@ jobs:
           test "$(grep -c 'packages: write' .github/workflows/backend-deploy-server.yml)" = 1
           awk '/^  deploy:/{d=1} d&&/packages:/{bad=1} END{exit bad}' .github/workflows/backend-deploy-server.yml
       - name: site-pages never deploys a draft preview
-        run: grep -q "if: \${{ !inputs.allow_placeholders }}" .github/workflows/site-pages.yml
+        run: grep -qF '!inputs.allow_placeholders' .github/workflows/site-pages.yml
 
   actionlint:
     runs-on: ubuntu-latest
