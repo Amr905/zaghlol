@@ -2,7 +2,7 @@ name: backend-monsterasp
 
 # T-206 package checks. Nothing is deployed and no secret is used: the win-x64 package builds, holds a web.config (in-process,
 # stdout logging off, allow-listed non-secret environment variables only) and no secrets; the package tool's tests run; actionlint
-# validates the three MonsterASP workflows.
+# validates the three MonsterASP workflows (runs on pushes to batch/** and ci/**).
 on:
   push:
     branches: ["batch/**", "ci/**"]
