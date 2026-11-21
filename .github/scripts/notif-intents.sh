@@ -96,7 +96,47 @@ PY
   A exec-out screencap -p > "$OUT/screens/notif-ui-miss.png" 2> /dev/null || true
   return 1
 }
-shade() { A shell cmd statusbar expand-notifications; sleep 2; }
+# Two or more notifications of the app are shown as one collapsed group
+# ("Zaghlol Dev", Expand): open it first so a tap lands on the notification.
+shade() {
+  A shell cmd statusbar expand-notifications; sleep 2
+  A shell uiautomator dump /sdcard/ui3.xml > /dev/null 2>&1
+  A pull /sdcard/ui3.xml "$OUT/ui3.xml" > /dev/null 2>&1
+  xy=$(python3 -I - "$OUT/ui3.xml" << 'PY'
+import re, sys
+import xml.etree.ElementTree as ET
+try:
+    root = ET.parse(sys.argv[1]).getroot()
+except Exception:
+    sys.exit(0)
+def center(n):
+    m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", n.get("bounds") or "")
+    if not m:
+        return None
+    a, b, c, d = map(int, m.groups())
+    return (a + c) // 2, (b + d) // 2
+probe_y = None
+for n in root.iter("node"):
+    if "ZPROBE" in (n.get("text") or ""):
+        xy = center(n)
+        if xy:
+            probe_y = xy[1]
+            break
+if probe_y is None:
+    sys.exit(0)
+best = None
+for n in root.iter("node"):
+    d = n.get("content-desc") or n.get("text") or ""
+    xy = center(n)
+    if d in ("Expand", "Collapse") and xy and xy[1] <= probe_y:
+        if best is None or xy[1] > best[1][1]:
+            best = (d, xy)
+if best and best[0] == "Expand":
+    print(best[1][0], best[1][1])
+PY
+)
+  if [ -n "$xy" ]; then echo "  group is collapsed: expanding"; A shell input tap $xy; sleep 2; fi
+}
 # Diagnostics (synthetic data only): what is on screen, what is posted, what started.
 ui_texts() {
   A shell uiautomator dump /sdcard/ui2.xml > /dev/null 2>&1
