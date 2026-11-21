@@ -878,6 +878,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-273** (batch 51 review minors, FIXED batch 52 except the PO item): purchase.dart doc comment above `outboxMaxAge` misplaced; Gold sign-out also stops scheduled Drive backups (PO call); delete-everything's Google sign-out bypasses the new sign-in gate; the gate is a module singleton (move to a provider); no rollback tests for FU-155a (budget saver) and FU-181a (split save); voice quota: if `countOne` throws after a row is written, the retry counts on the next row. Details in [batch-51](05-reviews/batch-51.md). Batch 52: sign-out goes through the gate; the gate is now `googleSignInGateProvider`; rollback tests for FU-155a / FU-181a; voice counter flags before `countOne` so a throw never double-counts. Still for the PO: Gold sign-out also stops scheduled Drive backups.
 
+- **FU-274** (batch 52 review minors, OPEN): token lifetime constants duplicated in `entitlement.dart`; paywall passes `_restore` to both `onRetry` and `onRestore`; after a failed forced OpenBao login the next login skips the 5 s throttle (the gate still allows one at a time); `AmountRepairEvents` publishes a held event after a rolled-back edit on the next commit; import done screen shows a blank category name while lookups load; docs say 140 packages, the release scan covers 142. Details in [batch-52](05-reviews/batch-52.md).
+
 ## Log
 | Date | Event |
 |---|---|
