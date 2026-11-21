@@ -152,6 +152,7 @@ class _InsightsTabs extends StatelessWidget {
                             ? c.surface
                             : Colors.transparent,
                         borderRadius: shape,
+                        border: s.value == selected ? c.flatBorder : null,
                         boxShadow: s.value == selected
                             ? [
                                 BoxShadow(

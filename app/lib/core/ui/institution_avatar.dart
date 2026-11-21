@@ -26,7 +26,7 @@ const double kBadgeMinContrast = 4.5;
 /// Fill and text colours for a badge on [brand] (ARGB). The brand colour is
 /// used as is when white or ink reaches [kBadgeMinContrast] on it; otherwise
 /// it is darkened in small steps until one does. In dark mode the fill is
-/// first deepened so the badge does not glare on Jade Night.
+/// first deepened so the badge does not glare on True Black.
 ({Color bg, Color fg}) badgeColors(int brand, Brightness brightness) {
   var bg = Color(brand);
   if (brightness == Brightness.dark) {

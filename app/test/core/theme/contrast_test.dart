@@ -47,6 +47,8 @@ void main() {
         'incomeText on surface': (c.incomeText, c.surface),
         'incomeText on incomeBg': (c.incomeText, c.incomeBg),
         'text on zaghlolBg': (c.text, c.zaghlolBg),
+        'zaghlolText on zaghlolBg': (c.zaghlolText, c.zaghlolBg),
+        'text on surfaceSunk': (c.text, c.surfaceSunk),
         'textMuted on zaghlolBg': (c.textMuted, c.zaghlolBg),
         'warningText on warningBg': (c.warningText, c.warningBg),
         'dangerText on dangerBg': (c.dangerText, c.dangerBg),
@@ -67,4 +69,58 @@ void main() {
       });
     });
   }
+
+  group('True Black table (05-theme-2026 section 0, D-79)', () {
+    const d = ZColors.dark;
+    test('hex values match the table exactly', () {
+      expect(d.bg, const Color(0xFF000000));
+      expect(d.surface, const Color(0xFF141414));
+      expect(d.surfaceAlt, const Color(0xFF222222));
+      expect(d.surfaceSunk, const Color(0xFF0A0A0A));
+      expect(d.outline, const Color(0xFF242424));
+      expect(d.text, const Color(0xFFFFFFFF));
+      expect(d.textMuted, const Color(0xFFA8A8A8));
+      expect(d.primary, const Color(0xFFFFFFFF));
+      expect(d.primaryContainer, const Color(0xFF2A2A2A));
+      expect(d.onPrimary, const Color(0xFF000000));
+      expect(d.brandMint, const Color(0xFF62E0AB));
+      expect(d.incomeText, const Color(0xFF6EE7B7));
+      expect(d.accentLight, const Color(0xFFFFCB8E));
+      expect(d.accentDark, const Color(0xFFFFA94D));
+      expect(d.onAccent, const Color(0xFF2E1600));
+      expect(d.zaghlolBg, const Color(0xFF2A2018));
+      expect(d.zaghlolText, const Color(0xFFFBE7D2));
+      expect(d.warningBg, const Color(0xFF262113));
+      expect(d.warningText, const Color(0xFFF2C76A));
+      expect(d.dangerText, const Color(0xFFF2A08B));
+    });
+
+    test('documented contrast ratios', () {
+      expect(contrastRatio(d.text, d.surface), closeTo(18.7, 0.4));
+      expect(contrastRatio(d.textMuted, d.surface), closeTo(8.0, 0.4));
+      expect(contrastRatio(d.primary, d.primaryContainer), closeTo(14.4, 0.4));
+      expect(contrastRatio(d.onPrimary, d.primary), closeTo(21, 0.01));
+      expect(contrastRatio(d.incomeText, d.surface), closeTo(12.0, 0.4));
+      expect(contrastRatio(d.zaghlolText, d.zaghlolBg), closeTo(13.3, 0.4));
+      expect(contrastRatio(d.warningText, d.warningBg), closeTo(10.4, 0.4));
+      expect(contrastRatio(d.dangerText, d.surface), closeTo(8.6, 0.4));
+    });
+
+    test('no green text: every text token except income is neutral grey', () {
+      for (final t in [d.text, d.textMuted, d.primary, d.heroNumber]) {
+        expect(t.r, closeTo(t.g, 0.001));
+        expect(t.g, closeTo(t.b, 0.001));
+      }
+    });
+
+    test('no shadows: the shadow token is fully transparent', () {
+      expect(d.shadow.a, 0);
+    });
+
+    test('flat hero: no gradient, mint progress fill', () {
+      expect(d.heroFrom, d.heroTo);
+      expect(d.heroFrom, d.surface);
+      expect(d.progressFrom, d.brandMint);
+    });
+  });
 }

@@ -9,6 +9,18 @@
   "commonNavMoney": "Money",
   "commonNavZaghlol": "Zaghlol",
   "commonNavAddA11y": "Quick add",
+  "commonNavAddLabel": "Add",
+  "commonNavBadgeCount": "{count}",
+  "@commonNavBadgeCount": {
+    "description": "Badge count on a bottom-bar tab (1 to 9).",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "commonNavBadgeMax": "9+",
+  "@commonNavBadgeMax": {
+    "description": "Badge text when the count is above 9."
+  },
   "appLockTitle": "Zaghlol is locked",
   "appLockUnlock": "Unlock",
   "appLockReason": "Confirm it's you to open Zaghlol",

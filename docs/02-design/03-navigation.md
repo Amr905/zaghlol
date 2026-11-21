@@ -1,27 +1,24 @@
 # 03 — Navigation Structure
 
 ## 1. Model
-Four tabs plus one gold **Add** button, pushed screens, bottom sheets and full-screen overlays. Arabic is the reference layout (RTL): the first tab sits on the **right**.
+Four tabs plus one apricot **Add** button, pushed screens, bottom sheets and full-screen overlays. Arabic is the reference layout (RTL): the first tab sits on the **right**.
 
-*Revised after the platform research (mockups round): the spec's centre-docked "+" is replaced by each platform's native pattern — iOS 26 detached floating button, Android M3 FAB at bottom-end. Same destinations, same behaviour; see §7 and `mockups/`.*
+*Revised 2026-11-19 (D-77, D-78): Zaghlol has **one shared look on Android and iOS**. The bottom bar is **option A — a solid bar docked to the bottom with a raised apricot Add button in the centre**, replacing the earlier per-platform patterns (iOS 26 detached circle, Android M3 FAB). Same destinations, same behaviour. Component spec: `04-design-system.md` C-02.*
 
 ```
- iOS (Arabic, RTL)
- ┌───────────────────────────────────────────┐
- │ ( + )   ( زغلول  فلوسي  التحليلات  [الرئيسية] ) │   glass capsule + detached gold button
- └───────────────────────────────────────────┘
- Android (Arabic, RTL)
-                                       ( + )  ← M3 FAB, bottom-end
- ┌───────────────────────────────────────────┐
- │  زغلول      فلوسي      التحليلات     [الرئيسية] │   M3 NavigationBar
- └───────────────────────────────────────────┘
+ Android & iOS (Arabic, RTL) — identical
+                        ╭─────╮
+                        │  +  │   ← raised apricot Add, centre
+ ┌──────────────────────┤     ├──────────────────────┐
+ │  زغلول     فلوسي        سجّل        الحسبة   [الرئيسية] │   solid docked bar
+ └────────────────────────────────────────────────────┘
 ```
 
 | Tab | Label AR / EN | Icon (Material Symbols Rounded) | Root | Inside |
 |-----|---------------|-------------------------------|------|--------|
 | 1 | الرئيسية / Home | `home` | S-10 | S-11, S-12, S-13, S-14, S-15, S-16 |
 | 2 | التحليلات / Insights | `bar_chart` | Segmented: **Charts** S-20 · **Budget** S-22 · **Bills** S-24 | S-21, S-23, S-25 |
-| — | سجل / Add (gold button: iOS detached circle, Android FAB) | `add` | opens S-30 sheet | S-31, S-13, S-32, S-44 |
+| — (centre) | سجّل / Add (raised apricot circle in the centre of the bar) | `add` | opens S-30 sheet | S-31, S-13, S-32, S-44 |
 | 4 | فلوسي / Money | `account_balance_wallet` | S-40 | S-41, S-42, S-43, S-44, S-45, S-46 [flag] |
 | 5 | زغلول / Zaghlol | mascot glyph | S-50 (with segment **Tips** S-51 only when flag on) | — |
 
@@ -47,7 +44,7 @@ App start
      │    ├─ Charts S-20 ─ S-21 Chart detail
      │    ├─ Budget S-22 ─ S-23 Edit budgets
      │    └─ Bills S-24 ─ S-25 Add/edit (sheet)
-     ├─ FAB → S-30 Quick add (sheet)
+     ├─ Add (centre) → S-30 Quick add (sheet)
      │          ├─ Speak → S-31 Voice (overlay)
      │          ├─ Type → S-13 Add transaction (sheet)
      │          ├─ Scan → S-32 Screenshot / receipt
@@ -115,8 +112,7 @@ All deep links pass through S-05 if app lock is on.
 ## 7. Platform differences
 | Area | Android (Material 3) | iOS (HIG) |
 |------|---------------------|-----------|
-| Bottom bar | Material 3 `NavigationBar`, 4 destinations, pill indicator (64×32) on the active one | iOS 26 floating **Liquid Glass** tab bar (capsule over the content, glass highlight on the active tab), 4 tabs |
-| Add button | M3 **FAB** (56 dp, gold) at the **bottom-end** above the navigation bar (bottom-left in Arabic) | Separate floating **gold circle** next to the tab capsule at the trailing end (left in Arabic), like iOS 26's detached search button |
+| Bottom bar + Add | **Same on both (D-78)**: docked bar, raised centre Add — `04-design-system.md` C-02. Android: respects gesture-nav / 3-button insets | **Same on both (D-78)**. iOS: bar height includes the home-indicator safe area; edge-swipe back unaffected |
 | Sheets | Modal bottom sheet with drag handle | Glass `.sheet` with detents (medium / large); solid surface for forms |
 | Back | System back + top-app-bar back arrow | Edge swipe + back chevron with previous title |
 | Haptics | `HapticFeedback.mediumImpact` on FAB, confirmations | Equivalent UIImpactFeedback |

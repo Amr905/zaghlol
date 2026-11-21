@@ -134,6 +134,24 @@ abstract class AppLocalizations {
   /// **'سجّل بسرعة'**
   String get commonNavAddA11y;
 
+  /// No description provided for @commonNavAddLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل'**
+  String get commonNavAddLabel;
+
+  /// Badge count on a bottom-bar tab (1 to 9).
+  ///
+  /// In ar, this message translates to:
+  /// **'{count}'**
+  String commonNavBadgeCount(int count);
+
+  /// Badge text when the count is above 9.
+  ///
+  /// In ar, this message translates to:
+  /// **'٩+'**
+  String get commonNavBadgeMax;
+
   /// Title of the app lock screen (S-05).
   ///
   /// In ar, this message translates to:
