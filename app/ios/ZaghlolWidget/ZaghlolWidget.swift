@@ -10,11 +10,25 @@ import WidgetKit
 struct SnapshotEntry: TimelineEntry {
   let date: Date
   let view: WidgetView?
+  /// Line two as of `date` (FU-206b); the stored line when there is no day list.
+  var secondary: String { view?.secondary(at: date) ?? "" }
 }
 
 struct SnapshotProvider: TimelineProvider {
   private func current() -> SnapshotEntry {
     SnapshotEntry(date: Date(), view: WidgetSnapshotStore.production()?.readOrNil())
+  }
+
+  /// FU-206b: one entry now and one at each coming local midnight, so the
+  /// days-to-payday line rolls without the app running.
+  static func entries(for view: WidgetView?, now: Date, calendar: Calendar = .current)
+    -> [SnapshotEntry]
+  {
+    var out = [SnapshotEntry(date: now, view: view)]
+    for d in (view?.rollDates(after: now, calendar: calendar) ?? []) {
+      out.append(SnapshotEntry(date: d, view: view))
+    }
+    return out
   }
 
   /// The gallery placeholder carries no amount (the mask only).
@@ -30,10 +44,12 @@ struct SnapshotProvider: TimelineProvider {
     completion(context.isPreview ? placeholder(in: context) : current())
   }
 
-  /// One entry, never refreshed by the widget itself: the app reloads the
+  /// An entry per coming local midnight (FU-206b); the app reloads the
   /// timeline (`WidgetCenter.reloadAllTimelines`) after each new snapshot.
   func getTimeline(in context: Context, completion: @escaping (Timeline<SnapshotEntry>) -> Void) {
-    completion(Timeline(entries: [current()], policy: .never))
+    completion(
+      Timeline(
+        entries: Self.entries(for: current().view, now: Date()), policy: .atEnd))
   }
 }
 
@@ -61,8 +77,8 @@ struct ZaghlolWidgetView: View {
           .minimumScaleFactor(0.6)
           .lineLimit(2)
           .privacySensitive()
-        if !v.secondaryText.isEmpty {
-          Text(v.secondaryText)
+        if !entry.secondary.isEmpty {
+          Text(entry.secondary)
             .font(.caption)
             .foregroundColor(.widgetMuted)
             .lineLimit(2)
