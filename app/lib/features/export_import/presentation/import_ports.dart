@@ -15,6 +15,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart' show Money;
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/accounts_dao.dart';
 import '../../../core/db/daos/transactions_dao.dart';
+import '../../accounts/data/accounts_providers.dart';
 import '../../gold/application/gating.dart';
 import '../../transactions/application/refund_matching.dart';
 import '../../transactions/application/transfer_pairing.dart';
@@ -162,6 +163,12 @@ enum ImportFailureKind {
 
   /// Unreadable, too large, or anything else.
   failed,
+
+  /// A protected PDF and no password was given (the flow asks for it).
+  passwordRequired,
+
+  /// The password given does not open the PDF.
+  wrongPassword,
 }
 
 final class ImportFlowException implements Exception {
@@ -171,6 +178,22 @@ final class ImportFlowException implements Exception {
   @override
   String toString() => 'ImportFlowException(${kind.name})';
 }
+
+/// A card an import can be filed under (the summary's "Change" action).
+final class ImportTargetCard {
+  const ImportTargetCard({required this.id, required this.name});
+  final String id;
+  final String name;
+}
+
+/// The cards the user can pick as the target. Names only; no balances.
+final importTargetCardsProvider = FutureProvider<List<ImportTargetCard>>((
+  ref,
+) async {
+  final repo = await ref.watch(accountsRepositoryProvider.future);
+  final list = await repo.list();
+  return [for (final a in list) ImportTargetCard(id: a.id, name: a.label)];
+}, name: 'importTargetCardsProvider');
 
 /// What an import would do, shown before the user confirms (mockup 33).
 final class ImportPreview {
@@ -236,9 +259,22 @@ final class ImportOutcome {
 }
 
 /// Parses a picked file and writes it. [preview] never writes.
+///
+/// [password] opens a protected PDF. It is a per-call argument: a runner
+/// never stores, logs or returns it. [targetCardId] files the rows under the
+/// card the user picked on the summary; null keeps the default.
 abstract interface class ImportRunner {
-  Future<ImportPreview> preview(ImportSourceId id, PickedImportFile file);
-  Future<ImportOutcome> commit(ImportSourceId id, PickedImportFile file);
+  Future<ImportPreview> preview(
+    ImportSourceId id,
+    PickedImportFile file, {
+    String? password,
+  });
+  Future<ImportOutcome> commit(
+    ImportSourceId id,
+    PickedImportFile file, {
+    String? password,
+    String? targetCardId,
+  });
 }
 
 /// T-155 for the Zaghlol CSV. Statement sources throw [unsupported] until
@@ -272,8 +308,9 @@ final class CsvImportRunner implements ImportRunner {
   @override
   Future<ImportPreview> preview(
     ImportSourceId id,
-    PickedImportFile file,
-  ) async {
+    PickedImportFile file, {
+    String? password,
+  }) async {
     _check(id, file);
     final s = await _run(file, dry: true);
     final untracked = s.invalidByProblem[ImportRowProblem.unknownAccount] ?? 0;
@@ -290,7 +327,12 @@ final class CsvImportRunner implements ImportRunner {
   }
 
   @override
-  Future<ImportOutcome> commit(ImportSourceId id, PickedImportFile file) async {
+  Future<ImportOutcome> commit(
+    ImportSourceId id,
+    PickedImportFile file, {
+    String? password,
+    String? targetCardId,
+  }) async {
     _check(id, file);
     final s = await _run(file, dry: false);
     return ImportOutcome(
