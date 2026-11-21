@@ -283,6 +283,7 @@ class DriftTransactionRepository implements TransactionRepository {
       currencies: {for (final c in f.currencies) c.code},
       statuses: {for (final s in f.statuses) s.code},
       text: text,
+      merchantNorm: f.merchantNorm,
     );
   }
 

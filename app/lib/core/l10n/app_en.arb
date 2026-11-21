@@ -1020,11 +1020,11 @@
       }
     }
   },
-  "insightsChartTitleCashFlow": "Cash flow",
+  "insightsChartTitleCashFlow": "Money in & out",
   "@insightsChartTitleCashFlow": {
     "description": "T · chart 1 (Free)"
   },
-  "insightsChartTitleCategories": "Where your money went",
+  "insightsChartTitleCategories": "Where it went",
   "@insightsChartTitleCategories": {
     "description": "T · chart 2 (Free)"
   },
@@ -1040,7 +1040,7 @@
   "@insightsChartTitleWeekPattern": {
     "description": "T · chart 5 (Gold), day of week and hour"
   },
-  "insightsChartTitleMerchants": "Top merchants",
+  "insightsChartTitleMerchants": "Top places",
   "@insightsChartTitleMerchants": {
     "description": "T · chart 6 (Free, top five)"
   },
@@ -7736,5 +7736,520 @@
   "networthCardOwed": "Amount you owe",
   "@networthCardOwed": {
     "description": "L"
+  },
+  "insightsSummarySpent": "Spent",
+  "@insightsSummarySpent": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryIncome": "Income",
+  "@insightsSummaryIncome": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummarySaved": "Saved",
+  "@insightsSummarySaved": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryRate": "Savings rate",
+  "@insightsSummaryRate": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeUpPct": "▲ {pct}",
+  "@insightsChangeUpPct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeDownPct": "▼ {pct}",
+  "@insightsChangeDownPct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeUpPts": "▲ {n} pts",
+  "@insightsChangeUpPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeDownPts": "▼ {n} pts",
+  "@insightsChangeDownPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeSame": "= same",
+  "@insightsChangeSame": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeSamePct": "= {pct}",
+  "@insightsChangeSamePct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeNew": "New",
+  "@insightsChangeNew": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeA11yUp": "up {pct}",
+  "@insightsChangeA11yUp": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yDown": "down {pct}",
+  "@insightsChangeA11yDown": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yUpPts": "up {n} points",
+  "@insightsChangeA11yUpPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yDownPts": "down {n} points",
+  "@insightsChangeA11yDownPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11ySame": "unchanged",
+  "@insightsChangeA11ySame": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeA11yNew": "new, nothing to compare with",
+  "@insightsChangeA11yNew": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryTileA11y": "{label}: {value}. {change}, against {baseline}",
+  "@insightsSummaryTileA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      },
+      "baseline": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryBaseline": "Compared with {prev}",
+  "@insightsSummaryBaseline": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryBaselineDays": "Compared with the same {days} days of {prev}",
+  "@insightsSummaryBaselineDays": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryEmpty": "No transactions in this period yet. Log some spending or income and I will work out your summary.",
+  "@insightsSummaryEmpty": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsOneLinerDownRiser": "{category} is up {pct}, but you spent less overall than {prev}. Keep it up!",
+  "@insightsOneLinerDownRiser": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerDown": "You spent less than {prev}. Keep it up!",
+  "@insightsOneLinerDown": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerUpRiser": "Spending is up on {prev}, mostly {category} at {pct}. Keep an eye on it.",
+  "@insightsOneLinerUpRiser": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerUp": "Spending is up on {prev}. Keep an eye on it.",
+  "@insightsOneLinerUp": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerSame": "Spending is about the same as {prev}. Steady!",
+  "@insightsOneLinerSame": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerNoBaseline": "Nothing before this period to compare with yet. Keep going and I will do the maths.",
+  "@insightsOneLinerNoBaseline": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsCashFlowSub": "{span} · {note}",
+  "@insightsChartsCashFlowSub": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "span": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsLastNMonths": "Last {n} months",
+  "@insightsChartsLastNMonths": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodOpenNote": "{now} is not over yet",
+  "@insightsChartsPeriodOpenNote": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "now": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCategoriesSub": "Top {n} categories, the rest in “Other”",
+  "@insightsChartsCategoriesSub": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsMerchantsSub": "Tap a place to see its transactions",
+  "@insightsChartsMerchantsSub": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsSeeTransactions": "See the {count} transactions",
+  "@insightsChartsSeeTransactions": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSeeTransactionsA11y": "Open the transactions",
+  "@insightsChartsSeeTransactionsA11y": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsBubbleSaved": "Saved {amount}",
+  "@insightsChartsBubbleSaved": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBubbleIncome": "Income {amount}",
+  "@insightsChartsBubbleIncome": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBubbleSpent": "Spent {amount}",
+  "@insightsChartsBubbleSpent": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSliceBubble": "{name} · {amount} · {percent}",
+  "@insightsChartsSliceBubble": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBarHint": "Tap a bar for its details",
+  "@insightsChartsBarHint": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsScrubHint": "Press and drag along the line to read each point",
+  "@insightsChartsScrubHint": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPartialLegend": "{name} (not over yet)",
+  "@insightsChartsPartialLegend": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPartialBarA11y": "{name}, not over yet",
+  "@insightsChartsPartialBarA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPlaceCount": "{count, plural, one{once} two{twice} other{{n} times}}",
+  "@insightsChartsPlaceCount": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPlaceRowA11y": "{name}: {count}, {amount}. Open its transactions",
+  "@insightsChartsPlaceRowA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSliceRowA11y": "{name}: {amount}, {percent}. {change}",
+  "@insightsChartsSliceRowA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsChipA11y": "{name}: {change}",
+  "@insightsChartsChipA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsAllCharts": "All charts ({n})",
+  "@insightsChartsAllCharts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsFewerCharts": "Fewer charts",
+  "@insightsChartsFewerCharts": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsHiddenNote": "Amounts hidden · charts still show their shape",
+  "@insightsChartsHiddenNote": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsAxisThousands": "{n}K",
+  "@insightsAxisThousands": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsAxisMillions": "{n}M",
+  "@insightsAxisMillions": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPresetThisCycle": "This month",
+  "@insightsChartsPresetThisCycle": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPresetLastCycle": "Last month",
+  "@insightsChartsPresetLastCycle": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPresetLastCycles": "Last {n} months",
+  "@insightsChartsPresetLastCycles": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedMonths": "I need {months} more for this chart to show.",
+  "@insightsThinNeedMonths": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "months": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedTxns": "{count, plural, one{I need one more transaction} other{I need {n} more transactions}} for this chart to show.",
+  "@insightsThinNeedTxns": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedIncome": "Add your income first and I will split it for you.",
+  "@insightsThinNeedIncome": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsThinNoData": "Nothing here yet. Once transactions come in, this chart will fill up.",
+  "@insightsThinNoData": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsThinSeeDetails": "See details",
+  "@insightsThinSeeDetails": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsDrillTotal": "{count} transactions",
+  "@insightsChartsDrillTotal": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsDrillTotalA11y": "Total {amount}, {count} transactions. {change}",
+  "@insightsChartsDrillTotalA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsDrillVs": "vs the period before",
+  "@insightsChartsDrillVs": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsRetry": "Try again",
+  "@insightsChartsRetry": {
+    "description": "T-189 charts redesign"
   }
 }

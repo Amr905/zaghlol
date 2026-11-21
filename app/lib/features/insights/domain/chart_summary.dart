@@ -70,10 +70,7 @@ final class PeriodTotals {
       final t = CashFlowPoint.total(data);
       return PeriodTotals(income: t.income, spend: t.spend);
     }(),
-    _ => PeriodTotals(
-      income: Money(currency, 0),
-      spend: Money(currency, 0),
-    ),
+    _ => PeriodTotals(income: Money(currency, 0), spend: Money(currency, 0)),
   };
 
   final Money income;
@@ -83,9 +80,8 @@ final class PeriodTotals {
 
   /// Saved over income as a whole percent (half away from zero); null when
   /// there was no income.
-  int? get ratePct => income.minor > 0
-      ? mulDivRound(saved.minor, 100, income.minor)
-      : null;
+  int? get ratePct =>
+      income.minor > 0 ? mulDivRound(saved.minor, 100, income.minor) : null;
 
   bool get isEmpty => income.minor == 0 && spend.minor == 0;
 }
@@ -154,7 +150,12 @@ final class DonutEntry {
     required this.shareBp,
     required this.count,
     required this.change,
+    this.memberIds = const [],
   });
+
+  /// The categories behind the entry: one for a named slice, all folded ones
+  /// for "Other" (a null among them is uncategorized).
+  final List<String?> memberIds;
 
   /// Null for uncategorized and for the folded "Other".
   final String? categoryId;
@@ -199,6 +200,7 @@ List<DonutEntry> topCategoriesPlusOther(
       DonutEntry(
         categoryId: s.categoryId,
         isOther: false,
+        memberIds: [s.categoryId],
         amount: s.amount,
         shareBp: s.shareBp,
         count: s.count,
@@ -212,6 +214,7 @@ List<DonutEntry> topCategoriesPlusOther(
       DonutEntry(
         categoryId: null,
         isOther: true,
+        memberIds: [for (final s in tail) s.categoryId],
         amount: tail.map((s) => s.amount).reduce((a, b) => a + b),
         shareBp: tail.fold<int>(0, (n, s) => n + s.shareBp),
         count: tail.fold<int>(0, (n, s) => n + s.count),
@@ -351,5 +354,8 @@ CompactAmount compactAmount(int minor, int exponent) {
     return k;
   }
   // Whole units, no decimal: tenths is a multiple of ten.
-  return CompactAmount(sign * mulDivRound(abs, 1, unitMinor) * 10, CompactUnit.none);
+  return CompactAmount(
+    sign * mulDivRound(abs, 1, unitMinor) * 10,
+    CompactUnit.none,
+  );
 }

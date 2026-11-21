@@ -87,7 +87,10 @@ final cashFlowTotalProvider =
 
 /// Income and spend of one whole period (T-189), zero when it has no rows.
 final periodTotalsProvider =
-    FutureProvider.family<PeriodTotals, (String, ChartPeriod)>((ref, key) async {
+    FutureProvider.family<PeriodTotals, (String, ChartPeriod)>((
+      ref,
+      key,
+    ) async {
       final repo = await ref.watch(chartRepositoryProvider.future);
       final r = await repo.cashFlow([key.$2], _filter(key.$1));
       return PeriodTotals.fromCashFlow(r, Currency.of(key.$1));

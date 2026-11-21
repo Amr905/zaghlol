@@ -9,29 +9,59 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
+import '../../../../core/l10n/locale_providers.dart';
+import '../../../../core/settings/settings_providers.dart';
+import '../../../../core/ui/z_banner.dart';
 import '../../../../core/ui/z_currency_switcher.dart';
+import '../../../budget/application/budget_providers.dart' show todayProvider;
 import '../../../budget/presentation/budget_providers_ui.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../../gold/application/gating.dart';
 import '../../application/chart_gate.dart';
 import '../../domain/chart_models.dart';
 import '../../domain/chart_period_selection.dart';
+import '../../domain/chart_summary.dart' show donutTopCount;
 import '../chart_detail.dart';
 import 'chart_bodies.dart';
 import 'chart_card.dart';
+import 'chart_drill.dart';
+import 'chart_overview.dart';
 import 'chart_period_bar.dart';
 import 'chart_period_text.dart';
 import 'chart_format.dart';
+import 'chart_thin.dart';
 import 'charts_providers.dart';
 import 'gold_chart_card.dart';
 import 'locked_chart_card.dart';
 
-class ChartsScreen extends ConsumerWidget {
+class ChartsScreen extends ConsumerStatefulWidget {
   const ChartsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChartsScreen> createState() => _ChartsScreenState();
+}
+
+class _ChartsScreenState extends ConsumerState<ChartsScreen> {
+  /// "All charts (12)" opened. The cards behind it are not built until then
+  /// (NFR-PERF-04: a chart only queries when it is on screen).
+  bool _all = false;
+
+  Widget _extra(AppLocalizations l, ChartId id, String? code) {
+    if (decideChart(ref.watch(entitlementStateProvider), id).allowed) {
+      return code == null
+          ? ChartCard(
+              title: goldChartTitle(l, id),
+              child: ChartMessage(text: l.insightsChartsEmptyCycle),
+            )
+          : GoldChartCard(chart: id, code: code);
+    }
+    return LockedChartCard(title: goldChartTitle(l, id));
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
     final currencies = ref.watch(chartsCurrenciesProvider);
     return currencies.when(
       loading: () => ListView(
@@ -59,6 +89,12 @@ class ChartsScreen extends ConsumerWidget {
             : list
                   .firstWhere((c) => c.code == chosen, orElse: () => list.first)
                   .code;
+        // The main charts, most useful first; the rest sit behind the
+        // "All charts" button.
+        final rest = [
+          for (final id in lockedChartOrder)
+            if (id != ChartId.monthVsAverage) id,
+        ];
         return ListView(
           padding: _padding,
           children: [
@@ -73,18 +109,24 @@ class ChartsScreen extends ConsumerWidget {
                       ref.read(chartsCurrencyProvider.notifier).select(v),
                 ),
               ),
+            if (ref.watch(hideAmountsProvider))
+              Padding(
+                padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
+                child: ZBanner(message: l.insightsChartsHiddenNote),
+              ),
+            if (code != null) ChartSummaryStrip(code: code),
             if (code == null) ...[
               ChartCard(
                 title: l.insightsChartTitleCashFlow,
-                child: ChartMessage(text: l.insightsChartsEmptyCycle),
+                child: ChartThinState(message: l.insightsChartsEmptyCycle),
               ),
               ChartCard(
                 title: l.insightsChartTitleCategories,
-                child: ChartMessage(text: l.insightsChartsEmptyCycle),
+                child: ChartThinState(message: l.insightsThinNoData),
               ),
               ChartCard(
                 title: l.insightsChartTitleMerchants,
-                child: ChartMessage(text: l.insightsChartsEmptyCycle),
+                child: ChartThinState(message: l.insightsThinNoData),
               ),
             ] else ...[
               _CashFlowCard(code: code),
@@ -92,23 +134,51 @@ class ChartsScreen extends ConsumerWidget {
               _MerchantsCard(code: code),
               _BudgetCard(code: code),
             ],
-            for (final id in lockedChartOrder)
-              if (decideChart(ref.watch(entitlementStateProvider), id).allowed)
-                if (code == null)
-                  ChartCard(
-                    title: goldChartTitle(l, id),
-                    child: ChartMessage(text: l.insightsChartsEmptyCycle),
-                  )
-                else
-                  GoldChartCard(chart: id, code: code)
-              else
-                LockedChartCard(title: goldChartTitle(l, id)),
+            _extra(l, ChartId.monthVsAverage, code),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
+              child: Semantics(
+                button: true,
+                expanded: _all,
+                child: OutlinedButton(
+                  key: const Key('charts-all'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(ZSpacing.minTarget),
+                    foregroundColor: c.primary,
+                    side: BorderSide(color: c.primary),
+                    shape: const StadiumBorder(),
+                  ),
+                  onPressed: () => setState(() => _all = !_all),
+                  child: Text(
+                    _all
+                        ? l.insightsChartsFewerCharts
+                        : l.insightsChartsAllCharts(
+                            ref
+                                .watch(
+                                  digitsModeProvider(
+                                    Localizations.localeOf(context)
+                                        .languageCode,
+                                  ),
+                                )
+                                .render('$kAllChartsCount'),
+                          ),
+                    style: ZType.titleSmall.copyWith(color: c.primary),
+                  ),
+                ),
+              ),
+            ),
+            if (_all)
+              for (final id in rest) _extra(l, id, code),
           ],
         );
       },
     );
   }
 }
+
+/// Free charts plus the nine Gold ones: the "All charts (12)" count (budget
+/// progress is a Free chart that sits in the main list).
+const int kAllChartsCount = 12;
 
 const _padding = EdgeInsetsDirectional.fromSTEB(
   ZSpacing.screen,
@@ -133,6 +203,10 @@ class _CashFlowCard extends ConsumerWidget {
     final periodResolved = ref.watch(chartsResolvedPeriodProvider).value;
     final periodText = ChartPeriodText.of(context, ref);
     final bucketKind = periodResolved?.bucketKind ?? ChartBucketKind.month;
+    final today = ref.watch(todayProvider);
+    final digits = ref.watch(
+      digitsModeProvider(Localizations.localeOf(context).languageCode),
+    );
     final total = ref.watch(cashFlowTotalProvider(code));
     return ref
         .watch(cashFlowChartProvider(code))
@@ -145,7 +219,16 @@ class _CashFlowCard extends ConsumerWidget {
           data: (r) => switch (r) {
             ChartReady(:final data) => ChartCard(
               title: title,
-              meta: periodText.bucketCount(bucketKind, data.length),
+              subtitle: _cashFlowSubtitle(
+                l,
+                periodText,
+                periodResolved,
+                bucketKind,
+                data.length,
+                digits.render('${data.length}'),
+                open:
+                    periodResolved != null && periodResolved.period.to >= today,
+              ),
               footnote: periodResolved == null
                   ? null
                   : CashFlowBody.footnote(
@@ -161,15 +244,42 @@ class _CashFlowCard extends ConsumerWidget {
                 (m) => chartMoney(ref, context, m),
                 cashFlowPeriodPoints(total, data),
               ),
-              child: CashFlowBody(points: data, bucketKind: bucketKind),
+              child: CashFlowBody(
+                points: data,
+                bucketKind: bucketKind,
+                lastIsOpen:
+                    periodResolved != null && periodResolved.period.to >= today,
+                onOpenBucket: (p) =>
+                    openChartDrill(context, code: code, period: p),
+              ),
             ),
             ChartNotEnoughData() => ChartCard(
               title: title,
-              child: ChartMessage(text: _emptyText(l, r)),
+              child: ChartNotEnough(result: r, fallback: _emptyText(l, r)),
             ),
           },
         );
   }
+}
+
+String _cashFlowSubtitle(
+  AppLocalizations l,
+  ChartPeriodText text,
+  ResolvedChartPeriod? resolved,
+  ChartBucketKind kind,
+  int count,
+  String countText, {
+  required bool open,
+}) {
+  final span = kind == ChartBucketKind.month || kind == ChartBucketKind.cycle
+      ? l.insightsChartsLastNMonths(countText)
+      : text.bucketCount(kind, count);
+  return open && resolved != null
+      ? l.insightsChartsCashFlowSub(
+          span,
+          l.insightsChartsPeriodOpenNote(text.now(resolved)),
+        )
+      : span;
 }
 
 class _DonutCard extends ConsumerWidget {
@@ -189,6 +299,11 @@ class _DonutCard extends ConsumerWidget {
       return l.insightsChartsOtherSlice;
     }
 
+    final resolved = ref.watch(chartsResolvedPeriodProvider).value;
+    final previous = ref.watch(previousDonutProvider(code)).value;
+    final digits = ref.watch(
+      digitsModeProvider(Localizations.localeOf(context).languageCode),
+    );
     return ref
         .watch(donutChartProvider(code))
         .when(
@@ -200,6 +315,9 @@ class _DonutCard extends ConsumerWidget {
           data: (r) => switch (r) {
             ChartReady(:final data) => ChartCard(
               title: title,
+              subtitle: l.insightsChartsCategoriesSub(
+                digits.render('$donutTopCount'),
+              ),
               trailing: _ExplainButton(
                 chart: ChartId.categoryDonut,
                 code: code,
@@ -211,11 +329,24 @@ class _DonutCard extends ConsumerWidget {
                 data,
                 nameOf,
               ),
-              child: DonutBody(donut: data, nameOf: nameOf),
+              child: DonutBody(
+                donut: data,
+                nameOf: nameOf,
+                previous: previous,
+                onOpenEntry: resolved == null
+                    ? null
+                    : (e) => openChartDrill(
+                        context,
+                        code: code,
+                        period: resolved.period,
+                        previous: resolved.previous,
+                        categoryIds: {for (final id in e.memberIds) ?id},
+                      ),
+              ),
             ),
             ChartNotEnoughData() => ChartCard(
               title: title,
-              child: ChartMessage(text: _emptyText(l, r)),
+              child: ChartNotEnough(result: r, fallback: _emptyText(l, r)),
             ),
           },
         );
@@ -230,6 +361,7 @@ class _MerchantsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final title = l.insightsChartTitleMerchants;
+    final resolved = ref.watch(chartsResolvedPeriodProvider).value;
     return ref
         .watch(merchantsChartProvider(code))
         .when(
@@ -241,13 +373,26 @@ class _MerchantsCard extends ConsumerWidget {
           data: (r) => switch (r) {
             ChartReady(:final data) when data.isNotEmpty => ChartCard(
               title: title,
+              subtitle: l.insightsChartsMerchantsSub,
               trailing: _ExplainButton(chart: ChartId.topMerchants, code: code),
               summary: MerchantsBody.summary(
                 l,
                 (m) => chartMoney(ref, context, m),
                 data,
               ),
-              child: MerchantsBody(rows: data),
+              child: MerchantsBody(
+                rows: data,
+                onOpen: resolved == null
+                    ? null
+                    : (m) => openChartDrill(
+                        context,
+                        code: code,
+                        period: resolved.period,
+                        previous: resolved.previous,
+                        merchantNorm: m.merchantNorm,
+                        merchantName: m.name,
+                      ),
+              ),
             ),
             ChartReady() => ChartCard(
               title: title,
@@ -255,7 +400,7 @@ class _MerchantsCard extends ConsumerWidget {
             ),
             ChartNotEnoughData() => ChartCard(
               title: title,
-              child: ChartMessage(text: _emptyText(l, r)),
+              child: ChartNotEnough(result: r, fallback: _emptyText(l, r)),
             ),
           },
         );

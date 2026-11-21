@@ -12,6 +12,7 @@ import '../../domain/chart_models.dart';
 import '../chart_detail.dart';
 import 'chart_card.dart';
 import 'chart_format.dart';
+import 'chart_thin.dart';
 import 'charts_providers.dart';
 import 'gold_chart_bodies.dart';
 
@@ -112,14 +113,11 @@ class GoldChartCard extends ConsumerWidget {
             title: title,
             child: ChartMessage(text: emptyText ?? l.insightsChartsEmptyFilter),
           ),
-          ChartNotEnoughData<T>(:final reason) => ChartCard(
+          ChartNotEnoughData<T>() => ChartCard(
             title: title,
-            child: ChartMessage(
-              text:
-                  emptyText ??
-                  (reason == NotEnoughReason.noData
-                      ? l.insightsChartsEmptyFilter
-                      : l.insightsChartsEmptyCycle),
+            child: ChartNotEnough(
+              result: r,
+              fallback: emptyText ?? l.insightsChartsEmptyFilter,
             ),
           ),
         };

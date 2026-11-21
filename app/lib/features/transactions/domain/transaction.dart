@@ -147,6 +147,7 @@ final class TransactionFilter {
     this.sources = const {},
     this.currencies = const {},
     this.statuses = const {},
+    this.merchantNorm,
   });
 
   final DateTime? from;
@@ -159,6 +160,9 @@ final class TransactionFilter {
   /// ISO 4217 codes; one currency is never mixed into another (D-28).
   final Set<Currency> currencies;
   final Set<TxnStatus> statuses;
+
+  /// T-189: only rows of this normalized merchant (chart drill-down).
+  final String? merchantNorm;
 }
 
 /// A page request. [limit] is capped by the repository (500).

@@ -47,6 +47,8 @@ final class TxnListFilter {
     this.type = TxnTypeFilter.any,
     this.sources = const {},
     this.currency,
+    this.merchantNorm,
+    this.merchantName,
   });
 
   final TxnPeriod period;
@@ -57,13 +59,18 @@ final class TxnListFilter {
   final Set<TxnSource> sources;
   final Currency? currency;
 
+  /// T-189: one merchant (from a chart); [merchantName] is its chip text.
+  final String? merchantNorm;
+  final String? merchantName;
+
   /// Everything narrowed beyond the default period.
   bool get hasNarrowing =>
       period != TxnPeriod.all ||
       categoryIds.isNotEmpty ||
       type != TxnTypeFilter.any ||
       sources.isNotEmpty ||
-      currency != null;
+      currency != null ||
+      merchantNorm != null;
 
   TxnListFilter copyWith({
     TxnPeriod? period,
@@ -74,6 +81,7 @@ final class TxnListFilter {
     Set<TxnSource>? sources,
     Currency? currency,
     bool clearCurrency = false,
+    bool clearMerchant = false,
   }) => TxnListFilter(
     period: period ?? this.period,
     customFrom: customFrom ?? this.customFrom,
@@ -82,6 +90,8 @@ final class TxnListFilter {
     type: type ?? this.type,
     sources: sources ?? this.sources,
     currency: clearCurrency ? null : (currency ?? this.currency),
+    merchantNorm: clearMerchant ? null : merchantNorm,
+    merchantName: clearMerchant ? null : merchantName,
   );
 }
 
@@ -259,6 +269,7 @@ TransactionFilter txnToRepoFilter(
     sources: f.sources,
     currencies: {?f.currency},
     statuses: f.type == TxnTypeFilter.declined ? {TxnStatus.declined} : {},
+    merchantNorm: f.merchantNorm,
   );
 }
 

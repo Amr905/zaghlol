@@ -16,34 +16,48 @@ import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/ui/amount_semantics.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
+import '../../../../core/settings/settings_providers.dart';
 import '../../../../core/ui/z_money_text.dart';
 import '../../../budget/presentation/budget_view.dart';
 import '../../domain/chart_models.dart';
 import '../../domain/chart_period_selection.dart';
+import '../../domain/chart_summary.dart';
 import '../../../categorization/presentation/category_tile.dart';
 import '../../../../core/db/app_database.dart' show CategoryRow;
 import '../../../../core/ui/z_card.dart';
 import 'chart_card.dart';
 import 'chart_format.dart';
+import 'chart_overview.dart';
 import 'chart_palette.dart';
+import 'chart_period_text.dart';
 
 bool _rtl(BuildContext context) =>
     Directionality.of(context) == TextDirection.rtl;
 
 // ------------------------------------------------------------ 1 cash flow
 
-/// Income, spend and saved bars per cycle, with the month under each group.
-class CashFlowBody extends ConsumerWidget {
+/// Income and spent bars per bucket with a light value axis, the month under
+/// each group and the open (current) bucket hatched. Tapping a bar shows its
+/// figures and a link to its transactions.
+class CashFlowBody extends ConsumerStatefulWidget {
   const CashFlowBody({
     super.key,
     required this.points,
     this.bucketKind = ChartBucketKind.month,
+    this.lastIsOpen = false,
+    this.onOpenBucket,
   });
   final List<CashFlowPoint> points;
 
   /// What one bar is (T-188): a day, a week or a month. Sets the label under
   /// the bar and how dense the bars and labels are.
   final ChartBucketKind bucketKind;
+
+  /// The last bar is the current, unfinished period: drawn hatched.
+  final bool lastIsOpen;
+
+  /// "See the transactions" of a tapped bar. Null: no link.
+  final ValueChanged<ChartPeriod>? onOpenBucket;
 
   /// The a11y summary for [points] (latest bucket).
   static String summary(
@@ -67,7 +81,7 @@ class CashFlowBody extends ConsumerWidget {
     return net < 0 ? -r : r;
   }
 
-  /// "You saved X over this cycle (38%)": the footnote of the whole period.
+  /// "You saved X over this month (38%)": the footnote of the whole period.
   /// [now] is the period as a phrase (`ChartPeriodText.now`).
   static String footnote(
     AppLocalizations l,
@@ -88,17 +102,34 @@ class CashFlowBody extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CashFlowBody> createState() => _CashFlowBodyState();
+}
+
+class _CashFlowBodyState extends ConsumerState<CashFlowBody> {
+  /// Index into [CashFlowBody.points] (logical order, not mirrored).
+  int? _selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final points = widget.points;
+    final bucketKind = widget.bucketKind;
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final shown = _rtl(context) ? points.reversed.toList() : points;
-    final maxY = points
+    final rtl = _rtl(context);
+    final text = ChartPeriodText.of(context, ref);
+    final hidden = ref.watch(hideAmountsProvider);
+    final currency = points.first.income.currency;
+    final shown = rtl ? points.reversed.toList() : points;
+    final n = shown.length;
+    final maxMinor = points
         .map((p) => math.max(p.income.minor, p.spend.minor))
-        .fold<int>(1, math.max);
+        .fold<int>(0, math.max);
+    final step = niceAxisStep(maxMinor);
+    final top = axisTop(maxMinor, step);
     final digits = ref.watch(digitsModeProvider(lang));
     // Day bars carry a month cue ("25 Oct") on the first bar and on day 1,
-    // so a cycle that spans two months reads clearly (F7).
+    // so a period that spans two months reads clearly (F7).
     bool cue(CashFlowPoint p) =>
         bucketKind == ChartBucketKind.day &&
         (identical(p, points.first) || p.period.from.day == 1);
@@ -126,10 +157,6 @@ class CashFlowBody extends ConsumerWidget {
       }
     }
 
-    // Few bars: income, spent and saved side by side, wide. Many bars
-    // (days, weeks, a long range of months): income and spent only, thin,
-    // with a label under about every sixth bar.
-    final n = shown.length;
     final dense = n > 12;
     final labelEvery = n <= 8 ? 1 : (n / 6).ceil();
     // A cue bar always has its label; the regular ones near it give way.
@@ -143,30 +170,84 @@ class CashFlowBody extends ConsumerWidget {
     }
 
     final rodWidth = n <= 6
-        ? 10.0
+        ? 13.0
         : n <= 12
-        ? 7.0
+        ? 8.0
         : n <= 31
         ? 4.0
         : 3.0;
+    final incomeColor = ZChartColors.incomeOf(c);
+    final spendColor = c.text;
+    final selected = _selected;
+    final openLogical = widget.lastIsOpen ? points.length - 1 : -1;
 
+    BarChartRodData rod(int logical, int value, Color color) {
+      final open = logical == openLogical;
+      final dim = selected != null && selected != logical;
+      final base = dim ? color.withValues(alpha: 0.45) : color;
+      return BarChartRodData(
+        toY: value.toDouble(),
+        color: open ? base.withValues(alpha: 0.4) : base,
+        width: rodWidth,
+        borderRadius: BorderRadius.circular(ZRadius.sm / 2),
+        borderSide: open
+            ? BorderSide(color: base, width: 1.5)
+            : BorderSide.none,
+        borderDashArray: open ? const [3, 3] : null,
+      );
+    }
+
+    final axisSide = SideTitles(
+      showTitles: !hidden,
+      reservedSize: 44,
+      interval: step.toDouble(),
+      getTitlesWidget: (v, meta) => SideTitleWidget(
+        meta: meta,
+        space: ZSpacing.xs,
+        child: Text(
+          chartCompactMoney(ref, context, Money(currency, v.round())),
+          style: ZType.caption.copyWith(color: c.textMuted, fontSize: 10),
+        ),
+      ),
+    );
+    final noTitles = const AxisTitles();
+    final axis = AxisTitles(sideTitles: axisSide);
+
+    final sel = selected == null ? null : points[selected];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (sel != null)
+          _BarBubble(
+            title: label(sel),
+            range: text.range(sel.period),
+            point: sel,
+            onOpen: widget.onOpenBucket == null
+                ? null
+                : () => widget.onOpenBucket!(sel.period),
+          ),
         SizedBox(
           height: 200,
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: BarChart(
               BarChartData(
-                maxY: maxY * 1.05,
+                maxY: top.toDouble(),
                 alignment: BarChartAlignment.spaceAround,
-                gridData: const FlGridData(show: false),
+                gridData: FlGridData(
+                  drawVerticalLine: false,
+                  horizontalInterval: step.toDouble(),
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: c.outline,
+                    strokeWidth: 1,
+                    dashArray: const [4, 4],
+                  ),
+                ),
                 borderData: FlBorderData(show: false),
                 titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(),
-                  rightTitles: const AxisTitles(),
-                  topTitles: const AxisTitles(),
+                  leftTitles: rtl ? axis : noTitles,
+                  rightTitles: rtl ? noTitles : axis,
+                  topTitles: noTitles,
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -179,6 +260,11 @@ class CashFlowBody extends ConsumerWidget {
                                 label(shown[v.toInt()]),
                                 style: ZType.caption.copyWith(
                                   color: c.textMuted,
+                                  fontWeight:
+                                      (rtl ? n - 1 - v.toInt() : v.toInt()) ==
+                                          openLogical
+                                      ? FontWeight.w700
+                                      : null,
                                 ),
                               )
                             : const SizedBox.shrink(),
@@ -186,28 +272,37 @@ class CashFlowBody extends ConsumerWidget {
                     ),
                   ),
                 ),
-                barTouchData: BarTouchData(enabled: false),
+                barTouchData: BarTouchData(
+                  handleBuiltInTouches: false,
+                  touchCallback: (event, response) {
+                    if (event is! FlTapUpEvent) return;
+                    final g = response?.spot?.touchedBarGroupIndex;
+                    setState(() {
+                      if (g == null) {
+                        _selected = null;
+                      } else {
+                        final logical = rtl ? n - 1 - g : g;
+                        _selected = _selected == logical ? null : logical;
+                      }
+                    });
+                  },
+                ),
                 barGroups: [
-                  for (var i = 0; i < shown.length; i++)
+                  for (var i = 0; i < n; i++)
                     BarChartGroupData(
                       x: i,
                       barsSpace: dense ? 1 : 3,
                       barRods: [
-                        for (final (value, color) in [
-                          (shown[i].income.minor, ZChartColors.incomeOf(c)),
-                          (shown[i].spend.minor, ZChartColors.spend),
-                          if (!dense)
-                            (
-                              math.max(0, shown[i].net.minor),
-                              ZChartColors.saved,
-                            ),
-                        ])
-                          BarChartRodData(
-                            toY: value.toDouble(),
-                            color: color,
-                            width: rodWidth,
-                            borderRadius: BorderRadius.circular(ZRadius.sm / 2),
-                          ),
+                        rod(
+                          rtl ? n - 1 - i : i,
+                          shown[i].income.minor,
+                          incomeColor,
+                        ),
+                        rod(
+                          rtl ? n - 1 - i : i,
+                          shown[i].spend.minor,
+                          spendColor,
+                        ),
                       ],
                     ),
                 ],
@@ -220,75 +315,130 @@ class CashFlowBody extends ConsumerWidget {
           spacing: ZSpacing.lg,
           runSpacing: ZSpacing.xs,
           children: [
-            LegendItem(
-              color: ZChartColors.incomeOf(c),
-              label: l.insightsLegendIncome,
-            ),
-            LegendItem(color: ZChartColors.spend, label: l.insightsLegendSpent),
-            if (!dense)
+            LegendItem(color: incomeColor, label: l.insightsLegendIncome),
+            LegendItem(color: spendColor, label: l.insightsLegendSpent),
+            if (widget.lastIsOpen)
               LegendItem(
-                color: ZChartColors.saved,
-                label: l.insightsLegendSaved,
+                color: spendColor.withValues(alpha: 0.4),
+                label: l.insightsChartsPartialLegend(label(points.last)),
               ),
           ],
         ),
+        if (sel == null)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
+            child: Text(
+              l.insightsChartsBarHint,
+              style: ZType.caption.copyWith(color: c.textMuted),
+            ),
+          ),
       ],
+    );
+  }
+}
+
+/// The figures of a tapped bar, with the link to its transactions.
+class _BarBubble extends ConsumerWidget {
+  const _BarBubble({
+    required this.title,
+    required this.range,
+    required this.point,
+    required this.onOpen,
+  });
+  final String title;
+  final String range;
+  final CashFlowPoint point;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    String m(Money v) => chartMoney(ref, context, v);
+    final body = [
+      l.insightsChartsBubbleIncome(m(point.income)),
+      l.insightsChartsBubbleSpent(m(point.spend)),
+      l.insightsChartsBubbleSaved(m(point.net)),
+    ];
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
+      child: Semantics(
+        container: true,
+        liveRegion: true,
+        label: a11yAmounts(l, '$title, $range. ${body.join('، ')}'),
+        excludeSemantics: true,
+        child: DecoratedBox(
+          key: const Key('cashflow-bubble'),
+          decoration: BoxDecoration(
+            color: c.surfaceAlt,
+            borderRadius: BorderRadius.circular(ZRadius.md),
+          ),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.all(ZSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$title ($range)',
+                  style: ZType.label.copyWith(color: c.text),
+                ),
+                const SizedBox(height: ZSpacing.xs),
+                Wrap(
+                  spacing: ZSpacing.md,
+                  children: [
+                    for (final t in body)
+                      Text(
+                        '\u2068$t\u2069',
+                        style: ZType.caption.copyWith(color: c.text),
+                      ),
+                  ],
+                ),
+                if (onOpen != null)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton(
+                      key: const Key('cashflow-open'),
+                      onPressed: onOpen,
+                      child: Text(
+                        l.insightsChartsSeeTransactionsA11y,
+                        style: ZType.titleSmall.copyWith(color: c.primary),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
 // --------------------------------------------------------- 2 category donut
 
-class _Slice {
-  const _Slice(this.name, this.amount, this.bp);
-  final String name;
-  final Money amount;
-  final int bp;
-}
-
-/// Top five slices; the rest fold into one "Other" slice.
-List<_Slice> _donutSlices(
-  AppLocalizations l,
-  CategoryDonut d,
-  String Function(String? id) nameOf,
-) {
-  final sorted = [...d.slices]..sort((a, b) => b.amount.compareTo(a.amount));
-  final head = sorted.take(5).toList();
-  final tail = sorted.skip(5).toList();
-  final out = [
-    for (final s in head)
-      _Slice(
-        s.categoryId == null
-            ? l.insightsChartsOtherSlice
-            : nameOf(s.categoryId),
-        s.amount,
-        s.shareBp,
-      ),
-  ];
-  if (tail.isNotEmpty) {
-    out.add(
-      _Slice(
-        l.insightsChartsOtherSlice,
-        tail.map((s) => s.amount).reduce((a, b) => a + b),
-        tail.fold<int>(0, (n, s) => n + s.shareBp),
-      ),
-    );
-  }
-  return out;
-}
-
-class DonutBody extends ConsumerWidget {
+/// The ring of the top five categories plus "Other", its legend (tap a row
+/// or a slice to select it), the change chips against the previous period
+/// and, for a selected slice, the link to its transactions.
+class DonutBody extends ConsumerStatefulWidget {
   const DonutBody({
     super.key,
     required this.donut,
     required this.nameOf,
     this.large = false,
+    this.previous,
+    this.onOpenEntry,
   });
   final CategoryDonut donut;
   final String Function(String? id) nameOf;
 
   /// S-21: the big ring alone (the category list sits below it).
   final bool large;
+
+  /// The donut of the period before, for the change chips.
+  final CategoryDonut? previous;
+
+  /// "See the N transactions" of a selected entry. Null: no link.
+  final ValueChanged<DonutEntry>? onOpenEntry;
 
   static String summary(
     AppLocalizations l,
@@ -297,24 +447,39 @@ class DonutBody extends ConsumerWidget {
     CategoryDonut donut,
     String Function(String? id) nameOf,
   ) {
-    final s = _donutSlices(l, donut, nameOf).first;
+    final s = topCategoriesPlusOther(donut).first;
     return l.insightsChartA11yCategories(
-      s.name,
+      s.isOther || s.categoryId == null
+          ? l.insightsChartsOtherSlice
+          : nameOf(s.categoryId),
       money(s.amount),
-      percent(s.bp),
+      percent(s.shareBp),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DonutBody> createState() => _DonutBodyState();
+}
+
+class _DonutBodyState extends ConsumerState<DonutBody> {
+  int? _selected;
+
+  @override
+  Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final l = AppLocalizations.of(context);
-    final slices = _donutSlices(l, donut, nameOf);
+    final large = widget.large;
+    final donut = widget.donut;
+    final entries = topCategoriesPlusOther(donut, previous: widget.previous);
+    String nameOf(DonutEntry e) => e.isOther || e.categoryId == null
+        ? l.insightsChartsOtherSlice
+        : widget.nameOf(e.categoryId);
     final palette = ZChartColors.rampOf(c);
+    Color colorOf(int i) => palette[i % palette.length];
+    final size = large ? 240.0 : 150.0;
+    final selected = _selected;
     // A ring is not mirrored: the largest slice starts at 12 o'clock and runs
     // clockwise in both directions (mockup 07/08).
-    final shown = slices;
-    final size = large ? 240.0 : 132.0;
     final ring = SizedBox(
       width: size,
       height: size,
@@ -328,45 +493,59 @@ class DonutBody extends ConsumerWidget {
                 sectionsSpace: 3,
                 startDegreeOffset: 270,
                 centerSpaceRadius: size * 0.33,
-                pieTouchData: PieTouchData(enabled: false),
+                pieTouchData: PieTouchData(
+                  touchCallback: (event, response) {
+                    if (event is! FlTapUpEvent) return;
+                    final i = response?.touchedSection?.touchedSectionIndex;
+                    setState(
+                      () => _selected = i == null || i < 0 || i == selected
+                          ? null
+                          : i,
+                    );
+                  },
+                ),
                 sections: [
-                  for (final s in shown)
+                  for (var i = 0; i < entries.length; i++)
                     PieChartSectionData(
-                      value: s.amount.minor.toDouble(),
-                      color: palette[slices.indexOf(s) % palette.length],
-                      radius: size * 0.15,
+                      value: entries[i].amount.minor.toDouble(),
+                      color: colorOf(i),
+                      radius: size * (selected == i ? 0.18 : 0.15),
                       showTitle: false,
                     ),
                 ],
               ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(size * 0.27),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l.insightsChartsSpendLabel,
-                    style: ZType.caption.copyWith(color: c.textMuted),
-                  ),
-                  ZMoneyText(
-                    text: large
-                        ? trimCurrency(chartMoney(ref, context, donut.total))
-                        : chartMoney(ref, context, donut.total),
-                    size: large ? ZMoneySize.display : ZMoneySize.title,
-                  ),
-                  if (large)
+          IgnorePointer(
+            child: Padding(
+              padding: EdgeInsets.all(size * 0.27),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
-                      RegExp(r'ج\.م|[A-Z]{3}')
-                              .firstMatch(chartMoney(ref, context, donut.total))
-                              ?.group(0) ??
-                          '',
+                      l.insightsChartsSpendLabel,
                       style: ZType.caption.copyWith(color: c.textMuted),
                     ),
-                ],
+                    ZMoneyText(
+                      text: large
+                          ? trimCurrency(chartMoney(ref, context, donut.total))
+                          : chartMoney(ref, context, donut.total),
+                      size: large ? ZMoneySize.display : ZMoneySize.title,
+                    ),
+                    if (large)
+                      Text(
+                        RegExp(r'ج\.م|[A-Z]{3}')
+                                .firstMatch(
+                                  chartMoney(ref, context, donut.total),
+                                )
+                                ?.group(0) ??
+                            '',
+                        style: ZType.caption.copyWith(color: c.textMuted),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -374,64 +553,185 @@ class DonutBody extends ConsumerWidget {
       ),
     );
     if (large) return Center(child: ring);
-    final legend = Column(
-      children: [
-        for (var i = 0; i < math.min(3, slices.length); i++)
-          ConstrainedBox(
+
+    Widget legendRow(int i) {
+      final e = entries[i];
+      final name = nameOf(e);
+      final amount = trimCurrency(chartMoney(ref, context, e.amount));
+      final percent = chartPercentBp(ref, context, e.shareBp);
+      return Semantics(
+        button: true,
+        selected: selected == i,
+        label: a11yAmounts(
+          l,
+          l.insightsChartsSliceRowA11y(
+            name,
+            amount,
+            percent,
+            e.isOther ? '' : changeA11y(ref, context, l, e.change),
+          ),
+        ),
+        excludeSemantics: true,
+        child: InkWell(
+          key: Key('donut-row-$i'),
+          borderRadius: BorderRadius.circular(ZRadius.sm),
+          onTap: () => setState(() => _selected = selected == i ? null : i),
+          child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 36),
-            child: Row(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: palette[i % palette.length],
-                    borderRadius: BorderRadius.circular(ZRadius.sm / 2),
+            child: Opacity(
+              opacity: selected == null || selected == i ? 1 : 0.55,
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: colorOf(i),
+                      borderRadius: BorderRadius.circular(ZRadius.sm / 2),
+                    ),
                   ),
-                ),
-                const SizedBox(width: ZSpacing.sm),
-                Expanded(
-                  child: Text(
-                    slices[i].name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: ZType.bodySmall.copyWith(color: c.text),
+                  const SizedBox(width: ZSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ZType.bodySmall.copyWith(color: c.text),
+                    ),
                   ),
-                ),
-                const SizedBox(width: ZSpacing.xs),
-                ZMoneyText(
-                  text: trimCurrency(
-                    chartMoney(ref, context, slices[i].amount),
+                  const SizedBox(width: ZSpacing.xs),
+                  ZMoneyText(text: amount, size: ZMoneySize.caption),
+                  const SizedBox(width: ZSpacing.sm),
+                  Text(
+                    percent,
+                    style: ZType.caption.copyWith(color: c.textMuted),
                   ),
-                  size: ZMoneySize.caption,
-                ),
-                const SizedBox(width: ZSpacing.sm),
-                Text(
-                  chartPercentBp(ref, context, slices[i].bp),
-                  style: ZType.caption.copyWith(color: c.textMuted),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
+        ),
+      );
+    }
+
+    final legend = Column(
+      children: [
+        for (var i = 0; i < entries.length; i++) legendRow(i),
         if (donut.coveredEarlier != null && donut.coveredEarlier!.minor > 0)
           _CoveredEarlierNote(amount: donut.coveredEarlier!),
       ],
     );
     // Large text: stack the legend under the ring so nothing is squeezed.
-    if (MediaQuery.textScalerOf(context).scale(16) > 18.5) {
-      return Column(
-        children: [
-          ring,
-          const SizedBox(height: ZSpacing.sm),
-          legend,
-        ],
-      );
-    }
-    return Row(
+    final stacked = MediaQuery.textScalerOf(context).scale(16) > 18.5;
+    final top = stacked
+        ? Column(
+            children: [
+              ring,
+              const SizedBox(height: ZSpacing.sm),
+              legend,
+            ],
+          )
+        : Row(
+            children: [
+              ring,
+              const SizedBox(width: ZSpacing.md),
+              Expanded(child: legend),
+            ],
+          );
+    final canOpen =
+        selected != null &&
+        widget.onOpenEntry != null &&
+        !(entries[selected].isOther &&
+            entries[selected].memberIds.contains(null));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ring,
-        const SizedBox(width: ZSpacing.md),
-        Expanded(child: legend),
+        top,
+        if (selected != null)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+            child: Semantics(
+              container: true,
+              liveRegion: true,
+              child: DecoratedBox(
+                key: const Key('donut-bubble'),
+                decoration: BoxDecoration(
+                  color: c.surfaceAlt,
+                  borderRadius: BorderRadius.circular(ZRadius.md),
+                ),
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.all(ZSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '\u2068${l.insightsChartsSliceBubble(nameOf(entries[selected]), chartMoney(ref, context, entries[selected].amount), chartPercentBp(ref, context, entries[selected].shareBp))}\u2069',
+                        style: ZType.label.copyWith(color: c.text),
+                      ),
+                      if (canOpen)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: TextButton(
+                            key: const Key('donut-open'),
+                            onPressed: () =>
+                                widget.onOpenEntry!(entries[selected]),
+                            child: Text(
+                              l.insightsChartsSeeTransactions(
+                                ref
+                                    .watch(
+                                      digitsModeProvider(
+                                        Localizations.localeOf(context)
+                                            .languageCode,
+                                      ),
+                                    )
+                                    .render('${entries[selected].count}'),
+                              ),
+                              style: ZType.titleSmall.copyWith(
+                                color: c.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (widget.previous != null)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+            child: Wrap(
+              spacing: ZSpacing.md,
+              runSpacing: ZSpacing.xs,
+              children: [
+                for (final e in entries)
+                  if (!e.isOther)
+                    Semantics(
+                      container: true,
+                      excludeSemantics: true,
+                      label: l.insightsChartsChipA11y(
+                        nameOf(e),
+                        changeA11y(ref, context, l, e.change),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            nameOf(e),
+                            style: ZType.caption.copyWith(color: c.text),
+                          ),
+                          const SizedBox(width: ZSpacing.xs),
+                          ChangeChip(
+                            change: e.change,
+                            tone: toneOf(e.change, moreIsGood: false),
+                          ),
+                        ],
+                      ),
+                    ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -544,8 +844,11 @@ class _CoveredEarlierNote extends ConsumerWidget {
 // ---------------------------------------------------------- 6 top merchants
 
 class MerchantsBody extends ConsumerWidget {
-  const MerchantsBody({super.key, required this.rows});
+  const MerchantsBody({super.key, required this.rows, this.onOpen});
   final List<MerchantSpend> rows;
+
+  /// A tapped place opens its transactions. Null: rows are plain.
+  final ValueChanged<MerchantSpend>? onOpen;
 
   static String summary(
     AppLocalizations l,
@@ -556,33 +859,71 @@ class MerchantsBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = ZColors.of(context);
+    final l = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final digits = ref.watch(digitsModeProvider(lang));
     final top = rows.map((r) => r.amount.minor).fold<int>(1, math.max);
     return Column(
       children: [
         for (final r in rows)
-          Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-              vertical: ZSpacing.xs,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        r.name,
-                        overflow: TextOverflow.ellipsis,
-                        style: ZType.body.copyWith(color: c.text),
-                      ),
-                    ),
-                    ZMoneyText(text: chartMoney(ref, context, r.amount)),
-                  ],
+          Builder(
+            builder: (context) {
+              final count = l.insightsChartsPlaceCount(
+                r.count,
+                digits.render('${r.count}'),
+              );
+              final amount = chartMoney(ref, context, r.amount);
+              final row = Padding(
+                padding: const EdgeInsetsDirectional.symmetric(
+                  vertical: ZSpacing.xs,
                 ),
-                const SizedBox(height: ZSpacing.xs),
-                _Bar(fraction: r.amount.minor / top),
-              ],
-            ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: ZSpacing.minTarget,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              r.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: ZType.body.copyWith(color: c.text),
+                            ),
+                          ),
+                          Text(
+                            count,
+                            style: ZType.caption.copyWith(color: c.textMuted),
+                          ),
+                          const SizedBox(width: ZSpacing.md),
+                          ZMoneyText(text: amount),
+                        ],
+                      ),
+                      const SizedBox(height: ZSpacing.xs),
+                      _Bar(fraction: r.amount.minor / top),
+                    ],
+                  ),
+                ),
+              );
+              if (onOpen == null) return row;
+              return Semantics(
+                button: true,
+                label: a11yAmounts(
+                  l,
+                  l.insightsChartsPlaceRowA11y(r.name, count, amount),
+                ),
+                excludeSemantics: true,
+                child: InkWell(
+                  key: Key('merchant-${r.merchantNorm}'),
+                  borderRadius: BorderRadius.circular(ZRadius.sm),
+                  onTap: () => onOpen!(r),
+                  child: row,
+                ),
+              );
+            },
           ),
       ],
     );

@@ -7,6 +7,8 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_card.dart';
+import '../../../../core/ui/z_mascot_bubble.dart';
+import '../../../mascot/presentation/zaghlol_avatar.dart' show ZaghlolMoment;
 import '../../../../core/ui/amount_semantics.dart';
 
 class ChartCard extends StatelessWidget {
@@ -18,6 +20,7 @@ class ChartCard extends StatelessWidget {
     this.summary,
     this.trailing,
     this.meta,
+    this.subtitle,
     this.footnote,
     this.bare = false,
   });
@@ -38,6 +41,9 @@ class ChartCard extends StatelessWidget {
   /// Small caption at the end of the title row (e.g. "6 months").
   final String? meta;
 
+  /// T-189: the line under the title ("last 6 months · ...").
+  final String? subtitle;
+
   /// One-line takeaway at the start of the footer row.
   final String? footnote;
 
@@ -54,7 +60,7 @@ class ChartCard extends StatelessWidget {
             child: child,
           )
         : child;
-    final footer = (footnote != null || trailing != null)
+    final footer = (footnote != null || (bare && trailing != null))
         ? Padding(
             padding: const EdgeInsetsDirectional.only(top: ZSpacing.md),
             child: Row(
@@ -72,7 +78,7 @@ class ChartCard extends StatelessWidget {
                   )
                 else
                   const Spacer(),
-                ?trailing,
+                if (bare) ?trailing,
               ],
             ),
           )
@@ -112,12 +118,27 @@ class ChartCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Semantics(
-                    header: true,
-                    child: Text(
-                      title,
-                      style: ZType.title.copyWith(color: c.text),
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          title,
+                          style: ZType.title.copyWith(color: c.text),
+                        ),
+                      ),
+                      if (subtitle != null)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            top: ZSpacing.xs,
+                          ),
+                          child: Text(
+                            subtitle!,
+                            style: ZType.caption.copyWith(color: c.textMuted),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 if (meta != null)
@@ -131,6 +152,7 @@ class ChartCard extends StatelessWidget {
                       style: ZType.caption.copyWith(color: c.textMuted),
                     ),
                   ),
+                ?trailing,
               ],
             ),
             const SizedBox(height: ZSpacing.md),
@@ -293,6 +315,30 @@ class ExplainLink extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// T-189: the "not enough data yet" state of a chart: a Zaghlol line (never
+/// blocks taps) and an optional action. Shown below a chart's minimum data
+/// rule instead of a near-empty drawing.
+class ChartThinState extends StatelessWidget {
+  const ChartThinState({super.key, required this.message, this.action});
+  final String message;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ZMascotBubble(
+          message: message,
+          moment: ZaghlolMoment.thinking,
+          avatarSize: 40,
+        ),
+        if (action != null) ...[const SizedBox(height: ZSpacing.sm), action!],
+      ],
     );
   }
 }

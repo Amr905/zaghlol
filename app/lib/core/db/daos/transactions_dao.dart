@@ -31,6 +31,7 @@ final class TxnQuery {
     this.currencies = const {},
     this.statuses = const {},
     this.text,
+    this.merchantNorm,
   });
 
   /// Inclusive lower bound of `occurred_at`.
@@ -45,6 +46,9 @@ final class TxnQuery {
   final Set<String> currencies;
   final Set<String> statuses;
   final String? text;
+
+  /// T-189: only rows of this normalized merchant (chart drill-down).
+  final String? merchantNorm;
 }
 
 final class _Built {
@@ -205,6 +209,10 @@ class TransactionsDao {
     inList('t.source', q.sources);
     inList('t.currency', q.currencies);
     inList('t.status', q.statuses);
+    if (q.merchantNorm != null) {
+      where.add('t.merchant_norm = ?');
+      args.add(Variable.withString(q.merchantNorm!));
+    }
 
     var join = '';
     var short = false;

@@ -89,6 +89,9 @@ class FakeRepo implements TransactionRepository {
           !filter.categoryIds.contains(t.categoryId)) {
         return false;
       }
+      if (filter.merchantNorm != null && t.merchantNorm != filter.merchantNorm) {
+        return false;
+      }
       if (filter.directions.isNotEmpty &&
           !filter.directions.contains(t.direction)) {
         return false;

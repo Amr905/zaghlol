@@ -4716,7 +4716,7 @@ abstract class AppLocalizations {
   /// C · donut remainder slice
   ///
   /// In ar, this message translates to:
-  /// **'حاجات تانية'**
+  /// **'تانية'**
   String get insightsChartsOtherSlice;
 
   /// Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)
@@ -4734,7 +4734,7 @@ abstract class AppLocalizations {
   /// T · chart 2 (Free)
   ///
   /// In ar, this message translates to:
-  /// **'فلوسك راحت فين؟'**
+  /// **'صرفت فين'**
   String get insightsChartTitleCategories;
 
   /// T · chart 3 (Gold)
@@ -4758,7 +4758,7 @@ abstract class AppLocalizations {
   /// T · chart 6 (Free, top five)
   ///
   /// In ar, this message translates to:
-  /// **'أكتر الأماكن اللي بتاخد فلوسك'**
+  /// **'أكتر أماكن صرفت فيها'**
   String get insightsChartTitleMerchants;
 
   /// T · chart 7 (Gold)
@@ -11569,6 +11569,398 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المستحق عليك'**
   String get networthCardOwed;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت'**
+  String get insightsSummarySpent;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك'**
+  String get insightsSummaryIncome;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'وفّرت'**
+  String get insightsSummarySaved;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'نسبة التوفير'**
+  String get insightsSummaryRate;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▲ {pct}'**
+  String insightsChangeUpPct(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▼ {pct}'**
+  String insightsChangeDownPct(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▲ {n} نقط'**
+  String insightsChangeUpPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▼ {n} نقط'**
+  String insightsChangeDownPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'= نفسه'**
+  String get insightsChangeSame;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'= {pct}'**
+  String insightsChangeSamePct(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'جديد'**
+  String get insightsChangeNew;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'زاد {pct}'**
+  String insightsChangeA11yUp(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'نزل {pct}'**
+  String insightsChangeA11yDown(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'زاد {n} نقط'**
+  String insightsChangeA11yUpPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'نزل {n} نقط'**
+  String insightsChangeA11yDownPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'زي ما هو'**
+  String get insightsChangeA11ySame;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'جديد، مفيش مقارنة'**
+  String get insightsChangeA11yNew;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{label}: {value}. {change}، قصاد {baseline}'**
+  String insightsSummaryTileA11y(
+    String label,
+    String value,
+    String change,
+    String baseline,
+  );
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'قصاد {prev}'**
+  String insightsSummaryBaseline(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'مقارنة بنفس الـ {days} يوم من {prev}'**
+  String insightsSummaryBaselineDays(String days, String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش حركات في الفترة دي. أول ما تسجّل صرف أو دخل هحسبلك الملخص.'**
+  String get insightsSummaryEmpty;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك على {category} زاد {pct} بس إجمالي صرفك أقل من {prev}. كمل كده يا كبير'**
+  String insightsOneLinerDownRiser(String category, String pct, String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك أقل من {prev}. كمل كده يا كبير'**
+  String insightsOneLinerDown(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك زاد عن {prev}، وأكتر حاجة زادت {category} بـ {pct}. خد بالك شوية'**
+  String insightsOneLinerUpRiser(String category, String pct, String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك زاد عن {prev}. خد بالك شوية'**
+  String insightsOneLinerUp(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك زي {prev} تقريباً. ثبات حلو'**
+  String insightsOneLinerSame(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش فترة قبل دي أقارنك بيها. كمّل وأنا هحسبها معاك.'**
+  String get insightsOneLinerNoBaseline;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{span} · {note}'**
+  String insightsChartsCashFlowSub(String span, String note);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر {n} شهور'**
+  String insightsChartsLastNMonths(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{now} لسه ماخلصش'**
+  String insightsChartsPeriodOpenNote(String now);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'أكبر {n} تصنيفات والباقي في «تانية»'**
+  String insightsChartsCategoriesSub(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط على أي مكان تشوف حركاته'**
+  String get insightsChartsMerchantsSub;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف الـ {count} حركة'**
+  String insightsChartsSeeTransactions(String count);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الحركات'**
+  String get insightsChartsSeeTransactionsA11y;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'وفّرت {amount}'**
+  String insightsChartsBubbleSaved(String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك {amount}'**
+  String insightsChartsBubbleIncome(String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت {amount}'**
+  String insightsChartsBubbleSpent(String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} · {amount} · {percent}'**
+  String insightsChartsSliceBubble(String name, String amount, String percent);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'دوس على عمود تشوف تفاصيله'**
+  String get insightsChartsBarHint;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط مطوّل واسحب على الخط عشان تشوف كل نقطة'**
+  String get insightsChartsScrubHint;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} (لسه ماخلصش)'**
+  String insightsChartsPartialLegend(String name);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}، لسه ماخلصش'**
+  String insightsChartsPartialBarA11y(String name);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{مرة} two{مرتين} few{{n} مرات} other{{n} مرة}}'**
+  String insightsChartsPlaceCount(int count, String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}: {count}، {amount}. افتح حركاته'**
+  String insightsChartsPlaceRowA11y(String name, String count, String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}: {amount}، {percent}. {change}'**
+  String insightsChartsSliceRowA11y(
+    String name,
+    String amount,
+    String percent,
+    String change,
+  );
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}: {change}'**
+  String insightsChartsChipA11y(String name, String change);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'كل الرسوم ({n})'**
+  String insightsChartsAllCharts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'رسوم أقل'**
+  String get insightsChartsFewerCharts;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'المبالغ مخفية · الرسوم باينة شكلها بس'**
+  String get insightsChartsHiddenNote;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} ألف'**
+  String insightsAxisThousands(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} مليون'**
+  String insightsAxisMillions(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده'**
+  String get insightsChartsPresetThisCycle;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get insightsChartsPresetLastCycle;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر {n} شهور'**
+  String insightsChartsPresetLastCycles(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاج {months} كمان عشان الرسم ده يبان.'**
+  String insightsThinNeedMonths(String months);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{محتاج حركة كمان} two{محتاج حركتين كمان} few{محتاج {n} حركات كمان} other{محتاج {n} حركة كمان}} عشان الرسم ده يبان.'**
+  String insightsThinNeedTxns(int count, String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف دخلك الأول وأنا أقسمهولك.'**
+  String get insightsThinNeedIncome;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش حاجة هنا. أول ما تتسجّل حركات هتلاقي الرسم ده جاهز.'**
+  String get insightsThinNoData;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف التفاصيل'**
+  String get insightsThinSeeDetails;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{count} حركة'**
+  String insightsChartsDrillTotal(String count);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي {amount}، {count} حركة. {change}'**
+  String insightsChartsDrillTotalA11y(
+    String amount,
+    String count,
+    String change,
+  );
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'قصاد الفترة اللي قبلها'**
+  String get insightsChartsDrillVs;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'حاول تاني'**
+  String get insightsChartsRetry;
 }
 
 class _AppLocalizationsDelegate

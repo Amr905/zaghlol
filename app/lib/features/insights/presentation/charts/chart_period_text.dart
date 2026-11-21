@@ -58,9 +58,9 @@ class ChartPeriodText {
 
   /// The name of a preset in the picker and on the chip's spoken label.
   String presetName(ChartPreset preset) => switch (preset) {
-    ChartPreset.thisCycle => l.commonPeriodThisCycle,
-    ChartPreset.lastCycle => l.commonPeriodLastCycle,
-    ChartPreset.last6Cycles => l.commonPeriodLastCycles(
+    ChartPreset.thisCycle => l.insightsChartsPresetThisCycle,
+    ChartPreset.lastCycle => l.insightsChartsPresetLastCycle,
+    ChartPreset.last6Cycles => l.insightsChartsPresetLastCycles(
       digits.render('${ChartPeriodSelection.cyclesPerBlock}'),
     ),
     ChartPreset.thisMonth => l.commonPeriodThisMonth,
@@ -119,6 +119,10 @@ class ChartPeriodText {
         ? l.insightsChartsPeriodPrevSameDays(phrase)
         : phrase;
   }
+
+  /// The previous period's name alone ("last month"), without the "same
+  /// days" cut: the summary names that separately.
+  String prevName(ResolvedChartPeriod r) => _prevPhrase(r);
 
   String _prevPhrase(ResolvedChartPeriod r) {
     final s = r.selection;

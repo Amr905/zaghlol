@@ -3064,10 +3064,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get insightsChartTitleCashFlow => 'Cash flow';
+  String get insightsChartTitleCashFlow => 'Money in & out';
 
   @override
-  String get insightsChartTitleCategories => 'Where your money went';
+  String get insightsChartTitleCategories => 'Where it went';
 
   @override
   String get insightsChartTitleBurnRate => 'Burn rate to payday';
@@ -3079,7 +3079,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsChartTitleWeekPattern => 'When you spend';
 
   @override
-  String get insightsChartTitleMerchants => 'Top merchants';
+  String get insightsChartTitleMerchants => 'Top places';
 
   @override
   String get insightsChartTitleVsAverage =>
@@ -7854,4 +7854,307 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networthCardOwed => 'Amount you owe';
+
+  @override
+  String get insightsSummarySpent => 'Spent';
+
+  @override
+  String get insightsSummaryIncome => 'Income';
+
+  @override
+  String get insightsSummarySaved => 'Saved';
+
+  @override
+  String get insightsSummaryRate => 'Savings rate';
+
+  @override
+  String insightsChangeUpPct(String pct) {
+    return '▲ $pct';
+  }
+
+  @override
+  String insightsChangeDownPct(String pct) {
+    return '▼ $pct';
+  }
+
+  @override
+  String insightsChangeUpPts(String n) {
+    return '▲ $n pts';
+  }
+
+  @override
+  String insightsChangeDownPts(String n) {
+    return '▼ $n pts';
+  }
+
+  @override
+  String get insightsChangeSame => '= same';
+
+  @override
+  String insightsChangeSamePct(String pct) {
+    return '= $pct';
+  }
+
+  @override
+  String get insightsChangeNew => 'New';
+
+  @override
+  String insightsChangeA11yUp(String pct) {
+    return 'up $pct';
+  }
+
+  @override
+  String insightsChangeA11yDown(String pct) {
+    return 'down $pct';
+  }
+
+  @override
+  String insightsChangeA11yUpPts(String n) {
+    return 'up $n points';
+  }
+
+  @override
+  String insightsChangeA11yDownPts(String n) {
+    return 'down $n points';
+  }
+
+  @override
+  String get insightsChangeA11ySame => 'unchanged';
+
+  @override
+  String get insightsChangeA11yNew => 'new, nothing to compare with';
+
+  @override
+  String insightsSummaryTileA11y(
+    String label,
+    String value,
+    String change,
+    String baseline,
+  ) {
+    return '$label: $value. $change, against $baseline';
+  }
+
+  @override
+  String insightsSummaryBaseline(String prev) {
+    return 'Compared with $prev';
+  }
+
+  @override
+  String insightsSummaryBaselineDays(String days, String prev) {
+    return 'Compared with the same $days days of $prev';
+  }
+
+  @override
+  String get insightsSummaryEmpty =>
+      'No transactions in this period yet. Log some spending or income and I will work out your summary.';
+
+  @override
+  String insightsOneLinerDownRiser(String category, String pct, String prev) {
+    return '$category is up $pct, but you spent less overall than $prev. Keep it up!';
+  }
+
+  @override
+  String insightsOneLinerDown(String prev) {
+    return 'You spent less than $prev. Keep it up!';
+  }
+
+  @override
+  String insightsOneLinerUpRiser(String category, String pct, String prev) {
+    return 'Spending is up on $prev, mostly $category at $pct. Keep an eye on it.';
+  }
+
+  @override
+  String insightsOneLinerUp(String prev) {
+    return 'Spending is up on $prev. Keep an eye on it.';
+  }
+
+  @override
+  String insightsOneLinerSame(String prev) {
+    return 'Spending is about the same as $prev. Steady!';
+  }
+
+  @override
+  String get insightsOneLinerNoBaseline =>
+      'Nothing before this period to compare with yet. Keep going and I will do the maths.';
+
+  @override
+  String insightsChartsCashFlowSub(String span, String note) {
+    return '$span · $note';
+  }
+
+  @override
+  String insightsChartsLastNMonths(String n) {
+    return 'Last $n months';
+  }
+
+  @override
+  String insightsChartsPeriodOpenNote(String now) {
+    return '$now is not over yet';
+  }
+
+  @override
+  String insightsChartsCategoriesSub(String n) {
+    return 'Top $n categories, the rest in “Other”';
+  }
+
+  @override
+  String get insightsChartsMerchantsSub =>
+      'Tap a place to see its transactions';
+
+  @override
+  String insightsChartsSeeTransactions(String count) {
+    return 'See the $count transactions';
+  }
+
+  @override
+  String get insightsChartsSeeTransactionsA11y => 'Open the transactions';
+
+  @override
+  String insightsChartsBubbleSaved(String amount) {
+    return 'Saved $amount';
+  }
+
+  @override
+  String insightsChartsBubbleIncome(String amount) {
+    return 'Income $amount';
+  }
+
+  @override
+  String insightsChartsBubbleSpent(String amount) {
+    return 'Spent $amount';
+  }
+
+  @override
+  String insightsChartsSliceBubble(String name, String amount, String percent) {
+    return '$name · $amount · $percent';
+  }
+
+  @override
+  String get insightsChartsBarHint => 'Tap a bar for its details';
+
+  @override
+  String get insightsChartsScrubHint =>
+      'Press and drag along the line to read each point';
+
+  @override
+  String insightsChartsPartialLegend(String name) {
+    return '$name (not over yet)';
+  }
+
+  @override
+  String insightsChartsPartialBarA11y(String name) {
+    return '$name, not over yet';
+  }
+
+  @override
+  String insightsChartsPlaceCount(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n times',
+      two: 'twice',
+      one: 'once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsPlaceRowA11y(String name, String count, String amount) {
+    return '$name: $count, $amount. Open its transactions';
+  }
+
+  @override
+  String insightsChartsSliceRowA11y(
+    String name,
+    String amount,
+    String percent,
+    String change,
+  ) {
+    return '$name: $amount, $percent. $change';
+  }
+
+  @override
+  String insightsChartsChipA11y(String name, String change) {
+    return '$name: $change';
+  }
+
+  @override
+  String insightsChartsAllCharts(String n) {
+    return 'All charts ($n)';
+  }
+
+  @override
+  String get insightsChartsFewerCharts => 'Fewer charts';
+
+  @override
+  String get insightsChartsHiddenNote =>
+      'Amounts hidden · charts still show their shape';
+
+  @override
+  String insightsAxisThousands(String n) {
+    return '${n}K';
+  }
+
+  @override
+  String insightsAxisMillions(String n) {
+    return '${n}M';
+  }
+
+  @override
+  String get insightsChartsPresetThisCycle => 'This month';
+
+  @override
+  String get insightsChartsPresetLastCycle => 'Last month';
+
+  @override
+  String insightsChartsPresetLastCycles(String n) {
+    return 'Last $n months';
+  }
+
+  @override
+  String insightsThinNeedMonths(String months) {
+    return 'I need $months more for this chart to show.';
+  }
+
+  @override
+  String insightsThinNeedTxns(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'I need $n more transactions',
+      one: 'I need one more transaction',
+    );
+    return '$_temp0 for this chart to show.';
+  }
+
+  @override
+  String get insightsThinNeedIncome =>
+      'Add your income first and I will split it for you.';
+
+  @override
+  String get insightsThinNoData =>
+      'Nothing here yet. Once transactions come in, this chart will fill up.';
+
+  @override
+  String get insightsThinSeeDetails => 'See details';
+
+  @override
+  String insightsChartsDrillTotal(String count) {
+    return '$count transactions';
+  }
+
+  @override
+  String insightsChartsDrillTotalA11y(
+    String amount,
+    String count,
+    String change,
+  ) {
+    return 'Total $amount, $count transactions. $change';
+  }
+
+  @override
+  String get insightsChartsDrillVs => 'vs the period before';
+
+  @override
+  String get insightsChartsRetry => 'Try again';
 }
