@@ -280,8 +280,8 @@ therefore never see a database password they don't use (connection strings are b
 Database login passwords come from `production.env`: `postgres/init/20-set-passwords.sh` applies them on first initialisation
 (after the unchanged `bootstrap-roles.sql`), `backup/set-db-passwords.sh` re-applies them after a change. Never `dev-passwords.sql`.
 
-**Images.** Third-party images are pinned by digest in `production.env` (`pin-images.sh` prints the lines; the examples hold an
-all-zero digest that CI accepts and no registry serves). The backend image is `ghcr.io/amr905/zaghlol-backend@sha256:...`, written
+**Images.** Third-party images are pinned by digest in `production.env` (`pin-images.sh` prints the lines; the example holds real digests resolved 2026-11-21, and an
+all-zero placeholder only for the backend image, which the first deploy writes). The backend image is `ghcr.io/amr905/zaghlol-backend@sha256:...`, written
 into `BACKEND_IMAGE` by `deploy.sh`, which also keeps the previous one in `BACKEND_IMAGE_PREVIOUS`.
 
 ### First install (numbered runbook)
