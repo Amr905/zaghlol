@@ -19,3 +19,4 @@ resolve OTEL_COLLECTOR_IMAGE otel/opentelemetry-collector-contrib:0.116.1
 resolve PROMETHEUS_IMAGE prom/prometheus:v3.5.0
 resolve ALERTMANAGER_IMAGE prom/alertmanager:v0.28.1
 resolve GRAFANA_IMAGE grafana/grafana:12.2.0
+# trigger
