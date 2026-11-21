@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=dd27a3be7ec3321dce61ff4ed7243bf594c47169
+SKIP sha=dd27a3be7ec3321dce61ff4ed7243bf594c47169 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-190-size dd27a3be7ec3321dce61ff4ed7243bf594c47169 2026-11-21T02:05:11.0169584+02:00
+
+
+
