@@ -1,6 +1,6 @@
 # T-193 AC5: emulator run of forged intents and real taps
 
-Branch `task/B53-t193-ac5`. Runner: the `device-flows` workflow (Android emulator API 34, `devSms` debug build), script `.github/scripts/notif-intents.sh` plus `app/integration_test/notification_intents_device_test.dart`. Evidence: the final green run (id in the commit log / PR; the last run before the lint-only move was 44864460325 at 8599191d, 20 of 20 device checks PASS).
+Branch `task/B53-t193-ac5`. Runner: the `device-flows` workflow (Android emulator API 34, `devSms` debug build), script `.github/scripts/notif-intents.sh` plus `app/integration_test/notification_intents_device_test.dart`. Evidence: green run device-flows 44899843561 (app-ci 44899843562, security-scan 44899843456) at 223b3ad5; all cases below PASS. The cold Mark-as-paid case needed the collapsed action notification expanded before its button could be tapped (script fix, no app change).
 
 ## Cases (all PASS)
 
