@@ -147,7 +147,7 @@ class BillsActions {
         reminderDays: d.reminderDays,
       );
     } else {
-      await repo.updateManual(
+      final found = await repo.updateManual(
         id,
         kind: d.kind,
         name: d.name,
@@ -161,6 +161,8 @@ class BillsActions {
         accountId: d.accountId,
         reminderDays: d.reminderDays,
       );
+      // FU-171b: the item was deleted meanwhile; do not claim it was saved.
+      if (!found) throw RecurringException(RecurringException.notFound);
     }
     _changed();
   }

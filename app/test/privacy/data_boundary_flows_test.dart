@@ -66,6 +66,9 @@ const Map<String, String> canaries = {
 
 final class _Tokens implements IdTokenSource {
   @override
+  Future<void> signOut() async {}
+
+  @override
   Future<ProviderCredential> obtain(
     SignInRequestProvider provider, {
     required String hashedNonce,

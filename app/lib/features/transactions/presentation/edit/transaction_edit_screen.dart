@@ -728,8 +728,10 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
                         ),
                         child: ZChip(
                           label: _currency.code,
-                          icon: Icons.arrow_drop_down,
-                          onTap: _pickCurrency,
+                          // FU-158c: an existing row keeps its currency; a
+                          // change would silently re-denominate it.
+                          icon: _isEdit ? null : Icons.arrow_drop_down,
+                          onTap: _isEdit ? null : _pickCurrency,
                         ),
                       ),
                       Expanded(

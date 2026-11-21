@@ -5,9 +5,11 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
+import 'package:zaghlol/core/db/daos/budgets_dao.dart';
 import 'package:zaghlol/core/db/daos/categories_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/features/categorization/data/categories_admin.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/financial_fixtures.dart';
 
@@ -144,4 +146,68 @@ void main() {
       expect((await admin.list()).map((x) => x.id), isNot(contains(c.id)));
     },
   );
+
+  test('delete frees children and moves their budget (FU-179a/b)', () async {
+    final p = await admin.create(
+      name: 'Trips',
+      bucket: 'wants',
+      icon: 'travel',
+      color: '#0F7A55',
+    );
+    final child = await admin.create(
+      name: 'Hotels',
+      bucket: 'wants',
+      icon: 'travel',
+      color: '#0F7A55',
+      parentId: p.id,
+    );
+    await db.customStatement(
+      'INSERT INTO budgets (id, category_id, currency, limit_minor, period, '
+      "created_at) VALUES ('b1', '${p.id}', 'EGP', 1000, 'cycle', 1)",
+    );
+    await db.customStatement(
+      'INSERT INTO fired_alerts (kind, subject_id, period_key, threshold, '
+      "fired_at) VALUES ('budget', 'b1', 'k', 80, 1)",
+    );
+    await admin.deleteWithReplacement(p.id, replacementId: 'sys:food');
+    expect((await admin.list()).map((x) => x.id), contains(child.id));
+    expect((await db.select(db.budgets).get()).single.categoryId, 'sys:food');
+    expect(await db.select(db.firedAlerts).get(), hasLength(1));
+  });
+
+  test('delete re-points budgets and drops colliding ones (FU-179b)', () async {
+    final c = await admin.create(
+      name: 'Trips',
+      bucket: 'wants',
+      icon: 'travel',
+      color: '#0F7A55',
+    );
+    final b = BudgetsDao(db);
+    Money m(int v, String cur) => Money(Currency.of(cur), v);
+    await b.insert(
+      id: 'b1',
+      categoryId: c.id,
+      limit: m(100, 'EGP'),
+      period: BudgetPeriod.cycle,
+      createdAt: 1,
+    );
+    await b.insert(
+      id: 'b2',
+      categoryId: c.id,
+      limit: m(100, 'USD'),
+      period: BudgetPeriod.cycle,
+      createdAt: 1,
+    );
+    await b.insert(
+      id: 'b3',
+      categoryId: 'sys:food',
+      limit: m(500, 'EGP'),
+      period: BudgetPeriod.cycle,
+      createdAt: 1,
+    );
+    await admin.deleteWithReplacement(c.id, replacementId: 'sys:food');
+    final rows = await db.select(db.budgets).get();
+    expect(rows.map((r) => r.id).toSet(), {'b2', 'b3'});
+    expect(rows.every((r) => r.categoryId == 'sys:food'), isTrue);
+  });
 }

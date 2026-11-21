@@ -23,6 +23,9 @@ final class _FakeGoogle implements GoogleSignInPort {
   }
 
   @override
+  Future<void> signOut() async => events.add('signOut');
+
+  @override
   Future<String?> authenticateIdToken() async {
     events.add('auth');
     if (cancel != null) throw cancel!;
@@ -67,6 +70,16 @@ void main() {
       await s.obtain(SignInRequestProvider.google, hashedNonce: 'bb');
       expect(p.nonces, ['aa', 'bb']);
       expect(p.events, ['init', 'auth', 'init', 'auth']);
+    });
+
+    test('signOut reaches the plugin port (FU-189c)', () async {
+      final p = _FakeGoogle();
+      await GoogleIdTokenSource(
+        port: p,
+        isIos: false,
+        serverClientId: 'server-id',
+      ).signOut();
+      expect(p.events, ['signOut']);
     });
 
     test('not configured, cancel and an empty token are typed', () async {

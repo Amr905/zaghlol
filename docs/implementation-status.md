@@ -642,111 +642,111 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-150b | ui | T-083 _AssetsPlaceholder shipped; confirm gated until assets task | accounts/presentation/money_tab.dart | none | CLOSED (placeholder no longer in money_tab; T-121 assets landed) |
 | FU-153a | ui | T-079 bulk delete: hooks run after commit; a hook failure leaves Undo ids only (rethrown at end) | transactions/application/bulk_actions.dart:70-90 | none | CLOSED (FU-132: every id gets its turn, batch id kept) |
 | FU-153b | ui | T-079 Undo onPressed has no mounted check before ref.invalidate | transactions/presentation/list/transactions_list_screen.dart | none | CLOSED (mounted guards at :323,:340, explorer fix a2fb84f0) |
-| FU-151a | core | T-091 repairForNewAmount event built from txnId only; counterpart cycle refreshes late | transactions/application/reimbursements.dart:375 | none | OPEN |
-| FU-151b | core | T-091 removeParticipant runs outside inTransaction and does not check the expense is live | transactions/application/reimbursements.dart:183 | none | OPEN |
+| FU-151a | core | T-091 repairForNewAmount event built from txnId only; counterpart cycle refreshes late | transactions/application/reimbursements.dart:375 | none | OBSOLETE (batch 51): event now carries both ends of every dropped link |
+| FU-151b | core | T-091 removeParticipant runs outside inTransaction and does not check the expense is live | transactions/application/reimbursements.dart:183 | none | OBSOLETE (batch 51): removeParticipant already runs in inTransaction and checks the expense is live |
 | FU-151c | core | T-091 EC-40 repair wired into DriftTransactionRepository.edit | transactions/data/drift_transaction_repository.dart:157 | none | CLOSED (reviewed in batch 17b: repair runs in the edit transaction) |
-| FU-152a | core | T-105 chart memo not invalidated on category/account edits | insights/data/chart_repository.dart:78-96 | none | OPEN |
+| FU-152a | core | T-105 chart memo not invalidated on category/account edits | insights/data/chart_repository.dart:78-96 | none | OBSOLETE (batch 51): watchEdits() invalidates the memo on categories/accounts edits |
 | FU-152b | core | T-105 weekday/hour math on epoch ms before 1970 | insights/data/chart_repository.dart:482 | none | CLOSED (nit, dates validated 2000+, no action) |
 | FU-149a | core | T-113 credit/bnpl balance taken as amount owed; confirm stored meaning (limit vs debt) and pin sign convention in a test | wealth/data/net_worth_repository.dart:135-144 | PO (confirm meaning) | OPEN |
 | FU-149b | core | T-113 unit with zero assets and liabilities omitted from snapshot (chart gap) | wealth/domain/net_worth.dart:199 | none | OPEN |
-| FU-149c | core | T-113 isGold uses startsWith('XAU'); use explicit symbol set | wealth/domain/net_worth.dart:46 | none | OPEN |
-| FU-154a | core | T-155 existingAt reads limit 500 and compares unsanitised merchantRaw (duplicate import risk) | export_import/data/drift_csv_import_store.dart:58 | none | OPEN |
-| FU-154b | core | T-155 DB constraint failure surfaces as raw store exception, not an ImportCsvException code | export_import/application/import_csv.dart:169-222 | none | OPEN |
-| FU-154c | core | T-155 imported refunds link only after categorization sets merchant_norm | export_import/application/import_csv.dart | none | OPEN |
-| FU-155a | ui | T-101 budget saver delete/update/insert not in one DB transaction | budget/application/budget_saver.dart:36-46 | none | OPEN |
-| FU-156a | core | T-106 second copy of essential-category set differs from domain copy (transport_work, utilities, installments vs work_transport) | insights/application/explanations.dart:258 | none | OPEN |
-| FU-157a | parsing | T-110 ask engine catches Exception only, so an Error escapes the "never throws" contract | ask/application/ask_engine.dart:72,120 | none | OPEN |
-| FU-157b | parsing | T-110 "budget left" uses categoryDonut total; confirm equals Home/budget net-spend | ask/application/ask_engine.dart:351-365 | none | OPEN |
-| FU-157c | parsing | T-110 unknownTarget guard may reject balance questions with filler words not in the stop list | packages/zaghlol_parsing/lib/chat/ask_parser.dart | none | OPEN |
-| FU-158a | ui | T-080 EC-40 repair event dropped in onAmountChange; cycle/budget views stale until next event | transactions/data/transactions_providers.dart:56 | none | OPEN |
-| FU-158b | ui | T-080 EC-40 notice reuses transfersAssignErrorExceedsExpense; add transactionsEditLinksRemoved | transactions/presentation/edit/transaction_edit_screen.dart | PO (copy) | OPEN |
-| FU-158c | ui | T-080 currency chip change on an edit with no links silently re-denominates the row | transactions/presentation/edit/transaction_edit_screen.dart:122 | none | OPEN |
-| FU-158d | ui | T-080 contextual cards on S-13 not built | transactions/presentation/detail | none | OPEN |
-| FU-159a | ui | T-085 merge_flow swallows the error code (catch on Object) | accounts/presentation/merge_flow.dart:47 | none | OPEN |
-| FU-159b | ui | T-085 confirm copy does not say the newer balance replaces the older | accounts/presentation/merge_flow.dart | PO (copy) | OPEN |
+| FU-149c | core | T-113 isGold uses startsWith('XAU'); use explicit symbol set | wealth/domain/net_worth.dart:46 | none | OBSOLETE (batch 51): GoldSymbols.isGold uses an explicit symbol set |
+| FU-154a | core | T-155 existingAt reads limit 500 and compares unsanitised merchantRaw (duplicate import risk) | export_import/data/drift_csv_import_store.dart:58 | none | OBSOLETE (batch 51): existingBetween pages all rows and compares sanitised text |
+| FU-154b | core | T-155 DB constraint failure surfaces as raw store exception, not an ImportCsvException code | export_import/application/import_csv.dart:169-222 | none | OBSOLETE (batch 51): store failures map to ImportCsvException.storeFailed |
+| FU-154c | core | T-155 imported refunds link only after categorization sets merchant_norm | export_import/application/import_csv.dart | none | OBSOLETE (batch 51): onImported hook runs pairing/refund matching after commit |
+| FU-155a | ui | T-101 budget saver delete/update/insert not in one DB transaction | budget/application/budget_saver.dart:36-46 | none | FIXED (batch 51) |
+| FU-156a | core | T-106 second copy of essential-category set differs from domain copy (transport_work, utilities, installments vs work_transport) | insights/application/explanations.dart:258 | none | OBSOLETE (batch 51): explanations.dart uses the domain defaultEssentialCategoryIds |
+| FU-157a | parsing | T-110 ask engine catches Exception only, so an Error escapes the "never throws" contract | ask/application/ask_engine.dart:72,120 | none | FIXED (batch 51): catch is `on Object` in ask() and askChip() (already in tree) |
+| FU-157b | parsing | T-110 "budget left" uses categoryDonut total; confirm equals Home/budget net-spend | ask/application/ask_engine.dart:351-365 | none | OPEN (batch 51): donut total and cycle budgetSpent use separate SQL; needs a seeded-DB differential test across insights+budget, not a parsing fix |
+| FU-157c | parsing | T-110 unknownTarget guard may reject balance questions with filler words not in the stop list | packages/zaghlol_parsing/lib/chat/ask_parser.dart | none | FIXED (batch 51): thanks/thank/thx/pls/plz added to ask stop words; test in ask_parser_test.dart |
+| FU-158a | ui | T-080 EC-40 repair event dropped in onAmountChange; cycle/budget views stale until next event | transactions/data/transactions_providers.dart:56 | none | OPEN (batch 51: needs a post-commit event hook in the data layer (core lane)) |
+| FU-158b | ui | T-080 EC-40 notice reuses transfersAssignErrorExceedsExpense; add transactionsEditLinksRemoved | transactions/presentation/edit/transaction_edit_screen.dart | PO (copy) | OPEN (batch 51: PO copy) |
+| FU-158c | ui | T-080 currency chip change on an edit with no links silently re-denominates the row | transactions/presentation/edit/transaction_edit_screen.dart:122 | none | FIXED (batch 51) |
+| FU-158d | ui | T-080 contextual cards on S-13 not built | transactions/presentation/detail | none | OPEN (batch 51: new S-13 cards need design/copy) |
+| FU-159a | ui | T-085 merge_flow swallows the error code (catch on Object) | accounts/presentation/merge_flow.dart:47 | none | OBSOLETE (batch 51): AccountsException branch already shows the support code; only an untyped error has none |
+| FU-159b | ui | T-085 confirm copy does not say the newer balance replaces the older | accounts/presentation/merge_flow.dart | PO (copy) | OPEN (batch 51: PO copy) |
 | FU-160a | ui | T-162 confirmed delete with null wipe provider does nothing silently; wipe() error not caught | settings/presentation/privacy_screen.dart:200-224 | none | CLOSED (wipe in try/catch at :224, provider wired by T-166) |
 | FU-160b | ui | T-162 D-55 Gold-on-Android warning before Delete everything | settings/presentation/privacy_screen.dart:162 | none | CLOSED (EC-69 warning present) |
-| FU-161a | core | T-143 one bad row deletes every gathered row (contributions and bank requests) | catalog_sync/application/sync_orchestrator.dart:446-455 | none | OPEN |
+| FU-161a | core | T-143 one bad row deletes every gathered row (contributions and bank requests) | catalog_sync/application/sync_orchestrator.dart:446-455 | none | OBSOLETE (batch 51): only the bad row is deleted now |
 | FU-161b | core | T-143 contributions queued before opt-out are sent after re-opt-in; confirm purge rule | catalog_sync/application/sync_orchestrator.dart:376 | PO | OPEN |
-| FU-161c | core | T-143 allowDevKeys/allowInsecureLocalhost use !kReleaseMode, so profile builds accept dev keys; use kDebugMode | catalog_sync/application/sync_providers.dart:94 | none | OPEN |
-| FU-161d | core | T-143 "user rule never overridden" has no orchestrator-level test | test/features/catalog_sync | none | OPEN |
-| FU-162a | native | T-178 iOS key replace does delete then add (old keyId lost if add fails); use SecItemUpdate with add fallback | ios/Runner/Platform/Attestation/AttestationHost.swift:107-110 | none | OPEN |
+| FU-161c | core | T-143 allowDevKeys/allowInsecureLocalhost use !kReleaseMode, so profile builds accept dev keys; use kDebugMode | catalog_sync/application/sync_providers.dart:94 | none | OBSOLETE (batch 51): uses kDebugMode |
+| FU-161d | core | T-143 "user rule never overridden" has no orchestrator-level test | test/features/catalog_sync | none | OBSOLETE (batch 51): orchestrator test with categorySource user exists (sync_orchestrator_test.dart:336) |
+| FU-162a | native | T-178 iOS key replace does delete then add (old keyId lost if add fails); use SecItemUpdate with add fallback | ios/Runner/Platform/Attestation/AttestationHost.swift:107-110 | none | OBSOLETE (batch 51): replace() already uses update with add fallback |
 | FU-162b | native | T-178 device ACs (Play token decode, App Attest verify, user-CA proxy release vs debug) not run | docs/05-reviews (T-178 device report not yet written) | device | OPEN |
 | FU-162c | native | T-178 network_security_config comment says dart:io "never trusts user CAs" flatly; confirm on device | android/app/src/main/res/xml/network_security_config.xml:7 | device | OPEN |
 | FU-163a | native | T-179 transient Secure Enclave error deletes an earlier-install key after 3 tries | ios/Runner/SeatKeyStore.swift:189,329 | device | OPEN |
-| FU-163b | native | T-179 BackendStateStore failure inside _prepare propagates instead of the "no keys" fallback | gold/application/seat_keys.dart:134 | none | OPEN |
+| FU-163b | native | T-179 BackendStateStore failure inside _prepare propagates instead of the "no keys" fallback | gold/application/seat_keys.dart:134 | none | OBSOLETE (batch 51): _prepare already catches and returns null |
 | FU-163c | native | T-179 R-19 reinstall and Delete-everything device ACs not run | docs/05-reviews (T-179 device report not yet written) | device | OPEN |
-| FU-164a | native | T-044 SMS revocation kills the process, so onPermissionChanged only via next-start getCapabilities; note in AC map | capture/CaptureRuntime.kt:296-301 | none | OPEN |
-| FU-164b | native | T-044 detach() drops pending callbacks silently; add comment | capture/UiPermissions.kt:58 | none | OPEN |
+| FU-164a | native | T-044 SMS revocation kills the process, so onPermissionChanged only via next-start getCapabilities; note in AC map | capture/CaptureRuntime.kt:296-301 | none | FIXED (batch 51) |
+| FU-164b | native | T-044 detach() drops pending callbacks silently; add comment | capture/UiPermissions.kt:58 | none | OBSOLETE (batch 51): FU-164b comment already in detach() |
 | FU-164c | native | T-044 POST_NOTIFICATIONS request needs an owner task | capture/UiPermissions.kt | none (unowned) | OPEN |
-| FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | OPEN |
-| FU-165b | core | T-145 uncaught PlatformException from _store.complete / _seats.prove in _onUpdates/_attempt | gold/application/purchase.dart:84,163 | none | OPEN |
-| FU-165c | core | T-145 restore proof.token!/keyId!/assertion! TypeError on incomplete proof | gold/application/restore.dart:216,235 | none | OPEN |
+| FU-165a | core | T-145 final answer for re-verify from non-holder (active, no purchase in token) treated as retry-later for 14 days | gold/application/purchase.dart:240-260 | none | OPEN (batch 51 review: needs the 145-2 typed outcome; a dead branch was reverted) |
+| FU-165b | core | T-145 uncaught PlatformException from _store.complete / _seats.prove in _onUpdates/_attempt | gold/application/purchase.dart:84,163 | none | OBSOLETE (batch 51): PlatformException caught around complete/prove |
+| FU-165c | core | T-145 restore proof.token!/keyId!/assertion! TypeError on incomplete proof | gold/application/restore.dart:216,235 | none | OBSOLETE (batch 51): restore no longer force-unwraps proof fields |
 | FU-165d | core | T-145 no native wake-up: purchase retry only if user opens app within 3 days; needs purchase-retry-worker and PO call | gold/application/purchase.dart | PO | OPEN |
-| FU-165e | core | T-145 verified entry whose purchase is gone (refunded) stays in outbox forever; add age-out | gold/application/purchase.dart:155 | none | OPEN |
+| FU-165e | core | T-145 verified entry whose purchase is gone (refunded) stays in outbox forever; add age-out | gold/application/purchase.dart:155 | none | OBSOLETE (batch 51): verified entries age out after outboxMaxAge |
 | FU-165f | core | T-145 device items: StoreKit-config test, release user-CA check, sandbox purchases | gold | device | OPEN |
-| FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | OPEN |
+| FU-166a | ui | T-146 weekly upsell cap store is in-memory; persist and add first caller | gold/presentation/gold_ui_ports.dart:178 | none | OPEN (batch 51: needs encrypted prefs store plus a first caller; not UI-only) |
 | FU-166b | ui | T-146 paywallTriggerOverride and goldLinkOpener wired in root | app/app_navigation.dart:96-100 | none | CLOSED (WIRE-NAV, FU-195) |
-| FU-166c | ui | T-146 tampered-clock copy "set clock to automatic" missing | gold/application/gold_messages.dart | PO (copy) | OPEN |
-| FU-167a | native | T-151 one quota error on any old file blocks every later iCloud backup | backup/application/icloud_backup_service.dart:109 | none | OPEN |
+| FU-166c | ui | T-146 tampered-clock copy "set clock to automatic" missing | gold/application/gold_messages.dart | PO (copy) | OPEN (batch 51: PO copy) |
+| FU-167a | native | T-151 one quota error on any old file blocks every later iCloud backup | backup/application/icloud_backup_service.dart:109 | none | OBSOLETE (batch 51): only the newest backup gates on quotaExceeded |
 | FU-167b | native | T-151 manual device test steps 1-6 and PO portal setup pending | docs/04-tasks/tasks/T-151.md | device; PO (portal) | OPEN |
 | FU-168a | core | T-152 keep and Gold check read entitlementStateProvider before first evaluate (manual backup could prune a Gold user to 1) | backup/application/schedule.dart:136,228,257 | none | CLOSED (pendingVerification keeps 5 and skips reconcile, Lead delta check batch 18) |
-| FU-168b | core | T-152 icloudBackupDestinationProvider still null; add ICloudBackupDestination mapping uploaded to confirmed | backup/application/schedule_providers.dart:41 | none | OPEN |
-| FU-168c | core | T-152 backupAppVersionProvider writes 0.0.0 into backup headers; bind to package_info | backup/application/schedule_providers.dart:39 | none | OPEN |
-| FU-168d | core | T-152 isScheduleDue: lastSuccess in the future (clock moved back) means never due | backup/application/schedule.dart:83-100 | none | OPEN |
-| FU-168e | core | T-152 WorkManager/BGProcessing binding, alert sink, reminder keys are inert seams | backup/application/schedule.dart | none | OPEN |
+| FU-168b | core | T-152 icloudBackupDestinationProvider still null; add ICloudBackupDestination mapping uploaded to confirmed | backup/application/schedule_providers.dart:41 | none | OBSOLETE (batch 51): icloudBackupDestinationProvider maps ICloudBackupDestination on iOS |
+| FU-168c | core | T-152 backupAppVersionProvider writes 0.0.0 into backup headers; bind to package_info | backup/application/schedule_providers.dart:39 | none | OBSOLETE (batch 51): bound to kClientAppVersion |
+| FU-168d | core | T-152 isScheduleDue: lastSuccess in the future (clock moved back) means never due | backup/application/schedule.dart:83-100 | none | OBSOLETE (batch 51): future lastSuccess is treated as due |
+| FU-168e | core | T-152 WorkManager/BGProcessing binding, alert sink, reminder keys are inert seams | backup/application/schedule.dart | none | OPEN (WorkManager/BGProcessing binding is native code; alert sink already bound) |
 | FU-169a | ui | T-107 locked previews shown to Gold users | insights/presentation/charts/charts_screen.dart:131 | none | CLOSED (decideChart(...).allowed skips the lock card) |
-| FU-169b | ui | T-107 percent computed through double (net*100/income).round() | insights/presentation/charts/chart_bodies.dart:59 | none | OPEN |
-| FU-170a | ui | T-108 essential set follows the bucket, so user-made needs category becomes essential (document) | insights/application/chart_explain_providers.dart:34 | none | OPEN |
-| FU-171a | ui | T-102 updateManual doc says keeps status but writes active/completed | accounts or bills/data/recurring_repository.dart:305 | none | OPEN |
-| FU-171b | ui | T-102 updateManual does not check id exists; UI says saved regardless | bills/presentation/bill_edit_screen.dart | none | OPEN |
+| FU-169b | ui | T-107 percent computed through double (net*100/income).round() | insights/presentation/charts/chart_bodies.dart:59 | none | OBSOLETE (batch 51): savedPercent already integer-only |
+| FU-170a | ui | T-108 essential set follows the bucket, so user-made needs category becomes essential (document) | insights/application/chart_explain_providers.dart:34 | none | FIXED (batch 51) |
+| FU-171a | ui | T-102 updateManual doc says keeps status but writes active/completed | accounts or bills/data/recurring_repository.dart:305 | none | FIXED (batch 51) |
+| FU-171b | ui | T-102 updateManual does not check id exists; UI says saved regardless | bills/presentation/bill_edit_screen.dart | none | FIXED (batch 51) |
 | FU-172a | ui | T-104 real HomeCardActions.enableAppLock test (FU-130 privacy property) | test/features/home/application | none | CLOSED (added in batch 18 fix round, Lead delta check) |
-| FU-172b | ui | T-104 two writes after enable not guarded; second throw leaves lock on, amounts visible | home/application/home_cards.dart:132-146 | none | OPEN |
-| FU-172c | ui | T-104 app-lock offer does not mention hidden notification amounts | core/l10n/app_en.arb:345 | PO (copy) | OPEN |
-| FU-172d | ui | T-104 salary-credit and backup-exists providers are stubs (payday and backup cards off) | home/application/home_cards.dart:28 | none | OPEN |
-| FU-173a | ui | T-081 throwing deferred job in closed.then unhandled; item stays hidden | ingestion/presentation/review/review_screen.dart:84-88 | none | OPEN |
-| FU-173b | ui | T-081 categorize edits transaction and resolves item in two calls (not atomic) | ingestion/presentation/review | none | OPEN |
-| FU-174a | ui | T-086 re-scan offer after un-ignoring overwrites the saved scan depth | settings/presentation/capture_settings_screen.dart:497-503 | none | OPEN |
-| FU-175a | ui | T-121 certificate/stock names have no length cap | wealth/application/validateAssetForm | none | OPEN |
-| FU-175b | ui | T-121 pricePaid without currency puts the error on a field the gold form does not render | wealth/presentation | none | OPEN |
+| FU-172b | ui | T-104 two writes after enable not guarded; second throw leaves lock on, amounts visible | home/application/home_cards.dart:132-146 | none | FIXED (batch 51) |
+| FU-172c | ui | T-104 app-lock offer does not mention hidden notification amounts | core/l10n/app_en.arb:345 | PO (copy) | OPEN (batch 51: PO copy) |
+| FU-172d | ui | T-104 salary-credit and backup-exists providers are stubs (payday and backup cards off) | home/application/home_cards.dart:28 | none | OPEN (batch 51: salary/backup sources are core work (FU-144)) |
+| FU-173a | ui | T-081 throwing deferred job in closed.then unhandled; item stays hidden | ingestion/presentation/review/review_screen.dart:84-88 | none | FIXED (batch 51) |
+| FU-173b | ui | T-081 categorize edits transaction and resolves item in two calls (not atomic) | ingestion/presentation/review | none | OBSOLETE (batch 51): not atomic but idempotent; failure re-shows the item and a retry converges |
+| FU-174a | ui | T-086 re-scan offer after un-ignoring overwrites the saved scan depth | settings/presentation/capture_settings_screen.dart:497-503 | none | OBSOLETE (batch 51): rescan(depthMonths: null) never saves depth |
+| FU-175a | ui | T-121 certificate/stock names have no length cap | wealth/application/validateAssetForm | none | OBSOLETE (batch 51): maxAssetNameLength cap already validated |
+| FU-175b | ui | T-121 pricePaid without currency puts the error on a field the gold form does not render | wealth/presentation | none | OBSOLETE (batch 51): gold form already puts the error on pricePaid |
 | FU-176a | ui | T-055 welcome minHeight magic number can go negative | onboarding/presentation/welcome.dart:62 | none | CLOSED (now ZSpacing.minTarget) |
 | FU-177a | ui | T-056 _listenScan runs twice and leaks the earlier subscription | onboarding/presentation/android_setup.dart:102,147 | none | CLOSED (earlier _sub cancelled at :102) |
-| FU-177b | ui | T-056 degraded Continue calls onSkipped then onDone (double navigation; records SMS as skipped) | onboarding/presentation/android_setup.dart:525 | none | OPEN |
-| FU-177c | ui | T-056 scan errors swallowed, card stays at "running" | onboarding/presentation/android_setup.dart:151 | none | OPEN |
-| FU-178a | ui | T-111 Ask text field keeps IME learning/suggestions/autocorrect | ask/presentation/ask_screen.dart | none | OPEN |
-| FU-178b | ui | T-111 hard-coded Arabic comma in English locale | ask/presentation/ask_answer_text.dart:200,250 | none | OPEN |
-| FU-178c | ui | T-111 literal '0' passed to chatAnswerDues bypasses digit mode | ask/presentation/ask_answer_text.dart:150 | none | OPEN |
-| FU-179a | ui | T-163 delete leaves subcategories on archived parent (children hidden, rules/transactions not moved) | categorization/data/categories_admin.dart:240-262 | none | OPEN |
-| FU-179b | ui | T-163 delete leaves budgets rows on the archived category | categorization/data/categories_admin.dart:240-262 | none | OPEN |
-| FU-179c | ui | T-163 delete failure shows generic message without a code | categorization/presentation/categories_screens.dart | none | OPEN |
-| FU-180a | core | T-098 defaultEssentialCategoryIds holds bare codes but DB ids are sys:<code>; subcategories unprotected (before first caller) | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:30-39 | none | OPEN |
-| FU-180b | core | T-098 diningSpike shocked pose takes any category; caller must restrict to dining/delivery | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:69 | none | OPEN |
-| FU-181a | ui | T-093 saveSplit applies removals/updates/adds as separate calls, not one transaction | transfers/presentation/split_sheet.dart | none | OPEN |
-| FU-181b | ui | T-093 Undo of unassign does not catch errors; assign_sheet firstWhere can throw | transfers/presentation/split_sheet.dart:131; assign_sheet.dart:91 | none | OPEN |
-| FU-181c | ui | T-093 "mark anyway" hidden (supportsMarkAnyway false, EC-15) | transfers/presentation | none | OPEN |
+| FU-177b | ui | T-056 degraded Continue calls onSkipped then onDone (double navigation; records SMS as skipped) | onboarding/presentation/android_setup.dart:525 | none | OBSOLETE (batch 51): Continue calls onSkipped, or onDone only when no onSkipped |
+| FU-177c | ui | T-056 scan errors swallowed, card stays at "running" | onboarding/presentation/android_setup.dart:151 | none | OBSOLETE (batch 51): _listenScan onError sets ScanPhase.failed |
+| FU-178a | ui | T-111 Ask text field keeps IME learning/suggestions/autocorrect | ask/presentation/ask_screen.dart | none | OBSOLETE (batch 51): IME learning/suggestions/autocorrect already off |
+| FU-178b | ui | T-111 hard-coded Arabic comma in English locale | ask/presentation/ask_answer_text.dart:200,250 | none | OBSOLETE (batch 51): separator already locale-driven (_sep) |
+| FU-178c | ui | T-111 literal '0' passed to chatAnswerDues bypasses digit mode | ask/presentation/ask_answer_text.dart:150 | none | OBSOLETE (batch 51): 0 now goes through _n digit mode |
+| FU-179a | ui | T-163 delete leaves subcategories on archived parent (children hidden, rules/transactions not moved) | categorization/data/categories_admin.dart:240-262 | none | FIXED (batch 51) |
+| FU-179b | ui | T-163 delete leaves budgets rows on the archived category | categorization/data/categories_admin.dart:240-262 | none | FIXED (batch 51) |
+| FU-179c | ui | T-163 delete failure shows generic message without a code | categorization/presentation/categories_screens.dart | none | FIXED (batch 51) |
+| FU-180a | core | T-098 defaultEssentialCategoryIds holds bare codes but DB ids are sys:<code>; subcategories unprotected (before first caller) | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:30-39 | none | OBSOLETE (batch 51): _isEssential also matches the code without the sys: prefix |
+| FU-180b | core | T-098 diningSpike shocked pose takes any category; caller must restrict to dining/delivery | packages/zaghlol_domain/lib/mascot_rules/mascot_rules.dart:69 | none | OBSOLETE (batch 51): diningSpike restricts to diningSpikeCategoryCodes |
+| FU-181a | ui | T-093 saveSplit applies removals/updates/adds as separate calls, not one transaction | transfers/presentation/split_sheet.dart | none | FIXED (batch 51) |
+| FU-181b | ui | T-093 Undo of unassign does not catch errors; assign_sheet firstWhere can throw | transfers/presentation/split_sheet.dart:131; assign_sheet.dart:91 | none | FIXED (batch 51) |
+| FU-181c | ui | T-093 "mark anyway" hidden (supportsMarkAnyway false, EC-15) | transfers/presentation | none | OPEN (batch 51: needs PO decision on EC-15 one-sided marker; no use case yet) |
 | FU-182a | native | T-009 Dart spike entrypoints shipped in AOT | app/lib/main.dart; ingestion/spike_channel.dart | none | CLOSED (spike file and entrypoints removed) |
-| FU-182b | native | T-009 RunnerTests Debug-prod has SWIFT_ACTIVE_COMPILATION_CONDITIONS twice | ios/Runner.xcodeproj/project.pbxproj:743,753 | none | OPEN |
-| FU-184a | ui | T-116 animateToPage(indexWhere) not guarded against -1 (unreachable today) | home/presentation/home_screen.dart:299 | none | OPEN |
-| FU-185a | ui | T-114 inflation chart isEmpty is length<2; cards opener hook null until shell wires it | insights/presentation/charts/gold_chart_bodies.dart | none | OPEN |
-| FU-186a | ui | T-084 compare-table Total row uses cardsSplit.spend while cells use donut slices; add repo-level test | accounts/presentation/card_detail/card_detail_providers.dart:189 | none | OPEN |
-| FU-187a | ui | T-057 _ignore with last4 null covers the whole institution while UI reads "this card" | onboarding/presentation/scan_results.dart:261 | none | OPEN |
+| FU-182b | native | T-009 RunnerTests Debug-prod has SWIFT_ACTIVE_COMPILATION_CONDITIONS twice | ios/Runner.xcodeproj/project.pbxproj:743,753 | none | OBSOLETE (batch 51): no config has the setting twice in project.pbxproj |
+| FU-184a | ui | T-116 animateToPage(indexWhere) not guarded against -1 (unreachable today) | home/presentation/home_screen.dart:299 | none | OBSOLETE (batch 51): home_screen.dart already returns on indexWhere < 0 |
+| FU-185a | ui | T-114 inflation chart isEmpty is length<2; cards opener hook null until shell wires it | insights/presentation/charts/gold_chart_bodies.dart | none | OBSOLETE (batch 51): length<2 is right for a line chart and no cards-opener hook remains in insights code |
+| FU-186a | ui | T-084 compare-table Total row uses cardsSplit.spend while cells use donut slices; add repo-level test | accounts/presentation/card_detail/card_detail_providers.dart:189 | none | OPEN (batch 51: needs a chart_repository-level test of cardsSplit vs donut totals) |
+| FU-187a | ui | T-057 _ignore with last4 null covers the whole institution while UI reads "this card" | onboarding/presentation/scan_results.dart:261 | none | FIXED (batch 51) |
 | FU-188a | ui | T-153 restore confirm when replacing existing data (S-66) | backup/presentation/backup_ports.dart; FU-197 | none | CLOSED (FU-197, batch 21) |
 | FU-188b | ui | T-153 restore pause/resume/resyncCatalog no-ops (restore race with capture) | backup/presentation/backup_ports.dart:237-253 | none | CLOSED (WIRE-SVC wired the pause gate, FU-194) |
-| FU-188c | ui | T-153 old-backup deletion after passphrase change not in UI; needs owner confirm | backup/presentation | none | OPEN |
+| FU-188c | ui | T-153 old-backup deletion after passphrase change not in UI; needs owner confirm | backup/presentation | none | OPEN (batch 51: needs owner confirm on deleting old backups) |
 | FU-189a | core | T-147 S-69 reachable (opener override and Settings entry) | app/app_navigation.dart:98 | none | CLOSED (goldSignInOpenerOverride wired) |
-| FU-189b | core | T-147 Drive authorizer GoogleSignIn.initialize without nonce can race the sign-in ID token (fails closed) | account/application/id_token_source.dart:128-150; backup/data/drive_auth.dart:51-63 | none | OPEN |
-| FU-189c | core | T-147 signOut never calls GoogleSignIn.signOut | account/application/account_service.dart:209 | none | OPEN |
-| FU-189d | core | T-147 AccountStatus.linkedGold reads claims.acct without sub==installId check (wording only) | account/application/account_providers.dart:95-101 | none | OPEN |
-| FU-190a | parsing | T-164 paste field has no autocorrect/enableSuggestions off | capture/presentation/template_builder_screen.dart | none | OPEN |
+| FU-189b | core | T-147 Drive authorizer GoogleSignIn.initialize without nonce can race the sign-in ID token (fails closed) | account/application/id_token_source.dart:128-150; backup/data/drive_auth.dart:51-63 | none | FIXED (batch 51): shared GoogleSignInGate serializes sign-in/Drive; Drive re-initializes after a nonce session |
+| FU-189c | core | T-147 signOut never calls GoogleSignIn.signOut | account/application/account_service.dart:209 | none | FIXED (batch 51): signOut calls IdTokenSource.signOut -> GoogleSignIn.signOut |
+| FU-189d | core | T-147 AccountStatus.linkedGold reads claims.acct without sub==installId check (wording only) | account/application/account_providers.dart:95-101 | none | FIXED (batch 51): AccountService.linkedGold checks sub == installId; test added |
+| FU-190a | parsing | T-164 paste field has no autocorrect/enableSuggestions off | capture/presentation/template_builder_screen.dart | none | OBSOLETE (batch 51): both paste fields already set autocorrect:false, enableSuggestions:false |
 | FU-190b | parsing | T-164 unsalted SHA-256 hash; pipeline registration, re-parse hook, route unwired | capture/application/template_builder.dart | none | CLOSED (re-parse hook wired in WIRE-SVC; hash as the task asks) |
 | FU-191a | native | T-160 iOS OCR path check allowed only NSHomeDirectory, spool in App Group | ios/Runner/Platform/OCR/OcrHost.swift:141,193 | none | CLOSED (FU-198, batch 20) |
 | FU-191b | native | T-160 iOS spool key provider provisioned | ios/Runner/Platform/OCR/OcrHost.swift:57 | none | CLOSED (SharedSpoolKeyProvider, FU-198) |
 | FU-192a | native | T-061 two Keychain items named spool_key_v1 (Guard own group vs shared) | ios/Runner/Guard/GuardUserCipher.swift:43 | none | CLOSED (FU-196; same shared item) |
-| FU-192b | native | T-061 GuardBaseSource.mirror never called | ios/Runner/Guard/GuardBaseSource.swift | none | OPEN |
+| FU-192b | native | T-061 GuardBaseSource.mirror never called | ios/Runner/Guard/GuardBaseSource.swift | none | OBSOLETE (batch 51): mirror() called from CaptureGuardRuntime.mirrorBaseInBackground at launch |
 | FU-193a | native | T-062 KeychainSpoolCipher caches key; another process replacing the item breaks reads (re-read ladder) | ios/Shared/SpoolCipher.swift | none | CLOSED (reloadKey, FU-196) |
 | FU-193b | native | T-062 releaseHeldIfVersionChanged never called | ios/Runner/AppDelegate.swift:25 | none | CLOSED (called at launch) |
 | FU-193c | native | T-062 Dart never calls registerBackgroundRefresh (chain never starts) | app/pigeons/capture_api.dart | none | CLOSED (T-066 schedules at start and resume) |
-| FU-193d | native | T-062 platform-channels.md section 1.3 Write row still says .atomic | docs/03-technical/platform-channels.md | none | OPEN |
+| FU-193d | native | T-062 platform-channels.md section 1.3 Write row still says .atomic | docs/03-technical/platform-channels.md | none | OBSOLETE (batch 51): platform-channels.md 1.3 Write row no longer says .atomic |
 | FU-193e | native | T-062 headless engine registers every plugin including sign-in and IAP | ios/Runner/Platform/Capture/HeadlessIngestion.swift:85 | none | OPEN |
 | FU-199a | native | T-063 reloadKey returns .changed when nothing cached | ios/Shared/SpoolCipher.swift:60 | none | CLOSED (returns .unchanged) |
 | FU-199b | native | T-063 AC "run while app closed" device step (iOS 17 and 26) not run | docs/04-tasks/tasks/T-063.md | device | OPEN |
@@ -758,86 +758,87 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-202a | core | T-166 failing step re-runs destructive resume on every launch (major) | security/application/delete_everything.dart:203-213 | none | CLOSED (capped, fix round batch 20) |
 | FU-202b | core | T-166 iOS wipe keeps in-process caches (cipher key, Guard snapshot) | ios/Runner/Platform/Capture/IosCaptureHost.swift:285 | none | CLOSED (caches dropped, batch 23 FU-native) |
 | FU-202c | core | T-166 widgets keep last figure after wipe | IosCaptureHost.swift:290 | none | CLOSED (reloadAllTimelines) |
-| FU-202d | core | T-166 Android wipe deletes the marker during native clear (acceptable; optionally skip wipe_pending) | android capture wipe | none | OPEN |
+| FU-202d | core | T-166 Android wipe deletes the marker during native clear (acceptable; optionally skip wipe_pending) | android capture wipe | none | OPEN (needs a Kotlin change in LocalDataWiper, not testable without an Android build) |
 | FU-202e | core | T-166 privacyDeleteBackupsKept and privacyDeleteFailed missing from copy deck | docs/02-design/copy-deck.md | PO (copy) | OPEN |
 | FU-202f | core | T-166 full device sandbox scan and seat-key element-1 check not run | docs/05-reviews | device | OPEN |
 | FU-202g | core | T-166 WipeMarker writes atomically (temp, flush, rename) | security/application/delete_everything.dart:123-130 | none | CLOSED (D-1, atomic write) |
-| FU-202h | core | T-166 marker read I/O error is never counted or dropped (harmless) | security/application/delete_everything.dart:237 | none | OPEN |
-| FU-203a | core | T-092 _dismissedFx uses payload LIKE '%"id"%' scan | transfers/application (TransferPairingUseCase._dismissedFx) | none | OPEN |
+| FU-202h | core | T-166 marker read I/O error is never counted or dropped (harmless) | security/application/delete_everything.dart:237 | none | OBSOLETE (batch 51): unreadable marker is counted and dropped at maxResumes, tested in delete_everything_test |
+| FU-203a | core | T-092 _dismissedFx uses payload LIKE '%"id"%' scan | transfers/application (TransferPairingUseCase._dismissedFx) | none | OBSOLETE (batch 51): LIKE scans only dismissed fx-suggestion rows, a small bounded set |
 | FU-204a | core | T-100 duplicate/weekly/backup alerts not instantiated anywhere | notifications/application/notification_providers.dart:267 | none | CLOSED (providers wired, WIRE-2) |
 | FU-204b | core | T-100 detector not restricted to POS channel (rule as implemented) | notifications/domain | none | CLOSED (rule as implemented, accepted) |
-| FU-204c | core | T-100 first launch runs the weekly summary at once; not anchored to a weekday | notifications/application/notification_providers.dart:256 | none | OPEN |
-| FU-204d | core | T-100 weekly-summary category names read once when provider is built | notifications/application/notification_providers.dart:221-235 | none | OPEN |
+| FU-204c | core | T-100 first launch runs the weekly summary at once; not anchored to a weekday | notifications/application/notification_providers.dart:256 | none | OBSOLETE (batch 51): weekly summary is Friday-anchored (PO WEEKLY-FRIDAY) |
+| FU-204d | core | T-100 weekly-summary category names read once when provider is built | notifications/application/notification_providers.dart:221-235 | none | OBSOLETE (batch 51): run path invalidates the alert provider; existing FU-204d test covers rename |
 | FU-205a | ui | T-117 Share channel zaghlol/share had no native implementation (major) | share_cards/share_providers.dart:38; ShareImageRegistration.kt; ShareImageHost.swift | none | CLOSED (native hosts added, WIRE-3) |
 | FU-205b | ui | T-117 plaintext share PNG left in tmp/cache after a crash | ShareImageRegistration.kt:55,73 | none | CLOSED (Android sweep at start, ShareImageRegistration.kt); iOS tmp sweep still open |
-| FU-205c | ui | T-117 iOS share sheet: result never called if present does not complete | ios/Runner/ShareImageHost.swift:56 | none | OPEN |
-| FU-205d | ui | T-117 zaghlol/share MethodChannel not documented in platform-channels.md | docs/03-technical/platform-channels.md | none | OPEN |
+| FU-205c | ui | T-117 iOS share sheet: result never called if present does not complete | ios/Runner/ShareImageHost.swift:56 | none | OPEN (batch 51: iOS share-sheet present callback needs a device to verify) |
+| FU-205d | ui | T-117 zaghlol/share MethodChannel not documented in platform-channels.md | docs/03-technical/platform-channels.md | none | FIXED (batch 51) |
 | FU-205e | ui | T-117 share cards screen routed from somewhere | share_cards | none | CLOSED (WIRE-3 share handlers) |
 | FU-206a | native | T-118 widget snapshot stays unmasked on the home screen after app lock until app republishes | widgets_bridge | none | OPEN |
 | FU-206b | native | T-118 days-to-payday does not roll over at midnight until app republishes | widgets_bridge | none | OPEN |
 | FU-206c | native | T-118 widgetBridgeWiringProvider/widgetCopyProvider wired in shell; clear() in delete flow | widgets_bridge/widget_bridge.dart:102 | none | CLOSED (WIRE-2) |
 | FU-207a | native | T-064 shortcutInstall still the TODO placeholder URL | app/app_config.dart:15 | PO (FU-212) | OPEN |
-| FU-207b | native | T-064 unreadable IntentRunLog reports "never ran" and flags after 7 days | ios/Runner/Capture/IntentRunLog.swift:51 | none | OPEN |
+| FU-207b | native | T-064 unreadable IntentRunLog reports "never ran" and flags after 7 days | ios/Runner/Capture/IntentRunLog.swift:51 | none | OBSOLETE (batch 51): readIfReadable() distinguishes unreadable from never ran |
 | FU-207c | native | T-064 users without Apple Pay are flagged on the Wallet automation for good | capture/domain/ios_shortcut_checker.dart | none | CLOSED (PO T-064: Wallet rule neverRan or not flagged, batch 21) |
-| FU-207d | native | T-064 shortcutSetupReportProvider has no consumer naming the flagged automation | capture/application | none | OPEN |
-| FU-208a | test | T-171 allow-list does not see headers dart:io adds (user-agent, host) | core/backend/transport.dart:82 | none | OPEN |
-| FU-208b | test | T-171 source guard gaps (print (x) with space; // inside string; .m/.h not scanned) | test/privacy/source_guards_test.dart:58,82 | none | OPEN (print-space part closed by FU-215; // in string and .m/.h not scanned) |
+| FU-207d | native | T-064 shortcutSetupReportProvider has no consumer naming the flagged automation | capture/application | none | OBSOLETE (batch 51): ios_setup.dart consumes the report and flags the automation row |
+| FU-208a | test | T-171 allow-list does not see headers dart:io adds (user-agent, host) | core/backend/transport.dart:82 | none | OBSOLETE (batch 51): IoBackendTransport sets userAgent=null; Host is the destination itself |
+| FU-208b | test | T-171 source guard gaps (print (x) with space; // inside string; .m/.h not scanned) | test/privacy/source_guards_test.dart:58,82 | none | OBSOLETE (batch 51): guard handles // inside strings and scans .m/.h/.mm |
 | FU-208c | test | T-171 F1 sign-out reaches server | core/backend | none | CLOSED (Lead delta check batch 20) |
-| FU-209a | test | T-173 benchmark job can block on a flake (no retry) | .github/workflows/app-ci.yml:231-250 | none | OPEN |
+| FU-209a | test | T-173 benchmark job can block on a flake (no retry) | .github/workflows/app-ci.yml:231-250 | none | OBSOLETE (batch 51): perf job retries the app benchmark step once |
 | FU-209b | test | T-173 passphrase_test lessThan(50) untagged timing assertion | test/features/backup/crypto/passphrase_test.dart:199 | none | CLOSED (FU-214, batch 21) |
-| FU-209c | test | T-173 --tags benchmark also reruns the 50k FTS benchmark db-platform gates | .github/workflows/app-ci.yml:250 | none | OPEN |
+| FU-209c | test | T-173 --tags benchmark also reruns the 50k FTS benchmark db-platform gates | .github/workflows/app-ci.yml:250 | none | OBSOLETE (batch 51): perf job now runs `benchmark && !db-platform` |
 | FU-210a | docs | T-082 no minors recorded in batch reports | - | none | CLOSED (nothing to track) |
 | FU-216a | ui | T-067 skip handlers fire recordSetupSkip unawaited then onFinish (no race today) | onboarding/presentation/ios_setup.dart | none | CLOSED (no action per review) |
-| FU-217a | test | T-174 bills row wrapped in Semantics container and ZCard merge may read twice | bills/presentation/bills_screen.dart:266 | none | OPEN |
+| FU-217a | test | T-174 bills row wrapped in Semantics container and ZCard merge may read twice | bills/presentation/bills_screen.dart:266 | none | OBSOLETE (batch 51): fixed earlier, test in bills_screen_test.dart (FU-217a) |
 | FU-217b | test | T-174 manual TalkBack/VoiceOver label audit on a device | - | device | OPEN |
-| FU-220a | parsing | T-037 (registry-wide) hsbc/kfh/citibank isAvailableLimit is per template: debit message ending Avl Bal inferred credit | app/assets/registry/institutions/hsbc.json:43,63; kfh.json; citibank.json | none | OPEN |
+| FU-220a | parsing | T-037 (registry-wide) hsbc/kfh/citibank isAvailableLimit is per template: debit message ending Avl Bal inferred credit | app/assets/registry/institutions/hsbc.json:43,63; kfh.json; citibank.json | none | OPEN (batch 51): needs real/PO wording for debit messages ending Avl Bal; no template change without samples |
 | FU-220b | parsing | T-037 Avl Limit tail captured as balance in EN templates (M-1 major) | app/assets/registry/institutions/*.json | none | CLOSED (fixed in batch 22 fix round) |
 | FU-221a | parsing | T-068 NBE purchase templates cite a PO sample that does not exist | app/assets/registry/institutions/nbe.json | none | CLOSED (tagged synthetic-unverified) |
 | FU-221b | parsing | T-068 foreign-only FX templates captured balance in the wrong currency (S1 major) | institutions/{nbe,cib,banque_misr,qnb}.json | none | CLOSED (fix ff96db40) |
 | FU-222a | parsing | T-069 foreign-only purchase makes a second USD account for an EGP card (resolve by institution+last4) | ingestion/application/ingest_raw_messages.dart | PO (how foreign-only is stored) | OPEN |
-| FU-226a | parsing | T-036 build notes say registry unwired / guard_base not generated | docs/04-tasks/tasks/T-036.md:40,44 | none | OPEN |
+| FU-226a | parsing | T-036 build notes say registry unwired / guard_base not generated | docs/04-tasks/tasks/T-036.md:40,44 | none | OBSOLETE (batch 51): T-036 build notes already say registry is wired and guard_base generated |
 | FU-226b | parsing | T-036 sms-spike-device assertion for stagingSms Guard dropped | .github/scripts/sms-spike-device.sh:522 | none | CLOSED (asserts st_guard = 1) |
 | FU-226c | parsing | T-036 stale "T-036 replaces the missing bundled one" doc comment | capture/application/capture_providers.dart:75 | none | CLOSED (comment gone) |
-| FU-229a | ui | T-120 voice partial save then Try again/close: log not counted, _savedKeys cleared (quota bypass) | voice/application/voice_controller.dart:213,239,361 | none | OPEN |
-| FU-229b | ui | T-120 Open settings on mic-denied opens notification page, not app details | voice/application/voice_providers.dart | none | OPEN |
-| FU-229c | ui | T-120 literal emoji appended to localized parsed title | voice/presentation/voice_logger_screen.dart | none | OPEN |
-| FU-229d | ui | T-120 no test picks a different account from the row picker | test/features/voice/voice_logger_test.dart | none | OPEN |
-| FU-229e | ui | T-120 SpeechSupportRegistration.kt double result.success if checkRecognitionSupport throws after timeout armed | android/.../SpeechSupportRegistration.kt:65-83 | none | OPEN |
+| FU-229a | ui | T-120 voice partial save then Try again/close: log not counted, _savedKeys cleared (quota bypass) | voice/application/voice_controller.dart:213,239,361 | none | FIXED (batch 51) |
+| FU-229b | ui | T-120 Open settings on mic-denied opens notification page, not app details | voice/application/voice_providers.dart | none | OPEN (batch 51: needs a native app-details channel; none exists) |
+| FU-229c | ui | T-120 literal emoji appended to localized parsed title | voice/presentation/voice_logger_screen.dart | none | OBSOLETE (batch 51): no literal emoji in voice presentation or ARBs now |
+| FU-229d | ui | T-120 no test picks a different account from the row picker | test/features/voice/voice_logger_test.dart | none | FIXED (batch 51) |
+| FU-229e | ui | T-120 SpeechSupportRegistration.kt double result.success if checkRecognitionSupport throws after timeout armed | android/.../SpeechSupportRegistration.kt:65-83 | none | OBSOLETE (batch 51): probe() wraps answers in a once-only done guard |
 | FU-229f | ui | T-120 on-device recognition fallback and voice account shown (majors F1/F2) | voice | none | CLOSED (fix round batch 24) |
 | FU-230a | parsing | T-161 Scan tile opens picker before saying OCR unavailable on Android | capture/application/scan_providers.dart | task T-159 (Tesseract aar) | OPEN |
 | FU-230b | parsing | T-161 Info.plist lacks NSPhotoLibraryUsageDescription (ITMS-90683 risk) | ios/Runner/Info.plist | device (first TestFlight upload) | OPEN |
 | FU-230c | parsing | T-161 shared PDF/CSV discarded when no navigator context; shown as not available | capture/application/shared_items_lifecycle.dart:119-130 | task T-158 | OPEN |
-| FU-230d | parsing | T-161 OcrHost.sealImageNow standardizedFileURL does not resolve symlinks | ios/Runner/Platform/OCR/OcrHost.swift | none | OPEN |
+| FU-230d | parsing | T-161 OcrHost.sealImageNow standardizedFileURL does not resolve symlinks | ios/Runner/Platform/OCR/OcrHost.swift | none | OBSOLETE (batch 51): sealImageNow already uses resolvingSymlinksInPath (OcrHost.swift:318) |
 | FU-230e | parsing | T-161 prefilled last-4 account lost on new item (major F7) | transactions/presentation/edit/transaction_edit_screen.dart:161 | none | CLOSED (fix round batch 24) |
-| FU-233a | backend | T-135 lock order not one global order (sign-in attach subset vs restore) | backend/.../Accounts/SignInService.cs:210-219; AccountStores.cs:61-66 | none | OPEN |
+| FU-233a | backend | T-135 lock order not one global order (sign-in attach subset vs restore) | backend/.../Accounts/SignInService.cs:210-219; AccountStores.cs:61-66 | none | CLOSED (obsolete batch 51: LockPurchasesAsync already locks the union of both sets in one ascending id order, AccountStores.cs:69-73; the attach subset is re-locked inside it) |
 | FU-233b | backend | T-135 permanent Apple revoke failure blocks account deletion; pending-revocation queue | backend/.../AccountLifecycleService.cs:64-70 | PO | CLOSED (PendingAppleRevocationStore added, batch 25 fix) |
 | FU-233c | backend | T-135 RevokeAsync catches only HTTP/Cancel exceptions | backend/.../AppleAccountClient.cs:110 | none | CLOSED (CryptographicException added) |
-| FU-233d | backend | T-135 null vault.OpenAsync deletes account with no record | backend/.../AccountLifecycleService.cs:69 | none | OPEN |
+| FU-233d | backend | T-135 null vault.OpenAsync deletes account with no record | backend/.../AccountLifecycleService.cs:69 | none | CLOSED (by design batch 51: an unreadable sealed token cannot be revoked at all; the account must still delete; it is logged as a warning, LogTokenUnreadable) |
 | FU-233e | backend | T-135 worker requires all Accounts:* config in Production (D1, before go-live) | backend/src/Zaghlol.Workers/Program.cs:64-68 | hosting go-live | OPEN |
 | FU-233f | backend | T-135 PendingAppleRevocationStore.ListDue lacks SKIP LOCKED (one worker replica documented) | backend/.../PendingAppleRevocationStore.cs:14-18 | hosting | OPEN |
-| FU-234a | core | T-167 percent hand-assembled with Latin % in zakah screen (Z3) | zakah/presentation/zakah_screen.dart:541 | none | OPEN |
+| FU-234a | core | T-167 percent hand-assembled with Latin % in zakah screen (Z3) | zakah/presentation/zakah_screen.dart:541 | none | FIXED (batch 51): uses formatBp (digit-mode percent sign); zakah goldens change, regenerate in CI |
 | FU-234b | core | T-167 unmappable lot dropped silently from nisab test (Z5) | zakah/data/zakah_repository.dart | PO | OPEN |
 | FU-234c | core | T-167 "scholar list" does not match what ships (debts, zakatable flag) (Z2 major) | docs/04-tasks/tasks/T-167.md | none | CLOSED (fix round batch 25) |
 | FU-235a | ui | T-168 "debts deducted" claim in How-it's-calculated (Z1 major) | zakah/presentation/zakah_screen.dart:558 | none | CLOSED (copy fixed, batch 25) |
-| FU-235b | ui | T-168 title and amount joined with hard-coded separator (not RTL-safe) | zakah/presentation/zakah_screen.dart:380 | none | OPEN |
+| FU-235b | ui | T-168 title and amount joined with hard-coded separator (not RTL-safe) | zakah/presentation/zakah_screen.dart:380 | none | OBSOLETE (batch 51): zakah_screen builds lines through l10n placeholders, no hard-coded join |
 | FU-235c | ui | T-168 "partly paid" shown but cannot be entered; l10n keys listed missing | zakah | PO (copy) | OPEN |
 | FU-236a | core | T-169 rule 2 erratum (22,200 vs printed 19,500) recorded in SRS | docs/01-requirements/requirements.md:457 | none | CLOSED |
 | FU-236b | core | T-169 rule 5 transport signal is a guess until a ride-hailing group exists | smart_roi/application/roi_providers.dart | PO | OPEN |
 | FU-236c | core | T-169 legal sign-off on disclaimer (Q-23) before flag on | - | PO | OPEN |
-| FU-237a | ui | T-170 "Not for me" dismissal lasts the session only | smart_roi/application/roi_tips_providers.dart:26 | none | OPEN |
-| FU-237b | ui | T-170 Share opens studio with no ROI template (S-73) | smart_roi/application/roi_tips_providers.dart | none | OPEN |
-| FU-237c | ui | T-170 Tips segment on Ask and badge (roiTipCountProvider) not wired (flag off) | smart_roi | none | OPEN |
+| FU-237a | ui | T-170 "Not for me" dismissal lasts the session only | smart_roi/application/roi_tips_providers.dart:26 | none | OPEN (batch 51: needs a persisted settings key; flag off) |
+| FU-237b | ui | T-170 Share opens studio with no ROI template (S-73) | smart_roi/application/roi_tips_providers.dart | none | OPEN (batch 51: needs the S-73 ROI share template design) |
+| FU-237c | ui | T-170 Tips segment on Ask and badge (roiTipCountProvider) not wired (flag off) | smart_roi | none | OPEN (batch 51: Tips segment/badge wiring behind smartRoi flag, off at launch) |
 | FU-238a | parsing | T-071 Revolut [£€$] had no left boundary (A$/CA$ read as USD) (major) | app/assets/registry/institutions/revolut.json | none | CLOSED (fix round batch 25) |
 | FU-238b | parsing | T-071 fx_conversion field convention only in task notes | docs/03-technical/parsing-engine.md:73 | none | CLOSED (documented) |
-| FU-238c | parsing | T-071 two-leg AC met only at parser level; legs come with T-089 | docs/04-tasks/TASKS.md | none | OPEN |
-| FU-239a | parsing | T-072 alrajhi lazy dot runs backtrack O(n^2) on long non-matching bodies | app/assets/registry/institutions/alrajhi.json:35 | none | OPEN |
+| FU-238c | parsing | T-071 two-leg AC met only at parser level; legs come with T-089 | docs/04-tasks/TASKS.md | none | OBSOLETE (batch 51): legs delivered by T-089 (DONE, batch 12) |
+| FU-239a | parsing | T-072 alrajhi lazy dot runs backtrack O(n^2) on long non-matching bodies | app/assets/registry/institutions/alrajhi.json:35 | none | OBSOLETE (batch 51): alrajhi patterns bounded; test/ingestion/alrajhi_backtrack_test.dart exists |
 | FU-240a | ui | T-158 CSV import pairing hook not passed to ImportCsvUseCase (blocker) | export_import/presentation/import_ports.dart:331 | none | CLOSED (importPostPersistHook) |
-| FU-240b | ui | T-158 commit returns no autoCategorised/needReview/topCategories; done tiles hidden | export_import/presentation/import_ports.dart:222 | none | OPEN |
-| FU-240c | ui | T-158 export half, target-card Change action and PDF password step not built | export_import/presentation | none | OPEN |
+| FU-240b | ui | T-158 commit returns no autoCategorised/needReview/topCategories; done tiles hidden | export_import/presentation/import_ports.dart:222 | none | OPEN (batch 51: needs ImportCsvUseCase to report per-category stats; data-layer work) |
+| FU-240c | ui | T-158 export half, target-card Change action and PDF password step not built | export_import/presentation | none | OPEN (batch 51: feature, >150 lines: export half screen, target-card Change sheet, PDF password step) |
 | FU-248a | parsing | T-070 registryVersion not bumped | app/assets/registry/registry_manifest.json:3 | none | CLOSED (v4, commit bfb9ef31) |
 | FU-248b | parsing | T-070 sender contact and wallet name Contact are generic guesses | app/assets/guard/guard_base.json:107,408 | PO | OPEN |
 | FU-249a | backend | T-186 detach phase 1 does not run link/source checks | backend/.../Support/SupportActionService.cs | none | CLOSED (commit 08434bf2) |
 | FU-249b | backend | T-186 freeze/unfreeze lock compares app clock with DB now() | backend/.../SupportActionService.cs | none | CLOSED (commits 08434bf2, 81fc987e) |
+| FU-271 | ci | app-ci main analyze step can miss riverpod_lint diagnostics (flutter analyze may return before the plugin reports; FU-270) | .github/workflows/app-ci.yml:87 | none | CLOSED (batch 51: step now `dart analyze --fatal-infos`, same annotations; local run not possible here, the analysis server crashes in this sandbox, so CI is the first run) |
 
 - **FU-256** (batch 36): see the batch-36 Lead delta check.
 
@@ -860,6 +861,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 - **FU-265** (T-200): C3 overlapping G12 checks (make each independently tested); C6 rotation steps miss chmod / leftover-folder cleanup; C8 pin the PEM/DER parse buffers; rename the Dart test kid `s2026a` (catalog_build_test.dart) that reuses the committed dev catalog key; I-9 host-startup flake seen again (tracked in T-193).
 
 - **FU-266** (batch 46): T-201 — pin `ghcr.io/openbao/openbao` by digest (S3); N1 a caller that loses the relogin CAS gets a retryable 503 instead of waiting; N2 verify-only pins share the bare `file:` name; PO: switch-over moment, recovery-share holders, unseal-key residual (design note T-201). T-198 — badge tests for «مصرف أبوظبي», a one-word label, "", "Bank"; Arabic comma after a generic word; PO checks brand colours and short codes. T-194 — shared mascot toast instead of a plain SnackBar.
+  - Batch 51: N1 left open. Not small: a CAS loser arriving before the winner clears the session cannot be told from a policy denial without new state, so a correct fix needs a generation/in-flight marker in RenewAfterRefusalAsync (OpenBaoClient.cs:378-406) and a concurrency test.
 
 - **FU-267** (batch 47): T-187 F-4 re-redact already-scheduled notifications at startup when hiding is on (needs a native cancel/reschedule hook or persisted scheduled alerts); T-196 no UI to see or revive a dismissed bill after the Undo snackbar; T-196 6/12-month chains need only 2 charges, so a coincidental pair can auto-add (undo exists); `capture_providers_test` "starts after the database opened" flakes under full-suite load (passes alone 3/3); goldens for batches 46–47 need the CI app-regen run.
 
@@ -870,6 +872,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 - **FU-270** (batch 50, CLOSED): the riverpod_lint CI probe used `flutter analyze`, which can return before the analyzer plugin reports; it now uses `dart analyze` and stays blocking. FU-271 (batch 51) moves the main analyze step to `dart analyze --fatal-infos` too.
 
 - **FU-272** (batch 50 review minors, OPEN): T-192 `gradle-deps-to-lockfile.py` drops BOM-managed `group:artifact -> version` lines; local dev compose images (postgres, otel, alpine) unpinned; Gradle graph scan stays `continue-on-error` until release runtime classpaths are scanned on their own with an osv-scanner.toml for the build-tool advisories (93 in 20 packages); gitleaks job needs the pinned binary or `GITLEAKS_LICENSE` before it can block. T-190 bundletool jar downloaded without a hash check (`size-report.yml`); `enforce_budget: true` vs "budgets are proposals" comment; no release (R8) build run on a device yet. T-193 import order nit.
+
+- **FU-273** (batch 51 review minors, OPEN): purchase.dart doc comment above `outboxMaxAge` misplaced; Gold sign-out also stops scheduled Drive backups (PO call); delete-everything's Google sign-out bypasses the new sign-in gate; the gate is a module singleton (move to a provider); no rollback tests for FU-155a (budget saver) and FU-181a (split save); voice quota: if `countOne` throws after a row is written, the retry counts on the next row. Details in [batch-51](05-reviews/batch-51.md).
 
 ## Log
 | Date | Event |

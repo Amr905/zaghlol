@@ -596,8 +596,7 @@ class _How extends ConsumerWidget {
     final c = ZColors.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    final pct =
-        '${digits.render('2')}${lang == 'ar' ? '٫' : '.'}${digits.render('5')}%';
+    final pct = zakahRateLabel(digits);
     return Column(
       key: const Key('zakah-how'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -624,6 +623,10 @@ class _How extends ConsumerWidget {
     );
   }
 }
+
+/// The 2.5% rate in the user's digits with the matching percent sign (Z3).
+@visibleForTesting
+String zakahRateLabel(DigitsMode digits) => formatBp(250, digits);
 
 extension on String {
   /// Currency for a unit code, or null for a gold symbol.

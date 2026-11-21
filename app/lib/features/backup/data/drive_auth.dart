@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../core/platform/google_sign_in_gate.dart';
 import 'drive_backup_exception.dart';
 import 'drive_files.dart';
 
@@ -46,12 +47,19 @@ final class GoogleSignInDriveAuthorizer implements DriveAuthorizer {
   final String serverClientId;
   final bool isIos;
   Future<void>? _init;
+  int _initEpoch = -1;
 
   static const List<String> _scopes = [driveAppDataScope];
 
   Future<void> _ensureInit() {
     if (isIos ? clientId.isEmpty : serverClientId.isEmpty) {
       throw DriveBackupException(DriveBackupErrorCode.notConfigured);
+    }
+    final gate = GoogleSignInGate.instance;
+    if (_initEpoch != gate.epoch) {
+      // A sign-in configured the plugin with its own nonce since: ours is gone.
+      _init = null;
+      _initEpoch = gate.epoch;
     }
     return _init ??= _signIn
         .initialize(
@@ -65,7 +73,10 @@ final class GoogleSignInDriveAuthorizer implements DriveAuthorizer {
   }
 
   @override
-  Future<String> accessToken({required bool interactive}) async {
+  Future<String> accessToken({required bool interactive}) =>
+      GoogleSignInGate.instance.run(() => _accessToken(interactive));
+
+  Future<String> _accessToken(bool interactive) async {
     await _ensureInit();
     try {
       var account = await _signIn.attemptLightweightAuthentication();

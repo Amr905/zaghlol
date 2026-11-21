@@ -154,6 +154,7 @@ class VoiceRig {
     this.gold = false,
     FakeSpeech? speech,
     FakeEditor? editor,
+    this.lookups = voiceLookups,
   }) : speech = speech ?? FakeSpeech(),
        editor = editor ?? FakeEditor(),
        usage = FakeUsage(used);
@@ -162,6 +163,7 @@ class VoiceRig {
   final FakeEditor editor;
   final FakeUsage usage;
   final bool gold;
+  final TxnLookups lookups;
   int paywall = 0;
   int settings = 0;
 
@@ -171,7 +173,7 @@ class VoiceRig {
     voiceInterpreterProvider.overrideWith((ref) async => TestInterpreter()),
     voiceUsageProvider.overrideWith((ref) async => usage),
     transactionEditorProvider.overrideWith((ref) async => editor),
-    txnLookupsProvider.overrideWith((ref) async => voiceLookups),
+    txnLookupsProvider.overrideWith((ref) async => lookups),
     defaultCashAccountIdProvider.overrideWith((ref) async => 'cash'),
     paydayScheduleProvider.overrideWith(
       (ref) async => PaydaySchedule.single(1),
