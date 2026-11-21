@@ -82,5 +82,24 @@ import UserNotifications
     SpeechSupportRegistration.register(with: engineBridge.pluginRegistry)
     // NOTIF-GW: local notifications and the permission prompt.
     NotificationsRegistration.register(with: engineBridge.pluginRegistry)
+    // FU-229b: "Open settings" opens this app's page in Settings.
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "ZaghlolAppSettings") {
+      let channel = FlutterMethodChannel(
+        name: "zaghlol/app_settings", binaryMessenger: registrar.messenger())
+      channel.setMethodCallHandler { call, result in
+        guard call.method == "open" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        guard let url = URL(string: UIApplication.openSettingsURLString) else {
+          result(FlutterError(code: "unavailable", message: nil, details: nil))
+          return
+        }
+        DispatchQueue.main.async {
+          UIApplication.shared.open(url)
+          result(nil)
+        }
+      }
+    }
   }
 }

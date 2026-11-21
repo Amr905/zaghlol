@@ -4,6 +4,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../application/gating.dart';
 import 'gold_ui_ports.dart';
 
 const Duration upsellInterval = Duration(days: 7);
@@ -32,3 +33,23 @@ final upsellCapProvider = Provider<UpsellCap>(
   ),
   name: 'upsellCapProvider',
 );
+
+/// First caller of the cap (FU-166a): a prompt the app raises by itself. Opens
+/// the paywall at most once a week and never for Gold users; false when it
+/// did not. Never throws (a failed settings read means no prompt).
+final unsolicitedPaywallProvider =
+    Provider<Future<bool> Function(GoldCapability capability)>(
+      (ref) => (capability) async {
+        try {
+          final allowed = await ref
+              .read(upsellCapProvider)
+              .tryShow(isGold: ref.read(entitlementStateProvider).isGold);
+          if (!allowed) return false;
+          ref.read(paywallTriggerProvider)(capability);
+          return true;
+        } on Object {
+          return false;
+        }
+      },
+      name: 'unsolicitedPaywallProvider',
+    );

@@ -36,6 +36,7 @@ import app.zaghlol.platform.text.TextNormalizationRegistration
 import app.zaghlol.platform.widget.WidgetBridgeRegistration
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -74,6 +75,24 @@ class MainActivity : FlutterFragmentActivity() {
         ShareImageRegistration.register(messenger, this)
         // T-120: on-device speech support check (UI engine only).
         SpeechSupportRegistration.register(messenger, this)
+        // FU-229b: "Open settings" of a denied permission opens the app details page.
+        MethodChannel(messenger, "zaghlol/app_settings").setMethodCallHandler { call, result ->
+            if (call.method != "open") {
+                result.notImplemented()
+            } else {
+                try {
+                    startActivity(
+                        Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            android.net.Uri.fromParts("package", packageName, null),
+                        ),
+                    )
+                    result.success(null)
+                } catch (_: RuntimeException) {
+                    result.error("unavailable", null, null)
+                }
+            }
+        }
         // NOTIF-GW: local alerts, channels, POST_NOTIFICATIONS (UI engine only).
         val notifHost = NotificationsHost(
             applicationContext,
@@ -140,6 +159,7 @@ class MainActivity : FlutterFragmentActivity() {
         ShareImageRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         ShareImageRegistration.sweepAll(this)
         SpeechSupportRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/app_settings").setMethodCallHandler(null)
         NotificationsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         notificationsHost = null
         notificationEvents = null
