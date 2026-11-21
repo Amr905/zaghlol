@@ -9,8 +9,8 @@ Draft for the PO and legal to confirm in Play Console. Items marked (confirm) ar
 | Question | Answer |
 |---|---|
 | Does the app collect or share any of the required user data types? | Yes (the items below) |
-| Is all collected data encrypted in transit? | Yes (TLS to the backend only; `BackendClient` is the only HTTP client). Pinning per ADR-018. |
-| Do you provide a way for users to request data deletion? | Yes: in-app account deletion (FR-ACCT-04) and "Delete everything"; support request for purchase-linked records. Privacy policy URL: real URL pending (FU-195). |
+| Is all collected data encrypted in transit? | Yes (TLS 1.2+ to the backend only; `BackendClient` is the only HTTP client). **No certificate pinning** (ADR-018, security-model §6): release builds trust system CAs only, and security-relevant responses are ES256-signed and verified against public keys embedded in the app. |
+| Do you provide a way for users to request data deletion? | Yes: in-app account deletion (FR-ACCT-04) and "Delete everything"; support request for purchase-linked records. Privacy policy URL: `https://zaghlol.app/privacy` (draft in `site/privacy/`, pending legal review, FU-195-legal). |
 | Data shared with third parties | **None** (no ads, analytics or crash SDKs). Google Play Billing and the user's own Drive are the platform / the user, not third-party sharing (confirm). |
 
 ## Data types collected (all: not shared, app functionality, collection required unless noted)
@@ -19,12 +19,27 @@ Draft for the PO and legal to confirm in Play Console. Items marked (confirm) ar
 |---|---|---|---|---|
 | Device or other IDs > Device or other IDs | Anonymous install ID (random, not derived from the device); attestation token (Play Integrity, D-45) with a per-request random time nonce (R4-2) | Required for backend features | App functionality, fraud prevention / security | The attestation token carries no other device data (D-45). The time nonce is random, one-time, stored nowhere. |
 | Financial info > Purchase history | Purchase tokens / transactions for Gold verification and restore | Required for Gold | App functionality | Gold is granted only by backend verification (constraint 2a). Order IDs are never sent by the app. |
-| Personal info > Email address | Only through the optional Google sign-in ID token (carries Gold across platforms, ADR-016) | **Optional** | Account management | The server uses the token; the e-mail claim is kept only as the keyed pseudonym described in NFR-PRIV-07 (support audit, 1 year). |
-| App activity > Other user-generated content (confirm) | Merchant-name contributions: merchant text and category only, **only if the user opts in** (off by default), filtered on the phone and again on the server (BR-SYNC-04) | **Optional** | App functionality (shared merchant catalog) | No amounts, dates, card digits, IPA or phone. |
+| Personal info > Email address | Only through the optional sign-in ID token: **Google sign-in or Sign in with Apple** (on Android Apple's web flow, D-44, `scope=email`, D-49); carries Gold across platforms (ADR-016) | **Optional** | Account management | The server **stores** the token's `email` claim, if the provider returns one (Apple may return a private relay address), in `accounts.email` next to the provider subject ID, for support lookup only; it is deleted with the account (FR-ACCT-04). Support-lookup audit rows keep only a keyed pseudonym of it for 1 year (NFR-PRIV-07). |
+| Personal info > User IDs (confirm) | The provider's account subject ID (`sub`) from the same optional ID token | **Optional** | Account management | Stored in `accounts.provider_subject` until the account is deleted. |
+| App activity > Other user-generated content (confirm) | Merchant-name contributions: the normalized merchant text, the **institution code** (e.g. `nbe`) and the chosen system category (BR-SYNC-04), **only if the user opts in** (off by default), filtered on the phone and again on the server | **Optional** | App functionality (shared merchant catalog) | No amounts, dates, card digits, IPA or phone. |
 | App activity > Other actions (confirm) | "Request my bank": institution name, country, channel type (FR-PAR-14), only when the user asks | **Optional** | App functionality | Never the message. |
 | App info and performance | Platform, app version, catalog version, registry version | Required | App functionality | Classified by D-48 as "catalog/app version". |
 
-Not collected, answer "no" for each: location, contacts, calendar, photos and videos (the Share/OCR input stays on the phone), audio (RECORD_AUDIO is for on-device speech to text only, ADR-010, nothing is uploaded), SMS or MMS content, call logs, web browsing, health, files, any analytics or diagnostics.
+Not collected, answer "no" for each: location, contacts, calendar, photos and videos (the Share/OCR input stays on the phone), SMS or MMS content, call logs, web browsing, health, files, any analytics or diagnostics.
+
+**Audio (confirm with legal):** voice entry (T-120) uses the OS speech recognizer, on-device first. If on-device Egyptian Arabic recognition isn't available, the app may use the OS **online** recognizer, only after the user's explicit consent (D-42, ADR-010): the audio then goes from the OS service to Google, never to Zaghlol's server, and the app never stores it. Zaghlol collects no audio, so the draft answer is "no"; whether the form must still list audio because the app starts that transfer is the classification to confirm. If voice entry is not in the submitted build, the answer is plainly "no".
+
+**Support e-mails** are not app data and not in this form, but the privacy policy states them: a user who writes to support gives an e-mail address and possibly the support code (install ID) and a store order ID; the order ID is checked live and never stored on the backend (D-57), but stays in the helpdesk ticket (security-model §6) for the ticket retention period.
+
+## Retention (privacy policy; the form itself has no retention field)
+
+| Data | Kept |
+|---|---|
+| Install record (install ID, platform, versions) | Deleted after 12 months of inactivity (NFR-PRIV-06), or 30 days after "Delete everything" (tombstone) |
+| Request logs | ≤ 30 days, truncated IP, no bodies (NFR-PRIV-06) |
+| Account (provider subject, e-mail) | Until the user deletes the account (FR-ACCT-04); hard delete |
+| Support-lookup and support-action audit rows | 1 year from creation (NFR-PRIV-07) |
+| Purchases, bank requests, helpdesk tickets | Not yet set: PO/legal (placeholders `PURCHASE_RETENTION`, `BANK_REQUEST_RETENTION`, `TICKET_RETENTION` in `site/`) |
 
 ## Permissions that must match the form
 
@@ -32,7 +47,7 @@ Not collected, answer "no" for each: location, contacts, calendar, photos and vi
 |---|---|---|
 | `INTERNET` | all | backend calls above (T-001 review F16) |
 | `POST_NOTIFICATIONS` | all | reminders and alerts |
-| `RECORD_AUDIO` | all | voice entry, on-device recognition |
+| `RECORD_AUDIO` | all | voice entry; on-device recognition first, the OS online recognizer only with explicit consent (D-42) |
 | `READ_SMS`, `RECEIVE_SMS` | prodSms only | SMS-based money management, see `play-sms-declaration.md` |
 | Notification access (`BIND_NOTIFICATION_LISTENER_SERVICE`, user-granted in Settings) | all | reading allowlisted bank / wallet notifications on the phone |
 
