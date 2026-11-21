@@ -400,12 +400,13 @@ class VoiceController extends Notifier<VoiceState> {
           ),
         ]);
         _savedKeys.add(d.key);
-        if (!_counted) {
-          await usage.countOne();
-          _counted = true;
-        }
         ids.addAll(saved);
         _set(state.copyWith(savedIds: ids));
+        if (!_counted) {
+          // Flag first: if the counter throws, a retry must not count again.
+          _counted = true;
+          await usage.countOne();
+        }
       }
       _set(state.copyWith(phase: VoicePhase.saved, savedIds: ids));
     } on Object {

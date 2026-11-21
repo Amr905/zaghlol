@@ -11,6 +11,9 @@
 // - iOS: `seatKeys` carries element 0 only, signed over `op = verify`,
 //   `challenge = SHA-256(signedTransaction)`, once per purchase; omitted when
 //   T-179 has no usable own key (including the R5-6 flag).
+// - FU-165a: an `active` answer whose token verifies locally but shows this
+//   install holds no seat (re-verify from a non-holder or onto a vacant seat)
+//   is final: completed, no Gold, `PurchaseVerifiedNoSeat` (offer Restore).
 //
 // Nothing here logs; no token, transaction or key reaches an error or event.
 
@@ -200,17 +203,17 @@ final class PurchaseService {
     }
 
     final PurchaseVerifyResponse resp;
+    String? sent;
     try {
-      resp = await _entitlement.anchored(
-        (nonce) =>
-            _backend.verify(request, IdempotencyKey.restore(e.key), nonce),
-        SignedBody.fromVerify,
-      );
+      resp = await _entitlement.anchored((nonce) {
+        sent = nonce.value;
+        return _backend.verify(request, IdempotencyKey.restore(e.key), nonce);
+      }, SignedBody.fromVerify);
     } on BackendFailure catch (f) {
       await _onFailure(e, f);
       return;
     }
-    await _onResponse(e, resp, live);
+    await _onResponse(e, resp, live, sentNonce: sent);
   }
 
   Future<PurchaseVerifyRequest> _requestFor(OutboxEntry e) async {
@@ -245,8 +248,9 @@ final class PurchaseService {
   Future<void> _onResponse(
     OutboxEntry e,
     PurchaseVerifyResponse r,
-    StorePurchase? live,
-  ) async {
+    StorePurchase? live, {
+    String? sentNonce,
+  }) async {
     switch (r.status) {
       case PurchaseStatus.active:
         final phase = await _entitlement.evaluate();
@@ -265,9 +269,16 @@ final class PurchaseService {
         } else if (gold && r.entitlement != null) {
           await _verified(e, live);
           _emit(const PurchaseGold());
+        } else if (await _verifiedNoSeat(r, sentNonce)) {
+          // FU-165a (145-2): verified, but the seat is not this install's.
+          // Final: complete the store purchase, no Gold, offer Restore.
+          await _verified(e, live);
+          _emit(const PurchaseVerifiedNoSeat());
         } else {
-          // "active" without an entitlement this app could verify: fail
-          // closed. No Gold, no acknowledgement; try again later.
+          // "active" without an entitlement this app could verify (bad
+          // signature, other install, outside its lifetime, a holder's token
+          // that failed local evaluation): fail closed. No Gold, no
+          // acknowledgement; try again later.
           await _retryLater(e, null);
         }
       case PurchaseStatus.pending:
@@ -283,6 +294,14 @@ final class PurchaseService {
       case PurchaseStatus.accountRequired || PurchaseStatus.unknown:
         await _retryLater(e, null);
     }
+  }
+
+  /// FU-165a: the `active` answer to this very request (it echoes the nonce
+  /// sent) carries a token that [EntitlementService.provesNoSeat] accepts.
+  Future<bool> _verifiedNoSeat(PurchaseVerifyResponse r, String? sent) async {
+    final token = r.entitlement?.token;
+    if (token == null || sent == null || r.timeNonce != sent) return false;
+    return _entitlement.provesNoSeat(token);
   }
 
   Future<void> _verified(OutboxEntry e, StorePurchase? live) async {

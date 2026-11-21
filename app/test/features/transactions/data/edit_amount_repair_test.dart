@@ -7,6 +7,7 @@ import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/offset_links_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/features/transactions/application/reimbursements.dart';
+import 'package:zaghlol/features/transactions/data/amount_repair_events.dart';
 import 'package:zaghlol/features/transactions/data/drift_transaction_repository.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -81,4 +82,35 @@ void main() {
     expect(out.removedLinkIds, isEmpty);
     expect(await OffsetLinksDao(db).forExpense('bill'), hasLength(1));
   });
+
+  test(
+    'FU-158a: the repair event is held, then published after commit',
+    () async {
+      final repairs = AmountRepairEvents(reimb);
+      final edited = DriftTransactionRepository(
+        TransactionsDao(db),
+        onAmountChange: repairs.onAmountChange,
+      );
+      final bus = DomainEventBus();
+      final seen = <DomainEvent>[];
+      bus.events.listen(seen.add);
+      addTearDown(bus.dispose);
+
+      await edited.editWithOutcome(
+        'bill',
+        TransactionEdit(amount: Money(Currency.of('EGP'), 30000)),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(seen, isEmpty, reason: 'nothing before the commit hook');
+
+      repairs.flush(bus);
+      await Future<void>.delayed(Duration.zero);
+      expect(seen.single, isA<TransactionsChanged>());
+      expect((seen.single as TransactionsChanged).accountIds, contains('acc1'));
+
+      repairs.flush(bus);
+      await Future<void>.delayed(Duration.zero);
+      expect(seen, hasLength(1), reason: 'released once');
+    },
+  );
 }

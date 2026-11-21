@@ -8,6 +8,7 @@ Compiled 2026-11-13. On 2026-11-13 the PO delegated every decision with a sound 
 
 | ID | Decision | Why |
 |---|---|---|
+| MERGE (PO, 2026-11-21) | The Lead merges each batch PR into `main` (merge commit) once its review is APPROVED and its GitHub CI is green, **without asking the PO**. | PO: "merge any required branches and dont ask me again about merging branches". |
 | FU-109 M-1 (T-048) | Phone-number senders the user adds: **live capture only**, and only messages that look financial (amount + currency or bank keywords); a consent line when the sender is added; a **separate opt-in "scan the last 3 months"**, never 25 months; their unparsed messages never go to the review queue. | Personal SMS must not be swept in by default (non-negotiable 1/6 spirit). |
 | FU-112 Q1 (T-132) | T-132 **backfills** a seat for every purchase verified before it, bound to the install that bought it, with no event-row cooldown and the reclaim unused. | Otherwise early buyers burn their move window and reclaim for nothing. |
 | FU-112 Q2 | A verify on a vacant seat with no new payment **leaves it vacant** (as built); the owner gets it back through restore. | Restore is the intended recovery path; no silent grants. |

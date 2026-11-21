@@ -42,6 +42,7 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
     private WebApplication? app;
     private int port;
     private int logins;
+    private int loginAttempts;
 
     private OpenBaoStub(TestCa ca)
     {
@@ -67,6 +68,15 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
     public int TokenTtlSeconds { get; set; } = 3600;
 
     public int Logins => Volatile.Read(ref logins);
+
+    /// <summary>Extra delay before a login answer (keeps a forced login in flight while other callers are refused).</summary>
+    public TimeSpan LoginDelay { get; set; }
+
+    /// <summary>When set, every login answers 500 (an OpenBao failure during a relogin).</summary>
+    public bool FailLogins { get; set; }
+
+    /// <summary>Login requests received, including failed ones.</summary>
+    public int LoginAttempts => Volatile.Read(ref loginAttempts);
 
     /// <summary>Every client token this stub issued (login or <see cref="CreateToken"/>), for the log sentinels.</summary>
     public ConcurrentQueue<string> IssuedTokens { get; } = new();
@@ -267,6 +277,18 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
 
     private async Task LoginAsync(HttpContext context, JsonObject body)
     {
+        Interlocked.Increment(ref loginAttempts);
+        if (LoginDelay > TimeSpan.Zero)
+        {
+            await Task.Delay(LoginDelay, context.RequestAborted);
+        }
+
+        if (FailLogins)
+        {
+            await Error(context, 500, "internal error");
+            return;
+        }
+
         var roleId = (string?)body["role_id"];
         var secretId = (string?)body["secret_id"];
         if (roleId is null || !roles.TryGetValue(roleId, out var role) || role.SecretId != secretId)

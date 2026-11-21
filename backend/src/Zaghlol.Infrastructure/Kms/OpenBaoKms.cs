@@ -141,7 +141,7 @@ internal sealed class OpenBaoKms : IKmsBackend, IVerifyOnlySigningKeys, IDisposa
         var roots = address.Scheme == Uri.UriSchemeHttps ? ReadCa(directory) : null;
 
         var transport = handler ?? OpenBaoClient.CreateHandler(roots, policy.Timeout);
-        var client = new OpenBaoClient(address, transport, () => ReadCredentials(directory), clock);
+        var client = new OpenBaoClient(address, transport, () => ReadCredentials(directory), clock, policy.Timeout);
         return new OpenBaoKms(client, openBao.Mount, settings.Scope, roles);
     }
 

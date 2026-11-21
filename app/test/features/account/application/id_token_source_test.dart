@@ -1,6 +1,7 @@
 // T-147: the provider sources (fake plugins) and the Apple `state` guard.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/platform/google_sign_in_gate.dart';
 import 'package:zaghlol/core/backend/backend_client.dart';
 import 'package:zaghlol/features/account/application/apple_state.dart';
 import 'package:zaghlol/features/account/application/id_token_source.dart';
@@ -63,6 +64,7 @@ void main() {
       final p = _FakeGoogle();
       final s = GoogleIdTokenSource(
         port: p,
+        gate: GoogleSignInGate(),
         isIos: false,
         serverClientId: 'server-id',
       );
@@ -76,6 +78,7 @@ void main() {
       final p = _FakeGoogle();
       await GoogleIdTokenSource(
         port: p,
+        gate: GoogleSignInGate(),
         isIos: false,
         serverClientId: 'server-id',
       ).signOut();
@@ -87,13 +90,19 @@ void main() {
       await expectLater(
         GoogleIdTokenSource(
           port: p,
+          gate: GoogleSignInGate(),
           isIos: true,
           clientId: '',
           serverClientId: 'x',
         ).obtain(SignInRequestProvider.google, hashedNonce: 'aa'),
         throwsA(isA<SignInProviderException>()),
       );
-      final s = GoogleIdTokenSource(port: p, isIos: false, serverClientId: 'x');
+      final s = GoogleIdTokenSource(
+        port: p,
+        gate: GoogleSignInGate(),
+        isIos: false,
+        serverClientId: 'x',
+      );
       p.cancel = const SignInCancelledException();
       await expectLater(
         s.obtain(SignInRequestProvider.google, hashedNonce: 'aa'),

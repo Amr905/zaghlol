@@ -8814,6 +8814,14 @@
   "@goldSeatMovedUserBody": {
     "description": "S · actions gold_seat_restoreAction, common_action_signIn"
   },
+  "goldSeatVerifiedNoSeatTitle": "دفعتك اتأكدت، بس الجولد مش على الموبايل ده",
+  "@goldSeatVerifiedNoSeatTitle": {
+    "description": "T · FU-165a: purchase verified, but Gold is not on this phone (re-verify from a phone without the seat)"
+  },
+  "goldSeatVerifiedNoSeatBody": "لو عايزه هنا، دوس استرجع مشترياتك.",
+  "@goldSeatVerifiedNoSeatBody": {
+    "description": "S · action gold_seat_restoreAction"
+  },
   "goldSeatMovedSupportTitle": "الدعم نقل الجولد لموبايل تاني",
   "@goldSeatMovedSupportTitle": {
     "description": "T · movedBy: support (D-57(f))"

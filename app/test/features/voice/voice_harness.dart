@@ -137,12 +137,16 @@ class FakeUsage implements VoiceUsagePort {
   FakeUsage(this.count);
   int count;
   int counted = 0;
+  int attempts = 0;
+  bool failFirstCount = false;
 
   @override
   Future<int> countThisMonth() async => count;
 
   @override
   Future<void> countOne() async {
+    attempts++;
+    if (failFirstCount && attempts == 1) throw StateError('counter');
     count++;
     counted++;
   }

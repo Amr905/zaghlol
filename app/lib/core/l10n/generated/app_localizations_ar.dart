@@ -6423,6 +6423,13 @@ class AppLocalizationsAr extends AppLocalizations {
       'لو عايزه على الموبايل ده، استرجع مشترياتك أو سجّل دخول.';
 
   @override
+  String get goldSeatVerifiedNoSeatTitle =>
+      'دفعتك اتأكدت، بس الجولد مش على الموبايل ده';
+
+  @override
+  String get goldSeatVerifiedNoSeatBody => 'لو عايزه هنا، دوس استرجع مشترياتك.';
+
+  @override
   String get goldSeatMovedSupportTitle => 'الدعم نقل الجولد لموبايل تاني';
 
   @override

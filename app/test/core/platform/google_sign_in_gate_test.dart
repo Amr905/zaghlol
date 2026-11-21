@@ -5,7 +5,7 @@ void main() {
   test(
     'FU-189b sessions never interleave and nonce sessions bump the epoch',
     () async {
-      final g = GoogleSignInGate.instance;
+      final g = GoogleSignInGate();
       final log = <String>[];
       final start = g.epoch;
       final a = g.run(() async {
@@ -21,7 +21,7 @@ void main() {
   );
 
   test('a failing session does not block the next one', () async {
-    final g = GoogleSignInGate.instance;
+    final g = GoogleSignInGate();
     await expectLater(
       g.run<void>(() async => throw StateError('x')),
       throwsStateError,

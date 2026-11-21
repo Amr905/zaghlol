@@ -117,21 +117,31 @@ internal sealed class OpenBaoClient : IDisposable
     private readonly Func<OpenBaoCredentials> credentials;
     private readonly TimeProvider clock;
     private readonly SemaphoreSlim loginGate = new(1, 1);
+    private readonly Lock renewLock = new();
+    private readonly TimeSpan loginTimeout;
     private readonly bool fixedToken;
     private Session? session;
     private int logins;
+
+    // Guarded by renewLock (FU-266 N1): the forced login for one refused token, shared by every caller refused with it.
+    private Renewal? renewal;
     private long lastForcedLogin = long.MinValue;
 
     /// <param name="address">The server address (validated by the caller); requests go to <c>&lt;address&gt;/v1/…</c>.</param>
     /// <param name="handler">The transport; <see cref="CreateHandler"/> in production, owned and disposed by this client.</param>
     /// <param name="credentials">Reads <c>role-id</c> and <c>secret-id</c> again for every login.</param>
-    public OpenBaoClient(Uri address, HttpMessageHandler handler, Func<OpenBaoCredentials> credentials, TimeProvider clock)
+    /// <param name="loginTimeout">
+    /// Bounds the forced login shared after a refusal (it runs on no caller's token); the KMS call policy timeout in
+    /// production. Default 30 s (the HTTP backstop).
+    /// </param>
+    public OpenBaoClient(Uri address, HttpMessageHandler handler, Func<OpenBaoCredentials> credentials, TimeProvider clock, TimeSpan? loginTimeout = null)
     {
         ArgumentNullException.ThrowIfNull(address);
         ArgumentNullException.ThrowIfNull(handler);
         apiBase = new Uri(address.GetLeftPart(UriPartial.Authority) + "/v1/");
         this.credentials = credentials;
         this.clock = clock;
+        this.loginTimeout = loginTimeout ?? TimeSpan.FromSeconds(30);
         http = new HttpClient(handler, disposeHandler: true)
         {
             // KmsCall bounds every attempt; this is only a backstop.
@@ -375,10 +385,11 @@ internal sealed class OpenBaoClient : IDisposable
         candidate is not null && (candidate.RefreshAt is null || clock.GetUtcNow() < candidate.RefreshAt) ? candidate.Token : null;
 
     /// <summary>
-    /// After a <c>403</c> with <paramref name="refusedToken"/> (review nit: single flight, no login storm): if another caller
-    /// already renewed the session, use its token; if a login is in flight, wait for it; otherwise force one login, but at most
-    /// once per <see cref="ForcedLoginInterval"/>. A token that is refused again within the interval means the policy denies
-    /// the call: unavailable, without another login.
+    /// After a <c>403</c> with <paramref name="refusedToken"/> (review nit: single flight, no login storm; FU-266 N1): if
+    /// another caller already renewed the session, use its token; if a forced login for this token is in flight, wait for it
+    /// (bounded by the caller's own token); otherwise force one login, but at most once per <see cref="ForcedLoginInterval"/>.
+    /// A token that is refused again within the interval means the policy denies the call: unavailable, without another
+    /// login. A failed forced login fails every caller waiting on it with the same constant error.
     /// </summary>
     private async Task<string> RenewAfterRefusalAsync(string refusedToken, CancellationToken cancellationToken)
     {
@@ -387,22 +398,72 @@ internal sealed class OpenBaoClient : IDisposable
             throw new OpenBaoUnavailableException();
         }
 
-        var current = Volatile.Read(ref session);
-        if (current is null || !string.Equals(current.Token, refusedToken, StringComparison.Ordinal))
+        Task<string>? shared = null;
+        TaskCompletionSource<string>? lead = null;
+        lock (renewLock)
         {
+            if (renewal is { } inFlight
+                && !inFlight.Login.IsCompleted
+                && string.Equals(inFlight.RefusedToken, refusedToken, StringComparison.Ordinal))
+            {
+                shared = inFlight.Login;
+            }
+            else if (Volatile.Read(ref session) is { } current && string.Equals(current.Token, refusedToken, StringComparison.Ordinal))
+            {
+                var now = clock.GetTimestamp();
+                if (lastForcedLogin != long.MinValue && clock.GetElapsedTime(lastForcedLogin, now) < ForcedLoginInterval)
+                {
+                    throw new OpenBaoUnavailableException();
+                }
+
+                lastForcedLogin = now;
+                Interlocked.CompareExchange(ref session, null, current);
+                lead = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+                shared = lead.Task;
+                renewal = new Renewal(refusedToken, shared);
+            }
+        }
+
+        if (shared is null)
+        {
+            // Already renewed (or the session was dropped): the normal path logs in only if nobody has.
             return await TokenAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var now = clock.GetTimestamp();
-        var last = Interlocked.Read(ref lastForcedLogin);
-        if ((last != long.MinValue && clock.GetElapsedTime(last, now) < ForcedLoginInterval)
-            || Interlocked.CompareExchange(ref lastForcedLogin, now, last) != last)
+        if (lead is not null)
         {
-            throw new OpenBaoUnavailableException();
+            // Started outside the lock (the login reads files and goes to the network) and on no caller's token, so one
+            // caller giving up doesn't fail the others; loginTimeout bounds it so a hung server can't hold the login gate.
+            _ = ForcedLoginAsync(lead);
+
+            // Every waiter may have given up first; observe a failure so it is never an unobserved task exception.
+            _ = shared.ContinueWith(
+                static t => _ = t.Exception,
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
-        Interlocked.CompareExchange(ref session, null, current);
-        return await TokenAsync(cancellationToken).ConfigureAwait(false);
+        return await shared.WaitAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task ForcedLoginAsync(TaskCompletionSource<string> lead)
+    {
+        try
+        {
+            using var timeout = new CancellationTokenSource(loginTimeout, clock);
+            lead.TrySetResult(await TokenAsync(timeout.Token).ConfigureAwait(false));
+        }
+        catch (OpenBaoUnavailableException ex)
+        {
+            lead.TrySetException(ex);
+        }
+#pragma warning disable CA1031 // The login's own timeout or any other failure is the one constant transient error for every waiter.
+        catch (Exception ex) when (ex is not (OutOfMemoryException or StackOverflowException))
+#pragma warning restore CA1031
+        {
+            lead.TrySetException(new OpenBaoUnavailableException());
+        }
     }
 
     private async Task<Session> LoginAsync(CancellationToken cancellationToken)
@@ -452,6 +513,8 @@ internal sealed class OpenBaoClient : IDisposable
     }
 
     private sealed record Session(string Token, DateTimeOffset? RefreshAt);
+
+    private sealed record Renewal(string RefusedToken, Task<string> Login);
 }
 
 /// <summary>The AppRole login pair, read from the credential directory for one login.</summary>

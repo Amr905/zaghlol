@@ -176,6 +176,97 @@ void main() {
     expect((await r.outbox.load()).single.stage, OutboxStage.queued);
   });
 
+  // FU-165a (batch-18a 145-2): the backend's answer to a re-verify from a
+  // non-holder or onto a vacant seat, as PurchaseEndpoints/VerifyGrant build
+  // it: `active`, `seatHeldElsewhere: false`, and the install's own token
+  // without the purchase (`status: none`, `plan: none`, empty `src`).
+  String noSeatToken(_Rig r, {String sub = installA, int? iatMs}) => r.h.token(
+    entClaims(
+      sub: sub,
+      status: 'none',
+      plan: 'none',
+      iatMs: iatMs ?? r.h.clock.wall,
+    ),
+  );
+
+  test('FU-165a verified without a seat here: completed, final, no Gold, '
+      'Restore offered', () async {
+    final r = _Rig();
+    await r.started();
+    r.backend.onVerify = (_, _, n) async => verifyAnswer(
+      r.h,
+      n,
+      tokenText: noSeatToken(r),
+      seatHeldElsewhere: false,
+      accountRequired: false,
+    );
+    await r.store.deliver(paid(_tokenSentinel));
+    expect(r.last, isA<PurchaseVerifiedNoSeat>());
+    expect(r.store.completed, hasLength(1));
+    expect(await r.outbox.load(), isEmpty);
+    expect(r.h.sink.phases, isNot(contains(EntitlementPhase.active)));
+    expect(r.h.sink.phases, isNot(contains(EntitlementPhase.grace)));
+    // Final: no retry later.
+    r.h.clock.pass(day);
+    await r.service.retryDue();
+    expect(r.backend.verifies, hasLength(1));
+  });
+
+  // Negative proof 3 (FU-165a): a "no seat" token that fails local checks
+  // (unknown key, another install, past its lifetime) is not a final answer.
+  test('NEG FU-165a: an unverifiable no-seat token is not completed and '
+      'grants nothing', () async {
+    for (final variant in ['forged', 'otherInstall', 'stale']) {
+      final r = _Rig();
+      await r.started();
+      final token = switch (variant) {
+        'forged' => mintJws(
+          TestSigningKeyFor.other,
+          entClaims(status: 'none', plan: 'none', iatMs: r.h.clock.wall),
+        ),
+        'otherInstall' => noSeatToken(r, sub: installB),
+        _ => noSeatToken(r, iatMs: r.h.clock.wall - 8 * day),
+      };
+      r.backend.onVerify = (_, _, n) async =>
+          verifyAnswer(r.h, n, tokenText: token, seatHeldElsewhere: false);
+      await r.store.deliver(paid(_tokenSentinel));
+      expect(r.store.completed, isEmpty, reason: variant);
+      expect(r.last, isA<PurchaseQueued>(), reason: variant);
+      expect(
+        (await r.outbox.load()).single.stage,
+        OutboxStage.queued,
+        reason: variant,
+      );
+      expect(
+        r.h.sink.phases.where(
+          (p) => p == EntitlementPhase.active || p == EntitlementPhase.grace,
+        ),
+        isEmpty,
+        reason: variant,
+      );
+    }
+  });
+
+  // A holder's valid token that fails local evaluation (account-linked, no
+  // account token here: `paused`) still fails closed: not a "no seat" answer.
+  test('NEG FU-165a: a holder token that does not evaluate to Gold is not '
+      'completed', () async {
+    final r = _Rig();
+    await r.started();
+    r.backend.onVerify = (_, _, n) async => verifyAnswer(
+      r.h,
+      n,
+      tokenText: r.h.token(
+        entClaims(acct: 'acct-1', status: 'active', iatMs: r.h.clock.wall),
+      ),
+      seatHeldElsewhere: false,
+    );
+    await r.store.deliver(paid(_tokenSentinel));
+    expect(r.h.sink.last, EntitlementPhase.paused);
+    expect(r.store.completed, isEmpty);
+    expect(r.last, isA<PurchaseQueued>());
+  });
+
   // Negative proof 2: a failed verification is retried and the store purchase
   // is not acknowledged; only a verified one is.
   test('NEG: failed verification is retried, never acknowledged early; a '

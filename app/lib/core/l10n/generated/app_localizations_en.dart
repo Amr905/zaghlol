@@ -6288,6 +6288,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'To use it on this phone, restore your purchases or sign in.';
 
   @override
+  String get goldSeatVerifiedNoSeatTitle =>
+      'Payment confirmed, but Gold isn\'t on this phone';
+
+  @override
+  String get goldSeatVerifiedNoSeatBody =>
+      'To use it here, restore your purchases.';
+
+  @override
   String get goldSeatMovedSupportTitle => 'Support moved Gold to another phone';
 
   @override
