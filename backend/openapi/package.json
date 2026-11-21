@@ -7,7 +7,7 @@
     "lint": "spectral lint zaghlol-v1.yaml --ruleset .spectral.yaml --fail-severity=warn"
   },
   "devDependencies": {
-    "@stoplight/spectral-cli": "6.15.0"
+    "@stoplight/spectral-cli": "6.17.1"
   },
   "overrides": {
     "lodash": "4.18.1"
