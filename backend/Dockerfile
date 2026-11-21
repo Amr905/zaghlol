@@ -5,7 +5,7 @@
 # T-175 L-5 / T-192: base images are pinned by multi-arch index digest (resolved 2026-11-20 with `docker buildx imagetools inspect`).
 # The tag stays in the comment; Dependabot (docker ecosystem, .github/dependabot.yml) bumps tag and digest weekly.
 # Tag: 10.0 (Docker allows no comment after an instruction).
-FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:bef136a371963aaa46ec97882845ef6f54dec15728bb4b128b1c2a400ffbc9b4 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0@sha256:65f3c7c6a25a239ab3e6719f2896147e7b68242ff2d8818dd70498bde6ef8bea AS build
 WORKDIR /src
 
 COPY global.json Directory.Build.props Directory.Packages.props nuget.config .editorconfig ./
