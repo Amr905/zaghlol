@@ -4,8 +4,10 @@ import 'z_tokens.dart';
 
 /// Builds the Material themes from the Mint Fresh / True Black tokens.
 abstract final class ZaghlolTheme {
-  static ThemeData get light => _build(ZColors.light);
-  static ThemeData get dark => _build(ZColors.dark);
+  // Built once: the switch theme holds closures, so two builds never compare
+  // equal and MaterialApp would animate between "different" themes.
+  static final ThemeData light = _build(ZColors.light);
+  static final ThemeData dark = _build(ZColors.dark);
 
   static ThemeData _build(ZColors c) {
     final scheme = ColorScheme(
