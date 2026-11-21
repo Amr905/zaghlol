@@ -3,12 +3,10 @@
 // launched the app is read once at start; later taps arrive as events.
 
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../core/l10n/date_format.dart';
 import '../core/l10n/locale_providers.dart';
@@ -19,57 +17,11 @@ import '../core/routing/app_routes.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show CivilDate;
 
 import '../features/notifications/application/notification_providers.dart';
-import '../features/notifications/domain/notification_types.dart';
 import '../features/recurring/presentation/bills_providers.dart';
 import '../features/security/domain/app_lock_controller.dart';
 import '../features/notifications/domain/notification_routes.dart';
 import 'app_navigation.dart';
-
-/// Debug builds only (T-193 AC5 device run): a marker line with no data in it
-/// (a target type name, a boolean). `kDebugMode` is a compile-time constant,
-/// so release builds drop it.
-void _probe(String line) {
-  if (kDebugMode) debugPrint('NOTIF_PROBE $line');
-}
-
-/// Debug builds only (T-193 AC5 device run): reinstalling the APK clears the
-/// posted notifications, so the device script drops `sig/post_cold`
-/// (a bill id and a due date, synthetic) and the real app posts the two cold-run
-/// notifications itself, once. Dead code in release (`kDebugMode`).
-Future<void> _debugPostColdFixtures(WidgetRef ref) async {
-  if (!kDebugMode) return;
-  try {
-    final docs = (await getApplicationDocumentsDirectory()).path;
-    final f = File('$docs/sig/post_cold');
-    if (!f.existsSync()) return;
-    final parts = f.readAsStringSync().trim().split(' ');
-    f.deleteSync();
-    final gateway = ref.read(notificationGatewayProvider);
-    await gateway.show(
-      const PlatformNotification(
-        id: 9102,
-        title: 'ZPROBE tap cold',
-        body: 'synthetic',
-        payload: '/settings/backup',
-        type: NotificationType.upcomingDue,
-      ),
-    );
-    await gateway.show(
-      PlatformNotification(
-        id: 9104,
-        title: 'ZPROBE paid cold',
-        body: 'synthetic',
-        payload: '/insights',
-        type: NotificationType.upcomingDue,
-        actionTitle: 'ZPROBE PAY COLD',
-        actionRoute: '/recurring/${parts[0]}/paid/${parts[1]}',
-      ),
-    );
-    _probe('cold fixtures posted');
-  } catch (_) {
-    _probe('cold fixtures failed');
-  }
-}
+import 'notification_taps_debug.dart';
 
 class NotificationTapLifecycle extends ConsumerStatefulWidget {
   const NotificationTapLifecycle({super.key, required this.child});
@@ -93,8 +45,8 @@ class _NotificationTapLifecycleState
     // After the first frame, so the router and navigator exist.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final route = await source.takeLaunchRoute();
-      _probe('launch route=${route != null}');
-      if (kDebugMode) unawaited(_debugPostColdFixtures(ref));
+      notifProbe('launch route=${route != null}');
+      if (kDebugMode) unawaited(debugPostColdFixtures(ref));
       if (mounted && route != null) unawaited(_open(route));
     });
   }
@@ -115,7 +67,7 @@ class _NotificationTapLifecycleState
       await Future<void>.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
     }
-    _probe(
+    notifProbe(
       'open ${target.runtimeType} ctx=${rootNavigatorKey.currentContext != null}',
     );
     openNotificationTarget(
@@ -130,7 +82,7 @@ class _NotificationTapLifecycleState
             final ok = await ref
                 .read(billsActionsProvider)
                 .markPaid(id, expectedDue: due);
-            _probe('paid ok=$ok');
+            notifProbe('paid ok=$ok');
           } catch (_) {
             // Unavailable: the app is open on the bills; nothing else to do.
             // Never echo the error.
@@ -162,7 +114,7 @@ class _NotificationTapLifecycleState
     }
     final context = rootNavigatorKey.currentContext;
     if (context == null || !context.mounted) {
-      _probe('confirm: no context');
+      notifProbe('confirm: no context');
       return false;
     }
     final lang = Localizations.localeOf(context).languageCode;
@@ -175,12 +127,12 @@ class _NotificationTapLifecycleState
             lang,
             digits,
           );
-    _probe('confirm shown');
+    notifProbe('confirm shown');
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => MarkPaidConfirmDialog(billName: name, dueText: dueText),
     );
-    _probe('confirm answer=${ok ?? false}');
+    notifProbe('confirm answer=${ok ?? false}');
     return ok ?? false;
   }
 
