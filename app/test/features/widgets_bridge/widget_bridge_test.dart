@@ -188,6 +188,56 @@ void main() {
     },
   );
 
+  test('FU-206a: going to the background with the lock on masks at once, '
+      'resuming unlocked shows the amount again', () async {
+    final c = make();
+    hide.add(false);
+    lockOn.add(true);
+    await pastDebounce();
+    expect(host.sent.last.primaryText, contains('314'));
+    c.read(appBackgroundedProvider.notifier).set(true);
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(host.sent.last.primaryText, '•••/day');
+    c.read(appBackgroundedProvider.notifier).set(false);
+    await pastDebounce();
+    expect(host.sent.last.primaryText, contains('314'));
+  });
+
+  test('FU-206a: background without the lock does not mask', () async {
+    final c = make();
+    hide.add(false);
+    lockOn.add(false);
+    c.read(appBackgroundedProvider.notifier).set(true);
+    await pastDebounce();
+    expect(host.sent.last.primaryText, contains('314'));
+  });
+
+  test(
+    'FU-206a: nothing is published before the lock setting is known',
+    () async {
+      make();
+      hide.add(false);
+      await pastDebounce();
+      expect(host.sent, isEmpty);
+    },
+  );
+
+  test(
+    'FU-206b: the snapshot carries one line per coming day, no amount',
+    () async {
+      make();
+      hide.add(false);
+      lockOn.add(false);
+      await pastDebounce();
+      final byDay = host.sent.last.secondaryTextByDay!;
+      expect(byDay.first, '28 days to payday');
+      expect(byDay[1], '27 days to payday');
+      expect(byDay.last, '1 days to payday');
+      expect(byDay, hasLength(28));
+      expect(byDay.join(), isNot(contains('314')));
+    },
+  );
+
   test('identical content is not sent twice', () async {
     final c = make();
     hide.add(false);

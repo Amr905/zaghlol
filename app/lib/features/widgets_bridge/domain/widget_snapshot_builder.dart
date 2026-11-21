@@ -15,6 +15,9 @@ import '../../budget/application/cycle_overview.dart';
 /// The mask for a hidden amount (platform-channels.md: `"•••"`).
 const widgetAmountMask = '•••';
 
+/// How many days of "days to payday" lines one snapshot carries.
+const widgetMaxRollDays = 62;
+
 /// Localized copy, supplied by the composition root from the ARB strings
 /// (no copy lives in this file). Each function returns the finished text.
 class WidgetCopy {
@@ -101,10 +104,17 @@ WidgetSnapshot buildWidgetSnapshot(WidgetSnapshotInput i) {
   );
   final amount = masked ? widgetAmountMask : formatted;
   final days = overview.daysRemaining;
+  String line(int n) => i.copy.daysToPayday(n, i.digits.render('$n'));
+  // FU-206b: one finished line per coming day so the widget rolls the count
+  // at local midnight by itself (no amount in any of them).
+  final perDay = <String>[
+    for (var n = days; n >= 1 && days - n < widgetMaxRollDays; n--) line(n),
+  ];
   return WidgetSnapshot(
     state: WidgetDisplayState.ok,
     primaryText: i.copy.perDay(amount),
-    secondaryText: i.copy.daysToPayday(days, i.digits.render('$days')),
+    secondaryText: line(days),
+    secondaryTextByDay: perDay,
     daysToPayday: days,
     currency: code,
     updatedAtMs: i.nowMs,

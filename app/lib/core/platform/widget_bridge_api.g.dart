@@ -117,6 +117,7 @@ class WidgetSnapshot {
     required this.currency,
     required this.updatedAtMs,
     this.daysToPayday,
+    this.secondaryTextByDay,
   });
 
   WidgetDisplayState state;
@@ -136,6 +137,13 @@ class WidgetSnapshot {
 
   int? daysToPayday;
 
+  /// FU-206b: finished line two for today (index 0), tomorrow (1), ... so the
+  /// widget can roll the days-to-payday line at local midnight without the
+  /// app running. Native picks the entry by the number of local midnights
+  /// since [updatedAtMs] and owns no copy. Never holds an amount. Contract
+  /// change 2026-11-21 (B53), optional and backwards compatible.
+  List<String>? secondaryTextByDay;
+
   List<Object?> _toList() {
     return <Object?>[
       state,
@@ -144,6 +152,7 @@ class WidgetSnapshot {
       currency,
       updatedAtMs,
       daysToPayday,
+      secondaryTextByDay,
     ];
   }
 
@@ -160,6 +169,7 @@ class WidgetSnapshot {
       currency: result[3]! as String,
       updatedAtMs: result[4]! as int,
       daysToPayday: result[5] as int?,
+      secondaryTextByDay: (result[6] as List<Object?>?)?.cast<String>(),
     );
   }
 
@@ -177,7 +187,8 @@ class WidgetSnapshot {
         _deepEquals(secondaryText, other.secondaryText) &&
         _deepEquals(currency, other.currency) &&
         _deepEquals(updatedAtMs, other.updatedAtMs) &&
-        _deepEquals(daysToPayday, other.daysToPayday);
+        _deepEquals(daysToPayday, other.daysToPayday) &&
+        _deepEquals(secondaryTextByDay, other.secondaryTextByDay);
   }
 
   @override

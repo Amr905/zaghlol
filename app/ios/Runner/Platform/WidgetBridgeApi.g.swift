@@ -197,6 +197,12 @@ struct WidgetSnapshot: Hashable {
   /// Epoch ms, the phone's clock, when Dart built this snapshot.
   var updatedAtMs: Int64
   var daysToPayday: Int64? = nil
+  /// FU-206b: finished line two for today (index 0), tomorrow (1), ... so the
+  /// widget can roll the days-to-payday line at local midnight without the
+  /// app running. Native picks the entry by the number of local midnights
+  /// since [updatedAtMs] and owns no copy. Never holds an amount. Contract
+  /// change 2026-11-21 (B53), optional and backwards compatible.
+  var secondaryTextByDay: [String]? = nil
 
 
   // swift-format-ignore: AlwaysUseLowerCamelCase
@@ -207,6 +213,7 @@ struct WidgetSnapshot: Hashable {
     let currency = pigeonVar_list[3] as! String
     let updatedAtMs = pigeonVar_list[4] as! Int64
     let daysToPayday: Int64? = nilOrValue(pigeonVar_list[5])
+    let secondaryTextByDay: [String]? = nilOrValue(pigeonVar_list[6])
 
     return WidgetSnapshot(
       state: state,
@@ -214,7 +221,8 @@ struct WidgetSnapshot: Hashable {
       secondaryText: secondaryText,
       currency: currency,
       updatedAtMs: updatedAtMs,
-      daysToPayday: daysToPayday
+      daysToPayday: daysToPayday,
+      secondaryTextByDay: secondaryTextByDay
     )
   }
   func toList() -> [Any?] {
@@ -225,13 +233,14 @@ struct WidgetSnapshot: Hashable {
       currency,
       updatedAtMs,
       daysToPayday,
+      secondaryTextByDay,
     ]
   }
   static func == (lhs: WidgetSnapshot, rhs: WidgetSnapshot) -> Bool {
     if Swift.type(of: lhs) != Swift.type(of: rhs) {
       return false
     }
-    return deepEqualsWidgetBridgeApi(lhs.state, rhs.state) && deepEqualsWidgetBridgeApi(lhs.primaryText, rhs.primaryText) && deepEqualsWidgetBridgeApi(lhs.secondaryText, rhs.secondaryText) && deepEqualsWidgetBridgeApi(lhs.currency, rhs.currency) && deepEqualsWidgetBridgeApi(lhs.updatedAtMs, rhs.updatedAtMs) && deepEqualsWidgetBridgeApi(lhs.daysToPayday, rhs.daysToPayday)
+    return deepEqualsWidgetBridgeApi(lhs.state, rhs.state) && deepEqualsWidgetBridgeApi(lhs.primaryText, rhs.primaryText) && deepEqualsWidgetBridgeApi(lhs.secondaryText, rhs.secondaryText) && deepEqualsWidgetBridgeApi(lhs.currency, rhs.currency) && deepEqualsWidgetBridgeApi(lhs.updatedAtMs, rhs.updatedAtMs) && deepEqualsWidgetBridgeApi(lhs.daysToPayday, rhs.daysToPayday) && deepEqualsWidgetBridgeApi(lhs.secondaryTextByDay, rhs.secondaryTextByDay)
   }
 
   func hash(into hasher: inout Hasher) {
@@ -242,6 +251,7 @@ struct WidgetSnapshot: Hashable {
     deepHashWidgetBridgeApi(value: currency, hasher: &hasher)
     deepHashWidgetBridgeApi(value: updatedAtMs, hasher: &hasher)
     deepHashWidgetBridgeApi(value: daysToPayday, hasher: &hasher)
+    deepHashWidgetBridgeApi(value: secondaryTextByDay, hasher: &hasher)
   }
 }
 

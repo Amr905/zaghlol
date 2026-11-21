@@ -1,5 +1,6 @@
 package app.zaghlol.platform.widget
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -41,7 +42,8 @@ class SafeToSpendWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val view = withContext(Dispatchers.IO) { WidgetStores.create(context).readOrNull() }
         val tap = Intent(Intent.ACTION_VIEW, Uri.parse("zaghlol://home")).setPackage(context.packageName)
-        provideContent { WidgetContent(view, tap) }
+        val secondary = view?.secondaryAt(System.currentTimeMillis()) ?: ""
+        provideContent { WidgetContent(view, secondary, tap) }
     }
 }
 
@@ -50,7 +52,7 @@ private val Ink = ColorProvider(day = Color(0xFF0F2A20), night = Color(0xFFE6F5E
 private val Muted = ColorProvider(day = Color(0xFF4D695C), night = Color(0xFF9DB8AB))
 
 @Composable
-private fun WidgetContent(view: WidgetView?, tap: Intent) {
+private fun WidgetContent(view: WidgetView?, secondary: String, tap: Intent) {
     Column(
         modifier = GlanceModifier
             .fillMaxSize()
@@ -65,8 +67,8 @@ private fun WidgetContent(view: WidgetView?, tap: Intent) {
                 style = TextStyle(color = Ink, fontSize = 18.sp, fontWeight = FontWeight.Bold),
                 maxLines = 2,
             )
-            if (view.secondaryText.isNotEmpty()) {
-                Text(text = view.secondaryText, style = TextStyle(color = Muted, fontSize = 12.sp), maxLines = 2)
+            if (secondary.isNotEmpty()) {
+                Text(text = secondary, style = TextStyle(color = Muted, fontSize = 12.sp), maxLines = 2)
             }
         }
     }
@@ -75,10 +77,26 @@ private fun WidgetContent(view: WidgetView?, tap: Intent) {
 class SafeToSpendWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = SafeToSpendWidget()
 
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetMidnightWorker.schedule(context)
+    }
+
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        WidgetMidnightWorker.schedule(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        WidgetMidnightWorker.cancel(context)
+    }
+
     companion object {
         /** Called from the channel's background thread after the snapshot changed. */
         fun refreshAll(context: Context) {
             runBlocking { SafeToSpendWidget().updateAll(context) }
+            WidgetMidnightWorker.schedule(context)
         }
     }
 }

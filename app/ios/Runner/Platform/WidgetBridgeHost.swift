@@ -24,7 +24,8 @@ final class WidgetBridgeHost: WidgetBridgeHostApi {
         WidgetView(
           state: snapshot.state.rawValue, primaryText: snapshot.primaryText,
           secondaryText: snapshot.secondaryText, currency: snapshot.currency,
-          updatedAtMs: snapshot.updatedAtMs, daysToPayday: snapshot.daysToPayday.map { Int($0) }))
+          updatedAtMs: snapshot.updatedAtMs, daysToPayday: snapshot.daysToPayday.map { Int($0) },
+          secondaryByDay: snapshot.secondaryTextByDay ?? []))
     } catch {
       throw Self.error("IO_ERROR")
     }

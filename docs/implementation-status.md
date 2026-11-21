@@ -773,8 +773,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-205c | ui | T-117 iOS share sheet: result never called if present does not complete | ios/Runner/ShareImageHost.swift:56 | none | OPEN (batch 51: iOS share-sheet present callback needs a device to verify) |
 | FU-205d | ui | T-117 zaghlol/share MethodChannel not documented in platform-channels.md | docs/03-technical/platform-channels.md | none | FIXED (batch 51) |
 | FU-205e | ui | T-117 share cards screen routed from somewhere | share_cards | none | CLOSED (WIRE-3 share handlers) |
-| FU-206a | native | T-118 widget snapshot stays unmasked on the home screen after app lock until app republishes | widgets_bridge | none | OPEN |
-| FU-206b | native | T-118 days-to-payday does not roll over at midnight until app republishes | widgets_bridge | none | OPEN |
+| FU-206a | native | T-118 widget snapshot stays unmasked on the home screen after app lock until app republishes | widgets_bridge | none | BUILT (batch 53; phone check pending) |
+| FU-206b | native | T-118 days-to-payday does not roll over at midnight until app republishes | widgets_bridge | none | BUILT (batch 53; phone check pending) |
 | FU-206c | native | T-118 widgetBridgeWiringProvider/widgetCopyProvider wired in shell; clear() in delete flow | widgets_bridge/widget_bridge.dart:102 | none | CLOSED (WIRE-2) |
 | FU-207a | native | T-064 shortcutInstall still the TODO placeholder URL | app/app_config.dart:15 | PO (FU-212) | OPEN |
 | FU-207b | native | T-064 unreadable IntentRunLog reports "never ran" and flags after 7 days | ios/Runner/Capture/IntentRunLog.swift:51 | none | OBSOLETE (batch 51): readIfReadable() distinguishes unreadable from never ran |
