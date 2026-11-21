@@ -339,3 +339,63 @@ into `BACKEND_IMAGE` by `deploy.sh`, which also keeps the previous one in `BACKE
   `./compose.sh up -d`. The collector turns OTLP into Prometheus metrics, Prometheus loads the repository's alert rules (the container and Postgres exporter rules stay silent until such exporters are added), Alertmanager
   e-mails, and Grafana (127.0.0.1:3000, reach it with `ssh -L`) shows the repository dashboards. Without it the apps export nothing and run unchanged. Watch disk space and certificate expiry by hand or with an external uptime check on `https://<api>/v1/health`.
 - **Residual risks of one host (ADR-025):** no zone redundancy (a server loss means hours of restore, RTO 4 h assumes the drill works), root on the host reads the File-KMS keys (until OpenBao, and even then the unseal key), Docker's published ports bypass ufw (only Caddy publishes any), and a deploy key is root-equivalent.
+
+## 7. MonsterASP.NET + Aiven
+
+D-80. The API runs as one IIS site on MonsterASP.NET (Windows, shared host) and the database is Aiven for PostgreSQL. The
+self-hosted server (section 6) stays the alternative. Hosting profile, embedded workers, deploy workflow and keep-alive: T-206;
+Aiven profile: T-207 (their subsections join this section).
+
+### Keys: HostSecrets provider (T-205, ADR-026)
+
+The File KMS refuses Windows and OpenBao needs our own server, so on this host the keys come from **secret settings the host
+injects** (`Kms:Provider = HostSecrets`). It is the File KMS key ring (same `file:<name>` key references, kids, `Signing:Keys`
+entries, pins and envelope format) read from one environment variable per key instead of one file per key. Read ADR-026 first:
+this custody is weaker than section 3 and is accepted only by setting `Kms:AcceptSharedHostCustody=true`.
+
+**Settings.**
+
+| Setting | Where | Value |
+|---|---|---|
+| `ZAGHLOL_KEYS__<name>` (one per key: `s2026a`, `e2026a`, `seat`, `audit`, `install_pepper`, `envelope`) | GitHub environment secret → `web.config` `<environmentVariable>` at deploy | printed by the key tool; **private** |
+| `Kms__Provider=HostSecrets` | public settings | |
+| `Kms__AcceptSharedHostCustody=true` | public settings | set by you, after reading ADR-026; refused start without it outside Development/Testing |
+| `Signing__Keys__<n>__…`, `Kms__HmacKeys__…`, `Kms__Envelope__…` | public settings | as in section 3 (`file:<name>` references) |
+| `Kms__File__Fingerprints__<name>`, `Kms__HmacKeys__SeatCheck` | public settings | printed by the key tool |
+| `Kms__File__OtherEnvironmentFingerprints__<n>` or `Kms__File__NoOtherEnvironment=true` | public settings | required outside Development/Testing |
+
+"Public settings" may be committed in `appsettings.<Environment>.json` or set as host settings. A `ZAGHLOL_KEYS` value must
+**never** be in any `appsettings*.json` (or any other configuration file): the API refuses to start if one is, even in a file it
+doesn't load. Names may use `_` for `-` and any letter case; setting both spellings of one name is refused.
+
+**Create the keys** (on your own machine, Windows or Linux, outside any checkout; the tool writes no file):
+
+```
+dotnet Zaghlol.Workers.dll --generate-keys --format host-secrets --environment Production \
+  --kid s2026a --kid e2026a --secret seat --secret audit --secret install-pepper --secret envelope
+```
+
+It prints, once, the `ZAGHLOL_KEYS__…` lines (private), then the public lines (`Kms__Provider`, ring entries with `Status=Next`,
+fingerprints, `SeatCheck`). Then:
+1. Create each `ZAGHLOL_KEYS__<NAME>` line as a secret of the GitHub environment (`backend-production`, required reviewer); the
+   deploy workflow (T-206) writes them into the site's `web.config` as `<environmentVariable name="ZAGHLOL_KEYS__<name>" value="…" />`.
+2. Put the public lines into the production settings, set the first kids to `Active` (rotation rules, section 3), add
+   `Kms__AcceptSharedHostCustody=true` and the other-environment fingerprints.
+3. Back up the private lines offline, like the File KMS keys (two encrypted media, never the repository, a cloud drive or chat), then
+   clear the terminal and its scrollback.
+4. Staging gets its own run with `--environment Staging`; list each environment's fingerprints in the other's
+   `Kms__File__OtherEnvironmentFingerprints`.
+
+**Already have File KMS keys** (section 3)? Convert them instead of creating new ones, so every stored hash and envelope stays valid:
+`--generate-keys --format host-secrets --environment Production --from-dir <key directory>` (run as a user that can read it).
+Pins and `SeatCheck` stay the same.
+
+**Check.** The start log says `KMS key ring verified`; a refusal names the guard with a constant message and no key data.
+`GET /v1/health` shows no key data either.
+
+**Rotation.** As in section 3, with `--kid`/`--secret` runs of the same tool: add the new secret and its ring entry and pin, deploy,
+flip statuses per the rules. Rotate the signing kids at least yearly here, and at once if the host or our host credentials may be compromised.
+
+**Leaving the shared host** (ADR-026 exit path): write each value's `pem`/`key` field (base64url-decode the setting, read the JSON) to
+`<name>.pem`/`<name>.key` with the section 3 modes, switch `Kms__Provider` to `File` with the same ring and pins, then follow "OpenBao
+Transit KMS" (BYOK import of HMAC and envelope keys). Rotate the signing keys into new kids on the new server; don't carry them over.
