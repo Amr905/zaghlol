@@ -89,13 +89,13 @@ class _NotificationTapLifecycleState
   void initState() {
     super.initState();
     final source = ref.read(notificationTapSourceProvider);
-    _sub = source.taps.listen(_open);
+    _sub = source.taps.listen((r) => unawaited(_open(r)));
     // After the first frame, so the router and navigator exist.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final route = await source.takeLaunchRoute();
       _probe('launch route=${route != null}');
       if (kDebugMode) unawaited(_debugPostColdFixtures(ref));
-      if (mounted && route != null) _open(route);
+      if (mounted && route != null) unawaited(_open(route));
     });
   }
 
@@ -105,9 +105,16 @@ class _NotificationTapLifecycleState
     super.dispose();
   }
 
-  void _open(String route) {
+  /// A tap event can arrive before the root navigator exists (the system
+  /// restored the old task after process death and delivered the tap to it as a
+  /// new intent): wait for the navigator (bounded, ~10 s) instead of dropping it.
+  Future<void> _open(String route) async {
     final target = notificationTargetFor(route);
     if (target == null) return;
+    for (var i = 0; i < 100 && rootNavigatorKey.currentContext == null; i++) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      if (!mounted) return;
+    }
     _probe(
       'open ${target.runtimeType} ctx=${rootNavigatorKey.currentContext != null}',
     );
