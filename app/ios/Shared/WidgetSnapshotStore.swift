@@ -16,6 +16,33 @@ struct WidgetView: Equatable {
   var currency: String
   var updatedAtMs: Int64
   var daysToPayday: Int?
+  /// Finished line two for day 0 (the day of `updatedAtMs`), day 1, ... (FU-206b).
+  /// Empty on a v1 file.
+  var secondaryByDay: [String] = []
+
+  /// Line two for `now`: the entry for the number of local midnights since
+  /// `updatedAtMs` (FU-206b), so days-to-payday rolls without the app. Past the
+  /// last entry it is empty (the app must republish a new cycle). Without a
+  /// list (v1) the stored line is kept.
+  func secondary(at now: Date, calendar: Calendar = .current) -> String {
+    if secondaryByDay.isEmpty { return secondaryText }
+    let then = Date(timeIntervalSince1970: TimeInterval(updatedAtMs) / 1000)
+    let elapsed =
+      calendar.dateComponents(
+        [.day], from: calendar.startOfDay(for: then), to: calendar.startOfDay(for: now)
+      ).day ?? 0
+    let i = max(elapsed, 0)
+    return i < secondaryByDay.count ? secondaryByDay[i] : ""
+  }
+
+  /// The local midnights (after `now`) at which line two changes, for a timeline.
+  func rollDates(after now: Date, calendar: Calendar = .current) -> [Date] {
+    if secondaryByDay.isEmpty { return [] }
+    let then = Date(timeIntervalSince1970: TimeInterval(updatedAtMs) / 1000)
+    let start = calendar.startOfDay(for: then)
+    return (1...secondaryByDay.count).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
+      .filter { $0 > now }
+  }
 }
 
 struct WidgetSnapshotFormatError: Error {}
@@ -31,8 +58,9 @@ struct WidgetSnapshotFormatError: Error {}
 /// available yet) reads as `nil`, which the widget shows as the app name; it is
 /// never deleted on a read and nothing is logged.
 final class WidgetSnapshotStore {
-  static let version: UInt8 = 1
-  static let maxFileBytes = 4096
+  static let version: UInt8 = 2
+  static let maxFileBytes = 16384
+  static let maxDays = 62
   static let aad = Data("zaghlol.widget.v1|snapshot".utf8)
 
   private let file: URL
@@ -88,8 +116,9 @@ final class WidgetSnapshotStore {
 
   // MARK: Record
 
-  /// `u8 v=1 | u8 state | str primary | str secondary | str currency |
-  ///  i64 updatedAtMs | i32 days (-1 = none)`; `str` = u16 length + UTF-8.
+  /// `u8 v=2 | u8 state | str primary | str secondary | str currency |
+  ///  i64 updatedAtMs | i32 days (-1 = none) | u16 n | n x str` (v2; v1 ends
+  ///  after days); `str` = u16 length + UTF-8.
   static func encode(_ v: WidgetView) -> Data {
     var out = Data([version, UInt8(truncatingIfNeeded: v.state)])
     func put<T: FixedWidthInteger>(_ x: T) { withUnsafeBytes(of: x.bigEndian) { out.append(contentsOf: $0) } }
@@ -103,6 +132,9 @@ final class WidgetSnapshotStore {
     str(v.currency, max: 8)
     put(v.updatedAtMs)
     put(Int32(v.daysToPayday ?? -1))
+    let byDay = Array(v.secondaryByDay.prefix(maxDays))
+    put(UInt16(byDay.count))
+    for line in byDay { str(line, max: WidgetView.maxTextChars) }
     return out
   }
 
@@ -131,7 +163,8 @@ final class WidgetSnapshotStore {
       }
       return s
     }
-    guard try u8() == version else { throw WidgetSnapshotFormatError() }
+    let fileVersion = try u8()
+    guard fileVersion == 1 || fileVersion == version else { throw WidgetSnapshotFormatError() }
     let state = Int(try u8())
     guard state <= WidgetView.stateNoData else { throw WidgetSnapshotFormatError() }
     let primary = try str()
@@ -139,9 +172,15 @@ final class WidgetSnapshotStore {
     let currency = try str()
     let updated = try i64()
     let days = try i32()
+    var byDay: [String] = []
+    if fileVersion >= 2 {
+      let n = try u16()
+      guard n <= maxDays else { throw WidgetSnapshotFormatError() }
+      for _ in 0..<n { byDay.append(try str()) }
+    }
     guard pos == b.count else { throw WidgetSnapshotFormatError() }
     return WidgetView(
       state: state, primaryText: primary, secondaryText: secondary, currency: currency,
-      updatedAtMs: updated, daysToPayday: days < 0 ? nil : Int(days))
+      updatedAtMs: updated, daysToPayday: days < 0 ? nil : Int(days), secondaryByDay: byDay)
   }
 }

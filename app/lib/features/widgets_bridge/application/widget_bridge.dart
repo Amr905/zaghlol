@@ -56,7 +56,17 @@ bool sameWidgetContent(WidgetSnapshot a, WidgetSnapshot b) =>
     a.primaryText == b.primaryText &&
     a.secondaryText == b.secondaryText &&
     a.daysToPayday == b.daysToPayday &&
+    _sameList(a.secondaryTextByDay, b.secondaryTextByDay) &&
     a.currency == b.currency;
+
+bool _sameList(List<String>? a, List<String>? b) {
+  if (a == null || b == null) return a == b;
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
 
 class WidgetSnapshotPublisher {
   WidgetSnapshotPublisher(this._host);
@@ -106,8 +116,17 @@ final widgetBridgeWiringProvider = Provider<void>((ref) {
   final hide =
       (ref.watch(hideAmountsWidgetProvider).value ?? false) ||
       ref.watch(hideAmountsProvider);
-  final lockOn = ref.watch(appLockEnabledProvider).value ?? false;
+  // FU-206a: until the lock setting has loaded, keep the previous snapshot
+  // (a cold start is locked; never publish amounts on a guess).
+  final lockSetting = ref.watch(appLockEnabledProvider).value;
+  if (lockSetting == null) return;
+  final lockOn = lockSetting;
   final locked = ref.watch(appLockControllerProvider.select((s) => s.locked));
+  // FU-206a: with the lock on, leaving the app masks the widget at once, not
+  // only when the lock timeout later engages; resuming (unlocked) shows the
+  // amount again.
+  final away = ref.watch(appBackgroundedProvider);
+  final maskForLock = lockOn && (locked || away);
   final primary = ref.watch(primaryCurrencyProvider).value;
   final lang = _languageFor(ref.watch(appLocaleProvider));
   final digits = ref.watch(digitsModeProvider(lang));
@@ -119,16 +138,16 @@ final widgetBridgeWiringProvider = Provider<void>((ref) {
   // Read here, not in the timer, so a missing override shows as a provider
   // error instead of an uncaught timer exception.
   final copy = ref.watch(widgetCopyProvider(lang));
-  // FU-206a: the masked snapshot goes out at once when the app locks (the
-  // app may be suspended a moment later); other changes are debounced.
-  final delay = lockOn && locked ? Duration.zero : widgetPublishDebounce;
+  // FU-206a: the masked snapshot goes out at once when the app locks or goes
+  // to the background with the lock on (the app may be suspended a moment later); other changes are debounced.
+  final delay = maskForLock ? Duration.zero : widgetPublishDebounce;
   final timer = Timer(delay, () {
     final snapshot = buildWidgetSnapshot(
       WidgetSnapshotInput(
         overview: overview.value,
         primaryCurrency: primary,
         hideAmounts: hide,
-        appLocked: lockOn && locked,
+        appLocked: maskForLock,
         languageCode: lang,
         digits: digits,
         copy: copy,

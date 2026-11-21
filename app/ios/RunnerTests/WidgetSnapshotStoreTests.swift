@@ -139,4 +139,62 @@ final class WidgetSnapshotStoreTests: XCTestCase {
       XCTAssertEqual((e as? WidgetBridgeApiError)?.code, "IO_ERROR")
     }
   }
+
+  // MARK: FU-206b
+
+  private var cairo: Calendar {
+    var c = Calendar(identifier: .gregorian)
+    c.timeZone = TimeZone(identifier: "Africa/Cairo")!
+    return c
+  }
+
+  private func date(_ d: Int, _ h: Int, _ m: Int) -> Date {
+    cairo.date(from: DateComponents(year: 2026, month: 11, day: d, hour: h, minute: m))!
+  }
+
+  private func rolling() -> WidgetView {
+    var v = view("•••/day")
+    v.updatedAtMs = Int64(date(3, 23, 50).timeIntervalSince1970 * 1000)
+    v.secondaryByDay = ["3 days", "2 days", "1 day"]
+    return v
+  }
+
+  func testDaysToPaydayRollsAtLocalMidnight() {
+    let v = rolling()
+    XCTAssertEqual(v.secondary(at: date(3, 23, 59), calendar: cairo), "3 days")
+    XCTAssertEqual(v.secondary(at: date(4, 0, 1), calendar: cairo), "2 days")
+    XCTAssertEqual(v.secondary(at: date(5, 12, 0), calendar: cairo), "1 day")
+    XCTAssertEqual(v.secondary(at: date(9, 12, 0), calendar: cairo), "")
+    XCTAssertEqual(v.secondary(at: date(1, 12, 0), calendar: cairo), "3 days")
+  }
+
+  func testTimelineHasAnEntryAtEachComingMidnight() {
+    let v = rolling()
+    let dates = v.rollDates(after: date(3, 23, 55), calendar: cairo)
+    XCTAssertEqual(dates, [date(4, 0, 0), date(5, 0, 0), date(6, 0, 0)])
+    XCTAssertEqual(v.rollDates(after: date(5, 1, 0), calendar: cairo), [date(6, 0, 0)])
+  }
+
+  func testAV1StyleViewKeepsItsStoredLine() {
+    let v = view()
+    XCTAssertEqual(v.secondary(at: Date.distantFuture, calendar: cairo), "7 days to payday")
+    XCTAssertTrue(v.rollDates(after: Date(), calendar: cairo).isEmpty)
+  }
+
+  func testDayListRoundTripsAndIsCapped() throws {
+    let s = store()
+    var v = view()
+    v.secondaryByDay = (1...100).map { "d\($0)" }
+    try s.write(v)
+    XCTAssertEqual(s.readOrNil()?.secondaryByDay, Array(v.secondaryByDay.prefix(62)))
+  }
+
+  func testHostStoresTheDayList() throws {
+    let host = WidgetBridgeHost(store: store(), reload: {})
+    try host.updateSnapshot(
+      snapshot: WidgetSnapshot(
+        state: .ok, primaryText: "•••/day", secondaryText: "2 days", currency: "EGP",
+        updatedAtMs: 5, daysToPayday: 2, secondaryTextByDay: ["2 days", "1 day"]))
+    XCTAssertEqual(store().readOrNil()?.secondaryByDay, ["2 days", "1 day"])
+  }
 }

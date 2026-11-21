@@ -77,6 +77,23 @@ final appLockWriterProvider = Provider<Future<void> Function(bool)>(
 
 enum EnableLockResult { enabled, notSecure, failed, canceled }
 
+/// True while the app is in the background (paused/hidden/detached) with the
+/// lock enabled. The widget bridge masks the home-screen widget at once on
+/// this (FU-206a), before the lock timeout engages.
+class AppBackgroundedNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool v) {
+    if (state != v) state = v;
+  }
+}
+
+final appBackgroundedProvider = NotifierProvider<AppBackgroundedNotifier, bool>(
+  AppBackgroundedNotifier.new,
+  name: 'appBackgroundedProvider',
+);
+
 class AppLockController extends Notifier<AppLockState> {
   bool _enabled = false;
   int? _bgWallMs;
@@ -99,6 +116,7 @@ class AppLockController extends Notifier<AppLockState> {
     _enabled = enabled;
     if (!enabled) {
       _bgWallMs = _bgMonoMs = null;
+      ref.read(appBackgroundedProvider.notifier).set(false);
       state = const AppLockState(locked: false, autoPrompt: false);
     }
   }
@@ -112,9 +130,11 @@ class AppLockController extends Notifier<AppLockState> {
       case AppLifecycleState.paused:
       case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
+        ref.read(appBackgroundedProvider.notifier).set(true);
         _bgWallMs ??= clock.wallMs();
         _bgMonoMs ??= clock.monotonicMs();
       case AppLifecycleState.resumed:
+        ref.read(appBackgroundedProvider.notifier).set(false);
         final wall0 = _bgWallMs;
         final mono0 = _bgMonoMs;
         _bgWallMs = _bgMonoMs = null;

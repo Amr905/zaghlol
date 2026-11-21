@@ -24,6 +24,7 @@ class WidgetBridgeHost(
                     currency = snapshot.currency,
                     updatedAtMs = snapshot.updatedAtMs,
                     daysToPayday = snapshot.daysToPayday?.toInt(),
+                    secondaryByDay = snapshot.secondaryTextByDay ?: emptyList(),
                 ),
             )
         } catch (_: Exception) {
