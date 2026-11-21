@@ -165,7 +165,7 @@ jobs:
         shell: bash
         run: |
           base="${SITE_URL%/}"
-          for i in $(seq 1 12); do
+          for _ in $(seq 1 12); do
             if curl -fsS --max-time 30 "$base/v1/health" | tee health.json | grep -q '"status":"ok"'; then echo; echo "health ok"; exit 0; fi
             sleep 15
           done
