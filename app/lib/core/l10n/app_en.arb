@@ -983,7 +983,7 @@
   "@insightsChartsLockedSub": {
     "description": "S · C-13 locked, blurred preview + common_gold_unlock"
   },
-  "insightsChartsEmptyCycle": "Comes alive after your first full cycle",
+  "insightsChartsEmptyCycle": "Comes alive after your first full month",
   "@insightsChartsEmptyCycle": {
     "description": "S · C-13 empty (EC-23)"
   },
@@ -1044,7 +1044,7 @@
   "@insightsChartTitleMerchants": {
     "description": "T · chart 6 (Free, top five)"
   },
-  "insightsChartTitleVsAverage": "This cycle vs your 3-cycle average",
+  "insightsChartTitleVsAverage": "This month vs your 3-month average",
   "@insightsChartTitleVsAverage": {
     "description": "T · chart 7 (Gold)"
   },
@@ -1116,7 +1116,7 @@
   "@insightsLegendAverage": {
     "description": "C · chart 7"
   },
-  "insightsLegendThisCycle": "This cycle",
+  "insightsLegendThisCycle": "This month",
   "@insightsLegendThisCycle": {
     "description": "C · chart 7"
   },
@@ -1228,7 +1228,7 @@
       }
     }
   },
-  "insightsChartA11yVsAverage": "This cycle vs average: biggest rise is {category} at {percent}",
+  "insightsChartA11yVsAverage": "This month vs average: biggest rise is {category} at {percent}",
   "@insightsChartA11yVsAverage": {
     "description": "A",
     "placeholders": {
@@ -1336,11 +1336,11 @@
   "@insightsChartDetailDeepLabel": {
     "description": "C · with common_gold_badge; shown on the deep part"
   },
-  "insightsChartDetailDeepUpsell": "Want a deeper look? Gold compares with last cycle and projects your cycle's end.",
+  "insightsChartDetailDeepUpsell": "Want a deeper look? Gold compares with last month and projects your month's end.",
   "@insightsChartDetailDeepUpsell": {
     "description": "S · Free only, once under the basic tip, plus common_gold_unlock"
   },
-  "insightsChartDetailNeedsData": "{need, select, cycle{I need one full cycle before I can explain this chart} months{I need three cycles to compare you with yourself} accounts{Add accounts or assets and I'll explain} installments{Add an installment or commitment and I'll explain} subscriptions{No subscriptions yet. I'll explain once I spot one} other{I need more data to explain this chart}}",
+  "insightsChartDetailNeedsData": "{need, select, cycle{I need one full month before I can explain this chart} months{I need three months to compare you with yourself} accounts{Add accounts or assets and I'll explain} installments{Add an installment or commitment and I'll explain} subscriptions{No subscriptions yet. I'll explain once I spot one} other{I need more data to explain this chart}}",
   "@insightsChartDetailNeedsData": {
     "description": "M · need:select (cycle/months/accounts/installments/subscriptions/other) · empty explainer",
     "placeholders": {
@@ -1415,7 +1415,7 @@
       }
     }
   },
-  "insightsExplainCashFlowTip": "{state, select, short{Trimming {category} by {target} next cycle would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}",
+  "insightsExplainCashFlowTip": "{state, select, short{Trimming {category} by {target} next month would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}",
   "@insightsExplainCashFlowTip": {
     "description": "S · state, category = largest category, target",
     "placeholders": {
@@ -1448,7 +1448,7 @@
       }
     }
   },
-  "insightsExplainCashFlowDeepTip": "Set a goal of saving {target} every cycle. That's {yearly} a year.",
+  "insightsExplainCashFlowDeepTip": "Set a goal of saving {target} every month. That's {yearly} a year.",
   "@insightsExplainCashFlowDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1481,7 +1481,7 @@
       }
     }
   },
-  "insightsExplainCategoriesTip": "Cap {category} {target} below this cycle and keep the difference.",
+  "insightsExplainCategoriesTip": "Cap {category} {target} below this month and keep the difference.",
   "@insightsExplainCategoriesTip": {
     "description": "S",
     "placeholders": {
@@ -1511,7 +1511,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeepTip": "Bring {category} down by {target} each cycle. That's {yearly} a year.",
+  "insightsExplainCategoriesDeepTip": "Bring {category} down by {target} each month. That's {yearly} a year.",
   "@insightsExplainCategoriesDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1526,7 +1526,7 @@
       }
     }
   },
-  "insightsExplainBurnRateBasic": "{state, select, over{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, above the ideal pace. What's left covers {perDay} a day.} other{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, under the ideal pace. You can spend {perDay} a day.}}",
+  "insightsExplainBurnRateBasic": "{state, select, over{You're on day {cycleDay} of the month and have spent {spent} of {budget}, above the ideal pace. What's left covers {perDay} a day.} other{You're on day {cycleDay} of the month and have spent {spent} of {budget}, under the ideal pace. You can spend {perDay} a day.}}",
   "@insightsExplainBurnRateBasic": {
     "description": "E · state:select(over/other). perDay = BR-BUD-03",
     "placeholders": {
@@ -1547,7 +1547,7 @@
       }
     }
   },
-  "insightsExplainBurnRateTip": "{state, select, over{Bring your daily spending down to {perDay} until payday so the budget lasts.} other{Keep this pace and the gap becomes surplus at the end of the cycle. You can spend {perDay} a day.}}",
+  "insightsExplainBurnRateTip": "{state, select, over{Bring your daily spending down to {perDay} until payday so the budget lasts.} other{Keep this pace and the gap becomes surplus at the end of the month. You can spend {perDay} a day.}}",
   "@insightsExplainBurnRateTip": {
     "description": "S",
     "placeholders": {
@@ -1559,7 +1559,7 @@
       }
     }
   },
-  "insightsExplainBurnRateDeep": "{trend, select, up{At this point last cycle you had spent {delta} less.} down{At this point last cycle you had spent {delta} more.} other{Your spending is about the same as this point last cycle.}}",
+  "insightsExplainBurnRateDeep": "{trend, select, up{At this point last month you had spent {delta} less.} down{At this point last month you had spent {delta} more.} other{Your spending is about the same as this point last month.}}",
   "@insightsExplainBurnRateDeep": {
     "description": "E · Gold · trend (up = spending more than last cycle)",
     "placeholders": {
@@ -1601,7 +1601,7 @@
       }
     }
   },
-  "insightsExplainRule503020Tip": "{state, select, wantsHigh{Trim wants by {target} next cycle and move it to savings.} savingsLow{Try to add {target} to your savings next cycle.} other{Keep this up, and add {target} more if you can.}}",
+  "insightsExplainRule503020Tip": "{state, select, wantsHigh{Trim wants by {target} next month and move it to savings.} savingsLow{Try to add {target} to your savings next month.} other{Keep this up, and add {target} more if you can.}}",
   "@insightsExplainRule503020Tip": {
     "description": "S",
     "placeholders": {
@@ -1754,7 +1754,7 @@
       }
     }
   },
-  "insightsExplainMerchantsDeepTip": "Cut {merchant} by a quarter and you'll save {target} a cycle, {yearly} a year.",
+  "insightsExplainMerchantsDeepTip": "Cut {merchant} by a quarter and you'll save {target} a month, {yearly} a year.",
   "@insightsExplainMerchantsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1769,7 +1769,7 @@
       }
     }
   },
-  "insightsExplainVsAverageBasic": "{state, select, both{{category} is up {percent} on your 3-cycle average, but {category2} is down {percent2}. Nice work on that.} rise{{category} is up {percent} on your 3-cycle average.} drop{{category2} is down {percent2} on your 3-cycle average. Nice work.} other{This cycle is close to your 3-cycle average.}}",
+  "insightsExplainVsAverageBasic": "{state, select, both{{category} is up {percent} on your 3-month average, but {category2} is down {percent2}. Nice work on that.} rise{{category} is up {percent} on your 3-month average.} drop{{category2} is down {percent2} on your 3-month average. Nice work.} other{This month is close to your 3-month average.}}",
   "@insightsExplainVsAverageBasic": {
     "description": "E · state:select(both/rise/drop/other). Needs three earlier cycles (insights_chartDetail_needsData)",
     "placeholders": {
@@ -1820,7 +1820,7 @@
       }
     }
   },
-  "insightsExplainVsAverageDeepTip": "Set {category}'s limit at your average, that's {target} a cycle.",
+  "insightsExplainVsAverageDeepTip": "Set {category}'s limit at your average, that's {target} a month.",
   "@insightsExplainVsAverageDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1973,7 +1973,7 @@
       }
     }
   },
-  "insightsExplainCardsDeepTip": "You spent {amount} on {card} this cycle. Set a {target} limit for the next one.",
+  "insightsExplainCardsDeepTip": "You spent {amount} on {card} this month. Set a {target} limit for the next one.",
   "@insightsExplainCardsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -7412,11 +7412,11 @@
       }
     }
   },
-  "insightsChartsPeriodNeedsCycle": "This chart works on a payday cycle. Pick this cycle or last cycle to see it.",
+  "insightsChartsPeriodNeedsCycle": "This chart works on a payday month. Pick this month or last month to see it.",
   "@insightsChartsPeriodNeedsCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodBudgetNote": "Budget progress always shows the current cycle.",
+  "insightsChartsPeriodBudgetNote": "Budget progress always shows the current month.",
   "@insightsChartsPeriodBudgetNote": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7444,11 +7444,11 @@
       }
     }
   },
-  "insightsChartsPeriodNowThisCycle": "this cycle",
+  "insightsChartsPeriodNowThisCycle": "this month",
   "@insightsChartsPeriodNowThisCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodNowLastCycle": "the previous cycle",
+  "insightsChartsPeriodNowLastCycle": "the previous month",
   "@insightsChartsPeriodNowLastCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7492,7 +7492,7 @@
       }
     }
   },
-  "insightsChartsPeriodPrevCycleNow": "last cycle",
+  "insightsChartsPeriodPrevCycleNow": "last month",
   "@insightsChartsPeriodPrevCycleNow": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7504,7 +7504,7 @@
   "@insightsChartsPeriodPrevYearNow": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodPrevCycle": "the cycle before",
+  "insightsChartsPeriodPrevCycle": "the month before",
   "@insightsChartsPeriodPrevCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7541,7 +7541,7 @@
       }
     }
   },
-  "insightsChartsCyclesCount": "{count, plural, one{{countText} cycle} other{{countText} cycles}}",
+  "insightsChartsCyclesCount": "{count, plural, one{{countText} month} other{{countText} months}}",
   "@insightsChartsCyclesCount": {
     "description": "S-20 chart period (T-188)",
     "placeholders": {

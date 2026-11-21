@@ -3133,7 +3133,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsLockedSub => 'شوف الشارت كله مع جولد';
 
   @override
-  String get insightsChartsEmptyCycle => 'هيشتغل بعد أول دورة كاملة';
+  String get insightsChartsEmptyCycle => 'هيشتغل بعد أول شهر كامل';
 
   @override
   String get insightsChartsEmptyNetWorth =>
@@ -3178,7 +3178,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartTitleMerchants => 'أكتر الأماكن اللي بتاخد فلوسك';
 
   @override
-  String get insightsChartTitleVsAverage => 'الدورة دي قصاد متوسط تلات دورات';
+  String get insightsChartTitleVsAverage => 'الشهر ده قصاد متوسط تلات شهور';
 
   @override
   String get insightsChartTitleInstallments => 'أقساطك في الستة شهور الجايين';
@@ -3232,7 +3232,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsLegendAverage => 'متوسطك';
 
   @override
-  String get insightsLegendThisCycle => 'الدورة دي';
+  String get insightsLegendThisCycle => 'الشهر ده';
 
   @override
   String get insightsLegendInstallments => 'أقساط';
@@ -3296,7 +3296,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsChartA11yVsAverage(String category, String percent) {
-    return 'الدورة دي قصاد متوسطك: أكبر زيادة في $category بـ $percent';
+    return 'الشهر ده قصاد متوسطك: أكبر زيادة في $category بـ $percent';
   }
 
   @override
@@ -3349,13 +3349,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get insightsChartDetailDeepUpsell =>
-      'عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة.';
+      'عايز تحليل أعمق؟ جولد بيقارن بالشهر اللي فات ويتوقع آخر الشهر.';
 
   @override
   String insightsChartDetailNeedsData(String need) {
     String _temp0 = intl.Intl.selectLogic(need, {
-      'cycle': 'محتاج دورة كاملة علشان أشرحلك الشارت ده',
-      'months': 'محتاج تلات دورات علشان أقارنك بنفسك',
+      'cycle': 'محتاج شهر كامل علشان أشرحلك الشارت ده',
+      'months': 'محتاج تلات شهور علشان أقارنك بنفسك',
       'accounts': 'ضيف حسابات أو أصول وأنا أشرحلك',
       'installments': 'ضيف قسط أو التزام وأنا أشرحلك',
       'subscriptions': 'لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك',
@@ -3419,7 +3419,7 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'short':
-          'لو قللت $category بـ $target الدورة الجاية، ده هيساعدك تقفل الفرق.',
+          'لو قللت $category بـ $target الشهر الجاي، ده هيساعدك تقفل الفرق.',
       'other': 'حوّل $target على الأقل من الفايض ده للتحويش قبل ما يتصرف.',
     });
     return '$_temp0';
@@ -3442,7 +3442,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainCashFlowDeepTip(String target, String yearly) {
-    return 'ثبّت هدف تحوّش $target كل دورة، يعني $yearly في السنة.';
+    return 'ثبّت هدف تحوّش $target كل شهر، يعني $yearly في السنة.';
   }
 
   @override
@@ -3458,7 +3458,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainCategoriesTip(String category, String target) {
-    return 'حط سقف لـ$category أقل بـ $target من الدورة دي، وهتوفر الفرق.';
+    return 'حط سقف لـ$category أقل بـ $target من الشهر ده، وهتوفر الفرق.';
   }
 
   @override
@@ -3482,7 +3482,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String target,
     String yearly,
   ) {
-    return 'قلّل $category بـ $target كل دورة، يعني $yearly في السنة.';
+    return 'قلّل $category بـ $target كل شهر، يعني $yearly في السنة.';
   }
 
   @override
@@ -3495,9 +3495,9 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'over':
-          'إنت في اليوم $cycleDay من الدورة وصارف $spent من $budget، يعني فوق الخط المثالي. الباقي يكفي $perDay في اليوم بس.',
+          'إنت في اليوم $cycleDay من الشهر وصارف $spent من $budget، يعني فوق الخط المثالي. الباقي يكفي $perDay في اليوم بس.',
       'other':
-          'إنت في اليوم $cycleDay من الدورة وصارف $spent من $budget، يعني تحت الخط المثالي. مسموحلك $perDay في اليوم.',
+          'إنت في اليوم $cycleDay من الشهر وصارف $spent من $budget، يعني تحت الخط المثالي. مسموحلك $perDay في اليوم.',
     });
     return '$_temp0';
   }
@@ -3507,7 +3507,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(state, {
       'over': 'نزّل صرفك اليومي لـ $perDay لحد القبض علشان الميزانية تكفي.',
       'other':
-          'كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف $perDay في اليوم.',
+          'كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الشهر. تقدر تصرف $perDay في اليوم.',
     });
     return '$_temp0';
   }
@@ -3515,9 +3515,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String insightsExplainBurnRateDeep(String trend, String delta) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ $delta.',
-      'down': 'في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ $delta.',
-      'other': 'صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.',
+      'up': 'في نفس اليوم في الشهر اللي فات كنت صارف أقل بـ $delta.',
+      'down': 'في نفس اليوم في الشهر اللي فات كنت صارف أكتر بـ $delta.',
+      'other': 'صرفك زي نفس اليوم في الشهر اللي فات تقريباً.',
     });
     return '$_temp0';
   }
@@ -3549,8 +3549,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String insightsExplainRule503020Tip(String state, String target) {
     String _temp0 = intl.Intl.selectLogic(state, {
-      'wantsHigh': 'نزّل الرفاهيات $target الدورة الجاية وحوّلهم للتحويش.',
-      'savingsLow': 'حاول تزود التحويش $target الدورة الجاية.',
+      'wantsHigh': 'نزّل الرفاهيات $target الشهر الجاي وحوّلهم للتحويش.',
+      'savingsLow': 'حاول تزود التحويش $target الشهر الجاي.',
       'other': 'حافظ على التحويش ده، وزوده $target لو قدرت.',
     });
     return '$_temp0';
@@ -3652,7 +3652,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String target,
     String yearly,
   ) {
-    return 'لو قللت $merchant بالربع هتوفر $target في الدورة، يعني $yearly في السنة.';
+    return 'لو قللت $merchant بالربع هتوفر $target في الشهر، يعني $yearly في السنة.';
   }
 
   @override
@@ -3665,10 +3665,10 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'both':
-          '$category زاد $percent عن متوسط آخر تلات دورات، لكن $category2 نزل $percent2. برافو على ده.',
-      'rise': '$category زاد $percent عن متوسط آخر تلات دورات.',
-      'drop': '$category2 نزل $percent2 عن متوسط آخر تلات دورات. برافو عليك.',
-      'other': 'صرفك الدورة دي قريب من متوسط آخر تلات دورات.',
+          '$category زاد $percent عن متوسط آخر تلات شهور، لكن $category2 نزل $percent2. برافو على ده.',
+      'rise': '$category زاد $percent عن متوسط آخر تلات شهور.',
+      'drop': '$category2 نزل $percent2 عن متوسط آخر تلات شهور. برافو عليك.',
+      'other': 'صرفك الشهر ده قريب من متوسط آخر تلات شهور.',
     });
     return '$_temp0';
   }
@@ -3701,7 +3701,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainVsAverageDeepTip(String category, String target) {
-    return 'حط حد لـ $category على قد متوسطك، يعني $target في الدورة.';
+    return 'حط حد لـ $category على قد متوسطك، يعني $target في الشهر.';
   }
 
   @override
@@ -3795,7 +3795,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String card,
     String target,
   ) {
-    return 'صرفت $amount من $card الدورة دي. حط له سقف $target للدورة الجاية.';
+    return 'صرفت $amount من $card الشهر ده. حط له سقف $target للشهر الجاي.';
   }
 
   @override
@@ -7768,11 +7768,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get insightsChartsPeriodNeedsCycle =>
-      'الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.';
+      'الرسم ده بيشتغل بشهر المرتب. اختار الشهر ده أو الشهر اللي فات عشان تشوفه.';
 
   @override
   String get insightsChartsPeriodBudgetNote =>
-      'تقدّم الميزانية بيعرض الدورة الحالية دايماً.';
+      'تقدّم الميزانية بيعرض الشهر الحالي دايماً.';
 
   @override
   String insightsChartsDaysCount(int count, String countText) {
@@ -7801,10 +7801,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsPeriodNowThisCycle => 'الدورة دي';
+  String get insightsChartsPeriodNowThisCycle => 'الشهر ده';
 
   @override
-  String get insightsChartsPeriodNowLastCycle => 'الدورة اللي فاتت';
+  String get insightsChartsPeriodNowLastCycle => 'الشهر اللي فات';
 
   @override
   String get insightsChartsPeriodNowThisMonth => 'الشهر ده';
@@ -7838,7 +7838,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsPeriodPrevCycleNow => 'الدورة اللي فاتت';
+  String get insightsChartsPeriodPrevCycleNow => 'الشهر اللي فات';
 
   @override
   String get insightsChartsPeriodPrevMonthNow => 'الشهر اللي فات';
@@ -7847,7 +7847,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsPeriodPrevYearNow => 'السنة اللي فاتت';
 
   @override
-  String get insightsChartsPeriodPrevCycle => 'الدورة اللي قبلها';
+  String get insightsChartsPeriodPrevCycle => 'الشهر اللي قبله';
 
   @override
   String get insightsChartsPeriodPrevMonth => 'الشهر اللي قبله';
@@ -7882,10 +7882,10 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$countText دورة',
-      few: '$countText دورات',
-      two: 'دورتين',
-      one: 'دورة',
+      other: '$countText شهر',
+      few: '$countText شهور',
+      two: 'شهرين',
+      one: 'شهر',
     );
     return '$_temp0';
   }

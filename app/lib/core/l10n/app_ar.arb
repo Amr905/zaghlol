@@ -4074,7 +4074,7 @@
   "@insightsChartsLockedSub": {
     "description": "S · C-13 locked, blurred preview + common_gold_unlock"
   },
-  "insightsChartsEmptyCycle": "هيشتغل بعد أول دورة كاملة",
+  "insightsChartsEmptyCycle": "هيشتغل بعد أول شهر كامل",
   "@insightsChartsEmptyCycle": {
     "description": "S · C-13 empty (EC-23)"
   },
@@ -4135,7 +4135,7 @@
   "@insightsChartTitleMerchants": {
     "description": "T · chart 6 (Free, top five)"
   },
-  "insightsChartTitleVsAverage": "الدورة دي قصاد متوسط تلات دورات",
+  "insightsChartTitleVsAverage": "الشهر ده قصاد متوسط تلات شهور",
   "@insightsChartTitleVsAverage": {
     "description": "T · chart 7 (Gold)"
   },
@@ -4207,7 +4207,7 @@
   "@insightsLegendAverage": {
     "description": "C · chart 7"
   },
-  "insightsLegendThisCycle": "الدورة دي",
+  "insightsLegendThisCycle": "الشهر ده",
   "@insightsLegendThisCycle": {
     "description": "C · chart 7"
   },
@@ -4319,7 +4319,7 @@
       }
     }
   },
-  "insightsChartA11yVsAverage": "الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent}",
+  "insightsChartA11yVsAverage": "الشهر ده قصاد متوسطك: أكبر زيادة في {category} بـ {percent}",
   "@insightsChartA11yVsAverage": {
     "description": "A",
     "placeholders": {
@@ -4427,11 +4427,11 @@
   "@insightsChartDetailDeepLabel": {
     "description": "C · with common_gold_badge; shown on the deep part"
   },
-  "insightsChartDetailDeepUpsell": "عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة.",
+  "insightsChartDetailDeepUpsell": "عايز تحليل أعمق؟ جولد بيقارن بالشهر اللي فات ويتوقع آخر الشهر.",
   "@insightsChartDetailDeepUpsell": {
     "description": "S · Free only, once under the basic tip, plus common_gold_unlock"
   },
-  "insightsChartDetailNeedsData": "{need, select, cycle{محتاج دورة كاملة علشان أشرحلك الشارت ده} months{محتاج تلات دورات علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}",
+  "insightsChartDetailNeedsData": "{need, select, cycle{محتاج شهر كامل علشان أشرحلك الشارت ده} months{محتاج تلات شهور علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}",
   "@insightsChartDetailNeedsData": {
     "description": "M · need:select (cycle/months/accounts/installments/subscriptions/other) · empty explainer",
     "placeholders": {
@@ -4506,7 +4506,7 @@
       }
     }
   },
-  "insightsExplainCashFlowTip": "{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}",
+  "insightsExplainCashFlowTip": "{state, select, short{لو قللت {category} بـ {target} الشهر الجاي، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}",
   "@insightsExplainCashFlowTip": {
     "description": "S · state, category = largest category, target",
     "placeholders": {
@@ -4539,7 +4539,7 @@
       }
     }
   },
-  "insightsExplainCashFlowDeepTip": "ثبّت هدف تحوّش {target} كل دورة، يعني {yearly} في السنة.",
+  "insightsExplainCashFlowDeepTip": "ثبّت هدف تحوّش {target} كل شهر، يعني {yearly} في السنة.",
   "@insightsExplainCashFlowDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4572,7 +4572,7 @@
       }
     }
   },
-  "insightsExplainCategoriesTip": "حط سقف لـ{category} أقل بـ {target} من الدورة دي، وهتوفر الفرق.",
+  "insightsExplainCategoriesTip": "حط سقف لـ{category} أقل بـ {target} من الشهر ده، وهتوفر الفرق.",
   "@insightsExplainCategoriesTip": {
     "description": "S",
     "placeholders": {
@@ -4602,7 +4602,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeepTip": "قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة.",
+  "insightsExplainCategoriesDeepTip": "قلّل {category} بـ {target} كل شهر، يعني {yearly} في السنة.",
   "@insightsExplainCategoriesDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4617,7 +4617,7 @@
       }
     }
   },
-  "insightsExplainBurnRateBasic": "{state, select, over{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}",
+  "insightsExplainBurnRateBasic": "{state, select, over{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}",
   "@insightsExplainBurnRateBasic": {
     "description": "E · state:select(over/other). perDay = BR-BUD-03",
     "placeholders": {
@@ -4638,7 +4638,7 @@
       }
     }
   },
-  "insightsExplainBurnRateTip": "{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف {perDay} في اليوم.}}",
+  "insightsExplainBurnRateTip": "{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الشهر. تقدر تصرف {perDay} في اليوم.}}",
   "@insightsExplainBurnRateTip": {
     "description": "S",
     "placeholders": {
@@ -4650,7 +4650,7 @@
       }
     }
   },
-  "insightsExplainBurnRateDeep": "{trend, select, up{في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ {delta}.} down{في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.}}",
+  "insightsExplainBurnRateDeep": "{trend, select, up{في نفس اليوم في الشهر اللي فات كنت صارف أقل بـ {delta}.} down{في نفس اليوم في الشهر اللي فات كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الشهر اللي فات تقريباً.}}",
   "@insightsExplainBurnRateDeep": {
     "description": "E · Gold · trend (up = spending more than last cycle)",
     "placeholders": {
@@ -4692,7 +4692,7 @@
       }
     }
   },
-  "insightsExplainRule503020Tip": "{state, select, wantsHigh{نزّل الرفاهيات {target} الدورة الجاية وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الدورة الجاية.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}",
+  "insightsExplainRule503020Tip": "{state, select, wantsHigh{نزّل الرفاهيات {target} الشهر الجاي وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الشهر الجاي.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}",
   "@insightsExplainRule503020Tip": {
     "description": "S",
     "placeholders": {
@@ -4845,7 +4845,7 @@
       }
     }
   },
-  "insightsExplainMerchantsDeepTip": "لو قللت {merchant} بالربع هتوفر {target} في الدورة، يعني {yearly} في السنة.",
+  "insightsExplainMerchantsDeepTip": "لو قللت {merchant} بالربع هتوفر {target} في الشهر، يعني {yearly} في السنة.",
   "@insightsExplainMerchantsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4860,7 +4860,7 @@
       }
     }
   },
-  "insightsExplainVsAverageBasic": "{state, select, both{{category} زاد {percent} عن متوسط آخر تلات دورات، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات دورات.} drop{{category2} نزل {percent2} عن متوسط آخر تلات دورات. برافو عليك.} other{صرفك الدورة دي قريب من متوسط آخر تلات دورات.}}",
+  "insightsExplainVsAverageBasic": "{state, select, both{{category} زاد {percent} عن متوسط آخر تلات شهور، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات شهور.} drop{{category2} نزل {percent2} عن متوسط آخر تلات شهور. برافو عليك.} other{صرفك الشهر ده قريب من متوسط آخر تلات شهور.}}",
   "@insightsExplainVsAverageBasic": {
     "description": "E · state:select(both/rise/drop/other). Needs three earlier cycles (insights_chartDetail_needsData)",
     "placeholders": {
@@ -4911,7 +4911,7 @@
       }
     }
   },
-  "insightsExplainVsAverageDeepTip": "حط حد لـ {category} على قد متوسطك، يعني {target} في الدورة.",
+  "insightsExplainVsAverageDeepTip": "حط حد لـ {category} على قد متوسطك، يعني {target} في الشهر.",
   "@insightsExplainVsAverageDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -5064,7 +5064,7 @@
       }
     }
   },
-  "insightsExplainCardsDeepTip": "صرفت {amount} من {card} الدورة دي. حط له سقف {target} للدورة الجاية.",
+  "insightsExplainCardsDeepTip": "صرفت {amount} من {card} الشهر ده. حط له سقف {target} للشهر الجاي.",
   "@insightsExplainCardsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -10515,11 +10515,11 @@
       }
     }
   },
-  "insightsChartsPeriodNeedsCycle": "الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.",
+  "insightsChartsPeriodNeedsCycle": "الرسم ده بيشتغل بشهر المرتب. اختار الشهر ده أو الشهر اللي فات عشان تشوفه.",
   "@insightsChartsPeriodNeedsCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodBudgetNote": "تقدّم الميزانية بيعرض الدورة الحالية دايماً.",
+  "insightsChartsPeriodBudgetNote": "تقدّم الميزانية بيعرض الشهر الحالي دايماً.",
   "@insightsChartsPeriodBudgetNote": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10547,11 +10547,11 @@
       }
     }
   },
-  "insightsChartsPeriodNowThisCycle": "الدورة دي",
+  "insightsChartsPeriodNowThisCycle": "الشهر ده",
   "@insightsChartsPeriodNowThisCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodNowLastCycle": "الدورة اللي فاتت",
+  "insightsChartsPeriodNowLastCycle": "الشهر اللي فات",
   "@insightsChartsPeriodNowLastCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10595,7 +10595,7 @@
       }
     }
   },
-  "insightsChartsPeriodPrevCycleNow": "الدورة اللي فاتت",
+  "insightsChartsPeriodPrevCycleNow": "الشهر اللي فات",
   "@insightsChartsPeriodPrevCycleNow": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10607,7 +10607,7 @@
   "@insightsChartsPeriodPrevYearNow": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodPrevCycle": "الدورة اللي قبلها",
+  "insightsChartsPeriodPrevCycle": "الشهر اللي قبله",
   "@insightsChartsPeriodPrevCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10644,7 +10644,7 @@
       }
     }
   },
-  "insightsChartsCyclesCount": "{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}",
+  "insightsChartsCyclesCount": "{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}",
   "@insightsChartsCyclesCount": {
     "description": "S-20 chart period (T-188)",
     "placeholders": {

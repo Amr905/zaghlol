@@ -664,6 +664,36 @@ class ChartRepository {
     });
   }
 
+  /// T-189: net spend and expense count of [p], optionally inside one
+  /// category and/or one merchant (the drill-down header). Never below zero.
+  Future<({Money amount, int count})> scopedSpend(
+    ChartPeriod p,
+    ChartFilter f, {
+    String? categoryId,
+    String? merchantNorm,
+  }) => _memoized(
+    _key('scoped', p, f, '${categoryId ?? ''}|${merchantNorm ?? ''}'),
+    () async {
+      final s = _spend(p, f);
+      final rows = await _select(
+        'SELECT coalesce(sum($_netSpend), 0) AS s, count(*) AS n '
+        'FROM transactions t WHERE ${s.where} '
+        '${categoryId == null ? '' : 'AND t.category_id = ? '}'
+        '${merchantNorm == null ? '' : 'AND t.merchant_norm = ? '}',
+        [
+          ...s.args,
+          if (categoryId != null) Variable.withString(categoryId),
+          if (merchantNorm != null) Variable.withString(merchantNorm),
+        ],
+      );
+      final sum = rows.single.read<int>('s');
+      return (
+        amount: _m(sum < 0 ? 0 : sum, f),
+        count: rows.single.read<int>('n'),
+      );
+    },
+  );
+
   // ------------------------------------------------ 7 month vs 3-cycle avg
 
   /// The current period's net spend so far against the mean of the earlier

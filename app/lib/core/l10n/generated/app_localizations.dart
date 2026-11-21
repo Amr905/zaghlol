@@ -4680,7 +4680,7 @@ abstract class AppLocalizations {
   /// S · C-13 empty (EC-23)
   ///
   /// In ar, this message translates to:
-  /// **'هيشتغل بعد أول دورة كاملة'**
+  /// **'هيشتغل بعد أول شهر كامل'**
   String get insightsChartsEmptyCycle;
 
   /// S · charts 8 and 11 when they have nothing to show
@@ -4764,7 +4764,7 @@ abstract class AppLocalizations {
   /// T · chart 7 (Gold)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي قصاد متوسط تلات دورات'**
+  /// **'الشهر ده قصاد متوسط تلات شهور'**
   String get insightsChartTitleVsAverage;
 
   /// T · chart 8 (Gold)
@@ -4872,7 +4872,7 @@ abstract class AppLocalizations {
   /// C · chart 7
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي'**
+  /// **'الشهر ده'**
   String get insightsLegendThisCycle;
 
   /// C · chart 8
@@ -4962,7 +4962,7 @@ abstract class AppLocalizations {
   /// A
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent}'**
+  /// **'الشهر ده قصاد متوسطك: أكبر زيادة في {category} بـ {percent}'**
   String insightsChartA11yVsAverage(String category, String percent);
 
   /// A
@@ -5032,13 +5032,13 @@ abstract class AppLocalizations {
   /// S · Free only, once under the basic tip, plus common_gold_unlock
   ///
   /// In ar, this message translates to:
-  /// **'عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة.'**
+  /// **'عايز تحليل أعمق؟ جولد بيقارن بالشهر اللي فات ويتوقع آخر الشهر.'**
   String get insightsChartDetailDeepUpsell;
 
   /// M · need:select (cycle/months/accounts/installments/subscriptions/other) · empty explainer
   ///
   /// In ar, this message translates to:
-  /// **'{need, select, cycle{محتاج دورة كاملة علشان أشرحلك الشارت ده} months{محتاج تلات دورات علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}'**
+  /// **'{need, select, cycle{محتاج شهر كامل علشان أشرحلك الشارت ده} months{محتاج تلات شهور علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}'**
   String insightsChartDetailNeedsData(String need);
 
   /// N · bubble hidden, chart stays
@@ -5092,7 +5092,7 @@ abstract class AppLocalizations {
   /// S · state, category = largest category, target
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}'**
+  /// **'{state, select, short{لو قللت {category} بـ {target} الشهر الجاي، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}'**
   String insightsExplainCashFlowTip(
     String state,
     String category,
@@ -5113,7 +5113,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'ثبّت هدف تحوّش {target} كل دورة، يعني {yearly} في السنة.'**
+  /// **'ثبّت هدف تحوّش {target} كل شهر، يعني {yearly} في السنة.'**
   String insightsExplainCashFlowDeepTip(String target, String yearly);
 
   /// E
@@ -5131,7 +5131,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'حط سقف لـ{category} أقل بـ {target} من الدورة دي، وهتوفر الفرق.'**
+  /// **'حط سقف لـ{category} أقل بـ {target} من الشهر ده، وهتوفر الفرق.'**
   String insightsExplainCategoriesTip(String category, String target);
 
   /// E · Gold
@@ -5148,7 +5148,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة.'**
+  /// **'قلّل {category} بـ {target} كل شهر، يعني {yearly} في السنة.'**
   String insightsExplainCategoriesDeepTip(
     String category,
     String target,
@@ -5158,7 +5158,7 @@ abstract class AppLocalizations {
   /// E · state:select(over/other). perDay = BR-BUD-03
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, over{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}'**
+  /// **'{state, select, over{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}'**
   String insightsExplainBurnRateBasic(
     String state,
     String cycleDay,
@@ -5170,13 +5170,13 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف {perDay} في اليوم.}}'**
+  /// **'{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الشهر. تقدر تصرف {perDay} في اليوم.}}'**
   String insightsExplainBurnRateTip(String state, String perDay);
 
   /// E · Gold · trend (up = spending more than last cycle)
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ {delta}.} down{في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.}}'**
+  /// **'{trend, select, up{في نفس اليوم في الشهر اللي فات كنت صارف أقل بـ {delta}.} down{في نفس اليوم في الشهر اللي فات كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الشهر اللي فات تقريباً.}}'**
   String insightsExplainBurnRateDeep(String trend, String delta);
 
   /// S · Gold
@@ -5200,7 +5200,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, wantsHigh{نزّل الرفاهيات {target} الدورة الجاية وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الدورة الجاية.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}'**
+  /// **'{state, select, wantsHigh{نزّل الرفاهيات {target} الشهر الجاي وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الشهر الجاي.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}'**
   String insightsExplainRule503020Tip(String state, String target);
 
   /// E · Gold
@@ -5290,7 +5290,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'لو قللت {merchant} بالربع هتوفر {target} في الدورة، يعني {yearly} في السنة.'**
+  /// **'لو قللت {merchant} بالربع هتوفر {target} في الشهر، يعني {yearly} في السنة.'**
   String insightsExplainMerchantsDeepTip(
     String merchant,
     String target,
@@ -5300,7 +5300,7 @@ abstract class AppLocalizations {
   /// E · state:select(both/rise/drop/other). Needs three earlier cycles (insights_chartDetail_needsData)
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, both{{category} زاد {percent} عن متوسط آخر تلات دورات، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات دورات.} drop{{category2} نزل {percent2} عن متوسط آخر تلات دورات. برافو عليك.} other{صرفك الدورة دي قريب من متوسط آخر تلات دورات.}}'**
+  /// **'{state, select, both{{category} زاد {percent} عن متوسط آخر تلات شهور، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات شهور.} drop{{category2} نزل {percent2} عن متوسط آخر تلات شهور. برافو عليك.} other{صرفك الشهر ده قريب من متوسط آخر تلات شهور.}}'**
   String insightsExplainVsAverageBasic(
     String state,
     String category,
@@ -5329,7 +5329,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'حط حد لـ {category} على قد متوسطك، يعني {target} في الدورة.'**
+  /// **'حط حد لـ {category} على قد متوسطك، يعني {target} في الشهر.'**
   String insightsExplainVsAverageDeepTip(String category, String target);
 
   /// E · item = the next installment to finish
@@ -5412,7 +5412,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'صرفت {amount} من {card} الدورة دي. حط له سقف {target} للدورة الجاية.'**
+  /// **'صرفت {amount} من {card} الشهر ده. حط له سقف {target} للشهر الجاي.'**
   String insightsExplainCardsDeepTip(String amount, String card, String target);
 
   /// E · one currency or unit at a time, no cross-currency sum
@@ -11237,13 +11237,13 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.'**
+  /// **'الرسم ده بيشتغل بشهر المرتب. اختار الشهر ده أو الشهر اللي فات عشان تشوفه.'**
   String get insightsChartsPeriodNeedsCycle;
 
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'تقدّم الميزانية بيعرض الدورة الحالية دايماً.'**
+  /// **'تقدّم الميزانية بيعرض الشهر الحالي دايماً.'**
   String get insightsChartsPeriodBudgetNote;
 
   /// S-20 chart period (T-188)
@@ -11261,13 +11261,13 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي'**
+  /// **'الشهر ده'**
   String get insightsChartsPeriodNowThisCycle;
 
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي فاتت'**
+  /// **'الشهر اللي فات'**
   String get insightsChartsPeriodNowLastCycle;
 
   /// S-20 chart period (T-188)
@@ -11309,7 +11309,7 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي فاتت'**
+  /// **'الشهر اللي فات'**
   String get insightsChartsPeriodPrevCycleNow;
 
   /// S-20 chart period (T-188)
@@ -11327,7 +11327,7 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي قبلها'**
+  /// **'الشهر اللي قبله'**
   String get insightsChartsPeriodPrevCycle;
 
   /// S-20 chart period (T-188)
@@ -11363,7 +11363,7 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}'**
+  /// **'{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}'**
   String insightsChartsCyclesCount(int count, String countText);
 
   /// S-20 chart period (T-188)

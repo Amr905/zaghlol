@@ -14,6 +14,7 @@ import '../../application/chart_period_providers.dart';
 import '../../data/chart_providers.dart';
 import '../../domain/chart_models.dart';
 import '../../domain/chart_period_selection.dart';
+import '../../domain/chart_summary.dart';
 
 export '../../application/chart_period_providers.dart';
 
@@ -83,6 +84,68 @@ final cashFlowTotalProvider =
       final repo = await ref.watch(chartRepositoryProvider.future);
       return repo.cashFlow([resolved.period], _filter(code));
     }, name: 'cashFlowTotalProvider');
+
+/// Income and spend of one whole period (T-189), zero when it has no rows.
+final periodTotalsProvider =
+    FutureProvider.family<PeriodTotals, (String, ChartPeriod)>((ref, key) async {
+      final repo = await ref.watch(chartRepositoryProvider.future);
+      final r = await repo.cashFlow([key.$2], _filter(key.$1));
+      return PeriodTotals.fromCashFlow(r, Currency.of(key.$1));
+    }, name: 'periodTotalsProvider');
+
+/// The summary strip: the chosen period against the previous one of the
+/// same elapsed length (`ResolvedChartPeriod.previous`), in one currency.
+final chartSummaryProvider = FutureProvider.family<ChartSummary, String>((
+  ref,
+  code,
+) async {
+  final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
+  final cur = await ref.watch(
+    periodTotalsProvider((code, resolved.period)).future,
+  );
+  final prev = await ref.watch(
+    periodTotalsProvider((code, resolved.previous)).future,
+  );
+  return ChartSummary.compute(cur, prev);
+}, name: 'chartSummaryProvider');
+
+/// The donut of the previous period (category change chips); null when it
+/// had no spending.
+final previousDonutProvider = FutureProvider.family<CategoryDonut?, String>((
+  ref,
+  code,
+) async {
+  final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
+  final repo = await ref.watch(chartRepositoryProvider.future);
+  final r = await repo.categoryDonut(resolved.previous, _filter(code));
+  return switch (r) {
+    ChartReady<CategoryDonut>(:final data) => data,
+    _ => null,
+  };
+}, name: 'previousDonutProvider');
+
+/// What the drill-down header totals (T-189): one period, one currency,
+/// optionally one category and/or merchant.
+typedef DrillScope = ({
+  String code,
+  ChartPeriod period,
+  String? categoryId,
+  String? merchantNorm,
+});
+
+final drillTotalsProvider =
+    FutureProvider.family<({Money amount, int count}), DrillScope>((
+      ref,
+      s,
+    ) async {
+      final repo = await ref.watch(chartRepositoryProvider.future);
+      return repo.scopedSpend(
+        s.period,
+        _filter(s.code),
+        categoryId: s.categoryId,
+        merchantNorm: s.merchantNorm,
+      );
+    }, name: 'drillTotalsProvider');
 
 final donutChartProvider =
     FutureProvider.family<ChartResult<CategoryDonut>, String>((

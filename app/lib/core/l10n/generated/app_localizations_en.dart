@@ -3035,7 +3035,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insightsChartsEmptyCycle =>
-      'Comes alive after your first full cycle';
+      'Comes alive after your first full month';
 
   @override
   String get insightsChartsEmptyNetWorth =>
@@ -3083,7 +3083,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insightsChartTitleVsAverage =>
-      'This cycle vs your 3-cycle average';
+      'This month vs your 3-month average';
 
   @override
   String get insightsChartTitleInstallments => 'Installments, next 6 months';
@@ -3137,7 +3137,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsLegendAverage => 'Your average';
 
   @override
-  String get insightsLegendThisCycle => 'This cycle';
+  String get insightsLegendThisCycle => 'This month';
 
   @override
   String get insightsLegendInstallments => 'Installments';
@@ -3201,7 +3201,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String insightsChartA11yVsAverage(String category, String percent) {
-    return 'This cycle vs average: biggest rise is $category at $percent';
+    return 'This month vs average: biggest rise is $category at $percent';
   }
 
   @override
@@ -3254,13 +3254,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insightsChartDetailDeepUpsell =>
-      'Want a deeper look? Gold compares with last cycle and projects your cycle\'s end.';
+      'Want a deeper look? Gold compares with last month and projects your month\'s end.';
 
   @override
   String insightsChartDetailNeedsData(String need) {
     String _temp0 = intl.Intl.selectLogic(need, {
-      'cycle': 'I need one full cycle before I can explain this chart',
-      'months': 'I need three cycles to compare you with yourself',
+      'cycle': 'I need one full month before I can explain this chart',
+      'months': 'I need three months to compare you with yourself',
       'accounts': 'Add accounts or assets and I\'ll explain',
       'installments': 'Add an installment or commitment and I\'ll explain',
       'subscriptions': 'No subscriptions yet. I\'ll explain once I spot one',
@@ -3327,7 +3327,7 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'short':
-          'Trimming $category by $target next cycle would help close the gap.',
+          'Trimming $category by $target next month would help close the gap.',
       'other':
           'Move at least $target of this surplus into savings before it gets spent.',
     });
@@ -3351,7 +3351,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String insightsExplainCashFlowDeepTip(String target, String yearly) {
-    return 'Set a goal of saving $target every cycle. That\'s $yearly a year.';
+    return 'Set a goal of saving $target every month. That\'s $yearly a year.';
   }
 
   @override
@@ -3367,7 +3367,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String insightsExplainCategoriesTip(String category, String target) {
-    return 'Cap $category $target below this cycle and keep the difference.';
+    return 'Cap $category $target below this month and keep the difference.';
   }
 
   @override
@@ -3391,7 +3391,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String target,
     String yearly,
   ) {
-    return 'Bring $category down by $target each cycle. That\'s $yearly a year.';
+    return 'Bring $category down by $target each month. That\'s $yearly a year.';
   }
 
   @override
@@ -3404,9 +3404,9 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'over':
-          'You\'re on day $cycleDay of the cycle and have spent $spent of $budget, above the ideal pace. What\'s left covers $perDay a day.',
+          'You\'re on day $cycleDay of the month and have spent $spent of $budget, above the ideal pace. What\'s left covers $perDay a day.',
       'other':
-          'You\'re on day $cycleDay of the cycle and have spent $spent of $budget, under the ideal pace. You can spend $perDay a day.',
+          'You\'re on day $cycleDay of the month and have spent $spent of $budget, under the ideal pace. You can spend $perDay a day.',
     });
     return '$_temp0';
   }
@@ -3417,7 +3417,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'over':
           'Bring your daily spending down to $perDay until payday so the budget lasts.',
       'other':
-          'Keep this pace and the gap becomes surplus at the end of the cycle. You can spend $perDay a day.',
+          'Keep this pace and the gap becomes surplus at the end of the month. You can spend $perDay a day.',
     });
     return '$_temp0';
   }
@@ -3425,9 +3425,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String insightsExplainBurnRateDeep(String trend, String delta) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'At this point last cycle you had spent $delta less.',
-      'down': 'At this point last cycle you had spent $delta more.',
-      'other': 'Your spending is about the same as this point last cycle.',
+      'up': 'At this point last month you had spent $delta less.',
+      'down': 'At this point last month you had spent $delta more.',
+      'other': 'Your spending is about the same as this point last month.',
     });
     return '$_temp0';
   }
@@ -3459,8 +3459,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String insightsExplainRule503020Tip(String state, String target) {
     String _temp0 = intl.Intl.selectLogic(state, {
-      'wantsHigh': 'Trim wants by $target next cycle and move it to savings.',
-      'savingsLow': 'Try to add $target to your savings next cycle.',
+      'wantsHigh': 'Trim wants by $target next month and move it to savings.',
+      'savingsLow': 'Try to add $target to your savings next month.',
       'other': 'Keep this up, and add $target more if you can.',
     });
     return '$_temp0';
@@ -3562,7 +3562,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String target,
     String yearly,
   ) {
-    return 'Cut $merchant by a quarter and you\'ll save $target a cycle, $yearly a year.';
+    return 'Cut $merchant by a quarter and you\'ll save $target a month, $yearly a year.';
   }
 
   @override
@@ -3575,11 +3575,11 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'both':
-          '$category is up $percent on your 3-cycle average, but $category2 is down $percent2. Nice work on that.',
-      'rise': '$category is up $percent on your 3-cycle average.',
+          '$category is up $percent on your 3-month average, but $category2 is down $percent2. Nice work on that.',
+      'rise': '$category is up $percent on your 3-month average.',
       'drop':
-          '$category2 is down $percent2 on your 3-cycle average. Nice work.',
-      'other': 'This cycle is close to your 3-cycle average.',
+          '$category2 is down $percent2 on your 3-month average. Nice work.',
+      'other': 'This month is close to your 3-month average.',
     });
     return '$_temp0';
   }
@@ -3612,7 +3612,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String insightsExplainVsAverageDeepTip(String category, String target) {
-    return 'Set $category\'s limit at your average, that\'s $target a cycle.';
+    return 'Set $category\'s limit at your average, that\'s $target a month.';
   }
 
   @override
@@ -3707,7 +3707,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String card,
     String target,
   ) {
-    return 'You spent $amount on $card this cycle. Set a $target limit for the next one.';
+    return 'You spent $amount on $card this month. Set a $target limit for the next one.';
   }
 
   @override
@@ -7624,11 +7624,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insightsChartsPeriodNeedsCycle =>
-      'This chart works on a payday cycle. Pick this cycle or last cycle to see it.';
+      'This chart works on a payday month. Pick this month or last month to see it.';
 
   @override
   String get insightsChartsPeriodBudgetNote =>
-      'Budget progress always shows the current cycle.';
+      'Budget progress always shows the current month.';
 
   @override
   String insightsChartsDaysCount(int count, String countText) {
@@ -7653,10 +7653,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsPeriodNowThisCycle => 'this cycle';
+  String get insightsChartsPeriodNowThisCycle => 'this month';
 
   @override
-  String get insightsChartsPeriodNowLastCycle => 'the previous cycle';
+  String get insightsChartsPeriodNowLastCycle => 'the previous month';
 
   @override
   String get insightsChartsPeriodNowThisMonth => 'this month';
@@ -7687,7 +7687,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsPeriodPrevCycleNow => 'last cycle';
+  String get insightsChartsPeriodPrevCycleNow => 'last month';
 
   @override
   String get insightsChartsPeriodPrevMonthNow => 'last month';
@@ -7696,7 +7696,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsChartsPeriodPrevYearNow => 'last year';
 
   @override
-  String get insightsChartsPeriodPrevCycle => 'the cycle before';
+  String get insightsChartsPeriodPrevCycle => 'the month before';
 
   @override
   String get insightsChartsPeriodPrevMonth => 'the month before';
@@ -7728,8 +7728,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$countText cycles',
-      one: '$countText cycle',
+      other: '$countText months',
+      one: '$countText month',
     );
     return '$_temp0';
   }
