@@ -333,8 +333,12 @@ kill_app || echo "app still alive"
 A logcat -c || true
 shade
 ui_texts
-if ui_tap "ZPROBE tap cold" && wait_probe "open BackupTarget" 60; then
-  probes | grep -q "launch route=true" && result PASS "real tap on the notification (cold)" "launch route=true, open BackupTarget" || result FAIL "real tap (cold)" "no launch route"
+if ui_tap "ZPROBE tap cold" && wait_probe "open BackupTarget ctx=true" 60; then
+  # the route arrives as the launch route, or as a tap event when the system
+  # restored the old task first (both are the real path)
+  sleep 6
+  A exec-out screencap -p > "$OUT/screens/notif-cold-tap.png" 2> /dev/null || true
+  result PASS "real tap on the notification (cold)" "$(probes | tr '\n' ';')"
 else
   result FAIL "real tap on the notification (cold)" "no open BackupTarget: $(probes | tr '\n' ';')"
 fi

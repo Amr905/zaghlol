@@ -108,7 +108,9 @@ class _NotificationTapLifecycleState
   void _open(String route) {
     final target = notificationTargetFor(route);
     if (target == null) return;
-    _probe('open ${target.runtimeType}');
+    _probe(
+      'open ${target.runtimeType} ctx=${rootNavigatorKey.currentContext != null}',
+    );
     openNotificationTarget(
       target,
       router: ref.read(appRouterProvider).go,
@@ -152,7 +154,10 @@ class _NotificationTapLifecycleState
       name = null;
     }
     final context = rootNavigatorKey.currentContext;
-    if (context == null || !context.mounted) return false;
+    if (context == null || !context.mounted) {
+      _probe('confirm: no context');
+      return false;
+    }
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.read(digitsModeProvider(lang));
     final due = CivilDate.tryParse(dueDate);
