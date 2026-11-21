@@ -216,6 +216,11 @@ forged() {
   [ -z "$bad" ] || ok=0
   if [ "$mode" = cold ]; then echo "$p" | grep -q "launch route=false" || { ok=0; detail="$detail, app did not reach its launch check"; }; fi
   if [ "$cancel" != - ] && [ "$(present "$cancel")" -lt 1 ]; then ok=0; detail="$detail, notification $cancel was dismissed"; fi
+  if [ "$ok" != 1 ] && [ "$mode" = cold ]; then
+    echo "    am: ${out:0:300}"
+    echo "    pid: $(A shell pidof "$PKG" | tr -d '\r')"
+    A logcat -d 2> /dev/null | tr -d '\r' | grep -E "flutter|AndroidRuntime|FATAL|libc|DEBUG|$PKG" | grep -v "Warning" | cut -c1-220 | tail -14 | sed 's/^/    lc: /'
+  fi
   [ "$ok" = 1 ] && result PASS "$mode forged: $label" "$detail" || result FAIL "$mode forged: $label" "$detail, saw: $bad"
 }
 
@@ -277,8 +282,13 @@ else
 fi
 grep -E "NOTIF_DEVICE|NOTIF_PROBE" "$LOG" | cut -c1-200
 MARK=
+# The tool first (SIGKILL: it must not run its cleanup, which force-stops the
+# app and cancels its notifications), then the app's process.
+pkill -9 -f flutter_tools 2> /dev/null; pkill -9 -f "flutter test" 2> /dev/null
+kill -9 "$tpid" 2> /dev/null; wait "$tpid" 2> /dev/null
+sleep 1
+echo "notifications posted before the kill: 9102=$(present 9102) 9104=$(present 9104)"
 kill_app || echo "app still alive"
-kill "$tpid" 2> /dev/null; wait "$tpid" 2> /dev/null
 echo "notifications posted after the test ended: 9102=$(present 9102) 9104=$(present 9104)"
 
 # ---- cold forged intents (the process is dead before each)
