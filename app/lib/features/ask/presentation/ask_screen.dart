@@ -162,6 +162,7 @@ class _Disc extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: c.surface,
+        border: c.flatBorder,
         boxShadow: [
           BoxShadow(
             color: c.shadow,

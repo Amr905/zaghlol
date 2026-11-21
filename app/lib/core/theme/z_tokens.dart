@@ -163,6 +163,11 @@ class ZColors extends ThemeExtension<ZColors> {
   /// KPI strip inside the hero (True Black); [surfaceAlt] in light.
   final Color surfaceSunk;
 
+  /// True Black (D-79): flat cards get an outline instead of a shadow; null in
+  /// light.
+  Border? get flatBorder =>
+      brightness == Brightness.dark ? Border.all(color: outline) : null;
+
   /// Text on [zaghlolBg] (Captain Zaghlol's banners and bubbles).
   final Color zaghlolText;
 

@@ -585,6 +585,7 @@ class _FilterPill extends StatelessWidget {
             decoration: BoxDecoration(
               color: selected ? c.primaryContainer : c.surface,
               borderRadius: shape,
+              border: selected ? null : c.flatBorder,
               boxShadow: selected
                   ? null
                   : [
