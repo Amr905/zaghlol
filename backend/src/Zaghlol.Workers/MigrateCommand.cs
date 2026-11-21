@@ -26,10 +26,22 @@ internal static class MigrateCommand
             return 2;
         }
 
+        var settings = DatabaseSettings.From(builder.Configuration);
+        var problems = settings.Validate([(DatabaseRole.Migrator, connectionString)], builder.Environment.IsProduction());
+        if (problems.Count > 0)
+        {
+            foreach (var problem in problems)
+            {
+                logger.Error("Database settings: {Problem}", problem);
+            }
+
+            return 2;
+        }
+
         using var cancellation = new CancellationTokenSource(TimeSpan.FromMinutes(10));
         try
         {
-            await ZaghlolMigrator.MigrateAsync(connectionString, cancellation.Token);
+            await ZaghlolMigrator.MigrateAsync(connectionString, cancellation.Token, settings);
             logger.Information("Database migrations applied");
             return 0;
         }

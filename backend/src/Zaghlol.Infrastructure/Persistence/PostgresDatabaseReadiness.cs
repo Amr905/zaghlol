@@ -26,8 +26,16 @@ internal sealed partial class PostgresDatabaseReadiness(
     private Snapshot? last;
 
     /// <summary>The probe's data source: the App connection string with a pool of one and its own application name.</summary>
-    public static NpgsqlDataSource CreateProbeSource(string appConnectionString) =>
-        NpgsqlDataSource.Create(ProbeConnectionString(appConnectionString));
+    public static NpgsqlDataSource CreateProbeSource(string appConnectionString, DatabaseSettings? settings = null)
+    {
+        var builder = new NpgsqlDataSourceBuilder(ProbeConnectionString(appConnectionString));
+        if (settings?.LoadCaCertificates() is { } roots)
+        {
+            builder.UseRootCertificates(roots);
+        }
+
+        return builder.Build();
+    }
 
     /// <summary>
     /// The App connection string with the pool forced to one connection, whatever the App string says. The connect
