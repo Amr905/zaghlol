@@ -39,7 +39,18 @@ result() { # PASS|FAIL name detail
   [ "$1" = PASS ] || fails=$((fails + 1))
 }
 
-probes() { A logcat -d -s flutter:V 2> /dev/null | tr -d '\r' | sed -n 's/.*\(NOTIF_PROBE .*\)$/\1/p'; }
+# The app's probe lines: while `flutter test` drives the app (warm part) they go
+# to the test's stdout from line $MARK on; for the standalone cold launches they
+# are in logcat.
+MARK=
+probes() {
+  if [ -n "$MARK" ]; then
+    tail -n +"$((MARK + 1))" "$LOG" | tr -d '\r' | sed -n 's/.*\(NOTIF_PROBE .*\)$/\1/p'
+  else
+    A logcat -d 2> /dev/null | tr -d '\r' | sed -n 's/.*\(NOTIF_PROBE .*\)$/\1/p'
+  fi
+}
+mark_log() { MARK=$(wc -l < "$LOG"); }
 sig() { A shell "run-as $PKG sh -c 'mkdir -p app_flutter/sig && touch app_flutter/sig/$1'" > /dev/null; }
 present() { A shell dumpsys notification --noredact 2> /dev/null | tr -d '\r' | grep -c "|$PKG|$1|"; }
 have_log() { grep -q "$1" "$LOG" 2> /dev/null; }
@@ -188,8 +199,13 @@ echo >> "$REPORT"; echo "## Warm (app in front)" >> "$REPORT"
 forged() {
   local label=$1 mode=$2 cancel=$3
   shift 3
-  [ "$mode" = cold ] && { kill_app || echo "app still alive"; }
-  A logcat -c || true
+  if [ "$mode" = cold ]; then
+    MARK=
+    kill_app || echo "app still alive"
+    A logcat -c || true
+  else
+    mark_log
+  fi
   local out
   out=$(A shell am start -W -n "$PKG/app.zaghlol.MainActivity" "$@" 2>&1 | tr -d '\r' | tr '\n' ' ')
   if [ "$mode" = cold ]; then sleep 20; else sleep 5; fi
@@ -211,7 +227,7 @@ forged "token without the action" warm 9103 --es $X_TOKEN $FAKE --es $X_ROUTE /s
 forged "action, wrong token, mark-paid route, cancel id" warm 9103 -a $ACT --es $X_TOKEN $FAKE --es $X_ROUTE "/recurring/$BILL_W/paid/$DUE" --ei $X_CANCEL 9103
 forged "action, no token, mark-paid route, cancel id" warm 9103 -a $ACT --es $X_ROUTE "/recurring/$BILL_W/paid/$DUE" --ei $X_CANCEL 9103
 # the trampoline is not exported: the shell may not start it
-A logcat -c || true
+mark_log
 out=$(A shell am start -n "$PKG/app.zaghlol.platform.notifications.NotificationTapActivity" --es $X_ROUTE /settings/backup 2>&1 | tr -d '\r' | tr '\n' ' ')
 sleep 3
 if echo "$out" | grep -qiE "not exported|Permission Denial" && ! probes | grep -qE "open|confirm|paid"; then
@@ -224,7 +240,7 @@ wait_log "NOTIF_DEVICE FORGED_WARM_CHECKED" 60 && result PASS "warm: nothing pai
 
 # ---- warm real taps
 echo >> "$REPORT"; echo "## Warm real taps" >> "$REPORT"
-A logcat -c || true
+mark_log
 shade
 ui_texts
 if ui_tap "ZPROBE tap warm" && wait_probe "open BackupTarget" 20; then
@@ -236,7 +252,7 @@ fi
 diag "after warm tap"
 sig real_tap_warm_done
 sleep 2
-A logcat -c || true
+mark_log
 shade
 ui_texts
 if ui_tap "ZPROBE PAY WARM"; then
@@ -249,15 +265,21 @@ else
 fi
 [ "$(present 9103)" -eq 0 ] && result PASS "action notification was cancelled" "cancel id" || result FAIL "action notification was cancelled" "still posted"
 
-# ---- release the test (it must end before its process is killed)
-wait_log "NOTIF_DEVICE READY_COLD" 60 || result FAIL "cold notifications posted" "never"
-sig cold_done
-wait "$tpid"
-r=$?
-echo "test exit: $r"
-grep -E "NOTIF_DEVICE|Some tests|All tests" "$LOG" | cut -c1-200
-[ "$r" -eq 0 ] && result PASS "integration test (in-process checks)" "exit 0" || { result FAIL "integration test (in-process checks)" "exit $r"; tail -30 "$LOG" | cut -c1-200; }
-echo "notifications posted: 9102=$(present 9102) 9104=$(present 9104)"
+# ---- end of the in-process part. The test is left waiting: the process is killed
+# below (killing it keeps the notifications; a finished `flutter test` force-stops
+# the app and cancels them).
+wait_log "NOTIF_DEVICE READY_COLD" 60 && result PASS "cold notifications posted" "READY_COLD" || result FAIL "cold notifications posted" "never"
+sleep 2
+if grep -q "NOTIF_DEVICE PROBLEM" "$LOG"; then
+  result FAIL "in-process checks (database, dialog)" "$(grep 'NOTIF_DEVICE PROBLEM' "$LOG" | cut -c1-160 | tr '\n' ';')"
+else
+  result PASS "in-process checks (database, dialog)" "no PROBLEM line"
+fi
+grep -E "NOTIF_DEVICE|NOTIF_PROBE" "$LOG" | cut -c1-200
+MARK=
+kill_app || echo "app still alive"
+kill "$tpid" 2> /dev/null; wait "$tpid" 2> /dev/null
+echo "notifications posted after the test ended: 9102=$(present 9102) 9104=$(present 9104)"
 
 # ---- cold forged intents (the process is dead before each)
 echo >> "$REPORT"; echo "## Cold (process dead)" >> "$REPORT"
@@ -270,6 +292,7 @@ forged "plain launch (no extras)" cold 9104
 
 # ---- cold real taps
 echo >> "$REPORT"; echo "## Cold real taps" >> "$REPORT"
+MARK=
 kill_app || echo "app still alive"
 A logcat -c || true
 shade
