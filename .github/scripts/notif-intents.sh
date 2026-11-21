@@ -97,6 +97,29 @@ PY
   return 1
 }
 shade() { A shell cmd statusbar expand-notifications; sleep 2; }
+# Diagnostics (synthetic data only): what is on screen, what is posted, what started.
+ui_texts() {
+  A shell uiautomator dump /sdcard/ui2.xml > /dev/null 2>&1
+  A pull /sdcard/ui2.xml "$OUT/ui2.xml" > /dev/null 2>&1
+  python3 -I - "$OUT/ui2.xml" << 'PY' | head -40 | sed 's/^/    ui: /'
+import sys
+import xml.etree.ElementTree as ET
+try:
+    root = ET.parse(sys.argv[1]).getroot()
+except Exception as e:
+    print("dump failed", type(e).__name__)
+    sys.exit(0)
+for n in root.iter("node"):
+    t = (n.get("text") or n.get("content-desc") or "").strip()
+    if t:
+        print(t[:60])
+PY
+}
+diag() {
+  echo "  diag $1: posted ids: $(for i in 9101 9102 9103 9104; do echo -n "$i=$(present $i) "; done)"
+  echo "  diag $1: probes: $(probes | tr '\n' ';')"
+  A logcat -d 2> /dev/null | tr -d '\r' | grep -E "ActivityTaskManager.*(START|Displayed)|NotificationTap|FATAL EXCEPTION|Force stopping|Killing .*$PKG|Process $PKG.*(died|has died)" | grep -i "$PKG" | cut -c1-200 | tail -12 | sed "s/^/    log: /"
+}
 
 # ---- install
 A uninstall "$PKG" > /dev/null 2>&1 || true
@@ -163,16 +186,19 @@ wait_log "NOTIF_DEVICE FORGED_WARM_CHECKED" 60 && result PASS "warm: nothing pai
 echo >> "$REPORT"; echo "## Warm real taps" >> "$REPORT"
 A logcat -c || true
 shade
+ui_texts
 if ui_tap "ZPROBE tap warm" && wait_probe "open BackupTarget" 20; then
   result PASS "real tap on the notification (warm)" "open BackupTarget"
 else
   result FAIL "real tap on the notification (warm)" "no open BackupTarget"
 fi
 [ "$(present 9101)" -eq 0 ] && result PASS "tapped notification was cancelled" "auto-cancel" || result FAIL "tapped notification was cancelled" "still posted"
+diag "after warm tap"
 sig real_tap_warm_done
 sleep 2
 A logcat -c || true
 shade
+ui_texts
 if ui_tap "ZPROBE PAY WARM"; then
   sig real_action_warm_tapped
   wait_log "NOTIF_DEVICE PAID_WARM=true" 60 && result PASS "real Mark-as-paid action then confirm (warm)" "dialog, confirm, bill paid in the database" || result FAIL "real Mark-as-paid action then confirm (warm)" "see test log"
@@ -207,6 +233,7 @@ echo >> "$REPORT"; echo "## Cold real taps" >> "$REPORT"
 kill_app || echo "app still alive"
 A logcat -c || true
 shade
+ui_texts
 if ui_tap "ZPROBE tap cold" && wait_probe "open BackupTarget" 60; then
   probes | grep -q "launch route=true" && result PASS "real tap on the notification (cold)" "launch route=true, open BackupTarget" || result FAIL "real tap (cold)" "no launch route"
 else
@@ -228,6 +255,7 @@ else
   A exec-out screencap -p > "$OUT/screens/notif-cold-action.png" 2> /dev/null || true
   result FAIL "real Mark-as-paid action (cold)" "no confirm dialog: $(probes | tr '\n' ';')"
 fi
+diag final
 A exec-out screencap -p > "$OUT/screens/zz-final-notif.png" 2> /dev/null || true
 A logcat -d -b crash 2> /dev/null | tail -20
 echo >> "$REPORT"; echo "failed checks: $fails" | tee -a "$REPORT"
