@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=1da75bc951568f30c533a0b1046a3cd040ed5586
+SKIP sha=1da75bc951568f30c533a0b1046a3cd040ed5586 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/FU51-parsing-test 1da75bc951568f30c533a0b1046a3cd040ed5586 2026-11-21T02:04:39.4296759+02:00
+
+
+
