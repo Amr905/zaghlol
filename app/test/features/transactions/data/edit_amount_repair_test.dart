@@ -113,4 +113,30 @@ void main() {
       expect(seen, hasLength(1), reason: 'released once');
     },
   );
+
+  test('FU-274: a rolled-back edit discards its held repair event', () async {
+    final repairs = AmountRepairEvents(reimb);
+    final edited = DriftTransactionRepository(
+      TransactionsDao(db),
+      onAmountChange: (id, minor) async {
+        await repairs.onAmountChange(id, minor);
+        throw StateError('boom');
+      },
+      onRollback: repairs.discard,
+    );
+    final bus = DomainEventBus();
+    final seen = <DomainEvent>[];
+    bus.events.listen(seen.add);
+    addTearDown(bus.dispose);
+    await expectLater(
+      edited.editWithOutcome(
+        'bill',
+        TransactionEdit(amount: Money(Currency.of('EGP'), 30000)),
+      ),
+      throwsStateError,
+    );
+    repairs.flush(bus);
+    await Future<void>.delayed(Duration.zero);
+    expect(seen, isEmpty);
+  });
 }

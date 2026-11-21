@@ -550,7 +550,11 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
                     ),
                     child: Text(
                       l.commonActionFix,
-                      style: ZType.titleSmall.copyWith(color: c.warningText),
+                      style: ZType.titleSmall.copyWith(
+                        color: c.brightness == Brightness.dark
+                            ? c.zaghlolText
+                            : c.warningText,
+                      ),
                     ),
                   ),
                 ),

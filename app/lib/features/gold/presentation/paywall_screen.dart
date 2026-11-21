@@ -91,13 +91,24 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   Future<void> _buy() async {
     final plan = _selected;
     if (plan == null || _busy) return;
+    _lastAction = _Notice.purchasing;
     _set(_Notice.purchasing);
     final started = await ref.read(goldActionsProvider).buy(plan);
     if (!started) _set(_Notice.storeError);
   }
 
+  /// Retry repeats what failed: the purchase when a plan is chosen, else the
+  /// restore (never a restore for a failed purchase).
+  Future<void> _retry() async {
+    if (_lastAction == _Notice.purchasing) return _buy();
+    return _restore();
+  }
+
+  _Notice? _lastAction;
+
   Future<void> _restore() async {
     if (_busy) return;
+    _lastAction = _Notice.restoring;
     _set(_Notice.restoring);
     final RestoreOutcome o;
     try {
@@ -229,7 +240,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             if (_message != null) ...[
               GoldMessageCard(
                 message: _message!,
-                onRetry: _restore,
+                onRetry: _retry,
                 onRestore: _restore,
               ),
               const SizedBox(height: ZSpacing.md),
@@ -481,7 +492,9 @@ class _PlanCard extends StatelessWidget {
                               child: Text(
                                 t.goldPaywallBestValue,
                                 style: ZType.caption.copyWith(
-                                  color: c.warningText,
+                                  color: c.brightness == Brightness.dark
+                                      ? c.zaghlolText
+                                      : c.warningText,
                                 ),
                               ),
                             ),
