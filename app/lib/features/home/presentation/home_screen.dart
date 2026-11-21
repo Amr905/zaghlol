@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -84,7 +83,6 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final model = ref.watch(homeModelProvider);
     final c = ZColors.of(context);
-    final ios = Theme.of(context).platform == TargetPlatform.iOS;
     final l = AppLocalizations.of(context);
     final a = _resolve(context);
     final settings = HomeSettingsButton(onPressed: a.openSettings);
@@ -97,42 +95,25 @@ class HomeScreen extends ConsumerWidget {
               minWidth: ZSpacing.minTarget,
               minHeight: ZSpacing.minTarget,
             ),
-            icon: Icon(
-              ios ? CupertinoIcons.share : Icons.ios_share,
-              color: c.text,
-            ),
+            icon: Icon(Icons.ios_share, color: c.text),
             onPressed: a.openShare,
           );
-    // iOS: filter pill at the start, settings circle at the end, greeting
-    // below. Android: greeting at the start, funnel and gear at the end.
-    final Widget header = ios
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Expanded(child: _FilterRow()),
-                  ?share,
-                  settings,
-                ],
-              ),
-              const SizedBox(height: ZSpacing.sm),
-              const HomeGreeting(),
-            ],
-          )
-        : Row(
-            children: [
-              const Expanded(
-                child: HomeGreeting(
-                  key: ValueKey('home-title-android'),
-                  fontSize: 26,
-                ),
-              ),
-              const HomeCardFilterChip(iconOnly: true),
-              ?share,
-              settings,
-            ],
-          );
+    // One layout on both platforms (D-77): filter pill at the start,
+    // settings circle at the end, greeting below.
+    final Widget header = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Expanded(child: _FilterRow()),
+            ?share,
+            settings,
+          ],
+        ),
+        const SizedBox(height: ZSpacing.sm),
+        const HomeGreeting(),
+      ],
+    );
     return ColoredBox(
       color: c.bg,
       child: SafeArea(

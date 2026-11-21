@@ -467,12 +467,10 @@ class HomeFeedRow extends StatelessWidget {
 }
 
 /// C-08 card filter: a white pill "funnel / label / chevron" on iOS, a bare
-/// funnel icon button on Android (mockups 03 / 20). Opens the multi-select
+/// (one layout on both platforms). Opens the multi-select
 /// sheet; an active filter shows the mint fill and a clear button.
 class HomeCardFilterChip extends ConsumerWidget {
-  const HomeCardFilterChip({super.key, this.iconOnly = false});
-
-  final bool iconOnly;
+  const HomeCardFilterChip({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -501,24 +499,6 @@ class HomeCardFilterChip extends ConsumerWidget {
       builder: (_) => const HomeCardFilterSheet(),
     );
     final active = filter.isNotEmpty;
-    if (iconOnly) {
-      return Semantics(
-        button: true,
-        label: semantics,
-        excludeSemantics: true,
-        child: IconButton(
-          constraints: const BoxConstraints(
-            minWidth: ZSpacing.minTarget,
-            minHeight: ZSpacing.minTarget,
-          ),
-          icon: Icon(
-            Icons.filter_alt_outlined,
-            color: active ? c.primary : c.text,
-          ),
-          onPressed: open,
-        ),
-      );
-    }
     final radius = BorderRadius.circular(ZRadius.pill);
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
@@ -533,6 +513,7 @@ class HomeCardFilterChip extends ConsumerWidget {
             decoration: BoxDecoration(
               color: active ? c.primaryContainer : c.surface,
               borderRadius: radius,
+              border: c.flatBorder,
               boxShadow: [
                 BoxShadow(
                   color: c.shadow,
@@ -600,18 +581,16 @@ class HomeCardFilterChip extends ConsumerWidget {
   }
 }
 
-/// Settings button: a white circle on iOS, a plain icon on Android.
+/// Settings button: a surface circle (outlined in True Black dark).
 class HomeSettingsButton extends StatelessWidget {
-  const HomeSettingsButton({super.key, required this.onPressed, this.circle});
+  const HomeSettingsButton({super.key, required this.onPressed});
 
   final VoidCallback? onPressed;
-  final bool? circle;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
     final l = AppLocalizations.of(context);
-    final round = circle ?? Theme.of(context).platform == TargetPlatform.iOS;
     final button = IconButton(
       tooltip: l.commonNavSettingsA11y,
       constraints: const BoxConstraints(
@@ -621,11 +600,11 @@ class HomeSettingsButton extends StatelessWidget {
       icon: Icon(Icons.settings_outlined, color: c.text),
       onPressed: onPressed,
     );
-    if (!round) return button;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: c.surface,
         shape: BoxShape.circle,
+        border: c.flatBorder,
         boxShadow: [
           BoxShadow(
             color: c.shadow,

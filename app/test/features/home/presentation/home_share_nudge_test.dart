@@ -1,6 +1,5 @@
 // T-117 share entry and T-066 nudge on Home.
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
@@ -34,7 +33,9 @@ void main() {
         expect(t.takeException(), isNull);
       });
 
-      testWidgets('iOS uses the Cupertino share glyph', (t) async {
+      testWidgets('share glyph is the same on iOS and Android (D-77)', (
+        t,
+      ) async {
         await pumpHome(
           t,
           locale: locale,
@@ -42,7 +43,7 @@ void main() {
           value: model(),
           actions: HomeActions(openShare: () {}),
         );
-        expect(find.byIcon(CupertinoIcons.share), findsOneWidget);
+        expect(find.byIcon(Icons.ios_share), findsOneWidget);
       });
 
       testWidgets('no share callback: no share icon', (t) async {
