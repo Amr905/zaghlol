@@ -344,8 +344,22 @@ else
 fi
 kill_app || echo "app still alive"
 A logcat -c || true
-shade
-if ui_tap "ZPROBE PAY COLD" && wait_probe "confirm shown" 60; then
+# The action button is sometimes missed on the first try (shade state): retry,
+# but only while the app has not started (no probe at all).
+pay_cold_tap() {
+  for _ in 1 2 3; do
+    shade
+    if ui_tap "ZPROBE PAY COLD"; then
+      wait_probe "confirm shown" 30 && return 0
+      [ -z "$(probes)" ] || return 1
+    fi
+    ui_texts
+    A shell input keyevent 3; sleep 2
+    A shell cmd statusbar collapse; sleep 1
+  done
+  return 1
+}
+if pay_cold_tap; then
   if probes | grep -q "paid ok"; then
     result FAIL "real Mark-as-paid action (cold)" "paid before the user confirmed"
   elif ui_tap "Mark paid" && wait_probe "paid ok=true" 30; then
