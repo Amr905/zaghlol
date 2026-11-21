@@ -17,6 +17,7 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/ui/shell/app_shell.dart' show ZBottomBar;
 
 /// One problem the explorer found.
 final class ExplorerIssue {
@@ -487,15 +488,15 @@ class Explorer {
 
   // ------------------------------------------------------------ tree
 
-  /// The selected tab of the shell's NavigationBar, or null without one.
+  /// The selected tab of the shell bar, or null without one.
   int? _tabIndex() {
     final root = WidgetsBinding.instance.rootElement;
     if (root == null) return null;
     int? idx;
     _walk(root, (e) {
       final w = e.widget;
-      if (w is NavigationBar) {
-        idx = w.selectedIndex;
+      if (w is ZBottomBar) {
+        idx = w.selected;
         return false;
       }
       return idx == null;
@@ -661,7 +662,7 @@ class Explorer {
       }
       // Shell navigation, the Add button, back/close buttons: driven by the
       // caller or not an action of this screen.
-      if (e.findAncestorWidgetOfExactType<NavigationBar>() != null ||
+      if (e.findAncestorWidgetOfExactType<ZBottomBar>() != null ||
           e.findAncestorWidgetOfExactType<BackButton>() != null ||
           e.findAncestorWidgetOfExactType<CloseButton>() != null ||
           e.findAncestorWidgetOfExactType<ModalBarrier>() != null ||

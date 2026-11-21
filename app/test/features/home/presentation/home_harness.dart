@@ -175,7 +175,6 @@ Widget homeApp({
                   selected: 0,
                   onSelect: (_) {},
                   onAdd: () {},
-                  glass: platform == TargetPlatform.iOS,
                   labels: [
                     l.commonNavHome,
                     l.commonNavInsights,

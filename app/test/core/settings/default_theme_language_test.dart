@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
+import 'package:zaghlol/core/ui/shell/app_shell.dart' show ZBottomBar;
 import 'package:zaghlol/core/theme/theme_mode_provider.dart';
 import 'package:zaghlol/main.dart';
 
@@ -80,7 +81,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    final ctx = tester.element(find.byType(NavigationBar));
+    final ctx = tester.element(find.byType(ZBottomBar));
     expect(Theme.of(ctx).brightness, Brightness.light);
     expect(Localizations.localeOf(ctx).languageCode, 'ar');
     expect(Directionality.of(ctx), TextDirection.rtl);

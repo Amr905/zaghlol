@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'z_tokens.dart';
 
-/// Builds the Material themes from the Mint Fresh / Jade Night tokens.
+/// Builds the Material themes from the Mint Fresh / True Black tokens.
 abstract final class ZaghlolTheme {
   static ThemeData get light => _build(ZColors.light);
   static ThemeData get dark => _build(ZColors.dark);

@@ -9,6 +9,18 @@
   "commonNavMoney": "فلوسي",
   "commonNavZaghlol": "زغلول",
   "commonNavAddA11y": "سجّل بسرعة",
+  "commonNavAddLabel": "سجّل",
+  "commonNavBadgeCount": "{count}",
+  "@commonNavBadgeCount": {
+    "description": "Badge count on a bottom-bar tab (1 to 9).",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "commonNavBadgeMax": "٩+",
+  "@commonNavBadgeMax": {
+    "description": "Badge text when the count is above 9."
+  },
   "appLockTitle": "زغلول مقفول",
   "@appLockTitle": {
     "description": "Title of the app lock screen (S-05)."
