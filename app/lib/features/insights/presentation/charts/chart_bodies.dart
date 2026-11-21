@@ -194,7 +194,7 @@ class CashFlowBody extends ConsumerWidget {
                       barsSpace: dense ? 1 : 3,
                       barRods: [
                         for (final (value, color) in [
-                          (shown[i].income.minor, ZChartColors.income),
+                          (shown[i].income.minor, ZChartColors.incomeOf(c)),
                           (shown[i].spend.minor, ZChartColors.spend),
                           if (!dense)
                             (
@@ -221,7 +221,7 @@ class CashFlowBody extends ConsumerWidget {
           runSpacing: ZSpacing.xs,
           children: [
             LegendItem(
-              color: ZChartColors.income,
+              color: ZChartColors.incomeOf(c),
               label: l.insightsLegendIncome,
             ),
             LegendItem(color: ZChartColors.spend, label: l.insightsLegendSpent),
@@ -310,7 +310,7 @@ class DonutBody extends ConsumerWidget {
     final c = ZColors.of(context);
     final l = AppLocalizations.of(context);
     final slices = _donutSlices(l, donut, nameOf);
-    const palette = ZChartColors.ramp;
+    final palette = ZChartColors.rampOf(c);
     // A ring is not mirrored: the largest slice starts at 12 o'clock and runs
     // clockwise in both directions (mockup 07/08).
     final shown = slices;
@@ -607,7 +607,7 @@ class _Bar extends StatelessWidget {
         widthFactor: fraction.clamp(0.02, 1.0),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: c.primary,
+            color: c.brightness == Brightness.dark ? c.brandMint : c.primary,
             borderRadius: BorderRadius.circular(ZRadius.pill),
           ),
         ),

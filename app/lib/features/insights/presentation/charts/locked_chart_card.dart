@@ -62,7 +62,9 @@ class LockedChartCard extends ConsumerWidget {
                                     heightFactor: h,
                                     child: DecoratedBox(
                                       decoration: BoxDecoration(
-                                        color: ZChartColors.income,
+                                        color: ZChartColors.incomeOf(
+                                          ZColors.of(context),
+                                        ),
                                         borderRadius: BorderRadius.circular(
                                           ZRadius.sm,
                                         ),

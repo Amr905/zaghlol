@@ -47,9 +47,21 @@ abstract final class ZaghlolTheme {
           labelSmall: ZType.caption,
         )
         .apply(bodyColor: c.text, displayColor: c.text);
+    final fill = c.brightness == Brightness.dark ? c.brandMint : c.primary;
     return base.copyWith(
       textTheme: textTheme,
       dividerColor: c.outline,
+      // brandMint is fill-only: dark (True Black) swaps the white primary for
+      // mint on progress and switches; light keeps the primary.
+      progressIndicatorTheme: ProgressIndicatorThemeData(color: fill),
+      switchTheme: SwitchThemeData(
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? fill : null,
+        ),
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.onPrimary : null,
+        ),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: c.bg,
         foregroundColor: c.text,

@@ -172,7 +172,9 @@ class HomeKpis extends StatelessWidget {
     final radius = BorderRadius.circular(ZRadius.lg + 4);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: c.surface.withValues(alpha: 0.72),
+        color: c.brightness == Brightness.dark
+            ? c.surfaceSunk
+            : c.surface.withValues(alpha: 0.72),
         borderRadius: radius,
       ),
       child: Padding(
