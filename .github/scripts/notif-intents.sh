@@ -346,9 +346,53 @@ kill_app || echo "app still alive"
 A logcat -c || true
 # The action button is sometimes missed on the first try (shade state): retry,
 # but only while the app has not started (no probe at all).
+# A collapsed notification hides its action buttons: tap the "Expand" under the
+# title when the action text is not on screen.
+expand_item() { # title action
+  A shell uiautomator dump /sdcard/ui4.xml > /dev/null 2>&1
+  A pull /sdcard/ui4.xml "$OUT/ui4.xml" > /dev/null 2>&1
+  xy=$(python3 -I - "$OUT/ui4.xml" "$1" "$2" << 'PY'
+import re, sys
+import xml.etree.ElementTree as ET
+try:
+    root = ET.parse(sys.argv[1]).getroot()
+except Exception:
+    sys.exit(0)
+title, action = sys.argv[2], sys.argv[3]
+def center(n):
+    m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", n.get("bounds") or "")
+    if not m:
+        return None
+    a, b, c, d = map(int, m.groups())
+    return (a + c) // 2, (b + d) // 2
+nodes = list(root.iter("node"))
+if any(action in (n.get("text") or "") or action in (n.get("content-desc") or "") for n in nodes):
+    sys.exit(0)
+ty = None
+for n in nodes:
+    if title in (n.get("text") or ""):
+        c = center(n)
+        if c:
+            ty = c[1]
+            break
+if ty is None:
+    sys.exit(0)
+best = None
+for n in nodes:
+    d = n.get("content-desc") or n.get("text") or ""
+    c = center(n)
+    if d == "Expand" and c and c[1] >= ty and (best is None or c[1] < best[1]):
+        best = c
+if best:
+    print(best[0], best[1])
+PY
+)
+  if [ -n "$xy" ]; then echo "  notification collapsed: expanding"; A shell input tap $xy; sleep 2; fi
+}
 pay_cold_tap() {
   for _ in 1 2 3; do
     shade
+    expand_item "ZPROBE paid cold" "ZPROBE PAY COLD"
     if ui_tap "ZPROBE PAY COLD"; then
       wait_probe "confirm shown" 30 && return 0
       [ -z "$(probes)" ] || return 1
