@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=c3c501a51ed2b574a98711a700fa121dc2d804eb
+SKIP sha=c3c501a51ed2b574a98711a700fa121dc2d804eb no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/FU51-ui-a c3c501a51ed2b574a98711a700fa121dc2d804eb 2026-11-21T02:04:50.0857674+02:00
+
+
+
