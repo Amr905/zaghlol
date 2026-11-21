@@ -285,9 +285,9 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-199](tasks/T-199.md) | Net worth breakdown: where the number comes from, balance per bank | PO 11-19 | High | Sonnet (+Opus note) | flutter-core-engineer | — | A | 12 | DONE (merged #77) |
 | [T-200](tasks/T-200.md) | Production key files: hardened file KMS (no cloud) | PO 11-20 | High* | Opus | backend-engineer | — | B | 12 | DONE (merged #77) |
 | [T-201](tasks/T-201.md) | Self-hosted OpenBao Transit KMS adapter | PO 11-20 | High* | Opus | backend-engineer | T-200 | B | 13 | DONE (merged #77) |
-| [T-202](tasks/T-202.md) | True Black dark theme and bar tokens (rework of T-022; D-79) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-022 | G | 54 | TODO |
-| [T-203](tasks/T-203.md) | Shared bottom bar option A (rework of T-024; D-77, D-78) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-202 | G | 54 | TODO |
-| [T-204](tasks/T-204.md) | Home one shared look + True Black dark pass on all screens (rework of T-054) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-202, T-203 | G | 54 | TODO |
+| [T-202](tasks/T-202.md) | True Black dark theme and bar tokens (rework of T-022; D-79) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-022 | G | 54 | DONE (batch 53) |
+| [T-203](tasks/T-203.md) | Shared bottom bar option A (rework of T-024; D-77, D-78) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-202 | G | 54 | DONE (batch 53) |
+| [T-204](tasks/T-204.md) | Home one shared look + True Black dark pass on all screens (rework of T-054) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-202, T-203 | G | 54 | DONE (batch 53) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

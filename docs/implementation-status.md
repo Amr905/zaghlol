@@ -880,6 +880,8 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-274** (batch 52 review minors, OPEN): token lifetime constants duplicated in `entitlement.dart`; paywall passes `_restore` to both `onRetry` and `onRestore`; after a failed forced OpenBao login the next login skips the 5 s throttle (the gate still allows one at a time); `AmountRepairEvents` publishes a held event after a rolled-back edit on the next commit; import done screen shows a blank category name while lookups load; docs say 140 packages, the release scan covers 142. Details in [batch-52](05-reviews/batch-52.md).
 
+- **FU-275** (batch 53 review minors, OPEN): deploy token has `packages: write`; redeploying the running image makes the "previous" digest equal the current one; docs don't say deleted records stay in backups up to 15 days; "never for Gold" upsell test has no Gold case; the weekly upsell check can let two prompts through at once; the site's draft-preview mode publishes placeholder pages; paywall banner text and one iOS setup headline not on `zaghlolText`; two nits. Details in [batch-53](05-reviews/batch-53.md).
+
 ## Log
 | Date | Event |
 |---|---|

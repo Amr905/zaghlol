@@ -76,3 +76,10 @@ Blocking: **1-1** (security Medium, before merge), **1-2** (data), **1-3** (depl
 - [x] No `double` money; widget lines carry no amount
 - [ ] No sensitive data in logs — fails on 1-1 (Caddy response headers)
 - [x] Scope: each lane stays in its files; CLAUDE.md token line updated for D-79 only
+
+## Fix round (Lead check)
+
+- 1-1, 1-2, 1-3 fixed on the batch branch (server kit): Caddy log filter drops response and request headers (CI asserts it via `caddy adapt` + jq); `restore.sh live` checks the dump, restores into `zaghlol_restore_new`, verifies, then swaps by rename with the old database kept and services restarted by a trap; `deploy.sh` waits on api and worker health and rolls back on timeout. New `restore-test` CI job proves a missing, garbage or empty dump leaves the source database untouched. backend-server-kit run 44852011550 green (5 jobs).
+- 3-1 fixed by the Lead (settings `allKeys` table), test passes.
+- Lane 5 minor (unused True Black tokens) taken now at the PO's design priority: `brandMint` for progress, switches and the first chart series in dark, `surfaceSunk` for the hero KPI strip, `zaghlolText` for Zaghlol banners; light pixel-identical; `brand_mint_test.dart`.
+- All lanes **APPROVED** after the fix round. Remaining minors stay in FU-275.
