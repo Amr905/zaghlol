@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=e3bedfb8bb1c7963aada57aefb5f1bf765699380
+SKIP sha=e3bedfb8bb1c7963aada57aefb5f1bf765699380 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/FU51-core e3bedfb8bb1c7963aada57aefb5f1bf765699380 2026-11-21T02:04:19.4018852+02:00
+
+
+
