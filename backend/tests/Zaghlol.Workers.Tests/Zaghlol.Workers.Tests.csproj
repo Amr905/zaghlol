@@ -14,6 +14,7 @@
     <Compile Include="..\Shared\TestSupportExclusion.cs" Link="Shared\TestSupportExclusion.cs" />
     <!-- T-201: the worker binary against the OpenBao stub, after the T-200 migration. -->
     <Compile Include="..\Shared\FileKmsKeySet.cs" Link="Shared\FileKmsKeySet.cs" />
+    <Compile Include="..\Shared\HostSecretsKeySet.cs" Link="Shared\HostSecretsKeySet.cs" />
     <Compile Include="..\Shared\OpenBaoStub.cs" Link="Shared\OpenBaoStub.cs" />
     <Compile Include="..\Shared\OpenBaoTestBed.cs" Link="Shared\OpenBaoTestBed.cs" />
     <None Include="..\..\deploy\openbao\setup.sh" Link="openbao\setup.sh" CopyToOutputDirectory="PreserveNewest" />

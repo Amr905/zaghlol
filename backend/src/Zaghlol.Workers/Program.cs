@@ -24,7 +24,8 @@ if (args.Contains(MigrateCommand.Flag, StringComparer.Ordinal))
 }
 
 // `dotnet Zaghlol.Workers.dll --generate-keys ...` is the production key tool of the File KMS (T-200): run it once on the server,
-// inside this image, with no network. It writes key files and prints public values only.
+// inside this image, with no network. It writes key files and prints public values only. With `--format host-secrets` (T-205) it
+// writes nothing and prints the keys once as ZAGHLOL_KEYS__<name> settings for the shared host (ADR-026).
 if (args.Contains(FileKeyTool.Flag, StringComparer.Ordinal))
 {
     return FileKeyTool.Run(args, Console.Out, Console.Error, Environment.CurrentDirectory);
