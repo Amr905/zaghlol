@@ -16,6 +16,7 @@
     <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
     <Compile Include="..\Shared\FileKmsKeySet.cs" Link="Shared\FileKmsKeySet.cs" />
+    <Compile Include="..\Shared\HostSecretsKeySet.cs" Link="Shared\HostSecretsKeySet.cs" />
     <Compile Include="..\Shared\OpenBaoStub.cs" Link="Shared\OpenBaoStub.cs" />
     <Compile Include="..\Shared\OpenBaoTestBed.cs" Link="Shared\OpenBaoTestBed.cs" />
     <Compile Include="..\Shared\AppHeaderHandler.cs" Link="Shared\AppHeaderHandler.cs" />
