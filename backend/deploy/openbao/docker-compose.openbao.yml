@@ -12,7 +12,7 @@ services:
   openbao:
     # T-192: pinned by multi-arch OCI index digest (tag 2.7.2). Keep in step with OPENBAO_IMAGE in .github/workflows/backend-ci.yml;
     # Dependabot (docker-compose ecosystem) bumps this line.
-    image: ghcr.io/openbao/openbao:2.7.2@sha256:5046911075e137e154ce49ab051502f4ec7cf367d484ae4a4dce665d9b90561f
+    image: ghcr.io/openbao/openbao:2.7.3@sha256:ba4b133eb9586630024e71a617e66f37f29cc3534cdd46a6233e098ceded8dc9
     user: "1655:1655"
     entrypoint: ["bao", "server", "-config=/openbao/config/openbao.hcl"]
     environment:
