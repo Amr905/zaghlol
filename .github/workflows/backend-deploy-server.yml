@@ -119,6 +119,8 @@ jobs:
           REF: ${{ steps.image.outputs.ref }}
         run: |
           set -euo pipefail
+          # REF is built from our own pushed digest (or a validated input), and is meant to expand on this side.
+          # shellcheck disable=SC2029
           printf '%s' "$GH_TOKEN" | ssh target sudo /opt/zaghlol/deploy/server/deploy.sh "$REF"
 
       - name: Smoke test from the runner (public HTTPS)
