@@ -3,10 +3,12 @@
 // launched the app is read once at start; later taps arrive as events.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../core/l10n/date_format.dart';
 import '../core/l10n/locale_providers.dart';
@@ -17,6 +19,7 @@ import '../core/routing/app_routes.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show CivilDate;
 
 import '../features/notifications/application/notification_providers.dart';
+import '../features/notifications/domain/notification_types.dart';
 import '../features/recurring/presentation/bills_providers.dart';
 import '../features/security/domain/app_lock_controller.dart';
 import '../features/notifications/domain/notification_routes.dart';
@@ -27,6 +30,45 @@ import 'app_navigation.dart';
 /// so release builds drop it.
 void _probe(String line) {
   if (kDebugMode) debugPrint('NOTIF_PROBE $line');
+}
+
+/// Debug builds only (T-193 AC5 device run): reinstalling the APK clears the
+/// posted notifications, so the device script drops `sig/post_cold`
+/// (a bill id and a due date, synthetic) and the real app posts the two cold-run
+/// notifications itself, once. Dead code in release (`kDebugMode`).
+Future<void> _debugPostColdFixtures(WidgetRef ref) async {
+  if (!kDebugMode) return;
+  try {
+    final docs = (await getApplicationDocumentsDirectory()).path;
+    final f = File('$docs/sig/post_cold');
+    if (!f.existsSync()) return;
+    final parts = f.readAsStringSync().trim().split(' ');
+    f.deleteSync();
+    final gateway = ref.read(notificationGatewayProvider);
+    await gateway.show(
+      const PlatformNotification(
+        id: 9102,
+        title: 'ZPROBE tap cold',
+        body: 'synthetic',
+        payload: '/settings/backup',
+        type: NotificationType.upcomingDue,
+      ),
+    );
+    await gateway.show(
+      PlatformNotification(
+        id: 9104,
+        title: 'ZPROBE paid cold',
+        body: 'synthetic',
+        payload: '/insights',
+        type: NotificationType.upcomingDue,
+        actionTitle: 'ZPROBE PAY COLD',
+        actionRoute: '/recurring/${parts[0]}/paid/${parts[1]}',
+      ),
+    );
+    _probe('cold fixtures posted');
+  } catch (_) {
+    _probe('cold fixtures failed');
+  }
 }
 
 class NotificationTapLifecycle extends ConsumerStatefulWidget {
@@ -52,6 +94,7 @@ class _NotificationTapLifecycleState
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final route = await source.takeLaunchRoute();
       _probe('launch route=${route != null}');
+      if (kDebugMode) unawaited(_debugPostColdFixtures(ref));
       if (mounted && route != null) _open(route);
     });
   }

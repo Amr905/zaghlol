@@ -221,15 +221,8 @@ void main() {
       say('PAID_WARM=$paid');
     }
 
-    // ---- cold: two more notifications for the script's process-death runs.
-    await post(9102, 'ZPROBE tap cold', payload: '/settings/backup');
-    await post(
-      9104,
-      'ZPROBE paid cold',
-      payload: '/insights',
-      actionTitle: 'ZPROBE PAY COLD',
-      actionRoute: '/recurring/${billCold.id}/paid/${billCold.due}',
-    );
+    // ---- cold: the script reinstalls the real app (which clears notifications)
+    // and the app posts the cold-run notifications itself (debug fixture hook).
     say('READY_COLD');
     check(await signal('cold_done', minutes: 25), 'script: cold cases done');
     if (problems.isNotEmpty) fail(problems.join('; '));

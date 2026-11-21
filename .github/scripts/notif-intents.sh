@@ -298,11 +298,24 @@ pkill -9 -f flutter_tools 2> /dev/null; pkill -9 -f "flutter test" 2> /dev/null
 kill -9 "$tpid" 2> /dev/null; wait "$tpid" 2> /dev/null
 sleep 1
 echo "notifications posted before the reinstall: 9102=$(present 9102) 9104=$(present 9104)"
-# Back to the real app (same key, data and notifications are kept by -r).
+# Back to the real app (same key and data are kept by -r).
 A install -r "$RUNNER_TEMP/real-app.apk" | tail -1
 sleep 3
+echo "notifications posted after the reinstall: 9102=$(present 9102) 9104=$(present 9104)"
+# The reinstall clears the notifications: the real app (debug build) posts the
+# cold-run ones itself once, from sig/post_cold.
+A shell "run-as $PKG sh -c 'mkdir -p app_flutter/sig && echo \"$BILL_C $DUE\" > app_flutter/sig/post_cold'" > /dev/null
+A logcat -c || true
+A shell am start -W -n "$PKG/app.zaghlol.MainActivity" > /dev/null 2>&1
+MARK=
+if wait_probe "cold fixtures posted" 120; then
+  result PASS "cold notifications posted by the real app" "9102=$(present 9102) 9104=$(present 9104)"
+else
+  result FAIL "cold notifications posted by the real app" "$(probes | tr '\n' ';')"
+fi
+sleep 3
 kill_app || echo "app still alive"
-echo "notifications posted after the test ended: 9102=$(present 9102) 9104=$(present 9104)"
+echo "notifications posted after kill: 9102=$(present 9102) 9104=$(present 9104)"
 
 # ---- cold forged intents (the process is dead before each)
 echo >> "$REPORT"; echo "## Cold (process dead)" >> "$REPORT"
