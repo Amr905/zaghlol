@@ -48,13 +48,23 @@ fi
 smoke() {
   domain=$(get_var API_DOMAIN)
   [ -n "$domain" ] || { echo "API_DOMAIN missing in $ENV_FILE" >&2; return 1; }
-  # 1. the api replicas report healthy to Docker; 2. the public path (Caddy, TLS) answers /v1/health.
+  # 1. every api replica and the worker report Docker-healthy and caddy is running (caddy has no healthcheck); a timeout
+  #    fails the smoke test so the deploy rolls back. 2. the public path (Caddy, TLS) answers /v1/health.
+  ok=0
   for _ in $(seq 1 36); do
-    unhealthy=$(compose ps --format '{{.Service}} {{.Health}}' api worker caddy | grep -vc ' healthy$' || true)
-    running=$(compose ps --format '{{.Service}}' api worker caddy | wc -l)
-    if [ "$running" -ge 3 ] && [ "$unhealthy" -eq 0 ]; then break; fi
+    states=$(compose ps --format '{{.Service}} {{.State}} {{.Health}}' api worker caddy)
+    bad=$(printf '%s\n' "$states" | grep -E '^(api|worker) ' | grep -vc ' running healthy$' || true)
+    api_n=$(printf '%s\n' "$states" | grep -c '^api running healthy$' || true)
+    worker_n=$(printf '%s\n' "$states" | grep -c '^worker running healthy$' || true)
+    caddy_n=$(printf '%s\n' "$states" | grep -c '^caddy running' || true)
+    if [ "$bad" -eq 0 ] && [ "$api_n" -ge 1 ] && [ "$worker_n" -ge 1 ] && [ "$caddy_n" -ge 1 ]; then ok=1; break; fi
     sleep 5
   done
+  if [ "$ok" -ne 1 ]; then
+    echo "services not healthy after 180 s:" >&2
+    printf '%s\n' "$states" >&2
+    return 1
+  fi
   curl -fsS --max-time 10 --retry 5 --retry-delay 3 --retry-connrefused "https://$domain/v1/health" | grep -q '"status":"ok"'
   # Optional readiness path (empty: the /v1/health body already reports database readiness).
   if [ -n "${SMOKE_READY_PATH:-}" ]; then

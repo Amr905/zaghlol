@@ -34,6 +34,8 @@
 				}
 				request>headers delete
 				request>tls delete
+				# Response headers carry the Apple callback's 303 Location (authorization code, id_token): never logged.
+				resp_headers delete
 			}
 		}
 	}
