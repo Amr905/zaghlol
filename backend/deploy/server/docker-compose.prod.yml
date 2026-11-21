@@ -1,0 +1,210 @@
+# Self-hosted production stack for ONE Linux server (Ubuntu 24.04 + Docker Engine + Compose v2).
+# ADR-025, deployment.md "Self-hosted server (single Linux host)". Run from this folder (a copy of backend/deploy lives at
+# /opt/zaghlol/deploy on the server):
+#
+#   docker compose --env-file /etc/zaghlol/production.env -f docker-compose.prod.yml up -d
+#   # with OpenBao (before Gold is sold, T-201):
+#   docker compose --env-file /etc/zaghlol/production.env -f docker-compose.prod.yml -f ../openbao/docker-compose.openbao.yml up -d
+#   # with local Prometheus + Grafana (optional): add  -f observability/docker-compose.observability.yml
+#
+# Two env files, so a container never sees a secret it doesn't need:
+#   /etc/zaghlol/production.env  read by Compose itself only (images, domain, database passwords). Mode 0600 root.
+#   /etc/zaghlol/app.env         application settings passed to api and worker (no database passwords). Mode 0600 root.
+# Published ports: caddy 80, 443 (tcp) and 443 (udp, HTTP/3). Nothing else is published.
+name: zaghlol-backend
+
+x-hardening: &hardening
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  ulimits:
+    core: 0
+  read_only: true
+  restart: unless-stopped
+
+# api and worker: same image, non-root uid 1654 (image user), read-only root.
+x-app-common: &app-common
+  image: ${BACKEND_IMAGE:?set BACKEND_IMAGE (ghcr.io/amr905/zaghlol-backend@sha256:...) in production.env}
+  user: "1654:1654"
+  <<: *hardening
+  env_file:
+    - ${ZAGHLOL_APP_ENV_FILE:-/etc/zaghlol/app.env}
+  tmpfs:
+    - /tmp
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:?set POSTGRES_IMAGE (postgres:17@sha256:...) in production.env}
+    # FU-025: no DETAIL/HINT in server logs. WAL is archived to a folder on the host for 14-day point-in-time recovery
+    # (backup/backup.sh takes the daily base backup and prunes; ADR-025). The archive command never overwrites a file.
+    command:
+      - postgres
+      - -c
+      - log_error_verbosity=terse
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_command=test ! -f /wal-archive/%f && cp %p /wal-archive/%f.tmp && mv /wal-archive/%f.tmp /wal-archive/%f
+      - -c
+      - archive_timeout=300
+      - -c
+      - wal_level=replica
+    environment:
+      POSTGRES_DB: zaghlol
+      POSTGRES_USER: zaghlol
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD}
+      # Used once, on first initialisation, by postgres/init/20-set-passwords.sh (and by backup/set-db-passwords.sh later).
+      DB_MIGRATOR_PASSWORD: ${DB_MIGRATOR_PASSWORD:?set DB_MIGRATOR_PASSWORD}
+      DB_API_PASSWORD: ${DB_API_PASSWORD:?set DB_API_PASSWORD}
+      DB_ADMIN_PASSWORD: ${DB_ADMIN_PASSWORD:?set DB_ADMIN_PASSWORD}
+      DB_WORKER_PASSWORD: ${DB_WORKER_PASSWORD:?set DB_WORKER_PASSWORD}
+      DB_OPS_RO_PASSWORD: ${DB_OPS_RO_PASSWORD:?set DB_OPS_RO_PASSWORD}
+    # No published port: only containers on the stack network can reach it.
+    volumes:
+      - /var/lib/zaghlol/postgres:/var/lib/postgresql/data
+      - /var/lib/zaghlol/backup/wal:/wal-archive
+      - ../db/bootstrap-roles.sql:/docker-entrypoint-initdb.d/10-bootstrap-roles.sql:ro
+      - ./postgres/init/20-set-passwords.sh:/docker-entrypoint-initdb.d/20-set-passwords.sh:ro
+    # The image's postgres user (uid 999) owns the data directory; the entrypoint needs a writable /var/run/postgresql.
+    user: "999:999"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ulimits:
+      core: 0
+    shm_size: 256m
+    restart: unless-stopped
+    stop_grace_period: 60s
+    networks: [default]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zaghlol -d zaghlol"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # One-shot migration job (same image as the worker), as the schema-owning `migrator` login. Run by the deploy workflow
+  # before api/worker are restarted:  docker compose ... run --rm migrate
+  migrate:
+    image: ${BACKEND_IMAGE:?set BACKEND_IMAGE}
+    user: "1654:1654"
+    entrypoint: ["dotnet", "/app/worker/Zaghlol.Workers.dll", "--migrate"]
+    environment:
+      ConnectionStrings__Migrator: Host=postgres;Port=5432;Database=zaghlol;Username=migrator;Password=${DB_MIGRATOR_PASSWORD:?set DB_MIGRATOR_PASSWORD}
+      DOTNET_ENVIRONMENT: Production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ulimits:
+      core: 0
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: "no"
+    networks: [default]
+
+  api:
+    <<: *app-common
+    # Two replicas behind Caddy (docker DNS round robin, Caddy re-resolves). Set Purchases__*__Budget__Replicas to the same
+    # number in app.env (deployment.md). Use API_REPLICAS=1 on a small host.
+    deploy:
+      replicas: ${API_REPLICAS:-2}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__App: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_api;Password=${DB_API_PASSWORD:?set DB_API_PASSWORD}
+      ConnectionStrings__Admin: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_admin;Password=${DB_ADMIN_PASSWORD:?set DB_ADMIN_PASSWORD}
+      Catalog__Snapshots__Directory: /var/lib/zaghlol/catalog
+    volumes:
+      # File KMS keys (T-200): read-only bind mount of the whole directory, exactly as deployment.md says.
+      - /etc/zaghlol/kms-production/keys:/run/zaghlol-kms:ro
+      # Catalog snapshots: the api writes (uid 1654), caddy serves them read-only at /catalog/.
+      - /var/lib/zaghlol/catalog:/var/lib/zaghlol/catalog
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [default]
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/api/Zaghlol.Api.dll", "--healthcheck"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  worker:
+    <<: *app-common
+    entrypoint: ["dotnet", "/app/worker/Zaghlol.Workers.dll"]
+    environment:
+      DOTNET_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__Worker: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_worker;Password=${DB_WORKER_PASSWORD:?set DB_WORKER_PASSWORD}
+      Worker__HeartbeatFile: /tmp/zaghlol-worker.heartbeat
+    volumes:
+      - /etc/zaghlol/kms-production/keys:/run/zaghlol-kms:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [default]
+    healthcheck:
+      test: ["CMD", "dotnet", "/app/worker/Zaghlol.Workers.dll", "--healthcheck"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  caddy:
+    image: ${CADDY_IMAGE:?set CADDY_IMAGE (caddy:2@sha256:...) in production.env}
+    user: "65532:65532"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?set API_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL}
+      ADMIN_ALLOWED_CIDRS: ${ADMIN_ALLOWED_CIDRS:-127.0.0.1/32}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /var/lib/zaghlol/caddy/data:/data
+      - /var/lib/zaghlol/caddy/config:/config
+      - /var/lib/zaghlol/catalog:/srv/snapshots:ro
+    # A non-root process may bind 80/443 when the container's unprivileged-port start is lowered (no capability needed,
+    # so no-new-privileges and cap_drop ALL stay).
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    ulimits:
+      core: 0
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [default]
+
+  # Optional (profile "otel"): receives OTLP and serves Prometheus metrics on :8889 inside the network. The apps export only
+  # when OTEL_EXPORTER_OTLP_ENDPOINT is set, which observability/docker-compose.observability.yml does for api and worker;
+  # start with `--profile otel` and that override (deployment.md, "Optional monitoring").
+  otel-collector:
+    profiles: ["otel"]
+    image: ${OTEL_COLLECTOR_IMAGE:?set OTEL_COLLECTOR_IMAGE}
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ../observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    <<: *hardening
+    tmpfs:
+      - /tmp
+    networks: [default]
+
+networks:
+  # Fixed subnet so ForwardedHeaders__KnownNetworks__0 in app.env is deterministic (Caddy's address is in it).
+  # The openbao override adds a second network `kms` (172.30.53.0/24).
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.52.0/24

@@ -1,0 +1,11 @@
+[Unit]
+Description=Zaghlol nightly backup
+
+[Timer]
+# 02:30 UTC = 04:30 in Cairo (summer 05:30), the quietest hour.
+OnCalendar=*-*-* 02:30:00 UTC
+RandomizedDelaySec=300
+Persistent=true
+
+[Install]
+WantedBy=timers.target

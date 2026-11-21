@@ -1,0 +1,21 @@
+# Copy to /etc/zaghlol/alertmanager/alertmanager.yml (folder root:65534, mode 0750; files 0640). Placeholders only.
+# The SMTP password is read from a file next to it, never written here: /etc/zaghlol/alertmanager/smtp-password.
+global:
+  smtp_smarthost: smtp.example.com:587
+  smtp_from: alerts@example.com
+  smtp_auth_username: alerts@example.com
+  smtp_auth_password_file: /etc/alertmanager/smtp-password
+  smtp_require_tls: true
+
+route:
+  receiver: ops-email
+  group_by: [alertname]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: ops-email
+    email_configs:
+      - to: ops@example.com
+        send_resolved: true
