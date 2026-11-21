@@ -62,7 +62,8 @@ jobs:
           check "only caddy publishes ports" '[.services | to_entries[] | select((.value.ports // []) | length > 0) | .key] == ["caddy"]'
           check "caddy publishes only 80 and 443" '[.services.caddy.ports[].target] | sort == [80,443,443]'
           check "every service has no-new-privileges" '[.services | to_entries[] | select(((.value.security_opt // []) | index("no-new-privileges:true")) == null) | .key] == []'
-          check "every service has core ulimit 0" '[.services | to_entries[] | select(((.value.ulimits.core // null) | tostring) != "0") | .key] == []'
+          # compose prints a zero ulimit as {} in its JSON output
+          check "every service has core ulimit 0" '[.services | to_entries[] | select(((.value.ulimits.core // null) != {}) and ((.value.ulimits.core // null) != 0)) | .key] == []'
           check "api and worker run as 1654" '.services.api.user == "1654:1654" and .services.worker.user == "1654:1654"'
           check "api and worker have read-only roots" '.services.api.read_only == true and .services.worker.read_only == true'
           check "api key directory is read-only" '[.services.api.volumes[] | select(.target == "/run/zaghlol-kms") | .read_only] == [true]'
@@ -132,4 +133,4 @@ jobs:
       - name: actionlint on the deploy workflows
         run: |
           docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color \
-            .github/workflows/backend-deploy-server.yml .github/workflows/backend-server-kit.yml .github/workflows/backend-deploy.yml
+            .github/workflows/backend-deploy-server.yml .github/workflows/backend-server-kit.yml

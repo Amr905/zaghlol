@@ -119,7 +119,7 @@ jobs:
           REF: ${{ steps.image.outputs.ref }}
         run: |
           set -euo pipefail
-          printf '%s' "$GH_TOKEN" | ssh target "sudo /opt/zaghlol/deploy/server/deploy.sh '$REF'"
+          printf '%s' "$GH_TOKEN" | ssh target sudo /opt/zaghlol/deploy/server/deploy.sh "$REF"
 
       - name: Smoke test from the runner (public HTTPS)
         run: |
