@@ -100,7 +100,7 @@ jobs:
           dotnet publish src/Zaghlol.Workers/Zaghlol.Workers.csproj -c Release -r win-x64 --self-contained false -o "$RUNNER_TEMP/migrate"
           python -I deploy/monsterasp/monsterasp_package.py check "$RUNNER_TEMP/package"
 
-      - name: Upload the package (kept 30 days: the rollback copy; holds no secrets)
+      - name: Upload the package (30 days, the rollback copy, no secrets)
         if: ${{ inputs.rollback_run_id == '' }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
