@@ -34,6 +34,7 @@ ProviderContainer _c({
   final c = ProviderContainer(
     overrides: [
       setupContextProvider.overrideWith((ref) async => _ctx()),
+      setupSalaryCreditProvider.overrideWithValue(const AsyncData(null)),
       setupHandledProvider.overrideWith((ref) => Stream.value(handled)),
       appLockEnabledProvider.overrideWith((ref) => Stream.value(lockOn)),
       setupProgressProvider.overrideWith((ref) => Stream.value(progress)),

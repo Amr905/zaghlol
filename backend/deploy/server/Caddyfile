@@ -1,0 +1,88 @@
+# Caddy: automatic HTTPS (Let's Encrypt, HTTP-01 on port 80), reverse proxy to the api replicas, read-only catalog snapshots.
+# Settings come from the container environment (docker-compose.prod.yml): API_DOMAIN, ACME_EMAIL, ADMIN_ALLOWED_CIDRS.
+{
+	email {$ACME_EMAIL}
+
+	# Caddy replaces any X-Forwarded-For sent by clients (no trusted proxy is declared), so the api sees the real client
+	# address as the single right-most entry (ForwardLimit 1, deployment.md "Forwarded headers").
+	servers {
+		timeouts {
+			read_header 10s
+			read_body 15s
+			write 30s
+			idle 2m
+		}
+	}
+}
+
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	# No client address, header, cookie or token reaches the log: /24 (IPv4) or /56 (IPv6) network only.
+	log {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				request>remote_ip ip_mask {
+					ipv4 24
+					ipv6 56
+				}
+				request>client_ip ip_mask {
+					ipv4 24
+					ipv6 56
+				}
+				request>headers delete
+				request>tls delete
+				# Response headers carry the Apple callback's 303 Location (authorization code, id_token): never logged.
+				resp_headers delete
+			}
+		}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		-Server
+	}
+
+	# Every request body is small JSON (sync, verify, contributions): 1 MiB is generous.
+	request_body {
+		max_size 1MB
+	}
+
+	# Operator endpoints are MFA-protected by the api itself; in addition they are reachable only from the listed networks.
+	@admin_blocked {
+		path /admin/*
+		not remote_ip {$ADMIN_ALLOWED_CIDRS}
+	}
+	respond @admin_blocked 403
+
+	# Signed catalog snapshots written by the api (Catalog:Snapshots:Directory), served as static files:
+	# /catalog/<version>/full.json.gz and full.json.sig. Content never changes once written.
+	handle_path /catalog/* {
+		root * /srv/snapshots/catalog
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	# Everything else is the api. Replicas are found through Docker's DNS name `api` and re-resolved every 5 seconds.
+	handle {
+		reverse_proxy {
+			dynamic a {
+				name api
+				port 8080
+				refresh 5s
+			}
+			lb_policy least_conn
+			health_uri /v1/health
+			health_interval 10s
+			health_timeout 5s
+			transport http {
+				dial_timeout 3s
+				response_header_timeout 25s
+			}
+			fail_duration 10s
+		}
+	}
+}

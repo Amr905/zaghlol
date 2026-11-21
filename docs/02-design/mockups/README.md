@@ -1,6 +1,6 @@
 # Zaghlol — Screen Mockups (round 4 · Mint Fresh · Egyptian voice)
 
-Round 4: Mint Fresh palette with Jade Night dark mode (`../05-theme-2026.md` §0), the coin-holding Captain Zaghlol as logo (`../brand/`), and all Arabic copy in Egyptian colloquial (`../06-voice-and-tone.md`).
+Round 5 (2026-11-19): all 34 screens re-rendered with the shared bottom bar A (D-78: docked bar, raised apricot Add in the centre, same on Android and iOS) and the True Black dark theme (D-79). Round 4: Mint Fresh palette with Jade Night dark mode (since replaced) (`../05-theme-2026.md` §0), the coin-holding Captain Zaghlol as logo (`../brand/`), and all Arabic copy in Egyptian colloquial (`../06-voice-and-tone.md`).
 
 High-fidelity mockups of 34 key screens (23–34: flows in `../07-flows-onboarding-cards-import.md`), rendered from the specs in `../screens/`. Arabic (right-to-left) is the reference; one dark-mode and one English sample are included. Images are 2× (≈ 880 × 1800 px).
 
@@ -11,7 +11,7 @@ High-fidelity mockups of 34 key screens (23–34: flows in `../07-flows-onboardi
 | One primary action | Each screen has a single filled button; everything else is secondary or text |
 | Progressive disclosure | Raw SMS and parsing details are collapsed in transaction detail; charts open into an explanation |
 | Plain Egyptian Arabic | Short labels ("فلوسي", "قولها", "اتدفع"); Captain Zaghlol speaks colloquially, system text stays clear |
-| Familiar platform parts | iOS 26 floating glass tab bar, large titles, grouped lists, glass sheets; Android Material 3 top app bar, NavigationBar, FAB |
+| Familiar platform parts | One shared bottom bar on both OSes (D-77/D-78); large titles, grouped lists, sheets; Android-style top app bar on Android screens |
 | Colour with meaning only | Mint green = primary & money in, apricot = Add & Gold tier, ink = spending, terracotta = problems, apricot cream = Zaghlol talking; all text AA-checked |
 | Friendly category icons | Emoji in soft tinted tiles — instantly recognisable, common in budget apps |
 
@@ -59,7 +59,7 @@ High-fidelity mockups of 34 key screens (23–34: flows in `../07-flows-onboardi
 - **Mascot / logo:** Captain Zaghlol holding coins (spec artwork) is the app icon, welcome image, chat avatar and voice-logger face; other expression poses come from spec figure 1; final Rive animations replace them.
 - **Prices** on the paywall are the spec's placeholders — final prices are TBD (D-12) and will come from the stores.
 - **Sample data** is illustrative only (synthetic card numbers, names, amounts).
-- **Navigation change** from the spec: the centre-docked "+" became each platform's native pattern — a detached gold button beside the iOS 26 glass tab bar, and an M3 FAB at bottom-end on Android (`03-navigation.md` §1, §7).
+- **Navigation (superseded 2026-11-19 by D-78 — docked bar with raised centre Add on both platforms):** previously the centre-docked "+" became each platform's native pattern — a detached gold button beside the iOS 26 glass tab bar, and an M3 FAB at bottom-end on Android (`03-navigation.md` §1, §7).
 - `source/` holds the generator (HTML/CSS/Python) and mascot cut-outs so screens can be re-rendered after changes (fonts not included).
 
 ## References consulted

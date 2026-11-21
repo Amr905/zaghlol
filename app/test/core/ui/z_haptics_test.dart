@@ -79,7 +79,6 @@ void main() {
           selected: 0,
           onSelect: (i) => picked = i,
           onAdd: () => added++,
-          glass: false,
           labels: const ['a', 'b', 'c', 'd'],
           addLabel: 'add',
         ),

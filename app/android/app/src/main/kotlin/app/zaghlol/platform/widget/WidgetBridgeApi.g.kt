@@ -222,7 +222,15 @@ data class WidgetSnapshot (
   val currency: String,
   /** Epoch ms, the phone's clock, when Dart built this snapshot. */
   val updatedAtMs: Long,
-  val daysToPayday: Long? = null
+  val daysToPayday: Long? = null,
+  /**
+   * FU-206b: finished line two for today (index 0), tomorrow (1), ... so the
+   * widget can roll the days-to-payday line at local midnight without the
+   * app running. Native picks the entry by the number of local midnights
+   * since [updatedAtMs] and owns no copy. Never holds an amount. Contract
+   * change 2026-11-21 (B53), optional and backwards compatible.
+   */
+  val secondaryTextByDay: List<String>? = null
 )
  {
   companion object {
@@ -233,7 +241,8 @@ data class WidgetSnapshot (
       val currency = pigeonVar_list[3] as String
       val updatedAtMs = pigeonVar_list[4] as Long
       val daysToPayday = pigeonVar_list[5] as Long?
-      return WidgetSnapshot(state, primaryText, secondaryText, currency, updatedAtMs, daysToPayday)
+      val secondaryTextByDay = pigeonVar_list[6] as List<String>?
+      return WidgetSnapshot(state, primaryText, secondaryText, currency, updatedAtMs, daysToPayday, secondaryTextByDay)
     }
   }
   fun toList(): List<Any?> {
@@ -244,6 +253,7 @@ data class WidgetSnapshot (
       currency,
       updatedAtMs,
       daysToPayday,
+      secondaryTextByDay,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -254,7 +264,7 @@ data class WidgetSnapshot (
       return true
     }
     val other = other as WidgetSnapshot
-    return WidgetBridgeApiPigeonUtils.deepEquals(this.state, other.state) && WidgetBridgeApiPigeonUtils.deepEquals(this.primaryText, other.primaryText) && WidgetBridgeApiPigeonUtils.deepEquals(this.secondaryText, other.secondaryText) && WidgetBridgeApiPigeonUtils.deepEquals(this.currency, other.currency) && WidgetBridgeApiPigeonUtils.deepEquals(this.updatedAtMs, other.updatedAtMs) && WidgetBridgeApiPigeonUtils.deepEquals(this.daysToPayday, other.daysToPayday)
+    return WidgetBridgeApiPigeonUtils.deepEquals(this.state, other.state) && WidgetBridgeApiPigeonUtils.deepEquals(this.primaryText, other.primaryText) && WidgetBridgeApiPigeonUtils.deepEquals(this.secondaryText, other.secondaryText) && WidgetBridgeApiPigeonUtils.deepEquals(this.currency, other.currency) && WidgetBridgeApiPigeonUtils.deepEquals(this.updatedAtMs, other.updatedAtMs) && WidgetBridgeApiPigeonUtils.deepEquals(this.daysToPayday, other.daysToPayday) && WidgetBridgeApiPigeonUtils.deepEquals(this.secondaryTextByDay, other.secondaryTextByDay)
   }
 
   override fun hashCode(): Int {
@@ -265,6 +275,7 @@ data class WidgetSnapshot (
     result = 31 * result + WidgetBridgeApiPigeonUtils.deepHash(this.currency)
     result = 31 * result + WidgetBridgeApiPigeonUtils.deepHash(this.updatedAtMs)
     result = 31 * result + WidgetBridgeApiPigeonUtils.deepHash(this.daysToPayday)
+    result = 31 * result + WidgetBridgeApiPigeonUtils.deepHash(this.secondaryTextByDay)
     return result
   }
 }

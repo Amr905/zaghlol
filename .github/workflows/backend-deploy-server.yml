@@ -1,0 +1,130 @@
+name: backend-deploy-server
+
+# Self-hosted deployment (ADR-025): one Linux server controlled by the PO. This is the ACTIVE path when no cloud provider is
+# used; the OpenTofu/cloud workflow `backend-deploy.yml` is the cloud alternative and is not used for the single server.
+#
+# Manual dispatch only. Runs only when the repository variable BACKEND_SERVER_DEPLOY_ENABLED is `true`, and the job waits for
+# the required reviewer of the GitHub environment `backend-production`.
+# Environment settings (Settings > Environments > backend-production):
+#   secret   DEPLOY_SSH_KEY       private key of the deploy user created by harden.sh (see deployment.md, runbook)
+#   secret   DEPLOY_KNOWN_HOSTS   the server's pinned host key line(s): `ssh-keyscan -t ed25519 <host>`, verified by hand
+#   variable DEPLOY_HOST          server DNS name or IP
+#   variable DEPLOY_USER          optional, default zaghlol-deploy
+#   variable DEPLOY_API_DOMAIN    the API's public DNS name (same as API_DOMAIN on the server), for the external smoke test
+# Order: build image -> push to GHCR by digest -> ship backend/deploy to the server -> deploy.sh (pull, migrate, restart,
+# smoke on the server, roll back to the previous digest on failure) -> smoke from the runner.
+on:
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: "Optional sha256:... of an image already in GHCR to deploy (skips the build). Empty = build this ref."
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: backend-deploy-server
+  cancel-in-progress: false
+
+env:
+  DOCKER_BUILDKIT: "1"
+
+jobs:
+  deploy:
+    name: build, push by digest, deploy to the server
+    runs-on: ubuntu-latest
+    environment: backend-production
+    timeout-minutes: 45
+    env:
+      ENABLED: ${{ vars.BACKEND_SERVER_DEPLOY_ENABLED }}
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      DEPLOY_API_DOMAIN: ${{ vars.DEPLOY_API_DOMAIN }}
+      INPUT_DIGEST: ${{ inputs.image_digest }}
+    steps:
+      - name: Refuse unless server deploys are enabled
+        run: |
+          if [ "$ENABLED" != "true" ]; then
+            echo "::error title=Server deploy disabled::Set the repository variable BACKEND_SERVER_DEPLOY_ENABLED=true (docs/03-technical/deployment.md, self-hosted runbook)."
+            exit 1
+          fi
+          for v in DEPLOY_HOST DEPLOY_API_DOMAIN; do
+            if [ -z "${!v}" ]; then echo "::error title=Missing variable::$v is not set in the backend-production environment."; exit 1; fi
+          done
+
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Build and push the image (by digest)
+        id: image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+          OWNER: ${{ github.repository_owner }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          repo="ghcr.io/${OWNER,,}/zaghlol-backend"
+          if [ -n "$INPUT_DIGEST" ]; then
+            case "$INPUT_DIGEST" in sha256:[0-9a-f]*) ;; *) echo "::error::image_digest must look like sha256:<64 hex>"; exit 1 ;; esac
+            [ "${#INPUT_DIGEST}" -eq 71 ] || { echo "::error::image_digest must be sha256: plus 64 hex characters"; exit 1; }
+            echo "ref=$repo@$INPUT_DIGEST" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
+          docker build -t "$repo:sha-${SHA::12}" backend
+          docker push "$repo:sha-${SHA::12}"
+          ref=$(docker inspect --format '{{index .RepoDigests 0}}' "$repo:sha-${SHA::12}")
+          case "$ref" in "$repo"@sha256:*) ;; *) echo "::error::could not read the pushed digest"; exit 1 ;; esac
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "Deploying $ref" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare ssh (pinned host key, no trust on first use)
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ]; then
+            echo "::error title=Missing secret::DEPLOY_SSH_KEY and DEPLOY_KNOWN_HOSTS must be set in the backend-production environment."
+            exit 1
+          fi
+          install -d -m 0700 ~/.ssh
+          umask 077
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          {
+            echo "Host target"
+            echo "  HostName $DEPLOY_HOST"
+            echo "  User ${DEPLOY_USER:-zaghlol-deploy}"
+            echo "  IdentityFile ~/.ssh/deploy_key"
+            echo "  IdentitiesOnly yes"
+            echo "  StrictHostKeyChecking yes"
+            echo "  UserKnownHostsFile ~/.ssh/known_hosts"
+            echo "  BatchMode yes"
+            echo "  ServerAliveInterval 30"
+          } > ~/.ssh/config
+
+      - name: Ship the deploy folder
+        run: |
+          set -euo pipefail
+          rsync -a --delete --exclude terraform --exclude '*.md' -e ssh backend/deploy/ target:/opt/zaghlol/deploy/
+
+      - name: Deploy on the server (migrate, restart, smoke, roll back on failure)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ steps.image.outputs.ref }}
+        run: |
+          set -euo pipefail
+          # REF is built from our own pushed digest (or a validated input), and is meant to expand on this side.
+          # shellcheck disable=SC2029
+          printf '%s' "$GH_TOKEN" | ssh target sudo /opt/zaghlol/deploy/server/deploy.sh "$REF"
+
+      - name: Smoke test from the runner (public HTTPS)
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 15 --retry 5 --retry-delay 5 --retry-connrefused "https://$DEPLOY_API_DOMAIN/v1/health" | tee health.json
+          grep -q '"status":"ok"' health.json

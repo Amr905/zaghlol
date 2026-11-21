@@ -42,7 +42,8 @@ import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/ui/z_button.dart' show ZButton;
 import 'package:zaghlol/features/gold/presentation/paywall_screen.dart';
-import 'package:zaghlol/core/ui/shell/app_shell.dart' show ZAddButton;
+import 'package:zaghlol/core/ui/shell/app_shell.dart'
+    show ZAddButton, ZBottomBar;
 import 'package:zaghlol/main.dart' as app;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -170,7 +171,7 @@ void main() {
     await app.main();
     // ignore: avoid_print
     print('EXPLORER_STAGE main() returned');
-    final bar = find.byType(NavigationBar);
+    final bar = find.byType(ZBottomBar);
     final welcome = find.byType(ZButton);
     final end = DateTime.now().add(const Duration(seconds: 40));
     while (DateTime.now().isBefore(end) &&

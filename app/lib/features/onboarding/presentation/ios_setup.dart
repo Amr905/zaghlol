@@ -506,7 +506,7 @@ class _IosSetupState extends ConsumerState<IosSetupScreen>
                 padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.xs),
                 child: Text(
                   '${_digits('${i + 1}')}. $t',
-                  style: ZType.body.copyWith(color: c.text),
+                  style: ZType.body.copyWith(color: c.zaghlolText),
                 ),
               ),
           ],

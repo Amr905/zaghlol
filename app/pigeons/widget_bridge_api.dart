@@ -43,6 +43,7 @@ class WidgetSnapshot {
     required this.currency,
     required this.updatedAtMs,
     this.daysToPayday,
+    this.secondaryTextByDay,
   });
 
   WidgetDisplayState state;
@@ -61,6 +62,13 @@ class WidgetSnapshot {
   int updatedAtMs;
 
   int? daysToPayday;
+
+  /// FU-206b: finished line two for today (index 0), tomorrow (1), ... so the
+  /// widget can roll the days-to-payday line at local midnight without the
+  /// app running. Native picks the entry by the number of local midnights
+  /// since [updatedAtMs] and owns no copy. Never holds an amount. Contract
+  /// change 2026-11-21 (B53), optional and backwards compatible.
+  List<String>? secondaryTextByDay;
 }
 
 @HostApi()

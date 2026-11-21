@@ -12,10 +12,18 @@ abstract final class ZSpacing {
   /// Screen side padding.
   static const double screen = 16;
 
-  /// Bottom space a tab scroller keeps so its last item clears the floating
-  /// Add button (60 button + 16 margin + 20 breathing room).
-  static const double fabClearance = 96;
-  static const double fabSize = 56;
+  /// End padding of tab scrollers so the last row clears the raised Add
+  /// (C-02, 40 dp). The bar itself is not overlaid: content ends above it.
+  static const double fabClearance = 40;
+  static const double fabSize = 62;
+
+  /// Bottom bar (C-02): content height, Add raise above the bar, ring, tab
+  /// indicator pill.
+  static const double barHeight = 64;
+  static const double addRaise = 34;
+  static const double addRing = 5;
+  static const double pillWidth = 56;
+  static const double pillHeight = 30;
 
   /// Minimum interactive target (WCAG / Material).
   static const double minTarget = 48;
@@ -69,7 +77,7 @@ abstract final class ZType {
   static final TextStyle caption = _s(12, FontWeight.w500, 16);
 }
 
-/// Colour tokens from 05-theme-2026 section 0 (Mint Fresh / Jade Night),
+/// Colour tokens from 05-theme-2026 section 0 (Mint Fresh / True Black),
 /// exposed as a [ThemeExtension] so widgets read them through
 /// `ZColors.of(context)`.
 @immutable
@@ -106,6 +114,9 @@ class ZColors extends ThemeExtension<ZColors> {
     required this.tintViolet,
     required this.tintBlue,
     required this.tintTeal,
+    required this.brandMint,
+    required this.surfaceSunk,
+    required this.zaghlolText,
   });
 
   final Brightness brightness;
@@ -146,6 +157,20 @@ class ZColors extends ThemeExtension<ZColors> {
   final Color tintBlue;
   final Color tintTeal;
 
+  /// Fill-only mint (progress, chart series, switches on). Never text.
+  final Color brandMint;
+
+  /// KPI strip inside the hero (True Black); [surfaceAlt] in light.
+  final Color surfaceSunk;
+
+  /// True Black (D-79): flat cards get an outline instead of a shadow; null in
+  /// light.
+  Border? get flatBorder =>
+      brightness == Brightness.dark ? Border.all(color: outline) : null;
+
+  /// Text on [zaghlolBg] (Captain Zaghlol's banners and bubbles).
+  final Color zaghlolText;
+
   /// Mint Fresh (light).
   static const ZColors light = ZColors(
     brightness: Brightness.light,
@@ -179,41 +204,50 @@ class ZColors extends ThemeExtension<ZColors> {
     tintViolet: Color(0xFF9585CF),
     tintBlue: Color(0xFF6A8FD8),
     tintTeal: Color(0xFF3F8C86),
+    brandMint: Color(0xFF34B284),
+    surfaceSunk: Color(0xFFE5F5EC),
+    zaghlolText: Color(0xFF0F2A20),
   );
 
-  /// Jade Night (dark).
+  /// True Black (dark, D-79; 05-theme-2026 section 0). White text, no green
+  /// text, no shadows: elevation is a surface step plus an outline.
   static const ZColors dark = ZColors(
     brightness: Brightness.dark,
-    bg: Color(0xFF08130F),
-    surface: Color(0xFF10211A),
-    surfaceAlt: Color(0xFF163026),
-    outline: Color(0xFF1D3A2E),
-    text: Color(0xFFE6F4EE),
-    textMuted: Color(0xFF93AFA3),
-    primary: Color(0xFF34D399),
-    onPrimary: Color(0xFF08130F),
-    primaryContainer: Color(0xFF163F31),
-    onPrimaryContainer: Color(0xFFE6F4EE),
+    bg: Color(0xFF000000),
+    surface: Color(0xFF141414),
+    surfaceAlt: Color(0xFF222222),
+    outline: Color(0xFF242424),
+    text: Color(0xFFFFFFFF),
+    textMuted: Color(0xFFA8A8A8),
+    primary: Color(0xFFFFFFFF),
+    onPrimary: Color(0xFF000000),
+    primaryContainer: Color(0xFF2A2A2A),
+    onPrimaryContainer: Color(0xFFFFFFFF),
     accent: Color(0xFFFFB86B),
-    accentLight: Color(0xFF6EE7B7),
-    accentDark: Color(0xFF34D399),
+    accentLight: Color(0xFFFFCB8E),
+    accentDark: Color(0xFFFFA94D),
     onAccent: Color(0xFF2E1600),
     incomeText: Color(0xFF6EE7B7),
-    incomeBg: Color(0xFF163F31),
-    zaghlolBg: Color(0xFF2B2419),
-    warningText: Color(0xFFF5C26B),
-    warningBg: Color(0xFF33280F),
+    incomeBg: Color(0xFF12261E),
+    zaghlolBg: Color(0xFF2A2018),
+    warningText: Color(0xFFF2C76A),
+    warningBg: Color(0xFF262113),
     dangerText: Color(0xFFF2A08B),
-    dangerBg: Color(0xFF3B1F1A),
-    heroNumber: Color(0xFF6EE7B7),
-    shadow: Color(0x33000000),
-    heroFrom: Color(0xFF1F7A5F),
-    heroTo: Color(0xFF0B2018),
-    progressFrom: Color(0xFF34D399),
-    progressTo: Color(0xFFA7F3D0),
+    dangerBg: Color(0xFF2A1713),
+    heroNumber: Color(0xFFFFFFFF),
+    // No shadows in dark.
+    shadow: Color(0x00000000),
+    // Flat hero: the surface colour, no gradient.
+    heroFrom: Color(0xFF141414),
+    heroTo: Color(0xFF141414),
+    progressFrom: Color(0xFF62E0AB),
+    progressTo: Color(0xFF62E0AB),
     tintViolet: Color(0xFFB4A8E6),
     tintBlue: Color(0xFF8FB0EE),
     tintTeal: Color(0xFF6CC4BD),
+    brandMint: Color(0xFF62E0AB),
+    surfaceSunk: Color(0xFF0A0A0A),
+    zaghlolText: Color(0xFFFBE7D2),
   );
 
   /// The tokens of the nearest [Theme]. Throws in debug if the theme was not
@@ -257,6 +291,9 @@ class ZColors extends ThemeExtension<ZColors> {
     tintViolet: tintViolet,
     tintBlue: tintBlue,
     tintTeal: tintTeal,
+    brandMint: brandMint,
+    surfaceSunk: surfaceSunk,
+    zaghlolText: zaghlolText,
   );
 
   @override
@@ -295,6 +332,9 @@ class ZColors extends ThemeExtension<ZColors> {
       tintViolet: l(tintViolet, other.tintViolet),
       tintBlue: l(tintBlue, other.tintBlue),
       tintTeal: l(tintTeal, other.tintTeal),
+      brandMint: l(brandMint, other.brandMint),
+      surfaceSunk: l(surfaceSunk, other.surfaceSunk),
+      zaghlolText: l(zaghlolText, other.zaghlolText),
     );
   }
 }

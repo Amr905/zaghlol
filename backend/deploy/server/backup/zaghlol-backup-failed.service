@@ -1,0 +1,6 @@
+[Unit]
+Description=Zaghlol backup failure notice
+
+[Service]
+Type=oneshot
+ExecStart=/opt/zaghlol/deploy/server/backup/notify-failure.sh

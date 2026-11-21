@@ -10,7 +10,6 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
-import '../../../core/ui/shell/app_shell.dart' show usesGlassBar;
 import '../../budget/application/budget_providers.dart' show todayProvider;
 import '../../budget/presentation/budget_providers_ui.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
@@ -163,6 +162,7 @@ class _Disc extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: c.surface,
+        border: c.flatBorder,
         boxShadow: [
           BoxShadow(
             color: c.shadow,
@@ -212,7 +212,9 @@ class _Bubble extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
         child: DefaultTextStyle.merge(
-          style: ZType.body.copyWith(color: fromUser ? c.onPrimary : c.text),
+          style: ZType.body.copyWith(
+            color: fromUser ? c.onPrimary : c.zaghlolText,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -565,17 +567,14 @@ class _InputRow extends ConsumerWidget {
       builder: (context, v, _) {
         final tooLong = v.text.trim().length > askMaxQuestionChars;
         final ok = AskChatController.isValid(v.text) && !busy;
-        // Android: the shell's floating Add button sits at bottom-end over
-        // this row, so the row keeps the FAB's width clear at the end.
-        final endClear = usesGlassBar(context)
-            ? ZSpacing.screen
-            : ZSpacing.fabSize + 2 * ZSpacing.lg;
         return Padding(
           padding: EdgeInsetsDirectional.fromSTEB(
             ZSpacing.screen,
             ZSpacing.sm,
-            endClear,
-            ZSpacing.sm,
+            ZSpacing.screen,
+            // The shell's Add circle is raised above the bar's top edge and
+            // would cover this row's centre: keep it clear (C-02).
+            ZSpacing.sm + ZSpacing.addRaise,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

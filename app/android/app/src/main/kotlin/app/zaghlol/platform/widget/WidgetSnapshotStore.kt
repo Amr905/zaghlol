@@ -9,6 +9,9 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 /**
  * What the widget shows (T-118). Already-formatted, redaction-aware strings
@@ -22,7 +25,23 @@ data class WidgetView(
     val currency: String,
     val updatedAtMs: Long,
     val daysToPayday: Int?,
+    /** Finished line two for day 0 (the day of [updatedAtMs]), day 1, ... (FU-206b). Empty on a v1 file. */
+    val secondaryByDay: List<String> = emptyList(),
 ) {
+    /**
+     * Line two for [nowMs] in [zone]: the entry for the number of local
+     * midnights since [updatedAtMs] (FU-206b), so days-to-payday rolls
+     * without the app. Past the last entry the line is empty (the app has to
+     * republish a new cycle). Without a list (v1) the stored line is kept.
+     */
+    fun secondaryAt(nowMs: Long, zone: ZoneId = ZoneId.systemDefault()): String {
+        if (secondaryByDay.isEmpty()) return secondaryText
+        val then = Instant.ofEpochMilli(updatedAtMs).atZone(zone).toLocalDate()
+        val now = Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate()
+        val elapsed = ChronoUnit.DAYS.between(then, now).coerceAtLeast(0)
+        return secondaryByDay.getOrNull(minOf(elapsed, Int.MAX_VALUE.toLong()).toInt()) ?: ""
+    }
+
     companion object {
         const val STATE_OK = 0
         const val STATE_NO_BUDGET = 1
@@ -85,8 +104,9 @@ class WidgetSnapshotStore(
     }
 
     companion object {
-        const val VERSION = 1
-        const val MAX_FILE_BYTES = 4096L
+        const val VERSION = 2
+        const val MAX_FILE_BYTES = 16384L
+        const val MAX_DAYS = 62
         val AAD: ByteArray get() = "zaghlol.widget.v1|snapshot".toByteArray(Charsets.UTF_8)
 
         internal fun encode(v: WidgetView): ByteArray {
@@ -99,13 +119,17 @@ class WidgetSnapshotStore(
                 out.writeUTF(v.currency.take(8))
                 out.writeLong(v.updatedAtMs)
                 out.writeInt(v.daysToPayday ?: -1)
+                val days = v.secondaryByDay.take(MAX_DAYS)
+                out.writeShort(days.size)
+                days.forEach { out.writeUTF(it.take(WidgetView.MAX_TEXT_CHARS)) }
             }
             return bos.toByteArray()
         }
 
         internal fun decode(b: ByteArray): WidgetView {
             DataInputStream(ByteArrayInputStream(b)).use { input ->
-                if (input.readUnsignedByte() != VERSION) throw IOException("WIDGET_FORMAT")
+                val version = input.readUnsignedByte()
+                if (version != 1 && version != VERSION) throw IOException("WIDGET_FORMAT")
                 val state = input.readUnsignedByte()
                 if (state > WidgetView.STATE_NO_DATA) throw IOException("WIDGET_FORMAT")
                 val primary = input.readUTF()
@@ -113,7 +137,13 @@ class WidgetSnapshotStore(
                 val currency = input.readUTF()
                 val updated = input.readLong()
                 val days = input.readInt()
-                return WidgetView(state, primary, secondary, currency, updated, if (days < 0) null else days)
+                val byDay = ArrayList<String>()
+                if (version >= 2) {
+                    val n = input.readUnsignedShort()
+                    if (n > MAX_DAYS) throw IOException("WIDGET_FORMAT")
+                    repeat(n) { byDay.add(input.readUTF()) }
+                }
+                return WidgetView(state, primary, secondary, currency, updated, if (days < 0) null else days, byDay)
             }
         }
     }

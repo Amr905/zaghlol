@@ -1,9 +1,8 @@
-// T-024: the app shell around the four tab branches (03-navigation.md section 7).
-// iOS: floating glass capsule plus a detached gold Add circle at the trailing
-// end. Android: Material 3 NavigationBar plus a gold FAB at bottom-end.
+// T-024 / T-203: the app shell around the four tab branches
+// (03-navigation.md section 7, 04-design-system C-02, D-77, D-78). One bar,
+// identical on Android and iOS: a solid docked bar with five equal slots
+// (Home, Insights, Add, Money, Zaghlol) and the Add circle raised above it.
 // The first tab is on the right in Arabic; everything uses start/end.
-
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -13,12 +12,6 @@ import '../../routing/app_routes.dart';
 import '../../theme/z_tokens.dart';
 import '../z_haptics.dart';
 
-/// Which bar the current platform gets.
-bool usesGlassBar(BuildContext context) => switch (Theme.of(context).platform) {
-  TargetPlatform.iOS || TargetPlatform.macOS => true,
-  _ => false,
-};
-
 class _Destination {
   const _Destination(this.icon, this.selectedIcon);
   final IconData icon;
@@ -26,10 +19,10 @@ class _Destination {
 }
 
 const _destinations = <_Destination>[
-  _Destination(Icons.home_outlined, Icons.home_outlined),
-  _Destination(Icons.area_chart_outlined, Icons.area_chart_outlined),
-  _Destination(Icons.account_balance_outlined, Icons.account_balance_outlined),
-  _Destination(Icons.chat_outlined, Icons.chat_outlined),
+  _Destination(Icons.home_outlined, Icons.home),
+  _Destination(Icons.area_chart_outlined, Icons.area_chart),
+  _Destination(Icons.account_balance_outlined, Icons.account_balance),
+  _Destination(Icons.chat_outlined, Icons.chat),
 ];
 
 List<String> _labels(AppLocalizations l10n) => [
@@ -56,7 +49,6 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final glass = usesGlassBar(context);
     // N-02: on a tab root, back goes to Home first, then exits.
     final body = PopScope(
       canPop: shell.currentIndex == 0,
@@ -70,15 +62,15 @@ class AppShell extends StatelessWidget {
       selected: shell.currentIndex,
       onSelect: _selectTab,
       onAdd: () => _openAdd(context),
-      glass: glass,
       labels: _labels(l10n),
       addLabel: l10n.commonNavAddA11y,
+      addCaption: l10n.commonNavAddLabel,
     );
   }
 }
 
-/// The shell frame: body plus the platform's tab bar and Add button. Public
-/// so widget tests and design shots can render it without a router.
+/// The shell frame: body plus the shared bottom bar (C-02). Public so widget
+/// tests and design shots can render it without a router.
 class ShellScaffold extends StatelessWidget {
   const ShellScaffold({
     super.key,
@@ -86,18 +78,28 @@ class ShellScaffold extends StatelessWidget {
     required this.selected,
     required this.onSelect,
     required this.onAdd,
-    required this.glass,
     required this.labels,
     required this.addLabel,
+    this.addCaption,
+    this.badges = const {},
   });
 
   final Widget body;
   final int selected;
   final ValueChanged<int> onSelect;
   final VoidCallback onAdd;
-  final bool glass;
+
+  /// The four tab labels, in logical order (Home, Insights, Money, Zaghlol).
   final List<String> labels;
+
+  /// Screen-reader label of the Add button.
   final String addLabel;
+
+  /// Visible caption under Add; defaults to [addLabel].
+  final String? addCaption;
+
+  /// Badge counts by tab index (max shown "9+"); empty unless S-51's flag is on.
+  final Map<int, int> badges;
 
   @override
   Widget build(BuildContext context) {
@@ -111,61 +113,43 @@ class ShellScaffold extends StatelessWidget {
       onAdd();
     }
 
-    if (glass) {
-      return Scaffold(
-        extendBody: true,
-        body: body,
-        bottomNavigationBar: _GlassBar(
-          labels: labels,
-          addLabel: addLabel,
-          selected: selected,
-          onSelect: select,
-          onAdd: add,
-        ),
-      );
-    }
     final c = ZColors.of(context);
-    // FAB-MOCKUP (PO 2026-11-17): floating apricot FAB at bottom-end above the
-    // M3 bar, as in mockups 03 / 20; tabs clear it with ZSpacing.fabClearance.
+    final mq = MediaQuery.of(context);
+    // The bar hides while the keyboard is open.
+    final keyboardOpen = mq.viewInsets.bottom > 0;
+    final barVisible = !keyboardOpen;
+    final content = barVisible
+        ? MediaQuery.removePadding(
+            context: context,
+            removeBottom: true,
+            child: body,
+          )
+        : body;
     return Scaffold(
-      body: body,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ZAddButton(label: addLabel, onTap: add),
-      bottomNavigationBar: ColoredBox(
-        color: Color.alphaBlend(
-          c.primaryContainer.withValues(alpha: 0.35),
-          c.bg,
-        ),
-        child: SafeArea(top: false, child: _androidBar(c, select)),
-      ),
-    );
-  }
-
-  Widget _androidBar(ZColors c, ValueChanged<int> onSelect) {
-    return NavigationBarTheme(
-      data: NavigationBarThemeData(
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        indicatorColor: c.primaryContainer,
-        labelTextStyle: WidgetStatePropertyAll(
-          ZType.label.copyWith(color: c.text),
-        ),
-        iconTheme: WidgetStateProperty.resolveWith(
-          (states) => IconThemeData(
-            color: states.contains(WidgetState.selected) ? c.primary : c.text,
-          ),
-        ),
-      ),
-      child: NavigationBar(
-        selectedIndex: selected,
-        onDestinationSelected: onSelect,
-        destinations: [
-          for (var i = 0; i < _destinations.length; i++)
-            NavigationDestination(
-              icon: Icon(_destinations[i].icon),
-              selectedIcon: Icon(_destinations[i].selectedIcon),
-              label: labels[i],
+      body: CustomMultiChildLayout(
+        delegate: _ShellLayout(barVisible: barVisible),
+        children: [
+          LayoutId(id: _ShellSlot.body, child: content),
+          if (barVisible)
+            LayoutId(
+              id: _ShellSlot.bar,
+              child: ZBottomBar(
+                labels: labels,
+                addCaption: addCaption ?? addLabel,
+                selected: selected,
+                onSelect: select,
+                onAdd: add,
+                badges: badges,
+              ),
+            ),
+          if (barVisible)
+            LayoutId(
+              id: _ShellSlot.add,
+              child: _RingedAdd(
+                label: addLabel,
+                ringColor: c.surface,
+                onTap: add,
+              ),
             ),
         ],
       ),
@@ -173,8 +157,68 @@ class ShellScaffold extends StatelessWidget {
   }
 }
 
-/// The apricot Add button (gradient; mint in dark): a circle on iOS, a
-/// rounded square FAB on Android (mockups 03 / 20 / 21).
+enum _ShellSlot { body, bar, add }
+
+/// Body above the bar (nothing scrolls under it); the Add circle is centred
+/// on the bar and raised [ZSpacing.addRaise] above its top edge.
+class _ShellLayout extends MultiChildLayoutDelegate {
+  _ShellLayout({required this.barVisible});
+  final bool barVisible;
+
+  @override
+  void performLayout(Size size) {
+    var barHeight = 0.0;
+    if (hasChild(_ShellSlot.bar)) {
+      final bar = layoutChild(
+        _ShellSlot.bar,
+        BoxConstraints.tightFor(width: size.width),
+      );
+      barHeight = bar.height;
+      positionChild(_ShellSlot.bar, Offset(0, size.height - barHeight));
+    }
+    layoutChild(
+      _ShellSlot.body,
+      BoxConstraints.tight(Size(size.width, size.height - barHeight)),
+    );
+    positionChild(_ShellSlot.body, Offset.zero);
+    if (hasChild(_ShellSlot.add)) {
+      final add = layoutChild(_ShellSlot.add, const BoxConstraints());
+      positionChild(
+        _ShellSlot.add,
+        Offset(
+          (size.width - add.width) / 2,
+          size.height - barHeight - ZSpacing.addRaise,
+        ),
+      );
+    }
+  }
+
+  @override
+  bool shouldRelayout(_ShellLayout old) => old.barVisible != barVisible;
+}
+
+class _RingedAdd extends StatelessWidget {
+  const _RingedAdd({
+    required this.label,
+    required this.ringColor,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color ringColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(color: ringColor, shape: BoxShape.circle),
+    child: Padding(
+      padding: const EdgeInsets.all(ZSpacing.addRing),
+      child: ZAddButton(label: label, onTap: onTap),
+    ),
+  );
+}
+
+/// The apricot Add circle (C-02): 62 dp, `accent` gradient, on-accent plus.
 class ZAddButton extends StatelessWidget {
   const ZAddButton({super.key, required this.label, required this.onTap});
 
@@ -184,25 +228,25 @@ class ZAddButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final glass = usesGlassBar(context);
-    final size = glass ? 62.0 : 56.0;
-    final shape = glass
-        ? const CircleBorder()
-        : RoundedRectangleBorder(borderRadius: BorderRadius.circular(18));
+    const shape = CircleBorder();
     return Semantics(
       button: true,
       label: label,
+      onTap: onTap,
       excludeSemantics: true,
       child: DecoratedBox(
         decoration: ShapeDecoration(
           shape: shape,
-          shadows: [
-            BoxShadow(
-              color: c.accentDark.withValues(alpha: 0.35),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          // No shadows or glows in dark.
+          shadows: c.brightness == Brightness.dark
+              ? null
+              : [
+                  BoxShadow(
+                    color: c.accentDark.withValues(alpha: 0.35),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
           gradient: LinearGradient(
             begin: AlignmentDirectional.topStart,
             end: AlignmentDirectional.bottomEnd,
@@ -216,8 +260,8 @@ class ZAddButton extends StatelessWidget {
             customBorder: shape,
             onTap: onTap,
             child: SizedBox(
-              width: size,
-              height: size,
+              width: ZSpacing.fabSize,
+              height: ZSpacing.fabSize,
               child: Icon(Icons.add, size: 32, color: c.onAccent, weight: 300),
             ),
           ),
@@ -227,137 +271,220 @@ class ZAddButton extends StatelessWidget {
   }
 }
 
-class _GlassBar extends StatelessWidget {
-  const _GlassBar({
+/// C-02: solid docked bar. [labels] are the four tabs in logical order; the
+/// Add slot sits between the second and third.
+class ZBottomBar extends StatelessWidget {
+  const ZBottomBar({
+    super.key,
     required this.labels,
-    required this.addLabel,
+    required this.addCaption,
     required this.selected,
     required this.onSelect,
     required this.onAdd,
+    this.badges = const {},
   });
 
   final List<String> labels;
-  final String addLabel;
+  final String addCaption;
   final int selected;
   final ValueChanged<int> onSelect;
   final VoidCallback onAdd;
-
-  static const double _barHeight = 64;
+  final Map<int, int> badges;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    return SafeArea(
-      top: false,
+    final inset = MediaQuery.of(context).padding.bottom;
+    Widget tab(int i) => Expanded(
+      child: _BarTab(
+        label: labels[i],
+        destination: _destinations[i],
+        selected: i == selected,
+        badge: badges[i],
+        onTap: () => onSelect(i),
+      ),
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.surface,
+        border: Border(top: BorderSide(color: c.outline)),
+        // Soft upward shadow in light only (c.shadow is clear in dark).
+        boxShadow: [
+          BoxShadow(
+            color: c.shadow,
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(
-          ZSpacing.lg,
-          0,
-          ZSpacing.lg,
-          ZSpacing.sm,
-        ),
-        // Row start is the right edge in RTL: capsule first, Add at the end
-        // (left in Arabic, right in English).
-        child: Row(
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(ZRadius.pill),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                  child: Container(
-                    height: _barHeight,
-                    padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: ZSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: c.surface.withValues(alpha: 0.82),
-                      borderRadius: BorderRadius.circular(ZRadius.pill),
-                      border: Border.all(color: c.outline),
-                    ),
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < labels.length; i++)
-                          Expanded(
-                            child: _GlassTab(
-                              label: labels[i],
-                              destination: _destinations[i],
-                              selected: i == selected,
-                              onTap: () => onSelect(i),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+        padding: EdgeInsets.only(bottom: inset),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: ZSpacing.barHeight),
+          // The tallest tab (wrapped labels at 1.3x) sets the bar height.
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                tab(0),
+                tab(1),
+                Expanded(
+                  child: _AddSlot(caption: addCaption, onTap: onAdd),
                 ),
-              ),
+                tab(2),
+                tab(3),
+              ],
             ),
-            const SizedBox(width: ZSpacing.md),
-            ZAddButton(label: addLabel, onTap: onAdd),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _GlassTab extends StatelessWidget {
-  const _GlassTab({
-    required this.label,
-    required this.destination,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final _Destination destination;
-  final bool selected;
+class _AddSlot extends StatelessWidget {
+  const _AddSlot({required this.caption, required this.onTap});
+  final String caption;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
-    final color = selected ? c.primary : c.text;
+    // The circle itself is the raised, labelled button; this slot carries the
+    // caption (and forwards taps on it) and keeps the slot width.
+    return ExcludeSemantics(
+      child: InkWell(
+        onTap: onTap,
+        child: Align(
+          alignment: AlignmentDirectional.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
+            child: Text(
+              caption,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              style: ZType.caption.copyWith(
+                color: c.textMuted,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BarTab extends StatelessWidget {
+  const _BarTab({
+    required this.label,
+    required this.destination,
+    required this.selected,
+    required this.onTap,
+    this.badge,
+  });
+
+  final String label;
+  final _Destination destination;
+  final bool selected;
+  final int? badge;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final color = selected ? c.primary : c.textMuted;
     return Semantics(
       button: true,
       selected: selected,
       label: label,
+      onTap: onTap,
       excludeSemantics: true,
       child: InkWell(
-        borderRadius: BorderRadius.circular(ZRadius.pill),
         onTap: onTap,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: ZSpacing.minTarget),
-          child: Container(
-            margin: const EdgeInsetsDirectional.symmetric(
-              vertical: ZSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: selected ? c.primaryContainer : null,
-              borderRadius: BorderRadius.circular(ZRadius.pill),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              vertical: ZSpacing.sm,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  selected ? destination.selectedIcon : destination.icon,
-                  size: 22,
-                  color: color,
-                ),
-                // Shrinks instead of truncating at 320 dp and text scale 1.3.
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    style: ZType.caption.copyWith(
-                      color: color,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                Stack(
+                  clipBehavior: Clip.none,
+                  alignment: AlignmentDirectional.center,
+                  children: [
+                    Container(
+                      width: ZSpacing.pillWidth,
+                      height: ZSpacing.pillHeight,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected ? c.primaryContainer : null,
+                        borderRadius: BorderRadius.circular(ZRadius.pill),
+                      ),
+                      child: Icon(
+                        selected ? destination.selectedIcon : destination.icon,
+                        size: 24,
+                        color: color,
+                      ),
                     ),
+                    if (badge != null && badge! > 0)
+                      PositionedDirectional(
+                        top: -2,
+                        end: 0,
+                        child: _Badge(count: badge!),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                // Labels always shown; at 1.3x they wrap to two lines and the
+                // bar grows.
+                Text(
+                  label,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  style: ZType.caption.copyWith(
+                    color: color,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({required this.count});
+  final int count;
+
+  /// Max "9+", digits per locale.
+  String _text(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return count > 9 ? l10n.commonNavBadgeMax : l10n.commonNavBadgeCount(count);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: c.accent,
+        borderRadius: BorderRadius.circular(ZRadius.pill),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: 5),
+        child: Text(
+          _text(context),
+          style: ZType.caption.copyWith(
+            color: c.onAccent,
+            fontSize: 10,
+            height: 1.4,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),

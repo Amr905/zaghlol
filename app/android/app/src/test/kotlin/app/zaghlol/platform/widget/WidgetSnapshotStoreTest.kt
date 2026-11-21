@@ -119,4 +119,51 @@ class WidgetSnapshotStoreTest {
         }
         assertNotNull(read)
     }
+
+    private val cairo = java.time.ZoneId.of("Africa/Cairo")
+
+    private fun at(y: Int, m: Int, d: Int, h: Int, min: Int) =
+        java.time.ZonedDateTime.of(y, m, d, h, min, 0, 0, cairo).toInstant().toEpochMilli()
+
+    @Test
+    fun daysToPaydayRollsAtLocalMidnightFromTheStoredList() {
+        val v = WidgetView(
+            WidgetView.STATE_OK, "•••/day", "3 days", "EGP", at(2026, 11, 3, 23, 50), 3,
+            listOf("3 days", "2 days", "1 day"),
+        )
+        assertEquals("3 days", v.secondaryAt(at(2026, 11, 3, 23, 59), cairo))
+        assertEquals("2 days", v.secondaryAt(at(2026, 11, 4, 0, 1), cairo))
+        assertEquals("1 day", v.secondaryAt(at(2026, 11, 5, 12, 0), cairo))
+        // Past the list: blank, never a stale count; a clock set back keeps day 0.
+        assertEquals("", v.secondaryAt(at(2026, 11, 9, 12, 0), cairo))
+        assertEquals("3 days", v.secondaryAt(at(2026, 11, 1, 12, 0), cairo))
+    }
+
+    @Test
+    fun aV1FileWithoutTheListKeepsItsStoredLine() {
+        val v = view()
+        assertEquals("7 days to payday", v.secondaryAt(Long.MAX_VALUE / 2, cairo))
+    }
+
+    @Test
+    fun theDayListRoundTripsAndIsCapped() {
+        val store = WidgetSnapshotStore(file, SoftwareSpoolCipher())
+        val many = (1..100).map { "d$it" }
+        store.write(view().copy(secondaryByDay = many))
+        assertEquals(many.take(WidgetSnapshotStore.MAX_DAYS), store.readOrNull()!!.secondaryByDay)
+    }
+
+    @Test
+    fun midnightDelayIsToJustAfterTheNextLocalMidnight() {
+        assertEquals(11L * 60 * 60_000 + 31 * 60_000, WidgetMidnightWorker.delayToNextMidnightMs(at(2026, 11, 3, 12, 30), cairo))
+    }
+
+    @Test
+    fun hostStoresTheDayList() {
+        val store = WidgetSnapshotStore(file, SoftwareSpoolCipher())
+        WidgetBridgeHost(store) {}.updateSnapshot(
+            WidgetSnapshot(WidgetDisplayState.OK, "•••/day", "2 days", "EGP", 5L, 2L, listOf("2 days", "1 day")),
+        )
+        assertEquals(listOf("2 days", "1 day"), store.readOrNull()!!.secondaryByDay)
+    }
 }

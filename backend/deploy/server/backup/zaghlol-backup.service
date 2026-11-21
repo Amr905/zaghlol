@@ -1,0 +1,11 @@
+[Unit]
+Description=Zaghlol nightly backup (dump, base backup, off-server copy)
+Wants=docker.service
+After=docker.service
+OnFailure=zaghlol-backup-failed.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/zaghlol/deploy/server/backup/backup.sh
+Nice=10
+IOSchedulingClass=idle

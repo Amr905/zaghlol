@@ -55,8 +55,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(seen.bg, const Color(0xFF08130F));
-      expect(seen.primary, const Color(0xFF34D399));
+      expect(seen.bg, const Color(0xFF000000));
+      expect(seen.primary, const Color(0xFFFFFFFF));
     });
 
     test('scaffold background follows the token', () {

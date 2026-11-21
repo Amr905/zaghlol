@@ -127,7 +127,7 @@ Delegation rules for the Lead:
 - Riverpod for state and DI; no global singletons.
 - Platform channel contracts defined in Dart first, documented in `docs/03-technical/`, then implemented natively.
 - Tests mirror `lib/` under `app/test/`. SMS fixtures live in `app/test/fixtures/sms/` (synthetic).
-- Brand tokens (Mint Fresh, `docs/02-design/05-theme-2026.md` §0): bg `#F3FBF7`, surface `#FFFFFF`, ink `#0F2A20`, muted `#4D695C`, primary green `#0F7A55`, mint container `#D7F3E5`, apricot accent `#FFB86B` (Add button, Gold), Zaghlol voice apricot cream `#FFF3E6`; dark "Jade Night" bg `#08130F`, primary `#34D399`. Spending amounts in ink, not red. Logo/app icon = Captain Zaghlol holding coins, in `docs/02-design/brand/`.
+- Brand tokens (Mint Fresh, `docs/02-design/05-theme-2026.md` §0): bg `#F3FBF7`, surface `#FFFFFF`, ink `#0F2A20`, muted `#4D695C`, primary green `#0F7A55`, mint container `#D7F3E5`, apricot accent `#FFB86B` (Add button, Gold), Zaghlol voice apricot cream `#FFF3E6`; dark "True Black" (D-79) bg `#000000`, surface `#141414`, text and primary `#FFFFFF`, mint `#62E0AB` for fills only, no shadows. Spending amounts in ink, not red. Logo/app icon = Captain Zaghlol holding coins, in `docs/02-design/brand/`.
 
 ## 9. Key decisions & risks
 

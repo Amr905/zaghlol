@@ -394,6 +394,7 @@ class _AccountsSection extends ConsumerWidget {
             decoration: BoxDecoration(
               color: c.surface,
               borderRadius: BorderRadius.circular(ZRadius.card),
+              border: c.flatBorder,
               boxShadow: [
                 BoxShadow(
                   color: c.shadow,

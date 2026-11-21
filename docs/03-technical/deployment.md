@@ -252,4 +252,90 @@ tag:  promote the same image digest to prod → migration job (expand/contract, 
 - [ ] RTDN + ASSN V2 configured for prod and sandbox; reconciliation jobs green.
 - [ ] Price provider contract signed (OQ-02); stale alerts tested.
 - [ ] Hosting region approved and PDPL licensing done (CR-03).
+- [ ] Self-hosted server: runbook (section 6) done, restore drill passed, backup off-server copy verified, OpenBao move done before Gold.
 - [ ] Privacy scan + data-boundary contract tests green on the release candidate.
+
+## 6. Self-hosted server (single Linux host)
+
+ADR-025. The product owner can't use a cloud provider, so the whole backend runs on **one Ubuntu 24.04 server with Docker** that
+he controls. Sections 3 to 5 still define every setting; this section says how they are put together on that one host. Files:
+`backend/deploy/server/` (compose, Caddyfile, env examples, `harden.sh`, `deploy.sh`, `backup/`, optional `observability/`), the
+workflow `.github/workflows/backend-deploy-server.yml` and the checks `.github/workflows/backend-server-kit.yml`. The OpenTofu
+files and `backend-deploy.yml` are the cloud alternative and stay untouched.
+
+**What runs.** `postgres:17` (no published port, data in `/var/lib/zaghlol/postgres`, WAL archived to `/var/lib/zaghlol/backup/wal`),
+a one-shot `migrate`, `api` (2 replicas; `API_REPLICAS=1` on a small host), `worker` (1), `caddy` (the only published ports: 80, 443/tcp,
+443/udp; automatic Let's Encrypt certificate; reverse proxy to the replicas; `/catalog/` serves the snapshot folder read-only;
+1 MiB request bodies; 10 s header and 15 s body timeouts; access log with the client network cut to /24 or /56 and no headers),
+and optionally an OTel collector, Prometheus, Alertmanager and Grafana. All containers drop every capability, set
+`no-new-privileges`, `ulimits.core: 0`, use read-only roots and run as non-root users (api/worker 1654, postgres 999, caddy 65532).
+The network `172.30.52.0/24` is fixed, so `ForwardedHeaders__KnownNetworks__0=172.30.52.0/24` is exact (Caddy is the one hop in
+front of the API). The api and worker mount `/etc/zaghlol/kms-production/keys` read-only at `/run/zaghlol-kms` (section 3, "File KMS").
+`-f ../openbao/docker-compose.openbao.yml` is added on top after the OpenBao move; `compose.sh` does that when the marker file
+`/etc/zaghlol/use-openbao` exists (`use-observability` likewise).
+
+**Two env files.** `/etc/zaghlol/production.env` (`production.env.example`: image references, domain, database passwords) is read by
+Compose only; `/etc/zaghlol/app.env` (`app.env.example`: every API/worker setting of section 3) is passed to api and worker, which
+therefore never see a database password they don't use (connection strings are built per service in the compose file). Both root, 0600.
+Database login passwords come from `production.env`: `postgres/init/20-set-passwords.sh` applies them on first initialisation
+(after the unchanged `bootstrap-roles.sql`), `backup/set-db-passwords.sh` re-applies them after a change. Never `dev-passwords.sql`.
+
+**Images.** Third-party images are pinned by digest in `production.env` (`pin-images.sh` prints the lines; the example holds real digests resolved 2026-11-21, and an
+all-zero placeholder only for the backend image, which the first deploy writes). The backend image is `ghcr.io/amr905/zaghlol-backend@sha256:...`, written
+into `BACKEND_IMAGE` by `deploy.sh`, which also keeps the previous one in `BACKEND_IMAGE_PREVIOUS`.
+
+### First install (numbered runbook)
+
+1. **Server.** Ubuntu 24.04 LTS, at least 2 vCPU / 4 GB / 40 GB, a static public IP, root or sudo SSH with your own key.
+   Install Docker Engine and the Compose plugin from Docker's apt repository (not rootless, no userns remap: section 3). Reboot.
+   Copy the repository's `backend/deploy` folder to `/opt/zaghlol/deploy` (`rsync -a backend/deploy/ root@server:/opt/zaghlol/deploy/`).
+2. **DNS.** An `A` (and `AAAA`) record for the API name (for example `api.<your domain>`) pointing at the server. Check with
+   `dig +short api.<your domain>`. Ports 80 and 443 must reach the server (Let's Encrypt needs 80).
+3. **Harden.** Put the deploy key's public part in `/etc/zaghlol/deploy.pub` (generate the pair on your laptop:
+   `ssh-keygen -t ed25519 -f deploy_key -C zaghlol-deploy`; the private half goes to GitHub only). Then, with your own SSH key already
+   working, `sudo /opt/zaghlol/deploy/server/harden.sh`. It sets ufw (22, 80, 443), SSH keys only (refused if no key exists), unattended
+   security upgrades, swap off, no core dumps, Docker log rotation, the deploy user, the folders under `/etc/zaghlol` and
+   `/var/lib/zaghlol` with the owners and modes of section 3, and the backup timer files. Re-run it after any change. Without
+   swap a memory spike kills a process instead of paging: size the host with headroom, or use encrypted swap instead.
+4. **Keys (File KMS).** As in section 3: `sudo docker pull <image>` of the first release, then the `--generate-keys` command into
+   `/etc/zaghlol/kms-production` (`--kid s2026a --kid e2026a --secret seat --secret audit --secret install-pepper --secret envelope`).
+   Copy the printed ring entries, fingerprints and `SeatCheck` into `app.env`. Back the key directory up to two offline encrypted media at once.
+5. **Env files.** `sudo install -m 0600 -o root -g root /opt/zaghlol/deploy/server/production.env.example /etc/zaghlol/production.env`,
+   `...app.env.example /etc/zaghlol/app.env`, `.../backup/backup.env.example /etc/zaghlol/backup.env`; fill every value
+   (`openssl rand -hex 24` for passwords; `./pin-images.sh` for digests; the store, Pub/Sub, operator sign-in and price values come from the
+   consoles named in section 3). Set `ASPNETCORE_ENVIRONMENT=Production`. Create the off-server backup key
+   (`ssh-keygen -t ed25519 -f /etc/zaghlol/backup/id_ed25519 -N ''`), install its public half on the backup host, and write the target's pinned host
+   key into `/etc/zaghlol/backup/known_hosts` (`ssh-keyscan -t ed25519 <backup host>`, compare the fingerprint by hand). Run `harden.sh` again to enable the timer.
+6. **GitHub.** Create the environment `backend-production` with a required reviewer, the secrets `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS`
+   (`ssh-keyscan -t ed25519 <server>`, fingerprint checked by hand), the variables `DEPLOY_HOST`, `DEPLOY_API_DOMAIN` (and optionally
+   `DEPLOY_USER`), and the repository variable `BACKEND_SERVER_DEPLOY_ENABLED=true`.
+7. **First deploy.** Actions > backend-deploy-server > Run workflow, approve it. It builds the image, pushes it by digest, ships
+   `backend/deploy`, and runs `deploy.sh` (pull, start postgres, migrate, start everything, smoke `GET /v1/health` on the server and from
+   the runner). On the server, `./compose.sh ps` shows everything healthy; Caddy fetches the certificate on the first request.
+   Run the first backup by hand (`sudo systemctl start zaghlol-backup.service`) and check `journalctl -u zaghlol-backup.service`.
+8. **Operator, stores, prices.** Seed the first operator (`backend/deploy/db/seed-operator.sql` as `migrator`), set the ASSN V2 and RTDN URLs
+   (section 3), run a synthetic sync and a sandbox purchase.
+9. **Move the keys into OpenBao before Gold is sold** (T-201, D-76): follow "OpenBao Transit KMS" (section 3) with the folders `harden.sh` already made;
+   `touch /etc/zaghlol/use-openbao`, switch the `Kms__*` entries of `app.env` as that section says, `./compose.sh up -d`; then remove the File key mount.
+   The OpenBao raft snapshot joins the nightly backup (`bao operator raft snapshot save`), but never `/etc/zaghlol/openbao/unseal` or the key folders.
+10. **Restore drill** (`backend/deploy/server/backup/restore-drill.md`) before launch and every quarter.
+
+### Day-to-day
+
+- **Upgrade the backend:** run the workflow again (it migrates first, N-1 compatible, then recreates api and worker). A failed smoke test puts the
+  previous digest back automatically; migrations are never reversed (expand/contract, section 3). To redeploy a known digest, give `image_digest`.
+- **Upgrade Postgres/Caddy/other images:** `./pin-images.sh`, review the diff, edit `production.env`, `./compose.sh pull && ./compose.sh up -d`. A Postgres major upgrade
+  needs a dump/restore (`backup/restore.sh`), not a tag bump.
+- **Backups (`backup/`).** `zaghlol-backup.timer` runs nightly at 02:30 UTC: `pg_dump` (custom format), a base backup, a `pg_switch_wal`, retention of 15 days, then an `rsync` over
+  ssh with a pinned host key to `OFFSITE_TARGET`. `archive_command` copies each WAL segment to `/var/lib/zaghlol/backup/wal` (at least every 5 minutes), which `backup.sh` mirrors
+  off-server too: 14-day point-in-time recovery, RPO of about 5 minutes for a lost disk if the last WAL reached the target (otherwise the previous nightly run). A failed run mails `ALERT_EMAIL` and logs
+  to the journal. Backups hold no financial data (it never reaches the server) but do hold install hashes and contributions: keep the target encrypted and private, and keep key material out of it.
+  The mirror deletes off-server what local retention drops: give the target its own snapshots or an append-only mode if ransomware on this host is a concern.
+- **Restore** (`backup/restore.sh`, drill in `backup/restore-drill.md`): `dump` into a scratch database, `live` to replace the live schema from a dump, `pitr <base> "<UTC time>"` to rebuild the cluster.
+  A new server needs runbook steps 1 to 5, the offline key backups, then `restore.sh pitr`.
+- **Rotation.** Signing, envelope and OpenBao secret ids: section 3. Database passwords: edit `production.env`, `backup/set-db-passwords.sh`, `./compose.sh up -d --force-recreate api worker`.
+  Deploy SSH key: new pair, replace `/etc/zaghlol/deploy.pub`, run `harden.sh`, update the GitHub secret. Off-server backup key: replace on both ends. Apple/Play credentials: edit `app.env`, recreate api and worker.
+- **Optional monitoring** (`observability/`): `touch /etc/zaghlol/use-observability`, create `/etc/zaghlol/alertmanager/alertmanager.yml` and `smtp-password` from the example (folder root:65534 0750),
+  `./compose.sh up -d`. The collector turns OTLP into Prometheus metrics, Prometheus loads the repository's alert rules (the container and Postgres exporter rules stay silent until such exporters are added), Alertmanager
+  e-mails, and Grafana (127.0.0.1:3000, reach it with `ssh -L`) shows the repository dashboards. Without it the apps export nothing and run unchanged. Watch disk space and certificate expiry by hand or with an external uptime check on `https://<api>/v1/health`.
+- **Residual risks of one host (ADR-025):** no zone redundancy (a server loss means hours of restore, RTO 4 h assumes the drill works), root on the host reads the File-KMS keys (until OpenBao, and even then the unseal key), Docker's published ports bypass ufw (only Caddy publishes any), and a deploy key is root-equivalent.
