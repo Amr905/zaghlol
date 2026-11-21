@@ -78,11 +78,18 @@ final class WidgetSnapshotStoreTests: XCTestCase {
     good.append(0)
     XCTAssertThrowsError(try WidgetSnapshotStore.decode(good))
     var badVersion = WidgetSnapshotStore.encode(view())
-    badVersion[0] = 2
+    badVersion[0] = 3
     XCTAssertThrowsError(try WidgetSnapshotStore.decode(badVersion))
     var badState = WidgetSnapshotStore.encode(view())
     badState[1] = 9
     XCTAssertThrowsError(try WidgetSnapshotStore.decode(badState))
+  }
+
+  func testAV1RecordStillDecodes() throws {
+    var v1 = WidgetSnapshotStore.encode(view())
+    v1.removeLast(2)  // no day list
+    v1[0] = 1
+    XCTAssertEqual(try WidgetSnapshotStore.decode(v1), view())
   }
 
   func testWriteExcludesTheDirectoryFromBackupFirst() throws {
