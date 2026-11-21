@@ -8,11 +8,11 @@ namespace Zaghlol.Infrastructure.Persistence;
 /// </summary>
 public static class ZaghlolMigrator
 {
-    public static async Task MigrateAsync(string connectionString, CancellationToken cancellationToken)
+    public static async Task MigrateAsync(string connectionString, CancellationToken cancellationToken, DatabaseSettings? settings = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
-        await using var dataSource = ZaghlolDbContextOptions.CreateDataSource(connectionString, DatabaseRole.Migrator);
+        await using var dataSource = ZaghlolDbContextOptions.CreateDataSource(connectionString, DatabaseRole.Migrator, settings);
         await using var context = new ZaghlolDbContext(ZaghlolDbContextOptions.Create(dataSource));
         await context.Database.MigrateAsync(cancellationToken);
     }

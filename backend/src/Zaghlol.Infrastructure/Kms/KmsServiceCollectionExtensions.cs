@@ -51,7 +51,8 @@ public static class KmsServiceCollectionExtensions
 
     /// <summary>
     /// The provider named by <c>Kms:Provider</c> (T-200 design note §1): <c>Local</c> (Development/Testing only) or <c>File</c>
-    /// (hardened key files, Linux) or <c>OpenBao</c> (Transit, T-201). Any other name refuses the start.
+    /// (hardened key files, Linux) or <c>OpenBao</c> (Transit, T-201) or <c>HostSecrets</c> (host-injected secret settings on a
+    /// shared host, T-205, ADR-026). Any other name refuses the start.
     /// </summary>
     internal static IKmsBackend SelectProvider(IServiceProvider provider)
     {
@@ -65,7 +66,11 @@ public static class KmsServiceCollectionExtensions
                 provider.GetRequiredService<IHostEnvironment>(),
                 provider.GetRequiredService<TimeProvider>(),
                 provider.GetRequiredService<KmsCallPolicy>()),
-            _ => throw new KmsConfigurationException("Kms:Provider names no available adapter (Local for development, File, OpenBao)."),
+            HostSecretsKms.ProviderName => HostSecretsKms.Load(
+                settings,
+                provider.GetRequiredService<IConfiguration>(),
+                provider.GetRequiredService<IHostEnvironment>()),
+            _ => throw new KmsConfigurationException("Kms:Provider names no available adapter (Local for development, File, OpenBao, HostSecrets)."),
         };
     }
 

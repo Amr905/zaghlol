@@ -36,6 +36,12 @@ public static class FileKeyTool
         ArgumentNullException.ThrowIfNull(stderr);
         ArgumentNullException.ThrowIfNull(workingDirectory);
 
+        // T-205: `--format host-secrets` prints the keys as host settings instead of writing key files (any OS, no file).
+        if (args.Contains(HostSecretsKeyTool.FormatFlag, StringComparer.Ordinal))
+        {
+            return HostSecretsKeyTool.Run(args, stdout, stderr, workingDirectory);
+        }
+
         if (!TryParse(args, out var request, out var problem))
         {
             stderr.WriteLine("refused: " + problem);

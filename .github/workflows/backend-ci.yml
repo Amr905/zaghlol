@@ -190,6 +190,7 @@ jobs:
         run: |
           set +e
           timeout 60 docker run --rm \
+            -e 'Database__AllowInsecureTransport=true' \
             -e 'ConnectionStrings__App=Host=127.0.0.1;Port=1;Database=none;Username=none' \
             -e 'ConnectionStrings__Admin=Host=127.0.0.1;Port=1;Database=none;Username=none' \
             "$IMAGE" > prod.log 2>&1

@@ -24,7 +24,8 @@ if (args.Contains(MigrateCommand.Flag, StringComparer.Ordinal))
 }
 
 // `dotnet Zaghlol.Workers.dll --generate-keys ...` is the production key tool of the File KMS (T-200): run it once on the server,
-// inside this image, with no network. It writes key files and prints public values only.
+// inside this image, with no network. It writes key files and prints public values only. With `--format host-secrets` (T-205) it
+// writes nothing and prints the keys once as ZAGHLOL_KEYS__<name> settings for the shared host (ADR-026).
 if (args.Contains(FileKeyTool.Flag, StringComparer.Ordinal))
 {
     return FileKeyTool.Run(args, Console.Out, Console.Error, Environment.CurrentDirectory);
@@ -47,40 +48,12 @@ builder.Logging.AddSerilog(Log.Logger, dispose: true);
 builder.Services.AddInfrastructure();
 builder.Services.AddZaghlolTelemetry(builder.Configuration, builder.Environment, "zaghlol-worker");
 builder.Services.AddZaghlolDatabase(DatabaseRole.Worker);
-builder.Services.AddHostedService<WorkerHeartbeatService>();
-
-// Price fetcher (T-127): providers from Prices:Providers, hourly.
-builder.Services.AddZaghlolPriceWorker();
-builder.Services.AddHostedService<PriceFetcherService>();
-
-// Contribution aggregator (T-129): roll raw rows into aggregates, A-48 threshold, retention purge.
-builder.Services.AddZaghlolContributionWorker();
-builder.Services.AddHostedService<ContributionAggregatorService>();
-// RetentionPurger (T-139): daily, Retention:IntervalHours / Retention:BatchSize.
-builder.Services.AddZaghlolRetention();
-builder.Services.AddHostedService<RetentionPurgerService>();
-// Google acknowledge sweeper (T-130): every 15 min, one instance across replicas (advisory lock), Purchases:Google:* config.
-builder.Services.AddZaghlolPlayAckSweeper();
-builder.Services.AddHostedService<PlayAckSweeperService>();
-// App Store Server Notifications V2 (T-134): processor (5 s idle poll), daily history reconciliation, hourly expiry sweep; one
-// instance of each across replicas (advisory locks), Purchases:Apple:* config, the worker's share of the Apple budget.
-builder.Services.AddZaghlolAppleNotificationWorker();
-builder.Services.AddHostedService<AppleNotificationProcessorService>();
-builder.Services.AddHostedService<AppleNotificationHistoryService>();
-builder.Services.AddHostedService<AppleExpirySweepService>();
-// Google RTDN (T-133): processor (5 s idle poll), daily voided-purchases reconciliation, hourly expiry sweep; one instance of each
-// across replicas (advisory locks), Purchases:Google:* config, the worker's share of the Play budget (with the ack sweeper's).
-builder.Services.AddZaghlolPlayNotificationWorker();
-builder.Services.AddHostedService<PlayNotificationProcessorService>();
-builder.Services.AddHostedService<PlayVoidedReconcileService>();
-builder.Services.AddHostedService<PlayExpirySweepService>();
-
-// Apple revocation retry (T-135): token revocations that failed at account deletion, every 15 min for up to 30 days. Needs the Kms:*
-// ring (to open the sealed refresh token) and Accounts:Apple:* (the Sign in with Apple key), like the API. With OpenBao (T-201) the
-// worker runs with Kms:Scope=Envelope and an AppRole whose policy allows envelope keys only.
+// KMS ring first (the Apple revocation job opens sealed refresh tokens with it). With OpenBao (T-201) the worker runs with
+// Kms:Scope=Envelope and an AppRole whose policy allows envelope keys only.
 builder.Services.AddZaghlolKms();
-builder.Services.AddZaghlolAppleRevocationWorker();
-builder.Services.AddHostedService<AppleRevocationRetryService>();
+// Every job (heartbeat, prices, contributions, retention, Play/Apple notifications and sweepers, revocation retry): shared with the
+// API's embedded-workers mode (T-206).
+builder.Services.AddZaghlolWorkerJobs();
 
 using var host = builder.Build();
 

@@ -340,3 +340,92 @@ into `BACKEND_IMAGE` by `deploy.sh`, which also keeps the previous one in `BACKE
   `./compose.sh up -d`. The collector turns OTLP into Prometheus metrics, Prometheus loads the repository's alert rules (the container and Postgres exporter rules stay silent until such exporters are added), Alertmanager
   e-mails, and Grafana (127.0.0.1:3000, reach it with `ssh -L`) shows the repository dashboards. Without it the apps export nothing and run unchanged. Watch disk space and certificate expiry by hand or with an external uptime check on `https://<api>/v1/health`.
 - **Residual risks of one host (ADR-025):** no zone redundancy (a server loss means hours of restore, RTO 4 h assumes the drill works), root on the host reads the File-KMS keys (until OpenBao, and even then the unseal key), Docker's published ports bypass ufw (only Caddy publishes any), and a deploy key is root-equivalent.
+
+## 7. MonsterASP.NET + Aiven
+
+D-80. The API runs as one IIS site on MonsterASP.NET (Windows, shared host) and the database is Aiven for PostgreSQL. The
+self-hosted server (section 6) stays the alternative. Hosting profile, embedded workers, deploy workflow and keep-alive: T-206;
+Aiven profile: T-207 (their subsections join this section).
+
+### Keys: HostSecrets provider (T-205, ADR-026)
+
+The File KMS refuses Windows and OpenBao needs our own server, so on this host the keys come from **secret settings the host
+injects** (`Kms:Provider = HostSecrets`). It is the File KMS key ring (same `file:<name>` key references, kids, `Signing:Keys`
+entries, pins and envelope format) read from one environment variable per key instead of one file per key. Read ADR-026 first:
+this custody is weaker than section 3 and is accepted only by setting `Kms:AcceptSharedHostCustody=true`.
+
+**Settings.**
+
+| Setting | Where | Value |
+|---|---|---|
+| `ZAGHLOL_KEYS__<name>` (one per key: `s2026a`, `e2026a`, `seat`, `audit`, `install_pepper`, `envelope`) | GitHub environment secret → `web.config` `<environmentVariable>` at deploy | printed by the key tool; **private** |
+| `Kms__Provider=HostSecrets` | public settings | |
+| `Kms__AcceptSharedHostCustody=true` | public settings | set by you, after reading ADR-026; refused start without it outside Development/Testing |
+| `Signing__Keys__<n>__…`, `Kms__HmacKeys__…`, `Kms__Envelope__…` | public settings | as in section 3 (`file:<name>` references) |
+| `Kms__File__Fingerprints__<name>`, `Kms__HmacKeys__SeatCheck` | public settings | printed by the key tool |
+| `Kms__File__OtherEnvironmentFingerprints__<n>` or `Kms__File__NoOtherEnvironment=true` | public settings | required outside Development/Testing |
+
+"Public settings" may be committed in `appsettings.<Environment>.json` or set as host settings. A `ZAGHLOL_KEYS` value must
+**never** be in any `appsettings*.json` (or any other configuration file): the API refuses to start if a file configuration source
+serves one, or if an `appsettings*.json` in the content root or app folder contains the text `ZAGHLOL_KEYS` (any case) or the prefix
+every value starts with, even when that file isn't loaded in this environment. Names may use `_` for `-` and any letter case; setting both spellings of one name is refused.
+
+**Create the keys** (on your own machine, Windows or Linux, outside any checkout; the tool writes no file):
+
+```
+dotnet Zaghlol.Workers.dll --generate-keys --format host-secrets --environment Production \
+  --kid s2026a --kid e2026a --secret seat --secret audit --secret install-pepper --secret envelope
+```
+
+It prints, once, the `ZAGHLOL_KEYS__…` lines (private), then the public lines (`Kms__Provider`, ring entries with `Status=Next`,
+fingerprints, `SeatCheck`). Then:
+1. Create each `ZAGHLOL_KEYS__<NAME>` line as a secret of the GitHub environment (`backend-production`, required reviewer); the
+   MonsterASP deploy workflow (T-206) takes them from the single multi-line secret `BACKEND_APP_SETTINGS` (one `ZAGHLOL_KEYS__<name>=value` line each, section 7) and writes them into the site's `web.config` as `<environmentVariable name="ZAGHLOL_KEYS__<name>" value="…" />`.
+2. Put the public lines into the production settings, set the first kids to `Active` (rotation rules, section 3), add
+   `Kms__AcceptSharedHostCustody=true` and the other-environment fingerprints.
+3. Back up the private lines offline, like the File KMS keys (two encrypted media, never the repository, a cloud drive or chat), then
+   clear the terminal and its scrollback.
+4. Staging gets its own run with `--environment Staging`; list each environment's fingerprints in the other's
+   `Kms__File__OtherEnvironmentFingerprints`.
+
+**Already have File KMS keys** (section 3)? Convert them instead of creating new ones, so every stored hash and envelope stays valid:
+`--generate-keys --format host-secrets --environment Production --from-dir <key directory>` (run as a user that can read it).
+Pins and `SeatCheck` stay the same.
+
+**Check.** The start log says `KMS key ring verified`; a refusal names the guard with a constant message and no key data.
+`GET /v1/health` shows no key data either.
+
+**Rotation.** As in section 3, with `--kid`/`--secret` runs of the same tool: add the new secret and its ring entry and pin, deploy,
+flip statuses per the rules. Rotate the signing kids at least yearly here, and at once if the host or our host credentials may be compromised.
+
+**Leaving the shared host** (ADR-026 exit path): write each value's `pem`/`key` field (base64url-decode the setting, read the JSON) to
+`<name>.pem`/`<name>.key` with the section 3 modes, switch `Kms__Provider` to `File` with the same ring and pins, then follow "OpenBao
+Transit KMS" (BYOK import of HMAC and envelope keys). Rotate the signing keys into new kids on the new server; don't carry them over.
+
+### Hosting profile, deploy and keep-alive (T-206)
+
+The alternative to section 6 when the backend runs on **MonsterASP.NET** (Windows/IIS, one website) with the database on **Aiven for PostgreSQL**. Plans: **Free** = one site, 256 MB RAM, a `*.runasp.net` subdomain only, EU, no planned tasks; **Premium** (from about $1.95/month) = custom domain, automatic HTTPS, planned tasks. Key custody and the Aiven connection are other tasks: `Kms:Provider = HostSecrets` with `ZAGHLOL_KEYS__...` settings (T-205, ADR-026) and the Aiven TLS/pool settings (T-207); this section only names them. Files: `backend/src/Zaghlol.Api/web.config` (template), `.../Properties/PublishProfiles/MonsterAsp.pubxml`, `backend/src/Zaghlol.Api/EmbeddedWorkers.cs`, `backend/src/Zaghlol.Workers/WorkerJobRegistration.cs`, `backend/deploy/monsterasp/`, and the workflows `backend-deploy-monsterasp.yml`, `backend-keepalive-monsterasp.yml`, `backend-monsterasp.yml` (package checks).
+
+**Embedded workers.** There is no always-on second process, so `Hosting:EmbeddedWorkers=true` (set in the `web.config` template; off by default, so the container layout with a separate `Zaghlol.Workers` keeps working) registers inside the API process the same jobs the worker runs: heartbeat, price fetcher, contribution aggregator, retention purger, Play ack sweeper, Apple and Play notification processors, history/voided reconcilers, expiry sweepers and the Apple revocation retry. `WorkerJobRegistration.AddZaghlolWorkerJobs` is the single list both hosts use. The API then also opens the `Worker` database login, so `ConnectionStrings__Worker` is required next to `App` and `Admin` (the role guard checks all three). **One place only:** the Play/Apple processors and sweepers take PostgreSQL advisory locks, so a second copy is safe for them, but the price, contribution and retention jobs have no lease and would run twice. If a separate worker also runs against this database, set `Hosting:SeparateWorkerRunning=true` there too: the API then refuses to start (`EmbeddedWorkersConfigurationException`). This flag is a declaration, not a detector.
+
+**IIS settings (`web.config`).** ASP.NET Core Module in-process (`hostingModel="inprocess"`), `stdoutLogEnabled="false"` (the app logs redacted structured JSON through Serilog; no stdout file), request limit 128 KiB (the largest accepted body is 64 KiB), URL 2048 / query string 1024, `Server` and `X-Powered-By` headers removed, `App_Data` a hidden segment. The template carries four public environment variables only: `ASPNETCORE_ENVIRONMENT=Production`, `Hosting__EmbeddedWorkers=true`, `ForwardedHeaders__NoProxy=true` (the client address is the connection's: no `X-Forwarded-For` is trusted, so the per-network rate limit cannot be spoofed), `DOTNET_EnableDiagnostics=0`. OpenTelemetry stays off because `OTEL_EXPORTER_OTLP_ENDPOINT` is never set; logs go to the host's log viewer and keep the existing redaction (no full IPs, tokens or contribution content).
+
+**Catalog snapshots.** With the embedded profile `Catalog:Snapshots:Directory` defaults to `<site>/App_Data/catalog-snapshots` (writable, not served as static content, kept across deploys). Clients read them from the existing route `GET /v1/catalog/{version}/full` (immutable, signed); `Catalog:Snapshots:BaseUrl` is the site URL and the deploy workflow writes it from the repository variable `BACKEND_SITE_URL`.
+
+**Secrets and settings the PO creates.**
+- Repository variables: `BACKEND_MONSTERASP_DEPLOY_ENABLED=true`, `BACKEND_SITE_URL` (`https://<site>.runasp.net`, or the custom domain on Premium).
+- Environment `backend-production` (with a required reviewer), secrets: `MONSTERASP_PUBLISH_URL` (host:port of the Web Deploy endpoint, from the publish profile), `MONSTERASP_SITE`, `MONSTERASP_USER`, `MONSTERASP_PASSWORD` (no comma or double quote), `BACKEND_MIGRATOR_CONNECTION` (Npgsql string of the `migrator` login, used on the runner only), `BACKEND_DATABASE_CA_PEM` (the Aiven project CA, public PEM; the migration step runs as `DOTNET_ENVIRONMENT=Production` and passes it as `Database__CaCertificatePem` for the TLS guard; the site's own CA setting (T-207, `aiven-postgres.md`) stays in `BACKEND_APP_SETTINGS`), `BACKEND_APP_SETTINGS` (multi-line `NAME=value`: `ConnectionStrings__App|Admin|Worker`, `Kms__Provider=HostSecrets` and the `ZAGHLOL_KEYS__...` settings of T-205, the Aiven settings of T-207, `Purchases__*`, `Accounts__*`, `Attestation__*`, `Signing__Keys__*`, operator OIDC; the `Catalog__Snapshots__BaseUrl` line is added by the workflow; the tool refuses lines that set the environment name or any `*__AllowInsecure*` switch). Each `ZAGHLOL_KEYS__<name>` line is one line of `BACKEND_APP_SETTINGS`, not a separate secret.
+
+**First deploy.**
+1. Create the MonsterASP account and the site (EU). Free gives `<name>.runasp.net`; check in the control panel that the site runs the current .NET (10) hosting bundle and that the app pool is 64-bit.
+2. In the control panel, download the **publish profile**: its `publishUrl` (host:8172), `msdeploySite`, `userName` and `userPWD` become the four `MONSTERASP_*` secrets. Reset the password if it holds a comma or a double quote.
+3. In Aiven allow the runner and the site to connect (their addresses change: use the service's IP allow-list wide enough, TLS verified per T-207) and create the `migrator`, `app_rw`, `ops_rw`, `worker_rw` logins as in the schema bootstrap.
+4. Create the secrets and variables above, the environment `backend-production` with a required reviewer, and the key settings (T-205 procedure).
+5. Run `backend-deploy-monsterasp` (`workflow_dispatch`). It builds, runs the unit tests, publishes the framework-dependent `win-x64` package, runs `monsterasp_package.py check` (in-process, no stdout log, only the four allow-listed public variables, no private key or password in any file), uploads the package (30 days; no secrets in it), applies migrations as `migrator`, renders the secrets into `web.config` on the runner (values are neither committed nor printed), syncs with msdeploy (`App_Data` and `logs` are skipped, so they are neither uploaded nor deleted; `AppOffline` rule on) and smoke-tests `GET /v1/health` for up to 3 minutes. A deploy while `BACKEND_MONSTERASP_DEPLOY_ENABLED` is not `true` refuses to run. The workflow installs Web Deploy with Chocolatey if the runner image lacks it.
+6. Create the repository variable first, then the keep-alive starts working on its own.
+
+**Custom domain (Premium).** Add the domain in the control panel (automatic HTTPS), point DNS as it shows, set `BACKEND_SITE_URL` to it, redeploy (it changes `Catalog__Snapshots__BaseUrl`; snapshot URLs recorded in earlier catalog versions keep the old host until the next publish), and update the Play RTDN push endpoint, the App Store notification URLs and the app's API base URL.
+
+**Rollback.** Every successful deploy keeps its package (an artifact without secrets, 30 days). Dispatch the workflow again with `rollback_run_id` = the run id of the last good run: it downloads that package, re-checks it, renders the current secrets and syncs; it skips build and migration. Migrations are never reversed (expand/contract, section 3), so each release must stay compatible with the previous package.
+
+**Keep-alive and recycles.** IIS idles the app pool out when it is quiet, and the embedded jobs stop with it. `backend-keepalive-monsterasp.yml` calls `GET /v1/health` every 10 minutes (GitHub's scheduler can be late and pauses scheduled workflows of repositories with no activity for 60 days; re-enable it if that happens). On Premium add a planned task in the control panel that requests the same URL. Every job must be safe to stop at any point and resume: the Play/Apple processors read from their database queues and claim rows with advisory locks (a row not finished is retried), the sweepers and reconcilers are idempotent by purchase token / notification id, the price fetcher is hourly and upserts, the retention purger deletes in batches. A recycle during a deploy (`app_offline`) is the same case. Residual risks: Free has 256 MB and one site (watch memory, set `Prices:Providers` modestly), the host can restart the pool at any time, and the keys sit in the host's configuration until moved to a server we control (ADR-026).

@@ -8,6 +8,8 @@ namespace Zaghlol.Infrastructure.Kms;
 /// table: a database write can never change the signer.
 /// <code>
 /// Kms:Provider                    Local (Development/Testing only) | File (T-200, Linux) | OpenBao (T-201, Transit)
+///                                 | HostSecrets (T-205: file: keys from ZAGHLOL_KEYS__&lt;name&gt; host settings, File pins)
+/// Kms:AcceptSharedHostCustody     true is required for HostSecrets outside Development/Testing (ADR-026)
 /// Kms:Scope                       Full (default; the API) | Envelope (the worker: envelope keys only, T-201)
 /// Kms:Local:KeyDirectory          PEM P-256 keys and base64 32-byte keys, named by keyRef (local:&lt;name&gt;)
 /// Kms:File:KeyDirectory           the same formats, named by keyRef (file:&lt;name&gt;), behind the T-200 guards

@@ -883,6 +883,10 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 - **FU-275** (batch 53 review minors, OPEN): deploy token has `packages: write` (FIXED (batch 54): build job only); redeploying the running image makes the "previous" digest equal the current one (FIXED (batch 54)); docs don't say deleted records stay in backups up to 15 days (FIXED (batch 54): deployment.md section 6 and privacy page, ar+en); "never for Gold" upsell test has no Gold case; the weekly upsell check can let two prompts through at once; the site's draft-preview mode publishes placeholder pages (FIXED (batch 54): preview is artifact-only); paywall banner text and one iOS setup headline not on `zaghlolText`; two nits. Details in [batch-53](05-reviews/batch-53.md).
 - **FU-275** (batch 53 review minors; app items FIXED (batch 54): Gold upsell test case, atomic weekly check, banner text on `zaghlolText` in dark (light unchanged), app_lock comment, `ZCard` uses `flatBorder`; the rest is backend/site/legal and still OPEN): deploy token has `packages: write`; redeploying the running image makes the "previous" digest equal the current one; docs don't say deleted records stay in backups up to 15 days; "never for Gold" upsell test has no Gold case; the weekly upsell check can let two prompts through at once; the site's draft-preview mode publishes placeholder pages; paywall banner text and one iOS setup headline not on `zaghlolText`; two nits. Details in [batch-53](05-reviews/batch-53.md).
 
+- **FU-278** (batch 55, OPEN): the database TLS guard (VerifyFull/VerifyCA) is enforced in Production only, not Staging.
+- **FU-280** (batch 55, OPEN, first deploy): confirm `ForwardedHeaders__NoProxy=true` is right behind MonsterASP's front end (client IPs for rate limits).
+- **FU-281** (batch 55, OPEN): the Aiven connection budget ignores an IIS overlapped recycle (old + new worker process briefly both hold pools).
+
 ## Log
 | Date | Event |
 |---|---|

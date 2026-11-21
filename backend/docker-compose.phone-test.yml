@@ -52,6 +52,7 @@ services:
         condition: service_healthy
     environment:
       ConnectionStrings__Migrator: Host=postgres;Port=5432;Database=zaghlol;Username=migrator;Password=migrator_dev_only
+      Database__AllowInsecureTransport: "true"
     read_only: true
     tmpfs:
       - /tmp

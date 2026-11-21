@@ -55,6 +55,20 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="u8);
     internal const int WrappedSize = EnvelopeCipher.NonceSize + DataKey.Size + EnvelopeCipher.TagSize;
 
+    /// <summary>The File provider's messages for the checks it shares with <see cref="HostSecretsKms"/> (T-205).</summary>
+    internal static readonly FileFormatMessages Messages = new(
+        KeyRefMessage,
+        SharedKeyMessage,
+        KnownTestKeyMessage,
+        FingerprintMessage,
+        OtherEnvironmentMessage,
+        OtherEnvironmentKeyMessage,
+        OtherEnvironmentUnsetMessage,
+        OtherEnvironmentMalformedMessage,
+        DevKidMessage,
+        NotEcPemMessage,
+        NotSecretMessage);
+
     private readonly Dictionary<string, SigningEntry> signing;
     private readonly Dictionary<string, byte[]> secrets;
     private int disposed;
@@ -79,18 +93,14 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         var euid = PosixFiles.EffectiveUid() ?? throw new KmsConfigurationException(DirectoryUnreadableMessage);
         var strict = !environment.IsDevelopment() && !environment.IsEnvironment("Testing");
 
-        if (strict && settings.SigningKeys.Any(k => k.Kid.Length > 5 && k.Kid.AsSpan(1, 4).SequenceEqual("0000")))
-        {
-            throw new KmsConfigurationException(DevKidMessage);
-        }
-
-        CheckOtherEnvironmentSettings(settings, strict);
+        CheckDevKids(settings, strict, Messages);
+        CheckOtherEnvironmentSettings(settings, strict, Messages);
 
         var directory = CheckDirectory(settings.FileKeyDirectory, euid);
         CheckNotInSourceTree(directory, environment);
         CheckEntries(directory, euid);
 
-        var (ecRefs, secretRefs) = KeyRefs(settings);
+        var (ecRefs, secretRefs) = KeyRefs(settings, Messages);
 
         // Review S2: keys live in process memory from here on; keep them out of core files and same-uid ptrace/proc reads.
         // Set before the first key byte is read, so the load itself is covered too.
@@ -108,19 +118,14 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
             {
                 var key = LoadEc(directory, keyRef, euid);
                 signingKeys[keyRef] = new SigningEntry(key);
-                CheckFingerprint(settings, keyRef, KeyFingerprints.OfSigningKey(key), KnownTestKeys.SigningKeys, seen);
+                CheckFingerprint(settings, keyRef, KeyFingerprints.OfSigningKey(key), KnownTestKeys.SigningKeys, seen, Messages);
             }
 
             foreach (var keyRef in secretRefs)
             {
                 var secret = LoadSecret(directory, keyRef, euid);
                 secretKeys[keyRef] = secret;
-                if (KnownTestKeys.IsDegenerate(secret))
-                {
-                    throw new KmsConfigurationException(KnownTestKeyMessage);
-                }
-
-                CheckFingerprint(settings, keyRef, KeyFingerprints.OfSecret(secret), KnownTestKeys.Secrets, seen);
+                CheckSecret(settings, keyRef, secret, seen, Messages);
             }
         }
         catch
@@ -131,6 +136,15 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
 
         return new FileKms(signingKeys, secretKeys);
     }
+
+    /// <summary>
+    /// T-205: a File-format key set loaded by another source (<see cref="HostSecretsKms"/>). Takes ownership of the keys: the
+    /// signing keys are disposed and the secrets zeroed by <see cref="Dispose"/>.
+    /// </summary>
+    internal static FileKms FromLoadedKeys(IReadOnlyDictionary<string, ECDsa> signingKeys, IReadOnlyDictionary<string, byte[]> secretKeys) =>
+        new(
+            signingKeys.ToDictionary(p => p.Key, p => new SigningEntry(p.Value), StringComparer.Ordinal),
+            secretKeys.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal));
 
     public ValueTask<byte[]> SignDigestAsync(string keyRef, ReadOnlyMemory<byte> sha256, CancellationToken cancellationToken)
     {
@@ -258,21 +272,31 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
 
     internal static byte[] WrapAad(string keyRef) => [.. "zaghlol-file-wrap-v1"u8, 0x00, .. Encoding.ASCII.GetBytes(keyRef)];
 
-    private static void CheckOtherEnvironmentSettings(KmsSettings settings, bool strict)
+    /// <summary>G13: the development and test kids (year 0000) outside Development and Testing.</summary>
+    internal static void CheckDevKids(KmsSettings settings, bool strict, FileFormatMessages messages)
+    {
+        if (strict && settings.SigningKeys.Any(k => k.Kid.Length > 5 && k.Kid.AsSpan(1, 4).SequenceEqual("0000")))
+        {
+            throw new KmsConfigurationException(messages.DevKid);
+        }
+    }
+
+    /// <summary>G12, settings level: the other environment's list is well formed, required outside Dev/Testing, and no pin is on it.</summary>
+    internal static void CheckOtherEnvironmentSettings(KmsSettings settings, bool strict, FileFormatMessages messages)
     {
         if (settings.FileOtherEnvironmentFingerprints.Any(f => !KeyFingerprints.IsWellFormed(f)))
         {
-            throw new KmsConfigurationException(OtherEnvironmentMalformedMessage);
+            throw new KmsConfigurationException(messages.OtherEnvironmentMalformed);
         }
 
         if (strict && settings.FileOtherEnvironmentFingerprints.Count == 0 && !settings.FileNoOtherEnvironment)
         {
-            throw new KmsConfigurationException(OtherEnvironmentUnsetMessage);
+            throw new KmsConfigurationException(messages.OtherEnvironmentUnset);
         }
 
         if (settings.FileFingerprints.Values.Any(settings.FileOtherEnvironmentFingerprints.Contains))
         {
-            throw new KmsConfigurationException(OtherEnvironmentMessage);
+            throw new KmsConfigurationException(messages.OtherEnvironment);
         }
     }
 
@@ -385,7 +409,8 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         }
     }
 
-    private static (List<string> Ec, List<string> Secrets) KeyRefs(KmsSettings settings)
+    /// <summary>G7/G15: every configured key reference is <c>file:&lt;name&gt;</c>, and each symmetric key has one role.</summary>
+    internal static (List<string> Ec, List<string> Secrets) KeyRefs(KmsSettings settings, FileFormatMessages messages)
     {
         var ec = settings.SigningKeys.Select(k => k.KeyRef).Distinct(StringComparer.Ordinal).ToList();
         var symmetric = settings.HmacKeyRefs.Values.Concat(settings.EnvelopeDecryptKeyRefs).Distinct(StringComparer.Ordinal).ToList();
@@ -393,65 +418,93 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         {
             if (!keyRef.StartsWith(Prefix, StringComparison.Ordinal) || !NamePattern().IsMatch(keyRef[Prefix.Length..]))
             {
-                throw new KmsConfigurationException(KeyRefMessage);
+                throw new KmsConfigurationException(messages.KeyRef);
             }
         }
 
         if (ec.Intersect(symmetric, StringComparer.Ordinal).Any())
         {
-            throw new KmsConfigurationException(KeyRefMessage);
+            throw new KmsConfigurationException(messages.KeyRef);
         }
 
         // Review S3: one 32-byte key must not be both an HMAC key and a key-encryption key (or two HMAC keys).
         var roles = settings.HmacKeyRefs.Values.Concat(settings.EnvelopeDecryptKeyRefs).ToList();
         if (roles.Distinct(StringComparer.Ordinal).Count() != roles.Count)
         {
-            throw new KmsConfigurationException(SharedKeyMessage);
+            throw new KmsConfigurationException(messages.SharedKey);
         }
 
         return (ec, symmetric);
     }
 
-    private static void CheckFingerprint(KmsSettings settings, string keyRef, string fingerprint, IReadOnlySet<string> denied, HashSet<string> seen)
+    /// <summary>G10 (degenerate) and the <see cref="CheckFingerprint"/> checks for a loaded 32-byte key.</summary>
+    internal static void CheckSecret(KmsSettings settings, string keyRef, ReadOnlySpan<byte> secret, HashSet<string> seen, FileFormatMessages messages)
+    {
+        if (KnownTestKeys.IsDegenerate(secret))
+        {
+            throw new KmsConfigurationException(messages.KnownTestKey);
+        }
+
+        CheckFingerprint(settings, keyRef, KeyFingerprints.OfSecret(secret), KnownTestKeys.Secrets, seen, messages);
+    }
+
+    /// <summary>G15 (same bytes twice), G10 (denylist), G12 (key on the other environment's list) and G11 (pin) for one key.</summary>
+    internal static void CheckFingerprint(KmsSettings settings, string keyRef, string fingerprint, IReadOnlySet<string> denied, HashSet<string> seen, FileFormatMessages messages)
     {
         // Review S3: the same key bytes under two names.
         if (!seen.Add(fingerprint))
         {
-            throw new KmsConfigurationException(SharedKeyMessage);
+            throw new KmsConfigurationException(messages.SharedKey);
         }
 
         if (denied.Contains(fingerprint))
         {
-            throw new KmsConfigurationException(KnownTestKeyMessage);
+            throw new KmsConfigurationException(messages.KnownTestKey);
         }
 
         // G12, second line (FU-265 C3): the key actually read from disk, whatever its pin says. Its own message, so a test can tell
         // it from the settings-level check in CheckOtherEnvironmentSettings (a pinned fingerprint that is on the list).
         if (settings.FileOtherEnvironmentFingerprints.Contains(fingerprint))
         {
-            throw new KmsConfigurationException(OtherEnvironmentKeyMessage);
+            throw new KmsConfigurationException(messages.OtherEnvironmentKey);
         }
 
         var pinned = settings.FileFingerprints.GetValueOrDefault(keyRef[Prefix.Length..]);
         if (!KeyFingerprints.IsWellFormed(pinned)
             || !CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(pinned!), Encoding.ASCII.GetBytes(fingerprint)))
         {
-            throw new KmsConfigurationException(FingerprintMessage);
+            throw new KmsConfigurationException(messages.Fingerprint);
         }
     }
 
     private static ECDsa LoadEc(string directory, string keyRef, uint euid)
     {
         var (buffer, length) = ReadChecked(Path.Combine(directory, keyRef[Prefix.Length..] + ".pem"), euid);
-        var chars = GC.AllocateArray<char>(length, pinned: true); // FU-265 C8: pinned, so no stray copy before it is cleared
+        try
+        {
+            return ParseEcPem(buffer.AsSpan(0, length), Messages);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(buffer);
+        }
+    }
+
+    /// <summary>
+    /// A single PEM P-256 private key (PKCS#8 or SEC1, named curve) whose scalar is not tiny (G7, G10). The caller zeroes
+    /// <paramref name="pem"/>; the characters made from it here are pinned and cleared.
+    /// </summary>
+    internal static ECDsa ParseEcPem(ReadOnlySpan<byte> pem, FileFormatMessages messages)
+    {
+        var chars = GC.AllocateArray<char>(pem.Length, pinned: true); // FU-265 C8: pinned, so no stray copy before it is cleared
         var key = ECDsa.Create();
         try
         {
-            if (Ascii(buffer.AsSpan(0, length), chars) is false
+            if (Ascii(pem, chars) is false
                 || !PemEncoding.TryFind(chars, out var fields)
                 || !IsPrivateKeyLabel(chars.AsSpan()[fields.Label]))
             {
-                throw new KmsConfigurationException(NotEcPemMessage);
+                throw new KmsConfigurationException(messages.NotEcPem);
             }
 
             key.ImportFromPem(chars);
@@ -460,12 +513,12 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
             var curve = key.ExportParameters(includePrivateParameters: false).Curve;
             if (!curve.IsNamed || !string.Equals(curve.Oid?.Value, P256Oid, StringComparison.Ordinal))
             {
-                throw new KmsConfigurationException(NotEcPemMessage);
+                throw new KmsConfigurationException(messages.NotEcPem);
             }
 
             if (HasTinyScalar(key))
             {
-                throw new KmsConfigurationException(KnownTestKeyMessage);
+                throw new KmsConfigurationException(messages.KnownTestKey);
             }
 
             return key;
@@ -473,7 +526,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         catch (Exception ex) when (ex is ArgumentException or CryptographicException)
         {
             key.Dispose();
-            throw new KmsConfigurationException(NotEcPemMessage);
+            throw new KmsConfigurationException(messages.NotEcPem);
         }
         catch
         {
@@ -482,7 +535,6 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(buffer);
             Array.Clear(chars);
         }
     }
@@ -507,31 +559,39 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
     internal static byte[] LoadSecret(string directory, string keyRef, uint euid)
     {
         var (buffer, length) = ReadChecked(Path.Combine(directory, keyRef[Prefix.Length..] + ".key"), euid);
-        var secret = GC.AllocateArray<byte>(DataKey.Size, pinned: true);
         try
         {
-            var text = buffer.AsSpan(0, length);
-            if (text.EndsWith("\n"u8))
-            {
-                text = text[..^1];
-            }
-
-            // Base64.DecodeFromUtf8 skips white space; the format allows none (only one trailing newline, removed above).
-            if (text.ContainsAnyExcept(Base64Alphabet)
-                || Base64.DecodeFromUtf8(text, secret, out var consumed, out var written) != OperationStatus.Done
-                || consumed != text.Length
-                || written != DataKey.Size)
-            {
-                CryptographicOperations.ZeroMemory(secret);
-                throw new KmsConfigurationException(NotSecretMessage);
-            }
-
-            return secret;
+            return ParseSecret(buffer.AsSpan(0, length), Messages);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(buffer);
         }
+    }
+
+    /// <summary>
+    /// The <c>.key</c> format: base64 of exactly 32 bytes, one optional trailing newline, nothing else. Returns a pinned array
+    /// the caller owns (and zeroes); the caller zeroes <paramref name="text"/>.
+    /// </summary>
+    internal static byte[] ParseSecret(ReadOnlySpan<byte> text, FileFormatMessages messages)
+    {
+        var secret = GC.AllocateArray<byte>(DataKey.Size, pinned: true);
+        if (text.EndsWith("\n"u8))
+        {
+            text = text[..^1];
+        }
+
+        // Base64.DecodeFromUtf8 skips white space; the format allows none (only one trailing newline, removed above).
+        if (text.ContainsAnyExcept(Base64Alphabet)
+            || Base64.DecodeFromUtf8(text, secret, out var consumed, out var written) != OperationStatus.Done
+            || consumed != text.Length
+            || written != DataKey.Size)
+        {
+            CryptographicOperations.ZeroMemory(secret);
+            throw new KmsConfigurationException(messages.NotSecret);
+        }
+
+        return secret;
     }
 
     /// <summary>
@@ -586,7 +646,7 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         }
     }
 
-    private static bool IsPrivateKeyLabel(ReadOnlySpan<char> label) =>
+    internal static bool IsPrivateKeyLabel(ReadOnlySpan<char> label) =>
         label.SequenceEqual("PRIVATE KEY") || label.SequenceEqual("EC PRIVATE KEY");
 
     private static bool Ascii(ReadOnlySpan<byte> bytes, Span<char> chars)
@@ -628,3 +688,20 @@ internal sealed partial class FileKms : IKmsBackend, IDisposable
         internal readonly Lock Gate = new();
     }
 }
+
+/// <summary>
+/// The constant refusal messages of the checks every File-format provider shares (T-205): File (T-200) and HostSecrets keep
+/// their own wording, so a refusal names the provider that refused.
+/// </summary>
+internal sealed record FileFormatMessages(
+    string KeyRef,
+    string SharedKey,
+    string KnownTestKey,
+    string Fingerprint,
+    string OtherEnvironment,
+    string OtherEnvironmentKey,
+    string OtherEnvironmentUnset,
+    string OtherEnvironmentMalformed,
+    string DevKid,
+    string NotEcPem,
+    string NotSecret);

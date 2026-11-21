@@ -23,7 +23,7 @@ public static class ZaghlolDbContextOptions
         return new DbContextOptionsBuilder<ZaghlolDbContext>().UseNpgsql(connectionString, ConfigureNpgsql).Options;
     }
 
-    public static NpgsqlDataSource CreateDataSource(string connectionString, DatabaseRole role)
+    public static NpgsqlDataSource CreateDataSource(string connectionString, DatabaseRole role, DatabaseSettings? settings = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
@@ -34,7 +34,33 @@ public static class ZaghlolDbContextOptions
 
         var builder = new NpgsqlDataSourceBuilder(connectionString);
         builder.ConnectionStringBuilder.ApplicationName = DatabaseRoles.ApplicationName(role);
+        ApplySettings(builder, role, settings);
         return builder.Build();
+    }
+
+    /// <summary>
+    /// T-207: the pool size (setting, else the connection string, else the free-plan default) and the provider CA that
+    /// <c>SSL Mode=VerifyFull|VerifyCA</c> verifies against.
+    /// </summary>
+    public static void ApplySettings(NpgsqlDataSourceBuilder builder, DatabaseRole role, DatabaseSettings? settings)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        var connection = builder.ConnectionStringBuilder;
+        var explicitPool = connection.ShouldSerialize("Maximum Pool Size");
+        if (settings?.PoolOverride(role) is int size)
+        {
+            connection.MaxPoolSize = size;
+        }
+        else if (!explicitPool)
+        {
+            connection.MaxPoolSize = DatabaseSettings.DefaultMaxPoolSize(role);
+        }
+
+        if (settings?.LoadCaCertificates() is { } roots)
+        {
+            builder.UseRootCertificates(roots);
+        }
     }
 
     /// <summary>

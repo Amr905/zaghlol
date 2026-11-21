@@ -35,6 +35,11 @@ public sealed class DatabaseConnectionOptions
 {
     public Dictionary<DatabaseRole, string?> ConnectionStrings { get; } = [];
 
+    /// <summary>The <c>Database:*</c> settings (CA, pool sizes, transport guard).</summary>
+    public DatabaseSettings Settings { get; set; } = new();
+
+    public bool IsProduction { get; set; }
+
     public string? For(DatabaseRole role) => ConnectionStrings.GetValueOrDefault(role);
 }
 
@@ -60,8 +65,10 @@ public static class PersistenceServiceCollectionExtensions
         var names = string.Join(", ", required.Select(r => $"ConnectionStrings:{DatabaseRoles.ConnectionStringName(r)}"));
 
         services.AddOptions<DatabaseConnectionOptions>()
-            .Configure<IConfiguration>((options, configuration) =>
+            .Configure<IConfiguration, IServiceProvider>((options, configuration, provider) =>
             {
+                options.Settings = DatabaseSettings.From(configuration);
+                options.IsProduction = provider.GetService<IHostEnvironment>()?.IsProduction() ?? false;
                 foreach (var role in required)
                 {
                     options.ConnectionStrings[role] = configuration.GetConnectionString(DatabaseRoles.ConnectionStringName(role));
@@ -71,6 +78,9 @@ public static class PersistenceServiceCollectionExtensions
             .Validate(
                 options => required.All(r => !ZaghlolDbContextOptions.IncludesErrorDetail(options.For(r))),
                 $"{names} must not set Include Error Detail: server error details carry row values (FU-025).")
+            .Validate(
+                options => options.Settings.Validate(options.ConnectionStrings.Select(c => (c.Key, c.Value)), options.IsProduction).Count == 0,
+                "Database TLS / pool settings are invalid: Production needs SSL Mode=VerifyFull or VerifyCA (Database:AllowInsecureTransport=true only for a private network); a configured CA needs a verifying mode; MaxPoolSize must be at least 1.")
             .ValidateOnStart();
 
         foreach (var role in required)
@@ -78,7 +88,8 @@ public static class PersistenceServiceCollectionExtensions
             services.TryAddKeyedSingleton(role, (provider, _) =>
                 ZaghlolDbContextOptions.CreateDataSource(
                     provider.GetRequiredService<IOptions<DatabaseConnectionOptions>>().Value.For(role)!,
-                    role));
+                    role,
+                    provider.GetRequiredService<IOptions<DatabaseConnectionOptions>>().Value.Settings));
         }
 
         services.TryAddSingleton<IZaghlolDbContextFactory, ZaghlolDbContextFactory>();
@@ -107,7 +118,8 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddKeyedSingleton(DatabaseRoles.ReadinessDataSourceKey, (provider, _) =>
             PostgresDatabaseReadiness.CreateProbeSource(
                 provider.GetRequiredService<IOptions<DatabaseConnectionOptions>>().Value.For(DatabaseRole.App)
-                ?? throw new InvalidOperationException("ConnectionStrings:App must be set for the readiness probe.")));
+                ?? throw new InvalidOperationException("ConnectionStrings:App must be set for the readiness probe."),
+                provider.GetRequiredService<IOptions<DatabaseConnectionOptions>>().Value.Settings));
         services.TryAddSingleton<IDatabaseReadiness, PostgresDatabaseReadiness>();
         return services;
     }

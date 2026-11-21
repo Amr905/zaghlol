@@ -93,6 +93,8 @@ services:
     entrypoint: ["dotnet", "/app/worker/Zaghlol.Workers.dll", "--migrate"]
     environment:
       ConnectionStrings__Migrator: Host=postgres;Port=5432;Database=zaghlol;Username=migrator;Password=${DB_MIGRATOR_PASSWORD:?set DB_MIGRATOR_PASSWORD}
+      # T-207: Production requires verified TLS; this database is on the private bridge network and not published.
+      Database__AllowInsecureTransport: "true"
       DOTNET_ENVIRONMENT: Production
     depends_on:
       postgres:
@@ -116,6 +118,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ConnectionStrings__App: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_api;Password=${DB_API_PASSWORD:?set DB_API_PASSWORD}
+      # T-207: Production requires verified TLS; this database is on the private bridge network and not published.
+      Database__AllowInsecureTransport: "true"
       ConnectionStrings__Admin: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_admin;Password=${DB_ADMIN_PASSWORD:?set DB_ADMIN_PASSWORD}
       Catalog__Snapshots__Directory: /var/lib/zaghlol/catalog
     volumes:
@@ -140,6 +144,8 @@ services:
     environment:
       DOTNET_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
       ConnectionStrings__Worker: Host=postgres;Port=5432;Database=zaghlol;Username=zaghlol_worker;Password=${DB_WORKER_PASSWORD:?set DB_WORKER_PASSWORD}
+      # T-207: Production requires verified TLS; this database is on the private bridge network and not published.
+      Database__AllowInsecureTransport: "true"
       Worker__HeartbeatFile: /tmp/zaghlol-worker.heartbeat
     volumes:
       - /etc/zaghlol/kms-production/keys:/run/zaghlol-kms:ro

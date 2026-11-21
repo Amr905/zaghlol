@@ -3,6 +3,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Zaghlol.Application\Zaghlol.Application.csproj" />
     <ProjectReference Include="..\Zaghlol.Infrastructure\Zaghlol.Infrastructure.csproj" />
+    <!-- T-206: the embedded-workers hosting profile registers the worker jobs (WorkerJobRegistration). -->
+    <ProjectReference Include="..\Zaghlol.Workers\Zaghlol.Workers.csproj" />
   </ItemGroup>
 
   <ItemGroup>
