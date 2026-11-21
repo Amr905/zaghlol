@@ -5,7 +5,8 @@
 # environment variables. Idempotent: run it again to rotate passwords (use --passwords-only to skip the roles/schema part).
 # Run it from a trusted machine or a one-off workflow step; never from the API or worker.
 #
-# Environment (secrets are read by psql with \getenv, so they never appear in argv or in the process list):
+# Environment (secrets never appear in argv or in the process list: the new passwords are read by psql with \getenv, and the
+# password inside ZAGHLOL_ADMIN_URI is moved to PGPASSWORD before psql is started, so psql only gets the URI without it):
 #   ZAGHLOL_ADMIN_URI              required. Aiven "Service URI" of avnadmin, for example
 #                                  postgres://avnadmin:<pw>@<host>:<port>/defaultdb?sslmode=verify-full
 #   PGSSLROOTCERT                  path of the Aiven project CA (ca.pem from the console); required for verify-full
@@ -42,6 +43,13 @@ if [ "${ZAGHLOL_BOOTSTRAP_ALLOW_NO_TLS:-}" != "1" ]; then
 fi
 command -v psql >/dev/null || { echo "psql (PostgreSQL client 15 or newer) is required" >&2; exit 69; }
 
+# Move the password out of the URI (argv is visible to other users via ps). Percent-escapes in it are decoded for PGPASSWORD.
+if [[ "$ZAGHLOL_ADMIN_URI" =~ ^([a-z]+://[^:/@]+):([^/]*)@(.*)$ ]]; then
+  enc="${BASH_REMATCH[2]}"
+  export PGPASSWORD="$(printf '%b' "${enc//%/\\x}")"
+  ZAGHLOL_ADMIN_URI="${BASH_REMATCH[1]}@${BASH_REMATCH[3]}"
+fi
+
 psql_run() { psql "$ZAGHLOL_ADMIN_URI" -X -q -v ON_ERROR_STOP=1 "$@"; }
 
 if [ "$passwords_only" -eq 0 ]; then
@@ -60,7 +68,8 @@ ALTER ROLE zaghlol_admin PASSWORD :'pw_admin';
 ALTER ROLE zaghlol_worker PASSWORD :'pw_worker';
 SQL
 
-# Verify: no privileged role, the schema belongs to migrator, each login is in exactly its group.
+# Verify: no privileged Zaghlol role (super/createdb/createrole/replication/bypassrls) and the schema belongs to migrator.
+# (Group membership is not checked here; bootstrap-roles.sql sets it.)
 bad="$(psql_run -At -c "SELECT string_agg(rolname, ',') FROM pg_roles
   WHERE rolname IN ('migrator','zaghlol_api','zaghlol_admin','zaghlol_worker','zaghlol_ops_ro','app_rw','ops_rw','worker_rw','ops_ro')
     AND (rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls)")"

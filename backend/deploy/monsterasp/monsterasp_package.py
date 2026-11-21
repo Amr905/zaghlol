@@ -28,6 +28,8 @@ FORBIDDEN = {
     "ASPNETCORE_DETAILEDERRORS",
     "Dev__FakeStores",
 }
+# The environment name is fixed by the committed template, and no guard-relaxing switch (`*__AllowInsecure*`) may be set at deploy time.
+FORBIDDEN_UPPER = {"ASPNETCORE_ENVIRONMENT", "DOTNET_ENVIRONMENT"}
 SECRET_PATTERNS = [
     re.compile(rb"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
     re.compile(rb"(?i)\bpassword\s*=\s*[^;\s\"<]{3,}"),
@@ -83,7 +85,7 @@ def parse_settings(text: str) -> dict[str, str]:
         name = name.strip()
         if not separator or not NAME.match(name):
             _fail(f"settings line {number}: expected NAME=value with a valid name")
-        if name in FORBIDDEN:
+        if name in FORBIDDEN or name.upper() in FORBIDDEN_UPPER or "__ALLOWINSECURE" in name.upper():
             _fail(f"settings line {number}: this setting may not be supplied at deploy time")
         if name in settings:
             _fail(f"settings line {number}: duplicate name")

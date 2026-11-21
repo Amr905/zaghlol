@@ -13,6 +13,19 @@ def run(*args):
     return subprocess.run([sys.executable, "-I", str(SCRIPT), *args], capture_output=True, text=True)
 
 
+WORKFLOW = Path(__file__).resolve().parents[4] / ".github" / "workflows" / "backend-deploy-monsterasp.yml"
+
+
+class WorkflowTests(unittest.TestCase):
+    def test_migration_step_runs_as_production_with_the_database_ca(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        start = text.index("- name: Apply database migrations")
+        step = text[start:text.index("\n      - name:", start + 10)]
+        self.assertIn("Database__CaCertificatePem: ${{ secrets.BACKEND_DATABASE_CA_PEM }}", step)
+        self.assertIn("DOTNET_ENVIRONMENT: Production", step)
+        self.assertNotIn("echo", step)
+
+
 class PackageTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -53,7 +66,9 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(out.count('name="Hosting__EmbeddedWorkers"'), 1)
 
     def test_render_rejects_bad_lines_without_echoing_them(self):
-        for body in ("no-equals-sign-secret-value\n", "A=1\nA=2\n", "bad name=1\n", "DOTNET_EnableDiagnostics=1\n"):
+        for body in ("no-equals-sign-secret-value\n", "A=1\nA=2\n", "bad name=1\n", "DOTNET_EnableDiagnostics=1\n",
+                     "ASPNETCORE_ENVIRONMENT=Development\n", "dotnet_environment=Development\n",
+                     "Database__AllowInsecureTransport=true\n", "Foo__AllowInsecureBar=1\n"):
             self.settings.write_text(body, encoding="utf-8")
             result = run("render", str(self.dir), str(self.settings))
             self.assertNotEqual(result.returncode, 0, body)

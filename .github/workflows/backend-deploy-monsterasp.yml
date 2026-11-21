@@ -11,6 +11,8 @@ name: backend-deploy-monsterasp
 #   MONSTERASP_USER          the publish profile user name
 #   MONSTERASP_PASSWORD      the publish profile password (no comma or double quote: msdeploy cannot parse them)
 #   BACKEND_MIGRATOR_CONNECTION   Npgsql connection string of the `migrator` login on Aiven (used by the runner only, never written to the site)
+#   BACKEND_DATABASE_CA_PEM  the Aiven project CA (ca.pem, public certificate, multi-line PEM). The migration step passes it as
+#                            Database__CaCertificatePem because it runs as Production and the TLS guard (T-207) needs the CA.
 #   BACKEND_APP_SETTINGS     the site's settings, one NAME=value per line (ConnectionStrings__App/Admin/Worker, Kms__Provider=HostSecrets,
 #                            ZAGHLOL_KEYS__..., Catalog__Snapshots__BaseUrl, Purchases__..., Accounts__...). Written into web.config on
 #                            the runner; never committed, never echoed.
@@ -61,6 +63,7 @@ jobs:
           S_PASSWORD: ${{ secrets.MONSTERASP_PASSWORD }}
           S_SETTINGS: ${{ secrets.BACKEND_APP_SETTINGS }}
           S_MIGRATOR: ${{ secrets.BACKEND_MIGRATOR_CONNECTION }}
+          S_CA: ${{ secrets.BACKEND_DATABASE_CA_PEM }}
         run: |
           if [ "$ENABLED" != "true" ]; then
             echo "::error title=MonsterASP deploy disabled::Set the repository variable BACKEND_MONSTERASP_DEPLOY_ENABLED=true (docs/03-technical/deployment.md, MonsterASP.NET + Aiven)."
@@ -71,6 +74,7 @@ jobs:
             if [ -z "${!v}" ]; then echo "::error title=Missing secret::A required secret of the backend-production environment is empty (see the header of this workflow)."; exit 1; fi
           done
           if [ -z "$ROLLBACK_RUN_ID" ] && [ -z "$S_MIGRATOR" ]; then echo "::error title=Missing secret::BACKEND_MIGRATOR_CONNECTION is required for a normal deploy."; exit 1; fi
+          if [ -z "$ROLLBACK_RUN_ID" ] && [ -z "$S_CA" ]; then echo "::error title=Missing secret::BACKEND_DATABASE_CA_PEM (the Aiven CA) is required for a normal deploy."; exit 1; fi
           case "$S_PASSWORD" in *,*|*\"*) echo "::error title=Publish password::MONSTERASP_PASSWORD contains a comma or double quote, which msdeploy cannot take. Reset it in the control panel."; exit 1 ;; esac
           case "$ROLLBACK_RUN_ID" in ""|*[!0-9]*) [ -z "$ROLLBACK_RUN_ID" ] || { echo "::error::rollback_run_id must be digits only."; exit 1; } ;; esac
 
@@ -121,6 +125,8 @@ jobs:
         shell: bash
         env:
           ConnectionStrings__Migrator: ${{ secrets.BACKEND_MIGRATOR_CONNECTION }}
+          Database__CaCertificatePem: ${{ secrets.BACKEND_DATABASE_CA_PEM }}
+          DOTNET_ENVIRONMENT: Production
         run: dotnet "$RUNNER_TEMP/migrate/Zaghlol.Workers.dll" --migrate
 
       - name: Render web.config from the environment secret (values are not printed)

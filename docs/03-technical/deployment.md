@@ -379,7 +379,7 @@ dotnet Zaghlol.Workers.dll --generate-keys --format host-secrets --environment P
 It prints, once, the `ZAGHLOL_KEYS__…` lines (private), then the public lines (`Kms__Provider`, ring entries with `Status=Next`,
 fingerprints, `SeatCheck`). Then:
 1. Create each `ZAGHLOL_KEYS__<NAME>` line as a secret of the GitHub environment (`backend-production`, required reviewer); the
-   deploy workflow (T-206) writes them into the site's `web.config` as `<environmentVariable name="ZAGHLOL_KEYS__<name>" value="…" />`.
+   MonsterASP deploy workflow (T-206) takes them from the single multi-line secret `BACKEND_APP_SETTINGS` (one `ZAGHLOL_KEYS__<name>=value` line each, section 7) and writes them into the site's `web.config` as `<environmentVariable name="ZAGHLOL_KEYS__<name>" value="…" />`.
 2. Put the public lines into the production settings, set the first kids to `Active` (rotation rules, section 3), add
    `Kms__AcceptSharedHostCustody=true` and the other-environment fingerprints.
 3. Back up the private lines offline, like the File KMS keys (two encrypted media, never the repository, a cloud drive or chat), then
@@ -413,7 +413,7 @@ The alternative to section 6 when the backend runs on **MonsterASP.NET** (Window
 
 **Secrets and settings the PO creates.**
 - Repository variables: `BACKEND_MONSTERASP_DEPLOY_ENABLED=true`, `BACKEND_SITE_URL` (`https://<site>.runasp.net`, or the custom domain on Premium).
-- Environment `backend-production` (with a required reviewer), secrets: `MONSTERASP_PUBLISH_URL` (host:port of the Web Deploy endpoint, from the publish profile), `MONSTERASP_SITE`, `MONSTERASP_USER`, `MONSTERASP_PASSWORD` (no comma or double quote), `BACKEND_MIGRATOR_CONNECTION` (Npgsql string of the `migrator` login, used on the runner only), `BACKEND_APP_SETTINGS` (multi-line `NAME=value`: `ConnectionStrings__App|Admin|Worker`, `Kms__Provider=HostSecrets` and the `ZAGHLOL_KEYS__...` settings of T-205, the Aiven settings of T-207, `Purchases__*`, `Accounts__*`, `Attestation__*`, `Signing__Keys__*`, operator OIDC; the `Catalog__Snapshots__BaseUrl` line is added by the workflow).
+- Environment `backend-production` (with a required reviewer), secrets: `MONSTERASP_PUBLISH_URL` (host:port of the Web Deploy endpoint, from the publish profile), `MONSTERASP_SITE`, `MONSTERASP_USER`, `MONSTERASP_PASSWORD` (no comma or double quote), `BACKEND_MIGRATOR_CONNECTION` (Npgsql string of the `migrator` login, used on the runner only), `BACKEND_DATABASE_CA_PEM` (the Aiven project CA, public PEM; the migration step runs as `DOTNET_ENVIRONMENT=Production` and passes it as `Database__CaCertificatePem` for the TLS guard; the site's own CA setting (T-207, `aiven-postgres.md`) stays in `BACKEND_APP_SETTINGS`), `BACKEND_APP_SETTINGS` (multi-line `NAME=value`: `ConnectionStrings__App|Admin|Worker`, `Kms__Provider=HostSecrets` and the `ZAGHLOL_KEYS__...` settings of T-205, the Aiven settings of T-207, `Purchases__*`, `Accounts__*`, `Attestation__*`, `Signing__Keys__*`, operator OIDC; the `Catalog__Snapshots__BaseUrl` line is added by the workflow; the tool refuses lines that set the environment name or any `*__AllowInsecure*` switch). Each `ZAGHLOL_KEYS__<name>` line is one line of `BACKEND_APP_SETTINGS`, not a separate secret.
 
 **First deploy.**
 1. Create the MonsterASP account and the site (EU). Free gives `<name>.runasp.net`; check in the control panel that the site runs the current .NET (10) hosting bundle and that the app pool is 64-bit.
