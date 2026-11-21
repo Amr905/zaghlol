@@ -63,3 +63,8 @@ updates:
     groups:
       docker-all:
         patterns: ["*"]
+
+  - package-ecosystem: docker-compose
+    directory: /backend
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 1

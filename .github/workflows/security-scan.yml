@@ -3,6 +3,8 @@ name: security-scan
 # T-175 M-1 (security-model §6): vulnerability scan of pub / npm / Gradle lockfiles (osv-scanner),
 # secret scan of the tree and history (gitleaks), CycloneDX SBOM of the backend.
 # Batch CI (PO, 2026-11-10): like app-ci and backend-ci, runs on batch/** and ci/** pushes, plus weekly and on demand.
+# FU-272 (batch 52): the Gradle release runtime classpaths and gitleaks (pinned binary, full history) are blocking; the full
+# Gradle graph (build tools, tests) stays non-blocking with osv-scanner.toml.
 # T-192: action SHAs confirmed against the upstream tags (osv-scanner-action v2.7.1 = 32d3cd48..., gitleaks-action v3.0.0 =
 # e0c47f4f...) and `scan-args` against osv-scanner-action's action.yml (newline-separated args). The first push run was clean
 # (osv-scanner: no issues; gitleaks: no leaks). The Gradle graph scan is new; once its first run is triaged, drop
@@ -22,17 +24,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  osv-scan:
-    name: osv-scanner (pub, npm, gradle)
+  gradle-export:
+    name: export Gradle dependency graphs
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    continue-on-error: true
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
+      - name: Self-test the Gradle graph converter
+        run: python3 -I .github/scripts/test-gradle-deps-to-lockfile.py
+
       # Gradle: verification-metadata.xml is a checksum list, not a dependency graph (osv-scanner reads it as 1 package), so
-      # the scan uses the resolved graph: `:app:dependencies` (all configurations, transitive) and `:buildEnvironment`
-      # (plugin classpaths), converted to a gradle.lockfile by .github/scripts/gradle-deps-to-lockfile.py.
+      # the scan uses the resolved graph printed by Gradle, converted to a gradle.lockfile by
+      # .github/scripts/gradle-deps-to-lockfile.py. Two lockfiles (FU-272):
+      #   release.lockfile: only the release runtime classpaths that ship in the store builds (blocking scan)
+      #   full.lockfile:    every configuration of :app plus the plugin/build classpath (build tools, lint, tests; non-blocking)
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
         with:
           distribution: temurin
@@ -50,42 +56,96 @@ jobs:
             echo "attempt $attempt failed"; tail -n 20 prepare.log
           done
           echo "::error::could not prepare the Android project"; exit 1
-      - name: Export the Gradle dependency graph
+      - name: Export the Gradle dependency graphs
         working-directory: app/android
         run: |
           set -o pipefail
-          mkdir -p "$GITHUB_WORKSPACE/gradle-export"
-          ./gradlew --no-daemon -q :app:dependencies > "$GITHUB_WORKSPACE/gradle-export/app-dependencies.txt"
-          ./gradlew --no-daemon -q :buildEnvironment > "$GITHUB_WORKSPACE/gradle-export/build-environment.txt"
-          python3 -I "$GITHUB_WORKSPACE/.github/scripts/gradle-deps-to-lockfile.py" \
-            "$GITHUB_WORKSPACE/gradle-export/gradle.lockfile" \
-            "$GITHUB_WORKSPACE/gradle-export/app-dependencies.txt" "$GITHUB_WORKSPACE/gradle-export/build-environment.txt"
+          out="$GITHUB_WORKSPACE/gradle-export"
+          mkdir -p "$out"
+          ./gradlew --no-daemon -q :app:dependencies > "$out/app-dependencies.txt"
+          ./gradlew --no-daemon -q :buildEnvironment > "$out/build-environment.txt"
+          : > "$out/release-dependencies.txt"
+          for c in prodSmsReleaseRuntimeClasspath prodNoSmsReleaseRuntimeClasspath; do
+            ./gradlew --no-daemon -q :app:dependencies --configuration "$c" >> "$out/release-dependencies.txt"
+          done
+          conv="$GITHUB_WORKSPACE/.github/scripts/gradle-deps-to-lockfile.py"
+          python3 -I "$conv" "$out/release.lockfile" "$out/release-dependencies.txt"
+          python3 -I "$conv" "$out/full.lockfile" "$out/app-dependencies.txt" "$out/build-environment.txt"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: gradle-lockfiles
+          path: gradle-export/*.lockfile
+          if-no-files-found: error
 
+  # BLOCKING: dependencies that ship in the app (pub, npm, Android release runtime classpaths). A new advisory here fails
+  # the run; fix it with a version bump or add a dated entry to osv-scanner-release.toml (reason, reachability, expiry).
+  osv-release:
+    name: osv-scanner (pub, npm, gradle release runtime) - blocking
+    needs: gradle-export
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: gradle-lockfiles
+          path: gradle-export
       - uses: google/osv-scanner-action/osv-scanner-action@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
         with:
           scan-args: |-
+            --config=osv-scanner-release.toml
             --lockfile=pubspec.lock
             --lockfile=tools/drift_codegen/pubspec.lock
             --lockfile=backend/openapi/package-lock.json
-            --lockfile=gradle.lockfile:gradle-export/gradle.lockfile
+            --lockfile=gradle.lockfile:gradle-export/release.lockfile
 
-  secrets:
-    name: gitleaks (tree and history)
+  # NON-BLOCKING: the full graph includes the Android Gradle Plugin, lint, aapt and test tooling, which never ship. Known
+  # advisories are listed with a reason in osv-scanner.toml; anything new still shows up in the log.
+  osv-full-graph:
+    name: osv-scanner (gradle full graph incl. build tools and tests) - non-blocking
+    needs: gradle-export
     runs-on: ubuntu-latest
     timeout-minutes: 15
     continue-on-error: true
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: gradle-lockfiles
+          path: gradle-export
+      - uses: google/osv-scanner-action/osv-scanner-action@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
+        with:
+          scan-args: |-
+            --config=osv-scanner.toml
+            --lockfile=gradle.lockfile:gradle-export/full.lockfile
+
+  secrets:
+    name: gitleaks (tree and full history) - blocking
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      # Uses /.gitleaks.toml (allow-list of the dev-only values). Organisation-owned repos need the
-      # GITLEAKS_LICENSE secret (free key from gitleaks.io); the PO sets it when the repo moves to an org.
-      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+      # Pinned release binary (version + SHA-256 from the release's gitleaks_<v>_checksums.txt), so no GITLEAKS_LICENSE and no
+      # API calls. Uses /.gitleaks.toml (allow-list of the dev-only values). Scans the full history on every run.
+      # To bump: change GITLEAKS_VERSION and GITLEAKS_SHA256 together (checksum from the release page).
+      - name: Install gitleaks (pinned)
         env:
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-          GITLEAKS_ENABLE_COMMENTS: "false"
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/gitleaks"; mkdir -p "$d"
+          curl -fsSL --retry 3 -o "$d/gitleaks.tgz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  $d/gitleaks.tgz" | sha256sum -c -
+          tar -xzf "$d/gitleaks.tgz" -C "$d" gitleaks
+          echo "$d" >> "$GITHUB_PATH"
+      - name: Scan tree and full history
+        run: gitleaks git --redact --no-banner --verbose --config .gitleaks.toml .
 
   sbom:
     name: CycloneDX SBOM (backend)

@@ -15,7 +15,7 @@ x-backend-image: &backend-image
 
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17@sha256:b60e90042aa6b8dbecd58e224b3e36114dbf8ad754465264c2476ad58a86e45c # postgres:17
     command: ["postgres", "-c", "log_error_verbosity=terse"]
     environment:
       POSTGRES_DB: zaghlol
@@ -35,7 +35,7 @@ services:
 
   # Generates the throwaway keys once (a no-op when they exist) into the `devkeys` volume. They stay on this PC.
   dev-keys:
-    image: alpine:3.21
+    image: alpine:3.21@sha256:bc21487101ae47172509130ee1092cc273a831968d64b617776d1f69c81e42ab # alpine:3.21
     entrypoint: ["sh", "-c", "apk add --no-cache openssl >/dev/null && sh /work/dev-keys.sh"]
     environment:
       DEV_KEYS_DIR: /keys
