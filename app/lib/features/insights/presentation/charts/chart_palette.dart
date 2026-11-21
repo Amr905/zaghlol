@@ -4,6 +4,8 @@
 
 import 'dart:ui';
 
+import '../../../../core/theme/z_tokens.dart';
+
 abstract final class ZChartColors {
   static const income = Color(0xFF3E8A86);
 
@@ -14,6 +16,13 @@ abstract final class ZChartColors {
 
   /// Budget bar at or over the limit (a warning, not a spending amount).
   static const overLimit = Color(0xFFD9765F);
+
+  /// First series colour: brandMint in True Black, [income] in light.
+  static Color incomeOf(ZColors c) =>
+      c.brightness == Brightness.dark ? c.brandMint : income;
+
+  /// Donut ramp for the theme: the lead slice follows [incomeOf].
+  static List<Color> rampOf(ZColors c) => [incomeOf(c), ...ramp.skip(1)];
 
   /// Donut ramp, largest slice first.
   static const ramp = [

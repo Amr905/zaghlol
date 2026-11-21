@@ -212,7 +212,9 @@ class _Bubble extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsetsDirectional.all(ZSpacing.lg),
         child: DefaultTextStyle.merge(
-          style: ZType.body.copyWith(color: fromUser ? c.onPrimary : c.text),
+          style: ZType.body.copyWith(
+            color: fromUser ? c.onPrimary : c.zaghlolText,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

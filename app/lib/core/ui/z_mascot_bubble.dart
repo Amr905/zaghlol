@@ -63,7 +63,7 @@ class ZMascotBubble extends StatelessWidget {
                     child: Text(
                       message,
                       style: ZType.bodySmall.copyWith(
-                        color: c.text,
+                        color: c.zaghlolText,
                         fontSize: 15,
                         height: 1.55,
                       ),

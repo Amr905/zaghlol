@@ -376,10 +376,10 @@ class _Card extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: ZType.titleSmall.copyWith(color: c.text)),
+            Text(title, style: ZType.titleSmall.copyWith(color: c.zaghlolText)),
             if (body != null) ...[
               const SizedBox(height: ZSpacing.xs),
-              Text(body!, style: ZType.body.copyWith(color: c.text)),
+              Text(body!, style: ZType.body.copyWith(color: c.zaghlolText)),
             ],
           ],
         ),
