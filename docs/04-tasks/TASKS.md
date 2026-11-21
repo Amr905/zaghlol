@@ -289,7 +289,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-203](tasks/T-203.md) | Shared bottom bar option A (rework of T-024; D-77, D-78) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-202 | G | 54 | DONE (batch 53) |
 | [T-204](tasks/T-204.md) | Home one shared look + True Black dark pass on all screens (rework of T-054) | PO 11-21 | Medium | Sonnet | flutter-ui-engineer | T-202, T-203 | G | 54 | DONE (batch 53) |
 | [T-205](tasks/T-205.md) | Key provider for Windows shared hosting (HostSecrets, custody opt-in; D-80) | PO 11-21 | High | Opus | backend-engineer | T-200, T-201 | A | 55 | TODO |
-| [T-206](tasks/T-206.md) | MonsterASP.NET (IIS) hosting profile, embedded workers, Web Deploy workflow, keep-alive | PO 11-21 | Med-High | Sonnet | backend-engineer | T-205 | A | 55 | TODO |
+| [T-206](tasks/T-206.md) | MonsterASP.NET (IIS) hosting profile, embedded workers, Web Deploy workflow, keep-alive | PO 11-21 | Med-High | Sonnet | backend-engineer | T-205 | A | 55 | BUILT |
 | [T-207](tasks/T-207.md) | Aiven for PostgreSQL profile (verify-full TLS, pool budget, avnadmin bootstrap, migrations, backups) | PO 11-21 | Medium | Sonnet | backend-engineer | — | A | 55 | TODO |
 
 ## Blocked or external items

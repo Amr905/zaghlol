@@ -36,6 +36,8 @@ var builder = WebApplication.CreateBuilder(args);
 // DEV ONLY: key ring from a file in the phone-test compose stack (Development only).
 DevKeyEnvFile.AddIfConfigured(builder.Configuration, builder.Environment);
 
+EmbeddedWorkers.ApplyDefaults(builder.Configuration, builder.Environment.ContentRootPath);
+
 builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
 builder.Host.UseSerilog((_, services, logger) =>
@@ -58,7 +60,7 @@ builder.Services.AddZaghlolSeatKeys();
 builder.Services.AddZaghlolSeats();
 
 // Two logins: app_rw for /v1/*, ops_rw for /admin/v1/* (T-122), so an injection in /v1 can't write catalog or audit rows.
-builder.Services.AddZaghlolDatabase(DatabaseRole.App, DatabaseRole.Admin);
+builder.Services.AddZaghlolDatabase(EmbeddedWorkers.DatabaseRoles(builder.Configuration));
 builder.Services.AddDatabaseReadiness();
 builder.Services.AddZaghlolHttp();
 
@@ -109,6 +111,9 @@ builder.Services.AddZaghlolAccounts();
 // Operator OIDC + MFA, the operator directory and the startup check (T-136); the audited support lookup on the Admin login.
 builder.Services.AddZaghlolOperatorAuth();
 builder.Services.AddZaghlolSupport();
+
+// Hosting:EmbeddedWorkers=true (T-206, one IIS site): the worker jobs run in this process on the Worker login. Off by default.
+builder.Services.AddEmbeddedWorkersIfEnabled(builder.Configuration);
 
 var app = builder.Build();
 
