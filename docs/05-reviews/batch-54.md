@@ -43,3 +43,8 @@ Checked against code and docs: the `accounts.email` column and the `SignInServic
 | B53-t193-ac5 | APPROVED |
 
 Minors and nits go to FU-276.
+
+## Lead delta check (fix round)
+
+- B54-fu240c major: CSV rows carry their own account, so `ImportRunner.supportsTargetCard` was added; `CsvImportRunner` returns false, "Change" is hidden for it and the done screen names the real card. Tests: CSV runner reports false; no "Change" when unsupported. **APPROVED.**
+- FU-276 minors fixed in the same pass: paywall "all charts" line hidden while `GoldGate.chartsOpenToFree` (test, ar+en); `_lastAction` order; privacy-consistency row 8. No follow-up left open from this batch.
