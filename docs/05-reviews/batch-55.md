@@ -108,3 +108,10 @@ FU-276 (T-205/T-206 docs: where the `ZAGHLOL_KEYS__` lines go; trivial, may be f
 
 ## Fix round
 One fix agent, T-206 lane: F-206-1, plus FU-276 if it stays trivial. The change should be about 30 lines or fewer, so a Lead delta check is enough.
+
+## Lead delta check (fix round)
+
+- F-206-1 fixed: the migration step gets `Database__CaCertificatePem` from the new environment secret `BACKEND_DATABASE_CA_PEM` and `DOTNET_ENVIRONMENT=Production`; a python test asserts both and no `echo`. backend-monsterasp run 44956749224 green.
+- FU-279 (render refuses environment-name and `*__AllowInsecure*` lines), FU-276, FU-277, FU-282, FU-283 fixed in the same pass, with tests where code changed.
+- Lead: `EmbeddedWorkersTests` boots a host, so it joins `ApiHostGroup` (backend-ci `EveryTestClassThatCanBootAHostIsInTheApiHostGroup` failed without it); filtered run 20/20.
+- T-206 **APPROVED** after the fix round. Open follow-ups: FU-278 (DB TLS guard in Staging), FU-280 (confirm ForwardedHeaders on first deploy), FU-281 (connection budget during an IIS overlapped recycle).

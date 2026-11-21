@@ -7,6 +7,7 @@ using Zaghlol.Workers;
 namespace Zaghlol.Api.Tests;
 
 /// <summary>T-206: the embedded-workers hosting profile for one IIS site.</summary>
+[Collection(ApiHostGroup.Name)]
 public class EmbeddedWorkersTests
 {
     private static IConfiguration Config(params (string Key, string? Value)[] values) =>
