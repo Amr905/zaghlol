@@ -1,12 +1,16 @@
 // T-170: state behind S-51 (Smart ROI tips). Reads the T-169 providers; no
 // database access here. Everything is empty while the `smart_roi` flag is off.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/flags/feature_flags.dart';
 import '../../../core/flags/flags_providers.dart';
+import '../../../core/settings/settings_keys.dart';
+import '../../../core/settings/settings_providers.dart';
 import '../../insights/presentation/charts/charts_providers.dart';
 import '../../share_cards/presentation/share_studio_screen.dart';
 import '../data/roi_providers.dart';
@@ -18,18 +22,32 @@ final roiTipsEnabledProvider = Provider<bool>(
   name: 'roiTipsEnabledProvider',
 );
 
-/// A tip's identity for dismissals: currency and rule.
-String roiTipKey(RoiSuggestion s) => '${s.currency.code}:${s.rule.name}';
+/// A tip's identity for dismissals: currency and rule, as a settings slug.
+String roiTipKey(RoiSuggestion s) =>
+    '${s.currency.code.toLowerCase()}_${s.rule.name.toLowerCase()}';
 
-/// "Not for me": tips hidden for the rest of the session. (Persisting this
-/// needs a settings key; see the T-170 task notes.)
+final _roiDismissedStoredProvider = settingProvider(Settings.roiDismissedTips);
+
+/// "Not for me": tips hidden until restored; persisted in the settings.
 class RoiDismissed extends Notifier<Set<String>> {
   @override
-  Set<String> build() => const {};
+  Set<String> build() => ref.watch(_roiDismissedStoredProvider).value ?? {};
 
-  void dismiss(RoiSuggestion s) => state = {...state, roiTipKey(s)};
+  void dismiss(RoiSuggestion s) => _write({...state, roiTipKey(s)});
 
-  void restore(RoiSuggestion s) => state = {...state}..remove(roiTipKey(s));
+  void restore(RoiSuggestion s) => _write({...state}..remove(roiTipKey(s)));
+
+  void _write(Set<String> next) {
+    state = next;
+    unawaited(() async {
+      try {
+        final repo = await ref.read(settingsRepositoryProvider.future);
+        await repo.set(Settings.roiDismissedTips, next);
+      } on Object {
+        // Stays hidden for this session.
+      }
+    }());
+  }
 }
 
 final roiDismissedProvider = NotifierProvider<RoiDismissed, Set<String>>(

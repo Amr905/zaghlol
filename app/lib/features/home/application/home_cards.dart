@@ -8,9 +8,11 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../backup/application/schedule_providers.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../onboarding/application/contextual.dart';
 import '../../onboarding/application/setup_steps.dart';
+import '../../salary/application/salary_providers.dart';
 import '../../security/domain/app_lock_controller.dart';
 
 /// Slug in `setup_suggestions_handled` for the app-lock offer (FR-ONB-04).
@@ -23,16 +25,22 @@ final class SalaryCredit {
   final Money amount;
 }
 
-/// Seam: the latest income credit that looks like a salary. No source produces
-/// it yet (FU-144), so the payday card stays off until one overrides this.
-final setupSalaryCreditProvider = FutureProvider<SalaryCredit?>(
-  (ref) async => null,
-  name: 'setupSalaryCreditProvider',
-);
+/// The latest salary credit: the newest entry of `salary.state` (its payday
+/// anchor) with the amount of `salary.plan`. Null without a plan or entry.
+final setupSalaryCreditProvider = Provider<AsyncValue<SalaryCredit?>>((ref) {
+  final plan = ref.watch(salaryPlanProvider).value;
+  final state = ref.watch(salaryStateProvider).value ?? SalaryState.empty;
+  if (plan == null || state.entries.isEmpty) return const AsyncData(null);
+  var latest = state.entries.first.anchor;
+  for (final e in state.entries) {
+    if (e.anchor.epochDay > latest.epochDay) latest = e.anchor;
+  }
+  return AsyncData(SalaryCredit(latest, plan.amount));
+}, name: 'setupSalaryCreditProvider');
 
-/// Seam: a backup exists (Drive/iCloud). Overridden when the backup UI lands.
+/// A backup exists: the backup module's last-backup record.
 final setupBackupExistsProvider = FutureProvider<bool>(
-  (ref) async => false,
+  (ref) => ref.watch(backupExistsProvider.future),
   name: 'setupBackupExistsProvider',
 );
 
@@ -58,7 +66,7 @@ final setupContextProvider = FutureProvider<SetupContext>((ref) async {
   final repo = await ref.watch(cycleRepositoryProvider.future);
   final budgets = await repo.cycleBudgets();
   final eras = await ref.watch(paydayErasProvider.future);
-  final salary = await ref.watch(setupSalaryCreditProvider.future);
+  final salary = ref.watch(setupSalaryCreditProvider).value;
   final backup = await ref.watch(setupBackupExistsProvider.future);
   // The first full cycle starts after the one the user installed in.
   final firstFull = schedule.cycleOn(
@@ -100,7 +108,7 @@ final homeCardsProvider = FutureProvider.family<HomeCards, bool>((
   final lockOn = await ref.watch(appLockEnabledProvider.future);
   final progress = await ref.watch(setupProgressProvider.future);
   final ctx = await ref.watch(setupContextProvider.future);
-  final salary = await ref.watch(setupSalaryCreditProvider.future);
+  final salary = ref.watch(setupSalaryCreditProvider).value;
   final s = nextSetupSuggestion(ctx, handled: handled);
   return HomeCards(
     suggestion: s,

@@ -17,6 +17,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../gold/application/gating.dart';
+import '../../gold/presentation/upsell_cap.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../../transactions/data/transactions_providers.dart';
 import '../../transactions/presentation/edit/transaction_edit_screen.dart';
@@ -153,6 +154,12 @@ class _VoiceLoggerState extends ConsumerState<VoiceLoggerScreen> {
     ref.listen(voiceControllerProvider.select((v) => v.phase), (prev, next) {
       if (next == VoicePhase.saved) {
         unawaited(_onSaved(ref.read(voiceControllerProvider)));
+      }
+      if (next == VoicePhase.limit && prev != VoicePhase.limit) {
+        // The app's own upgrade prompt: at most one a week (A-22).
+        unawaited(
+          ref.read(unsolicitedPaywallProvider)(GoldCapability.voiceEntry),
+        );
       }
       if (next == VoicePhase.needConsent && !_consentShown) {
         _consentShown = true;
