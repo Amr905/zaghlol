@@ -208,7 +208,14 @@ forged() {
   fi
   local out
   out=$(A shell am start -W -n "$PKG/app.zaghlol.MainActivity" "$@" 2>&1 | tr -d '\r' | tr '\n' ' ')
-  if [ "$mode" = cold ]; then sleep 20; else sleep 5; fi
+  if [ "$mode" = cold ]; then
+    # debug JIT start on the emulator is slow: wait for the launch check, then
+    # a few seconds more for any (unwanted) open/confirm/paid line
+    wait_probe "launch route=" 90
+    sleep 8
+  else
+    sleep 5
+  fi
   local p bad ok=1 detail
   p=$(probes)
   bad=$(echo "$p" | grep -E "NOTIF_PROBE (open|confirm|paid)" | head -3 | tr '\n' ';')
@@ -219,7 +226,7 @@ forged() {
   if [ "$ok" != 1 ] && [ "$mode" = cold ]; then
     echo "    am: ${out:0:300}"
     echo "    pid: $(A shell pidof "$PKG" | tr -d '\r')"
-    A logcat -d 2> /dev/null | tr -d '\r' | grep -E "flutter|AndroidRuntime|FATAL|libc|DEBUG|$PKG" | grep -v "Warning" | cut -c1-220 | tail -14 | sed 's/^/    lc: /'
+    A logcat -d 2> /dev/null | tr -d '\r' | grep -E "I flutter|AndroidRuntime|FATAL|Displayed|ANR" | cut -c1-200 | tail -8 | sed 's/^/    lc: /'
   fi
   [ "$ok" = 1 ] && result PASS "$mode forged: $label" "$detail" || result FAIL "$mode forged: $label" "$detail, saw: $bad"
 }
