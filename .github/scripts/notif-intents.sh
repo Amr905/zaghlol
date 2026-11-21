@@ -44,7 +44,12 @@ sig() { A shell "run-as $PKG sh -c 'mkdir -p app_flutter/sig && touch app_flutte
 present() { A shell dumpsys notification --noredact 2> /dev/null | tr -d '\r' | grep -c "|$PKG|$1|"; }
 have_log() { grep -q "$1" "$LOG" 2> /dev/null; }
 wait_log() { # pattern seconds
-  for _ in $(seq 1 "$2"); do have_log "$1" && return 0; sleep 1; done
+  for _ in $(seq 1 "$2"); do
+    have_log "$1" && return 0
+    # the test process is gone (it failed): stop waiting
+    kill -0 "$tpid" 2> /dev/null || { have_log "$1" && return 0; return 1; }
+    sleep 1
+  done
   return 1
 }
 wait_probe() { # pattern seconds

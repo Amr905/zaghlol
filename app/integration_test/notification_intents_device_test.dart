@@ -122,6 +122,7 @@ void main() {
         amount: Money(Currency.of('EGP'), 12300),
         dueDay: today.day > 28 ? 28 : today.day,
         nextDue: today,
+        merchantNorm: name.toLowerCase(),
       );
       final row = await db
           .customSelect(
