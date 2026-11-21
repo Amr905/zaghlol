@@ -1,5 +1,7 @@
 name: backend-deploy
 
+# CLOUD ALTERNATIVE (OpenTofu, OIDC). The active path for the PO's single self-hosted Linux server is
+# backend-deploy-server.yml (ADR-025). Use this file only if a cloud provider is chosen later.
 # T-140 (prepared, NOT active). Manual dispatch only; refuses to run until the PO has
 #   1. chosen the provider and region (docs/03-technical/hosting-options.md, ADR-015),
 #   2. created the GitHub environments `staging` and `prod` with required reviewers (environment protection), and

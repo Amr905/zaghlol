@@ -1,0 +1,69 @@
+# Optional local monitoring (ADR-025): OTel collector -> Prometheus -> Alertmanager (e-mail) + Grafana, all on this server.
+#   docker compose --env-file /etc/zaghlol/production.env --profile otel \
+#     -f docker-compose.prod.yml -f observability/docker-compose.observability.yml up -d
+# Nothing is published except Grafana on 127.0.0.1:3000 (reach it with `ssh -L 3000:127.0.0.1:3000 <server>`).
+# Needs /etc/zaghlol/alertmanager/{alertmanager.yml,smtp-password} (see alertmanager.yml.example) and the folders harden.sh makes.
+name: zaghlol-backend
+
+x-obs: &obs
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  read_only: true
+  restart: unless-stopped
+  networks: [default]
+  tmpfs:
+    - /tmp
+
+services:
+  # Turn the apps' OTLP export on and point it at the collector (profile "otel" in the base file).
+  api:
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_METRIC_EXPORT_INTERVAL: "15000"
+  worker:
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_METRIC_EXPORT_INTERVAL: "15000"
+
+  prometheus:
+    <<: *obs
+    image: ${PROMETHEUS_IMAGE:?set PROMETHEUS_IMAGE}
+    user: "65534:65534"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --web.enable-lifecycle=false
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../observability/alerts:/etc/prometheus/alerts:ro
+      - /var/lib/zaghlol/observability/prometheus:/prometheus
+    depends_on: [otel-collector]
+
+  alertmanager:
+    <<: *obs
+    image: ${ALERTMANAGER_IMAGE:?set ALERTMANAGER_IMAGE}
+    user: "65534:65534"
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/tmp/alertmanager
+    volumes:
+      - /etc/zaghlol/alertmanager:/etc/alertmanager:ro
+
+  grafana:
+    <<: *obs
+    image: ${GRAFANA_IMAGE:?set GRAFANA_IMAGE}
+    user: "472:472"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - /var/lib/zaghlol/observability/grafana:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/dashboards:/var/lib/zaghlol-dashboards:ro
+    depends_on: [prometheus]
