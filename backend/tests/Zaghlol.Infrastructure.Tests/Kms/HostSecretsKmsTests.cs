@@ -88,7 +88,8 @@ public sealed class HostSecretsKmsTests : IDisposable
     public async Task AKeyServedByAnAppsettingsFileIsRefused()
     {
         var settings = keys.Settings();
-        var json = Path.Combine(scratch, "appsettings.Production.json");
+        // Outside the content root, so only the configuration-provider check can see it.
+        var json = Path.Combine(Directory.CreateDirectory(Path.Combine(scratch, "conf")).FullName, "appsettings.Production.json");
         await File.WriteAllTextAsync(json, "{\"ZAGHLOL_KEYS\":{\"seat\":\"" + settings["ZAGHLOL_KEYS:seat"] + "\"}}");
         settings.Remove("ZAGHLOL_KEYS:seat");
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(settings).AddJsonFile(json).Build();
