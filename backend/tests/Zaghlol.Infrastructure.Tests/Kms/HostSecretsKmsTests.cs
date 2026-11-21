@@ -46,6 +46,26 @@ public sealed class HostSecretsKmsTests : IDisposable
     }
 
     [Fact]
+    public async Task TwoActorsSignAndHashAtTheSameTime()
+    {
+        await using var services = Services("Production", keys.Settings());
+        await FileKmsHost.StartAsync(services);
+        var signer = services.GetRequiredService<ISigner>();
+        var hasher = services.GetRequiredService<IKeyedHasher>();
+        var jwk = signer.PublishedKeys(SigningPurpose.Sync).Single().PublicJwk;
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 64).Select(i => Task.Run(async () =>
+        {
+            var body = BitConverter.GetBytes(i);
+            var signature = await signer.SignAsync(SigningPurpose.Sync, body, CancellationToken.None);
+            var mac = await hasher.HmacSha256Async(KeyedHashKey.Seat, body, CancellationToken.None);
+            return jwk.Verifies(body, signature.Signature.Span) && mac.AsSpan().SequenceEqual(HMACSHA256.HashData(keys.Secret("seat"), body));
+        })));
+
+        Assert.All(results, Assert.True);
+    }
+
+    [Fact]
     public async Task ShellSafeAndUpperCaseSettingNamesAreAccepted()
     {
         var settings = keys.Settings();

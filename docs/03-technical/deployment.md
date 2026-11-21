@@ -365,8 +365,9 @@ this custody is weaker than section 3 and is accepted only by setting `Kms:Accep
 | `Kms__File__OtherEnvironmentFingerprints__<n>` or `Kms__File__NoOtherEnvironment=true` | public settings | required outside Development/Testing |
 
 "Public settings" may be committed in `appsettings.<Environment>.json` or set as host settings. A `ZAGHLOL_KEYS` value must
-**never** be in any `appsettings*.json` (or any other configuration file): the API refuses to start if one is, even in a file it
-doesn't load. Names may use `_` for `-` and any letter case; setting both spellings of one name is refused.
+**never** be in any `appsettings*.json` (or any other configuration file): the API refuses to start if a file configuration source
+serves one, or if an `appsettings*.json` in the content root or app folder contains the text `ZAGHLOL_KEYS` (any case) or the prefix
+every value starts with, even when that file isn't loaded in this environment. Names may use `_` for `-` and any letter case; setting both spellings of one name is refused.
 
 **Create the keys** (on your own machine, Windows or Linux, outside any checkout; the tool writes no file):
 
