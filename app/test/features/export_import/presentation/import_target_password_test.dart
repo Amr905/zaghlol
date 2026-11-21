@@ -87,6 +87,14 @@ void main() {
         expect(find.byType(ImportDoneScreen), findsOneWidget);
       });
 
+      testWidgets('no Change when the runner ignores a target card', (t) async {
+        runner.supportsTargetCard = false;
+        final l = await pump(t);
+        await t.tap(find.text(l.exportsImportZaghlolCsv));
+        await t.pumpAndSettle();
+        expect(find.byKey(const ValueKey('importTargetChange')), findsNothing);
+      });
+
       testWidgets('no Change with a single card or no target', (t) async {
         final l = await pump(
           t,

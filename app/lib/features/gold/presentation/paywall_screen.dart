@@ -88,6 +88,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     }
   }
 
+  _Notice? _lastAction;
+
   Future<void> _buy() async {
     final plan = _selected;
     if (plan == null || _busy) return;
@@ -103,8 +105,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     if (_lastAction == _Notice.purchasing) return _buy();
     return _restore();
   }
-
-  _Notice? _lastAction;
 
   Future<void> _restore() async {
     if (_busy) return;
@@ -150,7 +150,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final link = ref.watch(goldLinkOpenerProvider);
 
     final benefits = [
-      t.goldPaywallBenefitCharts,
+      if (!GoldGate.chartsOpenToFree) t.goldPaywallBenefitCharts,
       t.goldPaywallBenefitVoice,
       t.goldPaywallBenefitExport,
       t.goldPaywallBenefitBackup,

@@ -97,7 +97,7 @@ class _State extends ConsumerState<ImportSourceScreen> {
         context,
         preview: preview,
         targetCardName: widget.targetCardName,
-        onTargetChanged: (c) => target = c,
+        onTargetChanged: runner.supportsTargetCard ? (c) => target = c : null,
       );
       if (go != true || !mounted) return;
       setState(() => _busy = true);

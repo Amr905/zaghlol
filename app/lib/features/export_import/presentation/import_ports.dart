@@ -264,6 +264,10 @@ final class ImportOutcome {
 /// never stores, logs or returns it. [targetCardId] files the rows under the
 /// card the user picked on the summary; null keeps the default.
 abstract interface class ImportRunner {
+  /// False when the source files rows under cards of their own (the Zaghlol
+  /// CSV names an account per row): the summary then hides "Change".
+  bool get supportsTargetCard;
+
   Future<ImportPreview> preview(
     ImportSourceId id,
     PickedImportFile file, {
@@ -282,6 +286,10 @@ abstract interface class ImportRunner {
 final class CsvImportRunner implements ImportRunner {
   const CsvImportRunner(this._use);
   final ImportCsvUseCase _use;
+
+  /// Every CSV row carries its own account, so a picked target is not used.
+  @override
+  bool get supportsTargetCard => false;
 
   void _check(ImportSourceId id, PickedImportFile file) {
     if (id != ImportSourceId.zaghlolCsv) {

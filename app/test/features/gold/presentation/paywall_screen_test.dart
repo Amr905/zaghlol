@@ -29,6 +29,23 @@ Future<void> main() async {
   for (final lang in ['en', 'ar']) {
     final t = tr(lang);
     group('paywall $lang', () {
+      testWidgets('charts benefit hidden while charts are open to Free', (
+        tester,
+      ) async {
+        final a = FakeGoldActions();
+        await pumpGold(
+          tester,
+          goldApp(
+            const PaywallScreen(),
+            overrides: goldOverrides(a),
+            lang: lang,
+          ),
+        );
+        expect(GoldGate.chartsOpenToFree, isTrue);
+        expect(find.text(t.goldPaywallBenefitCharts), findsNothing);
+        expect(find.text(t.goldPaywallBenefitExport), findsOneWidget);
+      });
+
       testWidgets(
         'ready: store prices only, yearly preselected, renewal line',
         (tester) async {

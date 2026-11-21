@@ -7,6 +7,11 @@ import 'package:zaghlol/features/export_import/presentation/import_ports.dart';
 import '../application/import_csv_test.dart' show FakeStore, hdr, line, raw;
 
 void main() {
+  test('CSV runner does not honour a target card', () {
+    final runner = CsvImportRunner(ImportCsvUseCase(FakeStore()));
+    expect(runner.supportsTargetCard, isFalse);
+  });
+
   test(
     'commit reports autoCategorised, needReview and topCategories',
     () async {

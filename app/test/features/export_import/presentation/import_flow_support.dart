@@ -29,6 +29,8 @@ class FakeRunner implements ImportRunner {
   ImportFailureKind? failure;
   ImportOutcome? outcome;
   int commits = 0;
+  @override
+  bool supportsTargetCard = true;
   String? requirePassword;
   final previewPasswords = <String?>[];
   String? lastTargetCardId;
