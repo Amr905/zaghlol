@@ -1,0 +1,55 @@
+name: backend-monsterasp
+
+# T-206 package checks. Nothing is deployed and no secret is used: the win-x64 package builds, holds a web.config (in-process,
+# stdout logging off, allow-listed non-secret environment variables only) and no secrets; the package tool's tests run; actionlint
+# validates the three MonsterASP workflows.
+on:
+  push:
+    branches: ["batch/**", "ci/**"]
+    paths:
+      - "backend/src/Zaghlol.Api/**"
+      - "backend/src/Zaghlol.Workers/**"
+      - "backend/deploy/monsterasp/**"
+      - ".github/workflows/backend-deploy-monsterasp.yml"
+      - ".github/workflows/backend-keepalive-monsterasp.yml"
+      - ".github/workflows/backend-monsterasp.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-monsterasp-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: dotnet publish win-x64, web.config, no secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: 10.0.x
+      - name: Package tool tests
+        run: python3 -I -m unittest discover -s backend/deploy/monsterasp/tests
+      - name: Publish with the MonsterAsp profile
+        working-directory: backend
+        run: dotnet publish src/Zaghlol.Api/Zaghlol.Api.csproj -p:PublishProfile=MonsterAsp -c Release -warnaserror -o "$RUNNER_TEMP/package"
+      - name: Package has web.config and the API, and no secrets
+        run: |
+          test -f "$RUNNER_TEMP/package/web.config" || { echo "::error::web.config missing from the package"; exit 1; }
+          test -f "$RUNNER_TEMP/package/Zaghlol.Api.dll" || { echo "::error::Zaghlol.Api.dll missing from the package"; exit 1; }
+          test -f "$RUNNER_TEMP/package/Zaghlol.Workers.dll" || { echo "::error::Zaghlol.Workers.dll missing (embedded workers)"; exit 1; }
+          python3 -I backend/deploy/monsterasp/monsterasp_package.py check "$RUNNER_TEMP/package"
+
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: actionlint on the MonsterASP workflows
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color \
+            .github/workflows/backend-deploy-monsterasp.yml .github/workflows/backend-keepalive-monsterasp.yml .github/workflows/backend-monsterasp.yml

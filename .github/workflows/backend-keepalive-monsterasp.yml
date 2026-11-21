@@ -1,0 +1,27 @@
+name: backend-keepalive-monsterasp
+
+# IIS idles the app pool out after a quiet period; the embedded worker jobs (T-206) stop with it. This pings GET /v1/health every
+# 10 minutes so the site stays warm. GitHub's scheduler can be late, so on Premium also add the host's planned task that calls the
+# same URL (runbook). Uses repository variables only (no environment, so no reviewer wait): BACKEND_MONSTERASP_DEPLOY_ENABLED=true
+# and BACKEND_SITE_URL. Jobs must still be safe after a recycle (deployment.md, "Keep-alive and recycles").
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: none
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      ENABLED: ${{ vars.BACKEND_MONSTERASP_DEPLOY_ENABLED }}
+      SITE_URL: ${{ vars.BACKEND_SITE_URL }}
+    steps:
+      - name: GET /v1/health
+        run: |
+          if [ "$ENABLED" != "true" ]; then echo "MonsterASP profile not enabled; nothing to ping."; exit 0; fi
+          case "$SITE_URL" in https://?*) ;; *) echo "::error title=Missing variable::BACKEND_SITE_URL must be the https:// site URL."; exit 1 ;; esac
+          curl -fsS --max-time 60 --retry 3 --retry-delay 10 --retry-all-errors -o /dev/null -w 'health %{http_code} in %{time_total}s\n' "${SITE_URL%/}/v1/health"
