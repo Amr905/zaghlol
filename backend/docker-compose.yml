@@ -36,7 +36,7 @@ services:
   # Local OpenTelemetry collector (T-138): receives OTLP from the api and the worker and exposes the metrics in Prometheus
   # format on :8889 (curl http://localhost:8889/metrics | grep zaghlol_). Logs are JSON on stdout, not OTLP.
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.116.1@sha256:d0ebf65280da2e1b1491d1b93648281afd353d4b9ea19160090303cec9a233bd # otel/opentelemetry-collector-contrib:0.116.1
+    image: otel/opentelemetry-collector-contrib:0.165.0@sha256:e40d61f10c9a617cca1ffd1be4d7e2b3a4b0f0001798ff07e58cabe82e618cea # otel/opentelemetry-collector-contrib:0.116.1
     command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
       - ./deploy/observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro
