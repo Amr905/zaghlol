@@ -109,6 +109,12 @@ allKeys = [
   (key: Settings.backupLastFailure, byDefault: null, other: 1760000000000),
   (key: Settings.backupReminderAt, byDefault: null, other: 1760000000000),
   (key: Settings.notifWeeklyLastRun, byDefault: null, other: 1760000000000),
+  (key: Settings.upsellLastShown, byDefault: null, other: 1760000000000),
+  (
+    key: Settings.roiDismissedTips,
+    byDefault: <String>{},
+    other: {'egp_cash_idle'},
+  ),
 ];
 
 void main() {
