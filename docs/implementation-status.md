@@ -833,7 +833,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-239a | parsing | T-072 alrajhi lazy dot runs backtrack O(n^2) on long non-matching bodies | app/assets/registry/institutions/alrajhi.json:35 | none | OBSOLETE (batch 51): alrajhi patterns bounded; test/ingestion/alrajhi_backtrack_test.dart exists |
 | FU-240a | ui | T-158 CSV import pairing hook not passed to ImportCsvUseCase (blocker) | export_import/presentation/import_ports.dart:331 | none | CLOSED (importPostPersistHook) |
 | FU-240b | ui | T-158 commit returns no autoCategorised/needReview/topCategories; done tiles hidden | export_import/presentation/import_ports.dart:222 | none | FIXED (batch 52): ImportSummary reports autoCategorised / needCategory / topCategories; done screen resolves names by id |
-| FU-240c | ui | T-158 export half, target-card Change action and PDF password step not built | export_import/presentation | none | OPEN (batch 51: feature, >150 lines: export half screen, target-card Change sheet, PDF password step) |
+| FU-240c | ui | T-158 export half, target-card Change action and PDF password step not built | export_import/presentation | none | FIXED (batch 54) |
 | FU-248a | parsing | T-070 registryVersion not bumped | app/assets/registry/registry_manifest.json:3 | none | CLOSED (v4, commit bfb9ef31) |
 | FU-248b | parsing | T-070 sender contact and wallet name Contact are generic guesses | app/assets/guard/guard_base.json:107,408 | PO | OPEN |
 | FU-249a | backend | T-186 detach phase 1 does not run link/source checks | backend/.../Support/SupportActionService.cs | none | CLOSED (commit 08434bf2) |

@@ -305,7 +305,7 @@ SettingsDestinations settingsDestinations(BuildContext context) =>
       onCapture: () => unawaited(openCaptureSettings(context)),
       onCategories: () => unawaited(_screens(context).categories(context)),
       onBackup: () => unawaited(openBackup(context)),
-      onExports: () => unawaited(openImportFlow(context)),
+      onExports: () => unawaited(openExportMain(context)),
       onAccount: () => unawaited(_screens(context).account(context)),
       onNotifications: () =>
           unawaited(_screens(context).notificationsSettings(context)),
@@ -324,6 +324,11 @@ Future<void> openCaptureSettings(BuildContext context) =>
         unawaited(_screens(context).templateBuilder(context));
       },
     );
+
+/// S-67 "Export & import" (Settings): export, with a row into the import flow.
+Future<void> openExportMain(BuildContext context) => _screens(
+  context,
+).exportMain(context, onOpenImport: () => unawaited(openImportFlow(context)));
 
 /// S-67 import flow. From a card, [cardName] names the target.
 Future<void> openImportFlow(BuildContext context, {String? cardName}) =>
