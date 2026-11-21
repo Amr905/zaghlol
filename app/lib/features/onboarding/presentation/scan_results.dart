@@ -521,7 +521,7 @@ class _BodyState extends ConsumerState<ScanResultsBody> {
                                     credit.label,
                                   ),
                                   style: ZType.bodySmall.copyWith(
-                                    color: c.text,
+                                    color: c.zaghlolText,
                                   ),
                                 ),
                                 const SizedBox(height: ZSpacing.md),

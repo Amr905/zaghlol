@@ -286,7 +286,7 @@ class _SuggestionCard extends ConsumerWidget {
                     l,
                     l.recurringBillsDetected(view.name, f.money(view.amount)),
                   ),
-                  style: ZType.body.copyWith(color: c.text),
+                  style: ZType.body.copyWith(color: c.zaghlolText),
                 ),
                 const SizedBox(height: ZSpacing.sm),
                 Wrap(
