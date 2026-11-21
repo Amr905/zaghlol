@@ -61,10 +61,10 @@ jobs:
       FLAVOR: ${{ matrix.flavor }}
       EXPECT_SMS: ${{ matrix.flavor == 'prodSms' }}
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: '17'
@@ -254,7 +254,7 @@ jobs:
           echo "symbols=true" >> "$GITHUB_OUTPUT"
       - name: Keep the encrypted symbols (14 days)
         if: steps.symbols.outputs.symbols == 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.flavor }}-symbols-encrypted
           path: ${{ runner.temp }}/${{ matrix.flavor }}-symbols.tar.enc
@@ -277,7 +277,7 @@ jobs:
           fi
       - name: Keep the unsigned bundle (3 days, dry run only)
         if: steps.sign.outputs.signed != 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.flavor }}-aab-UNSIGNED-dry-run
           path: ${{ runner.temp }}/aab-public/app-dry-run.aab
