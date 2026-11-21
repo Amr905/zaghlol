@@ -43,3 +43,8 @@ paths = [
 regexes = [
   '''[A-Za-z_]*_dev_only''',
 ]
+# PO-approved (2026-11-21): one historical commit whose backend/deploy/server/app.env.example
+# held a PEM-shaped placeholder ("-----BEGIN PRIVATE KEY-----\n<base64>...", no key material).
+commits = [
+  '''84dcdc80eafc61a870623df1fea7c1f239639cc8''',
+]
