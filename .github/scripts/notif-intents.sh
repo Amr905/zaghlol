@@ -177,6 +177,9 @@ A uninstall "$PKG" > /dev/null 2>&1 || true
 flutter build apk --debug --flavor devSms 2>&1 | tail -3
 apk=$(ls build/app/outputs/flutter-apk/*.apk 2> /dev/null | grep -i devsms | head -1)
 [ -n "$apk" ] || { echo "no apk"; exit 1; }
+# `flutter test` reinstalls the debug APK with the TEST as its entrypoint; the
+# cold launches below must run the real app, so keep this build for them.
+cp "$apk" "$RUNNER_TEMP/real-app.apk"
 A install -r "$apk" || exit 1
 A shell pm grant "$PKG" android.permission.POST_NOTIFICATIONS || echo "grant failed"
 A shell am force-stop "$PKG"
@@ -294,7 +297,10 @@ MARK=
 pkill -9 -f flutter_tools 2> /dev/null; pkill -9 -f "flutter test" 2> /dev/null
 kill -9 "$tpid" 2> /dev/null; wait "$tpid" 2> /dev/null
 sleep 1
-echo "notifications posted before the kill: 9102=$(present 9102) 9104=$(present 9104)"
+echo "notifications posted before the reinstall: 9102=$(present 9102) 9104=$(present 9104)"
+# Back to the real app (same key, data and notifications are kept by -r).
+A install -r "$RUNNER_TEMP/real-app.apk" | tail -1
+sleep 3
 kill_app || echo "app still alive"
 echo "notifications posted after the test ended: 9102=$(present 9102) 9104=$(present 9104)"
 
