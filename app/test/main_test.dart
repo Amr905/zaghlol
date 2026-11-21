@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
+import 'package:zaghlol/core/ui/shell/app_shell.dart' show ZBottomBar;
 import 'package:zaghlol/main.dart';
 
 void main() {
@@ -16,7 +17,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(NavigationDestination), findsNWidgets(4));
+    expect(find.byType(ZBottomBar), findsOneWidget);
+    expect(find.byType(InkWell), findsAtLeastNWidgets(5));
   });
 }

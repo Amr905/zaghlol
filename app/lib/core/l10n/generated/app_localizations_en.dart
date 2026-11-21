@@ -28,6 +28,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNavAddA11y => 'Quick add';
 
   @override
+  String get commonNavAddLabel => 'Add';
+
+  @override
+  String commonNavBadgeCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String get commonNavBadgeMax => '9+';
+
+  @override
   String get appLockTitle => 'Zaghlol is locked';
 
   @override

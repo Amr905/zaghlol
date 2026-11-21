@@ -28,6 +28,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonNavAddA11y => 'سجّل بسرعة';
 
   @override
+  String get commonNavAddLabel => 'سجّل';
+
+  @override
+  String commonNavBadgeCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String get commonNavBadgeMax => '٩+';
+
+  @override
   String get appLockTitle => 'زغلول مقفول';
 
   @override

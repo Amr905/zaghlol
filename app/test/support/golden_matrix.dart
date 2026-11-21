@@ -25,7 +25,7 @@ class GoldenVariant {
 const _ar = Locale('ar', 'EG');
 const _en = Locale('en');
 
-/// ar RTL and en LTR, light (Mint Fresh) and dark (Jade Night), scale 1.0.
+/// ar RTL and en LTR, light (Mint Fresh) and dark (True Black), scale 1.0.
 const goldenVariants = <GoldenVariant>[
   GoldenVariant(locale: _ar, dark: false),
   GoldenVariant(locale: _ar, dark: true),

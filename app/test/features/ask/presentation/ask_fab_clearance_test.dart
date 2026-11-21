@@ -28,7 +28,6 @@ void main() {
             selected: 3,
             onSelect: (_) {},
             onAdd: () => added++,
-            glass: false,
             labels: const ['a', 'b', 'c', 'd'],
             addLabel: 'add',
           ),
