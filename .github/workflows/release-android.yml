@@ -136,7 +136,8 @@ jobs:
           VERSION_CODE: ${{ steps.ver.outputs.ANDROID_VERSION_CODE }}
         run: |
           mkdir -p "$RUNNER_TEMP/symbols/$FLAVOR"
-          if ! flutter build appbundle --release --flavor "$FLAVOR" \
+          # T-190: no x86_64 in the store bundle (arm64-v8a + armeabi-v7a; Play serves each device its own ABI).
+          if ! flutter build appbundle --release --flavor "$FLAVOR" --target-platform android-arm,android-arm64 \
               --build-name "$BUILD_NAME" --build-number "$VERSION_CODE" \
               --obfuscate --split-debug-info="$RUNNER_TEMP/symbols/$FLAVOR" > build.log 2>&1; then
             echo "::error::bundle build failed: $(grep -v -E 'Unzipping|^\[' build.log | grep -A25 -E 'What went wrong|Error|error:' | head -n 40 | tr '\n' '|')"
@@ -159,7 +160,7 @@ jobs:
           ZAGHLOL_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
         run: |
           task=":app:package${FLAVOR^}ReleaseUniversalApk"
-          if ! ./gradlew --no-daemon "$task" > universal.log 2>&1; then
+          if ! ./gradlew --no-daemon -Ptarget-platform=android-arm,android-arm64 "$task" > universal.log 2>&1; then
             echo "::error::$task failed: $(grep -A25 -E 'What went wrong|Error|error:' universal.log | head -n 40 | tr '\n' '|')"
             exit 1
           fi
@@ -167,6 +168,13 @@ jobs:
           [ -n "$APK" ] || { echo "::error::no universal APK found: $(find ../build -name '*.apk' | tr '\n' ' ')"; exit 1; }
           echo "UAPK=$PWD/$APK" >> "$GITHUB_ENV"
           ls -l "$APK"
+
+      # T-190 / NFR-PERF-07: release size guard (+10 % over .github/size-baseline.json, or over budget).
+      # The per-device Play download size is measured by the size-report workflow.
+      - name: Size guard (T-190)
+        run: |
+          printf 'android.%s.release_aab\t%s\n' "$FLAVOR" "$(stat -c %s "$AAB")" > "$RUNNER_TEMP/sizes.tsv"
+          bash .github/scripts/check-app-size.sh "$RUNNER_TEMP/sizes.tsv" "$FLAVOR" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Assert permissions, ids, SDK levels, no OS backup, placement
         run: |
@@ -195,7 +203,8 @@ jobs:
           grep -qE "versionCode='${{ steps.ver.outputs.ANDROID_VERSION_CODE }}'" badging.txt || { echo "::error::versionCode mismatch"; exit 1; }
           bash .github/scripts/check-no-os-backup.sh "$AAPT2" "$UAPK"
           bash .github/scripts/check-sms-spike-placement.sh "$AAPT2" "$UAPK" "$FLAVOR" release
-          for abi in arm64-v8a armeabi-v7a x86_64; do
+          if unzip -Z1 "$UAPK" | grep -q '^lib/x86_64/'; then echo "::error::x86_64 libraries in the release bundle (T-190)"; exit 1; fi
+          for abi in arm64-v8a armeabi-v7a; do
             if unzip -p "$UAPK" "lib/$abi/libapp.so" | grep -aqE "ZAGHLOL_DB_BENCH|5550100"; then
               echo "::error::benchmark or spike code in lib/$abi/libapp.so"; exit 1
             fi

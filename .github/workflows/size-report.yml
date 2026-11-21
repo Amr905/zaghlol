@@ -1,0 +1,186 @@
+name: size-report
+
+# T-190: measures the app size (debug universal APK, release universal APK,
+# release per-ABI APKs, release AAB with --analyze-size, per-device download
+# size via bundletool, iOS IPA) and uploads only text/JSON reports.
+# Manual dispatch, or a push to a size/** branch (a workflow_dispatch can only be
+# triggered through the API once the file is on the default branch). The repository is public: no APK, AAB, IPA, R8 mapping
+# or Dart symbol file is ever uploaded from this workflow.
+on:
+  push:
+    branches:
+      - 'size/**'
+  workflow_dispatch:
+    inputs:
+      ios:
+        description: 'Also measure the iOS IPA (macOS runner)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: size-report-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Keep equal to FLUTTER_VERSION in app-ci.yml.
+  FLUTTER_VERSION: '3.47.9'
+  BUNDLETOOL_VERSION: '1.18.1'
+  # ABIs of the shipped release (T-190: no x86_64). Empty = all three (the pre-T-190 reference).
+  TP: 'android-arm,android-arm64'
+
+jobs:
+  android:
+    name: android ${{ matrix.flavor }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [prodSms, prodNoSms]
+    env:
+      FLAVOR: ${{ matrix.flavor }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Tools (bundletool, apkanalyzer)
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/tools" "$RUNNER_TEMP/out"
+          curl -fsSL -o "$RUNNER_TEMP/tools/bundletool.jar" \
+            "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          sha256sum "$RUNNER_TEMP/tools/bundletool.jar" | tee "$RUNNER_TEMP/out/bundletool.sha256"
+          AA=$(find "$ANDROID_HOME" -name apkanalyzer -type f | head -n 1)
+          [ -n "$AA" ] || { echo "::error::apkanalyzer not found under $ANDROID_HOME"; exit 1; }
+          echo "APKANALYZER=$AA" >> "$GITHUB_ENV"
+          # A throwaway keystore so bundletool can sign the extracted APK set.
+          keytool -genkeypair -keystore "$RUNNER_TEMP/tools/size.jks" -storepass sizepass -keypass sizepass \
+            -alias size -keyalg RSA -keysize 2048 -validity 2 -dname "CN=size" > /dev/null 2>&1
+      - name: Debug universal APK (the build a tester sideloads)
+        working-directory: app
+        run: |
+          FL="dev${FLAVOR#prod}"
+          flutter build apk --debug --flavor "$FL" > "$RUNNER_TEMP/out/build-debug.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-debug.log"; exit 1; }
+          ls -l build/app/outputs/flutter-apk/
+          cp "$(ls build/app/outputs/flutter-apk/*-debug.apk | head -n 1)" "$RUNNER_TEMP/debug-universal.apk"
+      - name: Release universal APK (what app-ci builds)
+        working-directory: app
+        run: |
+          flutter build apk --release --flavor "$FLAVOR" > "$RUNNER_TEMP/out/build-release-universal.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-universal.log"; exit 1; }
+          ls -l build/app/outputs/flutter-apk/
+          cp "$(ls build/app/outputs/flutter-apk/*-release.apk | head -n 1)" "$RUNNER_TEMP/release-universal.apk"
+          find build/app/outputs/mapping -name mapping.txt -exec ls -l {} \; | tee "$RUNNER_TEMP/out/r8-mapping-present-universal.txt"
+      - name: Release per-ABI APKs (side-load), obfuscated
+        working-directory: app
+        run: |
+          mkdir -p "$RUNNER_TEMP/sym-apk"
+          rm -f build/app/outputs/flutter-apk/*.apk
+          flutter build apk --release --split-per-abi --flavor "$FLAVOR" ${TP:+--target-platform $TP} \
+            --obfuscate --split-debug-info="$RUNNER_TEMP/sym-apk" > "$RUNNER_TEMP/out/build-release-split.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-split.log"; exit 1; }
+          mkdir -p "$RUNNER_TEMP/split"
+          cp build/app/outputs/flutter-apk/*-release.apk "$RUNNER_TEMP/split/"
+          ls -l "$RUNNER_TEMP/split"
+      - name: Release AAB (all ABIs), obfuscated
+        working-directory: app
+        run: |
+          mkdir -p "$RUNNER_TEMP/sym-aab"
+          flutter build appbundle --release --flavor "$FLAVOR" ${TP:+--target-platform $TP} \
+            --obfuscate --split-debug-info="$RUNNER_TEMP/sym-aab" > "$RUNNER_TEMP/out/build-release-aab.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-aab.log"; exit 1; }
+          ls -l build/app/outputs/bundle/*/
+          cp "$(ls build/app/outputs/bundle/*/*.aab | head -n 1)" "$RUNNER_TEMP/release.aab"
+          find build/app/outputs/mapping -name mapping.txt -exec ls -l {} \; | tee "$RUNNER_TEMP/out/r8-mapping-present-aab.txt"
+      # --analyze-size cannot be combined with --obfuscate / --split-debug-info, so this
+      # build is not obfuscated (symbol names only; sizes of libs/dex/assets are comparable).
+      - name: Release AAB arm64 with --analyze-size
+        working-directory: app
+        run: |
+          flutter build appbundle --release --flavor "$FLAVOR" --target-platform android-arm64 --analyze-size > "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log"; exit 1; }
+          tail -n 60 "$RUNNER_TEMP/out/build-release-aab-arm64-analyze.log"
+          cp "$(ls build/app/outputs/bundle/*/*.aab | head -n 1)" "$RUNNER_TEMP/release-arm64.aab"
+          cp build/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
+          cp ~/.flutter-devtools/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
+      - name: Report
+        run: bash .github/scripts/android-size-report.sh "$RUNNER_TEMP" "$FLAVOR"
+      - name: Size guard
+        run: bash .github/scripts/check-app-size.sh "$RUNNER_TEMP/out/sizes.tsv" "$FLAVOR"
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: size-android-${{ matrix.flavor }}
+          path: ${{ runner.temp }}/out/
+          if-no-files-found: error
+          retention-days: 30
+
+  ios:
+    name: ios prod
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.ios) || contains(github.event.head_commit.message, '[ios]') }}
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - name: Select Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -n 1)
+          [ -n "$X" ] || { echo "::error::no Xcode 26 on this runner image"; exit 1; }
+          sudo xcode-select -s "$X"
+          xcodebuild -version
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      # --analyze-size cannot be combined with --obfuscate: build once for the breakdown,
+      # then the obfuscated release-like IPA that the sizes are taken from.
+      - name: IPA with --analyze-size (unsigned, not obfuscated)
+        working-directory: app
+        run: |
+          mkdir -p "$RUNNER_TEMP/out" "$RUNNER_TEMP/sym-ios"
+          if ! flutter build ipa --release --flavor prod --no-codesign --analyze-size > "$RUNNER_TEMP/out/build-ios-analyze.log" 2>&1; then
+            tail -n 60 "$RUNNER_TEMP/out/build-ios-analyze.log"; exit 1
+          fi
+          tail -n 80 "$RUNNER_TEMP/out/build-ios-analyze.log"
+          cp build/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
+          cp ~/.flutter-devtools/*code-size-analysis*.json "$RUNNER_TEMP/out/" 2>/dev/null || true
+      - name: IPA obfuscated (unsigned, the size measured)
+        working-directory: app
+        run: |
+          if ! flutter build ipa --release --flavor prod --no-codesign \
+              --obfuscate --split-debug-info="$RUNNER_TEMP/sym-ios" > "$RUNNER_TEMP/out/build-ios.log" 2>&1; then
+            tail -n 60 "$RUNNER_TEMP/out/build-ios.log"; exit 1
+          fi
+          tail -n 8 "$RUNNER_TEMP/out/build-ios.log"
+          ARCHIVE=build/ios/archive/Runner.xcarchive
+          APP=$(ls -d "$ARCHIVE"/Products/Applications/*.app | head -n 1)
+          rm -rf "$RUNNER_TEMP/ipa" && mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/"
+          (cd "$RUNNER_TEMP/ipa" && zip -qry Zaghlol-UNSIGNED.ipa Payload)
+          echo "APP=$PWD/$APP" >> "$GITHUB_ENV"
+      - name: Report
+        run: bash .github/scripts/ios-size-report.sh "$RUNNER_TEMP" "$APP"
+      - name: Size guard
+        run: bash .github/scripts/check-app-size.sh "$RUNNER_TEMP/out/sizes.tsv" ios
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: size-ios
+          path: ${{ runner.temp }}/out/
+          if-no-files-found: error
+          retention-days: 30

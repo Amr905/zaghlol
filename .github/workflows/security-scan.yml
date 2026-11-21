@@ -3,8 +3,10 @@ name: security-scan
 # T-175 M-1 (security-model §6): vulnerability scan of pub / npm / Gradle lockfiles (osv-scanner),
 # secret scan of the tree and history (gitleaks), CycloneDX SBOM of the backend.
 # Batch CI (PO, 2026-11-10): like app-ci and backend-ci, runs on batch/** and ci/** pushes, plus weekly and on demand.
-# The scan jobs are NON-BLOCKING (continue-on-error) until the known findings in docs/05-reviews/T-175-pass1.md
-# (L-3) are fixed and the first full run is triaged; then remove `continue-on-error` to make them gates.
+# T-192: action SHAs confirmed against the upstream tags (osv-scanner-action v2.7.1 = 32d3cd48..., gitleaks-action v3.0.0 =
+# e0c47f4f...) and `scan-args` against osv-scanner-action's action.yml (newline-separated args). The first push run was clean
+# (osv-scanner: no issues; gitleaks: no leaks). The Gradle graph scan is new; once its first run is triaged, drop
+# `continue-on-error` from the osv-scan job (see T-192 builder note).
 on:
   push:
     branches: ["batch/**", "ci/**"]
@@ -28,15 +30,44 @@ jobs:
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
 
-      # Gradle: app/android/gradle/verification-metadata.xml lists every resolved artifact (dependency verification).
-      # Transitive plugin AARs not covered by it still need the `:app:dependencies` export (pass 2).
+      # Gradle: verification-metadata.xml is a checksum list, not a dependency graph (osv-scanner reads it as 1 package), so
+      # the scan uses the resolved graph: `:app:dependencies` (all configurations, transitive) and `:buildEnvironment`
+      # (plugin classpaths), converted to a gradle.lockfile by .github/scripts/gradle-deps-to-lockfile.py.
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: '3.47.9' # keep in sync with FLUTTER_VERSION in app-ci.yml
+          channel: stable
+      - name: Resolve workspace and prepare the Android project
+        run: |
+          flutter pub get --enforce-lockfile
+          cd app
+          for attempt in 1 2; do
+            if flutter build apk --debug --flavor devNoSms > prepare.log 2>&1; then exit 0; fi
+            echo "attempt $attempt failed"; tail -n 20 prepare.log
+          done
+          echo "::error::could not prepare the Android project"; exit 1
+      - name: Export the Gradle dependency graph
+        working-directory: app/android
+        run: |
+          set -o pipefail
+          mkdir -p "$GITHUB_WORKSPACE/gradle-export"
+          ./gradlew --no-daemon -q :app:dependencies > "$GITHUB_WORKSPACE/gradle-export/app-dependencies.txt"
+          ./gradlew --no-daemon -q :buildEnvironment > "$GITHUB_WORKSPACE/gradle-export/build-environment.txt"
+          python3 -I "$GITHUB_WORKSPACE/.github/scripts/gradle-deps-to-lockfile.py" \
+            "$GITHUB_WORKSPACE/gradle-export/gradle.lockfile" \
+            "$GITHUB_WORKSPACE/gradle-export/app-dependencies.txt" "$GITHUB_WORKSPACE/gradle-export/build-environment.txt"
+
       - uses: google/osv-scanner-action/osv-scanner-action@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
         with:
           scan-args: |-
             --lockfile=pubspec.lock
             --lockfile=tools/drift_codegen/pubspec.lock
             --lockfile=backend/openapi/package-lock.json
-            --lockfile=app/android/gradle/verification-metadata.xml
+            --lockfile=gradle.lockfile:gradle-export/gradle.lockfile
 
   secrets:
     name: gitleaks (tree and history)

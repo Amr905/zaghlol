@@ -4057,6 +4057,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillsMarkPaid => 'اتدفع';
 
   @override
+  String notificationMarkPaidConfirmBody(String name, String date) {
+    return '«$name» — ميعاد الدفع $date';
+  }
+
+  @override
   String get notificationMarkPaidConfirmTitle =>
       'تعلّم الفاتورة دي إنها اتدفعت؟';
 

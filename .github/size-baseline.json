@@ -1,0 +1,31 @@
+{
+  "growth_percent": 10,
+  "enforce_budget": true,
+  "budget_bytes": {
+    "android.prodSms.play_download.arm64-v8a": 41943040,
+    "android.prodNoSms.play_download.arm64-v8a": 41943040,
+    "ios.release_ipa_unsigned": 62914560
+  },
+  "baseline_bytes": {
+    "android.prodSms.release_universal_apk": 121119135,
+    "android.prodSms.release_split_apk.arm64-v8a": 66457336,
+    "android.prodSms.release_split_apk.armeabi-v7a": 55041564,
+    "android.prodSms.release_aab": 90843302,
+    "android.prodSms.play_download.arm64-v8a": 30284567,
+    "android.prodSms.play_download.armeabi-v7a": 28284704,
+    "android.prodNoSms.release_universal_apk": 121118943,
+    "android.prodNoSms.release_split_apk.arm64-v8a": 66457144,
+    "android.prodNoSms.release_split_apk.armeabi-v7a": 55041368,
+    "android.prodNoSms.release_aab": 90838580,
+    "android.prodNoSms.play_download.arm64-v8a": 30281814,
+    "android.prodNoSms.play_download.armeabi-v7a": 28281948,
+    "app-ci.prodSms.release_apk_arm_arm64": 121119131,
+    "app-ci.prodSms.release_apk_libs_arm64-v8a_compressed": 63032464,
+    "app-ci.prodSms.release_apk_libs_armeabi-v7a_compressed": 52146188,
+    "app-ci.prodNoSms.release_apk_arm_arm64": 121118939,
+    "app-ci.prodNoSms.release_apk_libs_arm64-v8a_compressed": 63032464,
+    "app-ci.prodNoSms.release_apk_libs_armeabi-v7a_compressed": 52146188,
+    "ios.release_ipa_unsigned": 18203010
+  },
+  "_note": "T-190. baseline_bytes = sizes after T-190 (2026-11-20, Flutter 3.47.9). Update in the same commit as an intended size change. Budgets: NFR-PERF-07 proposed targets (Play download arm64 <= 40 MiB, App Store download <= 60 MiB; the unsigned IPA is an upper bound of the App Store download)."
+}

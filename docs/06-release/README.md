@@ -39,6 +39,10 @@ Permissions (prodSms exactly READ_SMS + RECEIVE_SMS among the restricted ones; p
 
 Bundle ids (app, ShareExtension, widget), version and build number, no `NSAllowsArbitraryLoads`, `PrivacyInfo.xcprivacy` present with `NSPrivacyTracking=false` and required-reason **35F9.1**, extensions embedded, dSYMs present.
 
+## App size (T-190, NFR-PERF-07)
+
+Release builds ship arm64-v8a and armeabi-v7a only (no x86_64). Side-loaded per-ABI APKs: `flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64 --flavor <prodSms|prodNoSms>`. Measured 2026-11-20: Play download arm64 28.8 MiB, unsigned iOS IPA 17.4 MiB (report: `docs/05-reviews/T-190-size.md`). Each release workflow runs `.github/scripts/check-app-size.sh` against `.github/size-baseline.json` (fails above +10 % or over the 40 MiB / 60 MiB budget); after an intended change update the baseline in the same commit. The `size-report` workflow (manual, or a push to `size/**`) prints the per-ABI breakdown and the bundletool download size.
+
 ## iOS signing: deliberate deviation from "fastlane/match"
 
 The task text says fastlane/match. `match` needs a private certificates repository and a second passphrase. The pipeline instead takes one Apple Distribution `.p12` plus three provisioning profiles as secrets and lets fastlane switch `Release-prod` to manual signing at build time (`update_code_signing_settings`), leaving the committed project on automatic signing. Fewer moving parts; if the PO prefers match, only `archive_signed` changes. The signed path **could not be dry-run** (no Apple account); the unsigned path was.

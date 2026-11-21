@@ -74,6 +74,9 @@ jobs:
           fi
       - name: T-165 backup assertion self-test (negative controls)
         run: bash .github/scripts/test-check-no-os-backup.sh
+      # T-190: the size guard script's negative controls.
+      - name: size guard self-test (T-190)
+        run: bash .github/scripts/test-check-app-size.sh
       # R2-N1 (T-003 review, landed in T-007): the app-regen commit job's
       # pubspec.lock validator, run against the current lock and bad fixtures.
       - name: pubspec.lock validator self-test (app-regen)
@@ -596,7 +599,10 @@ jobs:
       - name: Build APK
         working-directory: app
         run: |
-          if ! flutter build apk --"$MODE" --flavor "$FLAVOR" > build.log 2>&1; then
+          # T-190: release builds ship arm64-v8a and armeabi-v7a only (no x86_64); debug keeps all three for emulators.
+          EXTRA=""
+          [ "$MODE" = "release" ] && EXTRA="--target-platform android-arm,android-arm64"
+          if ! flutter build apk --"$MODE" --flavor "$FLAVOR" $EXTRA > build.log 2>&1; then
             echo "::error::build failed: $(grep -v -E 'Unzipping|^\[' build.log | grep -A25 -E 'What went wrong|Error|error:' | head -n 40 | tr '\n' '|')"
             grep -E -A3 "Missing class|Caused by|R8:" build.log | head -n 40 || true
             exit 1
@@ -673,7 +679,13 @@ jobs:
           APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
           unzip -Z1 "$APK" | grep -E '^lib/' | sort > libs.txt
           cat libs.txt
-          for abi in arm64-v8a armeabi-v7a x86_64; do
+          ABIS="arm64-v8a armeabi-v7a x86_64"
+          [ "$MODE" = "release" ] && ABIS="arm64-v8a armeabi-v7a"
+          if [ "$MODE" = "release" ] && grep -q "^lib/x86_64/" libs.txt; then
+            echo "::error::release APK still carries x86_64 libraries (T-190)"
+            exit 1
+          fi
+          for abi in $ABIS; do
             if ! grep -qE "^lib/$abi/lib[^/]*sqlite3[^/]*[.]so$" libs.txt; then
               echo "::error::no sqlite3 code asset for $abi in $APK"
               exit 1
@@ -688,7 +700,7 @@ jobs:
             fi
             grep -E "lib/.*[.]so" zipalign.log
             tail -n 1 zipalign.log
-            for abi in arm64-v8a armeabi-v7a x86_64; do
+            for abi in arm64-v8a armeabi-v7a; do
               so="lib/$abi/libapp.so"
               if ! grep -qx "$so" libs.txt; then
                 echo "::error::$so missing from $APK"
@@ -700,6 +712,19 @@ jobs:
               fi
             done
           fi
+      # T-190 / NFR-PERF-07: every release build prints its size and is compared with
+      # .github/size-baseline.json (fails above +10 %, or over budget once enforced).
+      # The Play download size per ABI comes from the size-report workflow.
+      - name: Release size guard (T-190)
+        if: matrix.mode == 'release'
+        run: |
+          APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
+          printf 'app-ci.%s.release_apk_arm_arm64\t%s\n' "$FLAVOR" "$(stat -c %s "$APK")" > sizes.tsv
+          for abi in arm64-v8a armeabi-v7a; do
+            printf 'app-ci.%s.release_apk_libs_%s_compressed\t%s\n' "$FLAVOR" "$abi" \
+              "$(unzip -v "$APK" | awk -v p="lib/$abi/" 'index($NF,p)==1 {s+=$3} END {print s+0}')" >> sizes.tsv
+          done
+          bash .github/scripts/check-app-size.sh sizes.tsv "$FLAVOR" | tee -a "$GITHUB_STEP_SUMMARY"
       # T-165 (FR-SEC-05): on the final APK, backup is off and both rule files
       # exclude every domain for cloud backup and device-to-device transfer.
       - name: Assert no OS backup or device transfer
@@ -723,7 +748,7 @@ jobs:
         if: matrix.mode == 'release'
         run: |
           APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
-          for abi in arm64-v8a armeabi-v7a x86_64; do
+          for abi in arm64-v8a armeabi-v7a; do
             if unzip -p "$APK" "lib/$abi/libapp.so" | grep -aqF 5550100; then
               echo "::error::the synthetic spike sender 5550100 is in lib/$abi/libapp.so of $FLAVOR"
               exit 1

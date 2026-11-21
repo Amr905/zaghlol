@@ -3968,6 +3968,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringBillsMarkPaid => 'Mark paid';
 
   @override
+  String notificationMarkPaidConfirmBody(String name, String date) {
+    return '$name, due $date';
+  }
+
+  @override
   String get notificationMarkPaidConfirmTitle => 'Mark this bill as paid?';
 
   @override

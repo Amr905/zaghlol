@@ -1,9 +1,18 @@
-// CI probe (T-193 AC4, FU-263 a): this file breaks a riverpod_lint rule on purpose. It is never part of the app: it is stored as
-// text and copied to app/lib/ only by .github/scripts/check-riverpod-lint-active.sh, which analyzes it, expects the
-// `riverpod_lint/missing_provider_scope` diagnostic, and deletes the copy.
+// CI probe (T-193 AC4, FU-263 a): this file breaks riverpod_lint rules on purpose. It is never part of the app: it is stored as
+// text and copied to app/lib/ only by .github/scripts/check-riverpod-lint-active.sh, which runs `dart analyze`, expects a
+// riverpod_lint diagnostic on this file, and deletes the copy.
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  // No ProviderScope at the root of runApp: riverpod_lint warns (as it did for app/lib/main.dart in BUG-007).
+  // No ProviderScope at the root of runApp: missing_provider_scope (as for app/lib/main.dart in BUG-007).
   runApp(const SizedBox());
+}
+
+class ProbeNotifier extends Notifier<int> {
+  // A public notifier property: avoid_public_notifier_properties.
+  int calls = 0;
+
+  @override
+  int build() => 0;
 }

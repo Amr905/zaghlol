@@ -5772,6 +5772,12 @@ abstract class AppLocalizations {
   /// **'اتدفع'**
   String get recurringBillsMarkPaid;
 
+  /// L-1 · names the bill and its due date in the mark-paid confirmation
+  ///
+  /// In ar, this message translates to:
+  /// **'«{name}» — ميعاد الدفع {date}'**
+  String notificationMarkPaidConfirmBody(String name, String date);
+
   /// L-1 · confirm before a notification action marks a bill paid
   ///
   /// In ar, this message translates to:

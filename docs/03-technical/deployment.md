@@ -140,7 +140,7 @@ It writes `/etc/zaghlol/kms-production/keys/` (mode 0500) with 0400 files owned 
      -e ZAGHLOL_KIDS="s2027a e2027a" -e ZAGHLOL_ENVELOPE_KEYS=envelope-2027 -e ZAGHLOL_LEGACY_ENVELOPE_KEYS=envelope \
      -e ZAGHLOL_BOUND_CIDRS=172.30.53.0/24 \
      -v /etc/zaghlol/openbao/tls/ca.pem:/tls/ca.pem:ro -v "$PWD/deploy/openbao:/setup:ro" -v /etc/zaghlol/openbao-setup-out:/setup-out \
-     --entrypoint sh ghcr.io/openbao/openbao:<pinned> /setup/setup.sh apply /setup-out
+     --entrypoint sh ghcr.io/openbao/openbao:2.7.2@<digest from docker-compose.openbao.yml> /setup/setup.sh apply /setup-out
    ```
    It enables the Transit mount, creates the signing and new envelope keys (non-exportable, no plaintext backup, no deletion), writes the `zaghlol-api`, `zaghlol-worker` and `zaghlol-keytool` policies (`setup.sh policy api` prints one), creates the two AppRoles (1 h tokens, `secret_id` and tokens bound to `ZAGHLOL_BOUND_CIDRS`, which is **required**: S2), writes `role-id`/`secret-id` per role and a 15-minute key-tool token into the output folder (never printed), and fails if no audit device is enabled (declared in `openbao.hcl`). Re-running changes no key and keeps existing `secret-id` files. The audit log blocks every request when it can't be written: watch the disk of `/var/lib/zaghlol/openbao/audit` and rotate `audit.log` with `logrotate` + `SIGHUP` to the OpenBao process (`docker compose kill -s HUP openbao`).
 4. Credential folders: copy `/etc/zaghlol/openbao-setup-out/api/role-id`, `.../api/secret-id` and `ca.pem` into `/etc/zaghlol/openbao-api` (and the worker's into `/etc/zaghlol/openbao-worker`), owner 1654, files 0400, folder 0500; mount each read-only at `/run/zaghlol-openbao` of its service (the compose file does).
