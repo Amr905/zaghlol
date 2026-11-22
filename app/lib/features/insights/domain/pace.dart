@@ -121,3 +121,17 @@ PaceData computePace({
     projectedMinor: projected,
   );
 }
+
+/// The days (1-based) labelled on the x axis: the first, a few round
+/// numbers (every 10 days, or every 100 for a long period) and the last.
+/// A round day too close to the last one is dropped.
+List<int> paceDayTicks(int periodDays) {
+  if (periodDays <= 1) return const [1];
+  final step = periodDays <= 40 ? 10 : ((periodDays + 3) ~/ 4 + 9) ~/ 10 * 10;
+  final ticks = <int>[1];
+  for (var d = step; d < periodDays - step ~/ 3; d += step) {
+    ticks.add(d);
+  }
+  ticks.add(periodDays);
+  return ticks;
+}
