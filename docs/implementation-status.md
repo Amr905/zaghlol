@@ -886,6 +886,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 - **FU-278** (batch 55, OPEN): the database TLS guard (VerifyFull/VerifyCA) is enforced in Production only, not Staging.
 - **FU-280** (batch 55, OPEN, first deploy): confirm `ForwardedHeaders__NoProxy=true` is right behind MonsterASP's front end (client IPs for rate limits).
 - **FU-281** (batch 55, OPEN): the Aiven connection budget ignores an IIS overlapped recycle (old + new worker process briefly both hold pools).
+- **FU-284** (batch 56, OPEN): drill header names "vs the period before" but not the dates; axis-step edge-case test; route-scoped provider override for the drill filter (today it sets and restores the shared filter); T-189 scope notes (no new daily line chart, net-worth thin state without today's number, no "Other" row in places, Gold-only week-pattern and installments use fl_chart tooltips). Details in [batch-56](05-reviews/batch-56.md).
 
 ## Log
 | Date | Event |

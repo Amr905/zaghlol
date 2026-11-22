@@ -272,7 +272,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 |---|---|---|---|---|---|---|---|---|---|
 | [T-187](tasks/T-187.md) | Hide amounts in the app (eye toggle, `****`) | PO 11-19 | High | Sonnet | flutter-ui-engineer | — | G | 12 | DONE (merged #77) |
 | [T-188](tasks/T-188.md) | Chart period selector (presets, stepping, custom range) | PO 11-19 | High | Sonnet | flutter-core-engineer | — | A | 12 | DONE (merged #77) |
-| [T-189](tasks/T-189.md) | Charts review: interaction, comparison and clarity (mockups first) | PO 11-19 | High | Opus→Sonnet | ux-designer → flutter-ui-engineer | T-188 | G | 13 | TODO |
+| [T-189](tasks/T-189.md) | Charts review: interaction, comparison and clarity (mockups first) | PO 11-19 | High | Opus→Sonnet | ux-designer → flutter-ui-engineer | T-188 | G | 13 | DONE (batch 56) |
 | [T-190](tasks/T-190.md) | App size: measure and reduce (~150 MB reported) | PO 11-19 | High | Sonnet | native-platform-engineer | — | N | 12 | IN_REVIEW (approved, batch 50; release smoke on a device and OCR/PDF decision open) |
 | [T-191](tasks/T-191.md) | Production trust anchors in release builds (BUG-001) | QA | High* | Opus | flutter-core-engineer | T-140 | A | 13 | BLOCKED |
 | [T-192](tasks/T-192.md) | Security pass-1 leftovers (L-3, L-4, L-5, scan pins) | T-175 | Medium | Sonnet | backend-engineer | — | B | 12 | IN_PROGRESS (L-5, pins, gitleaks narrowing done in batch 50; L-4 and L-3 sign-off wait on the PO) |

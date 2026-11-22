@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../../core/l10n/date_format.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/theme/z_tokens.dart';
@@ -62,51 +63,129 @@ class _Bar extends StatelessWidget {
 }
 
 /// A line chart whose first point is at the start edge in either direction.
-class _Line extends StatelessWidget {
-  const _Line({required this.series, required this.maxX, this.minY = 0});
+/// Press and drag along it to read each point (T-189): the value bubble above
+/// the line follows the finger and stays on the last point read.
+class _Line extends StatefulWidget {
+  const _Line({
+    required this.series,
+    required this.maxX,
+    this.minY = 0,
+    this.bubble,
+  });
 
   /// Each series: (colour, dashed, ys by x = 0..).
   final List<({Color color, bool dashed, List<double> ys})> series;
   final int maxX;
   final double minY;
 
+  /// The text of the point at [index] of the first series, or null for no
+  /// bubble.
+  final String Function(int index)? bubble;
+
+  @override
+  State<_Line> createState() => _LineState();
+}
+
+class _LineState extends State<_Line> {
+  int? _index;
+
   @override
   Widget build(BuildContext context) {
     final rtl = _rtl(context);
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    final series = widget.series;
+    final maxX = widget.maxX;
     final top = series
         .expand((s) => s.ys)
         .fold<double>(1, (a, b) => math.max(a, b));
-    return SizedBox(
-      height: 160,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: LineChart(
-          LineChartData(
-            minX: 0,
-            maxX: math.max(1, maxX).toDouble(),
-            minY: minY,
-            maxY: top * 1.1,
-            gridData: const FlGridData(show: false),
-            borderData: FlBorderData(show: false),
-            titlesData: const FlTitlesData(show: false),
-            lineTouchData: const LineTouchData(enabled: false),
-            lineBarsData: [
-              for (final s in series)
-                LineChartBarData(
-                  spots: [
-                    for (var i = 0; i < s.ys.length; i++)
-                      FlSpot((rtl ? maxX - i : i).toDouble(), s.ys[i]),
-                  ],
-                  color: s.color,
-                  barWidth: 3,
-                  isCurved: false,
-                  dotData: const FlDotData(show: false),
-                  dashArray: s.dashed ? [6, 4] : null,
+    final bubble = widget.bubble;
+    final index = _index;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (bubble != null)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.xs),
+            child: index == null
+                ? Text(
+                    l.insightsChartsScrubHint,
+                    style: ZType.caption.copyWith(color: c.textMuted),
+                  )
+                : Semantics(
+                    liveRegion: true,
+                    child: DecoratedBox(
+                      key: const Key('line-bubble'),
+                      decoration: BoxDecoration(
+                        color: c.surfaceAlt,
+                        borderRadius: BorderRadius.circular(ZRadius.md),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: ZSpacing.md,
+                          vertical: ZSpacing.sm,
+                        ),
+                        child: Text(
+                          '\u2068${bubble(index)}\u2069',
+                          style: ZType.label.copyWith(color: c.text),
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+        SizedBox(
+          height: 160,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: LineChart(
+              LineChartData(
+                minX: 0,
+                maxX: math.max(1, maxX).toDouble(),
+                minY: widget.minY,
+                maxY: top * 1.1,
+                gridData: FlGridData(
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (_) => FlLine(
+                    color: c.outline,
+                    strokeWidth: 1,
+                    dashArray: const [4, 4],
+                  ),
                 ),
-            ],
+                borderData: FlBorderData(show: false),
+                titlesData: const FlTitlesData(show: false),
+                lineTouchData: LineTouchData(
+                  enabled: bubble != null,
+                  // No canvas bubble: the widget bubble above carries the text.
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (spots) => [for (final _ in spots) null],
+                  ),
+                  touchCallback: (event, response) {
+                    final spots = response?.lineBarSpots;
+                    if (spots == null || spots.isEmpty) return;
+                    final x = spots.first.x.round();
+                    final i = rtl ? maxX - x : x;
+                    if (i != _index) setState(() => _index = i);
+                  },
+                ),
+                lineBarsData: [
+                  for (final s in series)
+                    LineChartBarData(
+                      spots: [
+                        for (var i = 0; i < s.ys.length; i++)
+                          FlSpot((rtl ? maxX - i : i).toDouble(), s.ys[i]),
+                      ],
+                      color: s.color,
+                      barWidth: 3,
+                      isCurved: false,
+                      dotData: const FlDotData(show: false),
+                      dashArray: s.dashed ? [6, 4] : null,
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -139,6 +218,9 @@ class BurnBody extends ConsumerWidget {
       children: [
         _Line(
           maxX: curve.cycle.length - 1,
+          bubble: (i) =>
+              '${_digits(ref, context, '${i + 1}/${curve.cycle.length}')}'
+              ' · ${chartMoney(ref, context, curve.cumulative[math.min(i, curve.cumulative.length - 1)])}',
           series: [
             (
               color: c.text,
@@ -315,7 +397,16 @@ class WeekPatternBody extends ConsumerWidget {
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
                 titlesData: const FlTitlesData(show: false),
-                barTouchData: BarTouchData(enabled: false),
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => c.surfaceAlt,
+                    getTooltipItem: (group, _, rod, _) => BarTooltipItem(
+                      '${_weekdayName(lang, order[group.x])}: '
+                      '${chartMoney(ref, context, pattern.byWeekday[order[group.x]]!.spend)}',
+                      ZType.caption.copyWith(color: c.text),
+                    ),
+                  ),
+                ),
                 barGroups: [
                   for (var i = 0; i < order.length; i++)
                     BarChartGroupData(
@@ -494,7 +585,16 @@ class InstallmentsBody extends ConsumerWidget {
                 gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
                 titlesData: const FlTitlesData(show: false),
-                barTouchData: BarTouchData(enabled: false),
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (_) => c.surfaceAlt,
+                    getTooltipItem: (group, _, rod, _) => BarTooltipItem(
+                      '${label(shown[group.x])}: '
+                      '${chartMoney(ref, context, shown[group.x].total)}',
+                      ZType.caption.copyWith(color: c.text),
+                    ),
+                  ),
+                ),
                 barGroups: [
                   for (var i = 0; i < shown.length; i++)
                     BarChartGroupData(
@@ -735,6 +835,9 @@ class NetWorthBody extends ConsumerWidget {
         _Line(
           maxX: points.length - 1,
           minY: floor,
+          bubble: (i) =>
+              '${ZDateFormat.date(DateTime(points[i].takenOn.year, points[i].takenOn.month, points[i].takenOn.day), _lang(context), ref.watch(digitsModeProvider(_lang(context))))}'
+              ' · ${chartMoney(ref, context, Money.fromStorage(points[i].netMinor, points[i].unit))}',
           series: [
             (
               color: c.primary,
@@ -786,6 +889,8 @@ class InflationBody extends ConsumerWidget {
         _Line(
           maxX: points.length - 1,
           minY: math.max(0, low * 0.9),
+          bubble: (i) =>
+              '${label(points[i])} · ${chartPercentBp(ref, context, points[i].indexBp)}',
           series: [
             (
               color: c.primary,

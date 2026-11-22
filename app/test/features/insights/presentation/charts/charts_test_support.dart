@@ -1,10 +1,14 @@
 // T-107 test support: synthetic chart data and provider overrides.
 
+import 'package:flutter/widgets.dart' show Key;
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
+import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/features/insights/domain/chart_summary.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
 import 'package:zaghlol/features/budget/presentation/budget_providers_ui.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
+import 'package:zaghlol/features/mascot/presentation/zaghlol_avatar.dart';
 import 'package:zaghlol/features/insights/domain/chart_period_selection.dart';
 import 'package:zaghlol/features/insights/presentation/chart_explain_providers.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_providers.dart';
@@ -38,6 +42,27 @@ class FakeChartPeriodSelection extends ChartPeriodSelectionNotifier {
     state = AsyncData(selection);
   }
 }
+
+/// Zaghlol shows his still pose, so the page settles (no looping animation).
+class StillMascot extends ReduceMotionNotifier {
+  @override
+  bool build() => true;
+}
+
+/// Opens "All charts (12)" so the charts behind it are built.
+Future<void> openAllCharts(WidgetTester tester) async {
+  final button = find.byKey(const Key('charts-all'));
+  await tester.ensureVisible(button);
+  await tester.tap(button);
+  await tester.pumpAndSettle();
+}
+
+/// The summary strip's figures in tests: spent 1,980 (vs 2,150), income
+/// 3,200 (same), as in the PO mockup but in whole pounds.
+ChartSummary summaryData() => ChartSummary.compute(
+  PeriodTotals(income: egpM(32000), spend: egpM(19800)),
+  PeriodTotals(income: egpM(32000), spend: egpM(21500)),
+);
 
 /// The default view: six months of cycle points (T-188 keeps the trend).
 List<CashFlowPoint> cashFlowPoints() => [
@@ -105,6 +130,10 @@ List<Override> chartOverrides({
   bool cashFlowError = false,
   bool loading = false,
   ChartPeriodSelection selection = ChartPeriodSelection.thisCycle,
+  ChartSummary? summary,
+  CategoryDonut? previousDonut,
+  void Function(String code)? onSummary,
+  ({Money amount, int count}) Function(DrillScope scope)? drillTotals,
 }) {
   final cur = currencies ?? [egp];
   return [
@@ -130,6 +159,15 @@ List<Override> chartOverrides({
     donutChartProvider.overrideWith(
       (ref, code) async => donut ?? ChartReady(donutData()),
     ),
+    chartSummaryProvider.overrideWith((ref, code) async {
+      onSummary?.call(code);
+      return summary ?? summaryData();
+    }),
+    previousDonutProvider.overrideWith((ref, code) async => previousDonut),
+    drillTotalsProvider.overrideWith(
+      (ref, scope) async =>
+          drillTotals?.call(scope) ?? (amount: egpM(5400), count: 23),
+    ),
     merchantsChartProvider.overrideWith(
       (ref, code) async => top ?? ChartReady(merchants(5)),
     ),
@@ -140,6 +178,7 @@ List<Override> chartOverrides({
     chartPeriodSelectionProvider.overrideWith(
       () => FakeChartPeriodSelection(selection),
     ),
+    reduceMotionProvider.overrideWith(StillMascot.new),
   ];
 }
 
@@ -245,7 +284,12 @@ List<InflationPoint> inflationData() => [
 ];
 
 /// Overrides for the nine Gold charts. [empty] makes each say "not enough".
-List<Override> goldChartOverrides({bool empty = false, bool error = false}) {
+List<Override> goldChartOverrides({
+  bool empty = false,
+  bool error = false,
+  ChartResult<List<NetWorthPoint>>? netWorth,
+  void Function()? onBurn,
+}) {
   ChartResult<T> r<T>(T v) => empty
       ? ChartNotEnoughData<T>(NotEnoughReason.noData, have: 0, need: 1)
       : ChartReady<T>(v);
@@ -255,14 +299,19 @@ List<Override> goldChartOverrides({bool empty = false, bool error = false}) {
   }
 
   return [
-    burnChartProvider.overrideWith((ref, c) => f(burnData())),
+    burnChartProvider.overrideWith((ref, c) {
+      onBurn?.call();
+      return f(burnData());
+    }),
     rule503020ChartProvider.overrideWith((ref, c) => f(ruleData())),
     dayHourChartProvider.overrideWith((ref, c) => f(dayHourData())),
     vsAverageChartProvider.overrideWith((ref, c) => f(vsAverageData())),
     installmentsChartProvider.overrideWith((ref, c) => f(installmentData())),
     subscriptionsChartProvider.overrideWith((ref, c) => f(subscriptionsData())),
     cardsChartProvider.overrideWith((ref, c) => f(cardsData())),
-    netWorthChartProvider.overrideWith((ref, c) => f(netWorthData())),
+    netWorthChartProvider.overrideWith(
+      (ref, c) async => netWorth ?? await f(netWorthData()),
+    ),
     inflationChartProvider.overrideWith((ref, c) => f(inflationData())),
   ];
 }

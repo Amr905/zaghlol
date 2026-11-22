@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<title>4 · Period picker</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0F7A55}a:hover{color:#0B5E43}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F3FBF7; font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif" dir="rtl">
+<div style="padding: 52px 16px 120px 16px; display: flex; flex-direction: column; gap: 14px"><div style="display: flex; align-items: center; justify-content: space-between">
+<div style="font-size: 26px; font-weight: 700; color: #0F2A20">التحليلات</div>
+<button aria-label="hide amounts" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #E5F5EC; color: #0F2A20; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+</div>
+<div style="display: flex; gap: 4px; padding: 4px; border-radius: 22px; background: #E5F5EC"><button style="flex: 1 1 0; height: 36px; border: none; border-radius: 18px; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 700; box-shadow: 0 1px 3px rgba(15,42,32,0.12)">الرسوم</button><button style="flex: 1 1 0; height: 36px; border: none; border-radius: 18px; background: transparent; color: #4D695C; font-family: inherit; font-size: 14px; font-weight: 500; box-shadow: none">الميزانية</button><button style="flex: 1 1 0; height: 36px; border: none; border-radius: 18px; background: transparent; color: #4D695C; font-family: inherit; font-size: 14px; font-weight: 500; box-shadow: none">الفواتير</button></div><div style="display: flex; align-items: center; gap: 8px"><button aria-label="step" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #0F2A20; opacity: 1; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+<button style="flex-grow: 1; height: 44px; border-radius: 22px; border: 1.5px solid #0F7A55; background: #D7F3E5; color: #0F2A20; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="color: #0F7A55"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></span>الشهر ده · <span style="font-weight: 500; color: #4D695C">٢٥ أكتوبر – ٢٤ نوفمبر</span></button>
+<button aria-label="step" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #4D695C; opacity: 0.4; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button></div><div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px"><div style="background: #FFFFFF; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 12px; color: #4D695C">صرفت</div>
+<div style="font-size: 22px; font-weight: 700; color: #0F2A20; unicode-bidi: isolate">١٩٬٨٠٠</div>
+<div><span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: #E2F5EA; color: #0F7A55; font-size: 12px; font-weight: 600; unicode-bidi: isolate">▼ ٨٪</span></div></div><div style="background: #FFFFFF; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 12px; color: #4D695C">دخلك</div>
+<div style="font-size: 22px; font-weight: 700; color: #0F2A20; unicode-bidi: isolate">٣٢٬٠٠٠</div>
+<div><span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: #E5F5EC; color: #4D695C; font-size: 12px; font-weight: 600; unicode-bidi: isolate">= نفسه</span></div></div><div style="background: #FFFFFF; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 12px; color: #4D695C">وفّرت</div>
+<div style="font-size: 22px; font-weight: 700; color: #0F2A20; unicode-bidi: isolate">١٢٬٢٠٠</div>
+<div><span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: #E2F5EA; color: #0F7A55; font-size: 12px; font-weight: 600; unicode-bidi: isolate">▲ ١٥٪</span></div></div><div style="background: #FFFFFF; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 12px; color: #4D695C">نسبة التوفير</div>
+<div style="font-size: 22px; font-weight: 700; color: #0F2A20; unicode-bidi: isolate">٣٨٪</div>
+<div><span style="display: inline-block; padding: 2px 8px; border-radius: 10px; background: #E2F5EA; color: #0F7A55; font-size: 12px; font-weight: 600; unicode-bidi: isolate">▲ ٤ نقط</span></div></div></div>
+<div style="font-size: 12px; color: #4D695C; text-align: center">مقارنة بنفس الـ ٢٦ يوم من الشهر اللي فات</div>
+<div style="position: absolute; inset: 0; background: rgba(15,42,32,0.32)"></div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 28px 28px 0 0; padding: 12px 20px 34px 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="width: 36px; height: 4px; border-radius: 2px; background: #4D695C; opacity: 0.4; align-self: center"></div>
+<div style="font-size: 19px; font-weight: 700; color: #0F2A20">عايز تشوف أنهي فترة؟</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px"><button style="height: 48px; border-radius: 16px; border: 2px solid #0F7A55; background: #D7F3E5; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>الشهر ده</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">الشهر اللي فات</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">آخر ٦ شهور</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">الشهر ده</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">الشهر اللي فات</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">آخر ٣ شهور</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">آخر ٦ شهور</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">آخر سنة</button><button style="height: 48px; border-radius: 16px; border: 1px solid #E3F1E9; background: #FFFFFF; color: #0F2A20; font-family: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px">السنة دي</button></div>
+<button style="height: 56px; border-radius: 16px; border: 1px dashed #0F7A55; background: transparent; font-family: inherit; display: flex; align-items: center; gap: 12px; padding: 0 16px; color: #0F2A20"><span style="color: #0F7A55"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></span><span style="display: flex; flex-direction: column; align-items: flex-start"><span style="font-size: 15px; font-weight: 700">فترة من اختيارك</span><span style="font-size: 12px; color: #4D695C">اختار من يوم لـ يوم</span></span></button>
+<button style="height: 52px; border-radius: 26px; border: none; background: #0F7A55; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700">تمام</button></div></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

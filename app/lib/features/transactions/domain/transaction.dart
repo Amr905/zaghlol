@@ -143,22 +143,30 @@ final class TransactionFilter {
     this.to,
     this.accountIds = const {},
     this.categoryIds = const {},
+    this.includeUncategorized = false,
     this.directions = const {},
     this.sources = const {},
     this.currencies = const {},
     this.statuses = const {},
+    this.merchantNorm,
   });
 
   final DateTime? from;
   final DateTime? to;
   final Set<String> accountIds;
   final Set<String> categoryIds;
+
+  /// Also (or only, when [categoryIds] is empty) rows with no category.
+  final bool includeUncategorized;
   final Set<TxnDirection> directions;
   final Set<TxnSource> sources;
 
   /// ISO 4217 codes; one currency is never mixed into another (D-28).
   final Set<Currency> currencies;
   final Set<TxnStatus> statuses;
+
+  /// T-189: only rows of this normalized merchant (chart drill-down).
+  final String? merchantNorm;
 }
 
 /// A page request. [limit] is capped by the repository (500).

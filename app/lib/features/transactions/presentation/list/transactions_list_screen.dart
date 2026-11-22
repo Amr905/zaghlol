@@ -42,6 +42,7 @@ class TransactionsListScreen extends ConsumerStatefulWidget {
     super.key,
     this.onOpenTransaction,
     this.onAddExpense,
+    this.header,
   });
 
   /// Row tap (to S-12). Null until the detail screen is wired.
@@ -49,6 +50,9 @@ class TransactionsListScreen extends ConsumerStatefulWidget {
 
   /// Empty-state button; defaults to opening the Add sheet.
   final VoidCallback? onAddExpense;
+
+  /// T-189: shown under the filter chips (the drill-down total and change).
+  final WidgetBuilder? header;
 
   @override
   ConsumerState<TransactionsListScreen> createState() => _State();
@@ -161,6 +165,7 @@ class _State extends ConsumerState<TransactionsListScreen> {
               onClear: _clearSearch,
             ),
             _FilterBar(fmt: fmt),
+            if (widget.header != null) widget.header!(context),
             Expanded(child: _body(context, list, fmt, sel)),
           ],
         ),
@@ -591,13 +596,30 @@ class _FilterBar extends ConsumerWidget {
                   if (r != null) notifier.set(r);
                 },
               ),
-              chip(
-                withCount(
-                  l.transactionsListFilterCategory,
-                  f.categoryIds.length,
+              if (f.merchantNorm != null)
+                chip(
+                  f.merchantName ?? f.merchantNorm!,
+                  active: true,
+                  onClear: () => notifier.set(f.copyWith(clearMerchant: true)),
+                  onTap: () {},
                 ),
-                active: f.categoryIds.isNotEmpty,
-                onClear: () => notifier.set(f.copyWith(categoryIds: {})),
+              chip(
+                f.includeUncategorized && f.categoryIds.isEmpty
+                    ? l.transactionsListFilterUncategorized
+                    : f.categoryIds.length == 1 &&
+                          !f.includeUncategorized &&
+                          lookups?.category(f.categoryIds.first) != null
+                    ? (fmt.lang == 'ar'
+                          ? lookups!.category(f.categoryIds.first)!.nameAr
+                          : lookups!.category(f.categoryIds.first)!.nameEn)
+                    : withCount(
+                        l.transactionsListFilterCategory,
+                        f.categoryIds.length + (f.includeUncategorized ? 1 : 0),
+                      ),
+                active: f.categoryIds.isNotEmpty || f.includeUncategorized,
+                onClear: () => notifier.set(
+                  f.copyWith(categoryIds: {}, includeUncategorized: false),
+                ),
                 onTap: () async {
                   final r = await showCategoriesSheet(
                     context,
@@ -605,7 +627,11 @@ class _FilterBar extends ConsumerWidget {
                     selected: f.categoryIds,
                     lang: fmt.lang,
                   );
-                  if (r != null) notifier.set(f.copyWith(categoryIds: r));
+                  if (r != null) {
+                    notifier.set(
+                      f.copyWith(categoryIds: r, includeUncategorized: false),
+                    );
+                  }
                 },
               ),
               chip(

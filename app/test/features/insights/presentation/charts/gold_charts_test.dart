@@ -63,6 +63,7 @@ void main() {
       tester,
     ) async {
       await _pump(tester, const ChartsScreen(), locale: locale);
+      await openAllCharts(tester);
       final l = _l(tester, ChartsScreen);
       expect(find.byType(LockedChartCard, skipOffstage: false), findsNothing);
       expect(find.byType(GoldChartCard, skipOffstage: false), findsNWidgets(9));
@@ -88,6 +89,7 @@ void main() {
 
     testWidgets('$tag: Free keeps nine locked previews', (tester) async {
       await _pump(tester, const ChartsScreen(), locale: locale, gold: false);
+      await openAllCharts(tester);
       expect(
         find.byType(LockedChartCard, skipOffstage: false),
         findsNWidgets(9),
@@ -186,6 +188,7 @@ void main() {
 
   testWidgets('a11y summaries carry the figures', (tester) async {
     await _pump(tester, const ChartsScreen());
+    await openAllCharts(tester);
     expect(find.bySemanticsLabel(RegExp(r'^Subscriptions')), findsWidgets);
   });
 

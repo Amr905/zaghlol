@@ -1524,6 +1524,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsListFilterPeriod => 'المدة';
 
   @override
+  String get transactionsListFilterUncategorized => 'بدون تصنيف';
+
+  @override
   String get transactionsListFilterCategory => 'التصنيف';
 
   @override
@@ -3133,7 +3136,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsLockedSub => 'شوف الشارت كله مع جولد';
 
   @override
-  String get insightsChartsEmptyCycle => 'هيشتغل بعد أول دورة كاملة';
+  String get insightsChartsEmptyCycle => 'هيشتغل بعد أول شهر كامل';
 
   @override
   String get insightsChartsEmptyNetWorth =>
@@ -3152,7 +3155,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsLoadingA11y => 'بحمّل الشارتات';
 
   @override
-  String get insightsChartsOtherSlice => 'حاجات تانية';
+  String get insightsChartsOtherSlice => 'تانية';
 
   @override
   String insightsCoveredEarlier(String amount) {
@@ -3163,7 +3166,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartTitleCashFlow => 'الداخل والخارج';
 
   @override
-  String get insightsChartTitleCategories => 'فلوسك راحت فين؟';
+  String get insightsChartTitleCategories => 'صرفت فين';
 
   @override
   String get insightsChartTitleBurnRate => 'سرعة الصرف لحد القبض';
@@ -3175,10 +3178,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartTitleWeekPattern => 'إمتى بتصرف؟';
 
   @override
-  String get insightsChartTitleMerchants => 'أكتر الأماكن اللي بتاخد فلوسك';
+  String get insightsChartTitleMerchants => 'أكتر أماكن صرفت فيها';
 
   @override
-  String get insightsChartTitleVsAverage => 'الدورة دي قصاد متوسط تلات دورات';
+  String get insightsChartTitleVsAverage => 'الشهر ده قصاد متوسط تلات شهور';
 
   @override
   String get insightsChartTitleInstallments => 'أقساطك في الستة شهور الجايين';
@@ -3232,7 +3235,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsLegendAverage => 'متوسطك';
 
   @override
-  String get insightsLegendThisCycle => 'الدورة دي';
+  String get insightsLegendThisCycle => 'الشهر ده';
 
   @override
   String get insightsLegendInstallments => 'أقساط';
@@ -3296,7 +3299,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsChartA11yVsAverage(String category, String percent) {
-    return 'الدورة دي قصاد متوسطك: أكبر زيادة في $category بـ $percent';
+    return 'الشهر ده قصاد متوسطك: أكبر زيادة في $category بـ $percent';
   }
 
   @override
@@ -3349,13 +3352,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get insightsChartDetailDeepUpsell =>
-      'عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة.';
+      'عايز تحليل أعمق؟ جولد بيقارن بالشهر اللي فات ويتوقع آخر الشهر.';
 
   @override
   String insightsChartDetailNeedsData(String need) {
     String _temp0 = intl.Intl.selectLogic(need, {
-      'cycle': 'محتاج دورة كاملة علشان أشرحلك الشارت ده',
-      'months': 'محتاج تلات دورات علشان أقارنك بنفسك',
+      'cycle': 'محتاج شهر كامل علشان أشرحلك الشارت ده',
+      'months': 'محتاج تلات شهور علشان أقارنك بنفسك',
       'accounts': 'ضيف حسابات أو أصول وأنا أشرحلك',
       'installments': 'ضيف قسط أو التزام وأنا أشرحلك',
       'subscriptions': 'لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك',
@@ -3419,7 +3422,7 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'short':
-          'لو قللت $category بـ $target الدورة الجاية، ده هيساعدك تقفل الفرق.',
+          'لو قللت $category بـ $target الشهر الجاي، ده هيساعدك تقفل الفرق.',
       'other': 'حوّل $target على الأقل من الفايض ده للتحويش قبل ما يتصرف.',
     });
     return '$_temp0';
@@ -3442,7 +3445,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainCashFlowDeepTip(String target, String yearly) {
-    return 'ثبّت هدف تحوّش $target كل دورة، يعني $yearly في السنة.';
+    return 'ثبّت هدف تحوّش $target كل شهر، يعني $yearly في السنة.';
   }
 
   @override
@@ -3458,7 +3461,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainCategoriesTip(String category, String target) {
-    return 'حط سقف لـ$category أقل بـ $target من الدورة دي، وهتوفر الفرق.';
+    return 'حط سقف لـ$category أقل بـ $target من الشهر ده، وهتوفر الفرق.';
   }
 
   @override
@@ -3482,7 +3485,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String target,
     String yearly,
   ) {
-    return 'قلّل $category بـ $target كل دورة، يعني $yearly في السنة.';
+    return 'قلّل $category بـ $target كل شهر، يعني $yearly في السنة.';
   }
 
   @override
@@ -3495,9 +3498,9 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'over':
-          'إنت في اليوم $cycleDay من الدورة وصارف $spent من $budget، يعني فوق الخط المثالي. الباقي يكفي $perDay في اليوم بس.',
+          'إنت في اليوم $cycleDay من الشهر وصارف $spent من $budget، يعني فوق الخط المثالي. الباقي يكفي $perDay في اليوم بس.',
       'other':
-          'إنت في اليوم $cycleDay من الدورة وصارف $spent من $budget، يعني تحت الخط المثالي. مسموحلك $perDay في اليوم.',
+          'إنت في اليوم $cycleDay من الشهر وصارف $spent من $budget، يعني تحت الخط المثالي. مسموحلك $perDay في اليوم.',
     });
     return '$_temp0';
   }
@@ -3507,7 +3510,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(state, {
       'over': 'نزّل صرفك اليومي لـ $perDay لحد القبض علشان الميزانية تكفي.',
       'other':
-          'كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف $perDay في اليوم.',
+          'كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الشهر. تقدر تصرف $perDay في اليوم.',
     });
     return '$_temp0';
   }
@@ -3515,9 +3518,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String insightsExplainBurnRateDeep(String trend, String delta) {
     String _temp0 = intl.Intl.selectLogic(trend, {
-      'up': 'في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ $delta.',
-      'down': 'في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ $delta.',
-      'other': 'صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.',
+      'up': 'في نفس اليوم في الشهر اللي فات كنت صارف أقل بـ $delta.',
+      'down': 'في نفس اليوم في الشهر اللي فات كنت صارف أكتر بـ $delta.',
+      'other': 'صرفك زي نفس اليوم في الشهر اللي فات تقريباً.',
     });
     return '$_temp0';
   }
@@ -3549,8 +3552,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String insightsExplainRule503020Tip(String state, String target) {
     String _temp0 = intl.Intl.selectLogic(state, {
-      'wantsHigh': 'نزّل الرفاهيات $target الدورة الجاية وحوّلهم للتحويش.',
-      'savingsLow': 'حاول تزود التحويش $target الدورة الجاية.',
+      'wantsHigh': 'نزّل الرفاهيات $target الشهر الجاي وحوّلهم للتحويش.',
+      'savingsLow': 'حاول تزود التحويش $target الشهر الجاي.',
       'other': 'حافظ على التحويش ده، وزوده $target لو قدرت.',
     });
     return '$_temp0';
@@ -3652,7 +3655,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String target,
     String yearly,
   ) {
-    return 'لو قللت $merchant بالربع هتوفر $target في الدورة، يعني $yearly في السنة.';
+    return 'لو قللت $merchant بالربع هتوفر $target في الشهر، يعني $yearly في السنة.';
   }
 
   @override
@@ -3665,10 +3668,10 @@ class AppLocalizationsAr extends AppLocalizations {
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'both':
-          '$category زاد $percent عن متوسط آخر تلات دورات، لكن $category2 نزل $percent2. برافو على ده.',
-      'rise': '$category زاد $percent عن متوسط آخر تلات دورات.',
-      'drop': '$category2 نزل $percent2 عن متوسط آخر تلات دورات. برافو عليك.',
-      'other': 'صرفك الدورة دي قريب من متوسط آخر تلات دورات.',
+          '$category زاد $percent عن متوسط آخر تلات شهور، لكن $category2 نزل $percent2. برافو على ده.',
+      'rise': '$category زاد $percent عن متوسط آخر تلات شهور.',
+      'drop': '$category2 نزل $percent2 عن متوسط آخر تلات شهور. برافو عليك.',
+      'other': 'صرفك الشهر ده قريب من متوسط آخر تلات شهور.',
     });
     return '$_temp0';
   }
@@ -3701,7 +3704,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsExplainVsAverageDeepTip(String category, String target) {
-    return 'حط حد لـ $category على قد متوسطك، يعني $target في الدورة.';
+    return 'حط حد لـ $category على قد متوسطك، يعني $target في الشهر.';
   }
 
   @override
@@ -3795,7 +3798,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String card,
     String target,
   ) {
-    return 'صرفت $amount من $card الدورة دي. حط له سقف $target للدورة الجاية.';
+    return 'صرفت $amount من $card الشهر ده. حط له سقف $target للشهر الجاي.';
   }
 
   @override
@@ -7768,11 +7771,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get insightsChartsPeriodNeedsCycle =>
-      'الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.';
+      'الرسم ده بيشتغل بشهر المرتب. اختار الشهر ده أو الشهر اللي فات عشان تشوفه.';
 
   @override
   String get insightsChartsPeriodBudgetNote =>
-      'تقدّم الميزانية بيعرض الدورة الحالية دايماً.';
+      'تقدّم الميزانية بيعرض الشهر الحالي دايماً.';
 
   @override
   String insightsChartsDaysCount(int count, String countText) {
@@ -7801,10 +7804,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsPeriodNowThisCycle => 'الدورة دي';
+  String get insightsChartsPeriodNowThisCycle => 'الشهر ده';
 
   @override
-  String get insightsChartsPeriodNowLastCycle => 'الدورة اللي فاتت';
+  String get insightsChartsPeriodNowLastCycle => 'الشهر اللي فات';
 
   @override
   String get insightsChartsPeriodNowThisMonth => 'الشهر ده';
@@ -7838,7 +7841,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get insightsChartsPeriodPrevCycleNow => 'الدورة اللي فاتت';
+  String get insightsChartsPeriodPrevCycleNow => 'الشهر اللي فات';
 
   @override
   String get insightsChartsPeriodPrevMonthNow => 'الشهر اللي فات';
@@ -7847,7 +7850,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsPeriodPrevYearNow => 'السنة اللي فاتت';
 
   @override
-  String get insightsChartsPeriodPrevCycle => 'الدورة اللي قبلها';
+  String get insightsChartsPeriodPrevCycle => 'الشهر اللي قبله';
 
   @override
   String get insightsChartsPeriodPrevMonth => 'الشهر اللي قبله';
@@ -7882,10 +7885,10 @@ class AppLocalizationsAr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$countText دورة',
-      few: '$countText دورات',
-      two: 'دورتين',
-      one: 'دورة',
+      other: '$countText شهر',
+      few: '$countText شهور',
+      two: 'شهرين',
+      one: 'شهر',
     );
     return '$_temp0';
   }
@@ -8009,4 +8012,308 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get networthCardOwed => 'المستحق عليك';
+
+  @override
+  String get insightsSummarySpent => 'صرفت';
+
+  @override
+  String get insightsSummaryIncome => 'دخلك';
+
+  @override
+  String get insightsSummarySaved => 'وفّرت';
+
+  @override
+  String get insightsSummaryRate => 'نسبة التوفير';
+
+  @override
+  String insightsChangeUpPct(String pct) {
+    return '▲ $pct';
+  }
+
+  @override
+  String insightsChangeDownPct(String pct) {
+    return '▼ $pct';
+  }
+
+  @override
+  String insightsChangeUpPts(String n) {
+    return '▲ $n نقط';
+  }
+
+  @override
+  String insightsChangeDownPts(String n) {
+    return '▼ $n نقط';
+  }
+
+  @override
+  String get insightsChangeSame => '= نفسه';
+
+  @override
+  String insightsChangeSamePct(String pct) {
+    return '= $pct';
+  }
+
+  @override
+  String get insightsChangeNew => 'جديد';
+
+  @override
+  String insightsChangeA11yUp(String pct) {
+    return 'زاد $pct';
+  }
+
+  @override
+  String insightsChangeA11yDown(String pct) {
+    return 'نزل $pct';
+  }
+
+  @override
+  String insightsChangeA11yUpPts(String n) {
+    return 'زاد $n نقط';
+  }
+
+  @override
+  String insightsChangeA11yDownPts(String n) {
+    return 'نزل $n نقط';
+  }
+
+  @override
+  String get insightsChangeA11ySame => 'زي ما هو';
+
+  @override
+  String get insightsChangeA11yNew => 'جديد، مفيش مقارنة';
+
+  @override
+  String insightsSummaryTileA11y(
+    String label,
+    String value,
+    String change,
+    String baseline,
+  ) {
+    return '$label: $value. $change، قصاد $baseline';
+  }
+
+  @override
+  String insightsSummaryBaseline(String prev) {
+    return 'قصاد $prev';
+  }
+
+  @override
+  String insightsSummaryBaselineDays(String days, String prev) {
+    return 'مقارنة بنفس الـ $days يوم من $prev';
+  }
+
+  @override
+  String get insightsSummaryEmpty =>
+      'لسه مفيش حركات في الفترة دي. أول ما تسجّل صرف أو دخل هحسبلك الملخص.';
+
+  @override
+  String insightsOneLinerDownRiser(String category, String pct, String prev) {
+    return 'صرفك على $category زاد $pct بس إجمالي صرفك أقل من $prev. كمل كده يا كبير';
+  }
+
+  @override
+  String insightsOneLinerDown(String prev) {
+    return 'صرفك أقل من $prev. كمل كده يا كبير';
+  }
+
+  @override
+  String insightsOneLinerUpRiser(String category, String pct, String prev) {
+    return 'صرفك زاد عن $prev، وأكتر حاجة زادت $category بـ $pct. خد بالك شوية';
+  }
+
+  @override
+  String insightsOneLinerUp(String prev) {
+    return 'صرفك زاد عن $prev. خد بالك شوية';
+  }
+
+  @override
+  String insightsOneLinerSame(String prev) {
+    return 'صرفك زي $prev تقريباً. ثبات حلو';
+  }
+
+  @override
+  String get insightsOneLinerNoBaseline =>
+      'لسه مفيش فترة قبل دي أقارنك بيها. كمّل وأنا هحسبها معاك.';
+
+  @override
+  String insightsChartsCashFlowSub(String span, String note) {
+    return '$span · $note';
+  }
+
+  @override
+  String insightsChartsLastNMonths(String n) {
+    return 'آخر $n شهور';
+  }
+
+  @override
+  String insightsChartsPeriodOpenNote(String now) {
+    return '$now لسه ماخلصش';
+  }
+
+  @override
+  String insightsChartsCategoriesSub(String n) {
+    return 'أكبر $n تصنيفات والباقي في «تانية»';
+  }
+
+  @override
+  String get insightsChartsMerchantsSub => 'اضغط على أي مكان تشوف حركاته';
+
+  @override
+  String insightsChartsSeeTransactions(String count) {
+    return 'شوف الـ $count حركة';
+  }
+
+  @override
+  String get insightsChartsSeeTransactionsA11y => 'افتح الحركات';
+
+  @override
+  String insightsChartsBubbleSaved(String amount) {
+    return 'وفّرت $amount';
+  }
+
+  @override
+  String insightsChartsBubbleIncome(String amount) {
+    return 'دخلك $amount';
+  }
+
+  @override
+  String insightsChartsBubbleSpent(String amount) {
+    return 'صرفت $amount';
+  }
+
+  @override
+  String insightsChartsSliceBubble(String name, String amount, String percent) {
+    return '$name · $amount · $percent';
+  }
+
+  @override
+  String get insightsChartsBarHint => 'دوس على عمود تشوف تفاصيله';
+
+  @override
+  String get insightsChartsScrubHint =>
+      'اضغط مطوّل واسحب على الخط عشان تشوف كل نقطة';
+
+  @override
+  String insightsChartsPartialLegend(String name) {
+    return '$name (لسه ماخلصش)';
+  }
+
+  @override
+  String insightsChartsPartialBarA11y(String name) {
+    return '$name، لسه ماخلصش';
+  }
+
+  @override
+  String insightsChartsPlaceCount(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n مرة',
+      few: '$n مرات',
+      two: 'مرتين',
+      one: 'مرة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsChartsPlaceRowA11y(String name, String count, String amount) {
+    return '$name: $count، $amount. افتح حركاته';
+  }
+
+  @override
+  String insightsChartsSliceRowA11y(
+    String name,
+    String amount,
+    String percent,
+    String change,
+  ) {
+    return '$name: $amount، $percent. $change';
+  }
+
+  @override
+  String insightsChartsChipA11y(String name, String change) {
+    return '$name: $change';
+  }
+
+  @override
+  String insightsChartsAllCharts(String n) {
+    return 'كل الرسوم ($n)';
+  }
+
+  @override
+  String get insightsChartsFewerCharts => 'رسوم أقل';
+
+  @override
+  String get insightsChartsHiddenNote =>
+      'المبالغ مخفية · الرسوم باينة شكلها بس';
+
+  @override
+  String insightsAxisThousands(String n) {
+    return '$n ألف';
+  }
+
+  @override
+  String insightsAxisMillions(String n) {
+    return '$n مليون';
+  }
+
+  @override
+  String get insightsChartsPresetThisCycle => 'الشهر ده';
+
+  @override
+  String get insightsChartsPresetLastCycle => 'الشهر اللي فات';
+
+  @override
+  String insightsChartsPresetLastCycles(String n) {
+    return 'آخر $n شهور';
+  }
+
+  @override
+  String insightsThinNeedMonths(String months) {
+    return 'محتاج $months كمان عشان الرسم ده يبان.';
+  }
+
+  @override
+  String insightsThinNeedTxns(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'محتاج $n حركة كمان',
+      few: 'محتاج $n حركات كمان',
+      two: 'محتاج حركتين كمان',
+      one: 'محتاج حركة كمان',
+    );
+    return '$_temp0 عشان الرسم ده يبان.';
+  }
+
+  @override
+  String get insightsThinNeedIncome => 'ضيف دخلك الأول وأنا أقسمهولك.';
+
+  @override
+  String get insightsThinNoData =>
+      'لسه مفيش حاجة هنا. أول ما تتسجّل حركات هتلاقي الرسم ده جاهز.';
+
+  @override
+  String get insightsThinSeeDetails => 'شوف التفاصيل';
+
+  @override
+  String insightsChartsDrillTotal(String count) {
+    return '$count حركة';
+  }
+
+  @override
+  String insightsChartsDrillTotalA11y(
+    String amount,
+    String count,
+    String change,
+  ) {
+    return 'الإجمالي $amount، $count حركة. $change';
+  }
+
+  @override
+  String get insightsChartsDrillVs => 'قصاد الفترة اللي قبلها';
+
+  @override
+  String get insightsChartsRetry => 'حاول تاني';
 }

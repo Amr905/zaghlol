@@ -278,11 +278,13 @@ class DriftTransactionRepository implements TransactionRepository {
       to: f.to?.toUtc().millisecondsSinceEpoch,
       accountIds: f.accountIds,
       categoryIds: f.categoryIds,
+      includeUncategorized: f.includeUncategorized,
       directions: {for (final d in f.directions) d.code},
       sources: {for (final s in f.sources) s.code},
       currencies: {for (final c in f.currencies) c.code},
       statuses: {for (final s in f.statuses) s.code},
       text: text,
+      merchantNorm: f.merchantNorm,
     );
   }
 

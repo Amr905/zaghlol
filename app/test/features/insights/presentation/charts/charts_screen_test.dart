@@ -9,6 +9,7 @@ import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol/features/insights/domain/chart_period_selection.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart' show CivilDate;
 import 'package:zaghlol/features/insights/presentation/charts/charts_providers.dart';
+import 'package:zaghlol/features/insights/presentation/charts/chart_bodies.dart';
 import 'package:zaghlol/features/insights/presentation/charts/chart_card.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
 import 'package:zaghlol/features/insights/presentation/charts/locked_chart_card.dart';
@@ -59,6 +60,9 @@ void main() {
       expect(find.text(l.insightsTabsBudget), findsOneWidget);
       expect(find.byType(BarChart), findsOneWidget);
       expect(find.byType(PieChart), findsOneWidget);
+      // Month vs average is the one locked chart in the main list.
+      expect(find.byType(LockedChartCard, skipOffstage: false), findsOneWidget);
+      await openAllCharts(tester);
       await tester.scrollUntilVisible(
         find.text(l.insightsChartTitleInflation),
         400,
@@ -94,6 +98,7 @@ void main() {
         paywallTriggerProvider.overrideWithValue((c) => hit = c),
       ],
     );
+    await openAllCharts(tester);
     final l = _l(tester);
     final cards = find.byType(LockedChartCard, skipOffstage: false);
     expect(
@@ -162,14 +167,12 @@ void main() {
       await tester.tap(find.byKey(const Key('charts-period')));
       await tester.pumpAndSettle();
       final l = _l(tester);
-      for (final name in [
-        l.commonPeriodThisCycle,
-        l.commonPeriodLastCycle,
-        l.commonPeriodThisMonth,
-        l.commonPeriodLastMonth,
-        l.commonPeriodThisYear,
-        l.commonPeriodCustom,
-      ]) {
+      // The payday cycle reads "month" (PO sign-off); the calendar months
+      // keep their own rows, told apart by their ranges.
+      expect(find.text(l.insightsChartsPresetThisCycle), findsNWidgets(2));
+      expect(find.text(l.insightsChartsPresetLastCycle), findsNWidgets(2));
+      expect(find.textContaining('cycle'), findsNothing);
+      for (final name in [l.commonPeriodThisYear, l.commonPeriodCustom]) {
         expect(find.text(name), findsOneWidget, reason: name);
       }
       await tester.tap(find.byKey(const Key('charts-period-last6Months')));
@@ -239,10 +242,17 @@ void main() {
     tester,
   ) async {
     await _pump(tester);
-    expect(find.text('6 cycles'), findsOneWidget);
+    expect(
+      find.text('Last 6 months · this month is not over yet'),
+      findsOneWidget,
+    );
     final chart = tester.widget<BarChart>(find.byType(BarChart));
     expect(chart.data.barGroups, hasLength(6));
-    expect(chart.data.barGroups.first.barRods, hasLength(3));
+    // Income and spent per bar; saved lives in the summary strip.
+    expect(chart.data.barGroups.first.barRods, hasLength(2));
+    // The open (current) month is hatched: a dashed outline.
+    expect(chart.data.barGroups.last.barRods.first.borderDashArray, isNotNull);
+    expect(chart.data.barGroups.first.barRods.first.borderDashArray, isNull);
   });
 
   testWidgets('cash flow caption and bars follow the bucket size', (
@@ -268,14 +278,20 @@ void main() {
         selection: const ChartPeriodSelection(ChartPreset.thisMonth),
       ),
     );
-    expect(find.text('17 days'), findsOneWidget);
+    expect(find.textContaining('17 days'), findsOneWidget);
     // Month cue on the first bar and on day 1 (F7).
     expect(find.text('Oct 25'), findsOneWidget);
     expect(find.text('Nov 1'), findsOneWidget);
     final chart = tester.widget<BarChart>(find.byType(BarChart));
     // Dense: income and spent only.
     expect(chart.data.barGroups.first.barRods, hasLength(2));
-    expect(find.text('Saved'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(CashFlowBody),
+        matching: find.text('Saved'),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('cycle-only charts say so for a month period', (tester) async {
@@ -294,6 +310,7 @@ void main() {
       400,
       scrollable: find.byType(Scrollable).first,
     );
+    await openAllCharts(tester);
     expect(
       find.text(_l(tester).insightsChartsPeriodNeedsCycle),
       findsNWidgets(2),
@@ -317,7 +334,8 @@ void main() {
     tester,
   ) async {
     await _pump(tester, overrides: chartOverrides(currencies: []));
-    expect(find.text(_l(tester).insightsChartsEmptyCycle), findsNWidgets(3));
+    expect(find.text(_l(tester).insightsChartsEmptyCycle), findsOneWidget);
+    expect(find.text(_l(tester).insightsThinNoData), findsNWidgets(2));
   });
 
   testWidgets('empty: not-enough-data variants name the reason', (
@@ -340,7 +358,8 @@ void main() {
     );
     final l = _l(tester);
     expect(find.text(l.insightsChartsEmptyFilter), findsOneWidget);
-    expect(find.text(l.insightsChartsEmptyCycle), findsOneWidget);
+    // Below a chart's minimum, Zaghlol says how much is missing.
+    expect(find.text(l.insightsThinNeedTxns(2, '2')), findsOneWidget);
   });
 
   testWidgets('error: one chart fails, others stay', (tester) async {

@@ -253,6 +253,31 @@ void main() {
     );
 
     test(
+      'scopedSpend can scope to uncategorized (alone or with a category)',
+      () async {
+        await add('a', amount: 6000, category: 'cn');
+        await add('b', amount: 3000, category: 'cw');
+        await add('c', amount: 1000);
+        await add('d', amount: 500);
+        final none = await repo.scopedSpend(
+          period,
+          fEgp,
+          includeUncategorized: true,
+        );
+        expect((none.amount.minor, none.count), (1500, 2));
+        final withCn = await repo.scopedSpend(
+          period,
+          fEgp,
+          categoryId: 'cn',
+          includeUncategorized: true,
+        );
+        expect((withCn.amount.minor, withCn.count), (7500, 3));
+        final all = await repo.scopedSpend(period, fEgp);
+        expect((all.amount.minor, all.count), (10500, 4));
+      },
+    );
+
+    test(
       'internal transfers and other currencies are not in the donut',
       () async {
         await add('x', amount: 100, category: 'cn');

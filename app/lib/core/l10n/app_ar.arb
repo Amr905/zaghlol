@@ -1885,6 +1885,10 @@
   "@transactionsListFilterPeriod": {
     "description": "C · chip; shows the selected common_period_* once set"
   },
+  "transactionsListFilterUncategorized": "بدون تصنيف",
+  "@transactionsListFilterUncategorized": {
+    "description": "Filter chip: rows without a category"
+  },
   "transactionsListFilterCategory": "التصنيف",
   "@transactionsListFilterCategory": {
     "description": "C"
@@ -4074,7 +4078,7 @@
   "@insightsChartsLockedSub": {
     "description": "S · C-13 locked, blurred preview + common_gold_unlock"
   },
-  "insightsChartsEmptyCycle": "هيشتغل بعد أول دورة كاملة",
+  "insightsChartsEmptyCycle": "هيشتغل بعد أول شهر كامل",
   "@insightsChartsEmptyCycle": {
     "description": "S · C-13 empty (EC-23)"
   },
@@ -4098,7 +4102,7 @@
   "@insightsChartsLoadingA11y": {
     "description": "A"
   },
-  "insightsChartsOtherSlice": "حاجات تانية",
+  "insightsChartsOtherSlice": "تانية",
   "@insightsChartsOtherSlice": {
     "description": "C · donut remainder slice"
   },
@@ -4115,7 +4119,7 @@
   "@insightsChartTitleCashFlow": {
     "description": "T · chart 1 (Free)"
   },
-  "insightsChartTitleCategories": "فلوسك راحت فين؟",
+  "insightsChartTitleCategories": "صرفت فين",
   "@insightsChartTitleCategories": {
     "description": "T · chart 2 (Free)"
   },
@@ -4131,11 +4135,11 @@
   "@insightsChartTitleWeekPattern": {
     "description": "T · chart 5 (Gold), day of week and hour"
   },
-  "insightsChartTitleMerchants": "أكتر الأماكن اللي بتاخد فلوسك",
+  "insightsChartTitleMerchants": "أكتر أماكن صرفت فيها",
   "@insightsChartTitleMerchants": {
     "description": "T · chart 6 (Free, top five)"
   },
-  "insightsChartTitleVsAverage": "الدورة دي قصاد متوسط تلات دورات",
+  "insightsChartTitleVsAverage": "الشهر ده قصاد متوسط تلات شهور",
   "@insightsChartTitleVsAverage": {
     "description": "T · chart 7 (Gold)"
   },
@@ -4207,7 +4211,7 @@
   "@insightsLegendAverage": {
     "description": "C · chart 7"
   },
-  "insightsLegendThisCycle": "الدورة دي",
+  "insightsLegendThisCycle": "الشهر ده",
   "@insightsLegendThisCycle": {
     "description": "C · chart 7"
   },
@@ -4319,7 +4323,7 @@
       }
     }
   },
-  "insightsChartA11yVsAverage": "الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent}",
+  "insightsChartA11yVsAverage": "الشهر ده قصاد متوسطك: أكبر زيادة في {category} بـ {percent}",
   "@insightsChartA11yVsAverage": {
     "description": "A",
     "placeholders": {
@@ -4427,11 +4431,11 @@
   "@insightsChartDetailDeepLabel": {
     "description": "C · with common_gold_badge; shown on the deep part"
   },
-  "insightsChartDetailDeepUpsell": "عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة.",
+  "insightsChartDetailDeepUpsell": "عايز تحليل أعمق؟ جولد بيقارن بالشهر اللي فات ويتوقع آخر الشهر.",
   "@insightsChartDetailDeepUpsell": {
     "description": "S · Free only, once under the basic tip, plus common_gold_unlock"
   },
-  "insightsChartDetailNeedsData": "{need, select, cycle{محتاج دورة كاملة علشان أشرحلك الشارت ده} months{محتاج تلات دورات علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}",
+  "insightsChartDetailNeedsData": "{need, select, cycle{محتاج شهر كامل علشان أشرحلك الشارت ده} months{محتاج تلات شهور علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}",
   "@insightsChartDetailNeedsData": {
     "description": "M · need:select (cycle/months/accounts/installments/subscriptions/other) · empty explainer",
     "placeholders": {
@@ -4506,7 +4510,7 @@
       }
     }
   },
-  "insightsExplainCashFlowTip": "{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}",
+  "insightsExplainCashFlowTip": "{state, select, short{لو قللت {category} بـ {target} الشهر الجاي، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}",
   "@insightsExplainCashFlowTip": {
     "description": "S · state, category = largest category, target",
     "placeholders": {
@@ -4539,7 +4543,7 @@
       }
     }
   },
-  "insightsExplainCashFlowDeepTip": "ثبّت هدف تحوّش {target} كل دورة، يعني {yearly} في السنة.",
+  "insightsExplainCashFlowDeepTip": "ثبّت هدف تحوّش {target} كل شهر، يعني {yearly} في السنة.",
   "@insightsExplainCashFlowDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4572,7 +4576,7 @@
       }
     }
   },
-  "insightsExplainCategoriesTip": "حط سقف لـ{category} أقل بـ {target} من الدورة دي، وهتوفر الفرق.",
+  "insightsExplainCategoriesTip": "حط سقف لـ{category} أقل بـ {target} من الشهر ده، وهتوفر الفرق.",
   "@insightsExplainCategoriesTip": {
     "description": "S",
     "placeholders": {
@@ -4602,7 +4606,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeepTip": "قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة.",
+  "insightsExplainCategoriesDeepTip": "قلّل {category} بـ {target} كل شهر، يعني {yearly} في السنة.",
   "@insightsExplainCategoriesDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4617,7 +4621,7 @@
       }
     }
   },
-  "insightsExplainBurnRateBasic": "{state, select, over{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}",
+  "insightsExplainBurnRateBasic": "{state, select, over{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}",
   "@insightsExplainBurnRateBasic": {
     "description": "E · state:select(over/other). perDay = BR-BUD-03",
     "placeholders": {
@@ -4638,7 +4642,7 @@
       }
     }
   },
-  "insightsExplainBurnRateTip": "{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف {perDay} في اليوم.}}",
+  "insightsExplainBurnRateTip": "{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الشهر. تقدر تصرف {perDay} في اليوم.}}",
   "@insightsExplainBurnRateTip": {
     "description": "S",
     "placeholders": {
@@ -4650,7 +4654,7 @@
       }
     }
   },
-  "insightsExplainBurnRateDeep": "{trend, select, up{في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ {delta}.} down{في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.}}",
+  "insightsExplainBurnRateDeep": "{trend, select, up{في نفس اليوم في الشهر اللي فات كنت صارف أقل بـ {delta}.} down{في نفس اليوم في الشهر اللي فات كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الشهر اللي فات تقريباً.}}",
   "@insightsExplainBurnRateDeep": {
     "description": "E · Gold · trend (up = spending more than last cycle)",
     "placeholders": {
@@ -4692,7 +4696,7 @@
       }
     }
   },
-  "insightsExplainRule503020Tip": "{state, select, wantsHigh{نزّل الرفاهيات {target} الدورة الجاية وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الدورة الجاية.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}",
+  "insightsExplainRule503020Tip": "{state, select, wantsHigh{نزّل الرفاهيات {target} الشهر الجاي وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الشهر الجاي.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}",
   "@insightsExplainRule503020Tip": {
     "description": "S",
     "placeholders": {
@@ -4845,7 +4849,7 @@
       }
     }
   },
-  "insightsExplainMerchantsDeepTip": "لو قللت {merchant} بالربع هتوفر {target} في الدورة، يعني {yearly} في السنة.",
+  "insightsExplainMerchantsDeepTip": "لو قللت {merchant} بالربع هتوفر {target} في الشهر، يعني {yearly} في السنة.",
   "@insightsExplainMerchantsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -4860,7 +4864,7 @@
       }
     }
   },
-  "insightsExplainVsAverageBasic": "{state, select, both{{category} زاد {percent} عن متوسط آخر تلات دورات، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات دورات.} drop{{category2} نزل {percent2} عن متوسط آخر تلات دورات. برافو عليك.} other{صرفك الدورة دي قريب من متوسط آخر تلات دورات.}}",
+  "insightsExplainVsAverageBasic": "{state, select, both{{category} زاد {percent} عن متوسط آخر تلات شهور، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات شهور.} drop{{category2} نزل {percent2} عن متوسط آخر تلات شهور. برافو عليك.} other{صرفك الشهر ده قريب من متوسط آخر تلات شهور.}}",
   "@insightsExplainVsAverageBasic": {
     "description": "E · state:select(both/rise/drop/other). Needs three earlier cycles (insights_chartDetail_needsData)",
     "placeholders": {
@@ -4911,7 +4915,7 @@
       }
     }
   },
-  "insightsExplainVsAverageDeepTip": "حط حد لـ {category} على قد متوسطك، يعني {target} في الدورة.",
+  "insightsExplainVsAverageDeepTip": "حط حد لـ {category} على قد متوسطك، يعني {target} في الشهر.",
   "@insightsExplainVsAverageDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -5064,7 +5068,7 @@
       }
     }
   },
-  "insightsExplainCardsDeepTip": "صرفت {amount} من {card} الدورة دي. حط له سقف {target} للدورة الجاية.",
+  "insightsExplainCardsDeepTip": "صرفت {amount} من {card} الشهر ده. حط له سقف {target} للشهر الجاي.",
   "@insightsExplainCardsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -10515,11 +10519,11 @@
       }
     }
   },
-  "insightsChartsPeriodNeedsCycle": "الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.",
+  "insightsChartsPeriodNeedsCycle": "الرسم ده بيشتغل بشهر المرتب. اختار الشهر ده أو الشهر اللي فات عشان تشوفه.",
   "@insightsChartsPeriodNeedsCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodBudgetNote": "تقدّم الميزانية بيعرض الدورة الحالية دايماً.",
+  "insightsChartsPeriodBudgetNote": "تقدّم الميزانية بيعرض الشهر الحالي دايماً.",
   "@insightsChartsPeriodBudgetNote": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10547,11 +10551,11 @@
       }
     }
   },
-  "insightsChartsPeriodNowThisCycle": "الدورة دي",
+  "insightsChartsPeriodNowThisCycle": "الشهر ده",
   "@insightsChartsPeriodNowThisCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodNowLastCycle": "الدورة اللي فاتت",
+  "insightsChartsPeriodNowLastCycle": "الشهر اللي فات",
   "@insightsChartsPeriodNowLastCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10595,7 +10599,7 @@
       }
     }
   },
-  "insightsChartsPeriodPrevCycleNow": "الدورة اللي فاتت",
+  "insightsChartsPeriodPrevCycleNow": "الشهر اللي فات",
   "@insightsChartsPeriodPrevCycleNow": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10607,7 +10611,7 @@
   "@insightsChartsPeriodPrevYearNow": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodPrevCycle": "الدورة اللي قبلها",
+  "insightsChartsPeriodPrevCycle": "الشهر اللي قبله",
   "@insightsChartsPeriodPrevCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -10644,7 +10648,7 @@
       }
     }
   },
-  "insightsChartsCyclesCount": "{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}",
+  "insightsChartsCyclesCount": "{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}",
   "@insightsChartsCyclesCount": {
     "description": "S-20 chart period (T-188)",
     "placeholders": {
@@ -10839,5 +10843,520 @@
   "networthCardOwed": "المستحق عليك",
   "@networthCardOwed": {
     "description": "L"
+  },
+  "insightsSummarySpent": "صرفت",
+  "@insightsSummarySpent": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryIncome": "دخلك",
+  "@insightsSummaryIncome": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummarySaved": "وفّرت",
+  "@insightsSummarySaved": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryRate": "نسبة التوفير",
+  "@insightsSummaryRate": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeUpPct": "▲ {pct}",
+  "@insightsChangeUpPct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeDownPct": "▼ {pct}",
+  "@insightsChangeDownPct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeUpPts": "▲ {n} نقط",
+  "@insightsChangeUpPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeDownPts": "▼ {n} نقط",
+  "@insightsChangeDownPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeSame": "= نفسه",
+  "@insightsChangeSame": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeSamePct": "= {pct}",
+  "@insightsChangeSamePct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeNew": "جديد",
+  "@insightsChangeNew": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeA11yUp": "زاد {pct}",
+  "@insightsChangeA11yUp": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yDown": "نزل {pct}",
+  "@insightsChangeA11yDown": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yUpPts": "زاد {n} نقط",
+  "@insightsChangeA11yUpPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yDownPts": "نزل {n} نقط",
+  "@insightsChangeA11yDownPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11ySame": "زي ما هو",
+  "@insightsChangeA11ySame": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeA11yNew": "جديد، مفيش مقارنة",
+  "@insightsChangeA11yNew": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryTileA11y": "{label}: {value}. {change}، قصاد {baseline}",
+  "@insightsSummaryTileA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      },
+      "baseline": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryBaseline": "قصاد {prev}",
+  "@insightsSummaryBaseline": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryBaselineDays": "مقارنة بنفس الـ {days} يوم من {prev}",
+  "@insightsSummaryBaselineDays": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryEmpty": "لسه مفيش حركات في الفترة دي. أول ما تسجّل صرف أو دخل هحسبلك الملخص.",
+  "@insightsSummaryEmpty": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsOneLinerDownRiser": "صرفك على {category} زاد {pct} بس إجمالي صرفك أقل من {prev}. كمل كده يا كبير",
+  "@insightsOneLinerDownRiser": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerDown": "صرفك أقل من {prev}. كمل كده يا كبير",
+  "@insightsOneLinerDown": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerUpRiser": "صرفك زاد عن {prev}، وأكتر حاجة زادت {category} بـ {pct}. خد بالك شوية",
+  "@insightsOneLinerUpRiser": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerUp": "صرفك زاد عن {prev}. خد بالك شوية",
+  "@insightsOneLinerUp": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerSame": "صرفك زي {prev} تقريباً. ثبات حلو",
+  "@insightsOneLinerSame": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerNoBaseline": "لسه مفيش فترة قبل دي أقارنك بيها. كمّل وأنا هحسبها معاك.",
+  "@insightsOneLinerNoBaseline": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsCashFlowSub": "{span} · {note}",
+  "@insightsChartsCashFlowSub": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "span": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsLastNMonths": "آخر {n} شهور",
+  "@insightsChartsLastNMonths": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodOpenNote": "{now} لسه ماخلصش",
+  "@insightsChartsPeriodOpenNote": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "now": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCategoriesSub": "أكبر {n} تصنيفات والباقي في «تانية»",
+  "@insightsChartsCategoriesSub": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsMerchantsSub": "اضغط على أي مكان تشوف حركاته",
+  "@insightsChartsMerchantsSub": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsSeeTransactions": "شوف الـ {count} حركة",
+  "@insightsChartsSeeTransactions": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSeeTransactionsA11y": "افتح الحركات",
+  "@insightsChartsSeeTransactionsA11y": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsBubbleSaved": "وفّرت {amount}",
+  "@insightsChartsBubbleSaved": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBubbleIncome": "دخلك {amount}",
+  "@insightsChartsBubbleIncome": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBubbleSpent": "صرفت {amount}",
+  "@insightsChartsBubbleSpent": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSliceBubble": "{name} · {amount} · {percent}",
+  "@insightsChartsSliceBubble": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBarHint": "دوس على عمود تشوف تفاصيله",
+  "@insightsChartsBarHint": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsScrubHint": "اضغط مطوّل واسحب على الخط عشان تشوف كل نقطة",
+  "@insightsChartsScrubHint": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPartialLegend": "{name} (لسه ماخلصش)",
+  "@insightsChartsPartialLegend": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPartialBarA11y": "{name}، لسه ماخلصش",
+  "@insightsChartsPartialBarA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPlaceCount": "{count, plural, one{مرة} two{مرتين} few{{n} مرات} other{{n} مرة}}",
+  "@insightsChartsPlaceCount": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPlaceRowA11y": "{name}: {count}، {amount}. افتح حركاته",
+  "@insightsChartsPlaceRowA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSliceRowA11y": "{name}: {amount}، {percent}. {change}",
+  "@insightsChartsSliceRowA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsChipA11y": "{name}: {change}",
+  "@insightsChartsChipA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsAllCharts": "كل الرسوم ({n})",
+  "@insightsChartsAllCharts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsFewerCharts": "رسوم أقل",
+  "@insightsChartsFewerCharts": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsHiddenNote": "المبالغ مخفية · الرسوم باينة شكلها بس",
+  "@insightsChartsHiddenNote": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsAxisThousands": "{n} ألف",
+  "@insightsAxisThousands": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsAxisMillions": "{n} مليون",
+  "@insightsAxisMillions": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPresetThisCycle": "الشهر ده",
+  "@insightsChartsPresetThisCycle": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPresetLastCycle": "الشهر اللي فات",
+  "@insightsChartsPresetLastCycle": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPresetLastCycles": "آخر {n} شهور",
+  "@insightsChartsPresetLastCycles": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedMonths": "محتاج {months} كمان عشان الرسم ده يبان.",
+  "@insightsThinNeedMonths": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "months": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedTxns": "{count, plural, one{محتاج حركة كمان} two{محتاج حركتين كمان} few{محتاج {n} حركات كمان} other{محتاج {n} حركة كمان}} عشان الرسم ده يبان.",
+  "@insightsThinNeedTxns": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedIncome": "ضيف دخلك الأول وأنا أقسمهولك.",
+  "@insightsThinNeedIncome": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsThinNoData": "لسه مفيش حاجة هنا. أول ما تتسجّل حركات هتلاقي الرسم ده جاهز.",
+  "@insightsThinNoData": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsThinSeeDetails": "شوف التفاصيل",
+  "@insightsThinSeeDetails": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsDrillTotal": "{count} حركة",
+  "@insightsChartsDrillTotal": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsDrillTotalA11y": "الإجمالي {amount}، {count} حركة. {change}",
+  "@insightsChartsDrillTotalA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsDrillVs": "قصاد الفترة اللي قبلها",
+  "@insightsChartsDrillVs": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsRetry": "حاول تاني",
+  "@insightsChartsRetry": {
+    "description": "T-189 charts redesign"
   }
 }

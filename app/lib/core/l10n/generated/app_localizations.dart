@@ -2350,6 +2350,12 @@ abstract class AppLocalizations {
   /// **'المدة'**
   String get transactionsListFilterPeriod;
 
+  /// Filter chip: rows without a category
+  ///
+  /// In ar, this message translates to:
+  /// **'بدون تصنيف'**
+  String get transactionsListFilterUncategorized;
+
   /// C
   ///
   /// In ar, this message translates to:
@@ -4680,7 +4686,7 @@ abstract class AppLocalizations {
   /// S · C-13 empty (EC-23)
   ///
   /// In ar, this message translates to:
-  /// **'هيشتغل بعد أول دورة كاملة'**
+  /// **'هيشتغل بعد أول شهر كامل'**
   String get insightsChartsEmptyCycle;
 
   /// S · charts 8 and 11 when they have nothing to show
@@ -4716,7 +4722,7 @@ abstract class AppLocalizations {
   /// C · donut remainder slice
   ///
   /// In ar, this message translates to:
-  /// **'حاجات تانية'**
+  /// **'تانية'**
   String get insightsChartsOtherSlice;
 
   /// Muted note under the category donut: cash payments covered by an earlier withdrawal (not a slice, not in the total)
@@ -4734,7 +4740,7 @@ abstract class AppLocalizations {
   /// T · chart 2 (Free)
   ///
   /// In ar, this message translates to:
-  /// **'فلوسك راحت فين؟'**
+  /// **'صرفت فين'**
   String get insightsChartTitleCategories;
 
   /// T · chart 3 (Gold)
@@ -4758,13 +4764,13 @@ abstract class AppLocalizations {
   /// T · chart 6 (Free, top five)
   ///
   /// In ar, this message translates to:
-  /// **'أكتر الأماكن اللي بتاخد فلوسك'**
+  /// **'أكتر أماكن صرفت فيها'**
   String get insightsChartTitleMerchants;
 
   /// T · chart 7 (Gold)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي قصاد متوسط تلات دورات'**
+  /// **'الشهر ده قصاد متوسط تلات شهور'**
   String get insightsChartTitleVsAverage;
 
   /// T · chart 8 (Gold)
@@ -4872,7 +4878,7 @@ abstract class AppLocalizations {
   /// C · chart 7
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي'**
+  /// **'الشهر ده'**
   String get insightsLegendThisCycle;
 
   /// C · chart 8
@@ -4962,7 +4968,7 @@ abstract class AppLocalizations {
   /// A
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent}'**
+  /// **'الشهر ده قصاد متوسطك: أكبر زيادة في {category} بـ {percent}'**
   String insightsChartA11yVsAverage(String category, String percent);
 
   /// A
@@ -5032,13 +5038,13 @@ abstract class AppLocalizations {
   /// S · Free only, once under the basic tip, plus common_gold_unlock
   ///
   /// In ar, this message translates to:
-  /// **'عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة.'**
+  /// **'عايز تحليل أعمق؟ جولد بيقارن بالشهر اللي فات ويتوقع آخر الشهر.'**
   String get insightsChartDetailDeepUpsell;
 
   /// M · need:select (cycle/months/accounts/installments/subscriptions/other) · empty explainer
   ///
   /// In ar, this message translates to:
-  /// **'{need, select, cycle{محتاج دورة كاملة علشان أشرحلك الشارت ده} months{محتاج تلات دورات علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}'**
+  /// **'{need, select, cycle{محتاج شهر كامل علشان أشرحلك الشارت ده} months{محتاج تلات شهور علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}'**
   String insightsChartDetailNeedsData(String need);
 
   /// N · bubble hidden, chart stays
@@ -5092,7 +5098,7 @@ abstract class AppLocalizations {
   /// S · state, category = largest category, target
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}'**
+  /// **'{state, select, short{لو قللت {category} بـ {target} الشهر الجاي، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}'**
   String insightsExplainCashFlowTip(
     String state,
     String category,
@@ -5113,7 +5119,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'ثبّت هدف تحوّش {target} كل دورة، يعني {yearly} في السنة.'**
+  /// **'ثبّت هدف تحوّش {target} كل شهر، يعني {yearly} في السنة.'**
   String insightsExplainCashFlowDeepTip(String target, String yearly);
 
   /// E
@@ -5131,7 +5137,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'حط سقف لـ{category} أقل بـ {target} من الدورة دي، وهتوفر الفرق.'**
+  /// **'حط سقف لـ{category} أقل بـ {target} من الشهر ده، وهتوفر الفرق.'**
   String insightsExplainCategoriesTip(String category, String target);
 
   /// E · Gold
@@ -5148,7 +5154,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة.'**
+  /// **'قلّل {category} بـ {target} كل شهر، يعني {yearly} في السنة.'**
   String insightsExplainCategoriesDeepTip(
     String category,
     String target,
@@ -5158,7 +5164,7 @@ abstract class AppLocalizations {
   /// E · state:select(over/other). perDay = BR-BUD-03
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, over{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}'**
+  /// **'{state, select, over{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}'**
   String insightsExplainBurnRateBasic(
     String state,
     String cycleDay,
@@ -5170,13 +5176,13 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف {perDay} في اليوم.}}'**
+  /// **'{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الشهر. تقدر تصرف {perDay} في اليوم.}}'**
   String insightsExplainBurnRateTip(String state, String perDay);
 
   /// E · Gold · trend (up = spending more than last cycle)
   ///
   /// In ar, this message translates to:
-  /// **'{trend, select, up{في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ {delta}.} down{في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.}}'**
+  /// **'{trend, select, up{في نفس اليوم في الشهر اللي فات كنت صارف أقل بـ {delta}.} down{في نفس اليوم في الشهر اللي فات كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الشهر اللي فات تقريباً.}}'**
   String insightsExplainBurnRateDeep(String trend, String delta);
 
   /// S · Gold
@@ -5200,7 +5206,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, wantsHigh{نزّل الرفاهيات {target} الدورة الجاية وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الدورة الجاية.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}'**
+  /// **'{state, select, wantsHigh{نزّل الرفاهيات {target} الشهر الجاي وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الشهر الجاي.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}'**
   String insightsExplainRule503020Tip(String state, String target);
 
   /// E · Gold
@@ -5290,7 +5296,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'لو قللت {merchant} بالربع هتوفر {target} في الدورة، يعني {yearly} في السنة.'**
+  /// **'لو قللت {merchant} بالربع هتوفر {target} في الشهر، يعني {yearly} في السنة.'**
   String insightsExplainMerchantsDeepTip(
     String merchant,
     String target,
@@ -5300,7 +5306,7 @@ abstract class AppLocalizations {
   /// E · state:select(both/rise/drop/other). Needs three earlier cycles (insights_chartDetail_needsData)
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, both{{category} زاد {percent} عن متوسط آخر تلات دورات، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات دورات.} drop{{category2} نزل {percent2} عن متوسط آخر تلات دورات. برافو عليك.} other{صرفك الدورة دي قريب من متوسط آخر تلات دورات.}}'**
+  /// **'{state, select, both{{category} زاد {percent} عن متوسط آخر تلات شهور، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات شهور.} drop{{category2} نزل {percent2} عن متوسط آخر تلات شهور. برافو عليك.} other{صرفك الشهر ده قريب من متوسط آخر تلات شهور.}}'**
   String insightsExplainVsAverageBasic(
     String state,
     String category,
@@ -5329,7 +5335,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'حط حد لـ {category} على قد متوسطك، يعني {target} في الدورة.'**
+  /// **'حط حد لـ {category} على قد متوسطك، يعني {target} في الشهر.'**
   String insightsExplainVsAverageDeepTip(String category, String target);
 
   /// E · item = the next installment to finish
@@ -5412,7 +5418,7 @@ abstract class AppLocalizations {
   /// S · Gold
   ///
   /// In ar, this message translates to:
-  /// **'صرفت {amount} من {card} الدورة دي. حط له سقف {target} للدورة الجاية.'**
+  /// **'صرفت {amount} من {card} الشهر ده. حط له سقف {target} للشهر الجاي.'**
   String insightsExplainCardsDeepTip(String amount, String card, String target);
 
   /// E · one currency or unit at a time, no cross-currency sum
@@ -11237,13 +11243,13 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الرسم ده بيشتغل بدورة المرتب. اختار الدورة دي أو الدورة اللي فاتت عشان تشوفه.'**
+  /// **'الرسم ده بيشتغل بشهر المرتب. اختار الشهر ده أو الشهر اللي فات عشان تشوفه.'**
   String get insightsChartsPeriodNeedsCycle;
 
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'تقدّم الميزانية بيعرض الدورة الحالية دايماً.'**
+  /// **'تقدّم الميزانية بيعرض الشهر الحالي دايماً.'**
   String get insightsChartsPeriodBudgetNote;
 
   /// S-20 chart period (T-188)
@@ -11261,13 +11267,13 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي'**
+  /// **'الشهر ده'**
   String get insightsChartsPeriodNowThisCycle;
 
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي فاتت'**
+  /// **'الشهر اللي فات'**
   String get insightsChartsPeriodNowLastCycle;
 
   /// S-20 chart period (T-188)
@@ -11309,7 +11315,7 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي فاتت'**
+  /// **'الشهر اللي فات'**
   String get insightsChartsPeriodPrevCycleNow;
 
   /// S-20 chart period (T-188)
@@ -11327,7 +11333,7 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي قبلها'**
+  /// **'الشهر اللي قبله'**
   String get insightsChartsPeriodPrevCycle;
 
   /// S-20 chart period (T-188)
@@ -11363,7 +11369,7 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'{count, plural, one{دورة} two{دورتين} few{{countText} دورات} other{{countText} دورة}}'**
+  /// **'{count, plural, one{شهر} two{شهرين} few{{countText} شهور} other{{countText} شهر}}'**
   String insightsChartsCyclesCount(int count, String countText);
 
   /// S-20 chart period (T-188)
@@ -11569,6 +11575,398 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المستحق عليك'**
   String get networthCardOwed;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت'**
+  String get insightsSummarySpent;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك'**
+  String get insightsSummaryIncome;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'وفّرت'**
+  String get insightsSummarySaved;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'نسبة التوفير'**
+  String get insightsSummaryRate;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▲ {pct}'**
+  String insightsChangeUpPct(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▼ {pct}'**
+  String insightsChangeDownPct(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▲ {n} نقط'**
+  String insightsChangeUpPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'▼ {n} نقط'**
+  String insightsChangeDownPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'= نفسه'**
+  String get insightsChangeSame;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'= {pct}'**
+  String insightsChangeSamePct(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'جديد'**
+  String get insightsChangeNew;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'زاد {pct}'**
+  String insightsChangeA11yUp(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'نزل {pct}'**
+  String insightsChangeA11yDown(String pct);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'زاد {n} نقط'**
+  String insightsChangeA11yUpPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'نزل {n} نقط'**
+  String insightsChangeA11yDownPts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'زي ما هو'**
+  String get insightsChangeA11ySame;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'جديد، مفيش مقارنة'**
+  String get insightsChangeA11yNew;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{label}: {value}. {change}، قصاد {baseline}'**
+  String insightsSummaryTileA11y(
+    String label,
+    String value,
+    String change,
+    String baseline,
+  );
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'قصاد {prev}'**
+  String insightsSummaryBaseline(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'مقارنة بنفس الـ {days} يوم من {prev}'**
+  String insightsSummaryBaselineDays(String days, String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش حركات في الفترة دي. أول ما تسجّل صرف أو دخل هحسبلك الملخص.'**
+  String get insightsSummaryEmpty;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك على {category} زاد {pct} بس إجمالي صرفك أقل من {prev}. كمل كده يا كبير'**
+  String insightsOneLinerDownRiser(String category, String pct, String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك أقل من {prev}. كمل كده يا كبير'**
+  String insightsOneLinerDown(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك زاد عن {prev}، وأكتر حاجة زادت {category} بـ {pct}. خد بالك شوية'**
+  String insightsOneLinerUpRiser(String category, String pct, String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك زاد عن {prev}. خد بالك شوية'**
+  String insightsOneLinerUp(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك زي {prev} تقريباً. ثبات حلو'**
+  String insightsOneLinerSame(String prev);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش فترة قبل دي أقارنك بيها. كمّل وأنا هحسبها معاك.'**
+  String get insightsOneLinerNoBaseline;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{span} · {note}'**
+  String insightsChartsCashFlowSub(String span, String note);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر {n} شهور'**
+  String insightsChartsLastNMonths(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{now} لسه ماخلصش'**
+  String insightsChartsPeriodOpenNote(String now);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'أكبر {n} تصنيفات والباقي في «تانية»'**
+  String insightsChartsCategoriesSub(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط على أي مكان تشوف حركاته'**
+  String get insightsChartsMerchantsSub;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف الـ {count} حركة'**
+  String insightsChartsSeeTransactions(String count);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الحركات'**
+  String get insightsChartsSeeTransactionsA11y;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'وفّرت {amount}'**
+  String insightsChartsBubbleSaved(String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك {amount}'**
+  String insightsChartsBubbleIncome(String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت {amount}'**
+  String insightsChartsBubbleSpent(String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} · {amount} · {percent}'**
+  String insightsChartsSliceBubble(String name, String amount, String percent);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'دوس على عمود تشوف تفاصيله'**
+  String get insightsChartsBarHint;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط مطوّل واسحب على الخط عشان تشوف كل نقطة'**
+  String get insightsChartsScrubHint;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} (لسه ماخلصش)'**
+  String insightsChartsPartialLegend(String name);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}، لسه ماخلصش'**
+  String insightsChartsPartialBarA11y(String name);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{مرة} two{مرتين} few{{n} مرات} other{{n} مرة}}'**
+  String insightsChartsPlaceCount(int count, String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}: {count}، {amount}. افتح حركاته'**
+  String insightsChartsPlaceRowA11y(String name, String count, String amount);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}: {amount}، {percent}. {change}'**
+  String insightsChartsSliceRowA11y(
+    String name,
+    String amount,
+    String percent,
+    String change,
+  );
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{name}: {change}'**
+  String insightsChartsChipA11y(String name, String change);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'كل الرسوم ({n})'**
+  String insightsChartsAllCharts(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'رسوم أقل'**
+  String get insightsChartsFewerCharts;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'المبالغ مخفية · الرسوم باينة شكلها بس'**
+  String get insightsChartsHiddenNote;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} ألف'**
+  String insightsAxisThousands(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} مليون'**
+  String insightsAxisMillions(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده'**
+  String get insightsChartsPresetThisCycle;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get insightsChartsPresetLastCycle;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر {n} شهور'**
+  String insightsChartsPresetLastCycles(String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاج {months} كمان عشان الرسم ده يبان.'**
+  String insightsThinNeedMonths(String months);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, one{محتاج حركة كمان} two{محتاج حركتين كمان} few{محتاج {n} حركات كمان} other{محتاج {n} حركة كمان}} عشان الرسم ده يبان.'**
+  String insightsThinNeedTxns(int count, String n);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف دخلك الأول وأنا أقسمهولك.'**
+  String get insightsThinNeedIncome;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش حاجة هنا. أول ما تتسجّل حركات هتلاقي الرسم ده جاهز.'**
+  String get insightsThinNoData;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف التفاصيل'**
+  String get insightsThinSeeDetails;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'{count} حركة'**
+  String insightsChartsDrillTotal(String count);
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجمالي {amount}، {count} حركة. {change}'**
+  String insightsChartsDrillTotalA11y(
+    String amount,
+    String count,
+    String change,
+  );
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'قصاد الفترة اللي قبلها'**
+  String get insightsChartsDrillVs;
+
+  /// T-189 charts redesign
+  ///
+  /// In ar, this message translates to:
+  /// **'حاول تاني'**
+  String get insightsChartsRetry;
 }
 
 class _AppLocalizationsDelegate

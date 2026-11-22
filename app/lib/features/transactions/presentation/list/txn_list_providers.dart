@@ -44,44 +44,61 @@ final class TxnListFilter {
     this.customFrom,
     this.customTo,
     this.categoryIds = const {},
+    this.includeUncategorized = false,
     this.type = TxnTypeFilter.any,
     this.sources = const {},
     this.currency,
+    this.merchantNorm,
+    this.merchantName,
   });
 
   final TxnPeriod period;
   final CivilDate? customFrom;
   final CivilDate? customTo;
   final Set<String> categoryIds;
+
+  /// Also (or only, when [categoryIds] is empty) rows with no category.
+  final bool includeUncategorized;
   final TxnTypeFilter type;
   final Set<TxnSource> sources;
   final Currency? currency;
+
+  /// T-189: one merchant (from a chart); [merchantName] is its chip text.
+  final String? merchantNorm;
+  final String? merchantName;
 
   /// Everything narrowed beyond the default period.
   bool get hasNarrowing =>
       period != TxnPeriod.all ||
       categoryIds.isNotEmpty ||
+      includeUncategorized ||
       type != TxnTypeFilter.any ||
       sources.isNotEmpty ||
-      currency != null;
+      currency != null ||
+      merchantNorm != null;
 
   TxnListFilter copyWith({
     TxnPeriod? period,
     CivilDate? customFrom,
     CivilDate? customTo,
     Set<String>? categoryIds,
+    bool? includeUncategorized,
     TxnTypeFilter? type,
     Set<TxnSource>? sources,
     Currency? currency,
     bool clearCurrency = false,
+    bool clearMerchant = false,
   }) => TxnListFilter(
     period: period ?? this.period,
     customFrom: customFrom ?? this.customFrom,
     customTo: customTo ?? this.customTo,
     categoryIds: categoryIds ?? this.categoryIds,
+    includeUncategorized: includeUncategorized ?? this.includeUncategorized,
     type: type ?? this.type,
     sources: sources ?? this.sources,
     currency: clearCurrency ? null : (currency ?? this.currency),
+    merchantNorm: clearMerchant ? null : merchantNorm,
+    merchantName: clearMerchant ? null : merchantName,
   );
 }
 
@@ -255,10 +272,12 @@ TransactionFilter txnToRepoFilter(
     to: range.to,
     accountIds: cardIds,
     categoryIds: f.categoryIds,
+    includeUncategorized: f.includeUncategorized,
     directions: directions,
     sources: f.sources,
     currencies: {?f.currency},
     statuses: f.type == TxnTypeFilter.declined ? {TxnStatus.declined} : {},
+    merchantNorm: f.merchantNorm,
   );
 }
 

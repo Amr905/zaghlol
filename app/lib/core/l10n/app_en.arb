@@ -398,6 +398,10 @@
   "transactionsListTitle": "Transactions",
   "transactionsListSearchHint": "Merchant, note or amount…",
   "transactionsListFilterPeriod": "Dates",
+  "transactionsListFilterUncategorized": "Uncategorized",
+  "@transactionsListFilterUncategorized": {
+    "description": "Filter chip: rows without a category"
+  },
   "transactionsListFilterCategory": "Category",
   "transactionsListFilterType": "Type",
   "transactionsListFilterSource": "Source",
@@ -983,7 +987,7 @@
   "@insightsChartsLockedSub": {
     "description": "S · C-13 locked, blurred preview + common_gold_unlock"
   },
-  "insightsChartsEmptyCycle": "Comes alive after your first full cycle",
+  "insightsChartsEmptyCycle": "Comes alive after your first full month",
   "@insightsChartsEmptyCycle": {
     "description": "S · C-13 empty (EC-23)"
   },
@@ -1020,11 +1024,11 @@
       }
     }
   },
-  "insightsChartTitleCashFlow": "Cash flow",
+  "insightsChartTitleCashFlow": "Money in & out",
   "@insightsChartTitleCashFlow": {
     "description": "T · chart 1 (Free)"
   },
-  "insightsChartTitleCategories": "Where your money went",
+  "insightsChartTitleCategories": "Where it went",
   "@insightsChartTitleCategories": {
     "description": "T · chart 2 (Free)"
   },
@@ -1040,11 +1044,11 @@
   "@insightsChartTitleWeekPattern": {
     "description": "T · chart 5 (Gold), day of week and hour"
   },
-  "insightsChartTitleMerchants": "Top merchants",
+  "insightsChartTitleMerchants": "Top places",
   "@insightsChartTitleMerchants": {
     "description": "T · chart 6 (Free, top five)"
   },
-  "insightsChartTitleVsAverage": "This cycle vs your 3-cycle average",
+  "insightsChartTitleVsAverage": "This month vs your 3-month average",
   "@insightsChartTitleVsAverage": {
     "description": "T · chart 7 (Gold)"
   },
@@ -1116,7 +1120,7 @@
   "@insightsLegendAverage": {
     "description": "C · chart 7"
   },
-  "insightsLegendThisCycle": "This cycle",
+  "insightsLegendThisCycle": "This month",
   "@insightsLegendThisCycle": {
     "description": "C · chart 7"
   },
@@ -1228,7 +1232,7 @@
       }
     }
   },
-  "insightsChartA11yVsAverage": "This cycle vs average: biggest rise is {category} at {percent}",
+  "insightsChartA11yVsAverage": "This month vs average: biggest rise is {category} at {percent}",
   "@insightsChartA11yVsAverage": {
     "description": "A",
     "placeholders": {
@@ -1336,11 +1340,11 @@
   "@insightsChartDetailDeepLabel": {
     "description": "C · with common_gold_badge; shown on the deep part"
   },
-  "insightsChartDetailDeepUpsell": "Want a deeper look? Gold compares with last cycle and projects your cycle's end.",
+  "insightsChartDetailDeepUpsell": "Want a deeper look? Gold compares with last month and projects your month's end.",
   "@insightsChartDetailDeepUpsell": {
     "description": "S · Free only, once under the basic tip, plus common_gold_unlock"
   },
-  "insightsChartDetailNeedsData": "{need, select, cycle{I need one full cycle before I can explain this chart} months{I need three cycles to compare you with yourself} accounts{Add accounts or assets and I'll explain} installments{Add an installment or commitment and I'll explain} subscriptions{No subscriptions yet. I'll explain once I spot one} other{I need more data to explain this chart}}",
+  "insightsChartDetailNeedsData": "{need, select, cycle{I need one full month before I can explain this chart} months{I need three months to compare you with yourself} accounts{Add accounts or assets and I'll explain} installments{Add an installment or commitment and I'll explain} subscriptions{No subscriptions yet. I'll explain once I spot one} other{I need more data to explain this chart}}",
   "@insightsChartDetailNeedsData": {
     "description": "M · need:select (cycle/months/accounts/installments/subscriptions/other) · empty explainer",
     "placeholders": {
@@ -1415,7 +1419,7 @@
       }
     }
   },
-  "insightsExplainCashFlowTip": "{state, select, short{Trimming {category} by {target} next cycle would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}",
+  "insightsExplainCashFlowTip": "{state, select, short{Trimming {category} by {target} next month would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}",
   "@insightsExplainCashFlowTip": {
     "description": "S · state, category = largest category, target",
     "placeholders": {
@@ -1448,7 +1452,7 @@
       }
     }
   },
-  "insightsExplainCashFlowDeepTip": "Set a goal of saving {target} every cycle. That's {yearly} a year.",
+  "insightsExplainCashFlowDeepTip": "Set a goal of saving {target} every month. That's {yearly} a year.",
   "@insightsExplainCashFlowDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1481,7 +1485,7 @@
       }
     }
   },
-  "insightsExplainCategoriesTip": "Cap {category} {target} below this cycle and keep the difference.",
+  "insightsExplainCategoriesTip": "Cap {category} {target} below this month and keep the difference.",
   "@insightsExplainCategoriesTip": {
     "description": "S",
     "placeholders": {
@@ -1511,7 +1515,7 @@
       }
     }
   },
-  "insightsExplainCategoriesDeepTip": "Bring {category} down by {target} each cycle. That's {yearly} a year.",
+  "insightsExplainCategoriesDeepTip": "Bring {category} down by {target} each month. That's {yearly} a year.",
   "@insightsExplainCategoriesDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1526,7 +1530,7 @@
       }
     }
   },
-  "insightsExplainBurnRateBasic": "{state, select, over{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, above the ideal pace. What's left covers {perDay} a day.} other{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, under the ideal pace. You can spend {perDay} a day.}}",
+  "insightsExplainBurnRateBasic": "{state, select, over{You're on day {cycleDay} of the month and have spent {spent} of {budget}, above the ideal pace. What's left covers {perDay} a day.} other{You're on day {cycleDay} of the month and have spent {spent} of {budget}, under the ideal pace. You can spend {perDay} a day.}}",
   "@insightsExplainBurnRateBasic": {
     "description": "E · state:select(over/other). perDay = BR-BUD-03",
     "placeholders": {
@@ -1547,7 +1551,7 @@
       }
     }
   },
-  "insightsExplainBurnRateTip": "{state, select, over{Bring your daily spending down to {perDay} until payday so the budget lasts.} other{Keep this pace and the gap becomes surplus at the end of the cycle. You can spend {perDay} a day.}}",
+  "insightsExplainBurnRateTip": "{state, select, over{Bring your daily spending down to {perDay} until payday so the budget lasts.} other{Keep this pace and the gap becomes surplus at the end of the month. You can spend {perDay} a day.}}",
   "@insightsExplainBurnRateTip": {
     "description": "S",
     "placeholders": {
@@ -1559,7 +1563,7 @@
       }
     }
   },
-  "insightsExplainBurnRateDeep": "{trend, select, up{At this point last cycle you had spent {delta} less.} down{At this point last cycle you had spent {delta} more.} other{Your spending is about the same as this point last cycle.}}",
+  "insightsExplainBurnRateDeep": "{trend, select, up{At this point last month you had spent {delta} less.} down{At this point last month you had spent {delta} more.} other{Your spending is about the same as this point last month.}}",
   "@insightsExplainBurnRateDeep": {
     "description": "E · Gold · trend (up = spending more than last cycle)",
     "placeholders": {
@@ -1601,7 +1605,7 @@
       }
     }
   },
-  "insightsExplainRule503020Tip": "{state, select, wantsHigh{Trim wants by {target} next cycle and move it to savings.} savingsLow{Try to add {target} to your savings next cycle.} other{Keep this up, and add {target} more if you can.}}",
+  "insightsExplainRule503020Tip": "{state, select, wantsHigh{Trim wants by {target} next month and move it to savings.} savingsLow{Try to add {target} to your savings next month.} other{Keep this up, and add {target} more if you can.}}",
   "@insightsExplainRule503020Tip": {
     "description": "S",
     "placeholders": {
@@ -1754,7 +1758,7 @@
       }
     }
   },
-  "insightsExplainMerchantsDeepTip": "Cut {merchant} by a quarter and you'll save {target} a cycle, {yearly} a year.",
+  "insightsExplainMerchantsDeepTip": "Cut {merchant} by a quarter and you'll save {target} a month, {yearly} a year.",
   "@insightsExplainMerchantsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1769,7 +1773,7 @@
       }
     }
   },
-  "insightsExplainVsAverageBasic": "{state, select, both{{category} is up {percent} on your 3-cycle average, but {category2} is down {percent2}. Nice work on that.} rise{{category} is up {percent} on your 3-cycle average.} drop{{category2} is down {percent2} on your 3-cycle average. Nice work.} other{This cycle is close to your 3-cycle average.}}",
+  "insightsExplainVsAverageBasic": "{state, select, both{{category} is up {percent} on your 3-month average, but {category2} is down {percent2}. Nice work on that.} rise{{category} is up {percent} on your 3-month average.} drop{{category2} is down {percent2} on your 3-month average. Nice work.} other{This month is close to your 3-month average.}}",
   "@insightsExplainVsAverageBasic": {
     "description": "E · state:select(both/rise/drop/other). Needs three earlier cycles (insights_chartDetail_needsData)",
     "placeholders": {
@@ -1820,7 +1824,7 @@
       }
     }
   },
-  "insightsExplainVsAverageDeepTip": "Set {category}'s limit at your average, that's {target} a cycle.",
+  "insightsExplainVsAverageDeepTip": "Set {category}'s limit at your average, that's {target} a month.",
   "@insightsExplainVsAverageDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -1973,7 +1977,7 @@
       }
     }
   },
-  "insightsExplainCardsDeepTip": "You spent {amount} on {card} this cycle. Set a {target} limit for the next one.",
+  "insightsExplainCardsDeepTip": "You spent {amount} on {card} this month. Set a {target} limit for the next one.",
   "@insightsExplainCardsDeepTip": {
     "description": "S · Gold",
     "placeholders": {
@@ -7412,11 +7416,11 @@
       }
     }
   },
-  "insightsChartsPeriodNeedsCycle": "This chart works on a payday cycle. Pick this cycle or last cycle to see it.",
+  "insightsChartsPeriodNeedsCycle": "This chart works on a payday month. Pick this month or last month to see it.",
   "@insightsChartsPeriodNeedsCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodBudgetNote": "Budget progress always shows the current cycle.",
+  "insightsChartsPeriodBudgetNote": "Budget progress always shows the current month.",
   "@insightsChartsPeriodBudgetNote": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7444,11 +7448,11 @@
       }
     }
   },
-  "insightsChartsPeriodNowThisCycle": "this cycle",
+  "insightsChartsPeriodNowThisCycle": "this month",
   "@insightsChartsPeriodNowThisCycle": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodNowLastCycle": "the previous cycle",
+  "insightsChartsPeriodNowLastCycle": "the previous month",
   "@insightsChartsPeriodNowLastCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7492,7 +7496,7 @@
       }
     }
   },
-  "insightsChartsPeriodPrevCycleNow": "last cycle",
+  "insightsChartsPeriodPrevCycleNow": "last month",
   "@insightsChartsPeriodPrevCycleNow": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7504,7 +7508,7 @@
   "@insightsChartsPeriodPrevYearNow": {
     "description": "S-20 chart period (T-188)"
   },
-  "insightsChartsPeriodPrevCycle": "the cycle before",
+  "insightsChartsPeriodPrevCycle": "the month before",
   "@insightsChartsPeriodPrevCycle": {
     "description": "S-20 chart period (T-188)"
   },
@@ -7541,7 +7545,7 @@
       }
     }
   },
-  "insightsChartsCyclesCount": "{count, plural, one{{countText} cycle} other{{countText} cycles}}",
+  "insightsChartsCyclesCount": "{count, plural, one{{countText} month} other{{countText} months}}",
   "@insightsChartsCyclesCount": {
     "description": "S-20 chart period (T-188)",
     "placeholders": {
@@ -7736,5 +7740,520 @@
   "networthCardOwed": "Amount you owe",
   "@networthCardOwed": {
     "description": "L"
+  },
+  "insightsSummarySpent": "Spent",
+  "@insightsSummarySpent": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryIncome": "Income",
+  "@insightsSummaryIncome": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummarySaved": "Saved",
+  "@insightsSummarySaved": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryRate": "Savings rate",
+  "@insightsSummaryRate": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeUpPct": "▲ {pct}",
+  "@insightsChangeUpPct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeDownPct": "▼ {pct}",
+  "@insightsChangeDownPct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeUpPts": "▲ {n} pts",
+  "@insightsChangeUpPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeDownPts": "▼ {n} pts",
+  "@insightsChangeDownPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeSame": "= same",
+  "@insightsChangeSame": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeSamePct": "= {pct}",
+  "@insightsChangeSamePct": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeNew": "New",
+  "@insightsChangeNew": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeA11yUp": "up {pct}",
+  "@insightsChangeA11yUp": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yDown": "down {pct}",
+  "@insightsChangeA11yDown": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yUpPts": "up {n} points",
+  "@insightsChangeA11yUpPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11yDownPts": "down {n} points",
+  "@insightsChangeA11yDownPts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChangeA11ySame": "unchanged",
+  "@insightsChangeA11ySame": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChangeA11yNew": "new, nothing to compare with",
+  "@insightsChangeA11yNew": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsSummaryTileA11y": "{label}: {value}. {change}, against {baseline}",
+  "@insightsSummaryTileA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      },
+      "baseline": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryBaseline": "Compared with {prev}",
+  "@insightsSummaryBaseline": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryBaselineDays": "Compared with the same {days} days of {prev}",
+  "@insightsSummaryBaselineDays": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsSummaryEmpty": "No transactions in this period yet. Log some spending or income and I will work out your summary.",
+  "@insightsSummaryEmpty": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsOneLinerDownRiser": "{category} is up {pct}, but you spent less overall than {prev}. Keep it up!",
+  "@insightsOneLinerDownRiser": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerDown": "You spent less than {prev}. Keep it up!",
+  "@insightsOneLinerDown": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerUpRiser": "Spending is up on {prev}, mostly {category} at {pct}. Keep an eye on it.",
+  "@insightsOneLinerUpRiser": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      },
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerUp": "Spending is up on {prev}. Keep an eye on it.",
+  "@insightsOneLinerUp": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerSame": "Spending is about the same as {prev}. Steady!",
+  "@insightsOneLinerSame": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "prev": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsOneLinerNoBaseline": "Nothing before this period to compare with yet. Keep going and I will do the maths.",
+  "@insightsOneLinerNoBaseline": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsCashFlowSub": "{span} · {note}",
+  "@insightsChartsCashFlowSub": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "span": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsLastNMonths": "Last {n} months",
+  "@insightsChartsLastNMonths": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPeriodOpenNote": "{now} is not over yet",
+  "@insightsChartsPeriodOpenNote": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "now": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsCategoriesSub": "Top {n} categories, the rest in “Other”",
+  "@insightsChartsCategoriesSub": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsMerchantsSub": "Tap a place to see its transactions",
+  "@insightsChartsMerchantsSub": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsSeeTransactions": "See the {count} transactions",
+  "@insightsChartsSeeTransactions": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSeeTransactionsA11y": "Open the transactions",
+  "@insightsChartsSeeTransactionsA11y": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsBubbleSaved": "Saved {amount}",
+  "@insightsChartsBubbleSaved": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBubbleIncome": "Income {amount}",
+  "@insightsChartsBubbleIncome": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBubbleSpent": "Spent {amount}",
+  "@insightsChartsBubbleSpent": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSliceBubble": "{name} · {amount} · {percent}",
+  "@insightsChartsSliceBubble": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsBarHint": "Tap a bar for its details",
+  "@insightsChartsBarHint": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsScrubHint": "Press and drag along the line to read each point",
+  "@insightsChartsScrubHint": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPartialLegend": "{name} (not over yet)",
+  "@insightsChartsPartialLegend": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPartialBarA11y": "{name}, not over yet",
+  "@insightsChartsPartialBarA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPlaceCount": "{count, plural, one{once} two{twice} other{{n} times}}",
+  "@insightsChartsPlaceCount": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPlaceRowA11y": "{name}: {count}, {amount}. Open its transactions",
+  "@insightsChartsPlaceRowA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsSliceRowA11y": "{name}: {amount}, {percent}. {change}",
+  "@insightsChartsSliceRowA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsChipA11y": "{name}: {change}",
+  "@insightsChartsChipA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsAllCharts": "All charts ({n})",
+  "@insightsChartsAllCharts": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsFewerCharts": "Fewer charts",
+  "@insightsChartsFewerCharts": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsHiddenNote": "Amounts hidden · charts still show their shape",
+  "@insightsChartsHiddenNote": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsAxisThousands": "{n}K",
+  "@insightsAxisThousands": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsAxisMillions": "{n}M",
+  "@insightsAxisMillions": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsPresetThisCycle": "This month",
+  "@insightsChartsPresetThisCycle": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPresetLastCycle": "Last month",
+  "@insightsChartsPresetLastCycle": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsPresetLastCycles": "Last {n} months",
+  "@insightsChartsPresetLastCycles": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedMonths": "I need {months} more for this chart to show.",
+  "@insightsThinNeedMonths": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "months": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedTxns": "{count, plural, one{I need one more transaction} other{I need {n} more transactions}} for this chart to show.",
+  "@insightsThinNeedTxns": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsThinNeedIncome": "Add your income first and I will split it for you.",
+  "@insightsThinNeedIncome": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsThinNoData": "Nothing here yet. Once transactions come in, this chart will fill up.",
+  "@insightsThinNoData": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsThinSeeDetails": "See details",
+  "@insightsThinSeeDetails": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsDrillTotal": "{count} transactions",
+  "@insightsChartsDrillTotal": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsDrillTotalA11y": "Total {amount}, {count} transactions. {change}",
+  "@insightsChartsDrillTotalA11y": {
+    "description": "T-189 charts redesign",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsDrillVs": "vs the period before",
+  "@insightsChartsDrillVs": {
+    "description": "T-189 charts redesign"
+  },
+  "insightsChartsRetry": "Try again",
+  "@insightsChartsRetry": {
+    "description": "T-189 charts redesign"
   }
 }
