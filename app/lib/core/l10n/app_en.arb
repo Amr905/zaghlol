@@ -8575,5 +8575,137 @@
         "type": "String"
       }
     }
+  },
+  "insightsV2TrendsInOutTitle": "In and out",
+  "@insightsV2TrendsInOutTitle": {
+    "description": "T-211 Charts v2 · card title"
+  },
+  "insightsV2TrendsInOutSub": "Last 6 months",
+  "@insightsV2TrendsInOutSub": {
+    "description": "T-211 Charts v2 · card subtitle"
+  },
+  "insightsV2TrendsLegendSpent": "Spent",
+  "@insightsV2TrendsLegendSpent": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsLegendIncome": "Income",
+  "@insightsV2TrendsLegendIncome": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsLegendProjected": "Projected",
+  "@insightsV2TrendsLegendProjected": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsInOutA11y": "In and out chart. {list}",
+  "@insightsV2TrendsInOutA11y": {
+    "description": "T-211 Charts v2 · semantics label; list = the months",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutBarA11y": "{month}: income {income}, spent {spend}",
+  "@insightsV2TrendsInOutBarA11y": {
+    "description": "T-211 Charts v2 · one month",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spend": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutBarProjectedA11y": "{month} (projected): income {income}, spent {spend}",
+  "@insightsV2TrendsInOutBarProjectedA11y": {
+    "description": "T-211 Charts v2 · projected month",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spend": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutEmptyA11y": "{month}: no data",
+  "@insightsV2TrendsInOutEmptyA11y": {
+    "description": "T-211 Charts v2 · month without data",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayTitle": "Day by day",
+  "@insightsV2TrendsDayTitle": {
+    "description": "T-211 Charts v2 · heatmap title"
+  },
+  "insightsV2TrendsDaySub": "Darker = spent more",
+  "@insightsV2TrendsDaySub": {
+    "description": "T-211 Charts v2 · heatmap subtitle"
+  },
+  "insightsV2TrendsDayPriciest": "{weekday} is your priciest day",
+  "@insightsV2TrendsDayPriciest": {
+    "description": "T-211 Charts v2 · caption under the heatmap",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayLess": "Less",
+  "@insightsV2TrendsDayLess": {
+    "description": "T-211 Charts v2 · heatmap legend, light end"
+  },
+  "insightsV2TrendsDayMore": "More",
+  "@insightsV2TrendsDayMore": {
+    "description": "T-211 Charts v2 · heatmap legend, dark end"
+  },
+  "insightsV2TrendsDayCellA11y": "{date}: spent {amount}. Tap to see the transactions",
+  "@insightsV2TrendsDayCellA11y": {
+    "description": "T-211 Charts v2 · semantics label of a day cell",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayCellNoSpendA11y": "{date}: no spending",
+  "@insightsV2TrendsDayCellNoSpendA11y": {
+    "description": "T-211 Charts v2 · day without spending",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayCellFutureA11y": "{date}: not yet",
+  "@insightsV2TrendsDayCellFutureA11y": {
+    "description": "T-211 Charts v2 · future day",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayA11y": "Day by day spending chart. {days} days, darker means more spent",
+  "@insightsV2TrendsDayA11y": {
+    "description": "T-211 Charts v2 · heatmap semantics label",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
   }
 }

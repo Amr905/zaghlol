@@ -1473,6 +1473,30 @@ States: loading · populated · thin data (hero number plus a "not enough data y
 | `insights_v2_upIn` | `{count, plural, =0{النهارده} =1{بكرة} =2{بعد يومين} few{بعد {n} أيام} many{بعد {n} يوم} other{بعد {n} يوم}}` | `{count, plural, =0{Today} =1{Tomorrow} other{In {n} days}}` | C · count:int, n = digits |
 | `insights_v2_upA11y` | {item}، {when}، {amount} | {item}, {when}, {amount} | S · semantics label of one row |
 
+## 2.2c S-20 Charts v2 Trends tab (T-211, CHARTS-V2) — `insights_v2_trends*`
+States: loading · populated · month without data (empty slot, line broken) · no spending in the period (heatmap thin state) · error with retry · Gold-locked heatmap (existing treatment) · hidden amounts (labels read "amount hidden"). The priciest-weekday caption shows only with two weeks of data or more. «Saved each month» reuses the `insights_v2_saved*` rows above.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `insights_v2_trends_inOutTitle` | الداخل والخارج | In and out | T · card title |
+| `insights_v2_trends_inOutSub` | آخر ٦ شهور | Last 6 months | S · card subtitle |
+| `insights_v2_trends_legendSpent` | صرفت | Spent | C · legend |
+| `insights_v2_trends_legendIncome` | دخلك | Income | C · legend |
+| `insights_v2_trends_legendProjected` | متوقع | Projected | C · legend |
+| `insights_v2_trends_inOutA11y` | رسم الداخل والخارج. {list} | In and out chart. {list} | S · semantics label; list = the months |
+| `insights_v2_trends_inOutBarA11y` | {month}: دخلك {income}، صرفت {spend} | {month}: income {income}, spent {spend} | S · one month |
+| `insights_v2_trends_inOutBarProjectedA11y` | {month} (متوقع): دخلك {income}، صرفت {spend} | {month} (projected): income {income}, spent {spend} | S · projected month |
+| `insights_v2_trends_inOutEmptyA11y` | {month}: مفيش بيانات | {month}: no data | S · month without data (an empty slot) |
+| `insights_v2_trends_dayTitle` | صرفك يوم بيوم | Day by day | T · heatmap title |
+| `insights_v2_trends_daySub` | كل ما المربع يغمق صرفت أكتر | Darker = spent more | S · heatmap subtitle |
+| `insights_v2_trends_dayPriciest` | {weekday} أغلى يوم عندك | {weekday} is your priciest day | S · caption; omitted under two weeks of data |
+| `insights_v2_trends_dayLess` | أقل | Less | C · legend |
+| `insights_v2_trends_dayMore` | أكتر | More | C · legend |
+| `insights_v2_trends_dayCellA11y` | {date}: صرفت {amount}. اضغط تشوف المعاملات | {date}: spent {amount}. Tap to see the transactions | S · day cell |
+| `insights_v2_trends_dayCellNoSpendA11y` | {date}: مصرفتش حاجة | {date}: no spending | S · day cell |
+| `insights_v2_trends_dayCellFutureA11y` | {date}: لسه ماجاش | {date}: not yet | S · future day cell |
+| `insights_v2_trends_dayA11y` | رسم صرفك يوم بيوم. {days} يوم، الأغمق هو الأكتر صرفًا | Day by day spending chart. {days} days, darker means more spent | S · heatmap label |
+
 ## 2.3 S-21 Chart detail and explainer — `insights_chartDetail_*`, `insights_deep_*`
 States: populated · explainer closed (button) · typing (≤ 600 ms) · explained (basic or deep) · Gold-locked chart · empty · explainer error (bubble hidden, chart stays). Chart 10 lists spend per card per currency (FR-CHT-06).
 
