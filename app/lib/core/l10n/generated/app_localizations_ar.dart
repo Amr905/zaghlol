@@ -8136,6 +8136,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'لسه مفيش فترة قبل دي أقارنك بيها. كمّل وأنا هحسبها معاك.';
 
   @override
+  String insightsChartsCashFlowTotalsNote(String now) {
+    return 'الإجماليات عن $now';
+  }
+
+  @override
   String insightsChartsCashFlowSub(String span, String note) {
     return '$span · $note';
   }
@@ -8300,6 +8305,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String insightsChartsDrillTotal(String count) {
     return '$count حركة';
+  }
+
+  @override
+  String insightsChartsDrillTotalVs(String count, String range) {
+    return '$count حركة · مقارنة بـ $range';
   }
 
   @override

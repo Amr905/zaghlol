@@ -11743,6 +11743,12 @@ abstract class AppLocalizations {
   /// **'لسه مفيش فترة قبل دي أقارنك بيها. كمّل وأنا هحسبها معاك.'**
   String get insightsOneLinerNoBaseline;
 
+  /// FU-269 N2: the bars are several months, the totals are one
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجماليات عن {now}'**
+  String insightsChartsCashFlowTotalsNote(String now);
+
   /// T-189 charts redesign
   ///
   /// In ar, this message translates to:
@@ -11945,6 +11951,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{count} حركة'**
   String insightsChartsDrillTotal(String count);
+
+  /// FU-284: count and the dates the change is measured against
+  ///
+  /// In ar, this message translates to:
+  /// **'{count} حركة · مقارنة بـ {range}'**
+  String insightsChartsDrillTotalVs(String count, String range);
 
   /// T-189 charts redesign
   ///

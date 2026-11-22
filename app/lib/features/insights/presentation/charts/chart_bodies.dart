@@ -130,9 +130,16 @@ class _CashFlowBodyState extends ConsumerState<CashFlowBody> {
     final digits = ref.watch(digitsModeProvider(lang));
     // Day bars carry a month cue ("25 Oct") on the first bar and on day 1,
     // so a period that spans two months reads clearly (F7).
-    bool cue(CashFlowPoint p) =>
-        bucketKind == ChartBucketKind.day &&
-        (identical(p, points.first) || p.period.from.day == 1);
+    // FU-269: a period starting on the 30th/31st has its day 1 two bars
+    // later; then only the day-1 bar keeps the cue so the labels don't touch.
+    bool cue(CashFlowPoint p) {
+      if (bucketKind != ChartBucketKind.day) return false;
+      if (p.period.from.day == 1) return true;
+      if (!identical(p, points.first)) return false;
+      final near = points.take(4).skip(1);
+      return !near.any((q) => q.period.from.day == 1);
+    }
+
     String label(CashFlowPoint p) {
       final d = p.period.from;
       switch (bucketKind) {

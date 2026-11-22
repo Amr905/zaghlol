@@ -7958,6 +7958,15 @@
   "@insightsOneLinerNoBaseline": {
     "description": "T-189 charts redesign"
   },
+  "insightsChartsCashFlowTotalsNote": "Totals are for {now}",
+  "@insightsChartsCashFlowTotalsNote": {
+    "description": "FU-269 N2: the bars are several months, the totals are one",
+    "placeholders": {
+      "now": {
+        "type": "String"
+      }
+    }
+  },
   "insightsChartsCashFlowSub": "{span} · {note}",
   "@insightsChartsCashFlowSub": {
     "description": "T-189 charts redesign",
@@ -8229,6 +8238,18 @@
     "description": "T-189 charts redesign",
     "placeholders": {
       "count": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsChartsDrillTotalVs": "{count} transactions · vs {range}",
+  "@insightsChartsDrillTotalVs": {
+    "description": "FU-284: count and the dates the change is measured against",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "range": {
         "type": "String"
       }
     }

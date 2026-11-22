@@ -7981,6 +7981,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nothing before this period to compare with yet. Keep going and I will do the maths.';
 
   @override
+  String insightsChartsCashFlowTotalsNote(String now) {
+    return 'Totals are for $now';
+  }
+
+  @override
   String insightsChartsCashFlowSub(String span, String note) {
     return '$span · $note';
   }
@@ -8144,6 +8149,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String insightsChartsDrillTotal(String count) {
     return '$count transactions';
+  }
+
+  @override
+  String insightsChartsDrillTotalVs(String count, String range) {
+    return '$count transactions · vs $range';
   }
 
   @override
