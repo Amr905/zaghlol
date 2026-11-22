@@ -58,9 +58,10 @@ jobs:
         run: |
           # No upload key is configured here, so build.gradle.kts signs with the debug key.
           [ -z "${ZAGHLOL_UPLOAD_KEYSTORE_FILE:-}" ] || { echo "::error::an upload key is configured; this build must be debug-signed"; exit 1; }
-          flutter build apk --release --flavor "$FLAVOR" --target-platform android-arm64 > build.log 2>&1 || { tail -n 40 build.log; exit 1; }
+          flutter build apk --release --split-per-abi --flavor "$FLAVOR" --target-platform android-arm64 > build.log 2>&1 || { tail -n 40 build.log; exit 1; }
           mkdir -p "$RUNNER_TEMP/sideload"
-          cp build/app/outputs/flutter-apk/app-*-release.apk "$RUNNER_TEMP/sideload/zaghlol-$FLAVOR-release-arm64-sideload-NOT-FOR-STORE.apk"
+          ls -l build/app/outputs/flutter-apk/
+          cp "$(ls build/app/outputs/flutter-apk/*arm64-v8a*release.apk | head -n 1)" "$RUNNER_TEMP/sideload/zaghlol-$FLAVOR-release-arm64-sideload-NOT-FOR-STORE.apk"
           ls -l "$RUNNER_TEMP/sideload"
       - name: Layout of the APK (libs stored uncompressed, not extracted)
         env:
@@ -110,11 +111,13 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/apks"
           flutter build apk --debug --flavor devSms > "$RUNNER_TEMP/b1.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/b1.log"; exit 1; }
-          cp build/app/outputs/flutter-apk/app-devSms-debug.apk "$RUNNER_TEMP/apks/debug-universal.apk"
+          ls -l build/app/outputs/flutter-apk/
+          cp "$(ls build/app/outputs/flutter-apk/*debug.apk | head -n 1)" "$RUNNER_TEMP/apks/debug-universal.apk"
+          rm -f build/app/outputs/flutter-apk/*.apk
           # Release configuration with the x86_64 libs kept, so it installs on the emulator (build.gradle.kts, T-190).
           mkdir -p ~/.gradle && echo "zaghlol.releaseX86=true" >> ~/.gradle/gradle.properties
           flutter build apk --release --flavor devSms --target-platform android-x64 > "$RUNNER_TEMP/b2.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/b2.log"; exit 1; }
-          cp build/app/outputs/flutter-apk/app-devSms-release.apk "$RUNNER_TEMP/apks/release-x86_64.apk"
+          cp "$(ls build/app/outputs/flutter-apk/*release.apk | head -n 1)" "$RUNNER_TEMP/apks/release-x86_64.apk"
           ls -l "$RUNNER_TEMP/apks"
       - name: Static layout of both APKs
         run: |
