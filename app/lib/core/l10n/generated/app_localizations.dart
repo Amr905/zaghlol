@@ -12301,6 +12301,122 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{period}: {amount} لحد دلوقتي'**
   String insightsV2CatsTrendItemOpen(String period, String amount);
+
+  /// T-211 Charts v2 · card title
+  ///
+  /// In ar, this message translates to:
+  /// **'الداخل والخارج'**
+  String get insightsV2TrendsInOutTitle;
+
+  /// T-211 Charts v2 · card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر ٦ شهور'**
+  String get insightsV2TrendsInOutSub;
+
+  /// T-211 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت'**
+  String get insightsV2TrendsLegendSpent;
+
+  /// T-211 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك'**
+  String get insightsV2TrendsLegendIncome;
+
+  /// T-211 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'متوقع'**
+  String get insightsV2TrendsLegendProjected;
+
+  /// T-211 Charts v2 · semantics label; list = the months
+  ///
+  /// In ar, this message translates to:
+  /// **'رسم الداخل والخارج. {list}'**
+  String insightsV2TrendsInOutA11y(String list);
+
+  /// T-211 Charts v2 · one month
+  ///
+  /// In ar, this message translates to:
+  /// **'{month}: دخلك {income}، صرفت {spend}'**
+  String insightsV2TrendsInOutBarA11y(
+    String month,
+    String income,
+    String spend,
+  );
+
+  /// T-211 Charts v2 · projected month
+  ///
+  /// In ar, this message translates to:
+  /// **'{month} (متوقع): دخلك {income}، صرفت {spend}'**
+  String insightsV2TrendsInOutBarProjectedA11y(
+    String month,
+    String income,
+    String spend,
+  );
+
+  /// T-211 Charts v2 · month without data
+  ///
+  /// In ar, this message translates to:
+  /// **'{month}: مفيش بيانات'**
+  String insightsV2TrendsInOutEmptyA11y(String month);
+
+  /// T-211 Charts v2 · heatmap title
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك يوم بيوم'**
+  String get insightsV2TrendsDayTitle;
+
+  /// T-211 Charts v2 · heatmap subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'كل ما المربع يغمق صرفت أكتر'**
+  String get insightsV2TrendsDaySub;
+
+  /// T-211 Charts v2 · caption under the heatmap
+  ///
+  /// In ar, this message translates to:
+  /// **'{weekday} أغلى يوم عندك'**
+  String insightsV2TrendsDayPriciest(String weekday);
+
+  /// T-211 Charts v2 · heatmap legend, light end
+  ///
+  /// In ar, this message translates to:
+  /// **'أقل'**
+  String get insightsV2TrendsDayLess;
+
+  /// T-211 Charts v2 · heatmap legend, dark end
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر'**
+  String get insightsV2TrendsDayMore;
+
+  /// T-211 Charts v2 · semantics label of a day cell
+  ///
+  /// In ar, this message translates to:
+  /// **'{date}: صرفت {amount}. اضغط تشوف المعاملات'**
+  String insightsV2TrendsDayCellA11y(String date, String amount);
+
+  /// T-211 Charts v2 · day without spending
+  ///
+  /// In ar, this message translates to:
+  /// **'{date}: مصرفتش حاجة'**
+  String insightsV2TrendsDayCellNoSpendA11y(String date);
+
+  /// T-211 Charts v2 · future day
+  ///
+  /// In ar, this message translates to:
+  /// **'{date}: لسه ماجاش'**
+  String insightsV2TrendsDayCellFutureA11y(String date);
+
+  /// T-211 Charts v2 · heatmap semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'رسم صرفك يوم بيوم. {days} يوم، الأغمق هو الأكتر صرفًا'**
+  String insightsV2TrendsDayA11y(String days);
 }
 
 class _AppLocalizationsDelegate

@@ -8598,4 +8598,84 @@ class AppLocalizationsAr extends AppLocalizations {
   String insightsV2CatsTrendItemOpen(String period, String amount) {
     return '$period: $amount لحد دلوقتي';
   }
+
+  @override
+  String get insightsV2TrendsInOutTitle => 'الداخل والخارج';
+
+  @override
+  String get insightsV2TrendsInOutSub => 'آخر ٦ شهور';
+
+  @override
+  String get insightsV2TrendsLegendSpent => 'صرفت';
+
+  @override
+  String get insightsV2TrendsLegendIncome => 'دخلك';
+
+  @override
+  String get insightsV2TrendsLegendProjected => 'متوقع';
+
+  @override
+  String insightsV2TrendsInOutA11y(String list) {
+    return 'رسم الداخل والخارج. $list';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month: دخلك $income، صرفت $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarProjectedA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month (متوقع): دخلك $income، صرفت $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutEmptyA11y(String month) {
+    return '$month: مفيش بيانات';
+  }
+
+  @override
+  String get insightsV2TrendsDayTitle => 'صرفك يوم بيوم';
+
+  @override
+  String get insightsV2TrendsDaySub => 'كل ما المربع يغمق صرفت أكتر';
+
+  @override
+  String insightsV2TrendsDayPriciest(String weekday) {
+    return '$weekday أغلى يوم عندك';
+  }
+
+  @override
+  String get insightsV2TrendsDayLess => 'أقل';
+
+  @override
+  String get insightsV2TrendsDayMore => 'أكتر';
+
+  @override
+  String insightsV2TrendsDayCellA11y(String date, String amount) {
+    return '$date: صرفت $amount. اضغط تشوف المعاملات';
+  }
+
+  @override
+  String insightsV2TrendsDayCellNoSpendA11y(String date) {
+    return '$date: مصرفتش حاجة';
+  }
+
+  @override
+  String insightsV2TrendsDayCellFutureA11y(String date) {
+    return '$date: لسه ماجاش';
+  }
+
+  @override
+  String insightsV2TrendsDayA11y(String days) {
+    return 'رسم صرفك يوم بيوم. $days يوم، الأغمق هو الأكتر صرفًا';
+  }
 }

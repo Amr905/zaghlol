@@ -8435,4 +8435,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String insightsV2CatsTrendItemOpen(String period, String amount) {
     return '$period: $amount so far';
   }
+
+  @override
+  String get insightsV2TrendsInOutTitle => 'In and out';
+
+  @override
+  String get insightsV2TrendsInOutSub => 'Last 6 months';
+
+  @override
+  String get insightsV2TrendsLegendSpent => 'Spent';
+
+  @override
+  String get insightsV2TrendsLegendIncome => 'Income';
+
+  @override
+  String get insightsV2TrendsLegendProjected => 'Projected';
+
+  @override
+  String insightsV2TrendsInOutA11y(String list) {
+    return 'In and out chart. $list';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month: income $income, spent $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarProjectedA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month (projected): income $income, spent $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutEmptyA11y(String month) {
+    return '$month: no data';
+  }
+
+  @override
+  String get insightsV2TrendsDayTitle => 'Day by day';
+
+  @override
+  String get insightsV2TrendsDaySub => 'Darker = spent more';
+
+  @override
+  String insightsV2TrendsDayPriciest(String weekday) {
+    return '$weekday is your priciest day';
+  }
+
+  @override
+  String get insightsV2TrendsDayLess => 'Less';
+
+  @override
+  String get insightsV2TrendsDayMore => 'More';
+
+  @override
+  String insightsV2TrendsDayCellA11y(String date, String amount) {
+    return '$date: spent $amount. Tap to see the transactions';
+  }
+
+  @override
+  String insightsV2TrendsDayCellNoSpendA11y(String date) {
+    return '$date: no spending';
+  }
+
+  @override
+  String insightsV2TrendsDayCellFutureA11y(String date) {
+    return '$date: not yet';
+  }
+
+  @override
+  String insightsV2TrendsDayA11y(String days) {
+    return 'Day by day spending chart. $days days, darker means more spent';
+  }
 }

@@ -14,7 +14,9 @@
   "@commonNavBadgeCount": {
     "description": "Badge count on a bottom-bar tab (1 to 9).",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "commonNavBadgeMax": "٩+",
@@ -11803,6 +11805,138 @@
         "type": "String"
       },
       "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutTitle": "الداخل والخارج",
+  "@insightsV2TrendsInOutTitle": {
+    "description": "T-211 Charts v2 · card title"
+  },
+  "insightsV2TrendsInOutSub": "آخر ٦ شهور",
+  "@insightsV2TrendsInOutSub": {
+    "description": "T-211 Charts v2 · card subtitle"
+  },
+  "insightsV2TrendsLegendSpent": "صرفت",
+  "@insightsV2TrendsLegendSpent": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsLegendIncome": "دخلك",
+  "@insightsV2TrendsLegendIncome": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsLegendProjected": "متوقع",
+  "@insightsV2TrendsLegendProjected": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsInOutA11y": "رسم الداخل والخارج. {list}",
+  "@insightsV2TrendsInOutA11y": {
+    "description": "T-211 Charts v2 · semantics label; list = the months",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutBarA11y": "{month}: دخلك {income}، صرفت {spend}",
+  "@insightsV2TrendsInOutBarA11y": {
+    "description": "T-211 Charts v2 · one month",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spend": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutBarProjectedA11y": "{month} (متوقع): دخلك {income}، صرفت {spend}",
+  "@insightsV2TrendsInOutBarProjectedA11y": {
+    "description": "T-211 Charts v2 · projected month",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spend": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutEmptyA11y": "{month}: مفيش بيانات",
+  "@insightsV2TrendsInOutEmptyA11y": {
+    "description": "T-211 Charts v2 · month without data",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayTitle": "صرفك يوم بيوم",
+  "@insightsV2TrendsDayTitle": {
+    "description": "T-211 Charts v2 · heatmap title"
+  },
+  "insightsV2TrendsDaySub": "كل ما المربع يغمق صرفت أكتر",
+  "@insightsV2TrendsDaySub": {
+    "description": "T-211 Charts v2 · heatmap subtitle"
+  },
+  "insightsV2TrendsDayPriciest": "{weekday} أغلى يوم عندك",
+  "@insightsV2TrendsDayPriciest": {
+    "description": "T-211 Charts v2 · caption under the heatmap",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayLess": "أقل",
+  "@insightsV2TrendsDayLess": {
+    "description": "T-211 Charts v2 · heatmap legend, light end"
+  },
+  "insightsV2TrendsDayMore": "أكتر",
+  "@insightsV2TrendsDayMore": {
+    "description": "T-211 Charts v2 · heatmap legend, dark end"
+  },
+  "insightsV2TrendsDayCellA11y": "{date}: صرفت {amount}. اضغط تشوف المعاملات",
+  "@insightsV2TrendsDayCellA11y": {
+    "description": "T-211 Charts v2 · semantics label of a day cell",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayCellNoSpendA11y": "{date}: مصرفتش حاجة",
+  "@insightsV2TrendsDayCellNoSpendA11y": {
+    "description": "T-211 Charts v2 · day without spending",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayCellFutureA11y": "{date}: لسه ماجاش",
+  "@insightsV2TrendsDayCellFutureA11y": {
+    "description": "T-211 Charts v2 · future day",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayA11y": "رسم صرفك يوم بيوم. {days} يوم، الأغمق هو الأكتر صرفًا",
+  "@insightsV2TrendsDayA11y": {
+    "description": "T-211 Charts v2 · heatmap semantics label",
+    "placeholders": {
+      "days": {
         "type": "String"
       }
     }
