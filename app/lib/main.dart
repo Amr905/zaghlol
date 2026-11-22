@@ -34,6 +34,8 @@ import 'features/capture/presentation/shared_items_lifecycle.dart';
 import 'features/gold/application/gold_providers.dart';
 import 'features/catalog_sync/application/sync_providers.dart';
 import 'features/catalog_sync/presentation/sync_lifecycle.dart';
+import 'features/backup/application/schedule_providers.dart'
+    show backupDueRunProvider;
 import 'features/notifications/application/housekeeping_providers.dart';
 import 'features/notifications/application/notification_providers.dart';
 import 'features/security/application/delete_everything_providers.dart';
@@ -179,6 +181,8 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     // T-100: the weekly summary (when 7 days have passed) and the duplicate
     // check at start; again on every resume.
     unawaited(ref.read(resumeJobsProvider)(coldStart: true));
+    // FU-168e: the periodic backup job's due mark (after the entitlement).
+    unawaited(ref.read(backupDueRunProvider)());
     // FU-113: errors reach the diag log as codes once the database is open.
     unawaited(
       ref
@@ -201,6 +205,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(ref.read(resumeJobsProvider)());
+      unawaited(ref.read(backupDueRunProvider)());
       unawaited(
         ref
             .read(cycleResumeHandlerProvider)
@@ -227,6 +232,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
       if (next.hasValue) ref.invalidate(txnLookupsProvider);
     });
     ref.watch(cycleAppWiringProvider);
+    ref.watch(pendingAlertsWatcherProvider); // FU-267
     // T-118: the home-screen widget follows the cycle overview.
     ref.watch(widgetBridgeWiringProvider);
     return ZaghlolApp(

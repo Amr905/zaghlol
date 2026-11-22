@@ -199,9 +199,10 @@ final class IosCaptureHostTests: XCTestCase {
   // The declared identifiers match what the code submits (a mismatch makes submit fail at runtime).
   func testInfoPlistPermitsTheBackgroundTaskAndFetchMode() {
     let ids = Bundle.main.object(forInfoDictionaryKey: "BGTaskSchedulerPermittedIdentifiers") as? [String]
-    XCTAssertEqual(ids, [IngestBackgroundRefresh.identifier])
+    XCTAssertEqual(ids, [IngestBackgroundRefresh.identifier, BackupWorkHost.identifier])
     let modes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String]
     XCTAssertEqual(modes?.contains("fetch"), true)
+    XCTAssertEqual(modes?.contains("processing"), true)  // FU-168e BGProcessingTask
   }
 }
 

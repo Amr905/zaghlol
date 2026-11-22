@@ -291,6 +291,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-205](tasks/T-205.md) | Key provider for Windows shared hosting (HostSecrets, custody opt-in; D-80) | PO 11-21 | High | Opus | backend-engineer | T-200, T-201 | A | 55 | DONE (batch 55; first real deploy pending) |
 | [T-206](tasks/T-206.md) | MonsterASP.NET (IIS) hosting profile, embedded workers, Web Deploy workflow, keep-alive | PO 11-21 | Med-High | Sonnet | backend-engineer | T-205 | A | 55 | DONE (batch 55; first real deploy pending) |
 | [T-207](tasks/T-207.md) | Aiven for PostgreSQL profile (verify-full TLS, pool budget, avnadmin bootstrap, migrations, backups) | PO 11-21 | Medium | Sonnet | backend-engineer | — | A | 55 | DONE (batch 55; first real deploy pending) |
+| [T-208](tasks/T-208.md) | Installed app size on the phone (what the 250 MB is, packaging check, arm64 sideload build) | PO 11-22 | Medium | Sonnet | native-platform-engineer | — | A | 56 | DONE (batch 57) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

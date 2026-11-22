@@ -160,6 +160,19 @@ void main() {
     });
   });
 
+  test('FU-149b: a previously snapshotted unit with nothing gets zeros', () {
+    final w = computeNetWorth(
+      money: [MoneyLine(Money(egp, 100))],
+      gold: const [],
+      goldPrice: prices,
+    );
+    expect(snapshotRows(w, previousUnits: ['EGP', 'USD', 'XAU21_G']), [
+      (unit: 'EGP', assetsMinor: 100, liabilitiesMinor: 0),
+      (unit: 'USD', assetsMinor: 0, liabilitiesMinor: 0),
+      (unit: 'XAU21_G', assetsMinor: 0, liabilitiesMinor: 0),
+    ]);
+  });
+
   group('snapshotDue', () {
     final start = CivilDate(2026, 11, 28);
     test('none yet, new cycle, same cycle, older than a month', () {

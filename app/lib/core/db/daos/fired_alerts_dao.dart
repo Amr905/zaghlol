@@ -74,6 +74,36 @@ class FiredAlertsDao {
           .getSingleOrNull() !=
       null;
 
+  /// Alerts fired at or after [sinceMs] (UTC ms), as `(kind, subject,
+  /// period, threshold, firedAt)`. FU-267 re-derives what is still waiting for
+  /// quiet hours to end from these.
+  Future<
+    List<
+      ({
+        String kind,
+        String subjectId,
+        String periodKey,
+        int threshold,
+        int firedAt,
+      })
+    >
+  >
+  firedSince(int sinceMs) async {
+    final rows = await (_db.select(
+      _db.firedAlerts,
+    )..where((a) => a.firedAt.isBiggerOrEqualValue(sinceMs))).get();
+    return [
+      for (final r in rows)
+        (
+          kind: r.kind,
+          subjectId: r.subjectId,
+          periodKey: r.periodKey,
+          threshold: r.threshold,
+          firedAt: r.firedAt,
+        ),
+    ];
+  }
+
   /// Deletes the alerts of [subjectId] (e.g. a deleted budget). Returns the
   /// rows deleted.
   Future<int> deleteForSubject(String subjectId) => guardWrite(

@@ -82,7 +82,11 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
           ),
         ],
       ),
-      data: (list) {
+      data: (raw) {
+        final list = primaryFirst(
+          raw,
+          ref.watch(primaryCurrencyProvider).value,
+        );
         final chosen = ref.watch(chartsCurrencyProvider);
         final code = list.isEmpty
             ? null
@@ -274,12 +278,26 @@ String _cashFlowSubtitle(
   final span = kind == ChartBucketKind.month || kind == ChartBucketKind.cycle
       ? l.insightsChartsLastNMonths(countText)
       : text.bucketCount(kind, count);
-  return open && resolved != null
+  if (resolved == null) return span;
+  // FU-269 N2: one month picked, six month bars: say what the totals cover.
+  // When the period is still open the open-period note already names it.
+  final single =
+      !open &&
+      (kind == ChartBucketKind.month || kind == ChartBucketKind.cycle) &&
+      (resolved.selection.kind == ChartPeriodKind.cycle ||
+          resolved.selection.kind == ChartPeriodKind.month);
+  final withTotals = single
       ? l.insightsChartsCashFlowSub(
           span,
-          l.insightsChartsPeriodOpenNote(text.now(resolved)),
+          l.insightsChartsCashFlowTotalsNote(text.now(resolved)),
         )
       : span;
+  return open
+      ? l.insightsChartsCashFlowSub(
+          withTotals,
+          l.insightsChartsPeriodOpenNote(text.now(resolved)),
+        )
+      : withTotals;
 }
 
 class _DonutCard extends ConsumerWidget {

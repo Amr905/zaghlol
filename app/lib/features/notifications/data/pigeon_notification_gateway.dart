@@ -82,6 +82,11 @@ final class PigeonNotificationGateway implements NotificationGateway {
 
   /// Taken from the platform on cancel-all paths and tests.
   Future<void> cancelAll() => _api.cancelAll();
+
+  /// FU-267: drops what is scheduled for later and leaves what is shown. Call
+  /// it, then schedule again with text redacted for the current setting.
+  @override
+  Future<void> cancelScheduled() => _api.cancelScheduled();
 }
 
 final class PigeonNotificationPermission implements NotificationPermissionPort {

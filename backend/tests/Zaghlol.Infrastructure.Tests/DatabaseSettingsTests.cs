@@ -44,6 +44,18 @@ public class DatabaseSettingsTests
         Assert.Empty(new DatabaseSettings { AllowInsecureTransport = true }.Validate([(DatabaseRole.App, Plain)], production: true));
     }
 
+    [Theory]
+    [InlineData("Production", true)]
+    [InlineData("Staging", true)]
+    [InlineData("Development", false)]
+    [InlineData("Testing", false)]
+    public void TheTlsGuardCoversProductionAndStagingOnly(string environment, bool required)
+    {
+        var host = new Microsoft.Extensions.Hosting.Internal.HostingEnvironment { EnvironmentName = environment };
+        Assert.Equal(required, DatabaseSettings.RequiresVerifiedTls(host));
+        Assert.False(DatabaseSettings.RequiresVerifiedTls(null));
+    }
+
     [Fact]
     public void ACaCertificateNeedsAVerifyingMode()
     {

@@ -247,6 +247,20 @@ void main() {
       expect(niceAxisStep(3000000), 1000000);
       expect(axisTop(3000000, 1000000), 3000000);
     });
+    test('FU-284: edge maxima around step boundaries keep 1-4 lines', () {
+      for (var max = 1; max <= 5000; max++) {
+        final step = niceAxisStep(max);
+        final top = axisTop(max, step);
+        expect(top, greaterThanOrEqualTo(max), reason: 'max $max');
+        expect(top ~/ step, inInclusiveRange(1, 4), reason: 'max $max');
+      }
+      for (final max in [10, 100, 1000, 100000, 1000000]) {
+        final step = niceAxisStep(max);
+        expect(axisTop(max, step) ~/ step, inInclusiveRange(1, 4));
+        final above = niceAxisStep(max + 1);
+        expect(axisTop(max + 1, above) ~/ above, inInclusiveRange(1, 4));
+      }
+    });
     test('zero data still has a usable axis', () {
       expect(niceAxisStep(0), 1);
       expect(axisTop(0, 1), 1);

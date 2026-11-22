@@ -349,6 +349,12 @@ final class EntitlementService {
 
   Timer? _timer;
   StreamSubscription<BackendEvent>? _events;
+  final Completer<void> _firstEvaluation = Completer<void>();
+
+  /// Completes after the first [evaluate] has published a phase (FU-168e):
+  /// until then the phase is the default Free only because nothing has been
+  /// read, so a caller that would act on "Free" waits for this first.
+  Future<void> get firstEvaluation => _firstEvaluation.future;
   // In-memory copy of the last verified token (keyed by its exact text, so an
   // edit of the stored value is re-verified, never trusted from memory).
   String? _memoText;
@@ -432,6 +438,7 @@ final class EntitlementService {
       }
     }
     _sink.apply(phase, movedBy: movedBy);
+    if (!_firstEvaluation.isCompleted) _firstEvaluation.complete();
     return phase;
   }
 

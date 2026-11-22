@@ -29,9 +29,12 @@ typedef ShareInvoker = Future<void> Function(String path);
 typedef StagingDir = Future<Directory> Function();
 
 class StagedShareSheet implements ShareSheet {
-  StagedShareSheet({ShareInvoker? invoke, StagingDir? dir})
-    : _invoke = invoke ?? _channelInvoke,
-      _dir = dir ?? getTemporaryDirectory;
+  StagedShareSheet({
+    ShareInvoker? invoke,
+    StagingDir? dir,
+    this.timeout = const Duration(minutes: 2),
+  }) : _invoke = invoke ?? _channelInvoke,
+       _dir = dir ?? getTemporaryDirectory;
 
   static const _channel = MethodChannel('zaghlol/share');
   static Future<void> _channelInvoke(String path) =>
@@ -39,6 +42,10 @@ class StagedShareSheet implements ShareSheet {
 
   final ShareInvoker _invoke;
   final StagingDir _dir;
+
+  /// FU-205c: if the platform never answers (iOS present callback missing),
+  /// the call returns after this long and the staging file is deleted.
+  final Duration timeout;
 
   @override
   Future<void> sharePng(Uint8List png) async {
@@ -48,7 +55,7 @@ class StagedShareSheet implements ShareSheet {
     );
     try {
       await file.writeAsBytes(png, flush: true);
-      await _invoke(file.path);
+      await _invoke(file.path).timeout(timeout, onTimeout: () {});
     } finally {
       if (file.existsSync()) await file.delete();
     }

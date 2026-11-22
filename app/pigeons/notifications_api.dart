@@ -80,6 +80,13 @@ abstract class NotificationsHostApi {
   /// Cancels shown and scheduled notifications.
   void cancelAll();
 
+  /// FU-267: cancels only the notifications scheduled for later (Android
+  /// alarms, iOS pending requests); the ones already shown stay. Dart calls
+  /// it before it schedules again with text redacted for the current
+  /// "hide amounts" setting, so no stale alert keeps its amount. Native code
+  /// never rebuilds a notification (it has no text to redact).
+  void cancelScheduled();
+
   /// The route of the notification that launched the app, once.
   String? takeLaunchRoute();
 

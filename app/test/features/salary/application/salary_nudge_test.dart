@@ -24,11 +24,16 @@ const int day = 86400000;
 final CivilDate payday = CivilDate(2026, 11, 25);
 
 class _Gateway implements NotificationGateway {
+  int cancels = 0;
   final shown = <PlatformNotification>[];
   @override
   Future<void> show(PlatformNotification n) async => shown.add(n);
   @override
   Future<void> schedule(PlatformNotification n) async => shown.add(n);
+  @override
+  Future<void> cancelScheduled() async {
+    cancels++;
+  }
 }
 
 void main() {

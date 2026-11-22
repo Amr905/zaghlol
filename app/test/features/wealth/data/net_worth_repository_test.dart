@@ -199,6 +199,22 @@ void main() {
     expect(await repo.liveAssets(), isEmpty);
   });
 
+  test('FU-149b: a unit that drops to nothing gets a zero point', () async {
+    final id = await repo.addAsset(
+      const AssetDraft(
+        type: AssetType.gold,
+        name: 'g',
+        quantityMilli: 24000,
+        karat: 21,
+      ),
+    );
+    await repo.takeSnapshot(today: CivilDate(2026, 10, 1), goldCurrency: egp);
+    await repo.archive(id.toString());
+    await repo.takeSnapshot(today: CivilDate(2026, 11, 1), goldCurrency: egp);
+    final h = await repo.history('XAU21_G');
+    expect(h.map((r) => r.assetsMinor), [24000, 0]);
+  });
+
   test('snapshot: on demand, replaces same day, history, due rule', () async {
     await account('cash', 'cash', egp, 1000);
     await repo.addAsset(

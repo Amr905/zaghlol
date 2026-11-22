@@ -57,6 +57,8 @@ class NotificationsHost(
 
   override fun cancelAll() = presenter.cancelAll()
 
+  override fun cancelScheduled() = presenter.cancelScheduled()
+
   override fun takeLaunchRoute(): String? = NotificationRoutes.takeLaunchRoute()
 
   override fun openSystemSettings() {

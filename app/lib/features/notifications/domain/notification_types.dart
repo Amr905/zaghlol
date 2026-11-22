@@ -108,6 +108,10 @@ final class PlatformNotification {
 abstract interface class NotificationGateway {
   Future<void> show(PlatformNotification n);
   Future<void> schedule(PlatformNotification n);
+
+  /// FU-267: drops what is scheduled for later; what is shown stays. The
+  /// caller schedules again with text for the current "hide amounts" setting.
+  Future<void> cancelScheduled();
 }
 
 /// The notification permission (POST_NOTIFICATIONS on Android 13+, the iOS

@@ -347,7 +347,16 @@ class NetWorthRepository {
     required Currency goldCurrency,
   }) async {
     final worth = await compute(goldCurrency: goldCurrency);
-    final rows = snapshotRows(worth);
+    final prior = await _db
+        .customSelect(
+          'SELECT DISTINCT unit FROM networth_snapshots',
+          readsFrom: {_db.networthSnapshots},
+        )
+        .get();
+    final rows = snapshotRows(
+      worth,
+      previousUnits: [for (final r in prior) r.read<String>('unit')],
+    );
     await _db.transaction(() async {
       for (final r in rows) {
         await _snapshots.upsert(

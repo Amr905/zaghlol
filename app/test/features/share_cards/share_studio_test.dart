@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -169,6 +170,18 @@ void main() {
     );
     await expectLater(bad.sharePng(Uint8List(1)), throwsStateError);
     expect(File(seen!).existsSync(), isFalse);
+    expect(dir.listSync(), isEmpty);
+  });
+
+  test('FU-205c: share that never answers returns after the timeout', () async {
+    final dir = await Directory.systemTemp.createTemp('share_to');
+    addTearDown(() => dir.delete(recursive: true));
+    final sheet = StagedShareSheet(
+      dir: () async => dir,
+      timeout: const Duration(milliseconds: 20),
+      invoke: (_) => Completer<void>().future,
+    );
+    await sheet.sharePng(Uint8List(1));
     expect(dir.listSync(), isEmpty);
   });
 

@@ -127,6 +127,10 @@ internal sealed class OpenBaoClient : IDisposable
     private Renewal? renewal;
     private long lastForcedLogin = long.MinValue;
 
+    // FU-274: when the last forced login failed (the session is then null). Normal logins by later callers wait out the same
+    // interval, so a dead or denying server isn't asked for a login by every caller. Interlocked access.
+    private long forcedLoginFailedAt = long.MinValue;
+
     /// <param name="address">The server address (validated by the caller); requests go to <c>&lt;address&gt;/v1/…</c>.</param>
     /// <param name="handler">The transport; <see cref="CreateHandler"/> in production, owned and disposed by this client.</param>
     /// <param name="credentials">Reads <c>role-id</c> and <c>secret-id</c> again for every login.</param>
@@ -356,7 +360,7 @@ internal sealed class OpenBaoClient : IDisposable
         return (buffer, length);
     }
 
-    private async Task<string> TokenAsync(CancellationToken cancellationToken)
+    private async Task<string> TokenAsync(CancellationToken cancellationToken, bool forced = false)
     {
         if (Valid(Volatile.Read(ref session)) is { } current)
         {
@@ -371,8 +375,15 @@ internal sealed class OpenBaoClient : IDisposable
                 return refreshed;
             }
 
+            var failedAt = Interlocked.Read(ref forcedLoginFailedAt);
+            if (!forced && failedAt != long.MinValue && clock.GetElapsedTime(failedAt, clock.GetTimestamp()) < ForcedLoginInterval)
+            {
+                throw new OpenBaoUnavailableException();
+            }
+
             var fresh = await LoginAsync(cancellationToken).ConfigureAwait(false);
             Volatile.Write(ref session, fresh);
+            Interlocked.Exchange(ref forcedLoginFailedAt, long.MinValue);
             return fresh.Token;
         }
         finally
@@ -452,16 +463,18 @@ internal sealed class OpenBaoClient : IDisposable
         try
         {
             using var timeout = new CancellationTokenSource(loginTimeout, clock);
-            lead.TrySetResult(await TokenAsync(timeout.Token).ConfigureAwait(false));
+            lead.TrySetResult(await TokenAsync(timeout.Token, forced: true).ConfigureAwait(false));
         }
         catch (OpenBaoUnavailableException ex)
         {
+            Interlocked.Exchange(ref forcedLoginFailedAt, clock.GetTimestamp());
             lead.TrySetException(ex);
         }
 #pragma warning disable CA1031 // The login's own timeout or any other failure is the one constant transient error for every waiter.
         catch (Exception ex) when (ex is not (OutOfMemoryException or StackOverflowException))
 #pragma warning restore CA1031
         {
+            Interlocked.Exchange(ref forcedLoginFailedAt, clock.GetTimestamp());
             lead.TrySetException(new OpenBaoUnavailableException());
         }
     }

@@ -91,7 +91,10 @@ final class HeadlessIngestion {
     // Handlers only now: the shell exists after run().
     let readyHost = ReadyHost()
     HeadlessIngestionHostApiSetup.setUp(binaryMessenger: engine.binaryMessenger, api: readyHost)
-    GeneratedPluginRegistrant.register(with: engine)
+    // FU-193e: no GeneratedPluginRegistrant here. The headless Dart code needs
+    // only path_provider (path_provider_foundation is pure Dart/FFI on iOS, no
+    // native class: DartPluginRegistrant covers it), the secret store and the
+    // capture host below; sign-in, IAP, pickers and the rest stay unregistered.
     SecretStoreRegistration.register(with: engine)
     host = register(engine)
 

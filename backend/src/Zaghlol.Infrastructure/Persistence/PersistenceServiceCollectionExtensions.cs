@@ -68,7 +68,7 @@ public static class PersistenceServiceCollectionExtensions
             .Configure<IConfiguration, IServiceProvider>((options, configuration, provider) =>
             {
                 options.Settings = DatabaseSettings.From(configuration);
-                options.IsProduction = provider.GetService<IHostEnvironment>()?.IsProduction() ?? false;
+                options.IsProduction = DatabaseSettings.RequiresVerifiedTls(provider.GetService<IHostEnvironment>());
                 foreach (var role in required)
                 {
                     options.ConnectionStrings[role] = configuration.GetConnectionString(DatabaseRoles.ConnectionStringName(role));
@@ -80,7 +80,7 @@ public static class PersistenceServiceCollectionExtensions
                 $"{names} must not set Include Error Detail: server error details carry row values (FU-025).")
             .Validate(
                 options => options.Settings.Validate(options.ConnectionStrings.Select(c => (c.Key, c.Value)), options.IsProduction).Count == 0,
-                "Database TLS / pool settings are invalid: Production needs SSL Mode=VerifyFull or VerifyCA (Database:AllowInsecureTransport=true only for a private network); a configured CA needs a verifying mode; MaxPoolSize must be at least 1.")
+                "Database TLS / pool settings are invalid: Production and Staging need SSL Mode=VerifyFull or VerifyCA (Database:AllowInsecureTransport=true only for a private network); a configured CA needs a verifying mode; MaxPoolSize must be at least 1.")
             .ValidateOnStart();
 
         foreach (var role in required)

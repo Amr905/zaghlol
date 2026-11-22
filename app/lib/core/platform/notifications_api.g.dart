@@ -424,6 +424,29 @@ class NotificationsHostApi {
     );
   }
 
+  /// FU-267: cancels only the notifications scheduled for later (Android
+  /// alarms, iOS pending requests); the ones already shown stay. Dart calls
+  /// it before it schedules again with text redacted for the current
+  /// "hide amounts" setting, so no stale alert keeps its amount. Native code
+  /// never rebuilds a notification (it has no text to redact).
+  Future<void> cancelScheduled() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.NotificationsHostApi.cancelScheduled$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   /// The route of the notification that launched the app, once.
   Future<String?> takeLaunchRoute() async {
     final pigeonVar_channelName =
