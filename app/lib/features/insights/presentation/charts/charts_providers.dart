@@ -36,6 +36,13 @@ final chartsCurrenciesProvider = FutureProvider<List<Currency>>((ref) async {
   return repo.currenciesWithActivity(resolved.period);
 }, name: 'chartsCurrenciesProvider');
 
+/// C-09: the primary currency first, the rest in their given order. Other
+/// callers of the repository's list keep the code order.
+List<Currency> primaryFirst(List<Currency> list, Currency? primary) => [
+  ...list.where((c) => c == primary),
+  ...list.where((c) => c != primary),
+];
+
 /// The chosen currency code; null means the first one with activity.
 final chartsCurrencyProvider = NotifierProvider<ChartsCurrency, String?>(
   ChartsCurrency.new,

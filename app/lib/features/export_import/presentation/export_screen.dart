@@ -18,6 +18,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart' show kAmountMask;
+import '../../../core/ui/amount_semantics.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
@@ -307,12 +308,21 @@ class _PreviewTable extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: ZSpacing.md),
-                      Text(
-                        hidden
-                            ? kAmountMask
-                            : '${digits.render(r[iAmount])} ${r[iCur]}',
-                        textDirection: TextDirection.ltr,
-                        style: ZType.body.copyWith(color: c.text),
+                      Semantics(
+                        label: a11yAmounts(
+                          l,
+                          hidden
+                              ? kAmountMask
+                              : '${digits.render(r[iAmount])} ${r[iCur]}',
+                        ),
+                        excludeSemantics: true,
+                        child: Text(
+                          hidden
+                              ? kAmountMask
+                              : '${digits.render(r[iAmount])} ${r[iCur]}',
+                          textDirection: TextDirection.ltr,
+                          style: ZType.body.copyWith(color: c.text),
+                        ),
                       ),
                     ],
                   ),

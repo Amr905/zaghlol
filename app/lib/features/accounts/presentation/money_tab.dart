@@ -192,8 +192,10 @@ class _Hero extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final c = ZColors.of(context);
-    final currencies = totals.currencies;
-    final firstCur = currencies.isEmpty ? _zeroEgp.currency : currencies.first;
+    final primary =
+        ref.watch(primaryCurrencyProvider).value ?? _zeroEgp.currency;
+    final currencies = totals.orderedFor(primary);
+    final firstCur = currencies.isEmpty ? primary : currencies.first;
     final approx = ref.watch(approxViewProvider(totals)).value;
     final lang = Localizations.localeOf(context).languageCode;
     final card = Container(

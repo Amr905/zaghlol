@@ -6,6 +6,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/digits_mode.dart';
@@ -52,8 +53,12 @@ class ExplainFormat {
       digits: digits,
       hidden: hidden,
     ),
-    UnitAmountArg(:final unit, :final minor) =>
-      hidden ? '$kAmountMask $unit' : digits.render('$minor $unit'),
+    UnitAmountArg(:final unit, :final minor) => MoneyFormat.format(
+      Money(Currency.of(unit), minor),
+      languageCode: lang,
+      digits: digits,
+      hidden: hidden,
+    ),
     PercentArg(:final bp) => digits.render('${(bp + 50) ~/ 100}%'),
     CountArg(:final count) => digits.render('$count'),
     NameArg(:final name) => name,

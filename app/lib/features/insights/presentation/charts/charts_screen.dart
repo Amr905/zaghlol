@@ -82,7 +82,11 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
           ),
         ],
       ),
-      data: (list) {
+      data: (raw) {
+        final list = primaryFirst(
+          raw,
+          ref.watch(primaryCurrencyProvider).value,
+        );
         final chosen = ref.watch(chartsCurrencyProvider);
         final code = list.isEmpty
             ? null
