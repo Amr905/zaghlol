@@ -1,0 +1,644 @@
+{
+ "classes": {
+  "AdvanceableState": {
+   "props": {
+    "speed": [
+     292,
+     "float"
+    ]
+   },
+   "super": "LayerState",
+   "typeKey": 145
+  },
+  "Animation": {
+   "props": {
+    "name": [
+     55,
+     "string"
+    ]
+   },
+   "super": "Core",
+   "typeKey": 27
+  },
+  "AnimationState": {
+   "props": {
+    "animationId": [
+     149,
+     "uint"
+    ]
+   },
+   "super": "AdvanceableState",
+   "typeKey": 61
+  },
+  "AnyState": {
+   "props": {},
+   "super": "LayerState",
+   "typeKey": 62
+  },
+  "Artboard": {
+   "props": {
+    "defaultStateMachineId": [
+     236,
+     "uint"
+    ],
+    "originX": [
+     11,
+     "float"
+    ],
+    "originY": [
+     12,
+     "float"
+    ],
+    "viewModelId": [
+     583,
+     "uint"
+    ]
+   },
+   "super": "LayoutComponent",
+   "typeKey": 1
+  },
+  "Backboard": {
+   "props": {},
+   "super": "Core",
+   "typeKey": 23
+  },
+  "Component": {
+   "props": {
+    "name": [
+     4,
+     "string"
+    ],
+    "parentId": [
+     5,
+     "uint"
+    ]
+   },
+   "super": "Core",
+   "typeKey": 10
+  },
+  "ContainerComponent": {
+   "props": {},
+   "super": "Component",
+   "typeKey": 11
+  },
+  "CubicDetachedVertex": {
+   "props": {
+    "inDistance": [
+     85,
+     "float"
+    ],
+    "inRotation": [
+     84,
+     "float"
+    ],
+    "outDistance": [
+     87,
+     "float"
+    ],
+    "outRotation": [
+     86,
+     "float"
+    ]
+   },
+   "super": "CubicVertex",
+   "typeKey": 6
+  },
+  "CubicEaseInterpolator": {
+   "props": {},
+   "super": "CubicInterpolator",
+   "typeKey": 28
+  },
+  "CubicInterpolator": {
+   "props": {
+    "x1": [
+     63,
+     "float"
+    ],
+    "x2": [
+     65,
+     "float"
+    ],
+    "y1": [
+     64,
+     "float"
+    ],
+    "y2": [
+     66,
+     "float"
+    ]
+   },
+   "super": "KeyFrameInterpolator",
+   "typeKey": 139
+  },
+  "CubicVertex": {
+   "props": {},
+   "super": "PathVertex",
+   "typeKey": 36
+  },
+  "Drawable": {
+   "props": {
+    "additiveAmount": [
+     450,
+     "uint"
+    ],
+    "blendModeValue": [
+     23,
+     "uint"
+    ],
+    "drawableFlags": [
+     129,
+     "uint"
+    ]
+   },
+   "super": "Node",
+   "typeKey": 13
+  },
+  "EntryState": {
+   "props": {},
+   "super": "LayerState",
+   "typeKey": 63
+  },
+  "ExitState": {
+   "props": {},
+   "super": "LayerState",
+   "typeKey": 64
+  },
+  "Fill": {
+   "props": {
+    "fillRule": [
+     40,
+     "uint"
+    ]
+   },
+   "super": "ShapePaint",
+   "typeKey": 20
+  },
+  "InterpolatingKeyFrame": {
+   "props": {
+    "interpolationType": [
+     68,
+     "uint"
+    ],
+    "interpolatorId": [
+     69,
+     "uint"
+    ]
+   },
+   "super": "KeyFrame",
+   "typeKey": 170
+  },
+  "KeyFrame": {
+   "props": {
+    "frame": [
+     67,
+     "uint"
+    ]
+   },
+   "super": "Core",
+   "typeKey": 29
+  },
+  "KeyFrameDouble": {
+   "props": {
+    "value": [
+     70,
+     "float"
+    ]
+   },
+   "super": "InterpolatingKeyFrame",
+   "typeKey": 30
+  },
+  "KeyFrameInterpolator": {
+   "props": {},
+   "super": "Core",
+   "typeKey": 175
+  },
+  "KeyedObject": {
+   "props": {
+    "objectId": [
+     51,
+     "uint"
+    ]
+   },
+   "super": "Core",
+   "typeKey": 25
+  },
+  "KeyedProperty": {
+   "props": {
+    "propertyKey": [
+     53,
+     "uint"
+    ]
+   },
+   "super": "Core",
+   "typeKey": 26
+  },
+  "LayerState": {
+   "props": {
+    "flags": [
+     536,
+     "uint"
+    ]
+   },
+   "super": "StateMachineLayerComponent",
+   "typeKey": 60
+  },
+  "LayoutComponent": {
+   "props": {
+    "clip": [
+     196,
+     "bool"
+    ],
+    "fractionalHeight": [
+     707,
+     "float"
+    ],
+    "fractionalWidth": [
+     706,
+     "float"
+    ],
+    "height": [
+     8,
+     "float"
+    ],
+    "styleId": [
+     494,
+     "uint"
+    ],
+    "width": [
+     7,
+     "float"
+    ]
+   },
+   "super": "Drawable",
+   "typeKey": 409
+  },
+  "LinearAnimation": {
+   "props": {
+    "duration": [
+     57,
+     "uint"
+    ],
+    "enableWorkArea": [
+     62,
+     "bool"
+    ],
+    "fps": [
+     56,
+     "uint"
+    ],
+    "loopValue": [
+     59,
+     "uint"
+    ],
+    "quantize": [
+     376,
+     "bool"
+    ],
+    "speed": [
+     58,
+     "float"
+    ],
+    "workEnd": [
+     61,
+     "uint"
+    ],
+    "workStart": [
+     60,
+     "uint"
+    ]
+   },
+   "super": "Animation",
+   "typeKey": 31
+  },
+  "Node": {
+   "props": {
+    "computedHeight": [
+     811,
+     "uint"
+    ],
+    "computedLocalX": [
+     806,
+     "uint"
+    ],
+    "computedLocalY": [
+     807,
+     "uint"
+    ],
+    "computedRootX": [
+     864,
+     "uint"
+    ],
+    "computedRootY": [
+     865,
+     "uint"
+    ],
+    "computedWidth": [
+     810,
+     "uint"
+    ],
+    "computedWorldX": [
+     808,
+     "uint"
+    ],
+    "computedWorldY": [
+     809,
+     "uint"
+    ],
+    "x": [
+     13,
+     "float"
+    ],
+    "xArtboard": [
+     9,
+     "uint"
+    ],
+    "y": [
+     14,
+     "float"
+    ],
+    "yArtboard": [
+     10,
+     "uint"
+    ]
+   },
+   "super": "TransformComponent",
+   "typeKey": 2
+  },
+  "Path": {
+   "props": {
+    "isHole": [
+     770,
+     "bool"
+    ],
+    "pathFlags": [
+     128,
+     "uint"
+    ]
+   },
+   "super": "Node",
+   "typeKey": 12
+  },
+  "PathVertex": {
+   "props": {},
+   "super": "Vertex",
+   "typeKey": 14
+  },
+  "PointsCommonPath": {
+   "props": {
+    "isClosed": [
+     32,
+     "bool"
+    ]
+   },
+   "super": "Path",
+   "typeKey": 620
+  },
+  "PointsPath": {
+   "props": {},
+   "super": "PointsCommonPath",
+   "typeKey": 16
+  },
+  "Shape": {
+   "props": {
+    "length": [
+     781,
+     "uint"
+    ]
+   },
+   "super": "Drawable",
+   "typeKey": 3
+  },
+  "ShapePaint": {
+   "props": {
+    "additiveAmount": [
+     452,
+     "uint"
+    ],
+    "blendModeValue": [
+     747,
+     "uint"
+    ],
+    "isVisible": [
+     41,
+     "bool"
+    ]
+   },
+   "super": "ContainerComponent",
+   "typeKey": 21
+  },
+  "SolidColor": {
+   "props": {
+    "colorValue": [
+     37,
+     "color"
+    ]
+   },
+   "super": "Component",
+   "typeKey": 18
+  },
+  "StateMachine": {
+   "props": {},
+   "super": "Animation",
+   "typeKey": 53
+  },
+  "StateMachineBool": {
+   "props": {
+    "value": [
+     141,
+     "bool"
+    ]
+   },
+   "super": "StateMachineInput",
+   "typeKey": 59
+  },
+  "StateMachineComponent": {
+   "props": {
+    "name": [
+     138,
+     "string"
+    ]
+   },
+   "super": "Core",
+   "typeKey": 54
+  },
+  "StateMachineInput": {
+   "props": {},
+   "super": "StateMachineComponent",
+   "typeKey": 55
+  },
+  "StateMachineLayer": {
+   "props": {},
+   "super": "StateMachineComponent",
+   "typeKey": 57
+  },
+  "StateMachineLayerComponent": {
+   "props": {},
+   "super": "Core",
+   "typeKey": 66
+  },
+  "StateMachineNumber": {
+   "props": {
+    "value": [
+     140,
+     "float"
+    ]
+   },
+   "super": "StateMachineInput",
+   "typeKey": 56
+  },
+  "StateTransition": {
+   "props": {
+    "duration": [
+     158,
+     "uint"
+    ],
+    "exitTime": [
+     160,
+     "uint"
+    ],
+    "flags": [
+     152,
+     "uint"
+    ],
+    "interpolationType": [
+     349,
+     "uint"
+    ],
+    "interpolatorId": [
+     350,
+     "uint"
+    ],
+    "randomWeight": [
+     537,
+     "uint"
+    ],
+    "stateToId": [
+     151,
+     "uint"
+    ]
+   },
+   "super": "StateMachineLayerComponent",
+   "typeKey": 65
+  },
+  "StraightVertex": {
+   "props": {
+    "radius": [
+     26,
+     "float"
+    ]
+   },
+   "super": "PathVertex",
+   "typeKey": 5
+  },
+  "Stroke": {
+   "props": {
+    "cap": [
+     48,
+     "uint"
+    ],
+    "join": [
+     49,
+     "uint"
+    ],
+    "position": [
+     470,
+     "uint"
+    ],
+    "thickness": [
+     47,
+     "float"
+    ],
+    "transformAffectsStroke": [
+     50,
+     "bool"
+    ]
+   },
+   "super": "ShapePaint",
+   "typeKey": 24
+  },
+  "TransformComponent": {
+   "props": {
+    "rotation": [
+     15,
+     "float"
+    ],
+    "scaleX": [
+     16,
+     "float"
+    ],
+    "scaleY": [
+     17,
+     "float"
+    ]
+   },
+   "super": "WorldTransformComponent",
+   "typeKey": 38
+  },
+  "TransitionBoolCondition": {
+   "props": {},
+   "super": "TransitionValueCondition",
+   "typeKey": 71
+  },
+  "TransitionCondition": {
+   "props": {},
+   "super": "Core",
+   "typeKey": 476
+  },
+  "TransitionInputCondition": {
+   "props": {
+    "inputId": [
+     155,
+     "uint"
+    ]
+   },
+   "super": "TransitionCondition",
+   "typeKey": 67
+  },
+  "TransitionNumberCondition": {
+   "props": {
+    "value": [
+     157,
+     "float"
+    ]
+   },
+   "super": "TransitionValueCondition",
+   "typeKey": 70
+  },
+  "TransitionValueCondition": {
+   "props": {
+    "opValue": [
+     156,
+     "uint"
+    ]
+   },
+   "super": "TransitionInputCondition",
+   "typeKey": 69
+  },
+  "Vertex": {
+   "props": {
+    "x": [
+     24,
+     "float"
+    ],
+    "y": [
+     25,
+     "float"
+    ]
+   },
+   "super": "ContainerComponent",
+   "typeKey": 107
+  },
+  "WorldTransformComponent": {
+   "props": {
+    "opacity": [
+     18,
+     "float"
+    ]
+   },
+   "super": "ContainerComponent",
+   "typeKey": 91
+  }
+ },
+ "commit": "eaa5e03cfa81ab3cdfa002e8b4ed40d957194fa4",
+ "source": "rive-app/rive-runtime include/rive/generated"
+}

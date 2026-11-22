@@ -54,3 +54,4 @@ node_modules/
 # Python
 __pycache__/
 *.pyc
+tools/mascot_riv/verify/node_modules/

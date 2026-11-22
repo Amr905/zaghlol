@@ -1,0 +1,9 @@
+{
+  "name": "mascot-riv-verify",
+  "private": true,
+  "description": "Loads app/assets/rive/zaghlol.riv with the official Rive WASM runtime in headless Chrome",
+  "dependencies": {
+    "@rive-app/canvas-advanced": "2.31.0",
+    "puppeteer-core": "24.10.0"
+  }
+}

@@ -15,6 +15,9 @@ Widget _wrap(
   double scale = 1,
 }) {
   return ProviderScope(
+    // These tests are about the interim animation; the bundled .riv is covered
+    // by rive_mascot_test.dart.
+    overrides: [zaghlolRivePresentProvider.overrideWith((ref) async => false)],
     child: MaterialApp(
       theme: ZaghlolTheme.light,
       locale: locale,

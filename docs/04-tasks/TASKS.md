@@ -295,6 +295,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-209](tasks/T-209.md) | Charts v2: tabbed Insights shell and Overview tab (pace hero, categories, saved each month, coming up) | PO 11-22 | High | Sonnet | flutter-ui-engineer | T-189 | G | 58 | DONE (batch 58) |
 | [T-210](tasks/T-210.md) | Charts v2: Categories tab | PO 11-22 | Medium | Sonnet | flutter-ui-engineer | T-209 | G | 58 | DONE (batch 58) |
 | [T-211](tasks/T-211.md) | Charts v2: Trends tab (in and out, saved each month, day-by-day heatmap) | PO 11-22 | Medium | Sonnet | flutter-ui-engineer | T-209 | G | 58 | DONE (batch 58) |
+| [T-212](tasks/T-212.md) | Build zaghlol.riv in code (no Rive editor) | PO 11-23 | High | Sonnet | flutter-ui-engineer | — | G | 59 | DONE (batch 59) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
