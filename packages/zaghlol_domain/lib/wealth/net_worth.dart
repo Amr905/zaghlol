@@ -234,15 +234,25 @@ NetWorth computeNetWorth({
 typedef SnapshotRow = ({String unit, int assetsMinor, int liabilitiesMinor});
 
 /// The rows to store for a snapshot: one per unit, native (gold in
-/// milligrams, never valued).
-List<SnapshotRow> snapshotRows(NetWorth worth) => [
-  for (final u in worth.units)
-    (
-      unit: u.unit,
-      assetsMinor: u.assetsMinor,
-      liabilitiesMinor: u.liabilitiesMinor,
-    ),
-];
+/// milligrams, never valued). FU-149b: a unit that was snapshotted before
+/// ([previousUnits]) but now has no assets or liabilities gets a zero row, so
+/// its history line stays continuous. Never summed across units.
+List<SnapshotRow> snapshotRows(
+  NetWorth worth, {
+  Iterable<String> previousUnits = const [],
+}) {
+  final now = {for (final u in worth.units) u.unit};
+  final zero = ({...previousUnits}..removeAll(now)).toList()..sort();
+  return [
+    for (final u in worth.units)
+      (
+        unit: u.unit,
+        assetsMinor: u.assetsMinor,
+        liabilitiesMinor: u.liabilitiesMinor,
+      ),
+    for (final unit in zero) (unit: unit, assetsMinor: 0, liabilitiesMinor: 0),
+  ];
+}
 
 /// Whether a snapshot is due (A-20: at each cycle end, at least monthly).
 /// A snapshot is due when none exists, when the last one is older than the

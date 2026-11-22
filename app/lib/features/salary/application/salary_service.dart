@@ -231,7 +231,12 @@ class SalaryService {
         // like this salary, so reconcile never ties it to the new row later.
         var state = await _settings.get(Settings.salaryState);
         for (var i = 0; i < 20; i++) {
-          final other = await _findReceived(anchor, txn.amount, loose: loose);
+          final other = await _findReceived(
+            anchor,
+            txn.amount,
+            loose: loose,
+            declinedAlways: true,
+          );
           if (other == null) break;
           state = state.withDeclined(other.txnId);
           await _settings.set(Settings.salaryState, state);
@@ -285,8 +290,12 @@ class SalaryService {
     CivilDate anchor,
     Money expected, {
     bool loose = false,
+    bool declinedAlways = false,
   }) async {
     final state = await _settings.get(Settings.salaryState);
+    // FU-268: a declined credit stays declined only while the "another
+    // income" row it was declined for is still live for this payday.
+    final declinedHolds = declinedAlways || await _findTied(anchor) != null;
     final from =
         anchor.plusDays(-salaryWindowBeforeDays - 1).epochDay * 86400000 -
         14 * 3600000;
@@ -314,7 +323,10 @@ class SalaryService {
         .get();
     for (final r in rows) {
       final id = r.read<String>('id');
-      if (state.entryOf(id) != null || state.declined.contains(id)) continue;
+      if (state.entryOf(id) != null ||
+          (declinedHolds && state.declined.contains(id))) {
+        continue;
+      }
       final amount = Money.tryFromStorage(
         r.read<int>('amount_minor'),
         r.read<String>('currency'),

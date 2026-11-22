@@ -648,7 +648,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | FU-152a | core | T-105 chart memo not invalidated on category/account edits | insights/data/chart_repository.dart:78-96 | none | OBSOLETE (batch 51): watchEdits() invalidates the memo on categories/accounts edits |
 | FU-152b | core | T-105 weekday/hour math on epoch ms before 1970 | insights/data/chart_repository.dart:482 | none | CLOSED (nit, dates validated 2000+, no action) |
 | FU-149a | core | T-113 credit/bnpl balance taken as amount owed; confirm stored meaning (limit vs debt) and pin sign convention in a test | wealth/data/net_worth_repository.dart:135-144 | PO (confirm meaning) | OPEN |
-| FU-149b | core | T-113 unit with zero assets and liabilities omitted from snapshot (chart gap) | wealth/domain/net_worth.dart:199 | none | OPEN |
+| FU-149b | core | T-113 unit with zero assets and liabilities omitted from snapshot (chart gap) | wealth/domain/net_worth.dart:199 | none | FIXED (batch 57): `snapshotRows(previousUnits:)` writes a zero row per previously snapshotted unit |
 | FU-149c | core | T-113 isGold uses startsWith('XAU'); use explicit symbol set | wealth/domain/net_worth.dart:46 | none | OBSOLETE (batch 51): GoldSymbols.isGold uses an explicit symbol set |
 | FU-154a | core | T-155 existingAt reads limit 500 and compares unsanitised merchantRaw (duplicate import risk) | export_import/data/drift_csv_import_store.dart:58 | none | OBSOLETE (batch 51): existingBetween pages all rows and compares sanitised text |
 | FU-154b | core | T-155 DB constraint failure surfaces as raw store exception, not an ImportCsvException code | export_import/application/import_csv.dart:169-222 | none | OBSOLETE (batch 51): store failures map to ImportCsvException.storeFailed |
@@ -990,3 +990,5 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 | 2026-11-20 | Batch 47 (`batch/2026-11-20-47`): T-196 recurring 1/3/6/12-month bills (schema v5), T-187 hide amounts; reviews APPROVED; full non-golden app suite on the merged tree: 1 known load flake only. FU-267. |
 | 2026-11-20 | Batch 48 (`batch/2026-11-20-48`): T-195 salary as income, T-197 credit vs debit; reviews APPROVED; full non-golden app suite on the merged tree 5020/5020, backend build clean. FU-268. |
 | 2026-11-20 | Batch 49 (`batch/2026-11-20-49`): T-188 chart periods, T-199 net-worth breakdown, T-193 backend/ops/CI sweep; reviews APPROVED; full non-golden app suite: only the host-speed perf flake. FU-269. |
+
+- **Batch 57 (app core):** FU-268 FIXED (batch 57): a declined credit is declined only while its "another income" row is live for that payday. FU-267 Dart side NOT done: scheduled alerts are kept in memory only and `NotificationGateway` has no list-pending/cancel API, so nothing exists to re-render after a restart; needs a native pending-list/cancel hook or persisted scheduled alerts.
