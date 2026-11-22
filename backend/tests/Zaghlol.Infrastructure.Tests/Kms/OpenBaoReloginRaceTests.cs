@@ -83,6 +83,30 @@ public sealed class OpenBaoReloginRaceTests : IAsyncLifetime
         Assert.True(watch.Elapsed < TimeSpan.FromSeconds(5), $"waiters released after {watch.Elapsed}");
     }
 
+    [LinuxFact]
+    public async Task AfterAFailedForcedLoginTheNextCallersWaitOutTheIntervalBeforeAnotherLogin()
+    {
+        var clock = new ShiftedClock();
+        using var client = Client(clock, TimeSpan.FromSeconds(10));
+        await WarmUpAsync(client);
+        clock.Shift += OpenBaoClient.ForcedLoginInterval + TimeSpan.FromSeconds(1);
+        bed.Stub.FailLogins = true;
+        var attempts = bed.Stub.LoginAttempts;
+        bed.Stub.RevokeAllTokens();
+
+        Assert.Null((await RaceAsync(client))[0]);
+        Assert.Equal(attempts + 1, bed.Stub.LoginAttempts);
+
+        // The server is back, but the session is empty: before the fix this caller logged in at once, unthrottled.
+        bed.Stub.FailLogins = false;
+        Assert.Null((await RaceAsync(client))[0]);
+        Assert.Equal(attempts + 1, bed.Stub.LoginAttempts);
+
+        clock.Shift += OpenBaoClient.ForcedLoginInterval + TimeSpan.FromSeconds(1);
+        Assert.All(await RaceAsync(client), s => Assert.Equal(HttpStatusCode.OK, s));
+        Assert.Equal(attempts + 2, bed.Stub.LoginAttempts);
+    }
+
     private OpenBaoClient Client(TimeProvider clock, TimeSpan loginTimeout)
     {
         var roots = new X509Certificate2Collection { bed.Stub.Ca.Certificate };

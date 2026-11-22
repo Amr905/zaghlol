@@ -18,6 +18,9 @@ TEMPLATE_ALLOWED = {
     "Hosting__EmbeddedWorkers",
     "ForwardedHeaders__NoProxy",
     "DOTNET_EnableDiagnostics",
+    "Database__MaxPoolSize__App",
+    "Database__MaxPoolSize__Admin",
+    "Database__MaxPoolSize__Worker",
 }
 NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(__[A-Za-z0-9_-]+)*$")
 # Settings that must never be supplied at deploy time on this profile.

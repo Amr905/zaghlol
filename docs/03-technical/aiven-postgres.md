@@ -16,7 +16,7 @@ Download the project CA (`ca.pem`) from the Aiven console (service overview, "CA
 
 Rules enforced at startup (API, worker and `--migrate`; messages never print connection strings or certificate text):
 
-- In **Production** every role's connection string must be `VerifyFull` or `VerifyCA`; `Disable`, `Allow`, `Prefer` and `Require` (and
+- In **Production and Staging** every role's connection string must be `VerifyFull` or `VerifyCA`; `Disable`, `Allow`, `Prefer` and `Require` (and
   the default, which is `Prefer`) stop the host. The only escape is `Database__AllowInsecureTransport=true`, used by
   `deploy/server/docker-compose.prod.yml` (database on a private bridge network, not published). Never set it for Aiven.
 - A configured CA with a non-verifying `SSL Mode` is rejected (the CA would be silently unused).
@@ -43,6 +43,13 @@ Usable connections: 20 - 6 reserved = **14**. Pool sizes (`Database__MaxPoolSize
 | **Runtime total** | **10** | |
 | Migrator (`--migrate`) | 2 | only while a deploy runs; EF holds one |
 | Headroom | 2 | operator `psql`, `pg_dump` |
+
+**IIS overlapped recycle (FU-281, MonsterASP).** A recycle starts the new `w3wp.exe` before the old one stops, so for a moment two
+processes hold pools. `disallowOverlappingRotation="true"` is an application-pool setting (`applicationHost.config`), not available in
+`web.config`, and the shared host doesn't expose it, so the committed `web.config` template keeps each process small instead:
+`Database__MaxPoolSize__App=2`, `Admin=1`, `Worker=1` (+ readiness 1 = 5 per process). Two overlapping processes hold 10, the migrator's 2
+still fit (12 of 14), and 2 stay free for `psql`. A test in `deploy/monsterasp/tests/test_package.py` fails if the template stops fitting.
+If the pool is ever under your control (own IIS), set `disallowOverlappingRotation="true"` and raise the pools to the table above.
 
 With two API replicas, set `Database__MaxPoolSize__App=3` on each (total stays 10). Npgsql opens connections lazily (`Minimum Pool Size`
 0), so idle replicas cost nothing. Pool exhaustion shows as request timeouts, not as Aiven errors; watch

@@ -27,7 +27,7 @@ internal static class MigrateCommand
         }
 
         var settings = DatabaseSettings.From(builder.Configuration);
-        var problems = settings.Validate([(DatabaseRole.Migrator, connectionString)], builder.Environment.IsProduction());
+        var problems = settings.Validate([(DatabaseRole.Migrator, connectionString)], DatabaseSettings.RequiresVerifiedTls(builder.Environment));
         if (problems.Count > 0)
         {
             foreach (var problem in problems)

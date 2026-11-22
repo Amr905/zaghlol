@@ -1,5 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Npgsql;
 
 namespace Zaghlol.Infrastructure.Persistence;
@@ -81,6 +82,10 @@ public sealed class DatabaseSettings
         return collection;
     }
 
+    /// <summary>FU-278: the verified-TLS guard applies to every deployed environment (Production and Staging), not to Development or Testing.</summary>
+    public static bool RequiresVerifiedTls(IHostEnvironment? environment) =>
+        environment is not null && (environment.IsProduction() || environment.IsStaging());
+
     /// <summary>Configuration errors (empty when fine). Messages never contain connection strings or certificate text.</summary>
     public IReadOnlyList<string> Validate(IEnumerable<(DatabaseRole Role, string? ConnectionString)> connections, bool production)
     {
@@ -131,7 +136,7 @@ public sealed class DatabaseSettings
 
             if (production && !verifies && !AllowInsecureTransport)
             {
-                errors.Add($"ConnectionStrings:{name} must use SSL Mode=VerifyFull or VerifyCA in Production (or set Database:AllowInsecureTransport=true for a private network).");
+                errors.Add($"ConnectionStrings:{name} must use SSL Mode=VerifyFull or VerifyCA in Production and Staging (or set Database:AllowInsecureTransport=true for a private network).");
             }
 
             if (PoolOverride(role) is int size && size < 1)

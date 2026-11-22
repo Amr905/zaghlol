@@ -2,6 +2,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parent.parent / "monsterasp_package.py"
@@ -39,6 +40,17 @@ class PackageTests(unittest.TestCase):
 
     def test_committed_template_passes_check(self):
         self.assertEqual(run("check", str(self.dir)).returncode, 0)
+
+    def test_template_pools_fit_two_overlapping_processes_in_the_aiven_budget(self):
+        # FU-281: an IIS overlapped recycle holds two processes' pools at once. Aiven free plan: 20 connections, 6 reserved.
+        node = ET.parse(self.dir / "web.config").getroot().find(".//aspNetCore")
+        pools = {v.get("name"): int(v.get("value")) for v in node.findall("environmentVariables/environmentVariable")
+                 if v.get("name", "").startswith("Database__MaxPoolSize__")}
+        self.assertEqual(set(pools), {"Database__MaxPoolSize__App", "Database__MaxPoolSize__Admin", "Database__MaxPoolSize__Worker"})
+        readiness = 1  # fixed in code
+        migrator = 2   # only while a deploy runs
+        per_process = sum(pools.values()) + readiness
+        self.assertLessEqual(2 * per_process + migrator, 14 - 2)  # keeps the 2 headroom for operator psql / pg_dump
 
     def test_check_rejects_unlisted_environment_variable_and_private_key(self):
         text = (self.dir / "web.config").read_text(encoding="utf-8")
