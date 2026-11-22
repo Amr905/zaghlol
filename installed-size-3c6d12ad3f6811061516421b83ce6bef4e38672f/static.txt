@@ -1,0 +1,52 @@
+## debug-universal: 291756062 bytes
+412812210         291172946  30%                            1678 files
+138459584  Defl:N 45874780  67% 1981-01-01 01:01 a94e5b61  assets/flutter_assets/kernel_blob.bin
+40107168  Stored 40107168   0% 1981-01-01 01:01 59e07f19  lib/x86_64/libflutter.so
+38846424  Stored 38846424   0% 1981-01-01 01:01 d56fa04f  lib/arm64-v8a/libflutter.so
+33159780  Stored 33159780   0% 1981-01-01 01:01 892d77f4  lib/armeabi-v7a/libflutter.so
+15240080  Stored 15240080   0% 1981-01-01 01:01 771cbf74  lib/arm64-v8a/libVkLayer_khronos_validation.so
+11693060  Defl:N  4516170  61% 1981-01-01 01:01 a54e75d9  classes.dex
+11647016  Defl:N  4405748  62% 1981-01-01 01:01 7b570e40  assets/flutter_assets/isolate_snapshot_data
+11626128  Stored 11626128   0% 1981-01-01 01:01 373295b5  lib/x86_64/libmlkit_google_ocr_pipeline.so
+11064544  Stored 11064544   0% 1981-01-01 01:01 5a02f1b7  lib/arm64-v8a/libmlkit_google_ocr_pipeline.so
+ 8088648  Stored  8088648   0% 1981-01-01 01:01 a274c0ae  lib/x86_64/librive_native.so
+ 8062152  Defl:N  3031983  62% 1981-01-01 01:01 226e43a0  classes26.dex
+ 8058340  Defl:N  3027802  62% 1981-01-01 01:01 cb82c09b  classes27.dex
+ 7675336  Stored  7675336   0% 1981-01-01 01:01 63b4cbb1  lib/arm64-v8a/librive_native.so
+ 6886848  Stored  6886848   0% 1981-01-01 01:01 db266f61  lib/x86_64/libpdfium.so
+ 6781940  Stored  6781940   0% 1981-01-01 01:01 264f5dd0  lib/armeabi-v7a/libmlkit_google_ocr_pipeline.so
+ 6739096  Stored  6739096   0% 1981-01-01 01:01 1c16e164  lib/armeabi-v7a/librive_native.so
+ 6598376  Stored  6598376   0% 1981-01-01 01:01 63a2070f  lib/arm64-v8a/libpdfium.so
+ 4332136  Stored  4332136   0% 1981-01-01 01:01 e7a24285  lib/x86_64/libtesseract.so
+ 4324288  Stored  4324288   0% 1981-01-01 01:01 a9543e00  lib/armeabi-v7a/libpdfium.so
+ 4164360  Stored  4164360   0% 1981-01-01 01:01 f128c935  lib/arm64-v8a/libtesseract.so
+ 3104384  Stored  3104384   0% 1981-01-01 01:01 eeb6c93e  lib/x86_64/libleptonica.so
+ 3004948  Stored  3004948   0% 1981-01-01 01:01 27a50045  lib/armeabi-v7a/libtesseract.so
+ 2878240  Stored  2878240   0% 1981-01-01 01:01 aa765e7c  lib/arm64-v8a/libleptonica.so
+ 2191760  Stored  2191760   0% 1981-01-01 01:01 36967c16  lib/x86_64/libsqlite3mc.so
+## release-x86_64: 118287876 bytes
+122354512         117867213   4%                            1513 files
+16843656  Stored 16843656   0% 1981-01-01 01:01 4a2465de  lib/x86_64/libapp.so
+13074608  Stored 13074608   0% 1981-01-01 01:01 9ea7f212  lib/x86_64/libflutter.so
+11626128  Stored 11626128   0% 1981-01-01 01:01 373295b5  lib/x86_64/libmlkit_google_ocr_pipeline.so
+11064544  Stored 11064544   0% 1981-01-01 01:01 5a02f1b7  lib/arm64-v8a/libmlkit_google_ocr_pipeline.so
+ 8088648  Stored  8088648   0% 1981-01-01 01:01 a274c0ae  lib/x86_64/librive_native.so
+ 7675336  Stored  7675336   0% 1981-01-01 01:01 63b4cbb1  lib/arm64-v8a/librive_native.so
+ 6886848  Stored  6886848   0% 1981-01-01 01:01 db266f61  lib/x86_64/libpdfium.so
+ 6781940  Stored  6781940   0% 1981-01-01 01:01 264f5dd0  lib/armeabi-v7a/libmlkit_google_ocr_pipeline.so
+ 6739096  Stored  6739096   0% 1981-01-01 01:01 1c16e164  lib/armeabi-v7a/librive_native.so
+ 4332136  Stored  4332136   0% 1981-01-01 01:01 e7a24285  lib/x86_64/libtesseract.so
+ 4164360  Stored  4164360   0% 1981-01-01 01:01 f128c935  lib/arm64-v8a/libtesseract.so
+ 3785196  Defl:N  1686775  55% 1981-01-01 01:01 04f49e21  classes.dex
+ 3104384  Stored  3104384   0% 1981-01-01 01:01 eeb6c93e  lib/x86_64/libleptonica.so
+ 3004948  Stored  3004948   0% 1981-01-01 01:01 27a50045  lib/armeabi-v7a/libtesseract.so
+ 2878240  Stored  2878240   0% 1981-01-01 01:01 aa765e7c  lib/arm64-v8a/libleptonica.so
+ 2191760  Stored  2191760   0% 1981-01-01 01:01 36967c16  lib/x86_64/libsqlite3mc.so
+ 2160740  Stored  2160740   0% 1981-01-01 01:01 82c2199e  lib/armeabi-v7a/libleptonica.so
+ 1432056  Defl:N   723470  50% 1981-01-01 01:01 dc30c80f  assets/tessdata/ara.traineddata
+  513548  Stored   513548   0% 1981-01-01 01:01 50b28d5a  resources.arsc
+  340760  Stored   340760   0% 1981-01-01 01:01 9e027a15  assets/mlkit-google-ocr-models/taser/detector/rpn_text_detector_mobile_space_to_depth_quantized_mbv2_v1.tflite
+  315520  Stored   315520   0% 1981-01-01 01:01 394e5f6d  assets/mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/tflite_langid.tflite
+  309568  Defl:N   181609  41% 1981-01-01 01:01 56d84482  assets/mlkit-google-ocr-models/gocr/gocr_models/line_recognition_legacy_mobile/Latn_ctc/optical/lstm_model.fb
+  281728  Stored   281728   0% 1981-01-01 01:01 ccbe893b  lib/x86_64/libjpeg.so
+  251888  Stored   251888   0% 1981-01-01 01:01 79505c9b  lib/arm64-v8a/libjpeg.so

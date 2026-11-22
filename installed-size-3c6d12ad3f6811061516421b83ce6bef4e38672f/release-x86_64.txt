@@ -1,0 +1,88 @@
+== release-x86_64: release-x86_64.apk 118287876 bytes
+Performing Streamed Install
+Success
+-- after install, before first launch (no user data)
+package:/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/base.apk
+code dir: /data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+du -k of code dir (APK + oat + extracted libs):
+119436	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+115520	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/base.apk
+3892	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat
+3884	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64
+3812	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64/base.vdex
+64	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64/base.odex
+16	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/lib
+8	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/lib/x86_64
+du -sk code dir / data dir:
+119436	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+24	/data/data/app.zaghlol.dev
+data dir tree (sizes only):
+24	/data/data/app.zaghlol.dev
+8	/data/data/app.zaghlol.dev/code_cache
+8	/data/data/app.zaghlol.dev/cache
+dumpsys package (packaging fields):
+    codePath=/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+    legacyNativeLibraryDir=/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=x86_64
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ]
+Dexopt state:
+      x86_64: [status=verify] [reason=install] [primary-abi]
+dumpsys diskstats (App Size = what Settings shows as App size):
+cmd package art dump (compile filter):
+  [app.zaghlol.dev]
+    path: /data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/base.apk
+      x86_64: [status=verify] [reason=install] [primary-abi]
+        [location is /data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64/base.odex]
+  [com.android.backupconfirm]
+    path: /system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk
+      x86_64: [status=verify] [reason=prebuilt] [primary-abi]
+        [location is /system/priv-app/BackupRestoreConfirmation/oat/x86_64/BackupRestoreConfirmation.odex]
+-- after first launch (onboarding screen, no user data entered)
+package:/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/base.apk
+code dir: /data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+du -k of code dir (APK + oat + extracted libs):
+119436	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+115520	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/base.apk
+3892	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat
+3884	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64
+3812	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64/base.vdex
+64	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64/base.odex
+16	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/lib
+8	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/lib/x86_64
+du -sk code dir / data dir:
+119436	/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+1496	/data/data/app.zaghlol.dev
+data dir tree (sizes only):
+1496	/data/data/app.zaghlol.dev
+672	/data/data/app.zaghlol.dev/files
+632	/data/data/app.zaghlol.dev/files/db
+580	/data/data/app.zaghlol.dev/files/db/zaghlol.db-wal
+400	/data/data/app.zaghlol.dev/cache
+348	/data/data/app.zaghlol.dev/cache/oat_primary
+340	/data/data/app.zaghlol.dev/cache/oat_primary/x86_64
+332	/data/data/app.zaghlol.dev/cache/oat_primary/x86_64/base.art
+288	/data/data/app.zaghlol.dev/no_backup
+188	/data/data/app.zaghlol.dev/no_backup/androidx.work.workdb-wal
+72	/data/data/app.zaghlol.dev/databases
+60	/data/data/app.zaghlol.dev/databases/com.google.android.datatransport.events
+dumpsys package (packaging fields):
+    codePath=/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==
+    legacyNativeLibraryDir=/data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=x86_64
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ]
+Dexopt state:
+      x86_64: [status=verify] [reason=install] [primary-abi]
+dumpsys diskstats (App Size = what Settings shows as App size):
+cmd package art dump (compile filter):
+  [app.zaghlol.dev]
+    path: /data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/base.apk
+      x86_64: [status=verify] [reason=install] [primary-abi]
+        [location is /data/app/~~U0cJXBc0aFBhIfuD-nBRWg==/app.zaghlol.dev-exXjjOJUJ8WcTO_6aSOc3A==/oat/x86_64/base.odex]
+  [com.android.backupconfirm]
+    path: /system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk
+      x86_64: [status=verify] [reason=prebuilt] [primary-abi]
+        [location is /system/priv-app/BackupRestoreConfirmation/oat/x86_64/BackupRestoreConfirmation.odex]

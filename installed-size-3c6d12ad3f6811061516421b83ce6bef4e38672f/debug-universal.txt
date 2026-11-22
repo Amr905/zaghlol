@@ -1,0 +1,76 @@
+== debug-universal: debug-universal.apk 291756062 bytes
+Performing Streamed Install
+Success
+-- after install, before first launch (no user data)
+package:/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/base.apk
+code dir: /data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+du -k of code dir (APK + oat + extracted libs):
+284948	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+284924	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/base.apk
+16	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/lib
+8	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/lib/x86_64
+du -sk code dir / data dir:
+284948	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+24	/data/data/app.zaghlol.dev
+data dir tree (sizes only):
+24	/data/data/app.zaghlol.dev
+8	/data/data/app.zaghlol.dev/code_cache
+8	/data/data/app.zaghlol.dev/cache
+dumpsys package (packaging fields):
+    codePath=/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+    legacyNativeLibraryDir=/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=x86_64
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    pkgFlags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA LARGE_HEAP ]
+Dexopt state:
+      x86_64: [status=run-from-apk] [reason=unknown] [primary-abi]
+dumpsys diskstats (App Size = what Settings shows as App size):
+cmd package art dump (compile filter):
+  [app.zaghlol.dev]
+    path: /data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/base.apk
+      x86_64: [status=run-from-apk] [reason=unknown] [primary-abi]
+        [location is error]
+  [com.android.backupconfirm]
+    path: /system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk
+-- after first launch (onboarding screen, no user data entered)
+package:/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/base.apk
+code dir: /data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+du -k of code dir (APK + oat + extracted libs):
+284948	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+284924	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/base.apk
+16	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/lib
+8	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/lib/x86_64
+du -sk code dir / data dir:
+284948	/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+148164	/data/data/app.zaghlol.dev
+data dir tree (sizes only):
+148164	/data/data/app.zaghlol.dev
+146628	/data/data/app.zaghlol.dev/app_flutter
+146616	/data/data/app.zaghlol.dev/app_flutter/flutter_assets
+135224	/data/data/app.zaghlol.dev/app_flutter/flutter_assets/kernel_blob.bin
+11380	/data/data/app.zaghlol.dev/app_flutter/flutter_assets/isolate_snapshot_data
+1068	/data/data/app.zaghlol.dev/files
+1036	/data/data/app.zaghlol.dev/files/db
+984	/data/data/app.zaghlol.dev/files/db/zaghlol.db-wal
+288	/data/data/app.zaghlol.dev/no_backup
+188	/data/data/app.zaghlol.dev/no_backup/androidx.work.workdb-wal
+72	/data/data/app.zaghlol.dev/databases
+60	/data/data/app.zaghlol.dev/databases/com.google.android.datatransport.events
+dumpsys package (packaging fields):
+    codePath=/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==
+    legacyNativeLibraryDir=/data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=x86_64
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    pkgFlags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA LARGE_HEAP ]
+Dexopt state:
+      x86_64: [status=run-from-apk] [reason=unknown] [primary-abi]
+dumpsys diskstats (App Size = what Settings shows as App size):
+cmd package art dump (compile filter):
+  [app.zaghlol.dev]
+    path: /data/app/~~xMNIugoqoTTBOgcLiFMJ_w==/app.zaghlol.dev-jGTV6ks7OcVEvr9N-AScAg==/base.apk
+      x86_64: [status=run-from-apk] [reason=unknown] [primary-abi]
+        [location is error]
+  [com.android.backupconfirm]
+    path: /system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk
