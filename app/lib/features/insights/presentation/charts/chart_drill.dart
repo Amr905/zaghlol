@@ -39,7 +39,9 @@ TxnListFilter drillFilter({
   merchantName: merchantName,
 );
 
-/// Opens the transactions list for a chart tap.
+/// Opens the transactions list for a chart tap. The list's filter chips are
+/// set to the drill-down while it is open and put back when it closes, so
+/// the Transactions tab keeps its own filters.
 Future<void> openChartDrill(
   BuildContext context, {
   required String code,
@@ -48,20 +50,36 @@ Future<void> openChartDrill(
   Set<String> categoryIds = const {},
   String? merchantNorm,
   String? merchantName,
-}) => Navigator.of(context).push<void>(
-  MaterialPageRoute<void>(
-    builder: (_) => TransactionsListScreen(
-      initialFilter: drillFilter(
-        code: code,
-        period: period,
-        categoryIds: categoryIds,
-        merchantNorm: merchantNorm,
-        merchantName: merchantName,
+}) async {
+  final container = ProviderScope.containerOf(context);
+  // Keeps the (auto-dispose) filter alive from before the route opens.
+  final sub = container.listen(txnListFilterProvider, (_, _) {});
+  final before = sub.read();
+  container
+      .read(txnListFilterProvider.notifier)
+      .set(
+        drillFilter(
+          code: code,
+          period: period,
+          categoryIds: categoryIds,
+          merchantNorm: merchantNorm,
+          merchantName: merchantName,
+        ),
+      );
+  try {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => TransactionsListScreen(
+          header: (_) =>
+              ChartDrillHeader(scopePeriod: period, previous: previous),
+        ),
       ),
-      header: (_) => ChartDrillHeader(scopePeriod: period, previous: previous),
-    ),
-  ),
-);
+    );
+  } finally {
+    container.read(txnListFilterProvider.notifier).set(before);
+    sub.close();
+  }
+}
 
 /// The total, count and change of what the list shows. It follows the list's
 /// own chips: without a custom period or with several categories there is

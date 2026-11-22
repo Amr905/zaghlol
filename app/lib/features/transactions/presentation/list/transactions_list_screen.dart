@@ -42,7 +42,6 @@ class TransactionsListScreen extends ConsumerStatefulWidget {
     super.key,
     this.onOpenTransaction,
     this.onAddExpense,
-    this.initialFilter,
     this.header,
   });
 
@@ -51,10 +50,6 @@ class TransactionsListScreen extends ConsumerStatefulWidget {
 
   /// Empty-state button; defaults to opening the Add sheet.
   final VoidCallback? onAddExpense;
-
-  /// T-189: opened from a chart with these filters already on (the chips
-  /// show them and can remove each one).
-  final TxnListFilter? initialFilter;
 
   /// T-189: shown under the filter chips (the drill-down total and change).
   final WidgetBuilder? header;
@@ -71,11 +66,6 @@ class _State extends ConsumerState<TransactionsListScreen> {
   @override
   void initState() {
     super.initState();
-    final initial = widget.initialFilter;
-    if (initial != null) {
-      // Nothing listens yet, so this sets the state the list first builds on.
-      ref.read(txnListFilterProvider.notifier).set(initial);
-    }
     _scroll.addListener(() {
       if (_scroll.position.extentAfter < 400) {
         ref.read(txnListProvider.notifier).loadMore();

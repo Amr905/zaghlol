@@ -354,8 +354,8 @@ CompactAmount compactAmount(int minor, int exponent) {
     return k;
   }
   // Whole units, no decimal: tenths is a multiple of ten.
-  return CompactAmount(
-    sign * mulDivRound(abs, 1, unitMinor) * 10,
-    CompactUnit.none,
-  );
+  final whole = mulDivRound(abs, 1, unitMinor);
+  // 999.6 rounds to 1000: that is 1.0K.
+  if (whole >= 1000) return build(1000, CompactUnit.thousand);
+  return CompactAmount(sign * whole * 10, CompactUnit.none);
 }

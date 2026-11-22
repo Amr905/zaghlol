@@ -286,6 +286,7 @@ class ChartSummaryStrip extends ConsumerWidget {
           );
         }
         final baseline = baselineText(l, text, resolved);
+        final spokenBaseline = text.prev(resolved);
         final rate = s.ratePct;
         Widget row(_Tile a, _Tile b) => Padding(
           padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
@@ -309,7 +310,7 @@ class ChartSummaryStrip extends ConsumerWidget {
                 value: trimCurrency(chartMoney(ref, context, s.spent)),
                 change: s.spentChange,
                 moreIsGood: false,
-                baseline: baseline,
+                baseline: spokenBaseline,
                 valueKey: const Key('summary-spent'),
               ),
               _Tile(
@@ -317,7 +318,7 @@ class ChartSummaryStrip extends ConsumerWidget {
                 value: trimCurrency(chartMoney(ref, context, s.income)),
                 change: s.incomeChange,
                 moreIsGood: true,
-                baseline: baseline,
+                baseline: spokenBaseline,
                 valueKey: const Key('summary-income'),
               ),
             ),
@@ -327,7 +328,7 @@ class ChartSummaryStrip extends ConsumerWidget {
                 value: trimCurrency(chartMoney(ref, context, s.saved)),
                 change: s.savedChange,
                 moreIsGood: true,
-                baseline: baseline,
+                baseline: spokenBaseline,
                 valueKey: const Key('summary-saved'),
               ),
               _Tile(
@@ -337,7 +338,7 @@ class ChartSummaryStrip extends ConsumerWidget {
                     : chartPercent(ref, context, rate),
                 change: s.rateChange,
                 moreIsGood: true,
-                baseline: baseline,
+                baseline: spokenBaseline,
                 valueKey: const Key('summary-rate'),
               ),
             ),
