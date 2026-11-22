@@ -9,7 +9,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_segmented.dart';
 import '../../budget/presentation/budget_screen.dart';
 import '../../home/presentation/home_widgets.dart';
-import 'charts/charts_screen.dart';
+import 'v2/insights_v2_screen.dart';
 import '../../recurring/presentation/bills_screen.dart';
 import '../../../core/ui/z_hide_amounts_button.dart';
 
@@ -42,7 +42,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
     final c = ZColors.of(context);
     final body = switch (_segment) {
       InsightsSegment.charts =>
-        widget.chartsBuilder?.call(context) ?? const ChartsScreen(),
+        widget.chartsBuilder?.call(context) ?? const ChartsV2Screen(),
       InsightsSegment.budget =>
         widget.budgetBuilder?.call(context) ?? const BudgetScreen(),
       InsightsSegment.bills =>
