@@ -43,6 +43,10 @@ Bundle ids (app, ShareExtension, widget), version and build number, no `NSAllows
 
 Release builds ship arm64-v8a and armeabi-v7a only (no x86_64). Side-loaded per-ABI APKs: `flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64 --flavor <prodSms|prodNoSms>`. Measured 2026-11-20: Play download arm64 28.8 MiB, unsigned iOS IPA 17.4 MiB (report: `docs/05-reviews/T-190-size.md`). Each release workflow runs `.github/scripts/check-app-size.sh` against `.github/size-baseline.json` (fails above +10 % or over the 40 MiB / 60 MiB budget); after an intended change update the baseline in the same commit. The `size-report` workflow (manual, or a push to `size/**`) prints the per-ABI breakdown and the bundletool download size.
 
+## Installable size-check build (T-208)
+
+For "how big is the app on my phone" use **`zaghlol-devSms-release-arm64-sideload`** (or `...devNoSms...`), an artifact of the `installed-size` workflow (Actions tab, run on `main` or `workflow_dispatch`; 14 days). It holds `zaghlol-<flavor>-release-arm64-sideload-NOT-FOR-STORE.apk`: release mode, arm64-v8a only, R8-shrunk, signed with the **debug** key, dev backend, package `app.zaghlol.dev` (installs next to a store build; not uploadable anywhere). Expect "App size" of about 70 MiB in Android Settings. Do **not** use the `zaghlol-*-debug-apk` artifacts of app-ci for size checks: they are debug universal builds, 278 MiB of code plus 143 MiB copied to the data dir on first launch (`docs/05-reviews/T-208-installed-size.md`).
+
 ## iOS signing: deliberate deviation from "fastlane/match"
 
 The task text says fastlane/match. `match` needs a private certificates repository and a second passphrase. The pipeline instead takes one Apple Distribution `.p12` plus three provisioning profiles as secrets and lets fastlane switch `Release-prod` to manual signing at build time (`update_code_signing_settings`), leaving the committed project on automatic signing. Fewer moving parts; if the PO prefers match, only `archive_signed` changes. The signed path **could not be dry-run** (no Apple account); the unsigned path was.

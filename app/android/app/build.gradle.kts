@@ -78,6 +78,18 @@ android {
         }
     }
 
+    // T-208: native libs stay stored uncompressed and page-aligned inside the APK
+    // and are mapped from it (no extraction to /data/app/.../lib). Legacy
+    // packaging (compressed libs, extracted at install) would keep every .so
+    // twice on the phone: about 54 MiB extra for arm64. This is the AGP default
+    // for minSdk 23+; stated explicitly so a plugin or a template change cannot
+    // flip it silently. app-ci asserts the result on every release APK.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
     // T-165: AllowBackup / DataExtractionRules / FullBackupContent are fatal (lint.xml).
     lint {
         lintConfig = file("lint.xml")

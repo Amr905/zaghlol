@@ -676,6 +676,19 @@ jobs:
           path: app/build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
           retention-days: 14
+      # T-208: installed size = APK + oat, as long as the native libs are mapped from the APK.
+      - name: Assert native libs are stored uncompressed and not extracted (T-208)
+        run: |
+          APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
+          AAPT=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt | sort -V | tail -n 1)
+          if "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -iE "extractNativeLibs.*0xffffffff"; then
+            echo "::error::extractNativeLibs=true in $APK: every .so would be stored twice on the phone"
+            exit 1
+          fi
+          if ! unzip -v "$APK" | awk '$NF ~ /[.]so$/ && $2 != "Stored" {bad=1; print "compressed lib:", $NF} END{exit bad}'; then
+            echo "::error::compressed native libs in $APK (legacy packaging; installed size doubles)"
+            exit 1
+          fi
       - name: Assert sqlite3mc code asset, 16 KB alignment, no benchmark code
         run: |
           APK=$(find app/build/app/outputs -iname "*${FLAVOR}*${MODE}.apk" | head -n 1)
