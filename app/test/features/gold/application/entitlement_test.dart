@@ -1,3 +1,4 @@
+import 'dart:async';
 // T-144: token verification, install binding, offline bound, anchor rules,
 // sign-out and support notice. Synthetic keys and IDs only.
 
@@ -607,6 +608,19 @@ void main() {
         notice: SupportNotice.goldLinkedBySupport,
       );
       expect(await h.service.hasPendingSupportNotice(), isFalse);
+    });
+
+    test('FU-168e: firstEvaluation is pending until the first evaluate '
+        'published a phase', () async {
+      final h = Harness(boot: 1);
+      var done = false;
+      unawaited(h.service.firstEvaluation.then((_) => done = true));
+      await Future<void>.delayed(Duration.zero);
+      expect(done, isFalse);
+      await h.service.start();
+      await h.service.firstEvaluation;
+      expect(done, isTrue);
+      await h.service.stop();
     });
 
     test(

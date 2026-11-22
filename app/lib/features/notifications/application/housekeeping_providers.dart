@@ -2,12 +2,18 @@
 // ingest batch (and a manual add) and what start / resume run. Best effort
 // everywhere: a failure here never fails the ingest that triggered it.
 
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart' hide Settings;
 import '../../../core/db/app_database_providers.dart';
+import '../../../core/db/daos/fired_alerts_dao.dart';
 import '../../../core/l10n/locale_providers.dart' show digitsModeProvider;
+import '../../../core/settings/settings_keys.dart';
+import '../../../core/settings/settings_providers.dart';
+import '../domain/quiet_hours.dart';
 import '../../../core/l10n/money_format.dart';
 import '../../budget/application/budget_alert_runner.dart';
 import '../../budget/application/budget_alert_service.dart';
@@ -337,6 +343,16 @@ final resumeJobsProvider = Provider<Future<void> Function({bool coldStart})>((
   ref,
 ) {
   return ({bool coldStart = false}) async {
+    if (coldStart) {
+      // FU-267: alerts the platform still holds from before this start get
+      // the text of the current "hide amounts" setting; the jobs below
+      // schedule them again.
+      try {
+        await ref.read(rederivePendingAlertsProvider)();
+      } on Object {
+        // Best effort.
+      }
+    }
     await ref.read(alertsResumeProvider)();
     try {
       await ref
@@ -347,3 +363,87 @@ final resumeJobsProvider = Provider<Future<void> Function({bool coldStart})>((
     }
   };
 }, name: 'resumeJobsProvider');
+
+/// How far back an alert can still be waiting: quiet hours delay by less
+/// than a day.
+const pendingAlertLookback = Duration(hours: 24);
+
+/// FU-267: scheduled alerts are kept in memory only, so after a restart (or a
+/// change of "hide amounts") the platform may hold text with or without
+/// amounts that no longer matches the setting. This cancels what is
+/// scheduled, releases the dedupe claim of every alert that quiet hours were
+/// still holding (fired within [pendingAlertLookback] and its quiet end is in
+/// the future) and, with [rerun], runs the sources again (bills due, budget
+/// alerts, duplicate check, weekly summary), which schedule them again with
+/// text for the current setting.
+///
+/// When amounts are shown it does nothing unless something was waiting.
+/// Returns the number of alerts released. Never logs.
+final rederivePendingAlertsProvider =
+    Provider<Future<int> Function({bool rerun})>((ref) {
+      return ({bool rerun = false}) async {
+        final settings = await ref.read(settingsRepositoryProvider.future);
+        final hidden =
+            await settings.get(Settings.hideAmountsNotifications) ||
+            await settings.get(Settings.hideAmountsApp);
+        final db = await ref.read(appDatabaseProvider.future);
+        final dao = FiredAlertsDao(db);
+        final now = ref.read(clockProvider)().toUtc();
+        final quiet = QuietHours(
+          enabled: await settings.get(Settings.quietHoursEnabled),
+          startMin: await settings.get(Settings.quietHoursStartMin),
+          endMin: await settings.get(Settings.quietHoursEndMin),
+        );
+        final recent = await dao.firedSince(
+          now.subtract(pendingAlertLookback).millisecondsSinceEpoch,
+        );
+        final pending = [
+          for (final r in recent)
+            if (quiet
+                .nextAllowed(
+                  DateTime.fromMillisecondsSinceEpoch(
+                    r.firedAt,
+                    isUtc: true,
+                  ).toLocal(),
+                )
+                .isAfter(now.toLocal()))
+              r,
+        ];
+        if (!hidden && pending.isEmpty) return 0;
+        await ref.read(notificationGatewayProvider).cancelScheduled();
+        for (final r in pending) {
+          await dao.unmarkFired(
+            kind: r.kind,
+            subjectId: r.subjectId,
+            periodKey: r.periodKey,
+            threshold: r.threshold,
+          );
+        }
+        if (pending.any((r) => r.kind == NotificationType.weeklySummary.kind)) {
+          await settings.reset(Settings.notifWeeklyLastRun);
+        }
+        if (rerun && pending.isNotEmpty) {
+          await ref.read(alertsResumeProvider)();
+          await ref.read(housekeepingProvider).run(force: true);
+        }
+        return pending.length;
+      };
+    }, name: 'rederivePendingAlertsProvider');
+
+/// FU-267: when "hide amounts" is switched (the eye toggle or the
+/// notifications switch), waiting alerts are re-derived at once. Watched by
+/// the app root.
+final pendingAlertsWatcherProvider = Provider<void>((ref) {
+  void onSwitch(AsyncValue<bool>? prev, AsyncValue<bool> next) {
+    final before = prev?.value;
+    if (before == null || before == next.value) return;
+    unawaited(
+      ref
+          .read(rederivePendingAlertsProvider)(rerun: true)
+          .then<void>((_) {}, onError: (Object _) {}),
+    );
+  }
+
+  ref.listen(hideAmountsNotificationsProvider, onSwitch);
+  ref.listen(hideAmountsAppProvider, onSwitch);
+}, name: 'pendingAlertsWatcherProvider');

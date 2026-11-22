@@ -25,11 +25,16 @@ import '../../../core/db/financial_fixtures.dart';
 final egp = Currency.of('EGP');
 
 class _Gw implements NotificationGateway {
+  int cancels = 0;
   final shown = <PlatformNotification>[];
   @override
   Future<void> show(PlatformNotification n) async => shown.add(n);
   @override
   Future<void> schedule(PlatformNotification n) async => shown.add(n);
+  @override
+  Future<void> cancelScheduled() async {
+    cancels++;
+  }
 }
 
 bool _on(NotificationType t) => true;
