@@ -7,12 +7,17 @@ import 'package:zaghlol/features/notifications/domain/notification_types.dart';
 import 'package:zaghlol/features/notifications/domain/quiet_hours.dart';
 
 class FakeGateway implements NotificationGateway {
+  int cancels = 0;
   final shown = <PlatformNotification>[];
   final scheduled = <PlatformNotification>[];
   @override
   Future<void> show(PlatformNotification n) async => shown.add(n);
   @override
   Future<void> schedule(PlatformNotification n) async => scheduled.add(n);
+  @override
+  Future<void> cancelScheduled() async {
+    cancels++;
+  }
 }
 
 const quiet = QuietHours(enabled: true, startMin: 23 * 60, endMin: 8 * 60);
@@ -34,10 +39,15 @@ AlertRequest req({
 bool _all(NotificationType _) => true;
 
 class _ThrowingGateway implements NotificationGateway {
+  int cancels = 0;
   @override
   Future<void> show(PlatformNotification n) async => throw StateError('x');
   @override
   Future<void> schedule(PlatformNotification n) async => throw StateError('x');
+  @override
+  Future<void> cancelScheduled() async {
+    cancels++;
+  }
 }
 
 void main() {

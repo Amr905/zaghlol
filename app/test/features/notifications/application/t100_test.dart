@@ -16,11 +16,16 @@ import 'package:zaghlol/features/notifications/domain/quiet_hours.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 class _Gw implements NotificationGateway {
+  int cancels = 0;
   final shown = <PlatformNotification>[];
   @override
   Future<void> show(PlatformNotification n) async => shown.add(n);
   @override
   Future<void> schedule(PlatformNotification n) async => shown.add(n);
+  @override
+  Future<void> cancelScheduled() async {
+    cancels++;
+  }
 }
 
 DupTxn tx(

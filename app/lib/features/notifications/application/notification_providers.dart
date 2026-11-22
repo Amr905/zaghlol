@@ -123,6 +123,9 @@ final class _SilentGateway implements NotificationGateway {
 
   @override
   Future<void> schedule(PlatformNotification n) async {}
+
+  @override
+  Future<void> cancelScheduled() async {}
 }
 
 /// The strings of the language shown now (the setting, else the device).
