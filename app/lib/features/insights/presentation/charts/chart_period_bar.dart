@@ -81,7 +81,9 @@ class ChartPeriodBar extends ConsumerWidget {
                   label: resolved == null
                       ? null
                       : l.insightsChartsPeriodA11y(
-                          text.presetName(resolved.selection.preset),
+                          resolved.selection.offset == 0
+                              ? text.presetName(resolved.selection.preset)
+                              : text.range(resolved.period),
                           label,
                         ),
                   onTap: resolved == null

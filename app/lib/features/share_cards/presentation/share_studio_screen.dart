@@ -81,7 +81,11 @@ class _ShareStudioScreenState extends ConsumerState<ShareStudioScreen> {
           action: l.commonActionTryAgain,
           onAction: () => ref.invalidate(chartsCurrenciesProvider),
         ),
-        data: (list) {
+        data: (raw) {
+          final list = primaryFirst(
+            raw,
+            ref.watch(primaryCurrencyProvider).value,
+          );
           if (list.isEmpty) return _empty(l);
           final codes = [for (final x in list) x.code];
           final picked = ref.watch(chartsCurrencyProvider);

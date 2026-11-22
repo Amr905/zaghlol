@@ -21,7 +21,7 @@ import 'package:zaghlol/features/wealth/presentation/net_worth_breakdown_provide
 import 'package:zaghlol/features/wealth/data/net_worth_repository.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
-import '../support/hide_amounts_support.dart';
+import '../../support/hide_amounts_support.dart';
 
 final _egp = Currency.of('EGP');
 final _aed = Currency.of('AED');
