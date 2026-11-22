@@ -365,6 +365,12 @@ protocol NotificationsHostApi {
   func schedule(n: NotifMsg, atEpochMs: Int64) throws
   /// Cancels shown and scheduled notifications.
   func cancelAll() throws
+  /// FU-267: cancels only the notifications scheduled for later (Android
+  /// alarms, iOS pending requests); the ones already shown stay. Dart calls
+  /// it before it schedules again with text redacted for the current
+  /// "hide amounts" setting, so no stale alert keeps its amount. Native code
+  /// never rebuilds a notification (it has no text to redact).
+  func cancelScheduled() throws
   /// The route of the notification that launched the app, once.
   func takeLaunchRoute() throws -> String?
   /// Opens the system notification settings of this app (Android: the app's
@@ -475,6 +481,24 @@ class NotificationsHostApiSetup {
       }
     } else {
       cancelAllChannel.setMessageHandler(nil)
+    }
+    /// FU-267: cancels only the notifications scheduled for later (Android
+    /// alarms, iOS pending requests); the ones already shown stay. Dart calls
+    /// it before it schedules again with text redacted for the current
+    /// "hide amounts" setting, so no stale alert keeps its amount. Native code
+    /// never rebuilds a notification (it has no text to redact).
+    let cancelScheduledChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.NotificationsHostApi.cancelScheduled\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      cancelScheduledChannel.setMessageHandler { _, reply in
+        do {
+          try api.cancelScheduled()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      cancelScheduledChannel.setMessageHandler(nil)
     }
     /// The route of the notification that launched the app, once.
     let takeLaunchRouteChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.NotificationsHostApi.takeLaunchRoute\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)

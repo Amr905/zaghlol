@@ -184,6 +184,20 @@ final class BackupExclusionTests: XCTestCase {
     }
   }
 
+  // FU-202d: the resume marker survives the native clear at the top level only.
+  func testWipeKeepsTheResumeMarkerAtTopLevelOnly() throws {
+    let a = scratch.appendingPathComponent("support-marker", isDirectory: true)
+    let nested = a.appendingPathComponent("db", isDirectory: true)
+    try FileManager.default.createDirectory(at: nested, withIntermediateDirectories: true)
+    try Data([1]).write(to: a.appendingPathComponent("wipe_pending"))
+    try Data([2]).write(to: nested.appendingPathComponent("wipe_pending"))
+    try Data([3]).write(to: a.appendingPathComponent("other.bin"))
+
+    XCTAssertTrue(LocalDataWiper.wipeFiles(roots: [a]))
+
+    XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: a.path), ["wipe_pending"])
+  }
+
   // T-166: the seat keys are the only Keychain service the wipe keeps (D-55).
   func testDeleteEverythingKeepsOnlyTheSeatKeyService() {
     XCTAssertFalse(LocalDataWiper.shouldDelete(service: SeatKeyStore.service))

@@ -33,7 +33,7 @@ class LocalDataWiper(
             ok = attempt(part) && ok
         }
         for (root in roots) {
-            ok = clearContents(root) && ok
+            ok = clearContents(root, KEEP_AT_TOP_LEVEL) && ok
         }
         for (step in afterFiles) {
             attempt(step)
@@ -50,17 +50,27 @@ class LocalDataWiper(
 
     companion object {
         /**
+         * FU-202d: Dart's resume marker (`WipeMarker.fileName`) sits at the top
+         * of the app-support root. It stays through the native clear so a wipe
+         * that is cut short and resumed still knows; Dart deletes it itself
+         * once every part has finished.
+         */
+        const val WIPE_MARKER = "wipe_pending"
+        private val KEEP_AT_TOP_LEVEL = setOf(WIPE_MARKER)
+
+        /**
          * Deletes everything inside [dir], never [dir] itself and never by
          * following a symlink out of it. True when nothing is left (or [dir]
-         * does not exist).
+         * does not exist). Direct children named in [keep] are left alone.
          */
-        fun clearContents(dir: File): Boolean {
+        fun clearContents(dir: File, keep: Set<String> = emptySet()): Boolean {
             val children = dir.listFiles() ?: return !dir.exists()
             var ok = true
             for (child in children) {
+                if (child.name in keep) continue
                 ok = deleteTree(child) && ok
             }
-            return ok && (dir.listFiles()?.isEmpty() ?: !dir.exists())
+            return ok && (dir.listFiles()?.all { it.name in keep } ?: !dir.exists())
         }
 
         private fun deleteTree(f: File): Boolean {

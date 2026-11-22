@@ -14,16 +14,19 @@ import '../../catalog_sync/application/sync_providers.dart'
 import '../../gold/application/gating.dart';
 import '../crypto/backup_crypto_providers.dart';
 import '../crypto/backup_format.dart' show BackupPlatform;
+import '../data/platform_backup_work_scheduler.dart';
 import 'drive_backup_destination.dart';
 import 'drive_backup_providers.dart';
 import 'icloud_backup_destination.dart';
 import 'icloud_backup_providers.dart';
 import 'schedule.dart';
 
-/// Registers the periodic platform job. Default: does nothing until the
-/// WorkManager / BGProcessingTask binding exists.
+/// Registers the periodic platform job (WorkManager on Android,
+/// BGProcessingTask on iOS; FU-168e). Other platforms and tests: does nothing.
 final backupWorkSchedulerProvider = Provider<BackupWorkScheduler>(
-  (ref) => const _NoWorkScheduler(),
+  (ref) => Platform.isAndroid || Platform.isIOS
+      ? PlatformBackupWorkScheduler()
+      : const _NoWorkScheduler(),
   name: 'backupWorkSchedulerProvider',
 );
 

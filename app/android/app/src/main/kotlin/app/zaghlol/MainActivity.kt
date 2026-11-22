@@ -17,6 +17,8 @@ import app.zaghlol.platform.notifications.NotificationHandOff
 import app.zaghlol.platform.notifications.NotificationPresenter
 import app.zaghlol.platform.notifications.NotificationRoutes
 import app.zaghlol.platform.notifications.NotificationsEventsApi
+import app.zaghlol.platform.backupwork.BackupWorkHost
+import app.zaghlol.platform.backupwork.BackupWorkHostApi
 import app.zaghlol.platform.notifications.NotificationsHost
 import app.zaghlol.platform.notifications.NotificationsRegistration
 import app.zaghlol.platform.ocr.OcrHostApi
@@ -107,6 +109,8 @@ class MainActivity : FlutterFragmentActivity() {
         notificationsHost = notifHost
         notificationEvents = NotificationsEventsApi(messenger)
         NotificationsRegistration.register(messenger, notifHost)
+        // FU-168e: the periodic backup wake-up (UI engine only; the job runs no Dart).
+        BackupWorkHostApi.setUp(messenger, BackupWorkHost(applicationContext))
         // L-1: route and cancel id only from our own trampoline.
         // A plain launch (or a Recents relaunch) clears a stale route.
         val launch = intent?.let { acceptedNotification(it) }
@@ -161,6 +165,7 @@ class MainActivity : FlutterFragmentActivity() {
         SpeechSupportRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/app_settings").setMethodCallHandler(null)
         NotificationsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        BackupWorkHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         notificationsHost = null
         notificationEvents = null
         OcrHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)

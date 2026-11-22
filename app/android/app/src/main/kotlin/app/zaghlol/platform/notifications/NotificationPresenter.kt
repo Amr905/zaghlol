@@ -54,6 +54,11 @@ class NotificationPresenter(private val context: Context) {
 
   fun cancelAll() {
     nm.cancelAll()
+    cancelScheduled()
+  }
+
+  /** FU-267: only the alarms that have not fired; what is already shown stays. */
+  fun cancelScheduled() {
     for (id in pending.all()) {
       val pi =
         PendingIntent.getBroadcast(
