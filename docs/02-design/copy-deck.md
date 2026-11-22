@@ -1428,6 +1428,51 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_chartA11y_netWorth` | اللي حيلتك كله: من {startAmount} لـ {endAmount} | Net worth: from {startAmount} to {endAmount} | A |
 | `insights_chartA11y_inflation` | الغلاء: فاتورة السوبرماركت من {startAmount} لـ {endAmount} | Inflation: supermarket basket from {startAmount} to {endAmount} | A |
 
+## 2.2b S-20 Charts v2 Overview (T-209, CHARTS-V2) — `insights_v2_*`
+States: loading · populated · thin data (hero number plus a "not enough data yet" line) · closed period (full line, no projection) · no budget (budget line, left-in-budget and the budget part of the projection are hidden) · Coming up hidden when empty · Gold-locked card (existing treatment) · hidden amounts (figures, axis labels and the scrub tooltip show `****`). The period word is always «شهر» (PO, CHARTS-V2).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `insights_v2_tabOverview` | نظرة عامة | Overview | C · tab 1 |
+| `insights_v2_tabCategories` | التصنيفات | Categories | C · tab 2 |
+| `insights_v2_tabTrends` | الاتجاهات | Trends | C · tab 3 |
+| `insights_v2_heroLabel` | صرفت لحد النهارده | Spent so far | L · hero label, open period |
+| `insights_v2_heroLabelClosed` | إجمالي صرفك في الشهر | Total spent in the month | L · hero label, closed period |
+| `insights_v2_heroDay` | اليوم {day} من {total} | Day {day} of {total} | C · hero, open period |
+| `insights_v2_heroVs` | `{trend, select, up{أكتر بـ {delta} من نفس اليوم الشهر اللي فات} down{أقل بـ {delta} من نفس اليوم الشهر اللي فات} other{زي نفس اليوم الشهر اللي فات بالظبط}}` | `{trend, select, up{{delta} more than by this day last month} down{{delta} less than by this day last month} other{Same as by this day last month}}` | S · trend:select(up/down/other). Open period against the same days of the previous one |
+| `insights_v2_heroVsClosed` | `{trend, select, up{أكتر بـ {delta} من الشهر اللي فات} down{أقل بـ {delta} من الشهر اللي فات} other{زي الشهر اللي فات بالظبط}}` | `{trend, select, up{{delta} more than last month} down{{delta} less than last month} other{Same as last month}}` | S · trend:select(up/down/other). Closed period against the whole previous one |
+| `insights_v2_heroThin` | لسه مفيش بيانات كفاية نقارن بيها بالشهر اللي فات | Not enough data yet to compare with last month | S · thin data: under 3 days or no previous period |
+| `insights_v2_heroProjection` | `{state, select, under{لو كملت كده هتقفل الشهر على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل الشهر على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل الشهر على حوالي {projected}}}` | `{state, select, under{At this pace you'll end the month near {projected}, under your budget ({budget})} over{At this pace you'll end the month near {projected}, over your budget ({budget})} other{At this pace you'll end the month near {projected}}}` | S · state:select(under/over/other); other = no budget |
+| `insights_v2_heroClosedBudget` | `{state, select, under{قفلت الشهر تحت ميزانيتك ({budget})} over{قفلت الشهر فوق ميزانيتك ({budget})} other{}}` | `{state, select, under{You finished the month under your budget ({budget})} over{You finished the month over your budget ({budget})} other{}}` | S · state:select(under/over/other); other is never shown |
+| `insights_v2_legendThis` | الشهر ده | This month | C · legend |
+| `insights_v2_legendLast` | الشهر اللي فات | Last month | C · legend |
+| `insights_v2_legendBudget` | الميزانية | Budget | C · legend and line label |
+| `insights_v2_legendProjected` | المتوقع | Projected | C · legend |
+| `insights_v2_paceDay` | يوم {day} | Day {day} | C · x axis, first label |
+| `insights_v2_statIncome` | دخلك | Income | C · stat under the hero |
+| `insights_v2_statLeft` | فاضل في الميزانية | Left in budget | L · stat under the hero; hidden without a budget |
+| `insights_v2_statBills` | فواتير جاية | Bills coming | L · stat under the hero: due from today to the end of the period |
+| `insights_v2_otherCurrency` | وكمان صرفت {amount} | Also spent {amount} | S · another currency, in its own currency, never summed |
+| `insights_v2_paceA11y` | رسم سرعة الصرف: لحد اليوم {day} من {total} صرفت {spent} | Spending pace chart: by day {day} of {total} you spent {spent} | S · semantics label |
+| `insights_v2_paceA11yPrev` | الشهر اللي فات لحد نفس اليوم: {previous} | Last month by the same day: {previous} | S · semantics label, second sentence |
+| `insights_v2_paceA11yProjected` | المتوقع في آخر الشهر: {projected} | Projected for the end of the month: {projected} | S · semantics label, third sentence |
+| `insights_v2_scrubHint` | اسحب صباعك على الرسم علشان تشوف كل يوم | Drag along the chart to see each day | S · semantics hint |
+| `insights_v2_scrubSpent` | يوم {day} · صرفت لحد يومها {spent} | Day {day} · spent to date {spent} | S · scrub tooltip, line 1 |
+| `insights_v2_scrubLast` | الشهر اللي فات: {previous} | Last month: {previous} | C · scrub tooltip, line 2 |
+| `insights_v2_catTitle` | صرفت فين | Where it went | T · card title |
+| `insights_v2_catSub` | الشرطة الرمادي = نفس الأيام الشهر اللي فات | Grey tick = same days last month | S · card subtitle |
+| `insights_v2_catSeeAll` | شوف كل التصنيفات | See all categories | B · opens the Categories tab |
+| `insights_v2_catRowA11y` | {category}: {amount}. {status} | {category}: {amount}. {status} | S · semantics label of a category row; status = the change text |
+| `insights_v2_savedTitle` | وفّرت كام كل شهر | Saved each month | T · card title |
+| `insights_v2_savedSub` | الدخل ناقص الصرف · الشهر ده متوقع | Income minus spending · this month projected | S · card subtitle |
+| `insights_v2_savedAverage` | متوسطك {average} | Your average {average} | C · average line label |
+| `insights_v2_savedBarA11y` | {month}: {amount} | {month}: {amount} | C · semantics label of one bar |
+| `insights_v2_savedBarProjectedA11y` | {month} (متوقع): {amount} | {month} (projected): {amount} | C · semantics label of the projected bar |
+| `insights_v2_savedA11y` | رسم اللي وفّرته كل شهر. {list} | Saved each month chart. {list} | S · semantics label; list = the bars |
+| `insights_v2_upTitle` | جاي قريب | Coming up | T · card title; hidden when nothing is due |
+| `insights_v2_upIn` | `{count, plural, =0{النهارده} =1{بكرة} =2{بعد يومين} few{بعد {n} أيام} many{بعد {n} يوم} other{بعد {n} يوم}}` | `{count, plural, =0{Today} =1{Tomorrow} other{In {n} days}}` | C · count:int, n = digits |
+| `insights_v2_upA11y` | {item}، {when}، {amount} | {item}, {when}, {amount} | S · semantics label of one row |
+
 ## 2.3 S-21 Chart detail and explainer — `insights_chartDetail_*`, `insights_deep_*`
 States: populated · explainer closed (button) · typing (≤ 600 ms) · explained (basic or deep) · Gold-locked chart · empty · explainer error (bubble hidden, chart stays). Chart 10 lists spend per card per currency (FR-CHT-06).
 

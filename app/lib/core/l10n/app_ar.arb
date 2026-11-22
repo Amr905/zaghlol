@@ -11379,5 +11379,304 @@
   "insightsChartsRetry": "حاول تاني",
   "@insightsChartsRetry": {
     "description": "T-189 charts redesign"
+  },
+  "insightsV2TabOverview": "نظرة عامة",
+  "@insightsV2TabOverview": {
+    "description": "T-209 Charts v2 · tab 1"
+  },
+  "insightsV2TabCategories": "التصنيفات",
+  "@insightsV2TabCategories": {
+    "description": "T-209 Charts v2 · tab 2"
+  },
+  "insightsV2TabTrends": "الاتجاهات",
+  "@insightsV2TabTrends": {
+    "description": "T-209 Charts v2 · tab 3"
+  },
+  "insightsV2HeroLabel": "صرفت لحد النهارده",
+  "@insightsV2HeroLabel": {
+    "description": "T-209 Charts v2 · hero label, open period"
+  },
+  "insightsV2HeroLabelClosed": "إجمالي صرفك في الشهر",
+  "@insightsV2HeroLabelClosed": {
+    "description": "T-209 Charts v2 · hero label, closed period"
+  },
+  "insightsV2HeroDay": "اليوم {day} من {total}",
+  "@insightsV2HeroDay": {
+    "description": "T-209 Charts v2 · hero, open period",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroVs": "{trend, select, up{أكتر بـ {delta} من نفس اليوم الشهر اللي فات} down{أقل بـ {delta} من نفس اليوم الشهر اللي فات} other{زي نفس اليوم الشهر اللي فات بالظبط}}",
+  "@insightsV2HeroVs": {
+    "description": "T-209 Charts v2 · trend:select(up/down/other). Open period against the same days of the previous one",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroVsClosed": "{trend, select, up{أكتر بـ {delta} من الشهر اللي فات} down{أقل بـ {delta} من الشهر اللي فات} other{زي الشهر اللي فات بالظبط}}",
+  "@insightsV2HeroVsClosed": {
+    "description": "T-209 Charts v2 · trend:select(up/down/other). Closed period against the whole previous one",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroThin": "لسه مفيش بيانات كفاية نقارن بيها بالشهر اللي فات",
+  "@insightsV2HeroThin": {
+    "description": "T-209 Charts v2 · thin data: under 3 days or no previous period"
+  },
+  "insightsV2HeroProjection": "{state, select, under{لو كملت كده هتقفل الشهر على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل الشهر على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل الشهر على حوالي {projected}}}",
+  "@insightsV2HeroProjection": {
+    "description": "T-209 Charts v2 · state:select(under/over/other); other = no budget",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "projected": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroClosedBudget": "{state, select, under{قفلت الشهر تحت ميزانيتك ({budget})} over{قفلت الشهر فوق ميزانيتك ({budget})} other{}}",
+  "@insightsV2HeroClosedBudget": {
+    "description": "T-209 Charts v2 · state:select(under/over/other); other is never shown",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2LegendThis": "الشهر ده",
+  "@insightsV2LegendThis": {
+    "description": "T-209 Charts v2 · legend"
+  },
+  "insightsV2LegendLast": "الشهر اللي فات",
+  "@insightsV2LegendLast": {
+    "description": "T-209 Charts v2 · legend"
+  },
+  "insightsV2LegendBudget": "الميزانية",
+  "@insightsV2LegendBudget": {
+    "description": "T-209 Charts v2 · legend and line label"
+  },
+  "insightsV2LegendProjected": "المتوقع",
+  "@insightsV2LegendProjected": {
+    "description": "T-209 Charts v2 · legend"
+  },
+  "insightsV2PaceDay": "يوم {day}",
+  "@insightsV2PaceDay": {
+    "description": "T-209 Charts v2 · x axis, first label",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2StatIncome": "دخلك",
+  "@insightsV2StatIncome": {
+    "description": "T-209 Charts v2 · stat under the hero"
+  },
+  "insightsV2StatLeft": "فاضل في الميزانية",
+  "@insightsV2StatLeft": {
+    "description": "T-209 Charts v2 · stat under the hero; hidden without a budget"
+  },
+  "insightsV2StatBills": "فواتير جاية",
+  "@insightsV2StatBills": {
+    "description": "T-209 Charts v2 · stat under the hero: due from today to the end of the period"
+  },
+  "insightsV2OtherCurrency": "وكمان صرفت {amount}",
+  "@insightsV2OtherCurrency": {
+    "description": "T-209 Charts v2 · another currency, in its own currency, never summed",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2PaceA11y": "رسم سرعة الصرف: لحد اليوم {day} من {total} صرفت {spent}",
+  "@insightsV2PaceA11y": {
+    "description": "T-209 Charts v2 · semantics label",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2PaceA11yPrev": "الشهر اللي فات لحد نفس اليوم: {previous}",
+  "@insightsV2PaceA11yPrev": {
+    "description": "T-209 Charts v2 · semantics label, second sentence",
+    "placeholders": {
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2PaceA11yProjected": "المتوقع في آخر الشهر: {projected}",
+  "@insightsV2PaceA11yProjected": {
+    "description": "T-209 Charts v2 · semantics label, third sentence",
+    "placeholders": {
+      "projected": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2ScrubHint": "اسحب صباعك على الرسم علشان تشوف كل يوم",
+  "@insightsV2ScrubHint": {
+    "description": "T-209 Charts v2 · semantics hint"
+  },
+  "insightsV2ScrubSpent": "يوم {day} · صرفت لحد يومها {spent}",
+  "@insightsV2ScrubSpent": {
+    "description": "T-209 Charts v2 · scrub tooltip, line 1",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2ScrubLast": "الشهر اللي فات: {previous}",
+  "@insightsV2ScrubLast": {
+    "description": "T-209 Charts v2 · scrub tooltip, line 2",
+    "placeholders": {
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatTitle": "صرفت فين",
+  "@insightsV2CatTitle": {
+    "description": "T-209 Charts v2 · card title"
+  },
+  "insightsV2CatSub": "الشرطة الرمادي = نفس الأيام الشهر اللي فات",
+  "@insightsV2CatSub": {
+    "description": "T-209 Charts v2 · card subtitle"
+  },
+  "insightsV2CatSeeAll": "شوف كل التصنيفات",
+  "@insightsV2CatSeeAll": {
+    "description": "T-209 Charts v2 · opens the Categories tab"
+  },
+  "insightsV2CatRowA11y": "{category}: {amount}. {status}",
+  "@insightsV2CatRowA11y": {
+    "description": "T-209 Charts v2 · semantics label of a category row; status = the change text",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedTitle": "وفّرت كام كل شهر",
+  "@insightsV2SavedTitle": {
+    "description": "T-209 Charts v2 · card title"
+  },
+  "insightsV2SavedSub": "الدخل ناقص الصرف · الشهر ده متوقع",
+  "@insightsV2SavedSub": {
+    "description": "T-209 Charts v2 · card subtitle"
+  },
+  "insightsV2SavedAverage": "متوسطك {average}",
+  "@insightsV2SavedAverage": {
+    "description": "T-209 Charts v2 · average line label",
+    "placeholders": {
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedBarA11y": "{month}: {amount}",
+  "@insightsV2SavedBarA11y": {
+    "description": "T-209 Charts v2 · semantics label of one bar",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedBarProjectedA11y": "{month} (متوقع): {amount}",
+  "@insightsV2SavedBarProjectedA11y": {
+    "description": "T-209 Charts v2 · semantics label of the projected bar",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedA11y": "رسم اللي وفّرته كل شهر. {list}",
+  "@insightsV2SavedA11y": {
+    "description": "T-209 Charts v2 · semantics label; list = the bars",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2UpTitle": "جاي قريب",
+  "@insightsV2UpTitle": {
+    "description": "T-209 Charts v2 · card title; hidden when nothing is due"
+  },
+  "insightsV2UpIn": "{count, plural, =0{النهارده} =1{بكرة} =2{بعد يومين} few{بعد {n} أيام} many{بعد {n} يوم} other{بعد {n} يوم}}",
+  "@insightsV2UpIn": {
+    "description": "T-209 Charts v2 · count:int, n = digits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2UpA11y": "{item}، {when}، {amount}",
+  "@insightsV2UpA11y": {
+    "description": "T-209 Charts v2 · semantics label of one row",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }
