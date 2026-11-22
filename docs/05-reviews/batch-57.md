@@ -140,3 +140,30 @@ Goldens not assessed (CI regenerates). Minors and nits go to **FU-285**.
 - **Lane 3 (native/core):** 3.1. Either wire `takeDue` → `runScheduled`/`remindIfStale` on start/resume and `reconcile()` after verification (with a test), or keep the scheduler binding inert and drop `processing` from Info.plist until then.
 - **Lane 4 (UI):** 4.1. Update `charts_screen_test` for the new cash-flow subtitle. This is small, so a Lead delta check is enough.
 - Everything else → FU-285.
+
+---
+
+## Delta re-review (after 0caed40a)
+
+Scope: `git diff 0caed40a..HEAD`. Ran `flutter test --exclude-tags golden test/features/backup test/features/notifications test/features/gold test/features/insights`: 850 passed.
+
+| Item | Verdict |
+|------|---------|
+| 3.1 backup due-run + reconcile (B58-wiring) | RESOLVED |
+| FU-267 re-derive pending alerts (B58-wiring) | APPROVED (minors only) |
+| 4.1 no totals note while the period is open | RESOLVED |
+| T-208 installed size | APPROVED |
+
+**3.1.** `backupDueRunProvider` awaits `EntitlementService.firstEvaluation` (completed only after `_sink.apply`), returns early on `pendingVerification`, and `reconcile()` itself also returns on `pendingVerification`. So no path cancels a Gold user's schedule before verification. A verified non-Gold user does not consume the due mark (`takeDue` is only called for Gold) and gets a cancel. Gold: `takeDue` → `runScheduled` + `remindIfStale`, then `reconcile()` in `finally`. No loop: it runs once per start/resume, is guarded by `running`, and Android uses `ExistingPeriodicWorkPolicy.UPDATE`, so re-submitting does not reset the period. All error paths are caught and return false.
+
+**FU-267.** The cold-start path cancels, un-marks quiet-hold alerts and the following `alertsResume` + housekeeping re-schedule them, so nothing is lost or duplicated. The watcher fires only on an actual value change, so there is no loop. When hiding, re-derived text goes through the redacting sources and the stale scheduled text is cancelled first, so no amount leaks.
+
+**T-208.** `useLegacyPackaging = false` is the default, stated explicitly. The app-ci assertion (aapt `extractNativeLibs` true, or any non-Stored `.so`) is correct. The workflow produces a debug-signed arm64 sideload APK named NOT-FOR-STORE, with a guard against an upload keystore. The only token use is `contents: write` on the measure job, which runs only on dispatch or `ci/` branches. The scripts record sizes only. No secrets.
+
+### New minors (all go to FU-285)
+
+| # | Sev | File | Issue |
+|---|-----|------|-------|
+| R.1 | minor | `schedule_providers.dart` (`backupDueRunProvider`) | If the first `evaluate()` throws, `firstEvaluation` stays pending, the awaiting call never returns, and `running` stays true, so later resumes return false until some later evaluation (timer/event) completes the future. Add a timeout, or release `running` on a timeout. |
+| R.2 | minor | `housekeeping_providers.dart` (`rederivePendingAlertsProvider`) | When hiding is switched on and `pending` is empty (for example the quiet-hours settings changed after the alert fired), `cancelScheduled()` runs with no re-run, so a scheduled alert is dropped until the next housekeeping run. Privacy-safe but lossy. Re-run when anything was cancelled, or when the platform reports a non-empty pending list. |
+| R.3 | nit | `housekeeping_providers.dart` imports | `quiet_hours.dart` is imported out of order (before `money_format.dart`). |
