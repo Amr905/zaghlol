@@ -1472,6 +1472,20 @@ States: loading · populated · thin data (hero number plus a "not enough data y
 | `insights_v2_upTitle` | جاي قريب | Coming up | T · card title; hidden when nothing is due |
 | `insights_v2_upIn` | `{count, plural, =0{النهارده} =1{بكرة} =2{بعد يومين} few{بعد {n} أيام} many{بعد {n} يوم} other{بعد {n} يوم}}` | `{count, plural, =0{Today} =1{Tomorrow} other{In {n} days}}` | C · count:int, n = digits |
 | `insights_v2_upA11y` | {item}، {when}، {amount} | {item}, {when}, {amount} | S · semantics label of one row |
+| `insights_v2_catsTitle` | التصنيفات | Categories | T · card title |
+| `insights_v2_catsSub` | `{count, plural, =0{{total} من غير تصنيفات} =1{{total} على تصنيف واحد} =2{{total} على تصنيفين} few{{total} على {n} تصنيفات} many{{total} على {n} تصنيف} other{{total} على {n} تصنيف}}` | `{count, plural, =0{{total} in no categories} =1{{total} in 1 category} other{{total} across {n} categories}}` | S · card subtitle: the total and how many categories; count:int, n = digits |
+| `insights_v2_catsSortAmount` | الأكبر الأول | Largest first | C · sort option |
+| `insights_v2_catsSortChange` | أكتر تغيير | Biggest change | C · sort option |
+| `insights_v2_catsSortA11y` | الترتيب: {label}. دوس علشان تغيّره. | Sort order: {label}. Tap to change. | S · semantics label of the sort control |
+| `insights_v2_catsStripA11y` | نسبة كل تصنيف. {list} | Share of each category. {list} | S · semantics label of the share strip; list = segments |
+| `insights_v2_catsStripSeg` | {name} {percent} | {name} {percent} | S · one segment of the strip in the semantics label |
+| `insights_v2_catsTip` | `{count, plural, =0{{name} · {amount}} =1{{name} · {amount} · حركة} =2{{name} · {amount} · حركتين} few{{name} · {amount} · {n} حركات} many{{name} · {amount} · {n} حركة} other{{name} · {amount} · {n} حركة}}` | `{count, plural, =0{{name} · {amount}} =1{{name} · {amount} · 1 txn} other{{name} · {amount} · {n} txns}}` | C · the selected category line; count:int, n = digits |
+| `insights_v2_catsOpenTxns` | افتح الحركات | Open transactions | B · opens the drill-down of the selected category |
+| `insights_v2_catsTrendTitle` | {name} على آخر ست شهور | {name}, 6 months | T · trend card title |
+| `insights_v2_catsTrendOpen` | آخر عمود لسه مفتوح، فهو لسه بيكبر. | The latest bar is still open, so it is still growing. | S · note while the current period is open |
+| `insights_v2_catsTrendA11y` | {name} في آخر ست فترات. {list} | {name} over the last six periods. {list} | S · semantics label of the trend; list = the bars |
+| `insights_v2_catsTrendItem` | {period}: {amount} | {period}: {amount} | S · one closed bar in the semantics label |
+| `insights_v2_catsTrendItemOpen` | {period}: {amount} لحد دلوقتي | {period}: {amount} so far | S · the open bar in the semantics label |
 
 ## 2.3 S-21 Chart detail and explainer — `insights_chartDetail_*`, `insights_deep_*`
 States: populated · explainer closed (button) · typing (≤ 600 ms) · explained (basic or deep) · Gold-locked chart · empty · explainer error (bubble hidden, chart stays). Chart 10 lists spend per card per currency (FR-CHT-06).

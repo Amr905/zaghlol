@@ -8575,5 +8575,133 @@
         "type": "String"
       }
     }
+  },
+  "insightsV2CatsTitle": "Categories",
+  "@insightsV2CatsTitle": {
+    "description": "T-210 Categories tab · card title"
+  },
+  "insightsV2CatsSub": "{count, plural, =0{{total} in no categories} =1{{total} in 1 category} other{{total} across {n} categories}}",
+  "@insightsV2CatsSub": {
+    "description": "T-210 · card subtitle: the total and how many categories",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsSortAmount": "Largest first",
+  "@insightsV2CatsSortAmount": {
+    "description": "T-210 · sort option"
+  },
+  "insightsV2CatsSortChange": "Biggest change",
+  "@insightsV2CatsSortChange": {
+    "description": "T-210 · sort option"
+  },
+  "insightsV2CatsSortA11y": "Sort order: {label}. Tap to change.",
+  "@insightsV2CatsSortA11y": {
+    "description": "T-210 · semantics label of the sort control",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsStripA11y": "Share of each category. {list}",
+  "@insightsV2CatsStripA11y": {
+    "description": "T-210 · semantics label of the share strip; list = segments",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsStripSeg": "{name} {percent}",
+  "@insightsV2CatsStripSeg": {
+    "description": "T-210 · one segment of the strip in the semantics label",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTip": "{count, plural, =0{{name} · {amount}} =1{{name} · {amount} · 1 txn} other{{name} · {amount} · {n} txns}}",
+  "@insightsV2CatsTip": {
+    "description": "T-210 · the selected category line",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsOpenTxns": "Open transactions",
+  "@insightsV2CatsOpenTxns": {
+    "description": "T-210 · opens the drill-down of the selected category"
+  },
+  "insightsV2CatsTrendTitle": "{name}, 6 months",
+  "@insightsV2CatsTrendTitle": {
+    "description": "T-210 · trend card title",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTrendOpen": "The latest bar is still open, so it is still growing.",
+  "@insightsV2CatsTrendOpen": {
+    "description": "T-210 · note while the current period is open"
+  },
+  "insightsV2CatsTrendA11y": "{name} over the last six periods. {list}",
+  "@insightsV2CatsTrendA11y": {
+    "description": "T-210 · semantics label of the trend; list = the bars",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTrendItem": "{period}: {amount}",
+  "@insightsV2CatsTrendItem": {
+    "description": "T-210 · one closed bar in the semantics label",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTrendItemOpen": "{period}: {amount} so far",
+  "@insightsV2CatsTrendItemOpen": {
+    "description": "T-210 · the open bar in the semantics label",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }
