@@ -3,20 +3,17 @@
 // thin-data states, hidden amounts. Synthetic data only.
 
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
-import 'package:zaghlol/core/l10n/locale_providers.dart';
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 import 'package:zaghlol/core/theme/z_tokens.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol/features/insights/domain/chart_summary.dart';
 import 'package:zaghlol/features/insights/presentation/charts/chart_bodies.dart';
-import 'package:zaghlol/features/insights/presentation/charts/charts_providers.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
 import 'package:zaghlol/features/insights/presentation/charts/gold_chart_card.dart';
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
@@ -267,7 +264,6 @@ void main() {
       expect(find.byKey(const Key('cashflow-bubble')), findsNothing);
       await _tapBar(tester, 1, 6);
       expect(find.byKey(const Key('cashflow-bubble')), findsOneWidget);
-      final l = _l(tester);
       expect(find.textContaining('30,000'), findsOneWidget);
       await _tapBar(tester, 1, 6);
       expect(find.byKey(const Key('cashflow-bubble')), findsNothing);
