@@ -409,6 +409,17 @@ void main() {
       // The list shows only that category and the header totals it.
       expect(find.byType(TxnRow), findsOneWidget);
       expect(find.byKey(const Key('drill-total')), findsOneWidget);
+      // FU-284: the header names the dates it is compared with, and the
+      // shared (Transactions tab) filter was never touched.
+      expect(find.textContaining('·'), findsWidgets);
+      expect(container.read(txnListFilterProvider).categoryIds, {
+        'food',
+      }, reason: 'scoped');
+      final root = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      expect(root.read(txnListFilterProvider).categoryIds, isEmpty);
+      expect(root.read(txnListFilterProvider).period, isNot(TxnPeriod.custom));
     });
 
     for (final locale in [_en, _ar]) {

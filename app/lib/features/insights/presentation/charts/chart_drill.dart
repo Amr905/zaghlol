@@ -18,6 +18,7 @@ import '../../domain/chart_models.dart';
 import '../../domain/chart_summary.dart';
 import 'chart_format.dart';
 import 'chart_overview.dart';
+import 'chart_period_text.dart';
 import 'charts_providers.dart';
 
 /// The filter a chart tap opens the list with: expenses of [code] in
@@ -41,9 +42,17 @@ TxnListFilter drillFilter({
   merchantName: merchantName,
 );
 
-/// Opens the transactions list for a chart tap. The list's filter chips are
-/// set to the drill-down while it is open and put back when it closes, so
-/// the Transactions tab keeps its own filters.
+class _DrillFilterNotifier extends TxnListFilterNotifier {
+  _DrillFilterNotifier(this._initial);
+  final TxnListFilter _initial;
+
+  @override
+  TxnListFilter build() => _initial;
+}
+
+/// Opens the transactions list for a chart tap. The list runs in a
+/// route-scoped provider scope with its own filter, so the Transactions tab
+/// never sees the drill-down's chips (FU-284).
 Future<void> openChartDrill(
   BuildContext context, {
   required String code,
@@ -54,35 +63,31 @@ Future<void> openChartDrill(
   String? merchantNorm,
   String? merchantName,
 }) async {
-  final container = ProviderScope.containerOf(context);
-  // Keeps the (auto-dispose) filter alive from before the route opens.
-  final sub = container.listen(txnListFilterProvider, (_, _) {});
-  final before = sub.read();
-  container
-      .read(txnListFilterProvider.notifier)
-      .set(
-        drillFilter(
-          code: code,
-          period: period,
-          categoryIds: categoryIds,
-          includeUncategorized: includeUncategorized,
-          merchantNorm: merchantNorm,
-          merchantName: merchantName,
-        ),
-      );
-  try {
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => TransactionsListScreen(
+  final filter = drillFilter(
+    code: code,
+    period: period,
+    categoryIds: categoryIds,
+    includeUncategorized: includeUncategorized,
+    merchantNorm: merchantNorm,
+    merchantName: merchantName,
+  );
+  await Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      builder: (_) => ProviderScope(
+        overrides: [
+          txnListFilterProvider.overrideWith(
+            () => _DrillFilterNotifier(filter),
+          ),
+          // Re-created in this scope so it reads the scoped filter.
+          txnListProvider.overrideWith(TxnListController.new),
+        ],
+        child: TransactionsListScreen(
           header: (_) =>
               ChartDrillHeader(scopePeriod: period, previous: previous),
         ),
       ),
-    );
-  } finally {
-    container.read(txnListFilterProvider.notifier).set(before);
-    sub.close();
-  }
+    ),
+  );
 }
 
 /// The total, count and change of what the list shows. It follows the list's
@@ -162,7 +167,10 @@ class ChartDrillHeader extends ConsumerWidget {
                     size: ZMoneySize.display,
                   ),
                   Text(
-                    l.insightsChartsDrillTotal(count),
+                    l.insightsChartsDrillTotalVs(
+                      count,
+                      ChartPeriodText.of(context, ref).range(before),
+                    ),
                     style: ZType.caption.copyWith(color: c.textMuted),
                   ),
                 ],
