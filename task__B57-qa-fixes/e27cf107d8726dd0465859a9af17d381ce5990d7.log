@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=e27cf107d8726dd0465859a9af17d381ce5990d7
+SKIP sha=e27cf107d8726dd0465859a9af17d381ce5990d7 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/B57-qa-fixes e27cf107d8726dd0465859a9af17d381ce5990d7 2026-11-22T17:02:54.2806454+02:00
+
+
+
