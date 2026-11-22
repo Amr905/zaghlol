@@ -77,7 +77,8 @@ class _Hero extends ConsumerWidget {
       );
     } else {
       final delta = data.spent - base;
-      final trend = delta > 0 ? 'up' : (delta < 0 ? 'down' : 'other');
+      final trend =
+          (delta > 0 ? _Sel.up : (delta < 0 ? _Sel.down : _Sel.other)).name;
       final change = percentChange(data.spent, base);
       final text = data.closed
           ? l.insightsV2HeroVsClosed(trend, money(delta.abs()))
@@ -104,7 +105,8 @@ class _Hero extends ConsumerWidget {
     // The projection (or, for a closed period, how it ended) against budget.
     String? panel;
     final over = data.overBudget;
-    final state = over == null ? 'other' : (over ? 'over' : 'under');
+    final state =
+        (over == null ? _Sel.other : (over ? _Sel.over : _Sel.under)).name;
     if (data.closed) {
       if (data.budgetMinor != null && over != null) {
         panel = l.insightsV2HeroClosedBudget(state, money(data.budgetMinor!));
@@ -369,3 +371,6 @@ class _Stat extends StatelessWidget {
     );
   }
 }
+
+/// ICU select keys for the hero copy (not user-facing text).
+enum _Sel { up, down, over, under, other }
