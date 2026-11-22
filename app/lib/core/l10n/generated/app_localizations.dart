@@ -2350,6 +2350,12 @@ abstract class AppLocalizations {
   /// **'المدة'**
   String get transactionsListFilterPeriod;
 
+  /// Filter chip: rows without a category
+  ///
+  /// In ar, this message translates to:
+  /// **'بدون تصنيف'**
+  String get transactionsListFilterUncategorized;
+
   /// C
   ///
   /// In ar, this message translates to:

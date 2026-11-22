@@ -26,6 +26,7 @@ final class TxnQuery {
     this.to,
     this.accountIds = const {},
     this.categoryIds = const {},
+    this.includeUncategorized = false,
     this.directions = const {},
     this.sources = const {},
     this.currencies = const {},
@@ -41,6 +42,9 @@ final class TxnQuery {
   final int? to;
   final Set<String> accountIds;
   final Set<String> categoryIds;
+
+  /// Also (or only, when [categoryIds] is empty) rows with no category.
+  final bool includeUncategorized;
   final Set<String> directions;
   final Set<String> sources;
   final Set<String> currencies;
@@ -204,7 +208,21 @@ class TransactionsDao {
       args.add(Variable.withInt(q.to!));
     }
     inList('t.account_id', q.accountIds);
-    inList('t.category_id', q.categoryIds);
+    if (q.includeUncategorized) {
+      if (q.categoryIds.isEmpty) {
+        where.add('t.category_id IS NULL');
+      } else {
+        where.add(
+          '(t.category_id IS NULL OR t.category_id IN '
+          '(${List.filled(q.categoryIds.length, '?').join(',')}))',
+        );
+        for (final v in q.categoryIds) {
+          args.add(Variable.withString(v));
+        }
+      }
+    } else {
+      inList('t.category_id', q.categoryIds);
+    }
     inList('t.direction', q.directions);
     inList('t.source', q.sources);
     inList('t.currency', q.currencies);

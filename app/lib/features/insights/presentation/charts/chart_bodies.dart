@@ -638,11 +638,7 @@ class _DonutBodyState extends ConsumerState<DonutBody> {
               Expanded(child: legend),
             ],
           );
-    final canOpen =
-        selected != null &&
-        widget.onOpenEntry != null &&
-        !(entries[selected].isOther &&
-            entries[selected].memberIds.contains(null));
+    final canOpen = selected != null && widget.onOpenEntry != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

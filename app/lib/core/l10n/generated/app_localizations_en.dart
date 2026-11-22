@@ -1477,6 +1477,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsListFilterPeriod => 'Dates';
 
   @override
+  String get transactionsListFilterUncategorized => 'Uncategorized';
+
+  @override
   String get transactionsListFilterCategory => 'Category';
 
   @override

@@ -1885,6 +1885,10 @@
   "@transactionsListFilterPeriod": {
     "description": "C · chip; shows the selected common_period_* once set"
   },
+  "transactionsListFilterUncategorized": "بدون تصنيف",
+  "@transactionsListFilterUncategorized": {
+    "description": "Filter chip: rows without a category"
+  },
   "transactionsListFilterCategory": "التصنيف",
   "@transactionsListFilterCategory": {
     "description": "C"

@@ -44,6 +44,7 @@ final class TxnListFilter {
     this.customFrom,
     this.customTo,
     this.categoryIds = const {},
+    this.includeUncategorized = false,
     this.type = TxnTypeFilter.any,
     this.sources = const {},
     this.currency,
@@ -55,6 +56,9 @@ final class TxnListFilter {
   final CivilDate? customFrom;
   final CivilDate? customTo;
   final Set<String> categoryIds;
+
+  /// Also (or only, when [categoryIds] is empty) rows with no category.
+  final bool includeUncategorized;
   final TxnTypeFilter type;
   final Set<TxnSource> sources;
   final Currency? currency;
@@ -67,6 +71,7 @@ final class TxnListFilter {
   bool get hasNarrowing =>
       period != TxnPeriod.all ||
       categoryIds.isNotEmpty ||
+      includeUncategorized ||
       type != TxnTypeFilter.any ||
       sources.isNotEmpty ||
       currency != null ||
@@ -77,6 +82,7 @@ final class TxnListFilter {
     CivilDate? customFrom,
     CivilDate? customTo,
     Set<String>? categoryIds,
+    bool? includeUncategorized,
     TxnTypeFilter? type,
     Set<TxnSource>? sources,
     Currency? currency,
@@ -87,6 +93,7 @@ final class TxnListFilter {
     customFrom: customFrom ?? this.customFrom,
     customTo: customTo ?? this.customTo,
     categoryIds: categoryIds ?? this.categoryIds,
+    includeUncategorized: includeUncategorized ?? this.includeUncategorized,
     type: type ?? this.type,
     sources: sources ?? this.sources,
     currency: clearCurrency ? null : (currency ?? this.currency),
@@ -265,6 +272,7 @@ TransactionFilter txnToRepoFilter(
     to: range.to,
     accountIds: cardIds,
     categoryIds: f.categoryIds,
+    includeUncategorized: f.includeUncategorized,
     directions: directions,
     sources: f.sources,
     currencies: {?f.currency},

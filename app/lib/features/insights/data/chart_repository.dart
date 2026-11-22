@@ -670,15 +670,21 @@ class ChartRepository {
     ChartPeriod p,
     ChartFilter f, {
     String? categoryId,
+    bool includeUncategorized = false,
     String? merchantNorm,
   }) => _memoized(
-    _key('scoped', p, f, '${categoryId ?? ''}|${merchantNorm ?? ''}'),
+    _key(
+      'scoped',
+      p,
+      f,
+      '${categoryId ?? ''}|$includeUncategorized|${merchantNorm ?? ''}',
+    ),
     () async {
       final s = _spend(p, f);
       final rows = await _select(
         'SELECT coalesce(sum($_netSpend), 0) AS s, count(*) AS n '
         'FROM transactions t WHERE ${s.where} '
-        '${categoryId == null ? '' : 'AND t.category_id = ? '}'
+        '${includeUncategorized ? (categoryId == null ? 'AND t.category_id IS NULL ' : 'AND (t.category_id IS NULL OR t.category_id = ?) ') : (categoryId == null ? '' : 'AND t.category_id = ? ')}'
         '${merchantNorm == null ? '' : 'AND t.merchant_norm = ? '}',
         [
           ...s.args,

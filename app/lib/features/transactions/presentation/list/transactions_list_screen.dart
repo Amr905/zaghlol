@@ -604,17 +604,22 @@ class _FilterBar extends ConsumerWidget {
                   onTap: () {},
                 ),
               chip(
-                f.categoryIds.length == 1 &&
-                        lookups?.category(f.categoryIds.first) != null
+                f.includeUncategorized && f.categoryIds.isEmpty
+                    ? l.transactionsListFilterUncategorized
+                    : f.categoryIds.length == 1 &&
+                          !f.includeUncategorized &&
+                          lookups?.category(f.categoryIds.first) != null
                     ? (fmt.lang == 'ar'
                           ? lookups!.category(f.categoryIds.first)!.nameAr
                           : lookups!.category(f.categoryIds.first)!.nameEn)
                     : withCount(
                         l.transactionsListFilterCategory,
-                        f.categoryIds.length,
+                        f.categoryIds.length + (f.includeUncategorized ? 1 : 0),
                       ),
-                active: f.categoryIds.isNotEmpty,
-                onClear: () => notifier.set(f.copyWith(categoryIds: {})),
+                active: f.categoryIds.isNotEmpty || f.includeUncategorized,
+                onClear: () => notifier.set(
+                  f.copyWith(categoryIds: {}, includeUncategorized: false),
+                ),
                 onTap: () async {
                   final r = await showCategoriesSheet(
                     context,
@@ -622,7 +627,11 @@ class _FilterBar extends ConsumerWidget {
                     selected: f.categoryIds,
                     lang: fmt.lang,
                   );
-                  if (r != null) notifier.set(f.copyWith(categoryIds: r));
+                  if (r != null) {
+                    notifier.set(
+                      f.copyWith(categoryIds: r, includeUncategorized: false),
+                    );
+                  }
                 },
               ),
               chip(

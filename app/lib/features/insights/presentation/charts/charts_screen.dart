@@ -341,6 +341,7 @@ class _DonutCard extends ConsumerWidget {
                         period: resolved.period,
                         previous: resolved.previous,
                         categoryIds: {for (final id in e.memberIds) ?id},
+                        includeUncategorized: e.memberIds.contains(null),
                       ),
               ),
             ),

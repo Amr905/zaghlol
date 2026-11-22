@@ -133,6 +133,7 @@ List<Override> chartOverrides({
   ChartSummary? summary,
   CategoryDonut? previousDonut,
   void Function(String code)? onSummary,
+  ({Money amount, int count}) Function(DrillScope scope)? drillTotals,
 }) {
   final cur = currencies ?? [egp];
   return [
@@ -164,7 +165,8 @@ List<Override> chartOverrides({
     }),
     previousDonutProvider.overrideWith((ref, code) async => previousDonut),
     drillTotalsProvider.overrideWith(
-      (ref, scope) async => (amount: egpM(5400), count: 23),
+      (ref, scope) async =>
+          drillTotals?.call(scope) ?? (amount: egpM(5400), count: 23),
     ),
     merchantsChartProvider.overrideWith(
       (ref, code) async => top ?? ChartReady(merchants(5)),

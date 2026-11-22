@@ -143,6 +143,7 @@ final class TransactionFilter {
     this.to,
     this.accountIds = const {},
     this.categoryIds = const {},
+    this.includeUncategorized = false,
     this.directions = const {},
     this.sources = const {},
     this.currencies = const {},
@@ -154,6 +155,9 @@ final class TransactionFilter {
   final DateTime? to;
   final Set<String> accountIds;
   final Set<String> categoryIds;
+
+  /// Also (or only, when [categoryIds] is empty) rows with no category.
+  final bool includeUncategorized;
   final Set<TxnDirection> directions;
   final Set<TxnSource> sources;
 

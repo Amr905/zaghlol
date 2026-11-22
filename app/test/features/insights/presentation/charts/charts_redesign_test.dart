@@ -11,6 +11,7 @@ import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 import 'package:zaghlol/core/theme/z_tokens.dart';
+import 'package:zaghlol/core/ui/z_money_text.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol/features/insights/domain/chart_summary.dart';
 import 'package:zaghlol/features/insights/presentation/charts/chart_bodies.dart';
@@ -408,6 +409,125 @@ void main() {
       // The list shows only that category and the header totals it.
       expect(find.byType(TxnRow), findsOneWidget);
       expect(find.byKey(const Key('drill-total')), findsOneWidget);
+    });
+
+    for (final locale in [_en, _ar]) {
+      testWidgets(
+        'uncategorized slice drills to only uncategorized (${locale.languageCode})',
+        (tester) async {
+          final repo = lh.FakeRepo([
+            lh.txnRec('t1', merchant: 'A'),
+            lh.txnRec('t2', merchant: 'B', categoryId: null),
+            lh.txnRec('t3', merchant: 'C', categoryId: null),
+          ]);
+          await _pump(
+            tester,
+            locale: locale,
+            overrides: [
+              ...chartOverrides(
+                drillTotals: (s) => s.includeUncategorized
+                    ? (amount: egpM(200), count: 2)
+                    : (amount: egpM(1000), count: 3),
+                donut: ChartReady(
+                  CategoryDonut(
+                    total: egpM(1000),
+                    slices: [
+                      CategorySlice(
+                        categoryId: 'food',
+                        amount: egpM(800),
+                        shareBp: 8000,
+                        count: 1,
+                      ),
+                      CategorySlice(
+                        categoryId: null,
+                        amount: egpM(200),
+                        shareBp: 2000,
+                        count: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              ..._drillOverrides(repo),
+            ],
+          );
+          await tester.tap(find.byKey(const Key('donut-row-1')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('donut-open')));
+          await tester.pumpAndSettle();
+          final container = ProviderScope.containerOf(
+            tester.element(find.byType(TransactionsListScreen)),
+          );
+          final f = container.read(txnListFilterProvider);
+          expect(f.includeUncategorized, isTrue);
+          expect(f.categoryIds, isEmpty);
+          expect(find.byType(TxnRow), findsNWidgets(2));
+          final l = AppLocalizations.of(
+            tester.element(find.byType(TransactionsListScreen)),
+          );
+          expect(
+            find.text(l.transactionsListFilterUncategorized),
+            findsOneWidget,
+          );
+          expect(
+            tester
+                .widget<ZMoneyText>(find.byKey(const Key('drill-total')))
+                .text,
+            contains(locale.languageCode == 'ar' ? '٢٠٠' : '200'),
+          );
+        },
+      );
+    }
+
+    testWidgets('Other folding uncategorized includes uncategorized rows', (
+      tester,
+    ) async {
+      final repo = lh.FakeRepo([
+        lh.txnRec('t1', merchant: 'A', categoryId: 'c0'),
+        lh.txnRec('t2', merchant: 'B', categoryId: null),
+        lh.txnRec('t3', merchant: 'C', categoryId: 'c6'),
+        lh.txnRec('t4', merchant: 'D', categoryId: 'c7'),
+      ]);
+      await _pump(
+        tester,
+        overrides: [
+          ...chartOverrides(
+            donut: ChartReady(
+              CategoryDonut(
+                total: egpM(2100),
+                slices: [
+                  for (var i = 0; i < 6; i++)
+                    CategorySlice(
+                      categoryId: 'c$i',
+                      amount: egpM(300 - i),
+                      shareBp: 1000,
+                      count: 1,
+                    ),
+                  CategorySlice(
+                    categoryId: null,
+                    amount: egpM(10),
+                    shareBp: 100,
+                    count: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ..._drillOverrides(repo),
+        ],
+      );
+      await tester.tap(find.byKey(const Key('donut-row-5')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('donut-open')));
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TransactionsListScreen)),
+      );
+      final f = container.read(txnListFilterProvider);
+      expect(f.includeUncategorized, isTrue);
+      expect(f.categoryIds, {'c5'});
+      // c5 + uncategorized: t2 only (c0, c6, c7 are outside).
+      expect(find.byType(TxnRow), findsOneWidget);
     });
 
     testWidgets('tapping a slice on the ring selects it', (tester) async {

@@ -133,6 +133,7 @@ typedef DrillScope = ({
   String code,
   ChartPeriod period,
   String? categoryId,
+  bool includeUncategorized,
   String? merchantNorm,
 });
 
@@ -146,6 +147,7 @@ final drillTotalsProvider =
         s.period,
         _filter(s.code),
         categoryId: s.categoryId,
+        includeUncategorized: s.includeUncategorized,
         merchantNorm: s.merchantNorm,
       );
     }, name: 'drillTotalsProvider');

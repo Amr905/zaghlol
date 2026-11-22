@@ -26,6 +26,7 @@ TxnListFilter drillFilter({
   required String code,
   required ChartPeriod period,
   Set<String> categoryIds = const {},
+  bool includeUncategorized = false,
   String? merchantNorm,
   String? merchantName,
 }) => TxnListFilter(
@@ -33,6 +34,7 @@ TxnListFilter drillFilter({
   customFrom: period.from,
   customTo: period.to,
   categoryIds: categoryIds,
+  includeUncategorized: includeUncategorized,
   type: TxnTypeFilter.expense,
   currency: Currency.of(code),
   merchantNorm: merchantNorm,
@@ -48,6 +50,7 @@ Future<void> openChartDrill(
   required ChartPeriod period,
   ChartPeriod? previous,
   Set<String> categoryIds = const {},
+  bool includeUncategorized = false,
   String? merchantNorm,
   String? merchantName,
 }) async {
@@ -62,6 +65,7 @@ Future<void> openChartDrill(
           code: code,
           period: period,
           categoryIds: categoryIds,
+          includeUncategorized: includeUncategorized,
           merchantNorm: merchantNorm,
           merchantName: merchantName,
         ),
@@ -101,7 +105,7 @@ class ChartDrillHeader extends ConsumerWidget {
         from == null ||
         to == null ||
         currency == null ||
-        f.categoryIds.length > 1) {
+        f.categoryIds.length + (f.includeUncategorized ? 1 : 0) > 1) {
       return const SizedBox.shrink();
     }
     final period = ChartPeriod(from, to);
@@ -113,6 +117,7 @@ class ChartDrillHeader extends ConsumerWidget {
       code: currency.code,
       period: p,
       categoryId: categoryId,
+      includeUncategorized: f.includeUncategorized,
       merchantNorm: f.merchantNorm,
     );
     final now = ref.watch(drillTotalsProvider(scope(period)));

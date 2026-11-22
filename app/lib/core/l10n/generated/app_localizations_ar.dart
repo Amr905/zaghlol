@@ -1524,6 +1524,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsListFilterPeriod => 'المدة';
 
   @override
+  String get transactionsListFilterUncategorized => 'بدون تصنيف';
+
+  @override
   String get transactionsListFilterCategory => 'التصنيف';
 
   @override

@@ -398,6 +398,10 @@
   "transactionsListTitle": "Transactions",
   "transactionsListSearchHint": "Merchant, note or amount…",
   "transactionsListFilterPeriod": "Dates",
+  "transactionsListFilterUncategorized": "Uncategorized",
+  "@transactionsListFilterUncategorized": {
+    "description": "Filter chip: rows without a category"
+  },
   "transactionsListFilterCategory": "Category",
   "transactionsListFilterType": "Type",
   "transactionsListFilterSource": "Source",
