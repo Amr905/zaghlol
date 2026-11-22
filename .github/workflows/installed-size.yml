@@ -1,0 +1,156 @@
+name: installed-size
+
+# T-208: (1) the installable size-check build for the PO, a release APK for
+# arm64 only, signed with the DEBUG key, dev flavors (not for any store);
+# (2) installed-size measurements on the Android emulator (debug universal,
+# release x86_64 as a stand-in for arm64, both release flavors' static layout).
+# Text reports only; the sideload APKs are the only binaries kept (14 days).
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'ci/T-208*'
+      - main
+    paths:
+      - '.github/workflows/installed-size.yml'
+      - '.github/scripts/installed-size-emu.sh'
+      - 'app/android/**'
+      - 'app/pubspec.yaml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installed-size-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.9'
+
+jobs:
+  sideload:
+    name: sideload ${{ matrix.flavor }} (release, arm64, debug-signed)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [devSms, devNoSms]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Build release arm64 APK (debug key, dev backend)
+        working-directory: app
+        env:
+          FLAVOR: ${{ matrix.flavor }}
+        run: |
+          # No upload key is configured here, so build.gradle.kts signs with the debug key.
+          [ -z "${ZAGHLOL_UPLOAD_KEYSTORE_FILE:-}" ] || { echo "::error::an upload key is configured; this build must be debug-signed"; exit 1; }
+          flutter build apk --release --flavor "$FLAVOR" --target-platform android-arm64 > build.log 2>&1 || { tail -n 40 build.log; exit 1; }
+          mkdir -p "$RUNNER_TEMP/sideload"
+          cp build/app/outputs/flutter-apk/app-*-release.apk "$RUNNER_TEMP/sideload/zaghlol-$FLAVOR-release-arm64-sideload-NOT-FOR-STORE.apk"
+          ls -l "$RUNNER_TEMP/sideload"
+      - name: Layout of the APK (libs stored uncompressed, not extracted)
+        env:
+          FLAVOR: ${{ matrix.flavor }}
+        run: |
+          APK=$(ls "$RUNNER_TEMP"/sideload/*.apk)
+          AAPT=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt | sort -V | tail -n 1)
+          echo "size: $(stat -c %s "$APK") bytes"
+          "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -iE "extractNativeLibs|useEmbeddedDex" || echo "extractNativeLibs not set in the merged manifest (default for minSdk 26+: not extracted)"
+          unzip -v "$APK" | grep -E "[.]so$" || true
+          # Every .so must be Stored (compressed == uncompressed size): the OS then maps it from the APK, no second copy.
+          if unzip -v "$APK" | awk '$NF ~ /[.]so$/ && $2 != "Stored" {bad=1; print "compressed lib:", $NF} END{exit bad}'; then echo "all native libs are stored uncompressed"; else echo "::error::compressed native libs in $APK"; exit 1; fi
+          if "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -iE "extractNativeLibs.*(=true|0xffffffff)"; then echo "::error::extractNativeLibs=true"; exit 1; fi
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: zaghlol-${{ matrix.flavor }}-release-arm64-sideload
+          path: ${{ runner.temp }}/sideload/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  measure:
+    name: installed size on the emulator (devSms)
+    if: github.event_name != 'push' || startsWith(github.ref_name, 'ci/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      DEVICE: emulator-5554
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace
+        run: flutter pub get --enforce-lockfile
+      - name: Build debug universal, release x86_64 (emulator stand-in for arm64)
+        working-directory: app
+        run: |
+          mkdir -p "$RUNNER_TEMP/apks"
+          flutter build apk --debug --flavor devSms > "$RUNNER_TEMP/b1.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/b1.log"; exit 1; }
+          cp build/app/outputs/flutter-apk/app-devSms-debug.apk "$RUNNER_TEMP/apks/debug-universal.apk"
+          # Release configuration with the x86_64 libs kept, so it installs on the emulator (build.gradle.kts, T-190).
+          mkdir -p ~/.gradle && echo "zaghlol.releaseX86=true" >> ~/.gradle/gradle.properties
+          flutter build apk --release --flavor devSms --target-platform android-x64 > "$RUNNER_TEMP/b2.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/b2.log"; exit 1; }
+          cp build/app/outputs/flutter-apk/app-devSms-release.apk "$RUNNER_TEMP/apks/release-x86_64.apk"
+          ls -l "$RUNNER_TEMP/apks"
+      - name: Static layout of both APKs
+        run: |
+          mkdir -p "$RUNNER_TEMP/size-out"
+          for a in debug-universal release-x86_64; do
+            f="$RUNNER_TEMP/apks/$a.apk"
+            { echo "## $a: $(stat -c %s "$f") bytes"; unzip -v "$f" | sort -k1 -n -r | head -n 25; } | tee -a "$RUNNER_TEMP/size-out/static.txt"
+          done
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install and measure on the emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/installed-size-run.sh
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: installed-size-report
+          path: ${{ runner.temp }}/size-out
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Publish the report to the device-shots branch (the Lead cannot download artifacts)
+        if: always()
+        permissions:
+          contents: write
+        run: |
+          set -eu
+          ls "$RUNNER_TEMP"/size-out/*.md >/dev/null 2>&1 || exit 0
+          dir=$(mktemp -d); cd "$dir"; git init -q
+          git config user.name "github-actions[bot]"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p "installed-size-$GITHUB_SHA"; cp "$RUNNER_TEMP"/size-out/* "installed-size-$GITHUB_SHA"/
+          git add -A; git commit -qm "installed-size report for $GITHUB_SHA"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/installed-size-report
