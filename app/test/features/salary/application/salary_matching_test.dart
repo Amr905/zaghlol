@@ -590,6 +590,22 @@ void main() {
       expect(await incomes(egp), [5000000, 3000000]);
     });
 
+    test('FU-268 a declined credit is offered again once the other income '
+        'row is deleted', () async {
+      await setPlan();
+      await sms('s1', tenK, payday);
+      await service.recordManual(leg(), allowDuplicate: true);
+      expect(await incomes(egp), [tenK, tenK]);
+      // While the other income is live, s1 stays declined.
+      expect(await service.recordManual(leg()), isA<SalaryFoundExisting>());
+      await db.customStatement(
+        "UPDATE transactions SET deleted_at = 1 WHERE source = 'manual'",
+      );
+      final r = await service.recordManual(leg());
+      expect(r, isA<SalaryFoundExisting>());
+      expect((r as SalaryFoundExisting).txnId, 's1');
+    });
+
     test('F2 linkExisting keeps a manual entry manual', () async {
       await setPlan();
       final man = await manual();
