@@ -412,9 +412,18 @@ Pigeon file `app/pigeons/notifications_api.dart`. **Local notifications only**: 
 | `ensureChannels(channels)` | Android 8+: creates or renames one channel per alert type. Ids are stable and never renamed: `zaghlol_alert_budget`, `_spike`, `_due`, `_duplicate`, `_renewal`, `_backup_failure`, `_weekly`. Names come from l10n in the app language. No-op on iOS. The ingestion worker's capture channel is separate. |
 | `show(n)` / `schedule(n, atEpochMs)` | `NotifMsg{id, channelId, title, body, publicTitle, route?}`. Android: `VISIBILITY_PRIVATE` plus a public version whose only text is `publicTitle` (the channel name, never an amount). Scheduling (quiet hours) is an inexact `AlarmManager.setAndAllowWhileIdle` (no exact-alarm permission); the alarm intent holds the text in system memory only, ids go to a small file in the no-backup dir so `cancelAll` can cancel; a reboot loses the alarm. iOS: a time-interval trigger that the system persists. |
 | `cancelAll()` | Cancels shown and scheduled alerts. "Delete everything" (`wipeLocalData`, section 1.2) already does this natively on both platforms; on Android it now also cancels pending alarms. |
+| `cancelScheduled()` | FU-267 (batch 57). Cancels only what is scheduled for later (Android alarms, iOS pending requests); shown alerts stay. Dart calls it, then schedules again with text redacted for the current "hide amounts" setting. Chosen over a native `rescheduleAll` because native code holds no alert text to rebuild. |
 | `takeLaunchRoute()` and `onTap(route)` | The tap payload is a **route id** (`/budget`, `/insights`, `/settings/backup`, `/transactions/<id>`), never data. Native validates the shape (starts with `/`, 1-96 printable ASCII); Dart allow-lists it (`notificationTargetFor`). A tap that launched the app is read once; a tap while running arrives as an event. |
 
 Manifest and entitlements: Android adds `POST_NOTIFICATIONS` and a non-exported `NotificationAlarmReceiver`; iOS adds none.
+
+## 4d. Periodic backup wake-up (`BackupWorkHostApi`, both platforms; FU-168e)
+
+Pigeon file `app/pigeons/backup_work_api.dart`. Native code only keeps time: the job runs **no Dart**, reads no data, starts no service. `schedule(periodDays)` (1, 7 or 30; anything else is refused) registers or replaces it, `cancel()` removes it and clears a pending mark, `takeDue() -> bool` is true once after the job fired. Dart (`PlatformBackupWorkScheduler`, bound as `backupWorkSchedulerProvider` on Android and iOS) calls `BackupScheduleService.runScheduled()` and `remindIfStale()` when `takeDue()` is true; those check the verified entitlement, schedule and back-off. A headless backup was not built: the verified entitlement lives in memory and is not available to a headless engine, so a headless `runScheduled` would read Free and cancel a Gold user's schedule.
+
+- Android: WorkManager unique periodic work `zaghlol.backup.wake`, constraints unmetered network, battery not low, storage not low, flex a quarter of the period. The worker writes an empty file `noBackupFilesDir/backupwork/due`. Wiped by `WorkManager.cancelAllWork` and the root clear.
+- iOS: `BGProcessingTask` `app.zaghlol.backup`, network required, no external power required, earliest begin after the period; the launch handler is registered in `didFinishLaunching` and writes `Application Support/backupwork/due`. Info.plist: identifier in `BGTaskSchedulerPermittedIdentifiers`, `processing` in `UIBackgroundModes`. The next period is requested by Dart's `schedule` after it runs the backup.
+- Store policy: no new permission, no foreground service, no wake lock; `processing` is a background mode App Review checks against actual use (periodic backup).
 
 ## 5. Other hosts
 

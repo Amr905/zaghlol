@@ -101,6 +101,11 @@ final class NotificationsHost: NotificationsHostApi {
     center.removeAllDeliveredNotifications()
   }
 
+  /// FU-267: only what is scheduled for later; delivered notifications stay.
+  func cancelScheduled() throws {
+    center.removeAllPendingNotificationRequests()
+  }
+
   func takeLaunchRoute() throws -> String? {
     NotificationsHost.lock.lock()
     defer { NotificationsHost.lock.unlock() }

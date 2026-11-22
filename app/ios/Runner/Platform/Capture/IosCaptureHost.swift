@@ -273,6 +273,11 @@ enum LocalDataWiper {
   /// The Keychain service that survives the wipe.
   static let keptService = SeatKeyStore.service
 
+  /// FU-202d: Dart's resume marker sits at the top of Application Support. It
+  /// stays through the native clear so a resumed wipe still knows; Dart
+  /// deletes it once every part has finished.
+  static let wipeMarkerName = "wipe_pending"
+
   static func wipeAll() throws {
     var ok = true
     BGTaskScheduler.shared.cancelAllTaskRequests()
@@ -299,7 +304,7 @@ enum LocalDataWiper {
   static func wipeFiles(roots: [URL], fileManager: FileManager = .default) -> Bool {
     var ok = true
     for root in roots {
-      ok = clearContents(of: root, fileManager: fileManager) && ok
+      ok = clearContents(of: root, keeping: [wipeMarkerName], fileManager: fileManager) && ok
     }
     ok = ZaghlolDirectories.exclude(roots) && ok
     return ok
@@ -308,7 +313,9 @@ enum LocalDataWiper {
   /// Deletes every entry inside `dir`, never `dir` itself. A symlink is
   /// removed as a link (its target is not followed). True when nothing is
   /// left or `dir` does not exist.
-  static func clearContents(of dir: URL, fileManager: FileManager = .default) -> Bool {
+  static func clearContents(
+    of dir: URL, keeping: Set<String> = [], fileManager: FileManager = .default
+  ) -> Bool {
     guard fileManager.fileExists(atPath: dir.path) else { return true }
     guard
       let entries = try? fileManager.contentsOfDirectory(
@@ -316,6 +323,7 @@ enum LocalDataWiper {
     else { return false }
     var ok = true
     for entry in entries {
+      if keeping.contains(entry.lastPathComponent) { continue }
       do {
         try fileManager.removeItem(at: entry)
       } catch {

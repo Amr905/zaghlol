@@ -15,6 +15,8 @@ import UserNotifications
     // T-062: the BGAppRefreshTask launch handler must be registered before
     // launch ends; also runs on background launches by the system.
     IngestBackgroundRefresh.registerLaunchHandler()
+    // FU-168e: the BGProcessingTask that marks a scheduled backup as due.
+    BackupWorkHost.registerLaunchHandler()
     IosCaptureRegistration.prepareKey()
     // T-063 (061-2): the Guard base copy the extensions read.
     CaptureGuardRuntime.mirrorBaseInBackground()
@@ -80,6 +82,8 @@ import UserNotifications
     ShareImageRegistration.register(with: engineBridge.pluginRegistry)
     // T-120: on-device speech support check (no network fallback without consent).
     SpeechSupportRegistration.register(with: engineBridge.pluginRegistry)
+    // FU-168e: schedule / cancel the periodic backup wake-up.
+    BackupWorkRegistration.register(with: engineBridge.pluginRegistry)
     // NOTIF-GW: local notifications and the permission prompt.
     NotificationsRegistration.register(with: engineBridge.pluginRegistry)
     // FU-229b: "Open settings" opens this app's page in Settings.

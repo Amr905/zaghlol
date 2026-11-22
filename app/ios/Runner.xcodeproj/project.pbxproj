@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B570000000000000000A005 /* BackupWorkHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B570000000000000000A006 /* BackupWorkHostTests.swift */; };
+		5B570000000000000000A003 /* BackupWorkHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B570000000000000000A004 /* BackupWorkHost.swift */; };
+		5B570000000000000000A001 /* BackupWorkApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B570000000000000000A002 /* BackupWorkApi.g.swift */; };
 		5A7120000000000000000001 /* SpeechSupportHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7120000000000000000002 /* SpeechSupportHost.swift */; };
 		5A7120000000000000000004 /* SpeechSupportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7120000000000000000005 /* SpeechSupportTests.swift */; };
 		5A7117000000000000000001 /* ShareImageHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7117000000000000000002 /* ShareImageHost.swift */; };
@@ -187,6 +190,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5B570000000000000000A006 /* BackupWorkHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupWorkHostTests.swift; sourceTree = "<group>"; };
+		5B570000000000000000A004 /* BackupWorkHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupWorkHost.swift; sourceTree = "<group>"; };
+		5B570000000000000000A002 /* BackupWorkApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupWorkApi.g.swift; sourceTree = "<group>"; };
 		5A7120000000000000000002 /* SpeechSupportHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSupportHost.swift; sourceTree = "<group>"; };
 		5A7120000000000000000005 /* SpeechSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechSupportTests.swift; sourceTree = "<group>"; };
 		5A7117000000000000000002 /* ShareImageHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareImageHost.swift; sourceTree = "<group>"; };
@@ -399,6 +405,7 @@
 				5A1800000000000000000D07 /* TrustedClockTests.swift */,
 				5A1030000000000000000E06 /* DeviceSecurityTests.swift */,
 				5A7120000000000000000005 /* SpeechSupportTests.swift */,
+				5B570000000000000000A006 /* BackupWorkHostTests.swift */,
 				5A1780000000000000000F06 /* AttestationTests.swift */,
 				5A1790000000000000000F08 /* SeatKeyTests.swift */,
 				5A1510000000000000000F09 /* ICloudBackupTests.swift */,
@@ -514,6 +521,8 @@
 				5A1800000000000000000D02 /* ClockApi.g.swift */,
 				5A1900000000000000000E02 /* NotificationsApi.g.swift */,
 				5A1900000000000000000E04 /* NotificationsHost.swift */,
+				5B570000000000000000A004 /* BackupWorkHost.swift */,
+				5B570000000000000000A002 /* BackupWorkApi.g.swift */,
 				5A1030000000000000000E02 /* DeviceApi.g.swift */,
 				5A1030000000000000000E04 /* DeviceSecurityHost.swift */,
 				5A1780000000000000000F02 /* AttestationApi.g.swift */,
@@ -834,6 +843,7 @@
 				5A1800000000000000000D06 /* TrustedClockTests.swift in Sources */,
 				5A1030000000000000000E05 /* DeviceSecurityTests.swift in Sources */,
 				5A7120000000000000000004 /* SpeechSupportTests.swift in Sources */,
+				5B570000000000000000A005 /* BackupWorkHostTests.swift in Sources */,
 				5A1780000000000000000F05 /* AttestationTests.swift in Sources */,
 				5A1790000000000000000F07 /* SeatKeyTests.swift in Sources */,
 				5A1510000000000000000F08 /* ICloudBackupTests.swift in Sources */,
@@ -872,6 +882,8 @@
 				5A1800000000000000000D01 /* ClockApi.g.swift in Sources */,
 				5A1900000000000000000E01 /* NotificationsApi.g.swift in Sources */,
 				5A1900000000000000000E03 /* NotificationsHost.swift in Sources */,
+				5B570000000000000000A003 /* BackupWorkHost.swift in Sources */,
+				5B570000000000000000A001 /* BackupWorkApi.g.swift in Sources */,
 				5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */,
 				5A1030000000000000000E01 /* DeviceApi.g.swift in Sources */,
 				5A1030000000000000000E03 /* DeviceSecurityHost.swift in Sources */,

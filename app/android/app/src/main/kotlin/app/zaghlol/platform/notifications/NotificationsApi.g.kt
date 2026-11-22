@@ -387,6 +387,14 @@ interface NotificationsHostApi {
   fun schedule(n: NotifMsg, atEpochMs: Long)
   /** Cancels shown and scheduled notifications. */
   fun cancelAll()
+  /**
+   * FU-267: cancels only the notifications scheduled for later (Android
+   * alarms, iOS pending requests); the ones already shown stay. Dart calls
+   * it before it schedules again with text redacted for the current
+   * "hide amounts" setting, so no stale alert keeps its amount. Native code
+   * never rebuilds a notification (it has no text to redact).
+   */
+  fun cancelScheduled()
   /** The route of the notification that launched the app, once. */
   fun takeLaunchRoute(): String?
   /**
@@ -501,6 +509,22 @@ interface NotificationsHostApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               api.cancelAll()
+              listOf(null)
+            } catch (exception: Throwable) {
+              NotificationsApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.NotificationsHostApi.cancelScheduled$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.cancelScheduled()
               listOf(null)
             } catch (exception: Throwable) {
               NotificationsApiPigeonUtils.wrapError(exception)

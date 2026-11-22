@@ -69,6 +69,19 @@ class LocalDataWiperTest {
     }
 
     @Test
+    fun theResumeMarkerSurvivesTheClearAtTopLevelOnly() {
+        val a = tempDir()
+        File(a, "wipe_pending").writeBytes(byteArrayOf(1))
+        File(a, "db").mkdirs()
+        File(a, "db/wipe_pending").writeBytes(byteArrayOf(2))
+        File(a, "other.bin").writeBytes(byteArrayOf(3))
+
+        LocalDataWiper(listOf(a), emptyList()).wipe()
+
+        assertEquals(listOf("wipe_pending"), a.listFiles()!!.map { it.name })
+    }
+
+    @Test
     fun aMissingRootIsAlreadyClear() {
         val gone = File(tempDir(), "never")
         assertTrue(LocalDataWiper.clearContents(gone))
