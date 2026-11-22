@@ -53,12 +53,17 @@ class ExplainFormat {
       digits: digits,
       hidden: hidden,
     ),
-    UnitAmountArg(:final unit, :final minor) => MoneyFormat.format(
-      Money(Currency.of(unit), minor),
-      languageCode: lang,
-      digits: digits,
-      hidden: hidden,
-    ),
+    // ISO currencies get the money format; other units (gold karats such
+    // as XAU21) keep the plain "amount unit" form instead of throwing.
+    UnitAmountArg(:final unit, :final minor) => switch (Currency.tryOf(unit)) {
+      final c? => MoneyFormat.format(
+        Money(c, minor),
+        languageCode: lang,
+        digits: digits,
+        hidden: hidden,
+      ),
+      null => hidden ? '$kAmountMask $unit' : digits.render('$minor $unit'),
+    },
     PercentArg(:final bp) => digits.render('${(bp + 50) ~/ 100}%'),
     CountArg(:final count) => digits.render('$count'),
     NameArg(:final name) => name,
