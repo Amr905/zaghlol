@@ -95,15 +95,19 @@ class CategoryBarRow extends ConsumerWidget {
                     ),
                     const SizedBox(width: ZSpacing.md - 2),
                     Expanded(
-                      child: Text(
-                        name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: ZType.titleSmall.copyWith(color: c.text),
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: ZSpacing.sm,
+                        runSpacing: ZSpacing.xs,
+                        children: [
+                          Text(
+                            name,
+                            style: ZType.titleSmall.copyWith(color: c.text),
+                          ),
+                          ChangeChip(change: row.change, tone: tone),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: ZSpacing.sm),
-                    ChangeChip(change: row.change, tone: tone),
                     const SizedBox(width: ZSpacing.sm),
                     Text(
                       isolate(amount),

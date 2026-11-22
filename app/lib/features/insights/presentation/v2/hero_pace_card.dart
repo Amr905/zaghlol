@@ -88,10 +88,14 @@ class _Hero extends ConsumerWidget {
         runSpacing: ZSpacing.xs,
         children: [
           ChangeChip(change: change, tone: toneOf(change, moreIsGood: false)),
-          Text(
-            text,
-            key: const Key('hero-vs'),
-            style: ZType.bodySmall.copyWith(color: c.text),
+          Semantics(
+            label: a11yAmounts(l, text),
+            excludeSemantics: true,
+            child: Text(
+              text,
+              key: const Key('hero-vs'),
+              style: ZType.bodySmall.copyWith(color: c.text),
+            ),
           ),
         ],
       );
@@ -172,12 +176,19 @@ class _Hero extends ConsumerWidget {
             for (final m in others)
               Padding(
                 padding: const EdgeInsetsDirectional.only(top: ZSpacing.xs),
-                child: Text(
-                  l.insightsV2OtherCurrency(
-                    isolate(chartMoney(ref, context, m)),
+                child: Semantics(
+                  label: a11yAmounts(
+                    l,
+                    l.insightsV2OtherCurrency(chartMoney(ref, context, m)),
                   ),
-                  key: Key('hero-other-${m.currency.code}'),
-                  style: ZType.bodySmall.copyWith(color: c.textMuted),
+                  excludeSemantics: true,
+                  child: Text(
+                    l.insightsV2OtherCurrency(
+                      isolate(chartMoney(ref, context, m)),
+                    ),
+                    key: Key('hero-other-${m.currency.code}'),
+                    style: ZType.bodySmall.copyWith(color: c.textMuted),
+                  ),
                 ),
               ),
             const SizedBox(height: ZSpacing.md),
@@ -327,26 +338,32 @@ class _Stat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ZColors.of(context);
+    final l = AppLocalizations.of(context);
     return Expanded(
       child: Padding(
         padding: const EdgeInsetsDirectional.only(end: ZSpacing.sm),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: ZType.caption.copyWith(color: c.textMuted)),
-            const SizedBox(height: 2),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                value == null ? '' : isolate(value!),
-                style: ZType.titleSmall.copyWith(
-                  color: valueColor ?? c.text,
-                  fontWeight: FontWeight.w700,
+        child: Semantics(
+          container: true,
+          label: a11yAmounts(l, '$label: ${value ?? ''}'),
+          excludeSemantics: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: ZType.caption.copyWith(color: c.textMuted)),
+              const SizedBox(height: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  value == null ? '' : isolate(value!),
+                  style: ZType.titleSmall.copyWith(
+                    color: valueColor ?? c.text,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

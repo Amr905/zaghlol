@@ -1,6 +1,7 @@
 // T-107 test support: synthetic chart data and provider overrides.
 
 import 'package:flutter/widgets.dart' show Key;
+import 'package:zaghlol/core/db/app_database.dart' show CategoryRow;
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/insights/domain/chart_summary.dart';
@@ -134,11 +135,12 @@ List<Override> chartOverrides({
   CategoryDonut? previousDonut,
   void Function(String code)? onSummary,
   ({Money amount, int count}) Function(DrillScope scope)? drillTotals,
+  List<CategoryRow> categories = const [],
 }) {
   final cur = currencies ?? [egp];
   return [
     chartsCurrenciesProvider.overrideWith((ref) async => cur),
-    categoryRowsProvider.overrideWith((ref) async => []),
+    categoryRowsProvider.overrideWith((ref) async => categories),
     budgetScreenDataProvider.overrideWith(
       (ref) async => data([egpView(), usdView()]),
     ),

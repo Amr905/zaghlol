@@ -14,6 +14,7 @@ import 'package:zaghlol/features/insights/presentation/charts/chart_card.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
 import 'package:zaghlol/features/insights/presentation/charts/locked_chart_card.dart';
 import 'package:zaghlol/features/insights/presentation/insights_screen.dart';
+import 'package:zaghlol/features/insights/presentation/v2/insights_v2_screen.dart';
 
 import 'charts_test_support.dart';
 
@@ -400,13 +401,15 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Insights shell plugs in the charts segment', (tester) async {
+  testWidgets('Insights shell plugs in the charts segment (v2 Overview; the '
+      'T-189 screen sits behind All charts)', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 3200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       harness(const InsightsScreen(), locale: _en, overrides: chartOverrides()),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(ChartsScreen), findsOneWidget);
+    expect(find.byType(ChartsV2Screen), findsOneWidget);
+    expect(find.byType(ChartsScreen), findsNothing);
   });
 }

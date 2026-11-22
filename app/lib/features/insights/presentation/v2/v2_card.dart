@@ -64,28 +64,31 @@ class V2Card extends StatelessWidget {
                   ),
                 ),
                 if (actionLabel != null)
-                  Semantics(
-                    button: true,
-                    label: actionLabel,
-                    excludeSemantics: true,
-                    child: InkWell(
-                      key: actionKey,
-                      onTap: onAction,
-                      borderRadius: BorderRadius.circular(ZRadius.sm),
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minHeight: ZSpacing.minTarget,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsetsDirectional.only(
-                            start: ZSpacing.sm,
+                  Flexible(
+                    child: Semantics(
+                      button: true,
+                      label: actionLabel,
+                      excludeSemantics: true,
+                      child: InkWell(
+                        key: actionKey,
+                        onTap: onAction,
+                        borderRadius: BorderRadius.circular(ZRadius.sm),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minHeight: ZSpacing.minTarget,
                           ),
-                          child: Center(
-                            child: Text(
-                              actionLabel!,
-                              style: ZType.label.copyWith(
-                                color: c.primary,
-                                fontWeight: FontWeight.w600,
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                              start: ZSpacing.sm,
+                            ),
+                            child: Center(
+                              child: Text(
+                                actionLabel!,
+                                textAlign: TextAlign.end,
+                                style: ZType.label.copyWith(
+                                  color: c.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),

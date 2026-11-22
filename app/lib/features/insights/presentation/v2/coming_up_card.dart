@@ -65,15 +65,19 @@ class _Row extends ConsumerWidget {
             ),
             const SizedBox(width: ZSpacing.md - 2),
             Expanded(
-              child: Text(
-                due.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: ZType.bodySmall.copyWith(color: c.text),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    due.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: ZType.bodySmall.copyWith(color: c.text),
+                  ),
+                  Text(when, style: ZType.caption.copyWith(color: c.textMuted)),
+                ],
               ),
             ),
-            const SizedBox(width: ZSpacing.sm),
-            Text(when, style: ZType.caption.copyWith(color: c.textMuted)),
             const SizedBox(width: ZSpacing.sm),
             Text(
               isolate(amount),
