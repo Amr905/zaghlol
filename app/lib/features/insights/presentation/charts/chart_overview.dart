@@ -350,7 +350,11 @@ class ChartSummaryStrip extends ConsumerWidget {
                 style: ZType.caption.copyWith(color: c.textMuted),
               ),
             ),
-            _OneLiner(code: code, summary: s, prev: text.prevName(resolved)),
+            ChartOneLiner(
+              code: code,
+              summary: s,
+              prev: text.prevName(resolved),
+            ),
           ],
         );
       },
@@ -358,8 +362,9 @@ class ChartSummaryStrip extends ConsumerWidget {
   }
 }
 
-class _OneLiner extends ConsumerWidget {
-  const _OneLiner({
+class ChartOneLiner extends ConsumerWidget {
+  const ChartOneLiner({
+    super.key,
     required this.code,
     required this.summary,
     required this.prev,
