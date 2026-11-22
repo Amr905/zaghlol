@@ -27,3 +27,8 @@ Finding 1 only (lane: insights UI + transactions filter). Minors go to FU-284.
 
 ### Follow-ups (FU-284)
 Finding 2 (route-scoped filter), finding 3 (baseline label in drill header), finding 4, and builder deviations 1-3 (no daily line chart, net-worth thin state without current number, no "Other" in merchants) as tracked scope notes; new goldens for strip/drill/thin/hidden still to be added.
+
+## Lead delta check (fix round)
+
+- Major fixed (fb69d493): `includeUncategorized` runs through `TxnQuery` (`category_id IS NULL`, or `IS NULL OR IN (...)`), `TransactionFilter`, `scopedSpend`/`DrillScope` and the drill; the chip shows «بدون تصنيف» / "Uncategorized". Widget tests (ar + en) for the uncategorized slice and for "Other" containing it; repository test for `scopedSpend`. 1392 tests pass. **T-189 APPROVED.**
+- Minors → FU-284: name the baseline in the drill header beyond "vs the period before"; axis-step edge-case test; route-scoped override for the drill filter; scope notes (no new daily line, net-worth thin state shows only the line, no "Other" place row, Gold-only charts use fl_chart's tooltip).
