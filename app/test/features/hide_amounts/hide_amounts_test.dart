@@ -26,6 +26,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import '../../support/hide_amounts_support.dart';
 import '../home/presentation/home_harness.dart';
 import '../insights/presentation/charts/charts_test_support.dart';
+import '../insights/presentation/v2/v2_test_support.dart' show v2Overrides;
 
 final _digit = RegExp(r'[0-9٠-٩]');
 const _ar = Locale('ar', 'EG');
@@ -232,8 +233,8 @@ void main() {
       });
     }
 
-    testWidgets('Insights: one tap on the eye masks the charts, a second '
-        'shows them', (tester) async {
+    testWidgets('Insights: one tap on the eye masks the v2 Overview, a '
+        'second shows it', (tester) async {
       final h = HideAmountsHarness();
       addTearDown(h.dispose);
       await tester.binding.setSurfaceSize(const Size(390, 3200));
@@ -242,19 +243,19 @@ void main() {
         harness(
           const InsightsScreen(),
           locale: _en,
-          overrides: chartOverrides(),
+          overrides: v2Overrides(),
           hideAmounts: h,
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.textContaining('1,000'), findsWidgets);
+      expect(find.textContaining('13,650'), findsWidgets);
       await tester.tap(find.byKey(const Key('hide-amounts-toggle')));
       await tester.pumpAndSettle();
-      expect(find.textContaining('1,000'), findsNothing);
-      expect(find.byType(PieChart), findsOneWidget);
+      expect(find.textContaining('13,650'), findsNothing);
+      expect(find.byKey(const Key('pace-chart')), findsOneWidget);
       await tester.tap(find.byKey(const Key('hide-amounts-toggle')));
       await tester.pumpAndSettle();
-      expect(find.textContaining('1,000'), findsWidgets);
+      expect(find.textContaining('13,650'), findsWidgets);
     });
 
     testWidgets('masking off shows the same screen with its figures', (

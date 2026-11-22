@@ -29,6 +29,7 @@ import '../../../core/db/cash_cover_sql.dart';
 import '../../../core/db/daos/write_errors.dart';
 import '../domain/chart_models.dart';
 import '../domain/chart_rules.dart';
+import '../domain/overview_models.dart';
 
 const int _dayMs = 86400000;
 const int _maxOffsetMs = 18 * 3600000;
@@ -256,6 +257,63 @@ class ChartRepository {
         spend: prev?.spend ?? 0,
         count: (prev?.count ?? 0) + r.read<int>('c'),
       );
+    }
+    return out;
+  }
+
+  // ------------------------------------------------- Charts v2 (T-209)
+
+  /// Net spend of each day of [p], first day first (zero for a quiet day).
+  Future<List<int>> dailySpend(ChartPeriod p, ChartFilter f) async {
+    final daily = await _daily(p, f);
+    return [
+      for (var i = 0; i < p.lengthDays; i++)
+        daily[p.from.epochDay + i]?.spend ?? 0,
+    ];
+  }
+
+  /// The overall cycle budget basis of [currency], or null (no budget).
+  Future<Money?> overallBudget(Currency currency) => _cycleBudget(currency);
+
+  /// The charges of active subscriptions, bills and instalments due from
+  /// [today] on, up to [months] calendar months ahead, in one currency. An
+  /// overdue charge is not listed. Read live (never memoized): recurring
+  /// items raise no TransactionsChanged.
+  Future<List<UpcomingDue>> upcomingDues(
+    CivilDate today,
+    ChartFilter f, {
+    int months = 13,
+  }) async {
+    final out = <UpcomingDue>[];
+    for (final kind in const ['subscription', 'installment', 'bill']) {
+      for (final r in await _recurring(kind, f)) {
+        final next = r.nextDueDate == null
+            ? null
+            : CivilDate.tryParse(r.nextDueDate!);
+        if (next == null) continue;
+        final dues = dueDatesInWindow(
+          next: next,
+          cadence: _cadence(r),
+          dueDay: r.dueDay,
+          days: r.cadenceDays,
+          remaining: r.totalCount == null ? null : r.totalCount! - r.paidCount,
+          firstYear: today.year,
+          firstMonth: today.month,
+          months: months,
+        );
+        for (final d in dues) {
+          if (d.overdue || d.date < today) continue;
+          out.add(
+            UpcomingDue(
+              itemId: r.id,
+              name: r.name,
+              kind: kind,
+              date: d.date,
+              amount: Money.fromStorage(r.amountMinor, r.currency),
+            ),
+          );
+        }
+      }
     }
     return out;
   }

@@ -14,7 +14,9 @@
   "@commonNavBadgeCount": {
     "description": "Badge count on a bottom-bar tab (1 to 9).",
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "commonNavBadgeMax": "9+",
@@ -8276,5 +8278,564 @@
   "insightsChartsRetry": "Try again",
   "@insightsChartsRetry": {
     "description": "T-189 charts redesign"
+  },
+  "insightsV2TabOverview": "Overview",
+  "@insightsV2TabOverview": {
+    "description": "T-209 Charts v2 · tab 1"
+  },
+  "insightsV2TabCategories": "Categories",
+  "@insightsV2TabCategories": {
+    "description": "T-209 Charts v2 · tab 2"
+  },
+  "insightsV2TabTrends": "Trends",
+  "@insightsV2TabTrends": {
+    "description": "T-209 Charts v2 · tab 3"
+  },
+  "insightsV2HeroLabel": "Spent so far",
+  "@insightsV2HeroLabel": {
+    "description": "T-209 Charts v2 · hero label, open period"
+  },
+  "insightsV2HeroLabelClosed": "Total spent in the month",
+  "@insightsV2HeroLabelClosed": {
+    "description": "T-209 Charts v2 · hero label, closed period"
+  },
+  "insightsV2HeroDay": "Day {day} of {total}",
+  "@insightsV2HeroDay": {
+    "description": "T-209 Charts v2 · hero, open period",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroVs": "{trend, select, up{{delta} more than by this day last month} down{{delta} less than by this day last month} other{Same as by this day last month}}",
+  "@insightsV2HeroVs": {
+    "description": "T-209 Charts v2 · trend:select(up/down/other). Open period against the same days of the previous one",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroVsClosed": "{trend, select, up{{delta} more than last month} down{{delta} less than last month} other{Same as last month}}",
+  "@insightsV2HeroVsClosed": {
+    "description": "T-209 Charts v2 · trend:select(up/down/other). Closed period against the whole previous one",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      },
+      "delta": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroThin": "Not enough data yet to compare with last month",
+  "@insightsV2HeroThin": {
+    "description": "T-209 Charts v2 · thin data: under 3 days or no previous period"
+  },
+  "insightsV2HeroProjection": "{state, select, under{At this pace you'll end the month near {projected}, under your budget ({budget})} over{At this pace you'll end the month near {projected}, over your budget ({budget})} other{At this pace you'll end the month near {projected}}}",
+  "@insightsV2HeroProjection": {
+    "description": "T-209 Charts v2 · state:select(under/over/other); other = no budget",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "projected": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2HeroClosedBudget": "{state, select, under{You finished the month under your budget ({budget})} over{You finished the month over your budget ({budget})} other{}}",
+  "@insightsV2HeroClosedBudget": {
+    "description": "T-209 Charts v2 · state:select(under/over/other); other is never shown",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2LegendThis": "This month",
+  "@insightsV2LegendThis": {
+    "description": "T-209 Charts v2 · legend"
+  },
+  "insightsV2LegendLast": "Last month",
+  "@insightsV2LegendLast": {
+    "description": "T-209 Charts v2 · legend"
+  },
+  "insightsV2LegendBudget": "Budget",
+  "@insightsV2LegendBudget": {
+    "description": "T-209 Charts v2 · legend and line label"
+  },
+  "insightsV2LegendProjected": "Projected",
+  "@insightsV2LegendProjected": {
+    "description": "T-209 Charts v2 · legend"
+  },
+  "insightsV2PaceDay": "Day {day}",
+  "@insightsV2PaceDay": {
+    "description": "T-209 Charts v2 · x axis, first label",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2StatIncome": "Income",
+  "@insightsV2StatIncome": {
+    "description": "T-209 Charts v2 · stat under the hero"
+  },
+  "insightsV2StatLeft": "Left in budget",
+  "@insightsV2StatLeft": {
+    "description": "T-209 Charts v2 · stat under the hero; hidden without a budget"
+  },
+  "insightsV2StatBills": "Bills coming",
+  "@insightsV2StatBills": {
+    "description": "T-209 Charts v2 · stat under the hero: due from today to the end of the period"
+  },
+  "insightsV2OtherCurrency": "Also spent {amount}",
+  "@insightsV2OtherCurrency": {
+    "description": "T-209 Charts v2 · another currency, in its own currency, never summed",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2PaceA11y": "Spending pace chart: by day {day} of {total} you spent {spent}",
+  "@insightsV2PaceA11y": {
+    "description": "T-209 Charts v2 · semantics label",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2PaceA11yPrev": "Last month by the same day: {previous}",
+  "@insightsV2PaceA11yPrev": {
+    "description": "T-209 Charts v2 · semantics label, second sentence",
+    "placeholders": {
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2PaceA11yProjected": "Projected for the end of the month: {projected}",
+  "@insightsV2PaceA11yProjected": {
+    "description": "T-209 Charts v2 · semantics label, third sentence",
+    "placeholders": {
+      "projected": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2ScrubHint": "Drag along the chart to see each day",
+  "@insightsV2ScrubHint": {
+    "description": "T-209 Charts v2 · semantics hint"
+  },
+  "insightsV2ScrubSpent": "Day {day} · spent to date {spent}",
+  "@insightsV2ScrubSpent": {
+    "description": "T-209 Charts v2 · scrub tooltip, line 1",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2ScrubLast": "Last month: {previous}",
+  "@insightsV2ScrubLast": {
+    "description": "T-209 Charts v2 · scrub tooltip, line 2",
+    "placeholders": {
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatTitle": "Where it went",
+  "@insightsV2CatTitle": {
+    "description": "T-209 Charts v2 · card title"
+  },
+  "insightsV2CatSub": "Grey tick = same days last month",
+  "@insightsV2CatSub": {
+    "description": "T-209 Charts v2 · card subtitle"
+  },
+  "insightsV2CatSeeAll": "See all categories",
+  "@insightsV2CatSeeAll": {
+    "description": "T-209 Charts v2 · opens the Categories tab"
+  },
+  "insightsV2CatRowA11y": "{category}: {amount}. {status}",
+  "@insightsV2CatRowA11y": {
+    "description": "T-209 Charts v2 · semantics label of a category row; status = the change text",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedTitle": "Saved each month",
+  "@insightsV2SavedTitle": {
+    "description": "T-209 Charts v2 · card title"
+  },
+  "insightsV2SavedSub": "Income minus spending · this month projected",
+  "@insightsV2SavedSub": {
+    "description": "T-209 Charts v2 · card subtitle"
+  },
+  "insightsV2SavedAverage": "Your average {average}",
+  "@insightsV2SavedAverage": {
+    "description": "T-209 Charts v2 · average line label",
+    "placeholders": {
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedBarA11y": "{month}: {amount}",
+  "@insightsV2SavedBarA11y": {
+    "description": "T-209 Charts v2 · semantics label of one bar",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedBarProjectedA11y": "{month} (projected): {amount}",
+  "@insightsV2SavedBarProjectedA11y": {
+    "description": "T-209 Charts v2 · semantics label of the projected bar",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2SavedA11y": "Saved each month chart. {list}",
+  "@insightsV2SavedA11y": {
+    "description": "T-209 Charts v2 · semantics label; list = the bars",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2UpTitle": "Coming up",
+  "@insightsV2UpTitle": {
+    "description": "T-209 Charts v2 · card title; hidden when nothing is due"
+  },
+  "insightsV2UpIn": "{count, plural, =0{Today} =1{Tomorrow} other{In {n} days}}",
+  "@insightsV2UpIn": {
+    "description": "T-209 Charts v2 · count:int, n = digits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2UpA11y": "{item}, {when}, {amount}",
+  "@insightsV2UpA11y": {
+    "description": "T-209 Charts v2 · semantics label of one row",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTitle": "Categories",
+  "@insightsV2CatsTitle": {
+    "description": "T-210 Categories tab · card title"
+  },
+  "insightsV2CatsSub": "{count, plural, =0{{total} in no categories} =1{{total} in 1 category} other{{total} across {n} categories}}",
+  "@insightsV2CatsSub": {
+    "description": "T-210 · card subtitle: the total and how many categories",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsSortAmount": "Largest first",
+  "@insightsV2CatsSortAmount": {
+    "description": "T-210 · sort option"
+  },
+  "insightsV2CatsSortChange": "Biggest change",
+  "@insightsV2CatsSortChange": {
+    "description": "T-210 · sort option"
+  },
+  "insightsV2CatsSortA11y": "Sort order: {label}. Tap to change.",
+  "@insightsV2CatsSortA11y": {
+    "description": "T-210 · semantics label of the sort control",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsStripA11y": "Share of each category. {list}",
+  "@insightsV2CatsStripA11y": {
+    "description": "T-210 · semantics label of the share strip; list = segments",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsStripSeg": "{name} {percent}",
+  "@insightsV2CatsStripSeg": {
+    "description": "T-210 · one segment of the strip in the semantics label",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTip": "{count, plural, =0{{name} · {amount}} =1{{name} · {amount} · 1 txn} other{{name} · {amount} · {n} txns}}",
+  "@insightsV2CatsTip": {
+    "description": "T-210 · the selected category line",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsOpenTxns": "Open transactions",
+  "@insightsV2CatsOpenTxns": {
+    "description": "T-210 · opens the drill-down of the selected category"
+  },
+  "insightsV2CatsTrendTitle": "{name}, 6 months",
+  "@insightsV2CatsTrendTitle": {
+    "description": "T-210 · trend card title",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTrendOpen": "The latest bar is still open, so it is still growing.",
+  "@insightsV2CatsTrendOpen": {
+    "description": "T-210 · note while the current period is open"
+  },
+  "insightsV2CatsTrendA11y": "{name} over the last six periods. {list}",
+  "@insightsV2CatsTrendA11y": {
+    "description": "T-210 · semantics label of the trend; list = the bars",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTrendItem": "{period}: {amount}",
+  "@insightsV2CatsTrendItem": {
+    "description": "T-210 · one closed bar in the semantics label",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2CatsTrendItemOpen": "{period}: {amount} so far",
+  "@insightsV2CatsTrendItemOpen": {
+    "description": "T-210 · the open bar in the semantics label",
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutTitle": "In and out",
+  "@insightsV2TrendsInOutTitle": {
+    "description": "T-211 Charts v2 · card title"
+  },
+  "insightsV2TrendsInOutSub": "Last 6 months",
+  "@insightsV2TrendsInOutSub": {
+    "description": "T-211 Charts v2 · card subtitle"
+  },
+  "insightsV2TrendsLegendSpent": "Spent",
+  "@insightsV2TrendsLegendSpent": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsLegendIncome": "Income",
+  "@insightsV2TrendsLegendIncome": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsLegendProjected": "Projected",
+  "@insightsV2TrendsLegendProjected": {
+    "description": "T-211 Charts v2 · legend"
+  },
+  "insightsV2TrendsInOutA11y": "In and out chart. {list}",
+  "@insightsV2TrendsInOutA11y": {
+    "description": "T-211 Charts v2 · semantics label; list = the months",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutBarA11y": "{month}: income {income}, spent {spend}",
+  "@insightsV2TrendsInOutBarA11y": {
+    "description": "T-211 Charts v2 · one month",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spend": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutBarProjectedA11y": "{month} (projected): income {income}, spent {spend}",
+  "@insightsV2TrendsInOutBarProjectedA11y": {
+    "description": "T-211 Charts v2 · projected month",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "spend": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsInOutEmptyA11y": "{month}: no data",
+  "@insightsV2TrendsInOutEmptyA11y": {
+    "description": "T-211 Charts v2 · month without data",
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayTitle": "Day by day",
+  "@insightsV2TrendsDayTitle": {
+    "description": "T-211 Charts v2 · heatmap title"
+  },
+  "insightsV2TrendsDaySub": "Darker = spent more",
+  "@insightsV2TrendsDaySub": {
+    "description": "T-211 Charts v2 · heatmap subtitle"
+  },
+  "insightsV2TrendsDayPriciest": "{weekday} is your priciest day",
+  "@insightsV2TrendsDayPriciest": {
+    "description": "T-211 Charts v2 · caption under the heatmap",
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayLess": "Less",
+  "@insightsV2TrendsDayLess": {
+    "description": "T-211 Charts v2 · heatmap legend, light end"
+  },
+  "insightsV2TrendsDayMore": "More",
+  "@insightsV2TrendsDayMore": {
+    "description": "T-211 Charts v2 · heatmap legend, dark end"
+  },
+  "insightsV2TrendsDayCellA11y": "{date}: spent {amount}. Tap to see the transactions",
+  "@insightsV2TrendsDayCellA11y": {
+    "description": "T-211 Charts v2 · semantics label of a day cell",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayCellNoSpendA11y": "{date}: no spending",
+  "@insightsV2TrendsDayCellNoSpendA11y": {
+    "description": "T-211 Charts v2 · day without spending",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayCellFutureA11y": "{date}: not yet",
+  "@insightsV2TrendsDayCellFutureA11y": {
+    "description": "T-211 Charts v2 · future day",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "insightsV2TrendsDayA11y": "Day by day spending chart. {days} days, darker means more spent",
+  "@insightsV2TrendsDayA11y": {
+    "description": "T-211 Charts v2 · heatmap semantics label",
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
   }
 }

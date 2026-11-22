@@ -11979,6 +11979,444 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حاول تاني'**
   String get insightsChartsRetry;
+
+  /// T-209 Charts v2 · tab 1
+  ///
+  /// In ar, this message translates to:
+  /// **'نظرة عامة'**
+  String get insightsV2TabOverview;
+
+  /// T-209 Charts v2 · tab 2
+  ///
+  /// In ar, this message translates to:
+  /// **'التصنيفات'**
+  String get insightsV2TabCategories;
+
+  /// T-209 Charts v2 · tab 3
+  ///
+  /// In ar, this message translates to:
+  /// **'الاتجاهات'**
+  String get insightsV2TabTrends;
+
+  /// T-209 Charts v2 · hero label, open period
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت لحد النهارده'**
+  String get insightsV2HeroLabel;
+
+  /// T-209 Charts v2 · hero label, closed period
+  ///
+  /// In ar, this message translates to:
+  /// **'إجمالي صرفك في الشهر'**
+  String get insightsV2HeroLabelClosed;
+
+  /// T-209 Charts v2 · hero, open period
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم {day} من {total}'**
+  String insightsV2HeroDay(String day, String total);
+
+  /// T-209 Charts v2 · trend:select(up/down/other). Open period against the same days of the previous one
+  ///
+  /// In ar, this message translates to:
+  /// **'{trend, select, up{أكتر بـ {delta} من نفس اليوم الشهر اللي فات} down{أقل بـ {delta} من نفس اليوم الشهر اللي فات} other{زي نفس اليوم الشهر اللي فات بالظبط}}'**
+  String insightsV2HeroVs(String trend, String delta);
+
+  /// T-209 Charts v2 · trend:select(up/down/other). Closed period against the whole previous one
+  ///
+  /// In ar, this message translates to:
+  /// **'{trend, select, up{أكتر بـ {delta} من الشهر اللي فات} down{أقل بـ {delta} من الشهر اللي فات} other{زي الشهر اللي فات بالظبط}}'**
+  String insightsV2HeroVsClosed(String trend, String delta);
+
+  /// T-209 Charts v2 · thin data: under 3 days or no previous period
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش بيانات كفاية نقارن بيها بالشهر اللي فات'**
+  String get insightsV2HeroThin;
+
+  /// T-209 Charts v2 · state:select(under/over/other); other = no budget
+  ///
+  /// In ar, this message translates to:
+  /// **'{state, select, under{لو كملت كده هتقفل الشهر على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل الشهر على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل الشهر على حوالي {projected}}}'**
+  String insightsV2HeroProjection(
+    String state,
+    String projected,
+    String budget,
+  );
+
+  /// T-209 Charts v2 · state:select(under/over/other); other is never shown
+  ///
+  /// In ar, this message translates to:
+  /// **'{state, select, under{قفلت الشهر تحت ميزانيتك ({budget})} over{قفلت الشهر فوق ميزانيتك ({budget})} other{}}'**
+  String insightsV2HeroClosedBudget(String state, String budget);
+
+  /// T-209 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده'**
+  String get insightsV2LegendThis;
+
+  /// T-209 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات'**
+  String get insightsV2LegendLast;
+
+  /// T-209 Charts v2 · legend and line label
+  ///
+  /// In ar, this message translates to:
+  /// **'الميزانية'**
+  String get insightsV2LegendBudget;
+
+  /// T-209 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'المتوقع'**
+  String get insightsV2LegendProjected;
+
+  /// T-209 Charts v2 · x axis, first label
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم {day}'**
+  String insightsV2PaceDay(String day);
+
+  /// T-209 Charts v2 · stat under the hero
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك'**
+  String get insightsV2StatIncome;
+
+  /// T-209 Charts v2 · stat under the hero; hidden without a budget
+  ///
+  /// In ar, this message translates to:
+  /// **'فاضل في الميزانية'**
+  String get insightsV2StatLeft;
+
+  /// T-209 Charts v2 · stat under the hero: due from today to the end of the period
+  ///
+  /// In ar, this message translates to:
+  /// **'فواتير جاية'**
+  String get insightsV2StatBills;
+
+  /// T-209 Charts v2 · another currency, in its own currency, never summed
+  ///
+  /// In ar, this message translates to:
+  /// **'وكمان صرفت {amount}'**
+  String insightsV2OtherCurrency(String amount);
+
+  /// T-209 Charts v2 · semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'رسم سرعة الصرف: لحد اليوم {day} من {total} صرفت {spent}'**
+  String insightsV2PaceA11y(String day, String total, String spent);
+
+  /// T-209 Charts v2 · semantics label, second sentence
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات لحد نفس اليوم: {previous}'**
+  String insightsV2PaceA11yPrev(String previous);
+
+  /// T-209 Charts v2 · semantics label, third sentence
+  ///
+  /// In ar, this message translates to:
+  /// **'المتوقع في آخر الشهر: {projected}'**
+  String insightsV2PaceA11yProjected(String projected);
+
+  /// T-209 Charts v2 · semantics hint
+  ///
+  /// In ar, this message translates to:
+  /// **'اسحب صباعك على الرسم علشان تشوف كل يوم'**
+  String get insightsV2ScrubHint;
+
+  /// T-209 Charts v2 · scrub tooltip, line 1
+  ///
+  /// In ar, this message translates to:
+  /// **'يوم {day} · صرفت لحد يومها {spent}'**
+  String insightsV2ScrubSpent(String day, String spent);
+
+  /// T-209 Charts v2 · scrub tooltip, line 2
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات: {previous}'**
+  String insightsV2ScrubLast(String previous);
+
+  /// T-209 Charts v2 · card title
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت فين'**
+  String get insightsV2CatTitle;
+
+  /// T-209 Charts v2 · card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'الشرطة الرمادي = نفس الأيام الشهر اللي فات'**
+  String get insightsV2CatSub;
+
+  /// T-209 Charts v2 · opens the Categories tab
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف كل التصنيفات'**
+  String get insightsV2CatSeeAll;
+
+  /// T-209 Charts v2 · semantics label of a category row; status = the change text
+  ///
+  /// In ar, this message translates to:
+  /// **'{category}: {amount}. {status}'**
+  String insightsV2CatRowA11y(String category, String amount, String status);
+
+  /// T-209 Charts v2 · card title
+  ///
+  /// In ar, this message translates to:
+  /// **'وفّرت كام كل شهر'**
+  String get insightsV2SavedTitle;
+
+  /// T-209 Charts v2 · card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'الدخل ناقص الصرف · الشهر ده متوقع'**
+  String get insightsV2SavedSub;
+
+  /// T-209 Charts v2 · average line label
+  ///
+  /// In ar, this message translates to:
+  /// **'متوسطك {average}'**
+  String insightsV2SavedAverage(String average);
+
+  /// T-209 Charts v2 · semantics label of one bar
+  ///
+  /// In ar, this message translates to:
+  /// **'{month}: {amount}'**
+  String insightsV2SavedBarA11y(String month, String amount);
+
+  /// T-209 Charts v2 · semantics label of the projected bar
+  ///
+  /// In ar, this message translates to:
+  /// **'{month} (متوقع): {amount}'**
+  String insightsV2SavedBarProjectedA11y(String month, String amount);
+
+  /// T-209 Charts v2 · semantics label; list = the bars
+  ///
+  /// In ar, this message translates to:
+  /// **'رسم اللي وفّرته كل شهر. {list}'**
+  String insightsV2SavedA11y(String list);
+
+  /// T-209 Charts v2 · card title; hidden when nothing is due
+  ///
+  /// In ar, this message translates to:
+  /// **'جاي قريب'**
+  String get insightsV2UpTitle;
+
+  /// T-209 Charts v2 · count:int, n = digits
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{النهارده} =1{بكرة} =2{بعد يومين} few{بعد {n} أيام} many{بعد {n} يوم} other{بعد {n} يوم}}'**
+  String insightsV2UpIn(int count, String n);
+
+  /// T-209 Charts v2 · semantics label of one row
+  ///
+  /// In ar, this message translates to:
+  /// **'{item}، {when}، {amount}'**
+  String insightsV2UpA11y(String item, String when, String amount);
+
+  /// T-210 Categories tab · card title
+  ///
+  /// In ar, this message translates to:
+  /// **'التصنيفات'**
+  String get insightsV2CatsTitle;
+
+  /// T-210 · card subtitle: the total and how many categories
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{{total} من غير تصنيفات} =1{{total} على تصنيف واحد} =2{{total} على تصنيفين} few{{total} على {n} تصنيفات} many{{total} على {n} تصنيف} other{{total} على {n} تصنيف}}'**
+  String insightsV2CatsSub(int count, String n, String total);
+
+  /// T-210 · sort option
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكبر الأول'**
+  String get insightsV2CatsSortAmount;
+
+  /// T-210 · sort option
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر تغيير'**
+  String get insightsV2CatsSortChange;
+
+  /// T-210 · semantics label of the sort control
+  ///
+  /// In ar, this message translates to:
+  /// **'الترتيب: {label}. دوس علشان تغيّره.'**
+  String insightsV2CatsSortA11y(String label);
+
+  /// T-210 · semantics label of the share strip; list = segments
+  ///
+  /// In ar, this message translates to:
+  /// **'نسبة كل تصنيف. {list}'**
+  String insightsV2CatsStripA11y(String list);
+
+  /// T-210 · one segment of the strip in the semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} {percent}'**
+  String insightsV2CatsStripSeg(String name, String percent);
+
+  /// T-210 · the selected category line
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{{name} · {amount}} =1{{name} · {amount} · حركة} =2{{name} · {amount} · حركتين} few{{name} · {amount} · {n} حركات} many{{name} · {amount} · {n} حركة} other{{name} · {amount} · {n} حركة}}'**
+  String insightsV2CatsTip(int count, String n, String name, String amount);
+
+  /// T-210 · opens the drill-down of the selected category
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الحركات'**
+  String get insightsV2CatsOpenTxns;
+
+  /// T-210 · trend card title
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} على آخر ست شهور'**
+  String insightsV2CatsTrendTitle(String name);
+
+  /// T-210 · note while the current period is open
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر عمود لسه مفتوح، فهو لسه بيكبر.'**
+  String get insightsV2CatsTrendOpen;
+
+  /// T-210 · semantics label of the trend; list = the bars
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} في آخر ست فترات. {list}'**
+  String insightsV2CatsTrendA11y(String name, String list);
+
+  /// T-210 · one closed bar in the semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'{period}: {amount}'**
+  String insightsV2CatsTrendItem(String period, String amount);
+
+  /// T-210 · the open bar in the semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'{period}: {amount} لحد دلوقتي'**
+  String insightsV2CatsTrendItemOpen(String period, String amount);
+
+  /// T-211 Charts v2 · card title
+  ///
+  /// In ar, this message translates to:
+  /// **'الداخل والخارج'**
+  String get insightsV2TrendsInOutTitle;
+
+  /// T-211 Charts v2 · card subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر ٦ شهور'**
+  String get insightsV2TrendsInOutSub;
+
+  /// T-211 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت'**
+  String get insightsV2TrendsLegendSpent;
+
+  /// T-211 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك'**
+  String get insightsV2TrendsLegendIncome;
+
+  /// T-211 Charts v2 · legend
+  ///
+  /// In ar, this message translates to:
+  /// **'متوقع'**
+  String get insightsV2TrendsLegendProjected;
+
+  /// T-211 Charts v2 · semantics label; list = the months
+  ///
+  /// In ar, this message translates to:
+  /// **'رسم الداخل والخارج. {list}'**
+  String insightsV2TrendsInOutA11y(String list);
+
+  /// T-211 Charts v2 · one month
+  ///
+  /// In ar, this message translates to:
+  /// **'{month}: دخلك {income}، صرفت {spend}'**
+  String insightsV2TrendsInOutBarA11y(
+    String month,
+    String income,
+    String spend,
+  );
+
+  /// T-211 Charts v2 · projected month
+  ///
+  /// In ar, this message translates to:
+  /// **'{month} (متوقع): دخلك {income}، صرفت {spend}'**
+  String insightsV2TrendsInOutBarProjectedA11y(
+    String month,
+    String income,
+    String spend,
+  );
+
+  /// T-211 Charts v2 · month without data
+  ///
+  /// In ar, this message translates to:
+  /// **'{month}: مفيش بيانات'**
+  String insightsV2TrendsInOutEmptyA11y(String month);
+
+  /// T-211 Charts v2 · heatmap title
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفك يوم بيوم'**
+  String get insightsV2TrendsDayTitle;
+
+  /// T-211 Charts v2 · heatmap subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'كل ما المربع يغمق صرفت أكتر'**
+  String get insightsV2TrendsDaySub;
+
+  /// T-211 Charts v2 · caption under the heatmap
+  ///
+  /// In ar, this message translates to:
+  /// **'{weekday} أغلى يوم عندك'**
+  String insightsV2TrendsDayPriciest(String weekday);
+
+  /// T-211 Charts v2 · heatmap legend, light end
+  ///
+  /// In ar, this message translates to:
+  /// **'أقل'**
+  String get insightsV2TrendsDayLess;
+
+  /// T-211 Charts v2 · heatmap legend, dark end
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر'**
+  String get insightsV2TrendsDayMore;
+
+  /// T-211 Charts v2 · semantics label of a day cell
+  ///
+  /// In ar, this message translates to:
+  /// **'{date}: صرفت {amount}. اضغط تشوف المعاملات'**
+  String insightsV2TrendsDayCellA11y(String date, String amount);
+
+  /// T-211 Charts v2 · day without spending
+  ///
+  /// In ar, this message translates to:
+  /// **'{date}: مصرفتش حاجة'**
+  String insightsV2TrendsDayCellNoSpendA11y(String date);
+
+  /// T-211 Charts v2 · future day
+  ///
+  /// In ar, this message translates to:
+  /// **'{date}: لسه ماجاش'**
+  String insightsV2TrendsDayCellFutureA11y(String date);
+
+  /// T-211 Charts v2 · heatmap semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'رسم صرفك يوم بيوم. {days} يوم، الأغمق هو الأكتر صرفًا'**
+  String insightsV2TrendsDayA11y(String days);
 }
 
 class _AppLocalizationsDelegate

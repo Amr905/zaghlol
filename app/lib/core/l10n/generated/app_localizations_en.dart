@@ -8170,4 +8170,349 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insightsChartsRetry => 'Try again';
+
+  @override
+  String get insightsV2TabOverview => 'Overview';
+
+  @override
+  String get insightsV2TabCategories => 'Categories';
+
+  @override
+  String get insightsV2TabTrends => 'Trends';
+
+  @override
+  String get insightsV2HeroLabel => 'Spent so far';
+
+  @override
+  String get insightsV2HeroLabelClosed => 'Total spent in the month';
+
+  @override
+  String insightsV2HeroDay(String day, String total) {
+    return 'Day $day of $total';
+  }
+
+  @override
+  String insightsV2HeroVs(String trend, String delta) {
+    String _temp0 = intl.Intl.selectLogic(trend, {
+      'up': '$delta more than by this day last month',
+      'down': '$delta less than by this day last month',
+      'other': 'Same as by this day last month',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String insightsV2HeroVsClosed(String trend, String delta) {
+    String _temp0 = intl.Intl.selectLogic(trend, {
+      'up': '$delta more than last month',
+      'down': '$delta less than last month',
+      'other': 'Same as last month',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2HeroThin =>
+      'Not enough data yet to compare with last month';
+
+  @override
+  String insightsV2HeroProjection(
+    String state,
+    String projected,
+    String budget,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'under':
+          'At this pace you\'ll end the month near $projected, under your budget ($budget)',
+      'over':
+          'At this pace you\'ll end the month near $projected, over your budget ($budget)',
+      'other': 'At this pace you\'ll end the month near $projected',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String insightsV2HeroClosedBudget(String state, String budget) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'under': 'You finished the month under your budget ($budget)',
+      'over': 'You finished the month over your budget ($budget)',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2LegendThis => 'This month';
+
+  @override
+  String get insightsV2LegendLast => 'Last month';
+
+  @override
+  String get insightsV2LegendBudget => 'Budget';
+
+  @override
+  String get insightsV2LegendProjected => 'Projected';
+
+  @override
+  String insightsV2PaceDay(String day) {
+    return 'Day $day';
+  }
+
+  @override
+  String get insightsV2StatIncome => 'Income';
+
+  @override
+  String get insightsV2StatLeft => 'Left in budget';
+
+  @override
+  String get insightsV2StatBills => 'Bills coming';
+
+  @override
+  String insightsV2OtherCurrency(String amount) {
+    return 'Also spent $amount';
+  }
+
+  @override
+  String insightsV2PaceA11y(String day, String total, String spent) {
+    return 'Spending pace chart: by day $day of $total you spent $spent';
+  }
+
+  @override
+  String insightsV2PaceA11yPrev(String previous) {
+    return 'Last month by the same day: $previous';
+  }
+
+  @override
+  String insightsV2PaceA11yProjected(String projected) {
+    return 'Projected for the end of the month: $projected';
+  }
+
+  @override
+  String get insightsV2ScrubHint => 'Drag along the chart to see each day';
+
+  @override
+  String insightsV2ScrubSpent(String day, String spent) {
+    return 'Day $day · spent to date $spent';
+  }
+
+  @override
+  String insightsV2ScrubLast(String previous) {
+    return 'Last month: $previous';
+  }
+
+  @override
+  String get insightsV2CatTitle => 'Where it went';
+
+  @override
+  String get insightsV2CatSub => 'Grey tick = same days last month';
+
+  @override
+  String get insightsV2CatSeeAll => 'See all categories';
+
+  @override
+  String insightsV2CatRowA11y(String category, String amount, String status) {
+    return '$category: $amount. $status';
+  }
+
+  @override
+  String get insightsV2SavedTitle => 'Saved each month';
+
+  @override
+  String get insightsV2SavedSub =>
+      'Income minus spending · this month projected';
+
+  @override
+  String insightsV2SavedAverage(String average) {
+    return 'Your average $average';
+  }
+
+  @override
+  String insightsV2SavedBarA11y(String month, String amount) {
+    return '$month: $amount';
+  }
+
+  @override
+  String insightsV2SavedBarProjectedA11y(String month, String amount) {
+    return '$month (projected): $amount';
+  }
+
+  @override
+  String insightsV2SavedA11y(String list) {
+    return 'Saved each month chart. $list';
+  }
+
+  @override
+  String get insightsV2UpTitle => 'Coming up';
+
+  @override
+  String insightsV2UpIn(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'In $n days',
+      one: 'Tomorrow',
+      zero: 'Today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsV2UpA11y(String item, String when, String amount) {
+    return '$item, $when, $amount';
+  }
+
+  @override
+  String get insightsV2CatsTitle => 'Categories';
+
+  @override
+  String insightsV2CatsSub(int count, String n, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$total across $n categories',
+      one: '$total in 1 category',
+      zero: '$total in no categories',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsSortAmount => 'Largest first';
+
+  @override
+  String get insightsV2CatsSortChange => 'Biggest change';
+
+  @override
+  String insightsV2CatsSortA11y(String label) {
+    return 'Sort order: $label. Tap to change.';
+  }
+
+  @override
+  String insightsV2CatsStripA11y(String list) {
+    return 'Share of each category. $list';
+  }
+
+  @override
+  String insightsV2CatsStripSeg(String name, String percent) {
+    return '$name $percent';
+  }
+
+  @override
+  String insightsV2CatsTip(int count, String n, String name, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$name · $amount · $n txns',
+      one: '$name · $amount · 1 txn',
+      zero: '$name · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsOpenTxns => 'Open transactions';
+
+  @override
+  String insightsV2CatsTrendTitle(String name) {
+    return '$name, 6 months';
+  }
+
+  @override
+  String get insightsV2CatsTrendOpen =>
+      'The latest bar is still open, so it is still growing.';
+
+  @override
+  String insightsV2CatsTrendA11y(String name, String list) {
+    return '$name over the last six periods. $list';
+  }
+
+  @override
+  String insightsV2CatsTrendItem(String period, String amount) {
+    return '$period: $amount';
+  }
+
+  @override
+  String insightsV2CatsTrendItemOpen(String period, String amount) {
+    return '$period: $amount so far';
+  }
+
+  @override
+  String get insightsV2TrendsInOutTitle => 'In and out';
+
+  @override
+  String get insightsV2TrendsInOutSub => 'Last 6 months';
+
+  @override
+  String get insightsV2TrendsLegendSpent => 'Spent';
+
+  @override
+  String get insightsV2TrendsLegendIncome => 'Income';
+
+  @override
+  String get insightsV2TrendsLegendProjected => 'Projected';
+
+  @override
+  String insightsV2TrendsInOutA11y(String list) {
+    return 'In and out chart. $list';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month: income $income, spent $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarProjectedA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month (projected): income $income, spent $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutEmptyA11y(String month) {
+    return '$month: no data';
+  }
+
+  @override
+  String get insightsV2TrendsDayTitle => 'Day by day';
+
+  @override
+  String get insightsV2TrendsDaySub => 'Darker = spent more';
+
+  @override
+  String insightsV2TrendsDayPriciest(String weekday) {
+    return '$weekday is your priciest day';
+  }
+
+  @override
+  String get insightsV2TrendsDayLess => 'Less';
+
+  @override
+  String get insightsV2TrendsDayMore => 'More';
+
+  @override
+  String insightsV2TrendsDayCellA11y(String date, String amount) {
+    return '$date: spent $amount. Tap to see the transactions';
+  }
+
+  @override
+  String insightsV2TrendsDayCellNoSpendA11y(String date) {
+    return '$date: no spending';
+  }
+
+  @override
+  String insightsV2TrendsDayCellFutureA11y(String date) {
+    return '$date: not yet';
+  }
+
+  @override
+  String insightsV2TrendsDayA11y(String days) {
+    return 'Day by day spending chart. $days days, darker means more spent';
+  }
 }

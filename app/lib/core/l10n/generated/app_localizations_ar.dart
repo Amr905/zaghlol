@@ -8326,4 +8326,356 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get insightsChartsRetry => 'حاول تاني';
+
+  @override
+  String get insightsV2TabOverview => 'نظرة عامة';
+
+  @override
+  String get insightsV2TabCategories => 'التصنيفات';
+
+  @override
+  String get insightsV2TabTrends => 'الاتجاهات';
+
+  @override
+  String get insightsV2HeroLabel => 'صرفت لحد النهارده';
+
+  @override
+  String get insightsV2HeroLabelClosed => 'إجمالي صرفك في الشهر';
+
+  @override
+  String insightsV2HeroDay(String day, String total) {
+    return 'اليوم $day من $total';
+  }
+
+  @override
+  String insightsV2HeroVs(String trend, String delta) {
+    String _temp0 = intl.Intl.selectLogic(trend, {
+      'up': 'أكتر بـ $delta من نفس اليوم الشهر اللي فات',
+      'down': 'أقل بـ $delta من نفس اليوم الشهر اللي فات',
+      'other': 'زي نفس اليوم الشهر اللي فات بالظبط',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String insightsV2HeroVsClosed(String trend, String delta) {
+    String _temp0 = intl.Intl.selectLogic(trend, {
+      'up': 'أكتر بـ $delta من الشهر اللي فات',
+      'down': 'أقل بـ $delta من الشهر اللي فات',
+      'other': 'زي الشهر اللي فات بالظبط',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2HeroThin =>
+      'لسه مفيش بيانات كفاية نقارن بيها بالشهر اللي فات';
+
+  @override
+  String insightsV2HeroProjection(
+    String state,
+    String projected,
+    String budget,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'under':
+          'لو كملت كده هتقفل الشهر على حوالي $projected، تحت ميزانيتك ($budget)',
+      'over':
+          'لو كملت كده هتقفل الشهر على حوالي $projected، فوق ميزانيتك ($budget)',
+      'other': 'لو كملت كده هتقفل الشهر على حوالي $projected',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String insightsV2HeroClosedBudget(String state, String budget) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'under': 'قفلت الشهر تحت ميزانيتك ($budget)',
+      'over': 'قفلت الشهر فوق ميزانيتك ($budget)',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2LegendThis => 'الشهر ده';
+
+  @override
+  String get insightsV2LegendLast => 'الشهر اللي فات';
+
+  @override
+  String get insightsV2LegendBudget => 'الميزانية';
+
+  @override
+  String get insightsV2LegendProjected => 'المتوقع';
+
+  @override
+  String insightsV2PaceDay(String day) {
+    return 'يوم $day';
+  }
+
+  @override
+  String get insightsV2StatIncome => 'دخلك';
+
+  @override
+  String get insightsV2StatLeft => 'فاضل في الميزانية';
+
+  @override
+  String get insightsV2StatBills => 'فواتير جاية';
+
+  @override
+  String insightsV2OtherCurrency(String amount) {
+    return 'وكمان صرفت $amount';
+  }
+
+  @override
+  String insightsV2PaceA11y(String day, String total, String spent) {
+    return 'رسم سرعة الصرف: لحد اليوم $day من $total صرفت $spent';
+  }
+
+  @override
+  String insightsV2PaceA11yPrev(String previous) {
+    return 'الشهر اللي فات لحد نفس اليوم: $previous';
+  }
+
+  @override
+  String insightsV2PaceA11yProjected(String projected) {
+    return 'المتوقع في آخر الشهر: $projected';
+  }
+
+  @override
+  String get insightsV2ScrubHint => 'اسحب صباعك على الرسم علشان تشوف كل يوم';
+
+  @override
+  String insightsV2ScrubSpent(String day, String spent) {
+    return 'يوم $day · صرفت لحد يومها $spent';
+  }
+
+  @override
+  String insightsV2ScrubLast(String previous) {
+    return 'الشهر اللي فات: $previous';
+  }
+
+  @override
+  String get insightsV2CatTitle => 'صرفت فين';
+
+  @override
+  String get insightsV2CatSub => 'الشرطة الرمادي = نفس الأيام الشهر اللي فات';
+
+  @override
+  String get insightsV2CatSeeAll => 'شوف كل التصنيفات';
+
+  @override
+  String insightsV2CatRowA11y(String category, String amount, String status) {
+    return '$category: $amount. $status';
+  }
+
+  @override
+  String get insightsV2SavedTitle => 'وفّرت كام كل شهر';
+
+  @override
+  String get insightsV2SavedSub => 'الدخل ناقص الصرف · الشهر ده متوقع';
+
+  @override
+  String insightsV2SavedAverage(String average) {
+    return 'متوسطك $average';
+  }
+
+  @override
+  String insightsV2SavedBarA11y(String month, String amount) {
+    return '$month: $amount';
+  }
+
+  @override
+  String insightsV2SavedBarProjectedA11y(String month, String amount) {
+    return '$month (متوقع): $amount';
+  }
+
+  @override
+  String insightsV2SavedA11y(String list) {
+    return 'رسم اللي وفّرته كل شهر. $list';
+  }
+
+  @override
+  String get insightsV2UpTitle => 'جاي قريب';
+
+  @override
+  String insightsV2UpIn(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'بعد $n يوم',
+      many: 'بعد $n يوم',
+      few: 'بعد $n أيام',
+      two: 'بعد يومين',
+      one: 'بكرة',
+      zero: 'النهارده',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String insightsV2UpA11y(String item, String when, String amount) {
+    return '$item، $when، $amount';
+  }
+
+  @override
+  String get insightsV2CatsTitle => 'التصنيفات';
+
+  @override
+  String insightsV2CatsSub(int count, String n, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$total على $n تصنيف',
+      many: '$total على $n تصنيف',
+      few: '$total على $n تصنيفات',
+      two: '$total على تصنيفين',
+      one: '$total على تصنيف واحد',
+      zero: '$total من غير تصنيفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsSortAmount => 'الأكبر الأول';
+
+  @override
+  String get insightsV2CatsSortChange => 'أكتر تغيير';
+
+  @override
+  String insightsV2CatsSortA11y(String label) {
+    return 'الترتيب: $label. دوس علشان تغيّره.';
+  }
+
+  @override
+  String insightsV2CatsStripA11y(String list) {
+    return 'نسبة كل تصنيف. $list';
+  }
+
+  @override
+  String insightsV2CatsStripSeg(String name, String percent) {
+    return '$name $percent';
+  }
+
+  @override
+  String insightsV2CatsTip(int count, String n, String name, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$name · $amount · $n حركة',
+      many: '$name · $amount · $n حركة',
+      few: '$name · $amount · $n حركات',
+      two: '$name · $amount · حركتين',
+      one: '$name · $amount · حركة',
+      zero: '$name · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsOpenTxns => 'افتح الحركات';
+
+  @override
+  String insightsV2CatsTrendTitle(String name) {
+    return '$name على آخر ست شهور';
+  }
+
+  @override
+  String get insightsV2CatsTrendOpen => 'آخر عمود لسه مفتوح، فهو لسه بيكبر.';
+
+  @override
+  String insightsV2CatsTrendA11y(String name, String list) {
+    return '$name في آخر ست فترات. $list';
+  }
+
+  @override
+  String insightsV2CatsTrendItem(String period, String amount) {
+    return '$period: $amount';
+  }
+
+  @override
+  String insightsV2CatsTrendItemOpen(String period, String amount) {
+    return '$period: $amount لحد دلوقتي';
+  }
+
+  @override
+  String get insightsV2TrendsInOutTitle => 'الداخل والخارج';
+
+  @override
+  String get insightsV2TrendsInOutSub => 'آخر ٦ شهور';
+
+  @override
+  String get insightsV2TrendsLegendSpent => 'صرفت';
+
+  @override
+  String get insightsV2TrendsLegendIncome => 'دخلك';
+
+  @override
+  String get insightsV2TrendsLegendProjected => 'متوقع';
+
+  @override
+  String insightsV2TrendsInOutA11y(String list) {
+    return 'رسم الداخل والخارج. $list';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month: دخلك $income، صرفت $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutBarProjectedA11y(
+    String month,
+    String income,
+    String spend,
+  ) {
+    return '$month (متوقع): دخلك $income، صرفت $spend';
+  }
+
+  @override
+  String insightsV2TrendsInOutEmptyA11y(String month) {
+    return '$month: مفيش بيانات';
+  }
+
+  @override
+  String get insightsV2TrendsDayTitle => 'صرفك يوم بيوم';
+
+  @override
+  String get insightsV2TrendsDaySub => 'كل ما المربع يغمق صرفت أكتر';
+
+  @override
+  String insightsV2TrendsDayPriciest(String weekday) {
+    return '$weekday أغلى يوم عندك';
+  }
+
+  @override
+  String get insightsV2TrendsDayLess => 'أقل';
+
+  @override
+  String get insightsV2TrendsDayMore => 'أكتر';
+
+  @override
+  String insightsV2TrendsDayCellA11y(String date, String amount) {
+    return '$date: صرفت $amount. اضغط تشوف المعاملات';
+  }
+
+  @override
+  String insightsV2TrendsDayCellNoSpendA11y(String date) {
+    return '$date: مصرفتش حاجة';
+  }
+
+  @override
+  String insightsV2TrendsDayCellFutureA11y(String date) {
+    return '$date: لسه ماجاش';
+  }
+
+  @override
+  String insightsV2TrendsDayA11y(String days) {
+    return 'رسم صرفك يوم بيوم. $days يوم، الأغمق هو الأكتر صرفًا';
+  }
 }
