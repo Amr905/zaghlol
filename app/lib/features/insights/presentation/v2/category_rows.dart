@@ -47,7 +47,9 @@ class CategoryBarRow extends ConsumerWidget {
     final c = ZColors.of(context);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final cats = ref.watch(categoryRowsProvider).value ?? const [];
-    var name = l.insightsChartsOtherSlice;
+    var name = row.categoryId == null
+        ? l.transactionsListFilterUncategorized
+        : l.insightsChartsOtherSlice;
     var icon = Icons.category_outlined;
     for (final r in cats) {
       if (r.id == row.categoryId) {

@@ -12217,6 +12217,90 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{item}، {when}، {amount}'**
   String insightsV2UpA11y(String item, String when, String amount);
+
+  /// T-210 Categories tab · card title
+  ///
+  /// In ar, this message translates to:
+  /// **'التصنيفات'**
+  String get insightsV2CatsTitle;
+
+  /// T-210 · card subtitle: the total and how many categories
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{{total} من غير تصنيفات} =1{{total} على تصنيف واحد} =2{{total} على تصنيفين} few{{total} على {n} تصنيفات} many{{total} على {n} تصنيف} other{{total} على {n} تصنيف}}'**
+  String insightsV2CatsSub(int count, String n, String total);
+
+  /// T-210 · sort option
+  ///
+  /// In ar, this message translates to:
+  /// **'الأكبر الأول'**
+  String get insightsV2CatsSortAmount;
+
+  /// T-210 · sort option
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر تغيير'**
+  String get insightsV2CatsSortChange;
+
+  /// T-210 · semantics label of the sort control
+  ///
+  /// In ar, this message translates to:
+  /// **'الترتيب: {label}. دوس علشان تغيّره.'**
+  String insightsV2CatsSortA11y(String label);
+
+  /// T-210 · semantics label of the share strip; list = segments
+  ///
+  /// In ar, this message translates to:
+  /// **'نسبة كل تصنيف. {list}'**
+  String insightsV2CatsStripA11y(String list);
+
+  /// T-210 · one segment of the strip in the semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} {percent}'**
+  String insightsV2CatsStripSeg(String name, String percent);
+
+  /// T-210 · the selected category line
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{{name} · {amount}} =1{{name} · {amount} · حركة} =2{{name} · {amount} · حركتين} few{{name} · {amount} · {n} حركات} many{{name} · {amount} · {n} حركة} other{{name} · {amount} · {n} حركة}}'**
+  String insightsV2CatsTip(int count, String n, String name, String amount);
+
+  /// T-210 · opens the drill-down of the selected category
+  ///
+  /// In ar, this message translates to:
+  /// **'افتح الحركات'**
+  String get insightsV2CatsOpenTxns;
+
+  /// T-210 · trend card title
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} على آخر ست شهور'**
+  String insightsV2CatsTrendTitle(String name);
+
+  /// T-210 · note while the current period is open
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر عمود لسه مفتوح، فهو لسه بيكبر.'**
+  String get insightsV2CatsTrendOpen;
+
+  /// T-210 · semantics label of the trend; list = the bars
+  ///
+  /// In ar, this message translates to:
+  /// **'{name} في آخر ست فترات. {list}'**
+  String insightsV2CatsTrendA11y(String name, String list);
+
+  /// T-210 · one closed bar in the semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'{period}: {amount}'**
+  String insightsV2CatsTrendItem(String period, String amount);
+
+  /// T-210 · the open bar in the semantics label
+  ///
+  /// In ar, this message translates to:
+  /// **'{period}: {amount} لحد دلوقتي'**
+  String insightsV2CatsTrendItemOpen(String period, String amount);
 }
 
 class _AppLocalizationsDelegate

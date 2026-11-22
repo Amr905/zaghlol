@@ -8518,4 +8518,84 @@ class AppLocalizationsAr extends AppLocalizations {
   String insightsV2UpA11y(String item, String when, String amount) {
     return '$item، $when، $amount';
   }
+
+  @override
+  String get insightsV2CatsTitle => 'التصنيفات';
+
+  @override
+  String insightsV2CatsSub(int count, String n, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$total على $n تصنيف',
+      many: '$total على $n تصنيف',
+      few: '$total على $n تصنيفات',
+      two: '$total على تصنيفين',
+      one: '$total على تصنيف واحد',
+      zero: '$total من غير تصنيفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsSortAmount => 'الأكبر الأول';
+
+  @override
+  String get insightsV2CatsSortChange => 'أكتر تغيير';
+
+  @override
+  String insightsV2CatsSortA11y(String label) {
+    return 'الترتيب: $label. دوس علشان تغيّره.';
+  }
+
+  @override
+  String insightsV2CatsStripA11y(String list) {
+    return 'نسبة كل تصنيف. $list';
+  }
+
+  @override
+  String insightsV2CatsStripSeg(String name, String percent) {
+    return '$name $percent';
+  }
+
+  @override
+  String insightsV2CatsTip(int count, String n, String name, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$name · $amount · $n حركة',
+      many: '$name · $amount · $n حركة',
+      few: '$name · $amount · $n حركات',
+      two: '$name · $amount · حركتين',
+      one: '$name · $amount · حركة',
+      zero: '$name · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsOpenTxns => 'افتح الحركات';
+
+  @override
+  String insightsV2CatsTrendTitle(String name) {
+    return '$name على آخر ست شهور';
+  }
+
+  @override
+  String get insightsV2CatsTrendOpen => 'آخر عمود لسه مفتوح، فهو لسه بيكبر.';
+
+  @override
+  String insightsV2CatsTrendA11y(String name, String list) {
+    return '$name في آخر ست فترات. $list';
+  }
+
+  @override
+  String insightsV2CatsTrendItem(String period, String amount) {
+    return '$period: $amount';
+  }
+
+  @override
+  String insightsV2CatsTrendItemOpen(String period, String amount) {
+    return '$period: $amount لحد دلوقتي';
+  }
 }

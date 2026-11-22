@@ -8360,4 +8360,79 @@ class AppLocalizationsEn extends AppLocalizations {
   String insightsV2UpA11y(String item, String when, String amount) {
     return '$item, $when, $amount';
   }
+
+  @override
+  String get insightsV2CatsTitle => 'Categories';
+
+  @override
+  String insightsV2CatsSub(int count, String n, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$total across $n categories',
+      one: '$total in 1 category',
+      zero: '$total in no categories',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsSortAmount => 'Largest first';
+
+  @override
+  String get insightsV2CatsSortChange => 'Biggest change';
+
+  @override
+  String insightsV2CatsSortA11y(String label) {
+    return 'Sort order: $label. Tap to change.';
+  }
+
+  @override
+  String insightsV2CatsStripA11y(String list) {
+    return 'Share of each category. $list';
+  }
+
+  @override
+  String insightsV2CatsStripSeg(String name, String percent) {
+    return '$name $percent';
+  }
+
+  @override
+  String insightsV2CatsTip(int count, String n, String name, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$name · $amount · $n txns',
+      one: '$name · $amount · 1 txn',
+      zero: '$name · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get insightsV2CatsOpenTxns => 'Open transactions';
+
+  @override
+  String insightsV2CatsTrendTitle(String name) {
+    return '$name, 6 months';
+  }
+
+  @override
+  String get insightsV2CatsTrendOpen =>
+      'The latest bar is still open, so it is still growing.';
+
+  @override
+  String insightsV2CatsTrendA11y(String name, String list) {
+    return '$name over the last six periods. $list';
+  }
+
+  @override
+  String insightsV2CatsTrendItem(String period, String amount) {
+    return '$period: $amount';
+  }
+
+  @override
+  String insightsV2CatsTrendItemOpen(String period, String amount) {
+    return '$period: $amount so far';
+  }
 }
