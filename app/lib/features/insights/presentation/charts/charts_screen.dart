@@ -280,7 +280,9 @@ String _cashFlowSubtitle(
       : text.bucketCount(kind, count);
   if (resolved == null) return span;
   // FU-269 N2: one month picked, six month bars: say what the totals cover.
+  // When the period is still open the open-period note already names it.
   final single =
+      !open &&
       (kind == ChartBucketKind.month || kind == ChartBucketKind.cycle) &&
       (resolved.selection.kind == ChartPeriodKind.cycle ||
           resolved.selection.kind == ChartPeriodKind.month);
