@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T-220: True Black bg (D-79), docs/02-design/05-theme-2026.md section 0 -->
+    <color name="launch_bg">#000000</color>
+</resources>

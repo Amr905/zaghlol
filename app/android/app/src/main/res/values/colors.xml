@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T-220: Mint Fresh bg, docs/02-design/05-theme-2026.md section 0 -->
+    <color name="launch_bg">#F3FBF7</color>
+</resources>
