@@ -7,8 +7,10 @@
     <!-- NOTIF-GW (FR-NTF): local alerts on Android 13+. Requested at runtime
          after onboarding or when the user first turns an alert type on;
          never at install. Local notifications only: no FCM, no
-         RECEIVE_BOOT_COMPLETED, no SCHEDULE_EXACT_ALARM. -->
+         SCHEDULE_EXACT_ALARM (RECEIVE_BOOT_COMPLETED is added below for T-230). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- T-230: normal permission; lets the app re-arm its pending alerts after a restart. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- T-120 (FR-VOI-01): the voice logger listens only while its screen is
          open, asked at first use (never at install). Audio is handled by the
          OS recognizer and never stored by the app; on-device recognition is
@@ -39,6 +41,15 @@
         <receiver
             android:name=".platform.notifications.NotificationAlarmReceiver"
             android:exported="false"/>
+        <!-- T-230: re-arms saved alerts after a restart. Not exported; the
+             system's BOOT_COMPLETED is delivered regardless. -->
+        <receiver
+            android:name=".platform.notifications.NotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
         <!-- L-1: target of every notification PendingIntent. Not exported;
              no UI. Forwards route and cancel id to MainActivity with a
              per-process token, which MainActivity requires. -->

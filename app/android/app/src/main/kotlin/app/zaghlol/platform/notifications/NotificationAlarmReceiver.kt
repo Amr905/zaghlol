@@ -32,6 +32,7 @@ class NotificationAlarmReceiver : BroadcastReceiver() {
       // Dropped; never log the text.
     } finally {
       FilePendingIds(context).remove(id)
+      ScheduleBook(FileScheduleStore(context)).remove(id)
     }
   }
 }
