@@ -6706,8 +6706,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you turn it on, we send only the merchant name and the category you chose.';
 
   @override
-  String get voiceOnlineConsentLabel =>
-      'Use the phone\'s online speech recognition';
+  String get voiceOnlineConsentLabel => 'Online voice recognition';
 
   @override
   String get voiceOnlineConsentSentence =>
