@@ -13,6 +13,8 @@ import 'package:zaghlol/features/notifications/domain/quiet_hours.dart';
 import 'package:zaghlol/features/recurring/application/send_due_reminders.dart';
 import 'package:zaghlol/features/recurring/data/recurring_repository.dart';
 import 'package:zaghlol/features/recurring/presentation/bills_providers.dart';
+import 'package:zaghlol/features/transactions/data/transactions_providers.dart'
+    show clockProvider;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/financial_fixtures.dart';
@@ -265,6 +267,29 @@ void main() {
       expect(gw.cancelled.last, isNot(gw.scheduled.single.id));
     });
   });
+
+  test(
+    'FU-290f: cancelWeeklyNudgeProvider drops the pending Friday nudge',
+    () async {
+      final gw = _Gw();
+      final svc = _service(gw);
+      await scheduleWeeklyNudge(
+        notifications: svc,
+        today: CivilDate(2026, 11, 18),
+        title: 't',
+        body: 'b',
+      );
+      final c = ProviderContainer(
+        overrides: [
+          clockProvider.overrideWithValue(() => DateTime.utc(2026, 11, 18, 9)),
+          notificationServiceProvider.overrideWith((ref) async => svc),
+        ],
+      );
+      addTearDown(c.dispose);
+      await c.read(cancelWeeklyNudgeProvider)();
+      expect(gw.cancelled, [gw.scheduled.single.id]);
+    },
+  );
 }
 
 class _ThrowingCancel extends _Gw {

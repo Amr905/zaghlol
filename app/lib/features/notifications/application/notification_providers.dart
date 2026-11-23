@@ -426,6 +426,24 @@ final weeklyNudgeProvider = Provider<Future<void> Function()>((ref) {
   };
 }, name: 'weeklyNudgeProvider');
 
+/// FU-290f: turning the weekly-summary type off cancels the pending nudge at
+/// once (it would otherwise fire once more before the next app run).
+final cancelWeeklyNudgeProvider = Provider<Future<void> Function()>((ref) {
+  return () async {
+    try {
+      final service = await ref.read(notificationServiceProvider.future);
+      final now = ref.read(clockProvider)().toUtc();
+      final today = localToday(
+        now.millisecondsSinceEpoch,
+        ref.read(localZoneProvider),
+      );
+      await cancelWeeklyNudge(service, nextFriday(today));
+    } on Object {
+      // Best effort.
+    }
+  };
+}, name: 'cancelWeeklyNudgeProvider');
+
 /// Called at start and on resume: the weekly summary when due, the next
 /// Friday's nudge, and the duplicate check (catches what the headless engine
 /// stored meanwhile).

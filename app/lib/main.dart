@@ -15,13 +15,13 @@ import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
 import 'core/logging/diag_code.dart';
-import 'core/platform/launch_theme.dart';
 import 'core/logging/diag_error_handlers.dart';
 import 'core/logging/diag_logger.dart';
 import 'core/logging/early_error_handlers.dart';
 import 'core/l10n/font_licenses.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
+import 'core/platform/launch_theme.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'core/theme/app_theme.dart';
@@ -242,7 +242,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     ref.watch(widgetBridgeWiringProvider);
     return ZaghlolApp(
       locale: ref.watch(appLocaleProvider),
-      themeMode: ref.watch(appThemeModeProvider),
+      themeMode: ref.watch(effectiveThemeModeProvider),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/platform/launch_theme.dart';
+import 'package:zaghlol/core/theme/theme_mode_provider.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -37,5 +38,45 @@ void main() {
       (_) async => throw PlatformException(code: 'x'),
     );
     await c.read(launchThemeWriterProvider)(ThemeMode.dark);
+  });
+
+  group('system brightness (T-224 fix)', () {
+    ProviderContainer make(ThemeMode mode, bool? initial) {
+      messenger.setMockMethodCallHandler(launchThemeChannel, (c) async {
+        if (c.method == 'systemIsDark') return initial;
+        return null;
+      });
+      final c = ProviderContainer(
+        overrides: [appThemeModeProvider.overrideWithValue(mode)],
+      );
+      addTearDown(c.dispose);
+      c.listen(effectiveThemeModeProvider, (_, _) {});
+      return c;
+    }
+
+    Future<void> pushed(bool dark) => messenger.handlePlatformMessage(
+      launchThemeChannel.name,
+      const StandardMethodCodec().encodeMethodCall(
+        MethodCall('systemIsDark', dark),
+      ),
+      (_) {},
+    );
+
+    test('system follows the reported value and its changes', () async {
+      final c = make(ThemeMode.system, false);
+      expect(c.read(effectiveThemeModeProvider), ThemeMode.system);
+      await Future<void>.delayed(Duration.zero);
+      expect(c.read(effectiveThemeModeProvider), ThemeMode.light);
+      await pushed(true);
+      expect(c.read(effectiveThemeModeProvider), ThemeMode.dark);
+      await pushed(false);
+      expect(c.read(effectiveThemeModeProvider), ThemeMode.light);
+    });
+
+    test('an explicit choice ignores the system value', () async {
+      final c = make(ThemeMode.dark, false);
+      await Future<void>.delayed(Duration.zero);
+      expect(c.read(effectiveThemeModeProvider), ThemeMode.dark);
+    });
   });
 }

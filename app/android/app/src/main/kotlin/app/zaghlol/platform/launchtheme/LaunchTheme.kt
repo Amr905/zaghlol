@@ -2,6 +2,7 @@ package app.zaghlol.platform.launchtheme
 
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import java.io.File
 
 /**
@@ -40,6 +41,16 @@ object LaunchTheme {
             "light" -> Configuration.UI_MODE_NIGHT_NO
             else -> null
         }
+
+    /** True when [uiMode] has the night bit set. */
+    fun isNight(uiMode: Int): Boolean =
+        (uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
+    /**
+     * The real system night mode. Resources.getSystem() is not touched by the
+     * bits [wrap] forces on the activity, so "system" can follow the phone.
+     */
+    fun systemIsDark(): Boolean = isNight(Resources.getSystem().configuration.uiMode)
 
     /** [base] with the stored choice forced, so theme and splash resources resolve in it. */
     fun wrap(base: Context): Context {

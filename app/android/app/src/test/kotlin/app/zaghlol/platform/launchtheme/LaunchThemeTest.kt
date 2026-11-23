@@ -10,6 +10,16 @@ class LaunchThemeTest {
     private fun dir(): File = java.nio.file.Files.createTempDirectory("launch_theme").toFile()
 
     @Test
+    fun isNightReadsOnlyTheNightBits() {
+        val night = android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val day = android.content.res.Configuration.UI_MODE_NIGHT_NO
+        val type = android.content.res.Configuration.UI_MODE_TYPE_NORMAL
+        assertTrue(LaunchTheme.isNight(night or type))
+        assertFalse(LaunchTheme.isNight(day or type))
+        assertFalse(LaunchTheme.isNight(0))
+    }
+
+    @Test
     fun missingFileFollowsSystem() {
         assertEquals("system", LaunchTheme.read(dir()))
     }

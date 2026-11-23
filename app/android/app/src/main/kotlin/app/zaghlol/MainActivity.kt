@@ -62,6 +62,15 @@ class MainActivity : FlutterFragmentActivity() {
         if (SecureWindowState.requested) AndroidDeviceEnv.applyTo(this, true)
         super.onCreate(savedInstanceState)
     }
+    private var launchThemeChannel: MethodChannel? = null
+
+    // T-224 fix: uiMode is in configChanges, so a system theme switch arrives
+    // here; Dart maps its "system" choice to the reported value.
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        launchThemeChannel?.invokeMethod("systemIsDark", LaunchTheme.systemIsDark())
+    }
+
     private var ocrExecutor: ExecutorService? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -85,8 +94,13 @@ class MainActivity : FlutterFragmentActivity() {
         // T-120: on-device speech support check (UI engine only).
         SpeechSupportRegistration.register(messenger, this)
         // T-224: the theme choice (light/dark/system only) for the next cold start.
-        MethodChannel(messenger, "zaghlol/launch_theme").setMethodCallHandler { call, result ->
-            if (call.method != "set") {
+        val themeChannel = MethodChannel(messenger, "zaghlol/launch_theme")
+        launchThemeChannel = themeChannel
+        themeChannel.setMethodCallHandler { call, result ->
+            if (call.method == "systemIsDark") {
+                // The phone's real night mode (the activity's own is forced by the choice).
+                result.success(LaunchTheme.systemIsDark())
+            } else if (call.method != "set") {
                 result.notImplemented()
             } else if (LaunchTheme.write(applicationContext.noBackupFilesDir, call.arguments as? String)) {
                 result.success(null)
@@ -182,6 +196,7 @@ class MainActivity : FlutterFragmentActivity() {
         SpeechSupportRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/app_settings").setMethodCallHandler(null)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/launch_theme").setMethodCallHandler(null)
+        launchThemeChannel = null
         NotificationsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         BackupWorkHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         notificationsHost = null

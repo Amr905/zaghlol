@@ -36,3 +36,8 @@ Reviewer: code-reviewer (Opus). Production diff read; `flutter test --exclude-ta
 ## Verdicts
 - T-223 APPROVED, T-224 CHANGES_REQUESTED (1 major), T-225 APPROVED, T-226 APPROVED, T-227 APPROVED, T-228 APPROVED.
 - Proposed FU-290: a-f above (owner T-224 for a/b, doc tasks for c/d, notifications lane for e/f).
+
+## Fix round (T-224 major, FU-290 a, b, d, f)
+- T-224 major: chose the preferred fix (no activity recreation, no forcing change). Native reports the phone's real night mode (`Resources.getSystem().configuration.uiMode`, unaffected by the forced bits) over `zaghlol/launch_theme`: getter `systemIsDark` plus a push from `MainActivity.onConfigurationChanged`. Dart (`effectiveThemeModeProvider`) maps the "system" choice to explicit light/dark from that value; light/dark choices and hosts that do not answer (iOS, tests) are unchanged. Chosen over clearing the forced bits at runtime because the activity cannot re-resolve resources without a recreate.
+- FU-290a: iOS `set` handler now applies `overrideUserInterfaceStyle` to all windows (dark -> system clears it). FU-290b: import order in `main.dart`. FU-290d: T-227 task file updated. FU-290f: turning the weekly-summary toggle off calls `cancelWeeklyNudgeProvider` (cancels the next Friday's nudge).
+- Tests: Kotlin `isNightReadsOnlyTheNightBits`; Dart system brightness follows value and updates on push; explicit choice ignores it; `cancelWeeklyNudgeProvider` cancels the scheduled id. Local: format, analyze, `test/core/platform`, `test/features/notifications` green.
