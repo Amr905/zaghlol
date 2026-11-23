@@ -231,7 +231,7 @@ dependencies {
     // runtime classpath; Gradle's consistent resolution rejects anything else.
     // T-175 L-3: junit 4.12 has CVE-2020-15250 (TemporaryFolder permissions; test APK only, never shipped). Not bumped to
     // 4.13.2: the line below must match the integration_test plugin's 4.12 (consistent resolution). Revisit when the plugin moves.
-    androidTestImplementation("junit:junit:4.12")
+    androidTestImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.3.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.2")
 }
