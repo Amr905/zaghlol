@@ -3,14 +3,14 @@
   "isRoot": true,
   "tools": {
     "dotnet-ef": {
-      "version": "10.0.10",
+      "version": "10.0.15",
       "commands": [
         "dotnet-ef"
       ],
       "rollForward": false
     },
     "cyclonedx": {
-      "version": "6.3.1",
+      "version": "6.3.2",
       "commands": [
         "dotnet-CycloneDX"
       ],
