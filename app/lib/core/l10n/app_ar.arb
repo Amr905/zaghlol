@@ -9339,7 +9339,7 @@
   "@privacyContributeSentence": {
     "description": "S · one-sentence explanation (FR-CAT-09)"
   },
-  "voiceOnlineConsentLabel": "استخدم التعرّف على الصوت أونلاين من تليفونك",
+  "voiceOnlineConsentLabel": "التعرّف على الصوت أونلاين",
   "@voiceOnlineConsentLabel": {
     "description": "L · toggle in Privacy, off until allowed (D-42)"
   },
@@ -11828,7 +11828,7 @@
   "@insightsV2TrendsInOutTitle": {
     "description": "T-211 Charts v2 · card title"
   },
-  "insightsV2TrendsInOutSub": "آخر ٦ شهور",
+  "insightsV2TrendsInOutSub": "آخر ست شهور",
   "@insightsV2TrendsInOutSub": {
     "description": "T-211 Charts v2 · card subtitle"
   },
