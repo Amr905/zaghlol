@@ -70,4 +70,86 @@ void main() {
     expect(find.byType(rive.RiveWidget), findsOneWidget);
     expect(find.byType(Image), findsNothing, reason: 'the still is showing');
   });
+
+  // T-232: every state value 0-14 and `talk` reach the animation the Motion
+  // Lab port gave them, as the Flutter runtime reports it when a layer
+  // changes state (names are the animation names in zaghlol.riv).
+  testWidgets('every state 0-14 and talk play their animation', (t) async {
+    RiveMascotProbe.reset();
+    resetSharedRiveFileForTest();
+    // Moments whose props (fx layer) have their own animation.
+    const withProps = {
+      ZaghlolMoment.professor,
+      ZaghlolMoment.listening,
+      ZaghlolMoment.thinking,
+      ZaghlolMoment.scanning,
+      ZaghlolMoment.counting,
+      ZaghlolMoment.saved,
+      ZaghlolMoment.payday,
+      ZaghlolMoment.oops,
+      ZaghlolMoment.sleep,
+    };
+    var moment = ZaghlolMoment.proud;
+    var talk = false;
+    late StateSetter set;
+    await t.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                set = setState;
+                return RiveMascot(moment: moment, talk: talk, size: 200);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    final end = DateTime.now().add(const Duration(seconds: 40));
+    while (DateTime.now().isBefore(end) &&
+        RiveMascotProbe.loaded == 0 &&
+        RiveMascotProbe.failedToLoad == 0) {
+      await t.pump(const Duration(milliseconds: 250));
+    }
+    expect(RiveMascotProbe.loaded, 1, reason: 'the Rive file did not load');
+    for (var i = 0; i < 4; i++) {
+      await t.pump(const Duration(milliseconds: 100));
+    }
+    final missing = <String>[];
+    for (final m in ZaghlolMoment.values.reversed) {
+      final nn = m.index.toString().padLeft(2, '0');
+      RiveMascotProbe.stateNames.clear();
+      set(() => moment = m);
+      for (var i = 0; i < 6; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      final names = List<String>.of(RiveMascotProbe.stateNames);
+      final mood = 'mood${nn}_${m.name}';
+      if (!names.contains(mood)) missing.add('$mood in $names');
+      if (withProps.contains(m) && !names.contains('fx${nn}_${m.name}')) {
+        missing.add('fx${nn}_${m.name} in $names');
+      }
+    }
+    RiveMascotProbe.stateNames.clear();
+    set(() => talk = true);
+    for (var i = 0; i < 4; i++) {
+      await t.pump(const Duration(milliseconds: 100));
+    }
+    if (!RiveMascotProbe.stateNames.contains('talkOn')) {
+      missing.add('talkOn in ${RiveMascotProbe.stateNames}');
+    }
+    // ignore: avoid_print
+    print(
+      'RIVE_DEVICE states ok=${missing.isEmpty} missing=$missing '
+      'paintFailed=${RiveMascotProbe.paintFailed}',
+    );
+    expect(
+      missing,
+      isEmpty,
+      reason: 'states that did not reach their animation',
+    );
+    expect(RiveMascotProbe.paintFailed, 0, reason: 'painting threw');
+    expect(find.byType(Image), findsNothing, reason: 'the still is showing');
+  });
 }

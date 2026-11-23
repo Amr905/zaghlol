@@ -8861,5 +8861,85 @@
         "type": "String"
       }
     }
+  },
+  "devMoodsRowTitle": "Zaghlol's moods",
+  "@devMoodsRowTitle": {
+    "description": "Dev only: settings About row and screen title"
+  },
+  "devMoodsRowSubtitle": "Play every animation (debug builds)",
+  "@devMoodsRowSubtitle": {
+    "description": "Dev only: row subtitle"
+  },
+  "devMoodsHint": "Tap a mood to play it. Loops keep going until you pick another.",
+  "@devMoodsHint": {
+    "description": "Dev only: hint under the bird"
+  },
+  "devMoodsTalk": "Talking",
+  "@devMoodsTalk": {
+    "description": "Dev only: talk switch"
+  },
+  "devMoodsReduceNote": "Reduce motion is on, so the bird stays still. Turn it off to see the moods.",
+  "@devMoodsReduceNote": {
+    "description": "Dev only: shown when the OS or app reduce-motion setting is on"
+  },
+  "devMoodTourGuide": "Hello",
+  "@devMoodTourGuide": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodProud": "Proud",
+  "@devMoodProud": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodShocked": "Shocked",
+  "@devMoodShocked": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodDetective": "Detective",
+  "@devMoodDetective": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodProfessor": "Professor",
+  "@devMoodProfessor": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodListening": "Listening",
+  "@devMoodListening": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodThinking": "Thinking",
+  "@devMoodThinking": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodScanning": "Reading messages",
+  "@devMoodScanning": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodCounting": "Counting coins",
+  "@devMoodCounting": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodSaved": "Saved",
+  "@devMoodSaved": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodPayday": "Payday",
+  "@devMoodPayday": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodOops": "Oops",
+  "@devMoodOops": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodSleep": "Nothing yet",
+  "@devMoodSleep": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodPull": "Pull to refresh",
+  "@devMoodPull": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodTap": "Tap the bird",
+  "@devMoodTap": {
+    "description": "Dev only: mood button"
   }
 }

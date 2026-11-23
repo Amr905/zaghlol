@@ -8694,4 +8694,66 @@ class AppLocalizationsAr extends AppLocalizations {
   String insightsV2TrendsDayA11y(String days) {
     return 'رسم صرفك يوم بيوم. $days يوم، الأغمق هو الأكتر صرفًا';
   }
+
+  @override
+  String get devMoodsRowTitle => 'حالات زغلول';
+
+  @override
+  String get devMoodsRowSubtitle => 'شوف كل حركات زغلول (نسخ التجربة)';
+
+  @override
+  String get devMoodsHint =>
+      'دوس على أي حالة تشوفها. اللي بيتكرر هيفضل شغال لحد ما تختار غيره.';
+
+  @override
+  String get devMoodsTalk => 'بيتكلم';
+
+  @override
+  String get devMoodsReduceNote =>
+      'تقليل الحركة شغال، فزغلول واقف ثابت. اقفله علشان تشوف الحالات.';
+
+  @override
+  String get devMoodTourGuide => 'أهلاً';
+
+  @override
+  String get devMoodProud => 'فخور';
+
+  @override
+  String get devMoodShocked => 'مصدوم';
+
+  @override
+  String get devMoodDetective => 'مخبر';
+
+  @override
+  String get devMoodProfessor => 'أستاذ';
+
+  @override
+  String get devMoodListening => 'سامعك';
+
+  @override
+  String get devMoodThinking => 'بيفكر';
+
+  @override
+  String get devMoodScanning => 'بيقرا الرسايل';
+
+  @override
+  String get devMoodCounting => 'بيعدّ الفلوس';
+
+  @override
+  String get devMoodSaved => 'اتسجلت';
+
+  @override
+  String get devMoodPayday => 'المرتب نزل';
+
+  @override
+  String get devMoodOops => 'أوبس';
+
+  @override
+  String get devMoodSleep => 'لسه مفيش حاجة';
+
+  @override
+  String get devMoodPull => 'اسحب للتحديث';
+
+  @override
+  String get devMoodTap => 'دوس على زغلول';
 }

@@ -12442,6 +12442,126 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'رسم صرفك يوم بيوم. {days} يوم، الأغمق هو الأكتر صرفًا'**
   String insightsV2TrendsDayA11y(String days);
+
+  /// Dev only: settings About row and screen title
+  ///
+  /// In ar, this message translates to:
+  /// **'حالات زغلول'**
+  String get devMoodsRowTitle;
+
+  /// Dev only: row subtitle
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف كل حركات زغلول (نسخ التجربة)'**
+  String get devMoodsRowSubtitle;
+
+  /// Dev only: hint under the bird
+  ///
+  /// In ar, this message translates to:
+  /// **'دوس على أي حالة تشوفها. اللي بيتكرر هيفضل شغال لحد ما تختار غيره.'**
+  String get devMoodsHint;
+
+  /// Dev only: talk switch
+  ///
+  /// In ar, this message translates to:
+  /// **'بيتكلم'**
+  String get devMoodsTalk;
+
+  /// Dev only: shown when the OS or app reduce-motion setting is on
+  ///
+  /// In ar, this message translates to:
+  /// **'تقليل الحركة شغال، فزغلول واقف ثابت. اقفله علشان تشوف الحالات.'**
+  String get devMoodsReduceNote;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'أهلاً'**
+  String get devMoodTourGuide;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'فخور'**
+  String get devMoodProud;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'مصدوم'**
+  String get devMoodShocked;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'مخبر'**
+  String get devMoodDetective;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'أستاذ'**
+  String get devMoodProfessor;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'سامعك'**
+  String get devMoodListening;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'بيفكر'**
+  String get devMoodThinking;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'بيقرا الرسايل'**
+  String get devMoodScanning;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'بيعدّ الفلوس'**
+  String get devMoodCounting;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجلت'**
+  String get devMoodSaved;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'المرتب نزل'**
+  String get devMoodPayday;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'أوبس'**
+  String get devMoodOops;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش حاجة'**
+  String get devMoodSleep;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'اسحب للتحديث'**
+  String get devMoodPull;
+
+  /// Dev only: mood button
+  ///
+  /// In ar, this message translates to:
+  /// **'دوس على زغلول'**
+  String get devMoodTap;
 }
 
 class _AppLocalizationsDelegate
