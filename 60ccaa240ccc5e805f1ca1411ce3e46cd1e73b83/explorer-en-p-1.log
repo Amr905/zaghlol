@@ -1,0 +1,725 @@
+Resolving dependencies in `/home/runner/work/zaghlol/zaghlol`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  android_file_picker 2.1.6 (2.2.1 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.1 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_ui 1.1.6 (1.1.7 available)
+  dart_style 3.1.3 (3.1.14 available)
+  dbus 0.8.0 (0.8.1 available)
+  drift 2.35.3 (2.35.4 available)
+  file_picker 13.3.3 (13.4.1 available)
+  file_picker_darwin 2.5.1 (2.5.2 available)
+  file_picker_linux 2.0.4 (2.0.5 available)
+  file_picker_platform_interface 4.2.0 (4.3.0 available)
+  file_picker_web 4.2.1 (4.2.2 available)
+  hashlib 2.4.2 (2.4.4 available)
+  image_picker_ios 0.8.13+15 (0.8.13+16 available)
+  jni 1.1.2 (1.2.1 available)
+  jni_flutter 1.0.4+1 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.11.0 (1.11.1 available)
+  objective_c 9.6.3 (9.6.4 available)
+  package_config 2.2.0 (3.0.0 available)
+  pdfium_dart 0.4.3 (0.4.4 available)
+  pdfium_flutter 0.4.3 (0.4.4 available)
+  pdfrx 3.0.0 (3.1.0 available)
+  pdfrx_engine 0.9.3 (0.9.6 available)
+  pigeon 26.3.2 (30.0.4 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+Got dependencies in `/home/runner/work/zaghlol/zaghlol`!
+32 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /home/runner/work/zaghlol/zaghlol/app/integration_test/app_explorer_test.dart
+Running Gradle task 'assembleDevSmsDebug'...                    
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter, rive_native
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDevSmsDebug'...                       28.1s
+✓ Built build/app/outputs/flutter-apk/app-devsms-debug.apk
+Installing build/app/outputs/flutter-apk/app-devsms-debug.apk...      1,757ms
+00:00 +0: explorer[en]: taps every control of every screen
+EXPLORER_STAGE catalog ready
+EXPLORER_SEEDED accounts=5 txns=30 reviews=2
+EXPLORER_STAGE seeded; closing the seed database
+EXPLORER_STAGE starting the app
+EXPLORER_STAGE main() returned
+NOTIF_PROBE launch route=false
+EXPLORER_STAGE mode=en textScale=1.0 shell shown: true
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_SCREEN 1 الرئيسية (Scaffold, depth 0) rssMB=549
+EXPLORER_TAP 1 الرئيسية / inkwell "All cards"
+EXPLORER_SCREEN 2 Show which cards? (BottomSheet, depth 1) rssMB=562
+EXPLORER_TAP 2 Show which cards? / listtile "All cards"
+EXPLORER_TAP 2 Show which cards? / checkbox "Checkbox"
+EXPLORER_TAP 2 Show which cards? / listtile "Debit ••1234 ⁦•••• 1234⁩ / Debit"
+EXPLORER_TAP 2 Show which cards? / checkbox "Checkbox"
+EXPLORER_TAP 2 Show which cards? / listtile "Credit card ••4455 ⁦•••• 4455⁩ / Credit"
+EXPLORER_TAP 2 Show which cards? / checkbox "Checkbox"
+EXPLORER_TAP 2 Show which cards? / listtile "Wallet / Wallet"
+EXPLORER_TAP 2 Show which cards? / checkbox "Checkbox"
+EXPLORER_TAP 2 Show which cards? / listtile "Cash / Cash"
+EXPLORER_TAP 2 Show which cards? / checkbox "Checkbox"
+EXPLORER_TAP 2 Show which cards? / listtile "Dollar account ⁦•••• 9876⁩ / Bank account"
+EXPLORER_TAP 2 Show which cards? / checkbox "Checkbox"
+EXPLORER_TAP 2 Show which cards? / inkwell "Done"
+EXPLORER_TAP 1 الرئيسية / inkwell "icon U+e34d"
+EXPLORER_SCREEN 3 Share your win (Scaffold, depth 1) rssMB=600
+EXPLORER_TAP 3 Share your win / inkwell "EGP"
+EXPLORER_TAP 3 Share your win / inkwell "USD"
+EXPLORER_TAP 3 Share your win / inkwell "icon U+e16a"
+EXPLORER_TAP 1 الرئيسية / iconbutton "Settings"
+EXPLORER_SCREEN 4 Settings (Scaffold, depth 1) rssMB=581
+EXPLORER_TAP 4 Settings / inkwell "Zaghlol Gold / You're on the free plan"
+EXPLORER_TAP 4 Settings / inkwell "Preferences"
+EXPLORER_TAP 4 Settings / inkwell "Gold & account"
+EXPLORER_TAP 4 Settings / inkwell "Notifications"
+EXPLORER_TAP 4 Settings / inkwell "Capture / All on"
+EXPLORER_TAP 4 Settings / inkwell "Categories & rules"
+EXPLORER_TAP 4 Settings / inkwell "Backup / No backup yet"
+EXPLORER_TAP 4 Settings / inkwell "Export & import"
+EXPLORER_TAP 4 Settings / inkwell "About"
+EXPLORER_TAP 1 الرئيسية / inkwell "EGP"
+EXPLORER_TAP 1 الرئيسية / inkwell "USD"
+EXPLORER_TAP 1 الرئيسية / inkwell "Spent this month / ⁨⁨113.02⁩⁩ USD / until you tell me your payday"
+EXPLORER_SCREEN 5 Budget (Scaffold, depth 1) rssMB=603
+EXPLORER_TAP 5 Budget / inkwell "EGP"
+EXPLORER_TAP 5 Budget / inkwell "USD"
+EXPLORER_TAP 5 Budget / inkwell "Set budgets"
+EXPLORER_TAP 5 Budget / iconbutton "Hide amounts"
+EXPLORER_TAP 5 Budget / iconbutton "Show amounts"
+EXPLORER_TAP 1 الرئيسية / iconbutton "Hide amounts"
+EXPLORER_TAP 1 الرئيسية / inkwell "Spent this month / ⁨⁨****⁩⁩ USD / until you tell me your payday"
+EXPLORER_TAP 1 الرئيسية / iconbutton "Show amounts"
+EXPLORER_TAP 1 الرئيسية / inkwell "Set a budget"
+EXPLORER_TAP 1 الرئيسية / inkwell "Spent / ⁨113.02⁩"
+EXPLORER_SCREEN 6 Transactions (Scaffold, depth 1) rssMB=621
+EXPLORER_TAP 6 Transactions / inkwell "All cards"
+EXPLORER_TAP 6 Transactions / inkwell "This cycle"
+EXPLORER_TAP 6 Transactions / inkwell "icon U+e16a"
+EXPLORER_TAP 6 Transactions / inkwell "Dates"
+EXPLORER_TAP 6 Transactions / inkwell "Category"
+EXPLORER_TAP 6 Transactions / inkwell "EGP"
+EXPLORER_TAP 6 Transactions / inkwell "USD"
+EXPLORER_TAP 6 Transactions / inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · 2:34 PM · Manual"
+EXPLORER_TAP 6 Transactions / inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · 4:34 PM · Manual"
+EXPLORER_TAP 6 Transactions / iconbutton "Hide amounts"
+EXPLORER_TAP 6 Transactions / iconbutton "Show amounts"
+EXPLORER_TAP 6 Transactions / button "Select"
+EXPLORER_TAP 6 Transactions / inkwell "Spinneys / WISE ⁦•••• 9876⁩ · 2:34 PM · Manual / ⁨⁨USD -17.98⁩⁩"
+EXPLORER_TAP 6 Transactions / inkwell "Metro Market / WISE ⁦•••• 9876⁩ · 4:34 PM · Manual / ⁨⁨USD -24.83⁩⁩"
+EXPLORER_TAP 6 Transactions / iconbutton "Cancel"
+EXPLORER_TAP 6 Transactions / inkwell "⚡ / Metro Market / WISE ⁦•••• 9876⁩ · 1:34 PM · Manual"
+EXPLORER_TAP 6 Transactions / inkwell "💊 / Spinneys / WISE ⁦•••• 9876⁩ · 3:34 PM · Manual"
+EXPLORER_TAP 6 Transactions / inkwell "💼 / Metro Market / WISE ⁦•••• 9876⁩ · 5:34 PM · Manual"
+EXPLORER_TAP 1 الرئيسية / inkwell "Nice one! You're spending under plan so far 👏"
+EXPLORER_TAP 1 الرئيسية / inkwell "Hey, that tickles! 😄"
+EXPLORER_TAP 1 الرئيسية / inkwell "Still here, keeping an eye on your money"
+EXPLORER_TAP 1 الرئيسية / inkwell "Every bit you save grows me a new feather 🪶"
+EXPLORER_TAP 1 الرئيسية / inkwell "Captain reporting. You're the boss."
+EXPLORER_TAP 1 الرئيسية / inkwell "Save today, treat yourself tomorrow"
+EXPLORER_TAP 1 الرئيسية / inkwell "I only read bank messages. The rest is none of my business."
+EXPLORER_TAP 1 الرئيسية / inkwell "Pigeon or accountant? Both."
+EXPLORER_TAP 1 الرئيسية / inkwell "Quick wings, tidy numbers"
+EXPLORER_TAP 1 الرئيسية / inkwell "Wondering where it all went? Try Insights"
+EXPLORER_TAP 1 الرئيسية / inkwell "I count, the gold shines, you save"
+EXPLORER_TAP 1 الرئيسية / switch "Switch"
+EXPLORER_TAP 1 الرئيسية / inkwell "2 waiting for your review 👀"
+EXPLORER_SCREEN 7 Needs your review 👀 (Scaffold, depth 1) rssMB=645
+EXPLORER_TAP 7 Needs your review 👀 / inkwell "All 2"
+EXPLORER_TAP 7 Needs your review 👀 / inkwell "Category"
+EXPLORER_TAP 7 Needs your review 👀 / inkwell "New messages"
+EXPLORER_TAP 7 Needs your review 👀 / listtile "Show original message"
+EXPLORER_TAP 7 Needs your review 👀 / listtile "Hide original message"
+EXPLORER_TAP 7 Needs your review 👀 / inkwell "Enter details"
+EXPLORER_TAP 7 Needs your review 👀 / inkwell "Dismiss"
+EXPLORER_TAP 7 Needs your review 👀 / button "Undo"
+EXPLORER_TAP 7 Needs your review 👀 / inkwell "Ask us to support this bank"
+EXPLORER_TAP 1 الرئيسية / button "See all"
+EXPLORER_TAP 1 الرئيسية / inkwell "🛒 / Carrefour Maadi / Debit ••1234 ⁦•••• 1234⁩ · 6:34 PM"
+EXPLORER_SCREEN 8 🛒 (Scaffold, depth 1) rssMB=661
+EXPLORER_TAP 8 🛒 / inkwell "Groceries & Supermarkets"
+EXPLORER_TAP 8 🛒 / inkwell "Note / synthetic note"
+EXPLORER_TAP 8 🛒 / iconbutton "Hide amounts"
+EXPLORER_TAP 8 🛒 / iconbutton "Show amounts"
+EXPLORER_TAP 8 🛒 / iconbutton "Edit"
+EXPLORER_TAP 8 🛒 / inkwell "icon U+e402"
+EXPLORER_TAP 8 🛒 / inkwell "Delete"
+EXPLORER_TAP 8 🛒 / inkwell "Split / money back from friends"
+EXPLORER_TAP 8 🛒 / inkwell "This is my own transfer"
+EXPLORER_TAP 8 🛒 / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "🍔 / Uber / NBE ⁦•••• 4455⁩ · Nov 22"
+EXPLORER_SCREEN 9 🍔 (Scaffold, depth 1) rssMB=668
+EXPLORER_TAP 9 🍔 / inkwell "Dining, Cafes & Delivery"
+EXPLORER_TAP 9 🍔 / inkwell "Note / Add a note"
+EXPLORER_TAP 9 🍔 / iconbutton "Hide amounts"
+EXPLORER_TAP 9 🍔 / iconbutton "Show amounts"
+EXPLORER_TAP 9 🍔 / iconbutton "Edit"
+EXPLORER_TAP 9 🍔 / inkwell "icon U+e402"
+EXPLORER_TAP 9 🍔 / inkwell "Delete"
+EXPLORER_TAP 9 🍔 / inkwell "Split / money back from friends"
+EXPLORER_TAP 9 🍔 / inkwell "This is my own transfer"
+EXPLORER_TAP 9 🍔 / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "🚗 / Vodafone / Wallet · Nov 21"
+EXPLORER_SCREEN 10 🚗 (Scaffold, depth 1) rssMB=677
+EXPLORER_TAP 10 🚗 / inkwell "Transport, Fuel & Rides"
+EXPLORER_TAP 10 🚗 / inkwell "Note / Add a note"
+EXPLORER_TAP 10 🚗 / iconbutton "Hide amounts"
+EXPLORER_TAP 10 🚗 / iconbutton "Show amounts"
+EXPLORER_TAP 10 🚗 / iconbutton "Edit"
+EXPLORER_TAP 10 🚗 / inkwell "icon U+e402"
+EXPLORER_TAP 10 🚗 / inkwell "Delete"
+EXPLORER_TAP 10 🚗 / inkwell "Split / money back from friends"
+EXPLORER_TAP 10 🚗 / inkwell "This is my own transfer"
+EXPLORER_TAP 10 🚗 / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "🧾 / Talabat / Cash · Nov 20"
+EXPLORER_SCREEN 11 • (Scaffold, depth 1) rssMB=683
+EXPLORER_TAP 11 • / inkwell "Choose"
+EXPLORER_TAP 11 • / inkwell "Note / Add a note"
+EXPLORER_TAP 11 • / iconbutton "Hide amounts"
+EXPLORER_TAP 11 • / iconbutton "Show amounts"
+EXPLORER_TAP 11 • / iconbutton "Edit"
+EXPLORER_TAP 11 • / inkwell "icon U+e402"
+EXPLORER_TAP 11 • / inkwell "Delete"
+EXPLORER_TAP 11 • / inkwell "Split / money back from friends"
+EXPLORER_TAP 11 • / inkwell "This is my own transfer"
+EXPLORER_TAP 11 • / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · Nov 19"
+EXPLORER_SCREEN 12 🏠 (Scaffold, depth 1) rssMB=715
+EXPLORER_TAP 12 🏠 / inkwell "Housing, Rent & Home"
+EXPLORER_TAP 12 🏠 / inkwell "Note / Add a note"
+EXPLORER_TAP 12 🏠 / iconbutton "Hide amounts"
+EXPLORER_TAP 12 🏠 / iconbutton "Show amounts"
+EXPLORER_TAP 12 🏠 / iconbutton "Edit"
+EXPLORER_TAP 12 🏠 / inkwell "icon U+e402"
+EXPLORER_TAP 12 🏠 / inkwell "Delete"
+EXPLORER_TAP 12 🏠 / inkwell "Split / money back from friends"
+EXPLORER_TAP 12 🏠 / inkwell "This is my own transfer"
+EXPLORER_TAP 12 🏠 / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "🛍️ / Careem / NBE ⁦•••• 4455⁩ · Nov 18"
+EXPLORER_SCREEN 13 🛍️ (Scaffold, depth 1) rssMB=700
+EXPLORER_TAP 13 🛍️ / inkwell "Shopping, Fashion & Tech"
+EXPLORER_TAP 13 🛍️ / inkwell "Note / Add a note"
+EXPLORER_TAP 13 🛍️ / iconbutton "Hide amounts"
+EXPLORER_TAP 13 🛍️ / iconbutton "Show amounts"
+EXPLORER_TAP 13 🛍️ / iconbutton "Edit"
+EXPLORER_TAP 13 🛍️ / inkwell "icon U+e402"
+EXPLORER_TAP 13 🛍️ / inkwell "Delete"
+EXPLORER_TAP 13 🛍️ / inkwell "Split / money back from friends"
+EXPLORER_TAP 13 🛍️ / inkwell "This is my own transfer"
+EXPLORER_TAP 13 🛍️ / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "💳 / Breadfast / Wallet · Nov 17"
+EXPLORER_SCREEN 14 💳 (Scaffold, depth 1) rssMB=699
+EXPLORER_TAP 14 💳 / inkwell "BNPL, Installments & Debt"
+EXPLORER_TAP 14 💳 / inkwell "Note / synthetic note"
+EXPLORER_TAP 14 💳 / iconbutton "Hide amounts"
+EXPLORER_TAP 14 💳 / iconbutton "Show amounts"
+EXPLORER_TAP 14 💳 / iconbutton "Edit"
+EXPLORER_TAP 14 💳 / inkwell "icon U+e402"
+EXPLORER_TAP 14 💳 / inkwell "Delete"
+EXPLORER_TAP 14 💳 / inkwell "Split / money back from friends"
+EXPLORER_TAP 14 💳 / inkwell "This is my own transfer"
+EXPLORER_TAP 14 💳 / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "📺 / Cilantro / Cash · Nov 16"
+EXPLORER_SCREEN 15 📺 (Scaffold, depth 1) rssMB=702
+EXPLORER_TAP 15 📺 / inkwell "Subscriptions & Digital"
+EXPLORER_TAP 15 📺 / inkwell "Note / Add a note"
+EXPLORER_TAP 15 📺 / iconbutton "Hide amounts"
+EXPLORER_TAP 15 📺 / iconbutton "Show amounts"
+EXPLORER_TAP 15 📺 / iconbutton "Edit"
+EXPLORER_TAP 15 📺 / inkwell "icon U+e402"
+EXPLORER_TAP 15 📺 / inkwell "Delete"
+EXPLORER_TAP 15 📺 / inkwell "Split / money back from friends"
+EXPLORER_TAP 15 📺 / inkwell "This is my own transfer"
+EXPLORER_TAP 15 📺 / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "💊 / Fawry / CIB ⁦•••• 1234⁩ · Nov 15"
+EXPLORER_SCREEN 16 💊 (Scaffold, depth 1) rssMB=721
+EXPLORER_TAP 16 💊 / inkwell "Healthcare, Meds & Gym"
+EXPLORER_TAP 16 💊 / inkwell "Note / Add a note"
+EXPLORER_TAP 16 💊 / iconbutton "Hide amounts"
+EXPLORER_TAP 16 💊 / iconbutton "Show amounts"
+EXPLORER_TAP 16 💊 / iconbutton "Edit"
+EXPLORER_TAP 16 💊 / inkwell "icon U+e402"
+EXPLORER_TAP 16 💊 / inkwell "Delete"
+EXPLORER_TAP 16 💊 / inkwell "Split / money back from friends"
+EXPLORER_TAP 16 💊 / inkwell "This is my own transfer"
+EXPLORER_TAP 16 💊 / listtile "How Zaghlol read this"
+EXPLORER_TAP 1 الرئيسية / inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · Nov 14"
+EXPLORER_SCREEN 17 🎓 (Scaffold, depth 1) rssMB=720
+EXPLORER_TAP 17 🎓 / inkwell "Education, Kids & Courses"
+EXPLORER_TAP 17 🎓 / inkwell "Note / Add a note"
+EXPLORER_TAP 17 🎓 / iconbutton "Hide amounts"
+EXPLORER_TAP 17 🎓 / iconbutton "Show amounts"
+EXPLORER_TAP 17 🎓 / iconbutton "Edit"
+EXPLORER_TAP 17 🎓 / inkwell "icon U+e402"
+EXPLORER_TAP 17 🎓 / inkwell "Delete"
+EXPLORER_TAP 17 🎓 / inkwell "Split / money back from friends"
+EXPLORER_TAP 17 🎓 / inkwell "This is my own transfer"
+EXPLORER_TAP 17 🎓 / listtile "How Zaghlol read this"
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_STAGE no tab bar to select tab 1
+EXPLORER_SCREEN 18 الحسبة (Scaffold, depth 0) rssMB=725
+EXPLORER_TAP 18 الحسبة / inkwell "🧾 / Talabat / Cash · Nov 20"
+EXPLORER_STAGE no tab bar to select tab 1
+EXPLORER_STAGE no tab bar to select tab 1
+EXPLORER_STAGE no tab bar to select tab 1
+EXPLORER_STAGE no tab bar to select tab 1
+EXPLORER_STAGE no tab bar to select tab 1
+EXPLORER_STAGE no tab bar to select tab 1
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_STAGE no tab bar to select tab 2
+EXPLORER_SCREEN 19 فلوسي (Scaffold, depth 0) rssMB=769
+EXPLORER_TAP 19 فلوسي / inkwell "🧾 / Talabat / Cash · Nov 20"
+EXPLORER_STAGE no tab bar to select tab 2
+EXPLORER_STAGE no tab bar to select tab 2
+EXPLORER_STAGE no tab bar to select tab 2
+EXPLORER_STAGE no tab bar to select tab 2
+EXPLORER_STAGE no tab bar to select tab 2
+EXPLORER_STAGE no tab bar to select tab 2
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_STAGE no tab bar to select tab 3
+EXPLORER_SCREEN 20 زغلول (Scaffold, depth 0) rssMB=804
+EXPLORER_TAP 20 زغلول / inkwell "Safe to spend today / ⁨⁨4,297.27⁩⁩ EGP / until you tell me your payday"
+EXPLORER_STAGE no tab bar to select tab 3
+EXPLORER_STAGE no tab bar to select tab 3
+EXPLORER_STAGE no tab bar to select tab 3
+EXPLORER_STAGE no tab bar to select tab 3
+EXPLORER_STAGE no tab bar to select tab 3
+EXPLORER_STAGE no tab bar to select tab 3
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_SCREEN 21 سجّل بسرعة (BottomSheet, depth 0) rssMB=835
+EXPLORER_TAP 21 سجّل بسرعة / inkwell "Say / With your voice, in two seconds"
+EXPLORER_SCREEN 22 Use online speech recognition? (BottomSheet, depth 1) rssMB=843
+EXPLORER_TAP 22 Use online speech recognition? / inkwell "Allow"
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_TAP 21 سجّل بسرعة / inkwell "Type / An expense or income"
+EXPLORER_SCREEN 23 Add expense (Scaffold, depth 1) rssMB=858
+EXPLORER_TAP 23 Add expense / inkwell "Expense"
+EXPLORER_TAP 23 Add expense / inkwell "Income"
+EXPLORER_TAP 23 Add expense / inkwell "Transfer"
+EXPLORER_TAP 23 Add expense / inkwell "EGP"
+EXPLORER_TAP 23 Add expense / inkwell "From / Debit ••1234 ⁦•••• 1234⁩"
+EXPLORER_TAP 23 Add expense / inkwell "To / Choose"
+EXPLORER_TAP 23 Add expense / inkwell "When / Today"
+EXPLORER_TAP 23 Add expense / inkwell "icon U+e16a"
+EXPLORER_TAP 23 Add expense / inkwell "Save"
+EXPLORER_TAP 21 سجّل بسرعة / inkwell "Scan / A screenshot or receipt"
+EXPLORER_SCREEN 24 Scan a screenshot (Scaffold, depth 1) rssMB=834
+EXPLORER_TAP 24 Scan a screenshot / inkwell "Choose an image"
+EXPLORER_TAP 24 Scan a screenshot / inkwell "icon U+e16a"
+EXPLORER_TAP 21 سجّل بسرعة / inkwell "Gold / Asset / Gold, certificate, currency"
+EXPLORER_SCREEN 25 Restore purchases (Scaffold, depth 1) rssMB=848
+EXPLORER_TAP 25 Restore purchases / inkwell "icon U+e16a"
+EXPLORER_TAP 25 Restore purchases / button "Restore purchases"
+EXPLORER_STAGE no tab bar to select tab 0
+EXPLORER_DONE screens=25 taps=213 issues=8 deadTaps=3 minutes=9
+EXPLORER_REPORT # Explorer run 2026-11-23 (Android emulator, mode en, synthetic data)
+EXPLORER_REPORT 
+EXPLORER_REPORT Screens: 25. Taps: 213. Issues: 8 (exceptions 0, overflows 0, dead taps 3, dead ends 3, not reopened 1, left app 1).
+EXPLORER_REPORT 
+EXPLORER_REPORT ## Issues
+EXPLORER_REPORT 
+EXPLORER_REPORT | Screen | Kind | Where | Detail |
+EXPLORER_REPORT |---|---|---|---|
+EXPLORER_REPORT | Show which cards? (x-02) | dead-tap | listtile "All cards" | no route, text or state change after the tap |
+EXPLORER_REPORT | Show which cards? (x-02) | dead-tap | checkbox "Checkbox" | no route, text or state change after the tap |
+EXPLORER_REPORT | الحسبة (x-18) | dead-end | الحسبة | a screen stayed open after going back; went Home |
+EXPLORER_REPORT | فلوسي (x-19) | dead-end | فلوسي | a screen stayed open after going back; went Home |
+EXPLORER_REPORT | زغلول (x-20) | dead-end | زغلول | a screen stayed open after going back; went Home |
+EXPLORER_REPORT | Use online speech recognition? (x-22) | restore | Use online speech recognition? | the screen could not be reopened after its state changed |
+EXPLORER_REPORT | Scan a screenshot (x-24) | left-app | inkwell "Choose an image" | the app left the foreground (AppLifecycleState.inactive) |
+EXPLORER_REPORT | Scan a screenshot (x-24) | dead-tap | inkwell "Choose an image" | no route, text or state change after the tap |
+EXPLORER_REPORT 
+EXPLORER_REPORT ## Screens
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 1. الرئيسية (`x-01`, Scaffold, depth 0)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 9. Tapped: 35.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "All cards" -> opens "Show which cards?" (BottomSheet)
+EXPLORER_REPORT - inkwell "icon U+e34d" -> opens "Share your win" (Scaffold)
+EXPLORER_REPORT - iconbutton "Settings" -> opens "Settings" (Scaffold)
+EXPLORER_REPORT - inkwell "EGP" -> no change (already selected)
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "Spent this month / ⁨⁨113.02⁩⁩ USD / until you tell me your payday" -> opens "Budget" (Scaffold)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - inkwell "Spent this month / ⁨⁨****⁩⁩ USD / until you tell me your payday" -> opens "Budget" (seen)
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - inkwell "Set a budget" -> opens "Budget" (seen)
+EXPLORER_REPORT - inkwell "Spent / ⁨113.02⁩" -> opens "Transactions" (Scaffold)
+EXPLORER_REPORT - inkwell "Nice one! You're spending under plan so far 👏" -> changed the screen
+EXPLORER_REPORT - inkwell "Hey, that tickles! 😄" -> changed the screen
+EXPLORER_REPORT - inkwell "Still here, keeping an eye on your money" -> changed the screen
+EXPLORER_REPORT - inkwell "Every bit you save grows me a new feather 🪶" -> changed the screen
+EXPLORER_REPORT - inkwell "Captain reporting. You're the boss." -> changed the screen
+EXPLORER_REPORT - inkwell "Save today, treat yourself tomorrow" -> changed the screen
+EXPLORER_REPORT - inkwell "I only read bank messages. The rest is none of my business." -> changed the screen
+EXPLORER_REPORT - inkwell "Pigeon or accountant? Both." -> changed the screen
+EXPLORER_REPORT - inkwell "Quick wings, tidy numbers" -> changed the screen
+EXPLORER_REPORT - inkwell "Wondering where it all went? Try Insights" -> changed the screen
+EXPLORER_REPORT - inkwell "I count, the gold shines, you save" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - inkwell "2 waiting for your review 👀" -> opens "Needs your review 👀" (Scaffold)
+EXPLORER_REPORT - button "See all" -> opens "Transactions" (seen)
+EXPLORER_REPORT - inkwell "🛒 / Carrefour Maadi / Debit ••1234 ⁦•••• 1234⁩ · 6:34 PM" -> opens "🛒" (Scaffold)
+EXPLORER_REPORT - inkwell "🍔 / Uber / NBE ⁦•••• 4455⁩ · Nov 22" -> opens "🍔" (Scaffold)
+EXPLORER_REPORT - inkwell "🚗 / Vodafone / Wallet · Nov 21" -> opens "🚗" (Scaffold)
+EXPLORER_REPORT - inkwell "🧾 / Talabat / Cash · Nov 20" -> opens "•" (Scaffold)
+EXPLORER_REPORT - inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · Nov 19" -> opens "🏠" (Scaffold)
+EXPLORER_REPORT - inkwell "🛍️ / Careem / NBE ⁦•••• 4455⁩ · Nov 18" -> opens "🛍️" (Scaffold)
+EXPLORER_REPORT - inkwell "💳 / Breadfast / Wallet · Nov 17" -> opens "💳" (Scaffold)
+EXPLORER_REPORT - inkwell "📺 / Cilantro / Cash · Nov 16" -> opens "📺" (Scaffold)
+EXPLORER_REPORT - inkwell "💊 / Fawry / CIB ⁦•••• 1234⁩ · Nov 15" -> opens "💊" (Scaffold)
+EXPLORER_REPORT - inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · Nov 14" -> opens "🎓" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 2. Show which cards? (`x-02`, BottomSheet, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 12. Tapped: 13.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "All cards" -> NOTHING HAPPENED
+EXPLORER_REPORT - checkbox "Checkbox" -> NOTHING HAPPENED
+EXPLORER_REPORT - listtile "Debit ••1234 ⁦•••• 1234⁩ / Debit" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Credit card ••4455 ⁦•••• 4455⁩ / Credit" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Wallet / Wallet" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Cash / Cash" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Dollar account ⁦•••• 9876⁩ / Bank account" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "Done" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 3. Share your win (`x-03`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 3.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "EGP" -> no change (already selected)
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "icon U+e16a" -> closed Scaffold
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 4. Settings (`x-04`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 8. Tapped: 9.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Zaghlol Gold / You're on the free plan" -> opens "Restore purchases" (Scaffold)
+EXPLORER_REPORT - inkwell "Preferences" -> opens "Preferences" (Scaffold)
+EXPLORER_REPORT - inkwell "Gold & account" -> opens "Gold & account" (Scaffold)
+EXPLORER_REPORT - inkwell "Notifications" -> opens "Notifications" (Scaffold)
+EXPLORER_REPORT - inkwell "Capture / All on" -> opens "Capture" (Scaffold)
+EXPLORER_REPORT - inkwell "Categories & rules" -> opens "Categories & rules" (Scaffold)
+EXPLORER_REPORT - inkwell "Backup / No backup yet" -> opens "Backup" (Scaffold)
+EXPLORER_REPORT - inkwell "Export & import" -> opens "Export & import" (Scaffold)
+EXPLORER_REPORT - inkwell "About" -> opens "About Zaghlol" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 5. Budget (`x-05`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 6. Tapped: 5.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "EGP" -> no change (already selected)
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "Set budgets" -> opens "Budgets" (Scaffold)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 6. Transactions (`x-06`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 14. Tapped: 18.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "All cards" -> opens "Show which cards?" (seen)
+EXPLORER_REPORT - inkwell "This cycle" -> opens "Dates" (BottomSheet)
+EXPLORER_REPORT - inkwell "icon U+e16a" -> changed the screen
+EXPLORER_REPORT - inkwell "Dates" -> opens "Dates" (BottomSheet)
+EXPLORER_REPORT - inkwell "Category" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "EGP" -> changed the screen
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · 2:34 PM · Manual" -> opens "🏠" (Scaffold)
+EXPLORER_REPORT - inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · 4:34 PM · Manual" -> opens "🎓" (Scaffold)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - button "Select" -> changed the screen
+EXPLORER_REPORT - inkwell "Spinneys / WISE ⁦•••• 9876⁩ · 2:34 PM · Manual / ⁨⁨USD -17.98⁩⁩" -> changed the screen
+EXPLORER_REPORT - inkwell "Metro Market / WISE ⁦•••• 9876⁩ · 4:34 PM · Manual / ⁨⁨USD -24.83⁩⁩" -> changed the screen
+EXPLORER_REPORT - iconbutton "Cancel" -> changed the screen
+EXPLORER_REPORT - inkwell "⚡ / Metro Market / WISE ⁦•••• 9876⁩ · 1:34 PM · Manual" -> opens "⚡" (Scaffold)
+EXPLORER_REPORT - inkwell "💊 / Spinneys / WISE ⁦•••• 9876⁩ · 3:34 PM · Manual" -> opens "💊" (Scaffold)
+EXPLORER_REPORT - inkwell "💼 / Metro Market / WISE ⁦•••• 9876⁩ · 5:34 PM · Manual" -> opens "💼" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 7. Needs your review 👀 (`x-07`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 9.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "All 2" -> no change (already selected)
+EXPLORER_REPORT - inkwell "Category" -> changed the screen
+EXPLORER_REPORT - inkwell "New messages" -> changed the screen
+EXPLORER_REPORT - listtile "Show original message" -> changed the screen
+EXPLORER_REPORT - listtile "Hide original message" -> changed the screen
+EXPLORER_REPORT - inkwell "Enter details" -> opens "What do you want to log?" (BottomSheet)
+EXPLORER_REPORT - inkwell "Dismiss" -> changed the screen
+EXPLORER_REPORT - button "Undo" -> changed the screen
+EXPLORER_REPORT - inkwell "Ask us to support this bank" -> opens "Request your bank" (BottomSheet)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 8. 🛒 (`x-08`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Groceries & Supermarkets" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / synthetic note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 9. 🍔 (`x-09`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Dining, Cafes & Delivery" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 10. 🚗 (`x-10`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Transport, Fuel & Rides" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 11. • (`x-11`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Choose" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 12. 🏠 (`x-12`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Housing, Rent & Home" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 13. 🛍️ (`x-13`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Shopping, Fashion & Tech" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 14. 💳 (`x-14`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "BNPL, Installments & Debt" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / synthetic note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 15. 📺 (`x-15`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Subscriptions & Digital" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 16. 💊 (`x-16`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Healthcare, Meds & Gym" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 17. 🎓 (`x-17`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Education, Kids & Courses" -> opens "Category" (BottomSheet)
+EXPLORER_REPORT - inkwell "Note / Add a note" -> opens "Note" (BottomSheet)
+EXPLORER_REPORT - iconbutton "Hide amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Show amounts" -> changed the screen
+EXPLORER_REPORT - iconbutton "Edit" -> opens "Edit transaction" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "Delete" -> opens "Delete this transaction?" (Dialog)
+EXPLORER_REPORT - inkwell "Split / money back from friends" -> opens "Split the bill" (BottomSheet)
+EXPLORER_REPORT - inkwell "This is my own transfer" -> opens "Link my own transfer" (BottomSheet)
+EXPLORER_REPORT - listtile "How Zaghlol read this" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 18. الحسبة (`x-18`, Scaffold, depth 0)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "🧾 / Talabat / Cash · Nov 20" -> switched tab
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 19. فلوسي (`x-19`, Scaffold, depth 0)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "🧾 / Talabat / Cash · Nov 20" -> switched tab
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 20. زغلول (`x-20`, Scaffold, depth 0)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 5. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Safe to spend today / ⁨⁨4,297.27⁩⁩ EGP / until you tell me your payday" -> switched tab
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 21. سجّل بسرعة (`x-21`, BottomSheet, depth 0)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 4. Tapped: 4.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Say / With your voice, in two seconds" -> opens "Use online speech recognition?" (BottomSheet)
+EXPLORER_REPORT - inkwell "Type / An expense or income" -> opens "Add expense" (Scaffold)
+EXPLORER_REPORT - inkwell "Scan / A screenshot or receipt" -> opens "Scan a screenshot" (Scaffold)
+EXPLORER_REPORT - inkwell "Gold / Asset / Gold, certificate, currency" -> opens "Restore purchases" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 22. Use online speech recognition? (`x-22`, BottomSheet, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Allow" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 23. Add expense (`x-23`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 9. Tapped: 9.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Expense" -> no change (already selected)
+EXPLORER_REPORT - inkwell "Income" -> changed the screen
+EXPLORER_REPORT - inkwell "Transfer" -> changed the screen
+EXPLORER_REPORT - inkwell "EGP" -> opens "Currency" (BottomSheet)
+EXPLORER_REPORT - inkwell "From / Debit ••1234 ⁦•••• 1234⁩" -> opens "From" (BottomSheet)
+EXPLORER_REPORT - inkwell "To / Choose" -> opens "To" (BottomSheet)
+EXPLORER_REPORT - inkwell "When / Today" -> opens "Select date" (Dialog)
+EXPLORER_REPORT - inkwell "icon U+e16a" -> opens "Discard changes?" (Dialog)
+EXPLORER_REPORT - inkwell "Save" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 24. Scan a screenshot (`x-24`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Choose an image" -> left the app
+EXPLORER_REPORT - inkwell "icon U+e16a" -> closed Scaffold
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 25. Restore purchases (`x-25`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "icon U+e16a" -> closed Scaffold
+EXPLORER_REPORT - button "Restore purchases" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT 
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: empty
+  Actual: ['Scan a screenshot: left-app inkwell "Choose an image"']
+Scan a screenshot: left-app inkwell "Choose an image"
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/app_explorer_test.dart:412:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///home/runner/work/zaghlol/zaghlol/app/integration_test/app_explorer_test.dart line 412
+The test description was:
+  explorer[en]: taps every control of every screen
+════════════════════════════════════════════════════════════════════════════════════════════════════
+09:52 +0 -1: explorer[en]: taps every control of every screen [E]
+  'package:flutter_test/src/binding.dart': Failed assertion: line 1912 pos 9: '_pendingExceptionDetails != null': A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.
+  dart:core                                                                  _AssertionError._throwNew
+  package:flutter_test/src/binding.dart 1912:9                               TestWidgetsFlutterBinding._runTest.handleUncaughtError
+  package:flutter_test/src/binding.dart 1921:13                              TestWidgetsFlutterBinding._runTest.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                                                 _CustomZone.registerBinaryCallback
+  package:flutter_test/src/binding.dart 1942:5                               TestWidgetsFlutterBinding._runTestBody
+  dart:async                                                                 _CustomZone.runBinary
+  package:flutter_test/src/binding.dart 1927:10                              TestWidgetsFlutterBinding._runTest
+  package:flutter_test/src/binding.dart 3060:12                              LiveTestWidgetsFlutterBinding.runTest
+  package:integration_test/integration_test.dart 237:17                      IntegrationTestWidgetsFlutterBinding.runTest
+  package:flutter_test/src/widget_tester.dart 184:24                         testWidgets.<fn>
+  ===== asynchronous gap ===========================
+  package:stream_channel                                                     _GuaranteeSink.add
+  tmp/flutter_tools.TBFSZB/flutter_test_listener.NCXBRH/listener.dart 56:22  main.<fn>
+  
