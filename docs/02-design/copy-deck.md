@@ -1360,6 +1360,7 @@ Roast mode (FR-CHAT-04) only appends a line after the normal, exact answer, so t
 |---|---|---|---|
 | `mascot_tap_line9` | عايز تعرف فلوسك راحت فين؟ افتح الحسبة | Wondering where it all went? Try Insights | M · Rive `tap` |
 | `mascot_tap_line10` | أنا بحسب والدهب بيلمع، وإنت بتحوّش | I count, the gold shines, you save | M · Rive `tap` |
+| `mascot_payday_line` | القبض نزل يا كبير! 🎉 | Payday landed! 🎉 | M · Rive `payday` · Home bubble, once per payday |
 
 ---
 

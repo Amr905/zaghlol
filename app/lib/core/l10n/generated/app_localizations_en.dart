@@ -3008,6 +3008,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mascotTapLine10 => 'I count, the gold shines, you save';
 
   @override
+  String get mascotPaydayLine => 'Payday landed! 🎉';
+
+  @override
   String get insightsTabsCharts => 'Charts';
 
   @override
