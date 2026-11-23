@@ -415,6 +415,11 @@ class Explorer {
     final stuck = now.routes
         .where((r) => !target.ids.contains(r.id))
         .isNotEmpty;
+    // T-231: which routes would not go away (shown in the job log).
+    log(
+      'EXPLORER_STUCK ${rec.title} want=${target.routes.length} '
+      'have=${now.routes.length} extra=${[for (final r in now.routes.where((r) => !target.ids.contains(r.id))) '${r.kind}:${r.route.runtimeType}:first=${r.route.isFirst}:nav=${r.route.navigator != null}']}',
+    );
     _add(
       rec,
       stuck
@@ -477,6 +482,23 @@ class Explorer {
       }
       if (!seen.add(line)) continue;
       final overflow = text.contains('overflowed');
+      // T-231: the widget's creation file:line, and the box's size, so an
+      // overflow can be traced to its source from the job log.
+      if (overflow) {
+        final detail = RegExp(r'error-causing widget was:\s*\n((?:.*\n){1,3})')
+            .firstMatch(d.toString());
+        final lib = RegExp(r'zaghlol/(?:app/)?lib/[^\s:]+:\d+')
+            .allMatches(d.toString())
+            .map((m) => m.group(0))
+            .toSet()
+            .take(3)
+            .join(' ');
+        log(
+          'EXPLORER_OVERFLOW ${rec.title} / $where / '
+          '${(detail?.group(1) ?? '').replaceAll('\n', ' ').trim()} '
+          '[$lib]',
+        );
+      }
       // Our own frames (package:zaghlol) show where an exception came from.
       final frames = (d.stack?.toString() ?? '')
           .split('\n')

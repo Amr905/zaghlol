@@ -41,6 +41,7 @@ sms_rc=0
 cash_rc=0
 rc=0
 rive_rc=0
+rc2=0
 # T-231: EXPLORER_ONLY skips everything up to the explorer; FLOWS_ONLY skips
 # the explorer (each is its own CI job so that none runs past its limit).
 if [ -z "${EXPLORER_ONLY:-}" ]; then
@@ -227,6 +228,14 @@ fi
 fi
 if [ -z "${FLOWS_ONLY:-}" ]; then
 # ---- 2. explorer (Arabic, seeded database)
+# T-231: an explorer-only job has not installed the app yet: the grants below
+# (and the doubtful SMS of the `review` run) need it installed.
+if [ -n "${EXPLORER_ONLY:-}" ]; then
+  flutter build apk --debug --flavor devSms 2>&1 | tail -3
+  apk=$(ls build/app/outputs/flutter-apk/*.apk 2> /dev/null | grep -i devsms | head -1)
+  echo "apk: ${apk:-none}"
+  [ -n "$apk" ] && adb -s "$DEVICE" install -r "$apk"
+fi
 # A clean app: no leftovers from step 1. Notification and microphone
 # permissions are granted up front so no system dialog covers the app.
 adb -s "$DEVICE" shell pm clear "$PKG" || true
@@ -306,7 +315,7 @@ for run in $runs; do
   else
     adb -s "$DEVICE" shell settings put system font_scale 1.0 || true
   fi
-  perl -e 'alarm shift; exec @ARGV' 900 \
+  perl -e 'alarm shift; exec @ARGV' 1500 \
     flutter test integration_test/app_explorer_test.dart \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     --dart-define=EXPLORER_PART=$part --dart-define=EXPLORER_MODE=$mode \
