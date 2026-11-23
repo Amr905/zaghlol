@@ -28,6 +28,8 @@ env:
   # Keep equal to FLUTTER_VERSION in app-ci.yml.
   FLUTTER_VERSION: '3.47.9'
   BUNDLETOOL_VERSION: '1.18.1'
+  # SHA-256 of bundletool-all-$BUNDLETOOL_VERSION.jar; update together with the version.
+  BUNDLETOOL_SHA256: '675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c'
   # ABIs of the shipped release (T-190: no x86_64). Empty = all three (the pre-T-190 reference).
   TP: 'android-arm,android-arm64'
 
@@ -63,6 +65,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/tools" "$RUNNER_TEMP/out"
           curl -fsSL -o "$RUNNER_TEMP/tools/bundletool.jar" \
             "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          echo "$BUNDLETOOL_SHA256  $RUNNER_TEMP/tools/bundletool.jar" | sha256sum -c -
           sha256sum "$RUNNER_TEMP/tools/bundletool.jar" | tee "$RUNNER_TEMP/out/bundletool.sha256"
           AA=$(find "$ANDROID_HOME" -name apkanalyzer -type f | head -n 1)
           [ -n "$AA" ] || { echo "::error::apkanalyzer not found under $ANDROID_HOME"; exit 1; }

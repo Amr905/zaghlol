@@ -2,8 +2,8 @@
 # T-190 / NFR-PERF-07 size guard. Usage: check-app-size.sh <sizes.tsv> <label> [baseline.json]
 # sizes.tsv: "key<TAB>bytes" per line. Prints every size, then fails when
 #   - a key with a recorded baseline grew by more than growth_percent, or
-#   - a key with a budget passes it and enforce_budget is true (otherwise a warning:
-#     the 40 MB / 60 MB targets are proposals until the PO confirms them, D-69).
+#   - a key with a budget passes it and enforce_budget is true (the committed baseline sets it true, so the
+#     40 MB / 60 MB budgets of D-69 are enforced; with false they would only warn).
 # Keys without a baseline or budget are only printed. After an intended size change,
 # update .github/size-baseline.json in the same commit (the new value is the new reference).
 set -euo pipefail
