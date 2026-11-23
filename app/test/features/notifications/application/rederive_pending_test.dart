@@ -173,4 +173,27 @@ void main() {
     expect(gw2.shown.single.body, isNot(hiddenBody));
     expect(gw2.shown.single.body, matches(RegExp('150|١٥٠')));
   });
+
+  test('FU-285: hiding with nothing held still cancels and re-runs the '
+      'sources, so scheduled alerts are not dropped', () async {
+    await repo.set(Settings.hideAmountsApp, true);
+    final gw = _Gw();
+    var resumes = 0;
+    final c = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWith((ref) async => db),
+        settingsRepositoryProvider.overrideWith(
+          (ref) async => SettingsRepository(SettingsDao(db)),
+        ),
+        notificationGatewayProvider.overrideWithValue(gw),
+        clockProvider.overrideWithValue(() => now.toUtc()),
+        alertsResumeProvider.overrideWithValue(() async => resumes++),
+      ],
+    );
+    addTearDown(c.dispose);
+    final released = await c.read(rederivePendingAlertsProvider)(rerun: true);
+    expect(released, 0);
+    expect(gw.cancels, 1);
+    expect(resumes, 1);
+  });
 }

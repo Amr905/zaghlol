@@ -422,7 +422,7 @@ final rederivePendingAlertsProvider =
         if (pending.any((r) => r.kind == NotificationType.weeklySummary.kind)) {
           await settings.reset(Settings.notifWeeklyLastRun);
         }
-        if (rerun && pending.isNotEmpty) {
+        if (rerun && (pending.isNotEmpty || hidden)) {
           await ref.read(alertsResumeProvider)();
           await ref.read(housekeepingProvider).run(force: true);
         }

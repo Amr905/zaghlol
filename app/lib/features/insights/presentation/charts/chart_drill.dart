@@ -12,6 +12,7 @@ import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/amount_semantics.dart';
 import '../../../../core/ui/z_money_text.dart';
+import '../../../home/application/card_filter.dart';
 import '../../../transactions/presentation/list/transactions_list_screen.dart';
 import '../../../transactions/presentation/list/txn_list_providers.dart';
 import '../../domain/chart_models.dart';
@@ -80,6 +81,10 @@ Future<void> openChartDrill(
           ),
           // Re-created in this scope so it reads the scoped filter.
           txnListProvider.overrideWith(TxnListController.new),
+          // FU-285: search, card filter and selection are the drill's own.
+          txnSearchProvider.overrideWith(TxnSearchNotifier.new),
+          cardFilterProvider.overrideWith(CardFilterNotifier.new),
+          txnSelectionProvider.overrideWith(TxnSelectionNotifier.new),
         ],
         child: TransactionsListScreen(
           header: (_) =>
