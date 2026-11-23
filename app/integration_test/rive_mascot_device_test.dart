@@ -21,6 +21,7 @@ void main() {
     t,
   ) async {
     RiveMascotProbe.reset();
+    RiveMascotProbe.recordStates = true;
     resetSharedRiveFileForTest();
     var moment = ZaghlolMoment.tourGuide;
     late StateSetter set;
@@ -76,6 +77,7 @@ void main() {
   // changes state (names are the animation names in zaghlol.riv).
   testWidgets('every state 0-14 and talk play their animation', (t) async {
     RiveMascotProbe.reset();
+    RiveMascotProbe.recordStates = true;
     resetSharedRiveFileForTest();
     // Moments whose props (fx layer) have their own animation.
     const withProps = {

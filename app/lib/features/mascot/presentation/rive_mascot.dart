@@ -55,7 +55,21 @@ abstract final class RiveMascotProbe {
   /// device test checks that every state value reaches its animation.
   static final List<String> stateNames = <String>[];
 
+  /// Off in the app: only the on-device test turns state recording on, so
+  /// the looping layers never grow a list in production.
+  static bool recordStates = false;
+
+  /// Upper bound on [stateNames] even when recording.
+  static const int maxStateNames = 500;
+
+  @visibleForTesting
+  static void recordState(String name) {
+    if (stateNames.length >= maxStateNames) stateNames.removeAt(0);
+    stateNames.add(name);
+  }
+
   static void reset() {
+    recordStates = false;
     loaded = 0;
     failedToLoad = 0;
     paintFailed = 0;
@@ -136,9 +150,11 @@ class _RiveMascotState extends State<RiveMascot> {
         return;
       }
       RiveMascotProbe.loaded++;
-      _stateHandle = controller.stateMachine.onStateChanged(
-        RiveMascotProbe.stateNames.add,
-      );
+      if (RiveMascotProbe.recordStates) {
+        _stateHandle = controller.stateMachine.onStateChanged(
+          RiveMascotProbe.recordState,
+        );
+      }
       setState(() {
         _controller = controller;
       });

@@ -21,3 +21,6 @@ Reviewer: code-reviewer (Opus). Ran: `flutter test --exclude-tags golden` on mas
 ## Verdict
 - T-231: APPROVED (minors m1-m3 as FU-292).
 - T-232: CHANGES_REQUESTED until M1 is fixed (about 5 lines; Lead delta check is enough). m4, m5 as FU-292.
+
+## Lead delta check (M1)
+`RiveMascotProbe.recordStates` (default false, reset to false) gates the `onStateChanged` listener, so production never registers it; only `rive_mascot_device_test.dart` turns it on. `recordState` caps the list at `maxStateNames` (500). New `test/features/mascot/presentation/rive_mascot_probe_test.dart` (default off; cap holds). Mascot tests 75/75, analyze clean. T-232: APPROVED after the fix.
