@@ -40,6 +40,9 @@ class _RiveMascotState extends State<RiveMascot> {
 
   Future<void> _load() async {
     try {
+      // rive 0.14 needs the native runtime started once before any file
+      // loads (idempotent). If it can't start, the catch shows the still.
+      if (!await rive.RiveNative.init()) throw StateError('native');
       final file = await rive.File.asset(
         kZaghlolRivAsset,
         riveFactory: rive.Factory.rive,

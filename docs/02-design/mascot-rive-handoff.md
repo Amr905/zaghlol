@@ -19,3 +19,6 @@ Deviation from T-088 wording: it says `state` is an enum. Rive state machine inp
 
 ## Timing (08-mascot-motion section 1)
 Looping only while real work runs: listening, thinking, scanning, counting. One-offs <= 3 s then rest on the idle pose: tourGuide 1.6 s, proud 0.9, shocked 1.1, detective 2.0, professor 1.4, saved 0.9, payday 1.6, oops 1.4, sleep 2.8 (two breaths), pull follows the finger, tap 0.8. Setting `state` again to the same value must replay (the app toggles via a different value first when needed).
+
+## Generated file (T-212, 2026-11-23)
+Until an animator polishes it, `app/assets/rive/zaghlol.riv` is generated from code by `tools/mascot_riv/` (see its README; PO decision MASCOT-RIV-CODE). It follows this contract exactly. Extras: `state` defaults to -1 (idle; a negative value returns any mood to idle); the held `pull` mood stays stretched until `state` changes; `reduceMotion` freezes the rest pose in the file's own preview. Frames of every mood: `docs/02-design/mascot-riv/contact-sheet.png`. The file is a normal Rive file and can be opened in the Rive editor for polish (T-088); rebuilding it from code would overwrite that polish, so after the first hand edit the generator is a reference only.
