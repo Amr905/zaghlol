@@ -214,14 +214,15 @@ def main(out):
     for i, (lab_id, nm) in enumerate(STATES):
         a = body[lab_id]
         ai = w.emit(f"mood{i:02d}_{nm}", a["D"], a["kind"], a["tracks"], "moods", i)
-        moods.append({"anim": ai, "kind": a["kind"], "exit_ms": round(a["D"] * 1000)})
+        # the pull drop starts off-screen: no mix-in, so the bird really falls from above
+        moods.append({"anim": ai, "kind": a["kind"], "exit_ms": round(a["D"] * 1000), "instant": lab_id == "pull"})
     idx["idleFx"] = w.emit("idleFx", 1.0, "loop", fxa["idle"]["tracks"], "fx")
     fxm = []
     for i, (lab_id, nm) in enumerate(STATES):
         if lab_id in fxa:
             a = fxa[lab_id]
             ai = w.emit(f"fx{i:02d}_{nm}", a["D"], a["kind"], a["tracks"], "fx", i)
-            fxm.append({"anim": ai, "kind": a["kind"], "exit_ms": round(a["D"] * 1000)})
+            fxm.append({"anim": ai, "kind": a["kind"], "exit_ms": round(a["D"] * 1000), "instant": False})
         else:
             fxm.append(None)
     idx["talkOn"] = w.emit("talkOn", amb["talk"]["D"], "loop", amb["talk"]["tracks"], "talk")
@@ -269,7 +270,8 @@ def state_layer(f, name, idle_anim, moods, IN_STATE):
     def to_mood(k, ms, frm):
         if frm == k and False:
             return
-        f.add("StateTransition", stateToId=target(k), duration=ms)
+        inst = moods[k] is not None and moods[k].get("instant")
+        f.add("StateTransition", stateToId=target(k), duration=0 if inst else ms)
         f.add("TransitionNumberCondition", inputId=IN_STATE, opValue=0, value=float(k))
 
     def to_idle(ms=150):

@@ -8,8 +8,8 @@ import labcss as L
 
 LAB = L.Lab()
 ART = 1000.0
-S = 0.76                      # Lab unit -> artboard unit
-VTOP = -310.0                 # Lab v shown at the artboard top
+S = 0.75                      # Lab unit -> artboard unit
+VTOP = -345.0                 # Lab v shown at the artboard top
 UCENTER = 500.0               # Lab u shown at the artboard centre (the bird's own centre)
 STAGE_W, STAGE_H = 380.0, 400.0
 K = 1090.0 / (0.76 * STAGE_H)  # Lab units per stage pixel (svg viewBox 1090 high, drawn 76% of 400)

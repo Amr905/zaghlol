@@ -1,5 +1,6 @@
 // Verifies app/assets/rive/zaghlol.riv with the official Rive WASM runtime
 // (@rive-app/canvas-advanced) in headless Chrome. Usage: node check.mjs <riv>
+// Compares every state against expectations.json (derived from the Motion Lab by lab_expect.py).
 // Exit code 0 = every check passed.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,10 +9,11 @@ import { withBrowser } from './lib.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const riv = process.argv[2];
-const meta = JSON.parse(fs.readFileSync(process.env.MOODS_JSON || path.join(here, '../moods.json'), 'utf8'));
+const meta = JSON.parse(fs.readFileSync(path.join(here, '../moods.json'), 'utf8'));
+const exp = JSON.parse(fs.readFileSync(path.join(here, 'expectations.json'), 'utf8'));
 const size = fs.statSync(riv).size;
 
-const report = await withBrowser(riv, (page) => page.evaluate((meta) => {
+const report = await withBrowser(riv, (page) => page.evaluate((meta, exp) => {
   const R = window.rive;
   const results = [];
   const check = (name, ok, detail = '') => results.push({ name, ok: !!ok, detail });
@@ -33,12 +35,17 @@ const report = await withBrowser(riv, (page) => page.evaluate((meta) => {
   ab0.delete();
 
   const DT = 1 / 120;
-  const NODEPROPS = ['x', 'y', 'rotation', 'scaleX', 'scaleY'];
+  const COMPS = ['x', 'y', 'rotation', 'scaleX', 'scaleY'];
+  const REST = { x: null, y: null, rotation: 0, scaleX: 1, scaleY: 1 };
+  const restOf = (n, c) => (c === 'x' || c === 'y') ? exp.rest[n][c] : REST[c];
+  const watched = Object.keys(exp.rest);
   function session() {
     const ab = window.file.artboardByName('Zaghlol');
     const sm = new R.StateMachineInstance(ab.stateMachineByName('ZaghlolAvatar'), ab);
     const inp = {};
     for (let i = 0; i < sm.inputCount(); i++) inp[sm.input(i).name] = sm.input(i);
+    const nodes = {};
+    for (const n of watched) if (n !== 'stage' && n !== 'fx') nodes[n] = ab.node(n);
     const s = {
       ab, sm, names: [], ext: {},
       set(n, v) { (typeof v === 'boolean' ? inp[n].asBool() : inp[n].asNumber()).value = v; },
@@ -46,72 +53,102 @@ const report = await withBrowser(riv, (page) => page.evaluate((meta) => {
         for (let t = 0; t < sec - 1e-9; t += DT) {
           sm.advanceAndApply(DT);
           for (let i = 0; i < sm.stateChangedCount(); i++) s.names.push(sm.stateChangedNameByIndex(i));
-          for (const nodeName of Object.keys(meta.rest)) {
-            const nd = ab.node(nodeName);
-            for (const p of Object.keys(meta.rest[nodeName])) {
-              const k = nodeName + '.' + p;
-              const v = nd[p];
+          for (const n in nodes) {
+            for (const c of COMPS) {
+              const k = n + '.' + c;
+              const v = nodes[n][c];
               const e = s.ext[k] || (s.ext[k] = { min: v, max: v, last: v });
-              e.min = Math.min(e.min, v); e.max = Math.max(e.max, v); e.last = v;
+              if (v < e.min) e.min = v;
+              if (v > e.max) e.max = v;
+              e.last = v;
             }
           }
         }
       },
-      val(nodeName, p) { return ab.node(nodeName)[p]; },
+      val(n, c) { return nodes[n][c]; },
       resetExt() { s.ext = {}; s.names = []; },
       done() { sm.delete(); ab.delete(); },
     };
     return s;
   }
-  const moods = meta.animations.filter((a) => a.state !== undefined);
-  const near = (v, target, rest) => Math.abs(v - target) <= 0.1 * Math.abs(target - rest) + 0.02;
-  function reached(s, probe) {
-    const e = s.ext[probe.node + '.' + probe.prop];
-    const rest = meta.rest[probe.node][probe.prop];
-    const obs = Math.abs(e.max - rest) > Math.abs(e.min - rest) ? e.max : e.min;
-    return { ok: near(obs, probe.extreme, rest), obs, want: probe.extreme };
+  const tolFor = (c, range) => 0.03 * range + (c === 'x' || c === 'y' ? 0.6 : c === 'rotation' ? 0.01 : 0.005);
+
+  // Compare observed sweeps with the Lab's (rest is always visited: the mood mixes in and out).
+  function compare(s, ranges, label) {
+    const bad = [];
+    for (const [n, comps] of Object.entries(ranges)) {
+      for (const c of COMPS) {
+        const [lo0, hi0] = comps[c];
+        const r = restOf(n, c);
+        const lo = Math.min(lo0, r), hi = Math.max(hi0, r);
+        const e = s.ext[n + '.' + c];
+        if (!e) { bad.push(`${n}.${c} not observed`); continue; }
+        const tol = tolFor(c, hi - lo);
+        if (Math.abs(e.min - lo) > tol || Math.abs(e.max - hi) > tol) {
+          bad.push(`${n}.${c} want [${lo.toFixed(3)},${hi.toFixed(3)}] got [${e.min.toFixed(3)},${e.max.toFixed(3)}]`);
+        }
+      }
+    }
+    return bad;
   }
 
-  // 1. Every state value from a fresh start reaches its animation and keyed pose.
-  for (const m of moods) {
+  const states = Object.entries(exp.states).map(([k, v]) => ({ state: +k, ...v }));
+  const animName = (st) => `mood${String(st.state).padStart(2, '0')}_${st.name}`;
+  const fxName = (st) => `fx${String(st.state).padStart(2, '0')}_${st.name}`;
+  const bodyNodes = ['bird', 'head', 'wingL', 'brows', 'pupilsL', 'pupilsR', 'eyeL', 'eyeR', 'wingL'];
+
+  // 1. Every state from a fresh start: its animations play and every part sweeps the Lab's range.
+  for (const st of states) {
     const s = session();
     s.run(0.05);
-    s.set('state', m.state);
+    s.set('state', st.state);
     s.resetExt();
-    s.run(m.duration + 1.0);
-    const hasAnim = s.names.includes(m.name);
-    const bad = m.probes.map((p) => reached(s, p)).filter((r) => !r.ok);
-    check(`state=${m.state} plays ${m.name} and hits its keyed poses`, hasAnim && bad.length === 0,
-      `names=${[...new Set(s.names)].join(',')} bad=${JSON.stringify(bad)}`);
-    // one-offs (and not the held pull) go back to the idle pose; loops keep looping.
-    if (m.loop === 'oneShot') {
-      const rest = meta.rest.character;
-      const settled = Math.abs(s.val('character', 'y') - rest.y) < 3 && Math.abs(s.val('character', 'x') - rest.x) < 1 &&
-        Math.abs(s.val('character', 'rotation')) < 0.03;
-      check(`state=${m.state} one-off returns to idle and stays there`, settled && !s.names.slice(
-        s.names.lastIndexOf('idle') + 1).includes(m.name), `names=${s.names.join(',')}`);
-    } else if (m.loop === 'loop') {
+    const horizon = Math.max(st.D, st.fxD || 0) + (st.kind === 'oneShot' ? 1.0 : 0.2);
+    s.run(horizon);
+    const ranges = { ...st.nodes, ...st.fx };
+    const bad = compare(s, ranges, st.lab);
+    const hasAnim = s.names.includes(animName(st)) && (st.fxD === null || s.names.includes(fxName(st)));
+    check(`state=${st.state} ${st.lab}: plays ${animName(st)}${st.fxD ? ' + props' : ''}`, hasAnim, s.names.join(','));
+    check(`state=${st.state} ${st.lab}: every part sweeps the Lab's range (${Object.keys(ranges).length} nodes)`,
+      bad.length === 0, bad.slice(0, 6).join('; '));
+    if (st.kind === 'oneShot') {
+      let settled = true;
+      for (const n of bodyNodes) {
+        for (const c of COMPS) {
+          const r = restOf(n, c);
+          if (Math.abs(s.val(n, c) - r) > tolFor(c, 1) * 3) settled = false;
+        }
+      }
+      check(`state=${st.state} ${st.lab}: one-off returns to idle and stays there`,
+        settled && s.names.lastIndexOf('idle') > s.names.lastIndexOf(animName(st)), s.names.join(','));
+    } else if (st.kind === 'loop') {
       s.resetExt();
-      s.run(m.duration * 1.5);
-      const e = s.ext['character.rotation'], f = s.ext['face.x'], y = s.ext['face.y'];
-      check(`state=${m.state} loops while the input stays`, (m.probes.some((p) => {
-        const x = s.ext[p.node + '.' + p.prop]; return x && Math.abs(x.max - x.min) > 1e-4;
-      })), 'still animating after one full cycle');
+      s.run(st.D * 1.5);
+      const moving = Object.keys(st.nodes).concat(Object.keys(st.fx)).some((n) => {
+        const e = s.ext[n + '.y'], x = s.ext[n + '.x'], r = s.ext[n + '.rotation'], q = s.ext[n + '.scaleY'];
+        return [e, x, r, q].some((v) => v && v.max - v.min > 1e-4);
+      });
+      check(`state=${st.state} ${st.lab}: loops while the input stays`, moving && !s.names.includes('idle'),
+        s.names.join(','));
     } else {
-      check(`state=${m.state} holds its pose (pull)`, reached(s, m.probes[0]).ok);
+      const before = s.val('head', 'y');
+      s.run(3);
+      check(`state=${st.state} ${st.lab}: holds still after its two breaths`,
+        Math.abs(s.val('head', 'y') - before) < 0.01 && !s.names.slice(1).includes('idle'), s.names.join(','));
     }
     s.done();
   }
 
   // 2. Every ordered pair a -> b switches to b (interrupts one-offs/loops, replays after another value).
+  const moods = states.map((s) => s.state);
   let pairFails = [];
   for (const a of moods) {
     for (const b of moods) {
-      if (a.state === b.state) continue;
+      if (a === b) continue;
       const s = session();
-      s.set('state', a.state); s.run(0.4);
-      s.set('state', b.state); s.resetExt(); s.run(0.6);
-      if (!s.names.includes(b.name)) pairFails.push(`${a.state}->${b.state}`);
+      s.set('state', a); s.run(0.4);
+      s.set('state', b); s.resetExt(); s.run(0.6);
+      if (!s.names.includes(animName(states[b]))) pairFails.push(`${a}->${b}`);
       s.done();
     }
   }
@@ -122,51 +159,61 @@ const report = await withBrowser(riv, (page) => page.evaluate((meta) => {
     const s = session();
     s.set('state', 2); s.run(1.5); s.set('state', 5); s.run(0.4); s.set('state', 2); s.run(0.4);
     check('replay: state 2, then 5, then 2 plays mood02 again',
-      s.names.filter((n) => n === 'mood02_shocked').length === 2, s.names.join(','));
+      s.names.filter((n) => n === animName(states[2])).length === 2, s.names.join(','));
     s.done();
   }
-  // 4. Negative state returns to idle (preview default).
+  // 4. Negative state returns to idle (preview default), props too.
   {
     const s = session();
-    s.set('state', 5); s.run(0.6); s.set('state', -1); s.resetExt(); s.run(1.0);
-    check('state<0 returns a loop mood to idle', s.names.includes('idle'), s.names.join(','));
+    s.set('state', 6); s.run(0.6); s.set('state', -1); s.resetExt(); s.run(1.0);
+    check('state<0 returns a loop mood to idle (body and props)', s.names.includes('idle') && s.names.includes('idleFx'),
+      s.names.join(','));
     s.done();
   }
-  // 5. talk true/false.
+  // 5. ambient layers (breathe, wag, blink) run in idle with the Lab's amplitudes.
   {
-    const talk = meta.animations.find((a) => a.name === 'talkOn');
+    const s = session();
+    s.run(9.0);
+    const bad = [];
+    const a = exp.ambient;
+    const want = [['breath.scaleX', a.breath.scaleX], ['breath.scaleY', a.breath.scaleY], ['tail.rotation', a.tail.rotation],
+      ['blinkL.scaleY', a.blinkScaleY], ['blinkR.scaleY', a.blinkScaleY],
+      ['blinkHappyL.scaleY', a.blinkScaleY], ['blinkHappyR.scaleY', a.blinkScaleY]];
+    for (const [k, [lo, hi]] of want) {
+      const e = s.ext[k];
+      if (!e || Math.abs(e.min - lo) > 0.01 || Math.abs(e.max - hi) > 0.01) bad.push(`${k} want [${lo},${hi}] got ${e ? e.min.toFixed(3) + ',' + e.max.toFixed(3) : 'n/a'}`);
+    }
+    check('idle breathes, wags and blinks with the Lab amplitudes', bad.length === 0, bad.join('; '));
+    s.done();
+  }
+  // 6. talk true/false (jaw -8 degrees at .34 s, over any mood).
+  {
     const s = session();
     s.run(0.3);
-    check('talk=false leaves the beak at rest', Math.abs(s.val('jaw', 'rotation')) < 1e-3);
+    check('talk=false leaves the jaw closed', Math.abs(s.val('jaw', 'rotation')) < 1e-3);
     s.set('talk', true); s.resetExt(); s.run(1.2);
-    const bad = talk.probes.map((p) => reached(s, p)).filter((r) => !r.ok);
-    check('talk=true plays talkOn and moves jaw/beak', s.names.includes('talkOn') && bad.length === 0,
-      JSON.stringify({ names: s.names, bad }));
+    const j = s.ext['jaw.rotation'];
+    check('talk=true opens the jaw to the Lab angle', s.names.includes('talkOn') && Math.abs(j.min - exp.ambient.jaw.rotation[0]) < 0.01,
+      JSON.stringify({ names: s.names, j }));
     s.set('talk', false); s.run(0.8);
-    check('talk=false closes the beak again', Math.abs(s.val('jaw', 'rotation')) < 0.01 &&
-      Math.abs(s.val('beak', 'rotation')) < 0.01, `jaw=${s.val('jaw', 'rotation')}`);
-    // talk works together with a mood
-    s.set('state', 9); s.set('talk', true); s.resetExt(); s.run(1.0);
-    check('talk and a mood play together', s.names.includes('mood09_saved') &&
-      Math.abs(s.ext['jaw.rotation'].min) > 0.15, s.names.join(','));
+    check('talk=false closes the jaw again', Math.abs(s.val('jaw', 'rotation')) < 0.01, `jaw=${s.val('jaw', 'rotation')}`);
+    s.set('state', 9); s.set('talk', true); s.resetExt(); s.run(0.8);
+    check('talk and a mood play together', s.names.includes(animName(states[9])) && s.ext['jaw.rotation'].min < -0.1);
     s.done();
   }
-  // 6. reduceMotion holds the rest pose.
+  // 7. reduceMotion holds the rest pose.
   {
     const s = session();
-    s.set('reduceMotion', true); s.set('state', 2); s.resetExt(); s.run(1.6);
-    const rest = meta.rest.character;
-    const dev = Math.max(Math.abs(s.ext['character.y'].min - rest.y), Math.abs(s.ext['character.y'].max - rest.y));
+    s.set('reduceMotion', true); s.set('state', 2); s.resetExt(); s.run(1.2);
+    const rest = exp.rest.bird.y;
+    const dev = Math.max(Math.abs(s.ext['bird.y'].min - rest), Math.abs(s.ext['bird.y'].max - rest));
+    const dx = Math.max(Math.abs(s.ext['bird.x'].min - exp.rest.bird.x), Math.abs(s.ext['bird.x'].max - exp.rest.bird.x));
     s.done();
-    const t = session();
-    t.set('state', 2); t.resetExt(); t.run(1.6);
-    const devOn = Math.max(Math.abs(t.ext['character.y'].min - rest.y), Math.abs(t.ext['character.y'].max - rest.y));
-    t.done();
-    check('reduceMotion=true freezes the pose (shocked jump suppressed)', dev < 1.5 && devOn > 20,
-      `dev(reduce)=${dev.toFixed(2)} dev(normal)=${devOn.toFixed(2)}`);
+    check('reduceMotion=true freezes the pose (shake and hop suppressed)', dev < 1.5 && dx < 1.5,
+      `dev y=${dev.toFixed(2)} x=${dx.toFixed(2)}`);
   }
   return results;
-}, meta));
+}, meta, exp));
 
 let failed = 0;
 for (const r of report) {
