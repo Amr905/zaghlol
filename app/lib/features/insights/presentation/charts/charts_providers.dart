@@ -181,6 +181,18 @@ final merchantsChartProvider =
       return repo.topMerchants(resolved.period, _filter(code), limit: limit);
     }, name: 'merchantsChartProvider');
 
+/// T-223: what lies beyond the shown places, for the "Other" row.
+final merchantsOtherProvider =
+    FutureProvider.family<({Money amount, int count})?, String>((
+      ref,
+      code,
+    ) async {
+      final resolved = await ref.watch(chartsResolvedPeriodProvider.future);
+      final repo = await ref.watch(chartRepositoryProvider.future);
+      final limit = topMerchantsLimitFor(ref.watch(entitlementStateProvider));
+      return repo.otherMerchants(resolved.period, _filter(code), shown: limit);
+    }, name: 'merchantsOtherProvider');
+
 /// Cumulative spend by cycle day (chart 3). Cycle periods only; a past
 /// cycle runs to its last day.
 final burnChartProvider = FutureProvider.family<ChartResult<BurnCurve>, String>(

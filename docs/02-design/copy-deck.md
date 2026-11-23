@@ -1386,6 +1386,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_charts_emptyFilter` | مفيش بيانات للفلتر ده في الفترة دي | No data for this filter in this period | S · plus `common_action_clearFilter` |
 | `insights_charts_cardError` | الشارت ده مفتحش. باقي الشارتات تمام. | This chart didn't load. The others are fine. | S · C-29 inline; plus `common_action_tryAgain` |
 | `insights_charts_loadingA11y` | بحمّل الشارتات | Loading charts | A |
+| `insights_charts_netWorthNow` | صافي ثروتك النهارده: {amount} | Net worth today: {amount} | C · T-223 net-worth thin state |
 | `insights_charts_otherSlice` | حاجات تانية | Other | C · donut remainder slice |
 | `insights_chartTitle_cashFlow` | الداخل والخارج والصافي | Cash flow | T · chart 1 (Free) |
 | `insights_chartTitle_categories` | فلوسك رايحة فين؟ | Where your money went | T · chart 2 (Free) |

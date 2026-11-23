@@ -504,6 +504,17 @@ void main() {
       },
     );
 
+    test('T-223: the tail beyond the shown places folds into Other', () async {
+      await add('a', amount: 300, merchant: 'a');
+      await add('b', amount: 200, merchant: 'b');
+      await add('c', amount: 100, merchant: 'c');
+      await add('d', amount: 50, merchant: 'd');
+      final o = await repo.otherMerchants(period, fEgp, shown: 2);
+      expect(o?.amount.minor, 150);
+      expect(o?.count, 2);
+      expect(await repo.otherMerchants(period, fEgp, shown: 4), isNull);
+    });
+
     test('limit is clamped; empty period', () async {
       await add('a', merchant: 'a');
       expect(ready(await repo.topMerchants(period, fEgp, limit: 0)).length, 1);
@@ -820,6 +831,8 @@ void main() {
       );
       expect(n.reason, NotEnoughReason.tooFewSnapshots);
       expect(n.have, 1);
+      // T-223: today's number survives a thin history.
+      expect(n.current?.minor, 2);
       n = notEnough(
         await repo.netWorth(
           ChartPeriod(day(2026, 10, 1), day(2026, 12, 1)),

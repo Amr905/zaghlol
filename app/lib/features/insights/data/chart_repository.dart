@@ -722,6 +722,32 @@ class ChartRepository {
     });
   }
 
+  /// T-223: the merchants beyond the top [shown], folded into one "Other"
+  /// row (same filter and currency as [topMerchants]). Null when nothing
+  /// lies beyond them.
+  Future<({Money amount, int count})?> otherMerchants(
+    ChartPeriod p,
+    ChartFilter f, {
+    required int shown,
+  }) {
+    final n = shown < 1 ? 1 : (shown > 50 ? 50 : shown);
+    return _memoized(_key('merchantsOther', p, f, '$n'), () async {
+      final s = _spend(p, f);
+      final rows = await _select(
+        'SELECT coalesce(sum(s), 0) AS s, coalesce(sum(n), 0) AS n FROM ('
+        'SELECT t.merchant_norm AS m, sum($_netSpend) AS s, count(*) AS n '
+        'FROM transactions t '
+        'WHERE ${s.where} AND t.merchant_norm IS NOT NULL '
+        'GROUP BY t.merchant_norm HAVING sum($_netSpend) > 0 '
+        'ORDER BY s DESC, m LIMIT -1 OFFSET ?)',
+        [...s.args, Variable.withInt(n)],
+      );
+      final minor = rows.single.read<int>('s');
+      if (minor <= 0) return null;
+      return (amount: _m(minor, f), count: rows.single.read<int>('n'));
+    });
+  }
+
   /// T-189: net spend and expense count of [p], optionally inside one
   /// category and/or one merchant (the drill-down header). Never below zero.
   Future<({Money amount, int count})> scopedSpend(
@@ -1082,6 +1108,9 @@ class ChartRepository {
             : NotEnoughReason.tooFewSnapshots,
         have: points.length,
         need: ChartThresholds.netWorthMinSnapshots,
+        current: points.isEmpty
+            ? null
+            : Money.fromStorage(points.last.netMinor, unit),
       );
     }
     return ChartReady(points);

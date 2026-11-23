@@ -323,8 +323,16 @@ class ExplainLink extends StatelessWidget {
 /// blocks taps) and an optional action. Shown below a chart's minimum data
 /// rule instead of a near-empty drawing.
 class ChartThinState extends StatelessWidget {
-  const ChartThinState({super.key, required this.message, this.action});
+  const ChartThinState({
+    super.key,
+    required this.message,
+    this.action,
+    this.current,
+  });
   final String message;
+
+  /// T-223: today's number above the message, when one exists.
+  final Widget? current;
   final Widget? action;
 
   @override
@@ -332,6 +340,7 @@ class ChartThinState extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (current != null) ...[current!, const SizedBox(height: ZSpacing.sm)],
         ZMascotBubble(
           message: message,
           moment: ZaghlolMoment.thinking,

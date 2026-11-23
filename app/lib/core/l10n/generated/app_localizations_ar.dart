@@ -3158,6 +3158,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsChartsLoadingA11y => 'بحمّل الشارتات';
 
   @override
+  String insightsChartsNetWorthNow(String amount) {
+    return 'صافي ثروتك النهارده: $amount';
+  }
+
+  @override
   String get insightsChartsOtherSlice => 'تانية';
 
   @override

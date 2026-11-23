@@ -1017,6 +1017,15 @@
   "@insightsChartsLoadingA11y": {
     "description": "A"
   },
+  "insightsChartsNetWorthNow": "Net worth today: {amount}",
+  "@insightsChartsNetWorthNow": {
+    "description": "T-223: net worth thin state, today's number",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "insightsChartsOtherSlice": "Other",
   "@insightsChartsOtherSlice": {
     "description": "C · donut remainder slice"

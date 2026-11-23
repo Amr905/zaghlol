@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../domain/chart_models.dart';
+import '../../../../core/theme/z_tokens.dart';
 import 'chart_card.dart';
+import 'chart_format.dart';
 
 /// The message for [r]: what is missing, or [fallback] when the chart has no
 /// data at all (the caller's own empty text).
@@ -44,6 +46,20 @@ class ChartNotEnough extends ConsumerWidget {
         l.insightsChartsMonthsCount(missing, text),
       ),
     };
-    return ChartThinState(message: message, action: action);
+    final now = result.current;
+    final line = now == null
+        ? null
+        : l.insightsChartsNetWorthNow(chartMoney(ref, context, now));
+    return ChartThinState(
+      message: message,
+      action: action,
+      current: line == null
+          ? null
+          : Text(
+              line,
+              key: const Key('thin-current'),
+              style: ZType.body.copyWith(color: ZColors.of(context).text),
+            ),
+    );
   }
 }

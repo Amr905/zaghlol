@@ -3062,6 +3062,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get insightsChartsLoadingA11y => 'Loading charts';
 
   @override
+  String insightsChartsNetWorthNow(String amount) {
+    return 'Net worth today: $amount';
+  }
+
+  @override
   String get insightsChartsOtherSlice => 'Other';
 
   @override

@@ -405,6 +405,7 @@ class _MerchantsCard extends ConsumerWidget {
               ),
               child: MerchantsBody(
                 rows: data,
+                other: ref.watch(merchantsOtherProvider(code)).value,
                 onOpen: resolved == null
                     ? null
                     : (m) => openChartDrill(

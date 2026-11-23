@@ -4108,6 +4108,15 @@
   "@insightsChartsLoadingA11y": {
     "description": "A"
   },
+  "insightsChartsNetWorthNow": "صافي ثروتك النهارده: {amount}",
+  "@insightsChartsNetWorthNow": {
+    "description": "T-223: net worth thin state, today's number",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "insightsChartsOtherSlice": "تانية",
   "@insightsChartsOtherSlice": {
     "description": "C · donut remainder slice"
