@@ -118,6 +118,35 @@ void main() {
       expect(find.textContaining('▲ 12%'), findsOneWidget);
     });
 
+    testWidgets('cash-covered payment: a labelled row explains the gap '
+        '(T-218)', (tester) async {
+      await _pump(
+        tester,
+        overrides: catsOverrides(
+          donut: ChartReady(
+            CategoryDonut(
+              total: egpM(4000),
+              coveredEarlier: egpM(1000),
+              slices: [
+                CategorySlice(
+                  categoryId: 'food',
+                  amount: egpM(5000),
+                  shareBp: 10000,
+                  count: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(_text(tester, 'cats-covered-earlier'), contains('1,000'));
+    });
+
+    testWidgets('no cash-covered payment: no extra row', (tester) async {
+      await _pump(tester);
+      expect(find.byKey(const Key('cats-covered-earlier')), findsNothing);
+    });
+
     testWidgets('uncategorized has its own label', (tester) async {
       await _pump(
         tester,

@@ -41,7 +41,6 @@ Future<void> main() async {
             lang: lang,
           ),
         );
-        expect(GoldGate.chartsOpenToFree, isTrue);
         expect(find.text(t.goldPaywallBenefitCharts), findsNothing);
         expect(find.text(t.goldPaywallBenefitExport), findsOneWidget);
       });

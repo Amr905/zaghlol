@@ -12055,8 +12055,9 @@ abstract class AppLocalizations {
   /// T-209 Charts v2 · state:select(under/over/other); other = no budget
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, under{لو كملت كده هتقفل الشهر على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل الشهر على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل الشهر على حوالي {projected}}}'**
+  /// **'{state, select, under{لو كملت كده هتقفل {period} على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل {period} على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل {period} على حوالي {projected}}}'**
   String insightsV2HeroProjection(
+    String period,
     String state,
     String projected,
     String budget,

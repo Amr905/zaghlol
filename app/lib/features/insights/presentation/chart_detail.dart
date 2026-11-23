@@ -86,6 +86,7 @@ class ChartDetailScreen extends ConsumerWidget {
     final locked = !decideChart(
       ref.watch(entitlementStateProvider),
       chart,
+      openToFree: ref.watch(chartsOpenToFreeProvider),
     ).allowed;
     // A chart that needs a payday cycle says so and has nothing to explain
     // for another period (T-188).

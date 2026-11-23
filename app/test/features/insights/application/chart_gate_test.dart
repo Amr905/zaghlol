@@ -21,7 +21,7 @@ void main() {
   }();
 
   test('CHARTS-FREE: Free opens all 12 charts through the one switch', () {
-    expect(GoldGate.chartsOpenToFree, isTrue);
+    expect(ProviderContainer().read(chartsOpenToFreeProvider), isTrue);
     for (final id in ChartId.values) {
       expect(decideChart(free, id).allowed, isTrue, reason: '$id');
       expect(decideChart(free, id).paywall, isFalse, reason: '$id');
@@ -29,11 +29,12 @@ void main() {
   });
 
   test('the core-four matrix is intact for when the switch flips back', () {
-    GoldGate.chartsOpenToFree = false;
-    addTearDown(() => GoldGate.chartsOpenToFree = true);
     for (final id in ChartId.values) {
       final core = chartGateIndex(id) < FreeLimits.coreCharts;
-      expect(GoldGate.chart(free, chartGateIndex(id)).allowed, core);
+      expect(
+        GoldGate.chart(free, chartGateIndex(id), openToFree: false).allowed,
+        core,
+      );
     }
   });
 

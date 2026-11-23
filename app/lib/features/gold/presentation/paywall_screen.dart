@@ -150,7 +150,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     final link = ref.watch(goldLinkOpenerProvider);
 
     final benefits = [
-      if (!GoldGate.chartsOpenToFree) t.goldPaywallBenefitCharts,
+      if (!ref.watch(chartsOpenToFreeProvider)) t.goldPaywallBenefitCharts,
       t.goldPaywallBenefitVoice,
       t.goldPaywallBenefitExport,
       t.goldPaywallBenefitBackup,

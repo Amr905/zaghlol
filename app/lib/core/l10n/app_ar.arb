@@ -11454,10 +11454,13 @@
   "@insightsV2HeroThin": {
     "description": "T-209 Charts v2 · thin data: under 3 days or no previous period"
   },
-  "insightsV2HeroProjection": "{state, select, under{لو كملت كده هتقفل الشهر على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل الشهر على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل الشهر على حوالي {projected}}}",
+  "insightsV2HeroProjection": "{state, select, under{لو كملت كده هتقفل {period} على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل {period} على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل {period} على حوالي {projected}}}",
   "@insightsV2HeroProjection": {
     "description": "T-209 Charts v2 · state:select(under/over/other); other = no budget",
     "placeholders": {
+      "period": {
+        "type": "String"
+      },
       "state": {
         "type": "String"
       },

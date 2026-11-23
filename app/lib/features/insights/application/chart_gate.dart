@@ -26,8 +26,11 @@ int chartGateIndex(ChartId id) => switch (id) {
 };
 
 /// Whether [state] may open [id], or must see the locked preview.
-GateDecision decideChart(EntitlementState state, ChartId id) =>
-    GoldGate.chart(state, chartGateIndex(id));
+GateDecision decideChart(
+  EntitlementState state,
+  ChartId id, {
+  bool openToFree = true,
+}) => GoldGate.chart(state, chartGateIndex(id), openToFree: openToFree);
 
 /// The row limit of the top merchants chart for [state]: 5 for Free.
 int topMerchantsLimitFor(EntitlementState state, {int goldLimit = 10}) =>

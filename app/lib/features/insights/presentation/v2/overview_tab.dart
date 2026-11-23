@@ -59,8 +59,16 @@ class OverviewTab extends ConsumerWidget {
       ),
       data: (cur) {
         final state = ref.watch(entitlementStateProvider);
-        final donutOpen = decideChart(state, ChartId.categoryDonut).allowed;
-        final flowOpen = decideChart(state, ChartId.cashFlow).allowed;
+        final donutOpen = decideChart(
+          state,
+          ChartId.categoryDonut,
+          openToFree: ref.watch(chartsOpenToFreeProvider),
+        ).allowed;
+        final flowOpen = decideChart(
+          state,
+          ChartId.cashFlow,
+          openToFree: ref.watch(chartsOpenToFreeProvider),
+        ).allowed;
         return ListView(
           padding: _padding,
           children: [

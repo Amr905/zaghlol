@@ -138,15 +138,16 @@ abstract final class GoldGate {
     return GateDecision.needsGold;
   }
 
-  /// PO 2026-11-16: all charts are open in Free for now. Flip to `false` to
-  /// restore the Gold gate (Free then sees only the core charts).
-  static bool chartsOpenToFree = true;
-
-  /// Charts: while [chartsOpenToFree] every chart is open; otherwise Free
+  /// Charts: while [openToFree] (the [chartsOpenToFreeProvider] switch) every
+  /// chart is open; otherwise Free
   /// sees [FreeLimits.coreCharts] (core indexes 0..3 of the ordered chart
   /// list) and Gold all 12. Viewing is by chart index.
-  static GateDecision chart(EntitlementState state, int chartIndex) {
-    if (chartsOpenToFree ||
+  static GateDecision chart(
+    EntitlementState state,
+    int chartIndex, {
+    bool openToFree = true,
+  }) {
+    if (openToFree ||
         state.isGold ||
         (chartIndex >= 0 && chartIndex < FreeLimits.coreCharts)) {
       return GateDecision.allow;
@@ -161,6 +162,10 @@ abstract final class GoldGate {
   /// Export: Free gets a preview only.
   static bool exportPreviewOnly(EntitlementState state) => !state.isGold;
 }
+
+/// PO 2026-11-16 (CHARTS-FREE): all charts are open in Free for now. Override
+/// with `false` to restore the Gold gate (tests do this, not a global).
+final chartsOpenToFreeProvider = Provider<bool>((ref) => true);
 
 /// Called when a gate blocks; the UI layer registers the paywall opener.
 typedef PaywallTrigger = void Function(GoldCapability capability);

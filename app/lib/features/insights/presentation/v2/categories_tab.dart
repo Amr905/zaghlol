@@ -92,6 +92,7 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
         final open = decideChart(
           ref.watch(entitlementStateProvider),
           ChartId.categoryDonut,
+          openToFree: ref.watch(chartsOpenToFreeProvider),
         ).allowed;
         return ListView(
           padding: _padding,
@@ -233,6 +234,18 @@ class _CategoriesTabState extends ConsumerState<CategoriesTab> {
                   currency: cur,
                   scaleMinor: scale,
                   onTap: () => setState(() => _selected = _key(r.categoryId)),
+                ),
+              ),
+            // Rows add up to more than the title total by exactly this.
+            if (donut.coveredEarlier != null && donut.coveredEarlier!.minor > 0)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+                child: Text(
+                  l.insightsCoveredEarlier(
+                    isolate(chartMoney(ref, context, donut.coveredEarlier!)),
+                  ),
+                  key: const Key('cats-covered-earlier'),
+                  style: ZType.caption.copyWith(color: c.textMuted),
                 ),
               ),
           ],

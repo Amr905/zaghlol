@@ -77,7 +77,10 @@ Future<void> _pump(
       ChartDetailScreen(chart: chart, code: 'EGP', openExplainer: open),
       locale: locale,
       scale: scale,
-      overrides: overrides ?? _overrides(),
+      overrides: [
+        ...(overrides ?? _overrides()),
+        chartsOpenToFreeProvider.overrideWithValue(false),
+      ],
     ),
   );
   if (gold) {
@@ -99,8 +102,6 @@ Future<void> _typed(WidgetTester t) async {
 
 void main() {
   // CHARTS-FREE: these tests cover the Gold gate itself, so close it.
-  setUp(() => GoldGate.chartsOpenToFree = false);
-  tearDown(() => GoldGate.chartsOpenToFree = true);
 
   for (final locale in const [_en, _ar]) {
     final tag = locale.languageCode;

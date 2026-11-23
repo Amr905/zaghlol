@@ -57,8 +57,16 @@ class TrendsTab extends ConsumerWidget {
       ),
       data: (cur) {
         final state = ref.watch(entitlementStateProvider);
-        final flowOpen = decideChart(state, ChartId.cashFlow).allowed;
-        final dayOpen = decideChart(state, ChartId.dayHourPattern).allowed;
+        final flowOpen = decideChart(
+          state,
+          ChartId.cashFlow,
+          openToFree: ref.watch(chartsOpenToFreeProvider),
+        ).allowed;
+        final dayOpen = decideChart(
+          state,
+          ChartId.dayHourPattern,
+          openToFree: ref.watch(chartsOpenToFreeProvider),
+        ).allowed;
         return ListView(
           padding: _padding,
           children: [

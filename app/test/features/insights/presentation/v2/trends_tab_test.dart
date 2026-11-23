@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
+import 'package:zaghlol/features/insights/presentation/charts/locked_chart_card.dart';
 import 'package:zaghlol/features/insights/presentation/v2/heatmap_card.dart';
 import 'package:zaghlol/features/insights/presentation/v2/trends_tab.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
@@ -29,8 +30,6 @@ Future<void> _pump(
   await initDateFormatting();
   await tester.binding.setSurfaceSize(const Size(390, 2100));
   addTearDown(() => tester.binding.setSurfaceSize(null));
-  GoldGate.chartsOpenToFree = !closeGate;
-  addTearDown(() => GoldGate.chartsOpenToFree = true);
   await tester.pumpWidget(
     harness(
       const TrendsTab(),
@@ -38,7 +37,10 @@ Future<void> _pump(
       scale: scale,
       dark: dark,
       hideAmounts: hidden,
-      overrides: overrides ?? trendsOverrides(),
+      overrides: [
+        ...(overrides ?? trendsOverrides()),
+        if (closeGate) chartsOpenToFreeProvider.overrideWithValue(false),
+      ],
     ),
   );
   await tester.pumpAndSettle();
@@ -198,6 +200,15 @@ void main() {
     await _pump(tester, closeGate: true);
     expect(find.byType(HeatmapCard), findsNothing);
     expect(find.byType(InOutCard), findsOneWidget);
+    // The heatmap's locked card carries its own title (T-218).
+    final l = AppLocalizations.of(tester.element(find.byType(TrendsTab)));
+    expect(
+      find.descendant(
+        of: find.byType(LockedChartCard),
+        matching: find.text(l.insightsV2TrendsDayTitle),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('dark theme builds', (tester) async {

@@ -161,6 +161,8 @@ void main() {
       expect(find.textContaining('▼ 14%'), findsOneWidget);
       // 13,650 / 20 * 31 = 21,157.50
       expect(_text(tester, 'hero-projection'), contains('21,157.50'));
+      // The caption names the period it projects (T-218).
+      expect(_text(tester, 'hero-projection'), contains('end this month'));
       expect(_text(tester, 'hero-projection'), contains('under your budget'));
       expect(_text(tester, 'hero-projection'), contains('22,000'));
       expect(find.byKey(const Key('stat-income')), findsOneWidget);
