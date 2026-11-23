@@ -60,13 +60,23 @@ final entitlementLoadedProvider = Provider<Future<void> Function()>(
 /// on: schedule again, which re-submits the one-shot iOS request; Free or
 /// off: cancel). One run at
 /// a time. Returns whether a due mark was handled. Never throws.
+/// FU-285: how long a run waits for the first entitlement evaluation before
+/// giving up (a failed first `evaluate()` never completes it). The next
+/// start or resume asks again.
+final backupEntitlementWaitProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 30),
+  name: 'backupEntitlementWaitProvider',
+);
+
 final backupDueRunProvider = Provider<Future<bool> Function()>((ref) {
   var running = false;
   return () async {
     if (running) return false;
     running = true;
     try {
-      await ref.read(entitlementLoadedProvider)();
+      await ref
+          .read(entitlementLoadedProvider)()
+          .timeout(ref.read(backupEntitlementWaitProvider));
       final entitlement = ref.read(entitlementStateProvider);
       if (entitlement.phase == EntitlementPhase.pendingVerification) {
         return false;

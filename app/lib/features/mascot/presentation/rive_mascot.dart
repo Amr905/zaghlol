@@ -3,6 +3,7 @@
 // still so the app never breaks.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:rive/rive.dart' as rive;
 
 import 'zaghlol_avatar.dart' show ZaghlolAvatar;
@@ -14,6 +15,63 @@ const kRiveInputState = 'state'; // number: ZaghlolMoment.index
 const kRiveInputTalk = 'talk'; // boolean
 const kRiveInputReduceMotion =
     'reduceMotion'; // boolean (we only mount when off)
+
+/// FU-287: the decoded file is loaded once per app run and shared by every
+/// mount (never disposed; the controllers are per mount). A failure is not
+/// cached, so a later mount may try again.
+Future<rive.File>? _sharedFile;
+
+Future<rive.File> _loadSharedFile() => _sharedFile ??= () async {
+  try {
+    // rive 0.14 needs the native runtime started once before any file
+    // loads (idempotent). If it can't start, the caller shows the still.
+    if (!await rive.RiveNative.init()) throw StateError('native');
+    final file = await rive.File.asset(
+      kZaghlolRivAsset,
+      riveFactory: rive.Factory.rive,
+    );
+    if (file == null) throw StateError('decode');
+    return file;
+  } catch (_) {
+    _sharedFile = null;
+    rethrow;
+  }
+}();
+
+/// Test hook: forgets the shared file.
+void resetSharedRiveFileForTest() => _sharedFile = null;
+
+/// Paints [child]; if painting throws, calls [onError] once and paints
+/// nothing, so the mascot can fall back to the still (FU-287).
+class _PaintGuard extends SingleChildRenderObjectWidget {
+  const _PaintGuard({required this.onError, required super.child});
+  final VoidCallback onError;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderPaintGuard(onError);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderPaintGuard r) =>
+      r.onError = onError;
+}
+
+class _RenderPaintGuard extends RenderProxyBox {
+  _RenderPaintGuard(this.onError);
+  VoidCallback onError;
+  bool _failed = false;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_failed) return;
+    try {
+      super.paint(context, offset);
+    } catch (_) {
+      _failed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => onError());
+    }
+  }
+}
 
 class RiveMascot extends ZaghlolMascot {
   const RiveMascot({
@@ -28,7 +86,6 @@ class RiveMascot extends ZaghlolMascot {
 }
 
 class _RiveMascotState extends State<RiveMascot> {
-  rive.File? _file;
   rive.RiveWidgetController? _controller;
   bool _failed = false;
 
@@ -40,14 +97,7 @@ class _RiveMascotState extends State<RiveMascot> {
 
   Future<void> _load() async {
     try {
-      // rive 0.14 needs the native runtime started once before any file
-      // loads (idempotent). If it can't start, the catch shows the still.
-      if (!await rive.RiveNative.init()) throw StateError('native');
-      final file = await rive.File.asset(
-        kZaghlolRivAsset,
-        riveFactory: rive.Factory.rive,
-      );
-      if (file == null) throw StateError('decode');
+      final file = await _loadSharedFile();
       final controller = rive.RiveWidgetController(
         file,
         artboardSelector: rive.ArtboardSelector.byName(kRiveArtboard),
@@ -57,11 +107,9 @@ class _RiveMascotState extends State<RiveMascot> {
       );
       if (!mounted) {
         controller.dispose();
-        file.dispose();
         return;
       }
       setState(() {
-        _file = file;
         _controller = controller;
       });
       _push();
@@ -89,7 +137,6 @@ class _RiveMascotState extends State<RiveMascot> {
   @override
   void dispose() {
     _controller?.dispose();
-    _file?.dispose();
     super.dispose();
   }
 
@@ -105,6 +152,11 @@ class _RiveMascotState extends State<RiveMascot> {
         excludeFromSemantics: true,
       );
     }
-    return rive.RiveWidget(controller: c, fit: rive.Fit.contain);
+    return _PaintGuard(
+      onError: () {
+        if (mounted) setState(() => _failed = true);
+      },
+      child: rive.RiveWidget(controller: c, fit: rive.Fit.contain),
+    );
   }
 }

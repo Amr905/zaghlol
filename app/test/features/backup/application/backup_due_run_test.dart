@@ -198,4 +198,25 @@ void main() {
         .applyVerified(verified: true, status: 'active');
     expect(await bad.read(backupDueRunProvider)(), isFalse);
   });
+
+  test('FU-285: a first evaluation that never completes times out, and the '
+      'next call is not blocked', () async {
+    final never = Completer<void>();
+    final slow = ProviderContainer(
+      overrides: [
+        entitlementLoadedProvider.overrideWithValue(() => never.future),
+        backupEntitlementWaitProvider.overrideWithValue(
+          const Duration(milliseconds: 5),
+        ),
+      ],
+    );
+    addTearDown(slow.dispose);
+    final run = slow.read(backupDueRunProvider);
+    expect(await run(), isFalse);
+    // running was reset: the second call waits again and times out too,
+    // instead of returning at once because a run is "in progress".
+    final sw = Stopwatch()..start();
+    expect(await run(), isFalse);
+    expect(sw.elapsedMilliseconds, greaterThanOrEqualTo(4));
+  });
 }
