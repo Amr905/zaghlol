@@ -9,7 +9,6 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
-import 'package:zaghlol/features/gold/application/gating.dart';
 import 'package:zaghlol/core/theme/z_tokens.dart';
 import 'package:zaghlol/core/ui/z_money_text.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
@@ -84,8 +83,6 @@ Future<void> _tapBar(
 }
 
 void main() {
-  setUp(() => GoldGate.chartsOpenToFree = true);
-
   group('summary strip', () {
     for (final locale in const [_en, _ar]) {
       testWidgets('${locale.languageCode}: four figures, changes, baseline', (

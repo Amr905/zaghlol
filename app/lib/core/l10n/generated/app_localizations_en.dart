@@ -6706,8 +6706,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you turn it on, we send only the merchant name and the category you chose.';
 
   @override
-  String get voiceOnlineConsentLabel =>
-      'Use the phone\'s online speech recognition';
+  String get voiceOnlineConsentLabel => 'Online voice recognition';
 
   @override
   String get voiceOnlineConsentSentence =>
@@ -8228,16 +8227,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String insightsV2HeroProjection(
+    String period,
     String state,
     String projected,
     String budget,
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'under':
-          'At this pace you\'ll end the month near $projected, under your budget ($budget)',
+          'At this pace you\'ll end $period near $projected, under your budget ($budget)',
       'over':
-          'At this pace you\'ll end the month near $projected, over your budget ($budget)',
-      'other': 'At this pace you\'ll end the month near $projected',
+          'At this pace you\'ll end $period near $projected, over your budget ($budget)',
+      'other': 'At this pace you\'ll end $period near $projected',
     });
     return '$_temp0';
   }

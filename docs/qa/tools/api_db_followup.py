@@ -8,6 +8,8 @@ import hashlib
 import json
 import os
 import secrets
+# Passwords come from the environment: SU (connection string with QA_PG_SU_PW),
+# QA_PG_SU_PW, QA_PG_API_PW, QA_PG_OPS_RO_PW, QA_PG_ADMIN_PW. No literals here.
 import sys
 import uuid
 
@@ -283,8 +285,8 @@ if dup:
                 "insert into zaghlol.purchases(id, store, product_id, plan, store_key, state, acknowledged, environment, account_linked_by, support_link_notice_pending, last_verified_at, created_at) "
                 "select gen_random_uuid(), store, product_id, plan, store_key, state, acknowledged, environment, account_linked_by, support_link_notice_pending, now(), now() from zaghlol.purchases limit 1")
 
-api = psycopg.connect(os.environ['SU'].replace('user=zaghlol ', 'user=zaghlol_api ').replace('zaghlol_dev_only', 'api_dev_only') + ' dbname=zaghlol', autocommit=True)
-ro = psycopg.connect(os.environ['SU'].replace('user=zaghlol ', 'user=zaghlol_ops_ro ').replace('zaghlol_dev_only', 'ops_ro_dev_only') + ' dbname=zaghlol', autocommit=True)
+api = psycopg.connect(os.environ['SU'].replace('user=zaghlol ', 'user=zaghlol_api ').replace('password=' + os.environ['QA_PG_SU_PW'], 'password=' + os.environ['QA_PG_API_PW']) + ' dbname=zaghlol', autocommit=True)
+ro = psycopg.connect(os.environ['SU'].replace('user=zaghlol ', 'user=zaghlol_ops_ro ').replace('password=' + os.environ['QA_PG_SU_PW'], 'password=' + os.environ['QA_PG_OPS_RO_PW']) + ' dbname=zaghlol', autocommit=True)
 expect_fail('D-10', 'API login cannot read the operators table', api, 'select * from zaghlol.operators')
 expect_fail('D-11', 'API login cannot read the audit log', api, 'select * from zaghlol.audit_log')
 expect_fail('D-12', 'API login cannot change feature flags', api, "update zaghlol.feature_flags set enabled=true where key='zakah'")
@@ -292,7 +294,7 @@ expect_fail('D-13', 'API login cannot delete purchases', api, 'delete from zaghl
 expect_fail('D-14', 'API login cannot create tables in the schema', api, 'create table zaghlol.qa_x(i int)')
 expect_fail('D-15', 'read-only ops login cannot insert operators', ro, "insert into zaghlol.operators(id, oidc_subject, display_name, roles) values (gen_random_uuid(),'x','x',array['support_lead'])")
 expect_fail('D-16', 'read-only ops login cannot update installs', ro, "update zaghlol.installs set app_version='9.9.9'")
-adm = psycopg.connect(os.environ['SU'].replace('user=zaghlol ', 'user=zaghlol_admin ').replace('zaghlol_dev_only', 'admin_dev_only') + ' dbname=zaghlol', autocommit=True)
+adm = psycopg.connect(os.environ['SU'].replace('user=zaghlol ', 'user=zaghlol_admin ').replace('password=' + os.environ['QA_PG_SU_PW'], 'password=' + os.environ['QA_PG_ADMIN_PW']) + ' dbname=zaghlol', autocommit=True)
 expect_fail('D-17', 'admin login cannot delete audit rows', adm, 'delete from zaghlol.audit_log')
 expect_fail('D-18', 'admin login cannot update audit rows', adm, "update zaghlol.audit_log set action='x'")
 cols = [x[0] for x in q("select column_name from information_schema.columns where table_schema='zaghlol' and (column_name ilike '%ip%addr%' or column_name ilike '%imei%' or column_name ilike '%phone%' or column_name ilike '%advert%' or column_name ilike '%device_id%' or column_name ilike '%amount%' or column_name ilike '%balance%')")]

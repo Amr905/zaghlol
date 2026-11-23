@@ -3,10 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 
 void main() {
-  // CHARTS-FREE: these tests cover the Gold gate itself, so close it.
-  setUp(() => GoldGate.chartsOpenToFree = false);
-  tearDown(() => GoldGate.chartsOpenToFree = true);
-
   const free = EntitlementState.free;
   final gold = () {
     final c = ProviderContainer();
@@ -41,10 +37,10 @@ void main() {
   });
 
   test('charts: 4 core for Free, all 12 for Gold', () {
-    expect(GoldGate.chart(free, 3).allowed, isTrue);
-    expect(GoldGate.chart(free, 4).allowed, isFalse);
-    expect(GoldGate.chart(free, -1).allowed, isFalse);
-    expect(GoldGate.chart(gold, 11).allowed, isTrue);
+    expect(GoldGate.chart(free, 3, openToFree: false).allowed, isTrue);
+    expect(GoldGate.chart(free, 4, openToFree: false).allowed, isFalse);
+    expect(GoldGate.chart(free, -1, openToFree: false).allowed, isFalse);
+    expect(GoldGate.chart(gold, 11, openToFree: false).allowed, isTrue);
   });
 
   test('backup versions and export preview', () {

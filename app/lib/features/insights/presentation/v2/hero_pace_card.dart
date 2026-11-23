@@ -17,6 +17,7 @@ import '../../domain/overview_models.dart';
 import '../../domain/pace.dart';
 import '../charts/chart_card.dart';
 import '../charts/chart_format.dart';
+import '../charts/chart_period_text.dart';
 import '../charts/chart_overview.dart' show ChangeChip, toneOf;
 import '../charts/charts_providers.dart';
 import 'overview_providers.dart';
@@ -113,6 +114,9 @@ class _Hero extends ConsumerWidget {
       }
     } else if (data.projectedMinor != null) {
       panel = l.insightsV2HeroProjection(
+        resolved == null
+            ? l.insightsChartsPeriodNowThisMonth
+            : ChartPeriodText.of(context, ref).now(resolved),
         state,
         money(data.projectedMinor!),
         data.budgetMinor == null ? '' : money(data.budgetMinor!),

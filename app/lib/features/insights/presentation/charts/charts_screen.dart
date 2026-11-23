@@ -47,7 +47,11 @@ class _ChartsScreenState extends ConsumerState<ChartsScreen> {
   bool _all = false;
 
   Widget _extra(AppLocalizations l, ChartId id, String? code) {
-    if (decideChart(ref.watch(entitlementStateProvider), id).allowed) {
+    if (decideChart(
+      ref.watch(entitlementStateProvider),
+      id,
+      openToFree: ref.watch(chartsOpenToFreeProvider),
+    ).allowed) {
       return code == null
           ? ChartCard(
               title: goldChartTitle(l, id),

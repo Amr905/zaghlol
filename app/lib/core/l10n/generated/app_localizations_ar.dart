@@ -6841,8 +6841,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس.';
 
   @override
-  String get voiceOnlineConsentLabel =>
-      'استخدم التعرّف على الصوت أونلاين من تليفونك';
+  String get voiceOnlineConsentLabel => 'التعرّف على الصوت أونلاين';
 
   @override
   String get voiceOnlineConsentSentence =>
@@ -8384,16 +8383,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String insightsV2HeroProjection(
+    String period,
     String state,
     String projected,
     String budget,
   ) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'under':
-          'لو كملت كده هتقفل الشهر على حوالي $projected، تحت ميزانيتك ($budget)',
+          'لو كملت كده هتقفل $period على حوالي $projected، تحت ميزانيتك ($budget)',
       'over':
-          'لو كملت كده هتقفل الشهر على حوالي $projected، فوق ميزانيتك ($budget)',
-      'other': 'لو كملت كده هتقفل الشهر على حوالي $projected',
+          'لو كملت كده هتقفل $period على حوالي $projected، فوق ميزانيتك ($budget)',
+      'other': 'لو كملت كده هتقفل $period على حوالي $projected',
     });
     return '$_temp0';
   }
@@ -8614,7 +8614,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get insightsV2TrendsInOutTitle => 'الداخل والخارج';
 
   @override
-  String get insightsV2TrendsInOutSub => 'آخر ٦ شهور';
+  String get insightsV2TrendsInOutSub => 'آخر ست شهور';
 
   @override
   String get insightsV2TrendsLegendSpent => 'صرفت';

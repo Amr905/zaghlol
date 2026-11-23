@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-23 (Cairo) by the Lead session: batch 60 (T-213 startup flash, T-214 voice consent once, T-215 mascot moods, T-216/T-217 FU sweeps) merging. Update it whenever the state below changes._
+_Last updated: 2026-11-23 (Cairo) by the Lead session: batch 61 (T-218..T-222 follow-ups, launch screen) merging. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-289**
+Next free follow-up number: **FU-290**
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)

@@ -52,6 +52,8 @@ Isolate = the presentation layer wraps the value in FSI U+2068 … PDI U+2069 (�
 | `rate` | String | Money | yes | implied FX rate in the target currency, e.g. `٤٩٫٩ ج.م` |
 | `share` | String | Money | yes | the user's net share |
 | `spent` | String | Money | yes | cycle spend (KPI) |
+| `spend` | String | Money | yes | one month's spend in a chart a11y label |
+| `weekday` | String | Date (weekday name) | yes | — |
 | `percent` | String | Digits (+ `٪`/`%`) | yes | `٩٦٪` / `96%` |
 | `n` | String | Digits | yes | the printed number of a plural (§0.4) |
 | `count` | **int** | — | — | plural selector only, never printed |
@@ -1443,7 +1445,7 @@ States: loading · populated · thin data (hero number plus a "not enough data y
 | `insights_v2_heroVs` | `{trend, select, up{أكتر بـ {delta} من نفس اليوم الشهر اللي فات} down{أقل بـ {delta} من نفس اليوم الشهر اللي فات} other{زي نفس اليوم الشهر اللي فات بالظبط}}` | `{trend, select, up{{delta} more than by this day last month} down{{delta} less than by this day last month} other{Same as by this day last month}}` | S · trend:select(up/down/other). Open period against the same days of the previous one |
 | `insights_v2_heroVsClosed` | `{trend, select, up{أكتر بـ {delta} من الشهر اللي فات} down{أقل بـ {delta} من الشهر اللي فات} other{زي الشهر اللي فات بالظبط}}` | `{trend, select, up{{delta} more than last month} down{{delta} less than last month} other{Same as last month}}` | S · trend:select(up/down/other). Closed period against the whole previous one |
 | `insights_v2_heroThin` | لسه مفيش بيانات كفاية نقارن بيها بالشهر اللي فات | Not enough data yet to compare with last month | S · thin data: under 3 days or no previous period |
-| `insights_v2_heroProjection` | `{state, select, under{لو كملت كده هتقفل الشهر على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل الشهر على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل الشهر على حوالي {projected}}}` | `{state, select, under{At this pace you'll end the month near {projected}, under your budget ({budget})} over{At this pace you'll end the month near {projected}, over your budget ({budget})} other{At this pace you'll end the month near {projected}}}` | S · state:select(under/over/other); other = no budget |
+| `insights_v2_heroProjection` | `{state, select, under{لو كملت كده هتقفل {period} على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل {period} على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل {period} على حوالي {projected}}}` | `{state, select, under{At this pace you'll end {period} near {projected}, under your budget ({budget})} over{At this pace you'll end {period} near {projected}, over your budget ({budget})} other{At this pace you'll end {period} near {projected}}}` | S · state:select(under/over/other); other = no budget |
 | `insights_v2_heroClosedBudget` | `{state, select, under{قفلت الشهر تحت ميزانيتك ({budget})} over{قفلت الشهر فوق ميزانيتك ({budget})} other{}}` | `{state, select, under{You finished the month under your budget ({budget})} over{You finished the month over your budget ({budget})} other{}}` | S · state:select(under/over/other); other is never shown |
 | `insights_v2_legendThis` | الشهر ده | This month | C · legend |
 | `insights_v2_legendLast` | الشهر اللي فات | Last month | C · legend |
@@ -1493,24 +1495,24 @@ States: loading · populated · month without data (empty slot, line broken) · 
 
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `insights_v2_trends_inOutTitle` | الداخل والخارج | In and out | T · card title |
-| `insights_v2_trends_inOutSub` | آخر ٦ شهور | Last 6 months | S · card subtitle |
-| `insights_v2_trends_legendSpent` | صرفت | Spent | C · legend |
-| `insights_v2_trends_legendIncome` | دخلك | Income | C · legend |
-| `insights_v2_trends_legendProjected` | متوقع | Projected | C · legend |
-| `insights_v2_trends_inOutA11y` | رسم الداخل والخارج. {list} | In and out chart. {list} | S · semantics label; list = the months |
-| `insights_v2_trends_inOutBarA11y` | {month}: دخلك {income}، صرفت {spend} | {month}: income {income}, spent {spend} | S · one month |
-| `insights_v2_trends_inOutBarProjectedA11y` | {month} (متوقع): دخلك {income}، صرفت {spend} | {month} (projected): income {income}, spent {spend} | S · projected month |
-| `insights_v2_trends_inOutEmptyA11y` | {month}: مفيش بيانات | {month}: no data | S · month without data (an empty slot) |
-| `insights_v2_trends_dayTitle` | صرفك يوم بيوم | Day by day | T · heatmap title |
-| `insights_v2_trends_daySub` | كل ما المربع يغمق صرفت أكتر | Darker = spent more | S · heatmap subtitle |
-| `insights_v2_trends_dayPriciest` | {weekday} أغلى يوم عندك | {weekday} is your priciest day | S · caption; omitted under two weeks of data |
-| `insights_v2_trends_dayLess` | أقل | Less | C · legend |
-| `insights_v2_trends_dayMore` | أكتر | More | C · legend |
-| `insights_v2_trends_dayCellA11y` | {date}: صرفت {amount}. اضغط تشوف المعاملات | {date}: spent {amount}. Tap to see the transactions | S · day cell |
-| `insights_v2_trends_dayCellNoSpendA11y` | {date}: مصرفتش حاجة | {date}: no spending | S · day cell |
-| `insights_v2_trends_dayCellFutureA11y` | {date}: لسه ماجاش | {date}: not yet | S · future day cell |
-| `insights_v2_trends_dayA11y` | رسم صرفك يوم بيوم. {days} يوم، الأغمق هو الأكتر صرفًا | Day by day spending chart. {days} days, darker means more spent | S · heatmap label |
+| `insights_v2_trendsInOutTitle` | الداخل والخارج | In and out | T · card title |
+| `insights_v2_trendsInOutSub` | آخر ست شهور | Last 6 months | S · card subtitle |
+| `insights_v2_trendsLegendSpent` | صرفت | Spent | C · legend |
+| `insights_v2_trendsLegendIncome` | دخلك | Income | C · legend |
+| `insights_v2_trendsLegendProjected` | متوقع | Projected | C · legend |
+| `insights_v2_trendsInOutA11y` | رسم الداخل والخارج. {list} | In and out chart. {list} | S · semantics label; list = the months |
+| `insights_v2_trendsInOutBarA11y` | {month}: دخلك {income}، صرفت {spend} | {month}: income {income}, spent {spend} | S · one month |
+| `insights_v2_trendsInOutBarProjectedA11y` | {month} (متوقع): دخلك {income}، صرفت {spend} | {month} (projected): income {income}, spent {spend} | S · projected month |
+| `insights_v2_trendsInOutEmptyA11y` | {month}: مفيش بيانات | {month}: no data | S · month without data (an empty slot) |
+| `insights_v2_trendsDayTitle` | صرفك يوم بيوم | Day by day | T · heatmap title |
+| `insights_v2_trendsDaySub` | كل ما المربع يغمق صرفت أكتر | Darker = spent more | S · heatmap subtitle |
+| `insights_v2_trendsDayPriciest` | {weekday} أغلى يوم عندك | {weekday} is your priciest day | S · caption; omitted under two weeks of data |
+| `insights_v2_trendsDayLess` | أقل | Less | C · legend |
+| `insights_v2_trendsDayMore` | أكتر | More | C · legend |
+| `insights_v2_trendsDayCellA11y` | {date}: صرفت {amount}. اضغط تشوف المعاملات | {date}: spent {amount}. Tap to see the transactions | S · day cell |
+| `insights_v2_trendsDayCellNoSpendA11y` | {date}: مصرفتش حاجة | {date}: no spending | S · day cell |
+| `insights_v2_trendsDayCellFutureA11y` | {date}: لسه ماجاش | {date}: not yet | S · future day cell |
+| `insights_v2_trendsDayA11y` | رسم صرفك يوم بيوم. {days} يوم، الأغمق هو الأكتر صرفًا | Day by day spending chart. {days} days, darker means more spent | S · heatmap label |
 
 ## 2.3 S-21 Chart detail and explainer — `insights_chartDetail_*`, `insights_deep_*`
 States: populated · explainer closed (button) · typing (≤ 600 ms) · explained (basic or deep) · Gold-locked chart · empty · explainer error (bubble hidden, chart stays). Chart 10 lists spend per card per currency (FR-CHT-06).
@@ -2645,8 +2647,8 @@ Each money alert has a full text and a `…Hidden` text used when "hide amounts"
 |---|---|---|---|
 | `privacy_contribute_label` | ساعد في تحسين قايمة التجار | Help improve the merchant list | L · toggle, off by default |
 | `privacy_contribute_sentence` | لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس. | If you turn it on, we send only the merchant name and the category you chose. | S · one-sentence explanation (FR-CAT-09) |
-| `voiceOnlineConsent_label` | استخدم التعرّف على الصوت أونلاين من تليفونك | Use the phone's online speech recognition | L · toggle in Privacy, off until allowed (D-42) |
-| `voiceOnlineConsent_sentence` | بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول. | Only when your phone can't do it offline. The audio goes to Google or Apple, never to Zaghlol. | S · one-sentence explanation (D-42, INT-07) |
+| `voice_online_consentLabel` | التعرّف على الصوت أونلاين | Online voice recognition | L · toggle in Privacy, off until allowed (D-42) |
+| `voice_online_consentSentence` | بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول. | Only when your phone can't do it offline. The audio goes to Google or Apple, never to Zaghlol. | S · one-sentence explanation (D-42, INT-07) |
 | `privacy_contribute_infoTitle` | بالظبط إيه اللي بيتبعت؟ | What exactly is sent? | T · ⓘ sheet |
 | `privacy_contribute_sends` | بنبعت: اسم التاجر بعد تنضيفه، وكود البنك، والتصنيف اللي اخترته. | We send: the cleaned-up merchant name, the bank code and the category you chose. | E |
 | `privacy_contribute_neverSends` | مبنبعتش: مبالغ، ولا تواريخ، ولا أرقام كروت، ولا أرقام تليفونات، ولا حسابات إنستاباي، ولا أسماء ناس. | We never send: amounts, dates, card numbers, phone numbers, InstaPay addresses or people's names. | E |

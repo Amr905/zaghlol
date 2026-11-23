@@ -26,6 +26,7 @@ Future<void> _pump(
   Locale locale = _en,
   double scale = 1.0,
   List<Override>? overrides,
+  bool openAll = false,
 }) async {
   await tester.binding.setSurfaceSize(const Size(390, 3200));
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -34,7 +35,10 @@ Future<void> _pump(
       const ChartsScreen(),
       locale: locale,
       scale: scale,
-      overrides: overrides ?? chartOverrides(),
+      overrides: [
+        ...(overrides ?? chartOverrides()),
+        if (!openAll) chartsOpenToFreeProvider.overrideWithValue(false),
+      ],
     ),
   );
   await tester.pumpAndSettle();
@@ -45,8 +49,6 @@ AppLocalizations _l(WidgetTester t) =>
 
 void main() {
   // CHARTS-FREE: these tests cover the Gold gate itself, so close it.
-  setUp(() => GoldGate.chartsOpenToFree = false);
-  tearDown(() => GoldGate.chartsOpenToFree = true);
 
   for (final locale in const [_en, _ar]) {
     final tag = locale.languageCode;
@@ -296,9 +298,9 @@ void main() {
   });
 
   testWidgets('cycle-only charts say so for a month period', (tester) async {
-    GoldGate.chartsOpenToFree = true;
     await _pump(
       tester,
+      openAll: true,
       overrides: [
         ...chartOverrides(
           selection: const ChartPeriodSelection(ChartPreset.thisMonth),

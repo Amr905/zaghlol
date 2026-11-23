@@ -9804,7 +9804,7 @@ abstract class AppLocalizations {
   /// L · toggle in Privacy, off until allowed (D-42)
   ///
   /// In ar, this message translates to:
-  /// **'استخدم التعرّف على الصوت أونلاين من تليفونك'**
+  /// **'التعرّف على الصوت أونلاين'**
   String get voiceOnlineConsentLabel;
 
   /// S · one-sentence explanation (D-42, INT-07)
@@ -12055,8 +12055,9 @@ abstract class AppLocalizations {
   /// T-209 Charts v2 · state:select(under/over/other); other = no budget
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, under{لو كملت كده هتقفل الشهر على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل الشهر على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل الشهر على حوالي {projected}}}'**
+  /// **'{state, select, under{لو كملت كده هتقفل {period} على حوالي {projected}، تحت ميزانيتك ({budget})} over{لو كملت كده هتقفل {period} على حوالي {projected}، فوق ميزانيتك ({budget})} other{لو كملت كده هتقفل {period} على حوالي {projected}}}'**
   String insightsV2HeroProjection(
+    String period,
     String state,
     String projected,
     String budget,
@@ -12329,7 +12330,7 @@ abstract class AppLocalizations {
   /// T-211 Charts v2 · card subtitle
   ///
   /// In ar, this message translates to:
-  /// **'آخر ٦ شهور'**
+  /// **'آخر ست شهور'**
   String get insightsV2TrendsInOutSub;
 
   /// T-211 Charts v2 · legend

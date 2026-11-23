@@ -6236,7 +6236,7 @@
   "@privacyContributeSentence": {
     "description": "S · one-sentence explanation (FR-CAT-09)"
   },
-  "voiceOnlineConsentLabel": "Use the phone's online speech recognition",
+  "voiceOnlineConsentLabel": "Online voice recognition",
   "@voiceOnlineConsentLabel": {
     "description": "L · toggle in Privacy, off until allowed (D-42)"
   },
@@ -8351,10 +8351,13 @@
   "@insightsV2HeroThin": {
     "description": "T-209 Charts v2 · thin data: under 3 days or no previous period"
   },
-  "insightsV2HeroProjection": "{state, select, under{At this pace you'll end the month near {projected}, under your budget ({budget})} over{At this pace you'll end the month near {projected}, over your budget ({budget})} other{At this pace you'll end the month near {projected}}}",
+  "insightsV2HeroProjection": "{state, select, under{At this pace you'll end {period} near {projected}, under your budget ({budget})} over{At this pace you'll end {period} near {projected}, over your budget ({budget})} other{At this pace you'll end {period} near {projected}}}",
   "@insightsV2HeroProjection": {
     "description": "T-209 Charts v2 · state:select(under/over/other); other = no budget",
     "placeholders": {
+      "period": {
+        "type": "String"
+      },
       "state": {
         "type": "String"
       },
