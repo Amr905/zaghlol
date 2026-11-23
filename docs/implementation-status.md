@@ -844,7 +844,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-257** (batch 37): see the batch-37 report and Lead delta checks.
 
-- **FU-258** (batch 38): minors in [batch-38](05-reviews/batch-38.md): action via a non-exported trampoline or nonce; a failed mark-paid while locked has no feedback; the weekly summary is skipped if the app isn't opened on Friday; a reminder delayed by quiet hours isn't cancelled after paying.
+- **FU-258** (T-228 BUILT: paid bill cancels its reminders via new `cancel(id)`; Friday generic nudge scheduled at every run; action-intent item already closed by L-1; the failed-mark-paid-while-locked feedback minor is still open). Original: minors in [batch-38](05-reviews/batch-38.md): action via a non-exported trampoline or nonce; a failed mark-paid while locked has no feedback; the weekly summary is skipped if the app isn't opened on Friday; a reminder delayed by quiet hours isn't cancelled after paying.
 
 - **FU-259** (batch 40): minors in [batch-40](05-reviews/batch-40.md): GoldAPI per-karat vs ounce check and a doc link; narrow the deploy SA's IAM-admin role and limit prod deploys to main; the public dry-run AAB includes the R8 mapping; app-store-privacy.md out of date after the iOS fixes; "رفاهيات" for "wants".
 

@@ -457,6 +457,10 @@ class RecurringRepository {
     return changed > 0;
   }
 
+  /// T-228: the ISO date the item is next due, or null (unknown item).
+  Future<String?> nextDueDateOf(String id) =>
+      guardRead(() async => (await _recurring.itemById(id))?.nextDueDate);
+
   /// Deletes an item and its occurrences. A deleted item with a merchant key
   /// (any kind, BNPL installments included) is remembered (dismissal key), so
   /// detection does not bring it back the next night (T-196).

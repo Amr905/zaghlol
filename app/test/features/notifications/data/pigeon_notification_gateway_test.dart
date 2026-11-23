@@ -41,6 +41,9 @@ class _FakeHost implements NotificationsHostApi {
   Future<void> cancelScheduled() async => calls.add('cancelScheduled');
 
   @override
+  Future<void> cancel(int id) async => calls.add('cancel:$id');
+
+  @override
   Future<void> openSystemSettings() async => calls.add('openSystemSettings');
 
   @override
@@ -173,6 +176,15 @@ void main() {
       l10n: () => AppLocalizationsEn(),
     ).cancelScheduled();
     expect(host.calls, ['cancelScheduled']);
+  });
+
+  test('cancel(id) goes to the platform with that id only', () async {
+    final host = _FakeHost();
+    await PigeonNotificationGateway(
+      api: host,
+      l10n: () => AppLocalizationsEn(),
+    ).cancel(77);
+    expect(host.calls, ['cancel:77']);
   });
 
   test('cancelAll goes to the platform', () async {
