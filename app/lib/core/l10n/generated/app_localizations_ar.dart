@@ -6838,6 +6838,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس.';
 
   @override
+  String get voiceOnlineConsentLabel =>
+      'استخدم التعرّف على الصوت أونلاين من تليفونك';
+
+  @override
+  String get voiceOnlineConsentSentence =>
+      'بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول.';
+
+  @override
   String get privacyContributeInfoTitle => 'بالظبط إيه اللي بيتبعت؟';
 
   @override
