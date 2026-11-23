@@ -1,313 +1,276 @@
-"""Animations for the Zaghlol rig. Times in seconds; transforms are deltas from rest
-(x/y px in artboard units, rotation in degrees), scales are absolute (1.0 = rest)."""
+"""Compiles the Motion Lab (via labcss.py) into Rive animations.
+
+Every animation is a dict {name, D (s), kind (loop|oneShot|hold), tracks}, where tracks maps
+(node, comp) -> [(t_seconds, value_in_rive_units, ease_key)]; comp is one of
+x y rotation scaleX scaleY opacity; ease_key is "hold", "linear" or a cubic-bezier "x1,y1,x2,y2".
+Rest positions come from scene.py.  Nothing here knows about the .riv byte format.
+"""
 import math
 
+import labcss as L
+from labcss import IDENT, parse_animation, parse_transform
+import scene
+
 FPS = 60
+LAB = L.Lab()
+EPS = 1.0 / FPS
 
-# node -> animated props, in a fixed order (body animations key every one of them)
-BODY = {
-    "character": ["x", "y", "rotation", "scaleX", "scaleY"],
-    "face": ["x", "y", "rotation"],
-    "wing": ["rotation"],
-    "tail": ["rotation"],
-    "browL": ["y", "rotation"],
-    "browR": ["y", "rotation"],
-    "eyeL": ["scaleX", "scaleY"],
-    "eyeR": ["scaleX", "scaleY"],
-}
-TALK = {"jaw": ["rotation"], "beak": ["rotation"], "cere": ["rotation"]}
-NODES = list(BODY) + list(TALK)
-KEYED = {**BODY, **TALK}
-PROP_KEY = {"x": 13, "y": 14, "rotation": 15, "scaleX": 16, "scaleY": 17}
-REST = {"scaleX": 1.0, "scaleY": 1.0}
+BODY_NODE = {"bird": "bird", "head": "head", "wingL": "wingL", "brows": "brows", "eyeL": "eyeL",
+             "eyeR": "eyeR", "pupilsL": "pupilsL", "pupilsR": "pupilsR", "jaw": "jaw"}
+VIS = ["eyeHappyL", "eyeHappyR", "eyeOpenL", "eyeOpenR", "eyeClosed", "jaw", "mouthClosed", "glasses",
+       "hat", "mag", "sweat", "pointer"]
+BLINK_OPEN = {"eyeL": "blinkL", "eyeR": "blinkR"}
+INFINITE_STEP = 1.0 / 30  # sampling step for baked (phase-shifted) loops
 
 
-def both(t, nodes):  # helper: same timeline on several nodes
-    return {n: t for n in nodes}
+def ekey(ease):
+    return L.easing_key(ease)
 
 
-def tl(*pairs):
-    return list(pairs)
+# ---------------------------------------------------------------- compile one CSS animation
+def _points_for(css_pts, a, D, base, kind, vars):
+    """[(t, value, ease)] of one CSS property (all keyframes of one @keyframes entry) over [0, D]."""
+    pts = [(p, L.parse_value(v, kind, vars)) for p, v in css_pts]
+    if pts[0][0] > 0:
+        pts.insert(0, (0.0, base))
+    if pts[-1][0] < 100:
+        pts.append((100.0, base))
+    dur, delay = a["dur"], a["delay"]
+    n = a["iters"]
+    if n == math.inf:
+        n = max(1, math.ceil((D - delay) / dur - 1e-9))
+    n = int(n)
+    forwards = a["fill"] in ("forwards", "both")
+    ek = ekey(a["ease"])
+    out = []
 
+    def push(t, v, e):
+        if out and abs(out[-1][0] - t) < 1e-9:
+            if _same(out[-1][1], v):
+                out[-1] = (out[-1][0], v, e)
+                return
+            t = out[-1][0] + EPS
+        out.append((t, v, e))
 
-def sym(times, vals):
-    return list(zip(times, vals))
-
-
-def _blink(t0):
-    return [(0, 1), (t0, 1), (t0 + 0.06, 0.1), (t0 + 0.14, 1)]
-
-
-def idle():
-    d = 4.8
-    wag = []
-    for i in range(3):
-        b = i * 1.6
-        wag += [(b, 0), (b + 0.4, 5), (b + 0.8, -2), (b + 1.2, 4)]
-    wag.append((d, 0))
-    return d, "loop", {
-        ("character", "scaleY"): [(0, 1), (1.2, 1.014), (2.4, 1), (3.6, 1.014), (4.8, 1)],
-        ("character", "scaleX"): [(0, 1), (1.2, 0.992), (2.4, 1), (3.6, 0.992), (4.8, 1)],
-        ("tail", "rotation"): wag,
-        ("eyeL", "scaleY"): _blink(3.7) + [(d, 1)],
-        ("eyeR", "scaleY"): _blink(3.7) + [(d, 1)],
-    }
-
-
-def both_eyes(key, pts):
-    return {("eyeL", key): pts, ("eyeR", key): pts}
-
-
-def both_brows(key, pts):
-    return {("browL", key): pts, ("browR", key): pts}
-
-
-def merge(*ds):
-    out = {}
-    for d in ds:
-        out.update(d)
+    if delay > 0:
+        lead = pts[0][1] if a["fill"] in ("backwards", "both") else base
+        push(0.0, lead, "hold")
+    for i in range(n):
+        for p, v in pts:
+            push(delay + (i + p / 100.0) * dur, v, ek)
+    end = delay + n * dur
+    last = pts[-1][1]
+    if not forwards and not _same(last, base):
+        push(end + EPS, base, "hold")
+    elif out[-1][0] < D:
+        pass
+    if out[0][0] > 0:
+        out.insert(0, (0.0, out[0][1], "hold"))
+    out = [(t, v, e) for t, v, e in out if t <= D + 1e-9]
+    if out[-1][0] < D - 1e-9:
+        out.append((D, out[-1][1], "hold"))
     return out
 
 
-def mood_tourGuide():
-    return 1.6, "oneShot", merge(
-        {("wing", "rotation"): [(0, 0), (0.2, 20), (0.45, 5), (0.7, 20), (0.95, 5), (1.2, 20), (1.6, 0)],
-         ("face", "rotation"): [(0, 0), (0.3, -3), (1.2, -3), (1.6, 0)],
-         ("character", "rotation"): [(0, 0), (0.3, -2), (1.2, -2), (1.6, 0)],
-         ("character", "y"): [(0, 0), (0.2, -6), (0.45, 0), (0.7, -6), (0.95, 0), (1.2, -6), (1.6, 0)]},
-        both_brows("y", [(0, 0), (0.25, -6), (1.3, -6), (1.6, 0)]))
+def _same(a, b):
+    if isinstance(a, dict):
+        return all(abs(a[c] - b[c]) < 1e-9 for c in L.COMPS)
+    return abs(a - b) < 1e-9
 
 
-def mood_proud():
-    return 0.9, "oneShot", merge(
-        {("character", "scaleX"): [(0, 1), (0.25, 1.05), (0.55, 0.99), (0.9, 1)],
-         ("character", "scaleY"): [(0, 1), (0.25, 1.06), (0.55, 0.97), (0.9, 1)],
-         ("character", "y"): [(0, 0), (0.25, -14), (0.55, 0), (0.9, 0)],
-         ("wing", "rotation"): [(0, 0), (0.25, 12), (0.9, 0)],
-         ("face", "y"): [(0, 0), (0.25, -6), (0.9, 0)]},
-        both_brows("y", [(0, 0), (0.25, -5), (0.9, 0)]))
+def _split_tf(points):
+    """[(t, tf-dict, e)] -> {comp: [(t, v, e)]} (rotateY folded into scaleX)."""
+    res = {c: [] for c in ("x", "y", "rot", "sx", "sy")}
+    for t, v, e in points:
+        for c in ("x", "y", "rot", "sx", "sy"):
+            val = v[c]
+            if c == "sx":
+                val *= math.cos(math.radians(v["ry"]))
+            res[c].append((t, val, e))
+    return res
 
 
-def mood_shocked():
-    return 1.1, "oneShot", merge(
-        {("character", "y"): [(0, 0), (0.18, -55), (0.42, 0), (0.52, 0), (1.1, 0)],
-         ("character", "scaleX"): [(0, 1), (0.18, 0.96), (0.42, 1.08), (0.55, 1), (1.1, 1)],
-         ("character", "scaleY"): [(0, 1), (0.18, 1.05), (0.42, 0.92), (0.55, 1), (1.1, 1)],
-         ("wing", "rotation"): [(0, 0), (0.18, 25), (0.6, 5), (1.1, 0)]},
-        both_eyes("scaleY", [(0, 1), (0.15, 1.35), (0.95, 1.35), (1.1, 1)]),
-        both_eyes("scaleX", [(0, 1), (0.15, 1.2), (0.95, 1.2), (1.1, 1)]),
-        both_brows("y", [(0, 0), (0.15, -16), (0.95, -16), (1.1, 0)]))
+def compile_anim(a, D, base_tf=None, base_op=1.0, vars=None, steady=False):
+    """-> {"x","y","rot","sx","sy","opacity"} point lists (only properties the @keyframes set).
+    steady=True bakes the steady state of an infinite loop with a delay (phase-shifted) at 30 Hz."""
+    kfs = LAB.keyframes[a["name"]]
+    base_tf = base_tf or IDENT
+    out = {}
+    if steady:
+        n = int(round(D * 30))
+        for kind in ("transform", "opacity"):
+            if kind not in kfs:
+                continue
+            pts = []
+            for i in range(n + 1):
+                t = i * INFINITE_STEP
+                aa = dict(a, delay=0.0, fill="both")
+                tt = (t - a["delay"]) % a["dur"]
+                tf, op = L.eval_anim(LAB, aa, tt, base_tf, base_op, vars)
+                v = tf if kind == "transform" else op
+                pts.append((t, v, "linear"))
+            if kind == "transform":
+                out.update(_split_tf(pts))
+            else:
+                out["opacity"] = pts
+        return out
+    if "transform" in kfs:
+        out.update(_split_tf(_points_for(kfs["transform"], a, D, base_tf, "transform", vars)))
+    if "opacity" in kfs:
+        out["opacity"] = _points_for(kfs["opacity"], a, D, base_op, "opacity", vars)
+    return out
 
 
-def mood_detective():
-    return 2.0, "oneShot", merge(
-        {("character", "rotation"): [(0, 0), (0.3, 5), (1.7, 5), (2.0, 0)],
-         ("face", "x"): [(0, 0), (0.4, -14), (1.0, 14), (1.5, -14), (1.8, 0), (2.0, 0)],
-         ("face", "rotation"): [(0, 0), (0.4, -2), (1.0, 2), (1.5, -2), (1.8, 0), (2.0, 0)]},
-        both_brows("y", [(0, 0), (0.3, 6), (1.7, 6), (2.0, 0)]),
-        both_eyes("scaleY", [(0, 1), (0.3, 0.8), (1.7, 0.8), (2.0, 1)]))
+def const(D, v):
+    return [(0.0, v, "hold"), (D, v, "hold")]
 
 
-def mood_professor():
-    return 1.4, "oneShot", merge(
-        {("face", "y"): [(0, 0), (0.2, 10), (0.45, -2), (0.7, 10), (0.95, -2), (1.4, 0)],
-         ("face", "rotation"): [(0, 0), (0.2, 3), (0.45, -1), (0.7, 3), (0.95, -1), (1.4, 0)],
-         ("character", "rotation"): [(0, 0), (0.3, -2), (1.1, -2), (1.4, 0)],
-         ("wing", "rotation"): [(0, 0), (0.4, 10), (1.0, 10), (1.4, 0)]},
-        both_brows("y", [(0, 0), (0.2, -8), (1.1, -8), (1.4, 0)]))
-
-
-def mood_listening():
-    return 3.0, "loop", merge(
-        {("character", "rotation"): [(0, 0), (1.2, -4), (1.8, -4), (3.0, 0)],
-         ("face", "rotation"): [(0, 0), (1.2, -7), (1.8, -7), (3.0, 0)],
-         ("face", "y"): [(0, 0), (1.2, 3), (1.8, 3), (3.0, 0)]},
-        both_eyes("scaleY", [(0, 1), (1.2, 1.12), (1.8, 1.12), (3.0, 1)]),
-        both_brows("y", [(0, 0), (1.2, -6), (1.8, -6), (3.0, 0)]))
-
-
-def mood_thinking():
-    return 2.4, "loop", merge(
-        {("character", "rotation"): [(0, 0), (0.8, 3), (1.6, -3), (2.4, 0)],
-         ("face", "x"): [(0, 0), (0.5, -10), (1.9, -10), (2.4, 0)],
-         ("face", "y"): [(0, 0), (0.5, -6), (1.9, -6), (2.4, 0)],
-         ("browR", "y"): [(0, 0), (0.5, -12), (1.9, -12), (2.4, 0)],
-         ("browR", "rotation"): [(0, 0), (0.5, -6), (1.9, -6), (2.4, 0)]},
-        both_eyes("scaleY", [(0, 1), (1.1, 1), (1.17, 0.1), (1.26, 1), (2.4, 1)]))
-
-
-def mood_scanning():
-    return 2.0, "loop", merge(
-        {("face", "x"): [(0, 0), (0.5, -16), (1.5, 16), (2.0, 0)],
-         ("character", "rotation"): [(0, 0), (0.5, -3), (1.5, 3), (2.0, 0)]},
-        both_brows("y", [(0, 0), (0.3, 4), (1.7, 4), (2.0, 0)]),
-        both_eyes("scaleY", [(0, 1), (0.3, 0.85), (1.7, 0.85), (2.0, 1)]))
-
-
-def mood_counting():
-    return 1.2, "loop", merge(
-        {("face", "y"): [(0, 0), (0.3, 9), (0.6, 0), (0.9, 9), (1.2, 0)],
-         ("face", "rotation"): [(0, 0), (0.3, 2), (0.6, 0), (0.9, 2), (1.2, 0)],
-         ("character", "scaleY"): [(0, 1), (0.3, 0.99), (0.6, 1), (0.9, 0.99), (1.2, 1)],
-         ("wing", "rotation"): [(0, 0), (0.3, 8), (0.6, 0), (0.9, 8), (1.2, 0)]})
-
-
-def mood_saved():
-    return 0.9, "oneShot", merge(
-        {("character", "y"): [(0, 0), (0.12, 6), (0.35, -45), (0.65, 0), (0.75, 3), (0.9, 0)],
-         ("character", "scaleY"): [(0, 1), (0.12, 0.95), (0.35, 1.05), (0.65, 0.94), (0.75, 1.0), (0.9, 1)],
-         ("character", "scaleX"): [(0, 1), (0.12, 1.04), (0.35, 0.97), (0.65, 1.06), (0.9, 1)],
-         ("wing", "rotation"): [(0, 0), (0.35, 28), (0.9, 0)]},
-        both_brows("y", [(0, 0), (0.35, -8), (0.7, -8), (0.9, 0)]))
-
-
-def mood_payday():
-    return 1.6, "oneShot", merge(
-        {("character", "y"): [(0, 0), (0.25, -50), (0.5, 0), (0.75, -50), (1.0, 0), (1.6, 0)],
-         ("character", "scaleY"): [(0, 1), (0.25, 1.04), (0.5, 0.93), (0.75, 1.04), (1.0, 0.93), (1.2, 1), (1.6, 1)],
-         ("wing", "rotation"): [(0, 0), (0.25, 30), (0.5, 10), (0.75, 30), (1.0, 10), (1.3, 28), (1.6, 0)],
-         ("tail", "rotation"): [(0, 0), (0.25, 12), (0.5, -5), (0.75, 12), (1.0, -5), (1.3, 10), (1.6, 0)]},
-        both_brows("y", [(0, 0), (0.2, -10), (1.3, -10), (1.6, 0)]),
-        both_eyes("scaleY", [(0, 1), (0.2, 1.15), (1.3, 1.15), (1.6, 1)]))
-
-
-def mood_oops():
-    return 1.4, "oneShot", merge(
-        {("character", "x"): [(0, 0), (0.1, -12), (0.2, 12), (0.3, -10), (0.4, 10), (0.5, -7), (0.6, 6), (0.7, -4),
-                              (0.8, 3), (0.9, 0), (1.4, 0)],
-         ("character", "scaleY"): [(0, 1), (0.15, 0.95), (1.0, 0.95), (1.4, 1)],
-         ("character", "rotation"): [(0, 0), (0.15, -3), (1.0, -3), (1.4, 0)],
-         ("face", "y"): [(0, 0), (0.15, 6), (1.0, 6), (1.4, 0)],
-         ("wing", "rotation"): [(0, 0), (0.15, -8), (1.0, -8), (1.4, 0)],
-         ("browL", "rotation"): [(0, 0), (0.12, 12), (1.0, 12), (1.4, 0)],
-         ("browR", "rotation"): [(0, 0), (0.12, -12), (1.0, -12), (1.4, 0)]},
-        both_eyes("scaleY", [(0, 1), (0.12, 0.4), (1.0, 0.4), (1.4, 1)]),
-        both_brows("y", [(0, 0), (0.12, 8), (1.0, 8), (1.4, 0)]))
-
-
-def mood_sleep():
-    return 2.8, "oneShot", merge(
-        {("character", "scaleY"): [(0, 1), (0.7, 1.03), (1.4, 0.985), (2.1, 1.03), (2.8, 1)],
-         ("character", "scaleX"): [(0, 1), (0.7, 0.99), (1.4, 1.005), (2.1, 0.99), (2.8, 1)],
-         ("face", "y"): [(0, 0), (0.5, 12), (2.3, 12), (2.8, 0)],
-         ("face", "rotation"): [(0, 0), (0.5, 6), (2.3, 6), (2.8, 0)],
-         ("wing", "rotation"): [(0, 0), (0.5, -6), (2.3, -6), (2.8, 0)]},
-        both_eyes("scaleY", [(0, 1), (0.4, 0.08), (2.4, 0.08), (2.8, 1)]),
-        both_brows("y", [(0, 0), (0.5, 4), (2.3, 4), (2.8, 0)]))
-
-
-def mood_pull():
-    return 0.4, "hold", merge(
-        {("character", "scaleY"): [(0, 1), (0.4, 1.12)],
-         ("character", "scaleX"): [(0, 1), (0.4, 0.94)],
-         ("character", "y"): [(0, 0), (0.4, -8)],
-         ("face", "y"): [(0, 0), (0.4, -4)],
-         ("wing", "rotation"): [(0, 0), (0.4, 14)]},
-        both_eyes("scaleY", [(0, 1), (0.4, 1.2)]),
-        both_brows("y", [(0, 0), (0.4, -8)]))
-
-
-def mood_tap():
-    return 0.8, "oneShot", merge(
-        {("character", "y"): [(0, 0), (0.12, 5), (0.35, -40), (0.6, 0), (0.7, 2), (0.8, 0)],
-         ("character", "scaleY"): [(0, 1), (0.12, 0.88), (0.35, 1.08), (0.6, 0.92), (0.7, 1), (0.8, 1)],
-         ("character", "scaleX"): [(0, 1), (0.12, 1.1), (0.28, 0.1), (0.4, -1), (0.52, 0.1), (0.64, 1), (0.8, 1)]},
-        both_brows("y", [(0, 0), (0.3, -8), (0.8, 0)]))
-
-
-MOODS = [("tourGuide", mood_tourGuide), ("proud", mood_proud), ("shocked", mood_shocked),
-         ("detective", mood_detective), ("professor", mood_professor), ("listening", mood_listening),
-         ("thinking", mood_thinking), ("scanning", mood_scanning), ("counting", mood_counting),
-         ("saved", mood_saved), ("payday", mood_payday), ("oops", mood_oops), ("sleep", mood_sleep),
-         ("pull", mood_pull), ("tap", mood_tap)]
-
-
-def talk_on():
-    return 0.5, "loop", {
-        ("jaw", "rotation"): [(0, 0), (0.12, -14), (0.25, -2), (0.37, -12), (0.5, 0)],
-        ("beak", "rotation"): [(0, 0), (0.12, 5), (0.25, 0), (0.37, 4), (0.5, 0)],
-        ("cere", "rotation"): [(0, 0), (0.12, 2), (0.25, 0), (0.37, 2), (0.5, 0)],
-    }
-
-
-def rest_value(node, prop, xy):
-    if prop in REST:
-        return REST[prop]
-    if prop in ("x", "y"):
-        return xy[node][0 if prop == "x" else 1]
-    return 0.0
-
-
-def to_unit(node, prop, v, xy):
-    if prop == "rotation":
+# ---------------------------------------------------------------- rive units
+def to_rive(node, comp, v):
+    if comp == "x":
+        return scene.rest(node)[0] + v
+    if comp == "y":
+        return scene.rest(node)[1] + v
+    if comp == "rot":
         return math.radians(v)
-    if prop in ("x", "y"):
-        return xy[node][0 if prop == "x" else 1] + v
     return v
 
 
-def emit(f, slots, ease, xy, name, dur_s, loop, timeline, keyed):
-    """Write one LinearAnimation keying every prop in `keyed` (rest where unspecified)."""
-    frames = max(1, round(dur_s * FPS))
-    loopv = {"loop": 1, "oneShot": 0, "hold": 0}[loop]
-    f.add("LinearAnimation", name=name, duration=frames, fps=FPS, loopValue=loopv)
-    idx = f.anim_count
-    f.anim_count += 1
-    probes = []
-    for node, props in keyed.items():
-        for prop in props:
-            pts = list(timeline.get((node, prop), []))
-            rest_delta = 1.0 if prop in REST else 0.0
-            if not pts:
-                pts = [(0, rest_delta), (dur_s, rest_delta)]
-            if pts[0][0] > 0:
-                pts.insert(0, (0, rest_delta))
-            if loop != "hold" and pts[-1][0] < dur_s - 1e-9:
-                pts.append((dur_s, rest_delta))
-            f.add("KeyedObject", objectId=slots[node])
-            f.add("KeyedProperty", propertyKey=PROP_KEY[prop])
-            last = -1
-            for t, v in pts:
-                fr = max(round(t * FPS), last + 1 if round(t * FPS) <= last else 0)
-                last = fr
-                f.add("KeyFrameDouble", frame=fr, value=to_unit(node, prop, v, xy),
-                      interpolationType=2, interpolatorId=ease)
-            vals = [v for _, v in pts]
-            hi = max(vals, key=lambda v: abs(v - rest_delta))
-            if abs(hi - rest_delta) > 0:
-                probes.append({"node": node, "prop": prop,
-                               "extreme": to_unit(node, prop, hi, xy),
-                               "mag": abs(hi - rest_delta) * (100 if prop in REST else 1 / 10 if prop == "rotation" else 1 / 10),
-                               "t": [t for t, v in pts if v == hi][0]})
-    probes.sort(key=lambda p: (-p["mag"], p["node"], p["prop"]))
-    return idx, probes
+RIVE_COMP = {"x": "x", "y": "y", "rot": "rotation", "sx": "scaleX", "sy": "scaleY", "opacity": "opacity"}
 
 
-def build_motion(f, slots, ease, node_xy):
-    xy = {n: node_xy(n) for n in NODES}
-    meta = {"fps": FPS, "rest": {n: {p: rest_value(n, p, xy) for p in props} for n, props in KEYED.items()},
-            "animations": []}
-    sm = {"moods": []}
+def put(tracks, node, comp, pts):
+    tracks[(node, RIVE_COMP[comp])] = [(t, to_rive(node, comp, v), e) for t, v, e in pts]
 
-    d, k, t = idle()
-    idx, pr = emit(f, slots, ease, xy, "idle", d, k, t, BODY)
-    sm["idle"] = idx
-    meta["animations"].append({"name": "idle", "duration": d, "loop": k, "probes": pr[:3]})
-    for i, (nm, fn) in enumerate(MOODS):
-        d, k, t = fn()
-        name = f"mood{i:02d}_{nm}"
-        idx, pr = emit(f, slots, ease, xy, name, d, k, t, BODY)
-        sm["moods"].append({"anim": idx, "kind": k, "exit_ms": round(d * 1000)})
-        meta["animations"].append({"name": name, "state": i, "duration": d, "loop": k, "probes": pr[:3]})
-    # talk layer
-    idx, _ = emit(f, slots, ease, xy, "talkOff", 1 / FPS, "loop", {}, TALK)
-    sm["talkOff"] = idx
-    d, k, t = talk_on()
-    idx, pr = emit(f, slots, ease, xy, "talkOn", d, k, t, TALK)
-    sm["talkOn"] = idx
-    meta["animations"].append({"name": "talkOn", "duration": d, "loop": k, "probes": pr[:3]})
-    # reduce-motion still pose
-    idx, _ = emit(f, slots, ease, xy, "still", 1 / FPS, "loop", {}, BODY)
-    sm["still"] = idx
-    meta["sm"] = sm
-    return meta
+
+# ---------------------------------------------------------------- body moods
+def _anim_of(st):
+    a = parse_animation(st.get("animation"))
+    return a
+
+
+def mood_spec(mood):
+    """(D, kind) from the Lab's animations on the body (the jaw `talk` and the ambient
+    breathe/wag/blink are separate layers)."""
+    ends, periods = [], []
+    for el in L.ELEMENTS:
+        st = LAB.style(mood, el)
+        a = _anim_of(st)
+        if not a or a["name"] in ("talk", "blink", "wag"):
+            continue
+        if a["name"] == "breathe" and mood != "sleep":
+            continue
+        if a["iters"] == math.inf:
+            periods.append(a["dur"])
+        else:
+            ends.append(a["delay"] + a["dur"] * a["iters"])
+    if mood == "sleep":
+        return 2 * max(periods), "hold"
+    if periods:
+        return max(periods), "loop"
+    return max(ends) + EPS, "oneShot"  # one extra frame shows the base pose the CSS snaps back to
+
+
+def body_mood(mood, keyed):
+    """Tracks of the `moods` layer for one Lab mood ('default' = idle)."""
+    if mood == "default":
+        D, kind = 1.0, "loop"
+    else:
+        D, kind = mood_spec(mood)
+    raw = {}  # (node, comp) -> points (lab units)
+    for el, node in list(BODY_NODE.items()) + [("breath", "breath")]:
+        st = LAB.style(mood, el)
+        a = _anim_of(st)
+        if el == "breath":
+            dst = LAB.style("default", el)
+            if st.get("animation") == dst.get("animation") and not st.get("transform"):
+                continue
+        if a and a["name"] in ("talk", "blink"):
+            a = None
+        base = parse_transform(st.get("transform"))
+        pts = compile_anim(a, D, base, 1.0) if a else {}
+        for c in ("x", "y", "rot", "sx", "sy"):
+            if c in pts:
+                raw[(node, c)] = pts[c]
+            else:
+                raw[(node, c)] = const(D, base[c] * (math.cos(math.radians(base["ry"])) if c == "sx" else 1))
+    # shock: `.eye{animation:none}` stops the blink on the open eyes
+    for el, bn in BLINK_OPEN.items():
+        if LAB.style(mood, el).get("animation") == "none":
+            raw[(bn, "sy")] = const(D, 1.0)
+    # display + sweat's own animation
+    for el in VIS:
+        st = LAB.style(mood, el)
+        shown = 0.0 if st.get("display") == "none" else 1.0
+        a = _anim_of(st)
+        if a and a["name"] not in ("talk",):
+            pts = compile_anim(a, D, parse_transform(st.get("transform")), 1.0)
+            if "opacity" in pts:
+                raw[(el, "opacity")] = [(t, v * shown, e) for t, v, e in pts["opacity"]]
+            if "y" in pts:
+                for c in ("x", "y", "rot", "sx", "sy"):
+                    raw[(el, c)] = pts[c]
+            if "opacity" not in pts:
+                raw[(el, "opacity")] = const(D, shown)
+        else:
+            raw[(el, "opacity")] = const(D, shown)
+    return D, kind, raw
+
+
+def build_body():
+    """All 16 body animations (idle + 15 moods) with a common key set per node."""
+    specs = {m: body_mood(m, None) for m in ["default"] + L.MOODS}
+    union = {}
+    for D, kind, raw in specs.values():
+        for (node, c), pts in raw.items():
+            default_v = 1.0 if c in ("sx", "sy", "opacity") else 0.0
+            if any(abs(v - default_v) > 1e-9 for _, v, _ in pts):
+                union.setdefault(node, set()).add(c)
+    # sweat/other visibility always keyed; mood-layer nodes keep a fixed comp order
+    for el in VIS:
+        union.setdefault(el, set()).add("opacity")
+    order = ["x", "y", "rot", "sx", "sy", "opacity"]
+    anims = {}
+    for m, (D, kind, raw) in specs.items():
+        tracks = {}
+        for node, comps in union.items():
+            for c in order:
+                if c not in comps:
+                    continue
+                pts = raw.get((node, c))
+                if pts is None and node in ("breath", "blinkL", "blinkR"):
+                    continue  # ambient layers own these; only shock/sleep override them
+                if pts is None:
+                    pts = const(D, 1.0 if c in ("sx", "sy", "opacity") else 0.0)
+                put(tracks, node, c, pts)
+        anims[m] = {"D": D, "kind": kind, "tracks": tracks}
+    return anims, union
+
+
+# ---------------------------------------------------------------- ambient, talk
+def ambient():
+    out = {}
+    st = LAB.style("default", "breath")
+    a = parse_animation(st["animation"])
+    pts = compile_anim(a, a["dur"])
+    t = {}
+    put(t, "breath", "sx", pts["sx"])
+    put(t, "breath", "sy", pts["sy"])
+    out["breath"] = {"D": a["dur"], "kind": "loop", "tracks": t}
+    a = parse_animation(LAB.style("default", "tail")["animation"])
+    pts = compile_anim(a, a["dur"])
+    t = {}
+    put(t, "tail", "rot", pts["rot"])
+    out["tail"] = {"D": a["dur"], "kind": "loop", "tracks": t}
+    a = parse_animation(LAB.style("default", "eyeL")["animation"])
+    pts = compile_anim(a, a["dur"])
+    t = {}
+    for bn in ("blinkL", "blinkR", "blinkHappyL", "blinkHappyR"):
+        put(t, bn, "sy", pts["sy"])
+    out["blink"] = {"D": a["dur"], "kind": "loop", "tracks": t}
+    a = parse_animation(LAB.style("default", "jaw")["animation"])
+    pts = compile_anim(a, a["dur"])
+    t = {}
+    put(t, "jaw", "rot", pts["rot"])
+    out["talk"] = {"D": a["dur"], "kind": "loop", "tracks": t}
+    return out
