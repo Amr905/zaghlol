@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/theme_mode_provider.dart';
 
+const String _systemIsDarkMethod = 'systemIsDark';
+
 const MethodChannel launchThemeChannel = MethodChannel('zaghlol/launch_theme');
 
 /// The wire value for [mode]: exactly `light`, `dark` or `system`.
@@ -49,7 +51,7 @@ class SystemIsDark extends Notifier<bool?> {
   @override
   bool? build() {
     launchThemeChannel.setMethodCallHandler((call) async {
-      if (call.method == 'systemIsDark' && call.arguments is bool) {
+      if (call.method == _systemIsDarkMethod && call.arguments is bool) {
         state = call.arguments as bool;
       }
       return null;
@@ -57,7 +59,9 @@ class SystemIsDark extends Notifier<bool?> {
     ref.onDispose(() => launchThemeChannel.setMethodCallHandler(null));
     Future<void>(() async {
       try {
-        final v = await launchThemeChannel.invokeMethod<bool>('systemIsDark');
+        final v = await launchThemeChannel.invokeMethod<bool>(
+          _systemIsDarkMethod,
+        );
         if (v != null && ref.mounted) state = v;
       } on PlatformException {
         // Follow platformBrightness.
