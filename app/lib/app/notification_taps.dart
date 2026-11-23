@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/l10n/date_format.dart';
-import '../core/l10n/locale_providers.dart';
 import '../core/l10n/generated/app_localizations.dart';
+import '../core/l10n/locale_providers.dart';
 import '../core/routing/app_router.dart';
 import '../core/routing/app_routes.dart';
 
