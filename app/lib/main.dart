@@ -15,6 +15,7 @@ import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
 import 'core/logging/diag_code.dart';
+import 'core/platform/launch_theme.dart';
 import 'core/logging/diag_error_handlers.dart';
 import 'core/logging/diag_logger.dart';
 import 'core/logging/early_error_handlers.dart';
@@ -235,6 +236,10 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     ref.watch(pendingAlertsWatcherProvider); // FU-267
     // T-118: the home-screen widget follows the cycle overview.
     ref.watch(widgetBridgeWiringProvider);
+    // T-224: native reads the theme choice before the first frame.
+    ref.listen(appThemeModeProvider, (_, mode) {
+      ref.read(launchThemeWriterProvider)(mode);
+    }, fireImmediately: true);
     return ZaghlolApp(
       locale: ref.watch(appLocaleProvider),
       themeMode: ref.watch(appThemeModeProvider),
