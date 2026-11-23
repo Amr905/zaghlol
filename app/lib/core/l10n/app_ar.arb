@@ -9335,6 +9335,14 @@
   "@privacyContributeSentence": {
     "description": "S · one-sentence explanation (FR-CAT-09)"
   },
+  "voiceOnlineConsentLabel": "استخدم التعرّف على الصوت أونلاين من تليفونك",
+  "@voiceOnlineConsentLabel": {
+    "description": "L · toggle in Privacy, off until allowed (D-42)"
+  },
+  "voiceOnlineConsentSentence": "بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول.",
+  "@voiceOnlineConsentSentence": {
+    "description": "S · one-sentence explanation (D-42, INT-07)"
+  },
   "privacyContributeInfoTitle": "بالظبط إيه اللي بيتبعت؟",
   "@privacyContributeInfoTitle": {
     "description": "T · ⓘ sheet"

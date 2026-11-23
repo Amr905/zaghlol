@@ -2644,6 +2644,8 @@ Each money alert has a full text and a `…Hidden` text used when "hide amounts"
 |---|---|---|---|
 | `privacy_contribute_label` | ساعد في تحسين قايمة التجار | Help improve the merchant list | L · toggle, off by default |
 | `privacy_contribute_sentence` | لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس. | If you turn it on, we send only the merchant name and the category you chose. | S · one-sentence explanation (FR-CAT-09) |
+| `voiceOnlineConsent_label` | استخدم التعرّف على الصوت أونلاين من تليفونك | Use the phone's online speech recognition | L · toggle in Privacy, off until allowed (D-42) |
+| `voiceOnlineConsent_sentence` | بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول. | Only when your phone can't do it offline. The audio goes to Google or Apple, never to Zaghlol. | S · one-sentence explanation (D-42, INT-07) |
 | `privacy_contribute_infoTitle` | بالظبط إيه اللي بيتبعت؟ | What exactly is sent? | T · ⓘ sheet |
 | `privacy_contribute_sends` | بنبعت: اسم التاجر بعد تنضيفه، وكود البنك، والتصنيف اللي اخترته. | We send: the cleaned-up merchant name, the bank code and the category you chose. | E |
 | `privacy_contribute_neverSends` | مبنبعتش: مبالغ، ولا تواريخ، ولا أرقام كروت، ولا أرقام تليفونات، ولا حسابات إنستاباي، ولا أسماء ناس. | We never send: amounts, dates, card numbers, phone numbers, InstaPay addresses or people's names. | E |

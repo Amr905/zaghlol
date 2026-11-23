@@ -2,6 +2,7 @@
 // the monthly limit, on-device-first with consent, ar/en, text scale 1.3.
 
 import 'package:flutter/material.dart';
+import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
@@ -256,6 +257,41 @@ void main() {
     await t.pumpAndSettle();
     expect(speech.onDeviceCalls, [false], reason: 'exactly one online start');
     expect(find.text('Tell me what you paid'), findsOneWidget);
+  });
+
+  testWidgets('T-214: Allow is remembered; the next entry skips the sheet', (
+    t,
+  ) async {
+    final r = VoiceRig(speech: FakeSpeech(onDeviceSupported: false));
+    await r.pump(t);
+    await t.tap(find.byKey(const ValueKey('voice-consent-allow')));
+    await t.pumpAndSettle();
+    expect(await r.repo.get(Settings.voiceOnlineConsent), isTrue);
+    // A second entry with the consent stored: no sheet, listens at once.
+    await t.pumpWidget(const SizedBox());
+    final r2 = VoiceRig(speech: FakeSpeech(onDeviceSupported: false));
+    await r2.repo.set(Settings.voiceOnlineConsent, true);
+    await r2.pump(t);
+    expect(find.text('Use online speech recognition?'), findsNothing);
+    expect(r2.speech.onDeviceCalls, [false]);
+    expect(find.text('Tell me what you paid'), findsOneWidget);
+  });
+
+  testWidgets('T-214: Not now stores nothing', (t) async {
+    final r = VoiceRig(speech: FakeSpeech(onDeviceSupported: false));
+    await r.pump(t);
+    await t.tap(find.byKey(const ValueKey('voice-consent-deny')));
+    await t.pumpAndSettle();
+    expect(await r.repo.get(Settings.voiceOnlineConsent), isFalse);
+  });
+
+  testWidgets('T-214: stored consent, on-device now supported: on-device', (
+    t,
+  ) async {
+    final r = VoiceRig();
+    await r.repo.set(Settings.voiceOnlineConsent, true);
+    await r.pump(t);
+    expect(r.speech.onDeviceCalls, [true]);
   });
 
   testWidgets('on-device supported: starts on-device without consent', (

@@ -219,6 +219,13 @@ abstract final class Settings {
     byDefault: false,
   );
 
+  /// T-214 (D-42): the user allowed the OS online speech recognizer; asked
+  /// once, revocable in Settings > Privacy. Off until allowed.
+  static final voiceOnlineConsent = SettingKey.boolean(
+    'voice.online_consent',
+    byDefault: false,
+  );
+
   /// A-11: 6 months, up to 24.
   static final scanDepthMonths = SettingKey.integer(
     'scan_depth_months',

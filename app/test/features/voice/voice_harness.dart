@@ -1,6 +1,7 @@
 // T-120: fakes and pump helper for the S-31 tests. Synthetic data only.
 
 import 'package:flutter/material.dart';
+import 'package:zaghlol/core/settings/setting_key.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -171,8 +172,12 @@ class VoiceRig {
   int paywall = 0;
   int settings = 0;
 
+  /// In-memory settings, so the remembered consent (T-214) can be checked.
+  final hide = HideAmountsHarness();
+  late final repo = _RigRepo(hide);
+
   List<Override> get overrides => [
-    ...amountsShown(),
+    ...hide.overrides,
     speechPortProvider.overrideWithValue(speech),
     voiceInterpreterProvider.overrideWith((ref) async => TestInterpreter()),
     voiceUsageProvider.overrideWith((ref) async => usage),
@@ -242,4 +247,13 @@ class VoiceRig {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
   }
+}
+
+/// Reads and writes the rig's fake settings (see HideAmountsHarness).
+class _RigRepo {
+  _RigRepo(this._h);
+  final HideAmountsHarness _h;
+  Future<T> get<T>(SettingKey<T> k) async =>
+      _h.writes.containsKey(k.name) ? _h.writes[k.name] as T : k.defaultValue;
+  Future<void> set<T>(SettingKey<T> k, T v) async => _h.writes[k.name] = v;
 }

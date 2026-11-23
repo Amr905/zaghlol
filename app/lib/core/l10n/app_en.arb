@@ -6232,6 +6232,14 @@
   "@privacyContributeSentence": {
     "description": "S · one-sentence explanation (FR-CAT-09)"
   },
+  "voiceOnlineConsentLabel": "Use the phone's online speech recognition",
+  "@voiceOnlineConsentLabel": {
+    "description": "L · toggle in Privacy, off until allowed (D-42)"
+  },
+  "voiceOnlineConsentSentence": "Only when your phone can't do it offline. The audio goes to Google or Apple, never to Zaghlol.",
+  "@voiceOnlineConsentSentence": {
+    "description": "S · one-sentence explanation (D-42, INT-07)"
+  },
   "privacyContributeInfoTitle": "What exactly is sent?",
   "@privacyContributeInfoTitle": {
     "description": "T · ⓘ sheet"

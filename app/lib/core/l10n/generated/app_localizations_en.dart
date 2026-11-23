@@ -6703,6 +6703,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you turn it on, we send only the merchant name and the category you chose.';
 
   @override
+  String get voiceOnlineConsentLabel =>
+      'Use the phone\'s online speech recognition';
+
+  @override
+  String get voiceOnlineConsentSentence =>
+      'Only when your phone can\'t do it offline. The audio goes to Google or Apple, never to Zaghlol.';
+
+  @override
   String get privacyContributeInfoTitle => 'What exactly is sent?';
 
   @override
