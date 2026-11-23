@@ -21,6 +21,7 @@ class NotificationPresenter(private val context: Context) {
   private val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
   private val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
   private val pending = FilePendingIds(context)
+  private val book = ScheduleBook(FileScheduleStore(context))
 
   fun ensureChannels(channels: List<Pair<String, String>>) {
     for ((id, name) in channels) {
@@ -35,10 +36,19 @@ class NotificationPresenter(private val context: Context) {
   fun show(m: Map<String, Any?>) {
     nm.notify(m.id(), build(context, m))
     pending.remove(m.id())
+    book.remove(m.id())
   }
 
-  /** Inexact on purpose: no SCHEDULE_EXACT_ALARM permission. Lost at reboot. */
+  /** Inexact on purpose: no SCHEDULE_EXACT_ALARM permission. Re-armed after reboot (T-230). */
   fun schedule(m: Map<String, Any?>, atEpochMs: Long) {
+    arm(m, atEpochMs)
+    book.add(ScheduledAlert(atEpochMs, m.filterValues { it is String || it is Int }))
+  }
+
+  /** T-230: BOOT_COMPLETED. Future alerts re-armed; past-due dropped. */
+  fun rearmAfterBoot(nowMs: Long): Int = book.rearm(nowMs) { m, at -> arm(m, at) }
+
+  private fun arm(m: Map<String, Any?>, atEpochMs: Long) {
     val intent = Intent(context, NotificationAlarmReceiver::class.java).setPackage(context.packageName)
     for ((k, v) in m) if (v is String) intent.putExtra(k, v) else if (v is Int) intent.putExtra(k, v)
     val pi =
@@ -55,6 +65,7 @@ class NotificationPresenter(private val context: Context) {
   fun cancelAll() {
     nm.cancelAll()
     cancelScheduled()
+    book.clear()
   }
 
   /** T-228: one id, shown or scheduled. Unknown ids do nothing. */
@@ -72,6 +83,7 @@ class NotificationPresenter(private val context: Context) {
       pi.cancel()
     }
     pending.remove(id)
+    book.remove(id)
   }
 
   /** FU-267: only the alarms that have not fired; what is already shown stays. */
@@ -90,6 +102,7 @@ class NotificationPresenter(private val context: Context) {
       }
     }
     pending.clear()
+    book.clear()
   }
 
   companion object {
