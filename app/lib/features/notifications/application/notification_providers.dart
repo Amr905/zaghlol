@@ -35,6 +35,7 @@ import '../domain/notification_types.dart';
 import '../domain/quiet_hours.dart';
 import 'backup_alert_sink.dart';
 import 'duplicate_charge_alerts.dart';
+import 'weekly_nudge.dart';
 import 'weekly_summary_alert.dart';
 
 /// Shows and schedules platform notifications. Default: drops them (tests and
@@ -126,6 +127,9 @@ final class _SilentGateway implements NotificationGateway {
 
   @override
   Future<void> cancelScheduled() async {}
+
+  @override
+  Future<void> cancel(int id) async {}
 }
 
 /// The strings of the language shown now (the setting, else the device).
@@ -380,6 +384,11 @@ final weeklySummaryRunProvider = Provider<Future<bool> Function()>((ref) {
       // The category names are read when the alert is built: rebuild it so a
       // rename since the last run shows.
       ref.invalidate(weeklySummaryAlertProvider);
+      // T-228: the real summary replaces today's scheduled nudge.
+      await cancelWeeklyNudge(
+        await ref.read(notificationServiceProvider.future),
+        today,
+      );
       final alert = await ref.read(weeklySummaryAlertProvider.future);
       await alert.run(today);
       await settings.set(
@@ -393,11 +402,37 @@ final weeklySummaryRunProvider = Provider<Future<bool> Function()>((ref) {
   };
 }, name: 'weeklySummaryRunProvider');
 
-/// Called at start and on resume: the weekly summary when due, and the
-/// duplicate check (catches what the headless engine stored meanwhile).
+/// T-228: schedules the generic weekly nudge for the next Friday (see
+/// `weekly_nudge.dart`), in the current language. Best effort.
+final weeklyNudgeProvider = Provider<Future<void> Function()>((ref) {
+  return () async {
+    try {
+      final service = await ref.read(notificationServiceProvider.future);
+      final now = ref.read(clockProvider)().toUtc();
+      final today = localToday(
+        now.millisecondsSinceEpoch,
+        ref.read(localZoneProvider),
+      );
+      final l = notificationL10n(ref);
+      await scheduleWeeklyNudge(
+        notifications: service,
+        today: today,
+        title: l.notificationsAlertWeeklyTitle,
+        body: l.notificationsAlertWeeklyHidden,
+      );
+    } on Object {
+      // Best effort; the next start or resume tries again.
+    }
+  };
+}, name: 'weeklyNudgeProvider');
+
+/// Called at start and on resume: the weekly summary when due, the next
+/// Friday's nudge, and the duplicate check (catches what the headless engine
+/// stored meanwhile).
 final alertsResumeProvider = Provider<Future<void> Function()>((ref) {
   return () async {
     await ref.read(duplicateCheckProvider)();
     await ref.read(weeklySummaryRunProvider)();
+    await ref.read(weeklyNudgeProvider)();
   };
 }, name: 'alertsResumeProvider');

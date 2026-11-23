@@ -35,6 +35,9 @@ class _Gw implements NotificationGateway {
   Future<void> cancelScheduled() async {
     cancels++;
   }
+
+  @override
+  Future<void> cancel(int id) async {}
 }
 
 void main() {

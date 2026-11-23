@@ -87,6 +87,11 @@ abstract class NotificationsHostApi {
   /// never rebuilds a notification (it has no text to redact).
   void cancelScheduled();
 
+  /// T-228: cancels one notification by id, shown or scheduled (a paid
+  /// bill's reminder, a weekly nudge replaced by the real summary). Unknown
+  /// ids are ignored.
+  void cancel(int id);
+
   /// The route of the notification that launched the app, once.
   String? takeLaunchRoute();
 

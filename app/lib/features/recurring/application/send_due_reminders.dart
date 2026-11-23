@@ -48,3 +48,38 @@ Future<int> sendDueReminders({
   }
   return sent;
 }
+
+/// Overdue thresholds [sendDueReminders] uses (day 1 and day 3), plus 0 for
+/// the "coming up" reminder.
+const reminderThresholds = [0, 1, 3];
+
+/// T-228 (FU-258 #4): the item's occurrence due on [dueIso] was paid (by hand,
+/// from the notification action or by a matching payment): drops the
+/// reminders for exactly that item and date, shown or still scheduled (for
+/// example held back by quiet hours). Reminders of other items or of the next
+/// due date are untouched; the next one is scheduled by the normal run.
+Future<void> cancelPaidReminders(
+  NotificationService notifications, {
+  required String itemId,
+  required String dueIso,
+}) => notifications.cancelAlerts(
+  type: NotificationType.upcomingDue,
+  subjectId: itemId,
+  periodKey: dueIso,
+  thresholds: reminderThresholds,
+);
+
+/// T-228: [cancelPaidReminders] for every occurrence a matching payment paid
+/// (the `autoMarkPaid` result).
+Future<void> cancelRemindersForMarks(
+  NotificationService notifications,
+  Iterable<PaidMark> marks,
+) async {
+  for (final m in marks) {
+    await cancelPaidReminders(
+      notifications,
+      itemId: m.itemId,
+      dueIso: m.dueDate.toIso(),
+    );
+  }
+}

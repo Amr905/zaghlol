@@ -106,6 +106,12 @@ final class NotificationsHost: NotificationsHostApi {
     center.removeAllPendingNotificationRequests()
   }
 
+  /// T-228: one id, pending or delivered. Unknown ids are ignored.
+  func cancel(id: Int64) throws {
+    center.removePendingNotificationRequests(withIdentifiers: [String(id)])
+    center.removeDeliveredNotifications(withIdentifiers: [String(id)])
+  }
+
   func takeLaunchRoute() throws -> String? {
     NotificationsHost.lock.lock()
     defer { NotificationsHost.lock.unlock() }

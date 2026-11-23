@@ -371,6 +371,10 @@ protocol NotificationsHostApi {
   /// "hide amounts" setting, so no stale alert keeps its amount. Native code
   /// never rebuilds a notification (it has no text to redact).
   func cancelScheduled() throws
+  /// T-228: cancels one notification by id, shown or scheduled (a paid
+  /// bill's reminder, a weekly nudge replaced by the real summary). Unknown
+  /// ids are ignored.
+  func cancel(id: Int64) throws
   /// The route of the notification that launched the app, once.
   func takeLaunchRoute() throws -> String?
   /// Opens the system notification settings of this app (Android: the app's
@@ -499,6 +503,24 @@ class NotificationsHostApiSetup {
       }
     } else {
       cancelScheduledChannel.setMessageHandler(nil)
+    }
+    /// T-228: cancels one notification by id, shown or scheduled (a paid
+    /// bill's reminder, a weekly nudge replaced by the real summary). Unknown
+    /// ids are ignored.
+    let cancelChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.NotificationsHostApi.cancel\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      cancelChannel.setMessageHandler { message, reply in
+        let args = message as! [Any?]
+        let idArg = args[0] as! Int64
+        do {
+          try api.cancel(id: idArg)
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      cancelChannel.setMessageHandler(nil)
     }
     /// The route of the notification that launched the app, once.
     let takeLaunchRouteChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.zaghlol.NotificationsHostApi.takeLaunchRoute\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)

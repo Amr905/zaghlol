@@ -10,6 +10,9 @@ import '../../../core/db/app_database.dart';
 import '../../budget/application/budget_providers.dart' show todayProvider;
 import '../../transactions/data/transactions_providers.dart'
     show idGeneratorProvider;
+import '../../notifications/application/notification_providers.dart'
+    show notificationServiceProvider;
+import '../application/send_due_reminders.dart';
 import '../data/recurring_repository.dart';
 import 'bills_view.dart';
 
@@ -116,7 +119,21 @@ class BillsActions {
   }
 
   Future<bool> markPaid(String id, {String? expectedDue}) async {
-    final ok = await (await _repo).markPaidManual(id, expectedDue: expectedDue);
+    final repo = await _repo;
+    final due = expectedDue ?? await repo.nextDueDateOf(id);
+    final ok = await repo.markPaidManual(id, expectedDue: expectedDue);
+    if (ok && due != null) {
+      // T-228: the paid date's reminders are stale now. Best effort.
+      try {
+        await cancelPaidReminders(
+          await _ref.read(notificationServiceProvider.future),
+          itemId: id,
+          dueIso: due,
+        );
+      } on Object {
+        // The reminder is stale, not harmful.
+      }
+    }
     _changed();
     return ok;
   }

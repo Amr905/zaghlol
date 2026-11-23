@@ -311,6 +311,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-225](tasks/T-225.md) | Supply-chain pins and narrower secret-scan allowlists | FU | Medium | Sonnet | backend-engineer | — | B | 62 | TODO |
 | [T-226](tasks/T-226.md) | Old follow-up triage FU-233..FU-237 | FU | Medium | Sonnet | flutter-core-engineer | — | G | 62 | TODO |
 | [T-227](tasks/T-227.md) | Old follow-up triage FU-238..240, 248, 249, 258 | FU | Medium | Sonnet | flutter-core-engineer | — | G | 62 | TODO |
+| [T-228](tasks/T-228.md) | Notifications: cancel paid bill reminder, Friday summary, safer action intents | FU-258 | High | Sonnet | native-platform-engineer | — | D | 62 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

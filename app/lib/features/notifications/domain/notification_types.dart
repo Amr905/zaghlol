@@ -112,6 +112,9 @@ abstract interface class NotificationGateway {
   /// FU-267: drops what is scheduled for later; what is shown stays. The
   /// caller schedules again with text for the current "hide amounts" setting.
   Future<void> cancelScheduled();
+
+  /// T-228: drops one notification by id, shown or scheduled.
+  Future<void> cancel(int id);
 }
 
 /// The notification permission (POST_NOTIFICATIONS on Android 13+, the iOS

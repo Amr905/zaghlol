@@ -844,7 +844,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-257** (batch 37): see the batch-37 report and Lead delta checks.
 
-- **FU-258** (batch 38, triaged batch 62 by T-227): #2 (mark-paid while locked) CLOSED: `payAfterGate` now waits for unlock and asks for confirmation, so the press is no longer lost. OPEN: #1 non-exported trampoline or nonce (Kotlin, `MainActivity.kt`; sec Low), #3 weekly summary as a Friday alarm (needs native scheduling), #4 cancel the scheduled reminder when the bill is paid (gateway change). All three are larger than a small fix.
+- **FU-258** (batch 38; triaged and FIXED in batch 62): #1 action intents CLOSED (non-exported `NotificationTapActivity` + per-process token, L-1); #2 mark-paid while locked CLOSED (`payAfterGate` waits for unlock and confirms); #3 weekly summary: an amount-free Friday 10:00 nudge is scheduled at every app run and replaced by the real summary (T-228; lost after a reboot until the app runs); #4 marking a bill paid (app, notification, captured payment) cancels that due date's reminders via `cancel(id)` (T-228). Phone check pending.
 
 - **FU-259** (batch 40): minors in [batch-40](05-reviews/batch-40.md): GoldAPI per-karat vs ounce check and a doc link; narrow the deploy SA's IAM-admin role and limit prod deploys to main; the public dry-run AAB includes the R8 mapping; app-store-privacy.md out of date after the iOS fixes; "رفاهيات" for "wants".
 
