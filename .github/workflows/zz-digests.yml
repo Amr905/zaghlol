@@ -1,0 +1,15 @@
+name: zz-digests (temporary, not merged)
+on:
+  push:
+    branches: ['ci/digests']
+permissions:
+  contents: read
+jobs:
+  digests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for i in prom/prometheus:v3.5.0 ghcr.io/aquasecurity/trivy:0.58.1 rhysd/actionlint:1.7.7 caddy:2.10 prom/alertmanager:v0.28.1; do
+            d=$(docker buildx imagetools inspect "$i" --format '{{json .Manifest.Digest}}' | tr -d '"')
+            echo "DIGEST $i $d"
+          done
