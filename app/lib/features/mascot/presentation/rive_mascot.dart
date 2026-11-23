@@ -38,6 +38,45 @@ Future<rive.File> _loadSharedFile() => _sharedFile ??= () async {
   }
 }();
 
+/// FU-287: what the Rive mascots did, so an on-device test can tell "playing"
+/// from "fell back to the still". Counters only; nothing is logged.
+abstract final class RiveMascotProbe {
+  /// Controllers created (the file decoded and the state machine found).
+  static int loaded = 0;
+
+  /// Loads that threw (native runtime, decode, artboard or state machine).
+  static int failedToLoad = 0;
+
+  /// Paint-time exceptions that sent a mascot back to the still.
+  static int paintFailed = 0;
+
+  /// T-232: names the state machine reports as its layers change state (the
+  /// animation names, `mood03_detective`, `fx09_saved`, `talkOn`...). The
+  /// device test checks that every state value reaches its animation.
+  static final List<String> stateNames = <String>[];
+
+  /// Off in the app: only the on-device test turns state recording on, so
+  /// the looping layers never grow a list in production.
+  static bool recordStates = false;
+
+  /// Upper bound on [stateNames] even when recording.
+  static const int maxStateNames = 500;
+
+  @visibleForTesting
+  static void recordState(String name) {
+    if (stateNames.length >= maxStateNames) stateNames.removeAt(0);
+    stateNames.add(name);
+  }
+
+  static void reset() {
+    recordStates = false;
+    loaded = 0;
+    failedToLoad = 0;
+    paintFailed = 0;
+    stateNames.clear();
+  }
+}
+
 /// Test hook: forgets the shared file.
 void resetSharedRiveFileForTest() => _sharedFile = null;
 
@@ -87,6 +126,7 @@ class RiveMascot extends ZaghlolMascot {
 
 class _RiveMascotState extends State<RiveMascot> {
   rive.RiveWidgetController? _controller;
+  rive.CallbackHandler? _stateHandle;
   bool _failed = false;
 
   @override
@@ -109,11 +149,18 @@ class _RiveMascotState extends State<RiveMascot> {
         controller.dispose();
         return;
       }
+      RiveMascotProbe.loaded++;
+      if (RiveMascotProbe.recordStates) {
+        _stateHandle = controller.stateMachine.onStateChanged(
+          RiveMascotProbe.recordState,
+        );
+      }
       setState(() {
         _controller = controller;
       });
       _push();
     } catch (_) {
+      RiveMascotProbe.failedToLoad++;
       if (mounted) setState(() => _failed = true);
     }
   }
@@ -125,7 +172,7 @@ class _RiveMascotState extends State<RiveMascot> {
   }
 
   // Legacy state machine inputs: stable and enough for one number + two flags.
-  // ignore_for_file: deprecated_member_use
+  // ignore_for_file: deprecated_member_use, invalid_use_of_internal_member
   void _push() {
     final sm = _controller?.stateMachine;
     if (sm == null) return;
@@ -136,6 +183,7 @@ class _RiveMascotState extends State<RiveMascot> {
 
   @override
   void dispose() {
+    _stateHandle?.dispose();
     _controller?.dispose();
     super.dispose();
   }
@@ -154,6 +202,7 @@ class _RiveMascotState extends State<RiveMascot> {
     }
     return _PaintGuard(
       onError: () {
+        RiveMascotProbe.paintFailed++;
         if (mounted) setState(() => _failed = true);
       },
       child: rive.RiveWidget(controller: c, fit: rive.Fit.contain),

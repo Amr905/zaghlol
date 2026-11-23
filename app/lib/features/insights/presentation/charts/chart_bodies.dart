@@ -587,33 +587,57 @@ class _DonutBodyState extends ConsumerState<DonutBody> {
             constraints: const BoxConstraints(minHeight: 36),
             child: Opacity(
               opacity: selected == null || selected == i ? 1 : 0.55,
-              child: Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: colorOf(i),
-                      borderRadius: BorderRadius.circular(ZRadius.sm / 2),
-                    ),
-                  ),
-                  const SizedBox(width: ZSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ZType.bodySmall.copyWith(color: c.text),
-                    ),
-                  ),
-                  const SizedBox(width: ZSpacing.xs),
-                  ZMoneyText(text: amount, size: ZMoneySize.caption),
-                  const SizedBox(width: ZSpacing.sm),
-                  Text(
-                    percent,
-                    style: ZType.caption.copyWith(color: c.textMuted),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final rowWidth = box.maxWidth.isFinite ? box.maxWidth : 200.0;
+                  return Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: colorOf(i),
+                          borderRadius: BorderRadius.circular(ZRadius.sm / 2),
+                        ),
+                      ),
+                      const SizedBox(width: ZSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ZType.bodySmall.copyWith(color: c.text),
+                        ),
+                      ),
+                      const SizedBox(width: ZSpacing.xs),
+                      // T-231: scales down instead of overflowing the row when
+                      // amount and share are wide (found on the emulator).
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: rowWidth * 0.7),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ZMoneyText(
+                                text: amount,
+                                size: ZMoneySize.caption,
+                              ),
+                              const SizedBox(width: ZSpacing.sm),
+                              Text(
+                                percent,
+                                style: ZType.caption.copyWith(
+                                  color: c.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),

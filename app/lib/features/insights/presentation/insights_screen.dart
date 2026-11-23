@@ -64,7 +64,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(children: [HomeCardFilterChip()]),
+                  // T-231: Flexible, so a long single-card name ellipsizes instead of
+                  // overflowing the row (found on the emulator).
+                  const Row(children: [Flexible(child: HomeCardFilterChip())]),
                   Row(
                     children: [
                       Expanded(

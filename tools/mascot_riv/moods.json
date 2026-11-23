@@ -1,541 +1,305 @@
 {
  "animations": [
   {
-   "duration": 4.8,
-   "loop": "loop",
-   "name": "idle",
-   "probes": [
-    {
-     "extreme": 0.1,
-     "mag": 90.0,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 3.7600000000000002
-    },
-    {
-     "extreme": 0.1,
-     "mag": 90.0,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 3.7600000000000002
-    },
-    {
-     "extreme": 1.014,
-     "mag": 1.4000000000000012,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 1.2
-    }
-   ]
+   "D": 3.0,
+   "kind": "loop",
+   "layer": "breath",
+   "name": "breathe",
+   "state": null
   },
   {
-   "duration": 1.6,
-   "loop": "oneShot",
+   "D": 2.6,
+   "kind": "loop",
+   "layer": "tail",
+   "name": "wag",
+   "state": null
+  },
+  {
+   "D": 4.2,
+   "kind": "loop",
+   "layer": "blink",
+   "name": "blink",
+   "state": null
+  },
+  {
+   "D": 1.0,
+   "kind": "loop",
+   "layer": "moods",
+   "name": "idle",
+   "state": null
+  },
+  {
+   "D": 1.8166666666666667,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood00_tourGuide",
-   "probes": [
-    {
-     "extreme": 0.3490658503988659,
-     "mag": 2.0,
-     "node": "wing",
-     "prop": "rotation",
-     "t": 0.2
-    },
-    {
-     "extreme": -146.25,
-     "mag": 0.6000000000000001,
-     "node": "browL",
-     "prop": "y",
-     "t": 0.25
-    },
-    {
-     "extreme": -132.65,
-     "mag": 0.6000000000000001,
-     "node": "browR",
-     "prop": "y",
-     "t": 0.25
-    }
-   ],
    "state": 0
   },
   {
-   "duration": 0.9,
-   "loop": "oneShot",
+   "D": 1.2166666666666666,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood01_proud",
-   "probes": [
-    {
-     "extreme": 1.06,
-     "mag": 6.000000000000005,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.25
-    },
-    {
-     "extreme": 1.05,
-     "mag": 5.000000000000004,
-     "node": "character",
-     "prop": "scaleX",
-     "t": 0.25
-    },
-    {
-     "extreme": 908.5,
-     "mag": 1.4000000000000001,
-     "node": "character",
-     "prop": "y",
-     "t": 0.25
-    }
-   ],
    "state": 1
   },
   {
-   "duration": 1.1,
-   "loop": "oneShot",
+   "D": 1.0166666666666666,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood02_shocked",
-   "probes": [
-    {
-     "extreme": 1.35,
-     "mag": 35.00000000000001,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 0.15
-    },
-    {
-     "extreme": 1.35,
-     "mag": 35.00000000000001,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 0.15
-    },
-    {
-     "extreme": 1.2,
-     "mag": 19.999999999999996,
-     "node": "eyeL",
-     "prop": "scaleX",
-     "t": 0.15
-    }
-   ],
    "state": 2
   },
   {
-   "duration": 2.0,
-   "loop": "oneShot",
+   "D": 2.0166666666666666,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood03_detective",
-   "probes": [
-    {
-     "extreme": 0.8,
-     "mag": 19.999999999999996,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 0.3
-    },
-    {
-     "extreme": 0.8,
-     "mag": 19.999999999999996,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 0.3
-    },
-    {
-     "extreme": -26.75,
-     "mag": 1.4000000000000001,
-     "node": "face",
-     "prop": "x",
-     "t": 0.4
-    }
-   ],
    "state": 3
   },
   {
-   "duration": 1.4,
-   "loop": "oneShot",
+   "D": 1.6166666666666667,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood04_professor",
-   "probes": [
-    {
-     "extreme": -534.0,
-     "mag": 1.0,
-     "node": "face",
-     "prop": "y",
-     "t": 0.2
-    },
-    {
-     "extreme": 0.17453292519943295,
-     "mag": 1.0,
-     "node": "wing",
-     "prop": "rotation",
-     "t": 0.4
-    },
-    {
-     "extreme": -148.25,
-     "mag": 0.8,
-     "node": "browL",
-     "prop": "y",
-     "t": 0.2
-    }
-   ],
    "state": 4
   },
   {
-   "duration": 3.0,
-   "loop": "loop",
+   "D": 1.2,
+   "kind": "loop",
+   "layer": "moods",
    "name": "mood05_listening",
-   "probes": [
-    {
-     "extreme": 1.12,
-     "mag": 12.00000000000001,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 1.2
-    },
-    {
-     "extreme": 1.12,
-     "mag": 12.00000000000001,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 1.2
-    },
-    {
-     "extreme": -0.12217304763960307,
-     "mag": 0.7000000000000001,
-     "node": "face",
-     "prop": "rotation",
-     "t": 1.2
-    }
-   ],
    "state": 5
   },
   {
-   "duration": 2.4,
-   "loop": "loop",
+   "D": 2.4,
+   "kind": "loop",
+   "layer": "moods",
    "name": "mood06_thinking",
-   "probes": [
-    {
-     "extreme": 0.1,
-     "mag": 90.0,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 1.17
-    },
-    {
-     "extreme": 0.1,
-     "mag": 90.0,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 1.17
-    },
-    {
-     "extreme": -138.65,
-     "mag": 1.2000000000000002,
-     "node": "browR",
-     "prop": "y",
-     "t": 0.5
-    }
-   ],
    "state": 6
   },
   {
-   "duration": 2.0,
-   "loop": "loop",
+   "D": 2.0,
+   "kind": "loop",
+   "layer": "moods",
    "name": "mood07_scanning",
-   "probes": [
-    {
-     "extreme": 0.85,
-     "mag": 15.000000000000002,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 0.3
-    },
-    {
-     "extreme": 0.85,
-     "mag": 15.000000000000002,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 0.3
-    },
-    {
-     "extreme": -28.75,
-     "mag": 1.6,
-     "node": "face",
-     "prop": "x",
-     "t": 0.5
-    }
-   ],
    "state": 7
   },
   {
-   "duration": 1.2,
-   "loop": "loop",
+   "D": 0.6,
+   "kind": "loop",
+   "layer": "moods",
    "name": "mood08_counting",
-   "probes": [
-    {
-     "extreme": 0.99,
-     "mag": 1.0000000000000009,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.3
-    },
-    {
-     "extreme": -535.0,
-     "mag": 0.9,
-     "node": "face",
-     "prop": "y",
-     "t": 0.3
-    },
-    {
-     "extreme": 0.13962634015954636,
-     "mag": 0.8,
-     "node": "wing",
-     "prop": "rotation",
-     "t": 0.3
-    }
-   ],
    "state": 8
   },
   {
-   "duration": 0.9,
-   "loop": "oneShot",
+   "D": 0.9166666666666667,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood09_saved",
-   "probes": [
-    {
-     "extreme": 1.06,
-     "mag": 6.000000000000005,
-     "node": "character",
-     "prop": "scaleX",
-     "t": 0.65
-    },
-    {
-     "extreme": 0.94,
-     "mag": 6.000000000000005,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.65
-    },
-    {
-     "extreme": 877.5,
-     "mag": 4.5,
-     "node": "character",
-     "prop": "y",
-     "t": 0.35
-    }
-   ],
    "state": 9
   },
   {
-   "duration": 1.6,
-   "loop": "oneShot",
+   "D": 1.6166666666666667,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood10_payday",
-   "probes": [
-    {
-     "extreme": 1.15,
-     "mag": 14.999999999999991,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 0.2
-    },
-    {
-     "extreme": 1.15,
-     "mag": 14.999999999999991,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 0.2
-    },
-    {
-     "extreme": 0.93,
-     "mag": 6.999999999999995,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.5
-    }
-   ],
    "state": 10
   },
   {
-   "duration": 1.4,
-   "loop": "oneShot",
+   "D": 1.6166666666666667,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood11_oops",
-   "probes": [
-    {
-     "extreme": 0.4,
-     "mag": 60.0,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 0.12
-    },
-    {
-     "extreme": 0.4,
-     "mag": 60.0,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 0.12
-    },
-    {
-     "extreme": 0.95,
-     "mag": 5.000000000000004,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.15
-    }
-   ],
    "state": 11
   },
   {
-   "duration": 2.8,
-   "loop": "oneShot",
+   "D": 6.4,
+   "kind": "hold",
+   "layer": "moods",
    "name": "mood12_sleep",
-   "probes": [
-    {
-     "extreme": 0.08,
-     "mag": 92.0,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 0.4
-    },
-    {
-     "extreme": 0.08,
-     "mag": 92.0,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 0.4
-    },
-    {
-     "extreme": 1.03,
-     "mag": 3.0000000000000027,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.7
-    }
-   ],
    "state": 12
   },
   {
-   "duration": 0.4,
-   "loop": "hold",
+   "D": 1.4166666666666665,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood13_pull",
-   "probes": [
-    {
-     "extreme": 1.2,
-     "mag": 19.999999999999996,
-     "node": "eyeL",
-     "prop": "scaleY",
-     "t": 0.4
-    },
-    {
-     "extreme": 1.2,
-     "mag": 19.999999999999996,
-     "node": "eyeR",
-     "prop": "scaleY",
-     "t": 0.4
-    },
-    {
-     "extreme": 1.12,
-     "mag": 12.00000000000001,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.4
-    }
-   ],
    "state": 13
   },
   {
-   "duration": 0.8,
-   "loop": "oneShot",
+   "D": 0.8166666666666668,
+   "kind": "oneShot",
+   "layer": "moods",
    "name": "mood14_tap",
-   "probes": [
-    {
-     "extreme": -1,
-     "mag": 200.0,
-     "node": "character",
-     "prop": "scaleX",
-     "t": 0.4
-    },
-    {
-     "extreme": 0.88,
-     "mag": 12.0,
-     "node": "character",
-     "prop": "scaleY",
-     "t": 0.12
-    },
-    {
-     "extreme": 882.5,
-     "mag": 4.0,
-     "node": "character",
-     "prop": "y",
-     "t": 0.35
-    }
-   ],
    "state": 14
   },
   {
-   "duration": 0.5,
-   "loop": "loop",
+   "D": 1.0,
+   "kind": "loop",
+   "layer": "fx",
+   "name": "idleFx",
+   "state": null
+  },
+  {
+   "D": 1.6166666666666667,
+   "kind": "oneShot",
+   "layer": "fx",
+   "name": "fx04_professor",
+   "state": 4
+  },
+  {
+   "D": 1.8,
+   "kind": "loop",
+   "layer": "fx",
+   "name": "fx05_listening",
+   "state": 5
+  },
+  {
+   "D": 1.0,
+   "kind": "loop",
+   "layer": "fx",
+   "name": "fx06_thinking",
+   "state": 6
+  },
+  {
+   "D": 1.6,
+   "kind": "loop",
+   "layer": "fx",
+   "name": "fx07_scanning",
+   "state": 7
+  },
+  {
+   "D": 0.6,
+   "kind": "loop",
+   "layer": "fx",
+   "name": "fx08_counting",
+   "state": 8
+  },
+  {
+   "D": 1.413703864677033,
+   "kind": "oneShot",
+   "layer": "fx",
+   "name": "fx09_saved",
+   "state": 9
+  },
+  {
+   "D": 2.185263999008263,
+   "kind": "oneShot",
+   "layer": "fx",
+   "name": "fx10_payday",
+   "state": 10
+  },
+  {
+   "D": 1.6166666666666667,
+   "kind": "oneShot",
+   "layer": "fx",
+   "name": "fx11_oops",
+   "state": 11
+  },
+  {
+   "D": 6.4,
+   "kind": "oneShot",
+   "layer": "fx",
+   "name": "fx12_sleep",
+   "state": 12
+  },
+  {
+   "D": 0.34,
+   "kind": "loop",
+   "layer": "talk",
    "name": "talkOn",
-   "probes": [
-    {
-     "extreme": -0.24434609527920614,
-     "mag": 1.4000000000000001,
-     "node": "jaw",
-     "prop": "rotation",
-     "t": 0.12
-    },
-    {
-     "extreme": 0.08726646259971647,
-     "mag": 0.5,
-     "node": "beak",
-     "prop": "rotation",
-     "t": 0.12
-    },
-    {
-     "extreme": 0.03490658503988659,
-     "mag": 0.2,
-     "node": "cere",
-     "prop": "rotation",
-     "t": 0.12
-    }
-   ]
+   "state": null
+  },
+  {
+   "D": 1.0,
+   "kind": "loop",
+   "layer": "reduceMotion",
+   "name": "still",
+   "state": null
   }
  ],
+ "crop": {
+  "h": 1075.657894736842,
+  "w": 1021.875,
+  "x": -40.9375,
+  "y": -65.7730263157895
+ },
  "fps": 60,
- "rest": {
-  "beak": {
-   "rotation": 0.0
+ "states": [
+  {
+   "lab": "hello",
+   "name": "tourGuide",
+   "state": 0
   },
-  "browL": {
-   "rotation": 0.0,
-   "y": -140.25
+  {
+   "lab": "proud",
+   "name": "proud",
+   "state": 1
   },
-  "browR": {
-   "rotation": 0.0,
-   "y": -126.65
+  {
+   "lab": "shock",
+   "name": "shocked",
+   "state": 2
   },
-  "cere": {
-   "rotation": 0.0
+  {
+   "lab": "detect",
+   "name": "detective",
+   "state": 3
   },
-  "character": {
-   "rotation": 0.0,
-   "scaleX": 1.0,
-   "scaleY": 1.0,
-   "x": 496.75,
-   "y": 922.5
+  {
+   "lab": "explain",
+   "name": "professor",
+   "state": 4
   },
-  "eyeL": {
-   "scaleX": 1.0,
-   "scaleY": 1.0
+  {
+   "lab": "listen",
+   "name": "listening",
+   "state": 5
   },
-  "eyeR": {
-   "scaleX": 1.0,
-   "scaleY": 1.0
+  {
+   "lab": "think",
+   "name": "thinking",
+   "state": 6
   },
-  "face": {
-   "rotation": 0.0,
-   "x": -12.75,
-   "y": -544.0
+  {
+   "lab": "scan",
+   "name": "scanning",
+   "state": 7
   },
-  "jaw": {
-   "rotation": 0.0
+  {
+   "lab": "count",
+   "name": "counting",
+   "state": 8
   },
-  "tail": {
-   "rotation": 0.0
+  {
+   "lab": "saved",
+   "name": "saved",
+   "state": 9
   },
-  "wing": {
-   "rotation": 0.0
+  {
+   "lab": "payday",
+   "name": "payday",
+   "state": 10
+  },
+  {
+   "lab": "oops",
+   "name": "oops",
+   "state": 11
+  },
+  {
+   "lab": "sleep",
+   "name": "sleep",
+   "state": 12
+  },
+  {
+   "lab": "pull",
+   "name": "pull",
+   "state": 13
+  },
+  {
+   "lab": "tap",
+   "name": "tap",
+   "state": 14
   }
- }
+ ]
 }

@@ -11964,5 +11964,85 @@
         "type": "String"
       }
     }
+  },
+  "devMoodsRowTitle": "حالات زغلول",
+  "@devMoodsRowTitle": {
+    "description": "Dev only: settings About row and screen title"
+  },
+  "devMoodsRowSubtitle": "شوف كل حركات زغلول (نسخ التجربة)",
+  "@devMoodsRowSubtitle": {
+    "description": "Dev only: row subtitle"
+  },
+  "devMoodsHint": "دوس على أي حالة تشوفها. اللي بيتكرر هيفضل شغال لحد ما تختار غيره.",
+  "@devMoodsHint": {
+    "description": "Dev only: hint under the bird"
+  },
+  "devMoodsTalk": "بيتكلم",
+  "@devMoodsTalk": {
+    "description": "Dev only: talk switch"
+  },
+  "devMoodsReduceNote": "تقليل الحركة شغال، فزغلول واقف ثابت. اقفله علشان تشوف الحالات.",
+  "@devMoodsReduceNote": {
+    "description": "Dev only: shown when the OS or app reduce-motion setting is on"
+  },
+  "devMoodTourGuide": "أهلاً",
+  "@devMoodTourGuide": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodProud": "فخور",
+  "@devMoodProud": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodShocked": "مصدوم",
+  "@devMoodShocked": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodDetective": "مخبر",
+  "@devMoodDetective": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodProfessor": "أستاذ",
+  "@devMoodProfessor": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodListening": "سامعك",
+  "@devMoodListening": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodThinking": "بيفكر",
+  "@devMoodThinking": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodScanning": "بيقرا الرسايل",
+  "@devMoodScanning": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodCounting": "بيعدّ الفلوس",
+  "@devMoodCounting": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodSaved": "اتسجلت",
+  "@devMoodSaved": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodPayday": "المرتب نزل",
+  "@devMoodPayday": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodOops": "أوبس",
+  "@devMoodOops": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodSleep": "لسه مفيش حاجة",
+  "@devMoodSleep": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodPull": "اسحب للتحديث",
+  "@devMoodPull": {
+    "description": "Dev only: mood button"
+  },
+  "devMoodTap": "دوس على زغلول",
+  "@devMoodTap": {
+    "description": "Dev only: mood button"
   }
 }
