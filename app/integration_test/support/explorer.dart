@@ -29,6 +29,29 @@ final class ExplorerIssue {
   final String detail;
 }
 
+/// T-231: one expected finding, keyed by screen AND control (never a blanket
+/// ignore). [screen] matches the screen title; [kind] is the issue kind;
+/// [where] (when set) must match the control text. [reason] is printed in the
+/// report next to the finding.
+final class ExplorerAllow {
+  const ExplorerAllow({
+    required this.screen,
+    required this.kind,
+    required this.reason,
+    this.where,
+  });
+
+  final RegExp screen;
+  final String kind;
+  final RegExp? where;
+  final String reason;
+
+  bool matches(String title, ExplorerIssue i) =>
+      i.kind == kind &&
+      screen.hasMatch(title) &&
+      (where == null || where!.hasMatch(i.where));
+}
+
 /// One tap and what it did.
 final class TapRecord {
   TapRecord(this.kind, this.label, this.outcome);
@@ -47,6 +70,9 @@ final class ScreenRecord {
   final String shot;
   final List<TapRecord> taps = [];
   final List<ExplorerIssue> issues = [];
+
+  /// Findings an [ExplorerAllow] rule explained (issue, reason).
+  final List<(ExplorerIssue, String)> allowed = [];
   int candidates = 0;
   bool capped = false;
 }
@@ -101,6 +127,7 @@ class Explorer {
     required this.goHome,
     this.selectTab,
     this.deny = const {},
+    this.allow = const [],
     this.navLabels = const {},
     this.maxDepth = 3,
     this.maxTapsPerScreen = 60,
@@ -110,6 +137,7 @@ class Explorer {
   });
 
   final WidgetTester tester;
+  final List<ExplorerAllow> allow;
   final ShotFn shot;
   final DateTime deadline;
 
@@ -256,7 +284,8 @@ class Explorer {
     final threw = _flushErrors(rec, '${c.kind} "${c.label}"');
     final state = WidgetsBinding.instance.lifecycleState;
     if (state != null && state != AppLifecycleState.resumed) {
-      rec.issues.add(
+      _add(
+        rec,
         ExplorerIssue(
           'left-app',
           '${c.kind} "${c.label}"',
@@ -288,7 +317,8 @@ class Explorer {
         } else {
           _dead++;
           if (record.outcome.isEmpty) record.outcome = 'NOTHING HAPPENED';
-          rec.issues.add(
+          _add(
+            rec,
             ExplorerIssue(
               'dead-tap',
               '${c.kind} "${c.label}"',
@@ -385,7 +415,8 @@ class Explorer {
     final stuck = now.routes
         .where((r) => !target.ids.contains(r.id))
         .isNotEmpty;
-    rec.issues.add(
+    _add(
+      rec,
       stuck
           // A screen that cannot be left: a real navigation dead end.
           ? ExplorerIssue(
@@ -404,6 +435,17 @@ class Explorer {
     await goHome();
     await _settle(minMs: 300);
     return null;
+  }
+
+  /// Records [i] on [rec], or as allowed when a rule explains it.
+  void _add(ScreenRecord rec, ExplorerIssue i) {
+    for (final a in allow) {
+      if (a.matches(rec.title, i)) {
+        rec.allowed.add((i, a.reason));
+        return;
+      }
+    }
+    rec.issues.add(i);
   }
 
   Future<void> _tapByKey(String key) async {
@@ -800,6 +842,20 @@ class Explorer {
             '| ${_c(s.title)} (${s.shot}) | ${i.kind} | ${_c(i.where)} | ${_c(i.detail)} |',
           );
         }
+      }
+      b.writeln();
+    }
+    final allowed = [for (final s in screens) ...s.allowed.map((a) => (s, a))];
+    if (allowed.isNotEmpty) {
+      b
+        ..writeln('## Allowed (expected, not counted)')
+        ..writeln()
+        ..writeln('| Screen | Kind | Where | Why it is expected |')
+        ..writeln('|---|---|---|---|');
+      for (final (s, (i, why)) in allowed) {
+        b.writeln(
+          '| ${_c(s.title)} (${s.shot}) | ${i.kind} | ${_c(i.where)} | ${_c(why)} |',
+        );
       }
       b.writeln();
     }

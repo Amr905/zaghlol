@@ -38,6 +38,25 @@ Future<rive.File> _loadSharedFile() => _sharedFile ??= () async {
   }
 }();
 
+/// FU-287: what the Rive mascots did, so an on-device test can tell "playing"
+/// from "fell back to the still". Counters only; nothing is logged.
+abstract final class RiveMascotProbe {
+  /// Controllers created (the file decoded and the state machine found).
+  static int loaded = 0;
+
+  /// Loads that threw (native runtime, decode, artboard or state machine).
+  static int failedToLoad = 0;
+
+  /// Paint-time exceptions that sent a mascot back to the still.
+  static int paintFailed = 0;
+
+  static void reset() {
+    loaded = 0;
+    failedToLoad = 0;
+    paintFailed = 0;
+  }
+}
+
 /// Test hook: forgets the shared file.
 void resetSharedRiveFileForTest() => _sharedFile = null;
 
@@ -109,11 +128,13 @@ class _RiveMascotState extends State<RiveMascot> {
         controller.dispose();
         return;
       }
+      RiveMascotProbe.loaded++;
       setState(() {
         _controller = controller;
       });
       _push();
     } catch (_) {
+      RiveMascotProbe.failedToLoad++;
       if (mounted) setState(() => _failed = true);
     }
   }
@@ -154,6 +175,7 @@ class _RiveMascotState extends State<RiveMascot> {
     }
     return _PaintGuard(
       onError: () {
+        RiveMascotProbe.paintFailed++;
         if (mounted) setState(() => _failed = true);
       },
       child: rive.RiveWidget(controller: c, fit: rive.Fit.contain),

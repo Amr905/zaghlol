@@ -5,6 +5,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +28,13 @@ enum AccountReason {
   /// account that owns Gold.
   accountRequired,
 }
+
+/// T-231: Apple's sign-in sheet exists on Apple phones only; on Android the
+/// button did nothing, so it is not offered there.
+final appleSignInOfferedProvider = Provider<bool>(
+  (ref) => defaultTargetPlatform != TargetPlatform.android,
+  name: 'appleSignInOfferedProvider',
+);
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key, this.reason = AccountReason.none});
@@ -265,15 +274,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 variant: ZButtonVariant.secondary,
                 expand: true,
               ),
-              const SizedBox(height: ZSpacing.sm),
-              ZButton(
-                label: t.goldAccountApple,
-                onPressed: _busy
-                    ? null
-                    : () => unawaited(_signIn(SignInRequestProvider.apple)),
-                variant: ZButtonVariant.secondary,
-                expand: true,
-              ),
+              // T-231: Apple's sign-in sheet only exists on Apple phones; on
+              // Android the button did nothing, so it is not offered there.
+              if (ref.watch(appleSignInOfferedProvider)) ...[
+                const SizedBox(height: ZSpacing.sm),
+                ZButton(
+                  label: t.goldAccountApple,
+                  onPressed: _busy
+                      ? null
+                      : () => unawaited(_signIn(SignInRequestProvider.apple)),
+                  variant: ZButtonVariant.secondary,
+                  expand: true,
+                ),
+              ],
             ] else ...[
               ZButton(
                 label: t.commonActionSignOut,

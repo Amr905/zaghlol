@@ -79,20 +79,25 @@ Future<void> pumpAccount(
   AccountReason reason = AccountReason.none,
   bool dark = false,
   double scale = 1.3,
-}) => pumpGold(
-  t,
-  goldApp(
-    AccountScreen(reason: reason),
-    overrides: [
-      ...goldOverrides(FakeGoldActions()),
-      accountActionsProvider.overrideWithValue(a),
-    ],
-    lang: lang,
-    dark: dark,
-    scale: scale,
-  ),
-  height: 3000,
-);
+  bool apple = true,
+}) {
+  // T-231: "Continue with Apple" is offered on Apple phones only.
+  return pumpGold(
+    t,
+    goldApp(
+      AccountScreen(reason: reason),
+      overrides: [
+        ...goldOverrides(FakeGoldActions()),
+        accountActionsProvider.overrideWithValue(a),
+        appleSignInOfferedProvider.overrideWithValue(apple),
+      ],
+      lang: lang,
+      dark: dark,
+      scale: scale,
+    ),
+    height: 3000,
+  );
+}
 
 Future<void> main() async {
   await initDateFormatting();
@@ -168,6 +173,14 @@ Future<void> main() async {
         expect(find.textContaining(RegExp('2026|٢٠٢٦')), findsWidgets);
         expect(find.text(t.commonActionContactSupport), findsOneWidget);
         expect(find.textContaining('abc-123'), findsOneWidget);
+      });
+
+      testWidgets('T-231: on Android there is no "Continue with Apple"', (
+        tester,
+      ) async {
+        await pumpAccount(tester, FakeAccountActions(), lang, apple: false);
+        expect(find.text(t.goldAccountGoogle), findsOneWidget);
+        expect(find.text(t.goldAccountApple), findsNothing);
       });
 
       testWidgets('cancel and failure show their lines', (tester) async {

@@ -48,6 +48,7 @@ import 'package:zaghlol/main.dart' as app;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import 'support/explorer.dart';
+import 'support/explorer_allow.dart';
 import 'support/explorer_seed.dart';
 
 // One part per run (a fresh app process each): 0-3 = the four tabs, 4 = the
@@ -71,6 +72,8 @@ const _fresh = _mode == 'onboarding' || _mode == 'onboarding_en';
 
 /// Problems found by the TEST-explorer3 flows (charts, review).
 final List<String> flowProblems = [];
+
+void _selectOn(ZBottomBar b, int i) => b.onSelect(i);
 
 void _say(String line) {
   // ignore: avoid_print
@@ -235,20 +238,18 @@ void main() {
     };
 
     Future<void> selectTab(int i) async {
-      final dest = find.descendant(
-        of: bar,
-        matching: find.byType(NavigationDestination),
-      );
+      // T-231: the bar is a custom ZBottomBar (no NavigationDestination any
+      // more): call its own onSelect, as a tap on the tab does.
       final end = DateTime.now().add(const Duration(seconds: 8));
-      while (DateTime.now().isBefore(end) && dest.evaluate().length <= i) {
+      while (DateTime.now().isBefore(end) && bar.evaluate().isEmpty) {
         await t.pump(const Duration(milliseconds: 250));
       }
-      if (dest.evaluate().length <= i) {
+      if (bar.evaluate().isEmpty) {
         // ignore: avoid_print
         print('EXPLORER_STAGE no tab bar to select tab $i');
         return;
       }
-      await t.tap(dest.at(i));
+      _selectOn(t.widget<ZBottomBar>(bar.first), i);
       await t.pump(const Duration(milliseconds: 600));
     }
 
@@ -275,6 +276,7 @@ void main() {
       goHome: goHome,
       selectTab: selectTab,
       deny: deny,
+      allow: explorerAllow,
       log: (line) {
         // ignore: avoid_print
         print(

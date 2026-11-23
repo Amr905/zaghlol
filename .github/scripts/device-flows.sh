@@ -23,16 +23,27 @@ if [ -n "${NOTIF_ONLY:-}" ]; then
 fi
 cd "$(dirname "$0")/../../app"
 
+# pull_files [subdir]: the screenshots and reports the tests wrote. T-231: the
+# explorer runs pull into their own subdir (their file names repeat per run).
 pull_files() {
+  local dest="$OUT/screens/${1:-}"
+  mkdir -p "$dest"
   for f in $(adb -s "$DEVICE" shell run-as "$PKG" ls app_flutter/ci_screens 2>/dev/null | tr -d '\r'); do
     case "$f" in *.png | *.md) ;; *) continue ;; esac
-    adb -s "$DEVICE" exec-out run-as "$PKG" cat "app_flutter/ci_screens/$f" > "$OUT/screens/$f" || true
+    adb -s "$DEVICE" exec-out run-as "$PKG" cat "app_flutter/ci_screens/$f" > "$dest/$f" || true
   done
 }
 
 flutter devices
 adb -s "$DEVICE" logcat -c || true
 
+sms_rc=0
+cash_rc=0
+rc=0
+rive_rc=0
+# T-231: EXPLORER_ONLY skips everything up to the explorer; FLOWS_ONLY skips
+# the explorer (each is its own CI job so that none runs past its limit).
+if [ -z "${EXPLORER_ONLY:-}" ]; then
 # ---- 0. SMS on the device (SMS-device): permissions by `pm grant`, synthetic
 # SMS before the first launch (historical inbox scan) and while the app runs
 # (live receiver), then the real app must have saved them. The emulator console
@@ -135,7 +146,6 @@ run_sms_device() {
   return "$r"
 }
 
-sms_rc=0
 run_sms_device 2>&1 | tee "$OUT/sms-device-script.log"
 sms_rc=${PIPESTATUS[0]}
 pull_files
@@ -183,7 +193,6 @@ run_cash_device() {
   adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-cash.png" || true
   return "$r"
 }
-cash_rc=0
 run_cash_device 2>&1 | tee "$OUT/cash-device-script.log"
 cash_rc=${PIPESTATUS[0]}
 pull_files
@@ -207,6 +216,16 @@ if [ -z "${EXPLORER_ONLY:-}" ]; then
   adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-screen.png" || true
 fi
 
+  # ---- 1b. FU-287: does RiveMascot reach its loaded state on this emulator?
+  # (the flows run with animations off, so the mascot there is the still)
+  perl -e 'alarm shift; exec @ARGV' 900 \
+    flutter test integration_test/rive_mascot_device_test.dart \
+    --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
+    2>&1 | tee "$OUT/rive-device-test.log"
+  rive_rc=${PIPESTATUS[0]}
+  grep -E "RIVE_DEVICE" "$OUT/rive-device-test.log" | cut -c1-240
+fi
+if [ -z "${FLOWS_ONLY:-}" ]; then
 # ---- 2. explorer (Arabic, seeded database)
 # A clean app: no leftovers from step 1. Notification and microphone
 # permissions are granted up front so no system dialog covers the app.
@@ -254,8 +273,12 @@ rc2=0
 # and the Add sheet as parts 0-4), "variants" (FU-245: English, dark, text
 # scale 1.3, paywall, onboarding in both languages; two levels deep) or "all".
 runs=""
-case "${EXPLORER_PLAN:-all}" in base | all) runs="ar:0 ar:1 ar:2 ar:3 ar:4" ;; esac
-case "${EXPLORER_PLAN:-all}" in variants | all) runs="$runs en:-1 dark:-1 scale:-1 paywall:-1 onboarding:-1 onboarding_en:-1" ;; esac
+# T-231: the CI job runs one slice of the explorer (a matrix), so that none of
+# them runs past its limit. The old names (base, variants, new, all) stay.
+case "${EXPLORER_PLAN:-all}" in base | base-a | all) runs="$runs ar:0 ar:1" ;; esac
+case "${EXPLORER_PLAN:-all}" in base | base-b | all) runs="$runs ar:2 ar:3 ar:4" ;; esac
+case "${EXPLORER_PLAN:-all}" in variants | variants-a | all) runs="$runs en:-1 dark:-1 scale:-1" ;; esac
+case "${EXPLORER_PLAN:-all}" in variants | variants-b | all) runs="$runs paywall:-1 onboarding:-1 onboarding_en:-1" ;; esac
 # TEST-explorer3: doubtful SMS on the Review screen, SMS diagnostics, all charts as a free user.
 case "${EXPLORER_PLAN:-all}" in new | all) runs="$runs review:-1 charts:-1" ;; esac
 for run in $runs; do
@@ -290,7 +313,7 @@ for run in $runs; do
     2>&1 | tee "$OUT/explorer-$mode-p$part.log"
   r=${PIPESTATUS[0]}
   [ "$r" -ne 0 ] && rc2=$r
-  pull_files
+  pull_files "explorer-$mode-p$part"
 done
 adb -s "$DEVICE" shell settings put system font_scale 1.0 || true
 kill "$keeper" 2>/dev/null || true
@@ -300,12 +323,14 @@ echo "---- logcat: crashes and kills ----"
 adb -s "$DEVICE" logcat -d -b crash 2>/dev/null | tail -40 || true
 adb -s "$DEVICE" logcat -d 2>/dev/null | grep -E "FATAL|am_proc_died|am_kill|lowmemorykiller|lmkd|ANR in|Process $PKG|has died|signal [0-9]+ \(SIG" | tail -30 || true
 echo "---- end logcat ----"
-pull_files
+pull_files "explorer-last"
 adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-explorer.png" || true
+fi
 
 # Flutter's own log lines only (Dart errors, the tests' prints).
 adb -s "$DEVICE" logcat -d -s flutter:V > "$OUT/flutter-logcat.txt" 2>/dev/null || true
 ls -la "$OUT/screens"
 if [ "$sms_rc" -ne 0 ]; then exit "$sms_rc"; fi
 if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+if [ "$rive_rc" -ne 0 ]; then exit "$rive_rc"; fi
 exit "$rc2"

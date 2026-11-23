@@ -177,17 +177,22 @@ void main() {
     // A "discard changes?" prompt never appears for an untouched form.
     await waitFor(t, quickAdd(), what: 'back on Home after Say');
 
-    // ---- Scan: Android has no OCR host yet; the screen says so clearly
-    // and offers typing instead.
+    // ---- Scan (T-231): Android has an OCR host now (T-156b), so the screen
+    // asks for an image and offers nothing blocking. The system picker is not
+    // opened (it can't be driven from Flutter).
     await openAdd(t);
     await t.tap(find.text('Scan'));
     await waitFor(
       t,
-      find.text("Reading images isn't ready on this phone yet"),
-      what: 'scan unavailable message',
+      find.byKey(const Key('scan-choose')),
+      what: 'the Scan screen with its Choose an image button',
     );
-    expect(find.byKey(const Key('scan-type')), findsOneWidget);
-    await shot(t, '06-scan-unavailable');
+    expect(find.text('Scan a screenshot'), findsWidgets);
+    expect(
+      find.text("Reading images isn't ready on this phone yet"),
+      findsNothing,
+    );
+    await shot(t, '06-scan');
     await closeTop(t);
     await waitFor(t, quickAdd(), what: 'back on Home after Scan');
 
