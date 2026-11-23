@@ -491,14 +491,14 @@
 - ~~FU-232~~ closed (commits FU-228/FU-232 backend minors) — (batch-24a/24b minors): FU-backend-2 minors in docs/05-reviews/batch-24a.md; period-chip error-state test; voice logger subtitle copy (`voiceLoggerParsedSubtitle`) missing.
 - Done in batch 24: FU-211 (shared items → parse / OCR → S-32), FU-218 (1.3× goldens for 14 screens), FU-020, FU-017, FU-004 (#4, #7, #12, #13), FU-107 (revive), FU-098 L-1, FU-116 (sync header test), batch-23 minors.
 
-- **FU-233** (T-135: triaged batch 57 (T-226). Only FU-233e (worker Production config, hosting go-live) and FU-233f (SKIP LOCKED, hosting) remain; both backend lane, see rows FU-233a..f.)
-- **FU-234** (T-167: triaged batch 57. Only FU-234b remains (unmappable lot silently dropped from nisab test; needs a PO call on behaviour).)
-- **FU-235** (T-168: triaged batch 57. Only FU-235c remains (partly-paid display/entry and missing l10n keys; PO copy).)
-- **FU-236** (T-169: triaged batch 57. FU-236b (transport signal) and FU-236c (legal sign-off Q-23) remain; both PO.)
-- **FU-237** (T-170: triaged batch 57. FU-237b (S-73 ROI share template) and FU-237c (Tips segment and roiTipCountProvider badge unwired, flag off) remain.)
-- **FU-238** (T-071, batch 25): the minors, nits and open questions for T-071 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
-- **FU-239** (T-072, batch 25): the minors, nits and open questions for T-072 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
-- **FU-240** (T-158, batch 25): the minors, nits and open questions for T-158 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-233** (T-135: triaged batch 62 (T-226). Only FU-233e (worker Production config, hosting go-live) and FU-233f (SKIP LOCKED, hosting) remain; both backend lane, see rows FU-233a..f.)
+- **FU-234** (T-167: triaged batch 62. Only FU-234b remains (unmappable lot silently dropped from nisab test; needs a PO call on behaviour).)
+- **FU-235** (T-168: triaged batch 62. Only FU-235c remains (partly-paid display/entry and missing l10n keys; PO copy).)
+- **FU-236** (T-169: triaged batch 62. FU-236b (transport signal) and FU-236c (legal sign-off Q-23) remain; both PO.)
+- **FU-237** (T-170: triaged batch 62. FU-237b (S-73 ROI share template) and FU-237c (Tips segment and roiTipCountProvider badge unwired, flag off) remain.)
+- **FU-238** (T-071): CLOSED (batch 62, T-227): all rows FU-238a..c are CLOSED/OBSOLETE below; no other open findings.
+- **FU-239** (T-072): CLOSED (batch 62, T-227): FU-239a obsolete (patterns bounded, backtrack test exists); no other open findings.
+- **FU-240** (T-158): CLOSED (batch 62, T-227): FU-240a..c are CLOSED/FIXED below; no other open findings.
 - **FU-241** (batch 25): T-071/T-072 templates are synthetic-unverified (notifications/SMS of Wise, Revolut, Monzo, bunq, N26, Payoneer, HDFC, Paytm, Al Rajhi, ENBD, Liv, Warba); unknown $-prefixes (C$, MX$, E£) don't parse yet. Reimbursement-suggestion hook is not run after CSV import (only pairing and refunds). Zakah: no debts source, no zakatable/jewelry exemption flag, partial payments can't be entered (scholar list in T-167.md). Smart ROI: cafés, water and ride-hailing tips silent until those categories/merchant groups exist; disclaimer and example rates need legal sign-off (Q-23). T-135: PO supplies Google client IDs and Apple Services ID/Bundle/Team/Key IDs and the .p8 key.
 - **FU-242** (batch 26, before store build): release builds start with no categories — the bundled catalog seed is accepted in release mode only with the production signing key (FU-090); land the production-signed seed or let the editor save without a category.
 - ~~FU-243~~ closed (commits FU-243 (drop rules) and FU-244 (originalAmount cue)) — (batch 26): drop rules for bank OTP ("Your OTP … is NNNNNN"), payment-due/statement reminders and cashback/offer wording; a generic result from a known bank should file under that bank (not "new sender") and use the bank's card account; Guard corpus cases for `HSBC EG`/`HSBC-EG`/`HSBCX`; mic "Open settings" should open app permission settings; device-flows concurrency for the device-shots push; untested `closeAddSheetThen` branch; bulk delete reads rows one by one.
@@ -510,8 +510,8 @@
 - ~~FU-245~~ closed (commit "About: Important notices row opens the disclaimers list (FU-245)") — (batch 28, TEST-explorer): About Disclaimers row has an empty `onTap`; About "dead end after Back" needs a hand check; explorer lacks English, dark, text scale 1.3, onboarding and paywall coverage.
 - ~~FU-246~~ closed (PO FAB-MOCKUP (PO_DECISIONS.md) supersedes; batch 34) — (batch 28, DESIGN-pass2): Home lock card sits under the Add button at rest; Ask input row loses width at the end.
 
-- **FU-248** (T-070, batch 29): the minors, nits and open questions for T-070 in [batch-29](05-reviews/batch-29.md), plus the "left undone" items in its task file.
-- **FU-249** (T-186, batch 29): the minors, nits and open questions for T-186 in [batch-29](05-reviews/batch-29.md), plus the "left undone" items in its task file.
+- **FU-248** (T-070): OPEN, PO only: FU-248b (generic Contact sender and wallet name guesses need PO/real-sender confirmation). FU-248a CLOSED.
+- **FU-249** (T-186): CLOSED (batch 62, T-227): FU-249a/b CLOSED; backend-only, nothing left.
 
 - ~~FU-247~~ closed (sweep commits batch 32 (321aaec6, bfb9ef31, 78667335, 8accb343)) — (batch 29): minors in [batch-29](05-reviews/batch-29.md): T-186 (two), T-070 `registryVersion` not bumped, fresh hold-out FX cases for the generic parser; explorer open items (small-screen Start button, paywall offline state, red chart bars).
 
@@ -844,7 +844,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 
 - **FU-257** (batch 37): see the batch-37 report and Lead delta checks.
 
-- **FU-258** (batch 38): minors in [batch-38](05-reviews/batch-38.md): action via a non-exported trampoline or nonce; a failed mark-paid while locked has no feedback; the weekly summary is skipped if the app isn't opened on Friday; a reminder delayed by quiet hours isn't cancelled after paying.
+- **FU-258** (batch 38, triaged batch 62 by T-227): #2 (mark-paid while locked) CLOSED: `payAfterGate` now waits for unlock and asks for confirmation, so the press is no longer lost. OPEN: #1 non-exported trampoline or nonce (Kotlin, `MainActivity.kt`; sec Low), #3 weekly summary as a Friday alarm (needs native scheduling), #4 cancel the scheduled reminder when the bill is paid (gateway change). All three are larger than a small fix.
 
 - **FU-259** (batch 40): minors in [batch-40](05-reviews/batch-40.md): GoldAPI per-karat vs ounce check and a doc link; narrow the deploy SA's IAM-admin role and limit prod deploys to main; the public dry-run AAB includes the R8 mapping; app-store-privacy.md out of date after the iOS fixes; "رفاهيات" for "wants".
 
