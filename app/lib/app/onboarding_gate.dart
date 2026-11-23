@@ -48,6 +48,12 @@ class OnboardingGate extends ConsumerStatefulWidget {
 class _OnboardingGateState extends ConsumerState<OnboardingGate> {
   bool _finished = false;
 
+  /// True once the first-run flow was on screen in this session. Only then
+  /// may a scan that finishes late open the results sheet; a cold-start
+  /// catch-up scan on later runs must not (T-213: it opened an empty sheet
+  /// that closed itself at once).
+  bool _sawFirstRun = false;
+
   /// Marks the first run as done (Home's A-65 clock starts from it).
   Future<void> _finish([String? location]) async {
     try {
@@ -75,9 +81,13 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate> {
   Widget build(BuildContext context) {
     final needed = ref.watch(onboardingNeededProvider);
     if (_finished || needed.value == false) {
-      return ScanResultsSheetTrigger(child: widget.child);
+      return ScanResultsSheetTrigger(
+        enabled: _sawFirstRun,
+        child: widget.child,
+      );
     }
     if (needed.isLoading) return const SizedBox.shrink();
+    _sawFirstRun = true;
     return _OnboardingFlow(onFinish: _finish);
   }
 }
@@ -159,8 +169,15 @@ class _OnboardingFlow extends ConsumerWidget {
 /// S-06 as a sheet: when the first-run scan finishes after the user is
 /// already on Home (it started in the background), offer its results once.
 class ScanResultsSheetTrigger extends ConsumerStatefulWidget {
-  const ScanResultsSheetTrigger({super.key, required this.child});
+  const ScanResultsSheetTrigger({
+    super.key,
+    required this.child,
+    this.enabled = true,
+  });
   final Widget child;
+
+  /// False: no sheet is opened (not a first run).
+  final bool enabled;
 
   @override
   ConsumerState<ScanResultsSheetTrigger> createState() => _TriggerState();
@@ -185,6 +202,7 @@ class _TriggerState extends ConsumerState<ScanResultsSheetTrigger> {
 
   void _onProgress(ScanProgress p) {
     if (p.phase == ScanPhase.running) _sawRunning = true;
+    if (!widget.enabled) return;
     if (p.phase != ScanPhase.done || !_sawRunning || _shown) return;
     _shown = true;
     final ctx = rootNavigatorKey.currentContext;
