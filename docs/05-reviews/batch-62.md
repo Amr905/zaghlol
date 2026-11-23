@@ -41,3 +41,11 @@ Reviewer: code-reviewer (Opus). Production diff read; `flutter test --exclude-ta
 - T-224 major: chose the preferred fix (no activity recreation, no forcing change). Native reports the phone's real night mode (`Resources.getSystem().configuration.uiMode`, unaffected by the forced bits) over `zaghlol/launch_theme`: getter `systemIsDark` plus a push from `MainActivity.onConfigurationChanged`. Dart (`effectiveThemeModeProvider`) maps the "system" choice to explicit light/dark from that value; light/dark choices and hosts that do not answer (iOS, tests) are unchanged. Chosen over clearing the forced bits at runtime because the activity cannot re-resolve resources without a recreate.
 - FU-290a: iOS `set` handler now applies `overrideUserInterfaceStyle` to all windows (dark -> system clears it). FU-290b: import order in `main.dart`. FU-290d: T-227 task file updated. FU-290f: turning the weekly-summary toggle off calls `cancelWeeklyNudgeProvider` (cancels the next Friday's nudge).
 - Tests: Kotlin `isNightReadsOnlyTheNightBits`; Dart system brightness follows value and updates on push; explicit choice ignores it; `cancelWeeklyNudgeProvider` cancels the scheduled id. Local: format, analyze, `test/core/platform`, `test/features/notifications` green.
+
+## Delta re-review (T-224 fix round)
+- Reviewed 5540eb12 and 51b2a2a6 (no PNGs). `flutter test test/core/platform test/features/notifications`: 170 passed. app-ci run 45203157617 (ci/T-224b): success.
+- "system" follows the phone: native reads `Resources.getSystem()` (not the forced bits), pushes on `onConfigurationChanged` (uiMode is in configChanges), and Dart maps it to explicit light/dark. A live phone switch is covered by the push. Explicit light/dark pass through unchanged. No recreation, so no loop. Hosts that do not answer (iOS, tests) fall back to the choice.
+- iOS: after a write the override is applied to all windows, so dark to system clears it.
+- Weekly nudge cancel on toggle off uses the nudge's own subject id and `nextFriday(today)`; the real summary run is a separate path and is not cancelled.
+- No new findings.
+- Verdict T-224: APPROVED.
