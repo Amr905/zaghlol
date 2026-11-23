@@ -381,7 +381,18 @@ internal sealed class OpenBaoClient : IDisposable
                 throw new OpenBaoUnavailableException();
             }
 
-            var fresh = await LoginAsync(cancellationToken).ConfigureAwait(false);
+            Session fresh;
+            try
+            {
+                fresh = await LoginAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch when (forced)
+            {
+                // FU-285 1.1: mark the failure before the gate opens, so a waiter can't slip in and log in unthrottled.
+                Interlocked.Exchange(ref forcedLoginFailedAt, clock.GetTimestamp());
+                throw;
+            }
+
             Volatile.Write(ref session, fresh);
             Interlocked.Exchange(ref forcedLoginFailedAt, long.MinValue);
             return fresh.Token;

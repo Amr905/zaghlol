@@ -107,6 +107,26 @@ public sealed class OpenBaoReloginRaceTests : IAsyncLifetime
         Assert.Equal(attempts + 2, bed.Stub.LoginAttempts);
     }
 
+    [LinuxFact]
+    public async Task NoRequestFailsAcrossTokenExpiries()
+    {
+        // FU-285: the token is renewed at two thirds of its lease, so stepping the clock across several lifetimes never
+        // surfaces a refusal or an error.
+        bed.Stub.TokenTtlSeconds = 30;
+        var clock = new ShiftedClock();
+        using var client = Client(clock, TimeSpan.FromSeconds(10));
+        await WarmUpAsync(client);
+        var attempts = bed.Stub.LoginAttempts;
+
+        for (var step = 0; step < 6; step++)
+        {
+            clock.Shift += TimeSpan.FromSeconds(21);
+            Assert.All(await RaceAsync(client), s => Assert.Equal(HttpStatusCode.OK, s));
+        }
+
+        Assert.Equal(attempts + 6, bed.Stub.LoginAttempts);
+    }
+
     private OpenBaoClient Client(TimeProvider clock, TimeSpan loginTimeout)
     {
         var roots = new X509Certificate2Collection { bed.Stub.Ca.Certificate };
