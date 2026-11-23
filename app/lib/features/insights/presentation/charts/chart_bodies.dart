@@ -613,20 +613,27 @@ class _DonutBodyState extends ConsumerState<DonutBody> {
                       // T-231: scales down instead of overflowing the row when
                       // amount and share are wide (found on the emulator).
                       ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: rowWidth * 0.55),
+                        constraints: BoxConstraints(maxWidth: rowWidth * 0.7),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerEnd,
-                          child: ZMoneyText(
-                            text: amount,
-                            size: ZMoneySize.caption,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ZMoneyText(
+                                text: amount,
+                                size: ZMoneySize.caption,
+                              ),
+                              const SizedBox(width: ZSpacing.sm),
+                              Text(
+                                percent,
+                                style: ZType.caption.copyWith(
+                                  color: c.textMuted,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(width: ZSpacing.sm),
-                      Text(
-                        percent,
-                        style: ZType.caption.copyWith(color: c.textMuted),
                       ),
                     ],
                   );
