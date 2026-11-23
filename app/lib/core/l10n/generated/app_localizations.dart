@@ -4629,6 +4629,12 @@ abstract class AppLocalizations {
   /// **'أنا بحسب والدهب بيلمع، وإنت بتحوّش'**
   String get mascotTapLine10;
 
+  /// M · Rive payday · Home bubble when a salary lands (once per payday)
+  ///
+  /// In ar, this message translates to:
+  /// **'القبض نزل يا كبير! 🎉'**
+  String get mascotPaydayLine;
+
   /// C · C-35 segment 1
   ///
   /// In ar, this message translates to:

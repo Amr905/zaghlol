@@ -3107,6 +3107,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mascotTapLine10 => 'أنا بحسب والدهب بيلمع، وإنت بتحوّش';
 
   @override
+  String get mascotPaydayLine => 'القبض نزل يا كبير! 🎉';
+
+  @override
   String get insightsTabsCharts => 'الشارتات';
 
   @override

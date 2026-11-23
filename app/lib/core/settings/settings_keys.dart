@@ -146,6 +146,14 @@ abstract final class Settings {
     max: 999999999999999,
   );
 
+  /// T-215: epoch day of the last payday Captain Zaghlol celebrated; null:
+  /// never. Stops a second celebration and old salaries from celebrating.
+  static final mascotPaydayCelebrated = SettingKey.optionalInteger(
+    'mascot.payday_celebrated',
+    min: 0,
+    max: 9999999,
+  );
+
   // FR-NTF-02, A-27: 23:00–08:00, as minutes after local midnight.
   static final quietHoursEnabled = SettingKey.boolean(
     'quiet_hours.enabled',

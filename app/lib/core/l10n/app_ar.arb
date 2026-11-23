@@ -4033,6 +4033,10 @@
   "@mascotTapLine10": {
     "description": "M · Rive tap"
   },
+  "mascotPaydayLine": "القبض نزل يا كبير! 🎉",
+  "@mascotPaydayLine": {
+    "description": "M · Rive payday · Home bubble when a salary lands (once per payday)"
+  },
   "insightsTabsCharts": "الشارتات",
   "@insightsTabsCharts": {
     "description": "C · C-35 segment 1"
