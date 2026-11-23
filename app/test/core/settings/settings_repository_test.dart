@@ -115,6 +115,8 @@ allKeys = [
     byDefault: <String>{},
     other: {'egp_cash_idle'},
   ),
+  (key: Settings.mascotPaydayCelebrated, byDefault: null, other: 20410),
+  (key: Settings.voiceOnlineConsent, byDefault: false, other: true),
 ];
 
 void main() {
