@@ -15,6 +15,7 @@ import 'core/db/db_directory.dart';
 import 'core/db/db_key_providers.dart';
 import 'core/l10n/date_format.dart';
 import 'core/logging/diag_code.dart';
+import 'core/platform/launch_theme.dart';
 import 'core/logging/diag_error_handlers.dart';
 import 'core/logging/diag_logger.dart';
 import 'core/logging/early_error_handlers.dart';
@@ -178,6 +179,10 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // T-224: native reads the theme choice before the first frame.
+    ref.listenManual(appThemeModeProvider, (_, mode) {
+      unawaited(ref.read(launchThemeWriterProvider)(mode));
+    }, fireImmediately: true);
     // T-100: the weekly summary (when 7 days have passed) and the duplicate
     // check at start; again on every resume.
     unawaited(ref.read(resumeJobsProvider)(coldStart: true));
