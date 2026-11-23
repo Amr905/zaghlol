@@ -7,6 +7,6 @@ output "connection_name" {
 }
 
 output "private_ip_address" {
-  description = "Host= part of the connection strings (Npgsql, SSL Mode=Require)."
+  description = "Host= part of the connection strings (Npgsql, SSL Mode=VerifyFull with the Cloud SQL CA)."
   value       = google_sql_database_instance.this.private_ip_address
 }
