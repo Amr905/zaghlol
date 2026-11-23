@@ -7,7 +7,7 @@
     <!-- NOTIF-GW (FR-NTF): local alerts on Android 13+. Requested at runtime
          after onboarding or when the user first turns an alert type on;
          never at install. Local notifications only: no FCM, no
-         RECEIVE_BOOT_COMPLETED, no SCHEDULE_EXACT_ALARM. -->
+         SCHEDULE_EXACT_ALARM (RECEIVE_BOOT_COMPLETED is added below for T-230). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- T-230: normal permission; lets the app re-arm its pending alerts after a restart. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>

@@ -54,4 +54,22 @@ class ScheduleBookTest {
     assertFalse(f.exists())
     assertTrue(true)
   }
+
+  @Test
+  fun `writes leave no temp file and two books over one file share the lock`() {
+    val (a, f) = book()
+    val b = ScheduleBook(FileScheduleStore(f))
+    val threads =
+      (1..8).map { n ->
+        Thread {
+          repeat(25) { i -> (if (n % 2 == 0) a else b).add(alert(n * 100 + i, 10_000L + i)) }
+        }
+      }
+    threads.forEach { it.start() }
+    threads.forEach { it.join() }
+    assertFalse(File(f.parentFile, f.name + ".tmp").exists())
+    var count = 0
+    a.rearm(0) { _, _ -> count++ }
+    assertEquals(200, count)
+  }
 }

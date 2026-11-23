@@ -22,29 +22,35 @@ interface ScheduleStore {
  * alarms: written on schedule, removed on fire, cancel and cancelAll.
  */
 class ScheduleBook(private val store: ScheduleStore) {
-  @Synchronized
-  fun add(alert: ScheduledAlert) = store.save(store.load().filter { it.id != alert.id } + alert)
-
-  @Synchronized
-  fun remove(id: Int) {
-    val all = store.load()
-    if (all.any { it.id == id }) store.save(all.filter { it.id != id })
+  // One lock for the whole process: the presenter, the alarm receiver and the
+  // boot receiver each build their own ScheduleBook over the same file.
+  private companion object {
+    val LOCK = Any()
   }
 
-  @Synchronized fun clear() = store.save(emptyList())
+  fun add(alert: ScheduledAlert) =
+    synchronized(LOCK) { store.save(store.load().filter { it.id != alert.id } + alert) }
+
+  fun remove(id: Int) =
+    synchronized(LOCK) {
+      val all = store.load()
+      if (all.any { it.id == id }) store.save(all.filter { it.id != id })
+    }
+
+  fun clear() = synchronized(LOCK) { store.save(emptyList()) }
 
   /**
    * After a reboot: alerts still in the future are re-armed with the same id and
    * time. Past-due ones are DROPPED (not shown), so a restart never fires a
    * burst of stale alerts; the app re-derives and reschedules at its next run.
    */
-  @Synchronized
-  fun rearm(nowMs: Long, arm: (Map<String, Any?>, Long) -> Unit): Int {
-    val (future, past) = store.load().partition { it.atEpochMs > nowMs }
-    if (past.isNotEmpty()) store.save(future)
-    future.forEach { arm(it.fields, it.atEpochMs) }
-    return future.size
-  }
+  fun rearm(nowMs: Long, arm: (Map<String, Any?>, Long) -> Unit): Int =
+    synchronized(LOCK) {
+      val (future, past) = store.load().partition { it.atEpochMs > nowMs }
+      if (past.isNotEmpty()) store.save(future)
+      future.forEach { arm(it.fields, it.atEpochMs) }
+      future.size
+    }
 }
 
 /** File under `noBackupFilesDir/notif` (not in OS backups); wiped with the data. */
@@ -85,7 +91,10 @@ class FileScheduleStore(private val file: File) : ScheduleStore {
         return
       }
       file.parentFile?.mkdirs()
-      file.writeText(
+      // Write a temp file and rename it over the old one, so a crash mid-write
+      // never leaves a half-written schedule.
+      val tmp = File(file.parentFile, file.name + ".tmp")
+      tmp.writeText(
         all.joinToString("\n") { a ->
           val kv =
             a.fields.entries.mapNotNull { (k, v) ->
@@ -98,6 +107,10 @@ class FileScheduleStore(private val file: File) : ScheduleStore {
           (listOf(a.atEpochMs.toString()) + kv).joinToString("\t")
         }
       )
+      if (!tmp.renameTo(file)) {
+        file.delete()
+        tmp.renameTo(file)
+      }
     } catch (_: java.io.IOException) {
       // Best effort; a lost entry only means one alert is not re-armed.
     }
