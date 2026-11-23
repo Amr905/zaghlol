@@ -11,9 +11,6 @@ description = "dev-only values and synthetic test vectors (T-175 pass 1 §1.2)"
 paths = [
   '''tools/catalog_build/dev/dev_signing_key\.json''',
   '''backend/deploy/db/dev-passwords\.sql''',
-  '''backend/docker-compose(\.[a-z-]+)?\.yml''',
-  '''docs/qa/tools/run_backend_local\.sh''',
-  '''docs/qa/tools/api_db_followup\.py''',
   # Synthetic test vectors / example values that trip generic-api-key or jwt (T-192: named files, not whole test trees).
   '''^backend/openapi/zaghlol\-v1\.yaml$''',
   '''^backend/tests/Zaghlol\.Contract\.Tests/vectors/jws\-es256\-v1\.json$''',
