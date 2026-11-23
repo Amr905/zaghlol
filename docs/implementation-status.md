@@ -491,11 +491,11 @@
 - ~~FU-232~~ closed (commits FU-228/FU-232 backend minors) — (batch-24a/24b minors): FU-backend-2 minors in docs/05-reviews/batch-24a.md; period-chip error-state test; voice logger subtitle copy (`voiceLoggerParsedSubtitle`) missing.
 - Done in batch 24: FU-211 (shared items → parse / OCR → S-32), FU-218 (1.3× goldens for 14 screens), FU-020, FU-017, FU-004 (#4, #7, #12, #13), FU-107 (revive), FU-098 L-1, FU-116 (sync header test), batch-23 minors.
 
-- **FU-233** (T-135, batch 25): the minors, nits and open questions for T-135 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
-- **FU-234** (T-167, batch 25): the minors, nits and open questions for T-167 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
-- **FU-235** (T-168, batch 25): the minors, nits and open questions for T-168 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
-- **FU-236** (T-169, batch 25): the minors, nits and open questions for T-169 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
-- **FU-237** (T-170, batch 25): the minors, nits and open questions for T-170 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
+- **FU-233** (T-135: triaged batch 57 (T-226). Only FU-233e (worker Production config, hosting go-live) and FU-233f (SKIP LOCKED, hosting) remain; both backend lane, see rows FU-233a..f.)
+- **FU-234** (T-167: triaged batch 57. Only FU-234b remains (unmappable lot silently dropped from nisab test; needs a PO call on behaviour).)
+- **FU-235** (T-168: triaged batch 57. Only FU-235c remains (partly-paid display/entry and missing l10n keys; PO copy).)
+- **FU-236** (T-169: triaged batch 57. FU-236b (transport signal) and FU-236c (legal sign-off Q-23) remain; both PO.)
+- **FU-237** (T-170: triaged batch 57. FU-237b (S-73 ROI share template) and FU-237c (Tips segment and roiTipCountProvider badge unwired, flag off) remain.)
 - **FU-238** (T-071, batch 25): the minors, nits and open questions for T-071 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
 - **FU-239** (T-072, batch 25): the minors, nits and open questions for T-072 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
 - **FU-240** (T-158, batch 25): the minors, nits and open questions for T-158 in [batch-25a](05-reviews/batch-25a.md), [batch-25b](05-reviews/batch-25b.md), plus the "left undone" items in its task file.
