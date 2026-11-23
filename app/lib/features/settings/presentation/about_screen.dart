@@ -10,6 +10,7 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../gold/presentation/gold_ui_ports.dart'
     show GoldLink, goldLinkOpenerProvider;
+import '../../mascot/presentation/mascot_moods_screen.dart';
 import '../debug/debug_sms_diagnostics.dart' show smsDiagnosticsEnabledProvider;
 import '../debug/debug_sms_diagnostics_screen.dart';
 import 'disclaimers_screen.dart';
@@ -106,6 +107,21 @@ class AboutScreen extends ConsumerWidget {
                 onTap: () => Navigator.of(context).push<void>(
                   MaterialPageRoute<void>(
                     builder: (_) => const DebugSmsDiagnosticsScreen(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        // T-232: dev flavours only; every mascot animation on the phone.
+        if (ref.watch(mascotMoodsEnabledProvider))
+          SettingsSection(
+            children: [
+              SettingsRow(
+                title: t.devMoodsRowTitle,
+                subtitle: t.devMoodsRowSubtitle,
+                onTap: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const MascotMoodsScreen(),
                   ),
                 ),
               ),

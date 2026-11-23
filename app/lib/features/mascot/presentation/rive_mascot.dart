@@ -50,10 +50,16 @@ abstract final class RiveMascotProbe {
   /// Paint-time exceptions that sent a mascot back to the still.
   static int paintFailed = 0;
 
+  /// T-232: names the state machine reports as its layers change state (the
+  /// animation names, `mood03_detective`, `fx09_saved`, `talkOn`...). The
+  /// device test checks that every state value reaches its animation.
+  static final List<String> stateNames = <String>[];
+
   static void reset() {
     loaded = 0;
     failedToLoad = 0;
     paintFailed = 0;
+    stateNames.clear();
   }
 }
 
@@ -106,6 +112,7 @@ class RiveMascot extends ZaghlolMascot {
 
 class _RiveMascotState extends State<RiveMascot> {
   rive.RiveWidgetController? _controller;
+  rive.CallbackHandler? _stateHandle;
   bool _failed = false;
 
   @override
@@ -129,6 +136,9 @@ class _RiveMascotState extends State<RiveMascot> {
         return;
       }
       RiveMascotProbe.loaded++;
+      _stateHandle = controller.stateMachine.onStateChanged(
+        RiveMascotProbe.stateNames.add,
+      );
       setState(() {
         _controller = controller;
       });
@@ -146,7 +156,7 @@ class _RiveMascotState extends State<RiveMascot> {
   }
 
   // Legacy state machine inputs: stable and enough for one number + two flags.
-  // ignore_for_file: deprecated_member_use
+  // ignore_for_file: deprecated_member_use, invalid_use_of_internal_member
   void _push() {
     final sm = _controller?.stateMachine;
     if (sm == null) return;
@@ -157,6 +167,7 @@ class _RiveMascotState extends State<RiveMascot> {
 
   @override
   void dispose() {
+    _stateHandle?.dispose();
     _controller?.dispose();
     super.dispose();
   }

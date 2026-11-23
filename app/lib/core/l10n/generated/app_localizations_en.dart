@@ -8531,4 +8531,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String insightsV2TrendsDayA11y(String days) {
     return 'Day by day spending chart. $days days, darker means more spent';
   }
+
+  @override
+  String get devMoodsRowTitle => 'Zaghlol\'s moods';
+
+  @override
+  String get devMoodsRowSubtitle => 'Play every animation (debug builds)';
+
+  @override
+  String get devMoodsHint =>
+      'Tap a mood to play it. Loops keep going until you pick another.';
+
+  @override
+  String get devMoodsTalk => 'Talking';
+
+  @override
+  String get devMoodsReduceNote =>
+      'Reduce motion is on, so the bird stays still. Turn it off to see the moods.';
+
+  @override
+  String get devMoodTourGuide => 'Hello';
+
+  @override
+  String get devMoodProud => 'Proud';
+
+  @override
+  String get devMoodShocked => 'Shocked';
+
+  @override
+  String get devMoodDetective => 'Detective';
+
+  @override
+  String get devMoodProfessor => 'Professor';
+
+  @override
+  String get devMoodListening => 'Listening';
+
+  @override
+  String get devMoodThinking => 'Thinking';
+
+  @override
+  String get devMoodScanning => 'Reading messages';
+
+  @override
+  String get devMoodCounting => 'Counting coins';
+
+  @override
+  String get devMoodSaved => 'Saved';
+
+  @override
+  String get devMoodPayday => 'Payday';
+
+  @override
+  String get devMoodOops => 'Oops';
+
+  @override
+  String get devMoodSleep => 'Nothing yet';
+
+  @override
+  String get devMoodPull => 'Pull to refresh';
+
+  @override
+  String get devMoodTap => 'Tap the bird';
 }
