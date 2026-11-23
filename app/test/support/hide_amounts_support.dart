@@ -27,6 +27,18 @@ class _Repo implements SettingsRepository {
   }
 
   @override
+  Future<T> get<T>(SettingKey<T> key) async {
+    // Only the voice consent (T-214) is readable; other reads stay
+    // unsupported, as before, so unrelated features keep their old paths.
+    if (key.name != Settings.voiceOnlineConsent.name) {
+      throw UnimplementedError(key.name);
+    }
+    return _harness.writes.containsKey(key.name)
+        ? _harness.writes[key.name] as T
+        : key.defaultValue;
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

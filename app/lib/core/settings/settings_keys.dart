@@ -146,6 +146,14 @@ abstract final class Settings {
     max: 999999999999999,
   );
 
+  /// T-215: epoch day of the last payday Captain Zaghlol celebrated; null:
+  /// never. Stops a second celebration and old salaries from celebrating.
+  static final mascotPaydayCelebrated = SettingKey.optionalInteger(
+    'mascot.payday_celebrated',
+    min: 0,
+    max: 9999999,
+  );
+
   // FR-NTF-02, A-27: 23:00–08:00, as minutes after local midnight.
   static final quietHoursEnabled = SettingKey.boolean(
     'quiet_hours.enabled',
@@ -216,6 +224,13 @@ abstract final class Settings {
   /// Opt-in (D-13): off by default.
   static final contributionOptIn = SettingKey.boolean(
     'contribution_opt_in',
+    byDefault: false,
+  );
+
+  /// T-214 (D-42): the user allowed the OS online speech recognizer; asked
+  /// once, revocable in Settings > Privacy. Off until allowed.
+  static final voiceOnlineConsent = SettingKey.boolean(
+    'voice.online_consent',
     byDefault: false,
   );
 

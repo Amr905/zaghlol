@@ -17,6 +17,7 @@ import 'package:zaghlol/app/onboarding_gate.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/routing/app_router.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
+import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/core/ui/shell/add_sheet.dart' show AddAction;
 import 'package:zaghlol/features/accounts/data/accounts_providers.dart';
@@ -645,6 +646,34 @@ void main() {
         scan.emit(const ScanProgress(phase: ScanPhase.done, imported: 3));
         await t.pump();
         expect(rec.calls.where((c) => c == 'scanResultsSheet'), hasLength(1));
+      });
+
+      testWidgets('T-213 cold-start catch-up scan on a later run opens no '
+          'sheet', (t) async {
+        await h.repo.set(Settings.setupInstalledOn, 20000);
+        final scan = _FakeScan();
+        addTearDown(scan.close);
+        await t.pumpWidget(
+          ProviderScope(
+            overrides: [
+              settingsRepositoryProvider.overrideWith((ref) async => h.repo),
+              appScreensProvider.overrideWithValue(_stubs(rec)),
+              setupScanProvider.overrideWith((ref) async => scan),
+            ],
+            child: MaterialApp(
+              navigatorKey: rootNavigatorKey,
+              locale: locale,
+              home: const OnboardingGate(child: Text('shell')),
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+        scan.emit(const ScanProgress(phase: ScanPhase.running));
+        await t.pump();
+        scan.emit(const ScanProgress(phase: ScanPhase.done));
+        await t.pumpAndSettle();
+        expect(rec.calls, isNot(contains('scanResultsSheet')));
+        expect(find.text('shell'), findsOneWidget);
       });
     });
   }

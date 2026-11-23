@@ -32,6 +32,7 @@ class SettingsHarness {
     bool appLock = false,
     bool approx = false,
     bool contributing = false,
+    bool voiceOnline = false,
   }) => [
     appDatabaseProvider.overrideWith((ref) async => db),
     settingsRepositoryProvider.overrideWith((ref) async => repo),
@@ -54,6 +55,7 @@ class SettingsHarness {
     appLockEnabledProvider.overrideWith((ref) => Stream.value(appLock)),
     appLockTimeoutSProvider.overrideWith((ref) => Stream.value(60)),
     contributionOptInProvider.overrideWith((ref) => Stream.value(contributing)),
+    voiceOnlineConsentProvider.overrideWith((ref) => Stream.value(voiceOnline)),
     // The real ones read the backup and sync services (WIRE-SVC); a widget
     // test wants fixed values and no timers.
     lastBackupAtProvider.overrideWithValue(null),
@@ -68,6 +70,7 @@ class SettingsHarness {
     bool appLock = false,
     bool approx = false,
     bool contributing = false,
+    bool voiceOnline = false,
     List<Override> overrides = const [],
   }) {
     return ProviderScope(
@@ -77,6 +80,7 @@ class SettingsHarness {
           appLock: appLock,
           approx: approx,
           contributing: contributing,
+          voiceOnline: voiceOnline,
         ),
         ...overrides,
       ],

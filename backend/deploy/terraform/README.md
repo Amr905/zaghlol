@@ -54,7 +54,7 @@ CI does both in `.github/workflows/backend-iac-validate.yml` (also greps for sta
    `-target=module.environment.google_artifact_registry_repository.images`, push the image, then run the workflow.
 4. After the first apply: run `bootstrap-roles.sql` as the Cloud SQL admin (if `ALTER ROLE ... NOSUPERUSER` fails because
    `cloudsqlsuperuser` is not a superuser, make those statements conditional: T-122 follow-up), set the five login passwords,
-   and add a first version to each secret in `secret_ids` (connection strings use `Host=<db_private_ip>;SSL Mode=Require`).
+   and add a first version to each secret in `secret_ids` (connection strings use `Host=<db_private_ip>;SSL Mode=VerifyFull`, and set `Database__CaCertificatePem` or `Database__CaCertificatePath` to the Cloud SQL server CA; Production and Staging refuse `Require`).
    Add the two service accounts (`api_service_account`, `worker_service_account` outputs) in Play Console, and paste
    `rtdn_topic` into Play Console. Point the DNS A record at `load_balancer_ip`.
 5. `scripts/seat-check.sh <project> <region> <env>` and store the value as `kseat_check_hex` (repository variable `KSEAT_CHECK_HEX`).

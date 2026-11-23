@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/core/ui/z_mascot_bubble.dart';
 import 'package:zaghlol/features/mascot/presentation/interim_mascot.dart';
 import 'package:zaghlol/features/mascot/presentation/mascot_moments.dart';
 import 'package:zaghlol/features/mascot/presentation/zaghlol_avatar.dart';
@@ -35,6 +36,7 @@ Widget _wrap(
 }
 
 void main() {
+  _talkTests();
   for (final locale in const [Locale('ar'), Locale('en')]) {
     final l = locale.languageCode;
     for (final m in ZaghlolMoment.values) {
@@ -159,4 +161,26 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.byKey(const ValueKey('mascot-pull')), findsNothing);
   });
+}
+
+// T-215: talk input (the pull moment is covered by the MascotRefresh test).
+void _talkTests() {
+  for (final locale in const [Locale('ar'), Locale('en')]) {
+    final l = locale.languageCode;
+    testWidgets('bubble talks for 1.2 s after a new line ($l)', (tester) async {
+      Widget bubble(String m) =>
+          _wrap(ZMascotBubble(message: m), locale: locale);
+      bool talking() =>
+          tester.widget<ZaghlolAvatar>(find.byType(ZaghlolAvatar)).talk;
+      await tester.pumpWidget(bubble('a'));
+      expect(talking(), isTrue);
+      await tester.pump(const Duration(milliseconds: 1300));
+      expect(talking(), isFalse);
+      await tester.pumpWidget(bubble('b'));
+      expect(talking(), isTrue);
+      await tester.pump(const Duration(milliseconds: 1300));
+      expect(talking(), isFalse);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
 }

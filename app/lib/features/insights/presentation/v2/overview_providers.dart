@@ -45,7 +45,8 @@ final paceProvider = FutureProvider.family<PaceData, String>((ref, code) async {
     dailyThis: daily,
     dailyPrev: prev,
     periodDays: p.lengthDays,
-    elapsedDays: today.difference(p.from) + 1,
+    // A future period has no elapsed days (never negative).
+    elapsedDays: p.from > today ? 0 : today.difference(p.from) + 1,
     closed: p.to < today,
     budgetMinor: budget?.minor,
   );

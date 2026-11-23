@@ -11,16 +11,34 @@ import '../features/home/application/home_read_model.dart';
 import '../features/home/presentation/cards/home_cards_view.dart';
 import '../features/home/presentation/home_format.dart';
 import '../features/home/presentation/home_screen.dart' show HomeActions;
+import '../features/mascot/application/payday_celebration.dart';
 import '../features/mascot/presentation/mascot_moments.dart';
 import '../features/mascot/presentation/zaghlol_avatar.dart';
 
-class HomeMascotSlot extends ConsumerWidget {
+class HomeMascotSlot extends ConsumerStatefulWidget {
   const HomeMascotSlot({super.key, required this.actions});
 
   final HomeActions actions;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeMascotSlot> createState() => _HomeMascotSlotState();
+}
+
+class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
+  // T-215: set once when a payday celebration fires; the bubble keeps the
+  // payday line for this visit (the mark is already stored, so a restart or
+  // a rebuild never celebrates the same payday twice).
+  bool _payday = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final actions = widget.actions;
+    ref.listen(paydayCelebrationProvider, (_, next) {
+      if (next.value != null && !_payday) setState(() => _payday = true);
+    });
+    if (!_payday && ref.read(paydayCelebrationProvider).value != null) {
+      _payday = true;
+    }
     final l = AppLocalizations.of(context);
     final format = HomeFormat.of(context, ref);
     final message = ref.watch(homeMascotMessageProvider).value;
@@ -36,7 +54,13 @@ class HomeMascotSlot extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (text != null)
+        if (_payday)
+          ZaghlolTapBubble(
+            key: const ValueKey('home-mascot-payday'),
+            message: l.mascotPaydayLine,
+            moment: ZaghlolMoment.payday,
+          )
+        else if (text != null)
           ZaghlolTapBubble(
             key: const ValueKey('home-mascot'),
             message: text,

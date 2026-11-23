@@ -296,6 +296,11 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-210](tasks/T-210.md) | Charts v2: Categories tab | PO 11-22 | Medium | Sonnet | flutter-ui-engineer | T-209 | G | 58 | DONE (batch 58) |
 | [T-211](tasks/T-211.md) | Charts v2: Trends tab (in and out, saved each month, day-by-day heatmap) | PO 11-22 | Medium | Sonnet | flutter-ui-engineer | T-209 | G | 58 | DONE (batch 58) |
 | [T-212](tasks/T-212.md) | Build zaghlol.riv in code (no Rive editor) | PO 11-23 | High | Sonnet | flutter-ui-engineer | — | G | 59 | DONE (batch 59) |
+| [T-213](tasks/T-213.md) | Startup popup flashes on cold start (PO bug) | PO 11-23 | Medium | Sonnet | flutter-ui-engineer | — | G | 60 | DONE (batch 60) |
+| [T-214](tasks/T-214.md) | Voice: remember online-recognizer consent, revocable in Settings | PO 11-23 | Medium | Sonnet | flutter-core-engineer | — | G | 60 | DONE (batch 60) |
+| [T-215](tasks/T-215.md) | Mascot: wire payday, tap, pull, reading-messages and talk | PO 11-23 | Medium | Sonnet | flutter-ui-engineer | T-212 | G | 60 | DONE (batch 60) |
+| [T-216](tasks/T-216.md) | Follow-up sweep FU-285 (app), FU-286, FU-287 code | FU | Medium | Sonnet | flutter-core-engineer | — | G | 60 | DONE (batch 60) |
+| [T-217](tasks/T-217.md) | Follow-up sweep FU-285 backend | FU | Low | Sonnet | backend-engineer | — | G | 60 | DONE (batch 60) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

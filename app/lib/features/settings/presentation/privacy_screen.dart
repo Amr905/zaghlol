@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../categorization/application/contributions.dart';
@@ -35,6 +36,7 @@ class PrivacyScreen extends ConsumerWidget {
     final c = ZColors.of(context);
     final plat = platform ?? _platformName();
     final contributing = ref.watch(contributionOptInProvider).value ?? false;
+    final voiceOnline = ref.watch(voiceOnlineConsentProvider).value ?? false;
     final compromised = ref.watch(deviceCompromisedProvider);
 
     return SettingsScaffold(
@@ -97,6 +99,20 @@ class PrivacyScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+        SettingsSection(
+          children: [
+            SettingsSwitchRow(
+              key: const ValueKey('voice-online-consent-switch'),
+              title: t.voiceOnlineConsentLabel,
+              subtitle: t.voiceOnlineConsentSentence,
+              value: voiceOnline,
+              onChanged: (v) async {
+                final repo = await ref.read(settingsRepositoryProvider.future);
+                await repo.set(Settings.voiceOnlineConsent, v);
+              },
             ),
           ],
         ),

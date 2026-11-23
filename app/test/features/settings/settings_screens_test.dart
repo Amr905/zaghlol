@@ -444,6 +444,41 @@ void main() {
       );
     });
 
+    testWidgets(
+      'T-214: voice online switch shows stored state, off clears it',
+      (tester) async {
+        final h = SettingsHarness();
+        addTearDown(h.db.close);
+        await tester.runAsync(
+          () => h.repo.set(Settings.voiceOnlineConsent, true),
+        );
+        await tester.pumpWidget(
+          h.app(const PrivacyScreen(platform: 'android'), voiceOnline: true),
+        );
+        await settle(tester);
+        final row = find.byKey(const ValueKey('voice-online-consent-switch'));
+        await tester.ensureVisible(row);
+        expect(
+          tester
+              .widget<Switch>(
+                find.descendant(of: row, matching: find.byType(Switch)),
+              )
+              .value,
+          isTrue,
+        );
+        await tester.tap(
+          find.descendant(of: row, matching: find.byType(Switch)),
+        );
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 100)),
+        );
+        expect(
+          await tester.runAsync(() => h.repo.get(Settings.voiceOnlineConsent)),
+          isFalse,
+        );
+      },
+    );
+
     testWidgets('FU-141: turning contribution off deletes the queue', (
       tester,
     ) async {

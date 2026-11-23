@@ -1,7 +1,7 @@
 // T-120: the S-31 state machine. Listen, understand, let the user edit,
 // save on confirmation only (FR-VOI-03). Rules it enforces:
 //  * on-device recognition first; the online recognizer only after the user
-//    agrees in this session (D-42, OQ-06); never silently;
+//    agrees (D-42, OQ-06; remembered, revocable, T-214); never silently;
 //  * a Free user with 15 logs this month never reaches the mic (A-15);
 //  * one confirmed recording = one counted log, however many items (A-14);
 //    "Try again" and closing without saving count nothing.
@@ -13,6 +13,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../core/settings/settings_keys.dart';
+import '../../../core/settings/settings_providers.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../gold/application/gating.dart';
 import '../../transactions/data/transactions_providers.dart';
@@ -149,8 +151,23 @@ class VoiceController extends Notifier<VoiceState> {
     if (_disposed) return;
     if (supported) {
       await _listen(onDevice: true);
+    } else if (await _storedConsent()) {
+      // T-214: allowed before; no sheet, straight to recording.
+      _set(state.copyWith(online: true));
+      await _listen(onDevice: false);
     } else {
       _set(state.copyWith(phase: VoicePhase.needConsent));
+    }
+  }
+
+  /// The remembered "Allow" (encrypted settings); unreadable means not given.
+  Future<bool> _storedConsent() async {
+    try {
+      final repo = await ref.read(settingsRepositoryProvider.future);
+      final v = await repo.get(Settings.voiceOnlineConsent);
+      return !_disposed && v;
+    } on Object {
+      return false;
     }
   }
 
@@ -232,6 +249,12 @@ class VoiceController extends Notifier<VoiceState> {
 
   /// Consent sheet: "Allow".
   Future<void> allowOnline() async {
+    try {
+      final repo = await ref.read(settingsRepositoryProvider.future);
+      await repo.set(Settings.voiceOnlineConsent, true);
+    } on Object {
+      // Not remembered; this session still listens, the next one asks again.
+    }
     _set(state.copyWith(online: true));
     await _listen(onDevice: false);
   }

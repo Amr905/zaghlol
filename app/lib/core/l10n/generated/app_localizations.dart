@@ -4629,6 +4629,12 @@ abstract class AppLocalizations {
   /// **'أنا بحسب والدهب بيلمع، وإنت بتحوّش'**
   String get mascotTapLine10;
 
+  /// M · Rive payday · Home bubble when a salary lands (once per payday)
+  ///
+  /// In ar, this message translates to:
+  /// **'القبض نزل يا كبير! 🎉'**
+  String get mascotPaydayLine;
+
   /// C · C-35 segment 1
   ///
   /// In ar, this message translates to:
@@ -9794,6 +9800,18 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس.'**
   String get privacyContributeSentence;
+
+  /// L · toggle in Privacy, off until allowed (D-42)
+  ///
+  /// In ar, this message translates to:
+  /// **'استخدم التعرّف على الصوت أونلاين من تليفونك'**
+  String get voiceOnlineConsentLabel;
+
+  /// S · one-sentence explanation (D-42, INT-07)
+  ///
+  /// In ar, this message translates to:
+  /// **'بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول.'**
+  String get voiceOnlineConsentSentence;
 
   /// T · ⓘ sheet
   ///

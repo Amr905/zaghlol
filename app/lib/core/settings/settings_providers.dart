@@ -40,6 +40,7 @@ final quietHoursEnabledProvider = settingProvider(Settings.quietHoursEnabled);
 final appLockEnabledProvider = settingProvider(Settings.appLockEnabled);
 final appLockTimeoutSProvider = settingProvider(Settings.appLockTimeoutS);
 final contributionOptInProvider = settingProvider(Settings.contributionOptIn);
+final voiceOnlineConsentProvider = settingProvider(Settings.voiceOnlineConsent);
 final scanDepthMonthsProvider = settingProvider(Settings.scanDepthMonths);
 final setupProgressProvider = settingProvider(Settings.setupProgress);
 

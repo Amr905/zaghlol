@@ -3008,6 +3008,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mascotTapLine10 => 'I count, the gold shines, you save';
 
   @override
+  String get mascotPaydayLine => 'Payday landed! 🎉';
+
+  @override
   String get insightsTabsCharts => 'Charts';
 
   @override
@@ -6701,6 +6704,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyContributeSentence =>
       'If you turn it on, we send only the merchant name and the category you chose.';
+
+  @override
+  String get voiceOnlineConsentLabel =>
+      'Use the phone\'s online speech recognition';
+
+  @override
+  String get voiceOnlineConsentSentence =>
+      'Only when your phone can\'t do it offline. The audio goes to Google or Apple, never to Zaghlol.';
 
   @override
   String get privacyContributeInfoTitle => 'What exactly is sent?';

@@ -420,7 +420,12 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
         const SizedBox(height: ZSpacing.sm),
         _scanCard(l, c),
         const SizedBox(height: ZSpacing.lg),
-        const OnbMascot(size: 130),
+        OnbMascot(
+          size: 130,
+          moment: _progress.phase == ScanPhase.running
+              ? ZaghlolMoment.scanning
+              : ZaghlolMoment.tourGuide,
+        ),
         const SizedBox(height: ZSpacing.lg),
         Text(
           l.onboardingAndroidSetupNotifTitle,

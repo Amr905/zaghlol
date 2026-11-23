@@ -3107,6 +3107,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mascotTapLine10 => 'أنا بحسب والدهب بيلمع، وإنت بتحوّش';
 
   @override
+  String get mascotPaydayLine => 'القبض نزل يا كبير! 🎉';
+
+  @override
   String get insightsTabsCharts => 'الشارتات';
 
   @override
@@ -6836,6 +6839,14 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get privacyContributeSentence =>
       'لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس.';
+
+  @override
+  String get voiceOnlineConsentLabel =>
+      'استخدم التعرّف على الصوت أونلاين من تليفونك';
+
+  @override
+  String get voiceOnlineConsentSentence =>
+      'بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول.';
 
   @override
   String get privacyContributeInfoTitle => 'بالظبط إيه اللي بيتبعت؟';
