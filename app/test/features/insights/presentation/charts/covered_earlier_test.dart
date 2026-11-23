@@ -63,4 +63,36 @@ void main() {
       });
     }
   }
+
+  // T-231: the legend row (name, amount, share) scales its amount down
+  // instead of overflowing a 320dp screen (found on the emulator).
+  for (final locale in const [Locale('en'), Locale('ar', 'EG')]) {
+    testWidgets('${locale.languageCode} legend: wide amounts do not overflow '
+        'at 320dp', (t) async {
+      await t.binding.setSurfaceSize(const Size(320, 1200));
+      addTearDown(() => t.binding.setSurfaceSize(null));
+      final donut = CategoryDonut(
+        total: egpM(296296294),
+        slices: [
+          for (var i = 0; i < 3; i++)
+            CategorySlice(
+              categoryId: 'c$i',
+              amount: egpM(98765432 - i),
+              shareBp: 3333,
+              count: 2,
+            ),
+        ],
+      );
+      await t.pumpWidget(
+        harness(
+          DonutBody(donut: donut, nameOf: (_) => 'Food and drinks'),
+          locale: locale,
+          overrides: chartOverrides(),
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('donut-row-0')), findsOneWidget);
+      expect(t.takeException(), isNull);
+    });
+  }
 }

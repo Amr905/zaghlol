@@ -42,6 +42,24 @@ cash_rc=0
 rc=0
 rive_rc=0
 rc2=0
+# Helpers (also used by the explorer's `review` run).
+sms_emu() { # sender body: the emulator modem (real telephony, the real SmsReceiver when the app runs)
+  local out
+  out=$(adb -s "$DEVICE" emu sms send "$1" "$2" 2>&1 | tr -d '\r' | tr '\n' ' ')
+  echo "  emu[$1]: ${out:0:40}"
+  case "$out" in OK*) return 0 ;; *) return 1 ;; esac
+}
+sms_inbox_insert() { # sender body: a row in the system inbox (fallback when the console refuses the sender)
+  local out
+  out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$(date +%s)000 --bind read:i:0 --bind type:i:1" 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
+  echo "  insert[$1]: ${out:-ok}"
+}
+sms_hist() { sms_emu "$1" "$2" || sms_inbox_insert "$1" "$2"; }
+sms_live() { sms_emu "$1" "$2"; }
+inbox_rows() { # counts per sender in the system inbox (needs root); no bodies
+  adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address:date" 2>&1 | tr -d '\r' | sed -n 's/^Row: [0-9]* address=\(.*\), date=.*/\1/p' | sort | uniq -c | sed 's/^/  inbox: /'
+}
+
 # T-231: EXPLORER_ONLY skips everything up to the explorer; FLOWS_ONLY skips
 # the explorer (each is its own CI job so that none runs past its limit).
 if [ -z "${EXPLORER_ONLY:-}" ]; then
@@ -66,23 +84,6 @@ PERSONAL='hello from a friend 5'
 # Live copies differ from the historical ones: telephony drops an identical repeat.
 NODIGIT_L='Thank you for banking with HSBC again'
 PERSONAL_L='hello from a friend 6'
-
-sms_emu() { # sender body: the emulator modem (real telephony, the real SmsReceiver when the app runs)
-  local out
-  out=$(adb -s "$DEVICE" emu sms send "$1" "$2" 2>&1 | tr -d '\r' | tr '\n' ' ')
-  echo "  emu[$1]: ${out:0:40}"
-  case "$out" in OK*) return 0 ;; *) return 1 ;; esac
-}
-sms_inbox_insert() { # sender body: a row in the system inbox (fallback when the console refuses the sender)
-  local out
-  out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$(date +%s)000 --bind read:i:0 --bind type:i:1" 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
-  echo "  insert[$1]: ${out:-ok}"
-}
-sms_hist() { sms_emu "$1" "$2" || sms_inbox_insert "$1" "$2"; }
-sms_live() { sms_emu "$1" "$2"; }
-inbox_rows() { # counts per sender in the system inbox (needs root); no bodies
-  adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address:date" 2>&1 | tr -d '\r' | sed -n 's/^Row: [0-9]* address=\(.*\), date=.*/\1/p' | sort | uniq -c | sed 's/^/  inbox: /'
-}
 
 run_sms_device() {
   echo "==== SMS device"
@@ -286,7 +287,8 @@ runs=""
 # them runs past its limit. The old names (base, variants, new, all) stay.
 case "${EXPLORER_PLAN:-all}" in base | base-a | all) runs="$runs ar:0 ar:1" ;; esac
 case "${EXPLORER_PLAN:-all}" in base | base-b | all) runs="$runs ar:2 ar:3 ar:4" ;; esac
-case "${EXPLORER_PLAN:-all}" in variants | variants-a | all) runs="$runs en:-1 dark:-1 scale:-1" ;; esac
+case "${EXPLORER_PLAN:-all}" in variants | variants-a | all) runs="$runs en:-1 dark:-1" ;; esac
+case "${EXPLORER_PLAN:-all}" in variants | variants-c | all) runs="$runs scale:-1" ;; esac
 case "${EXPLORER_PLAN:-all}" in variants | variants-b | all) runs="$runs paywall:-1 onboarding:-1 onboarding_en:-1" ;; esac
 # TEST-explorer3: doubtful SMS on the Review screen, SMS diagnostics, all charts as a free user.
 case "${EXPLORER_PLAN:-all}" in new | all) runs="$runs review:-1 charts:-1" ;; esac
@@ -315,7 +317,7 @@ for run in $runs; do
   else
     adb -s "$DEVICE" shell settings put system font_scale 1.0 || true
   fi
-  perl -e 'alarm shift; exec @ARGV' 1500 \
+  perl -e 'alarm shift; exec @ARGV' 1200 \
     flutter test integration_test/app_explorer_test.dart \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     --dart-define=EXPLORER_PART=$part --dart-define=EXPLORER_MODE=$mode \

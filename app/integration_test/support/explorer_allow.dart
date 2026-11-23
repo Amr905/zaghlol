@@ -82,6 +82,22 @@ final List<ExplorerAllow> explorerAllow = [
     where: _r('اختار صورة|Choose an image'),
     reason: 'opens the system image picker (leaves the app on purpose)',
   ),
+  // Link my own transfer: the first candidate starts selected.
+  ExplorerAllow(
+    screen: _r('ربط تحويلة لنفسي|Link my own transfer'),
+    kind: 'dead-tap',
+    reason:
+        'the first candidate is preselected (the sheet keeps `_picked` null '
+        'until a tap), so tapping it again changes nothing',
+  ),
+  // Text fields: a tap focuses them, no text changes. The explorer calls the
+  // field's gesture area "GestureDetector". Inferred from the control type.
+  ExplorerAllow(
+    screen: _r('^رصيد |^Balance of |^مصروف جديد|^New expense|^Add expense'),
+    kind: 'dead-tap',
+    where: _r('GestureDetector'),
+    reason: 'a text field: the tap focuses it (no text change to see)',
+  ),
   // Pickers and sheets that close or change on a choice.
   ExplorerAllow(
     screen: _r(

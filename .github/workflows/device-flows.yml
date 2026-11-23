@@ -32,9 +32,9 @@ on:
         type: string
         default: '34'
       explorer_plan:
-        description: 'Explorer slice: base-a/base-b (Arabic light), variants-a (en, dark, 1.3) / variants-b (paywall, onboarding), new (review cards, charts) or all (every slice, in parallel jobs)'
+        description: 'Explorer slice: base-a/base-b (Arabic light), variants-a (en, dark) / variants-b (paywall, onboarding) / variants-c (text 1.3), new (review cards, charts) or all (every slice, in parallel jobs)'
         type: choice
-        options: [all, base-a, base-b, variants-a, variants-b, new]
+        options: [all, base-a, base-b, variants-a, variants-b, variants-c, new]
         default: all
   push:
     branches:
@@ -161,7 +161,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        plan: ${{ fromJSON(inputs.explorer_plan && inputs.explorer_plan != 'all' && format('["{0}"]', inputs.explorer_plan) || (startsWith(github.ref_name, 'ci/TEST-explorer3') && '["new"]' || '["base-a","base-b","variants-a","variants-b","new"]')) }}
+        plan: ${{ fromJSON(inputs.explorer_plan && inputs.explorer_plan != 'all' && format('["{0}"]', inputs.explorer_plan) || (startsWith(github.ref_name, 'ci/TEST-explorer3') && '["new"]' || '["base-a","base-b","variants-a","variants-b","variants-c","new"]')) }}
     env:
       DEVICE: emulator-5554
       JOB_LABEL: explorer-${{ matrix.plan }}
