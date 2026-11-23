@@ -447,6 +447,29 @@ class NotificationsHostApi {
     );
   }
 
+  /// T-228: cancels one notification by id, shown or scheduled (a paid
+  /// bill's reminder, a weekly nudge replaced by the real summary). Unknown
+  /// ids are ignored.
+  Future<void> cancel(int id) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.zaghlol.NotificationsHostApi.cancel$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   /// The route of the notification that launched the app, once.
   Future<String?> takeLaunchRoute() async {
     final pigeonVar_channelName =

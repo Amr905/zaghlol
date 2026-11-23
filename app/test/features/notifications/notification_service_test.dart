@@ -10,6 +10,7 @@ class FakeGateway implements NotificationGateway {
   int cancels = 0;
   final shown = <PlatformNotification>[];
   final scheduled = <PlatformNotification>[];
+  final cancelled = <int>[];
   @override
   Future<void> show(PlatformNotification n) async => shown.add(n);
   @override
@@ -18,6 +19,9 @@ class FakeGateway implements NotificationGateway {
   Future<void> cancelScheduled() async {
     cancels++;
   }
+
+  @override
+  Future<void> cancel(int id) async => cancelled.add(id);
 }
 
 const quiet = QuietHours(enabled: true, startMin: 23 * 60, endMin: 8 * 60);
@@ -48,6 +52,9 @@ class _ThrowingGateway implements NotificationGateway {
   Future<void> cancelScheduled() async {
     cancels++;
   }
+
+  @override
+  Future<void> cancel(int id) async {}
 }
 
 void main() {

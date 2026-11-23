@@ -27,9 +27,16 @@ class _Gw implements NotificationGateway {
   @override
   Future<void> show(PlatformNotification n) async => shown.add(n);
   @override
-  Future<void> schedule(PlatformNotification n) async => shown.add(n);
+  Future<void> schedule(PlatformNotification n) async {
+    // T-228: the resume run also schedules the generic Friday nudge.
+    if (n.type == NotificationType.weeklySummary) return;
+    shown.add(n);
+  }
+
   @override
   Future<void> cancelScheduled() async => cancels++;
+  @override
+  Future<void> cancel(int id) async {}
 }
 
 void main() {

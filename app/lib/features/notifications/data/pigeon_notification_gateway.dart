@@ -87,6 +87,10 @@ final class PigeonNotificationGateway implements NotificationGateway {
   /// it, then schedule again with text redacted for the current setting.
   @override
   Future<void> cancelScheduled() => _api.cancelScheduled();
+
+  /// T-228: one notification by id.
+  @override
+  Future<void> cancel(int id) => _api.cancel(id);
 }
 
 final class PigeonNotificationPermission implements NotificationPermissionPort {

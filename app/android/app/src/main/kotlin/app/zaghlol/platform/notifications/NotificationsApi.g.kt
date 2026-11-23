@@ -395,6 +395,12 @@ interface NotificationsHostApi {
    * never rebuilds a notification (it has no text to redact).
    */
   fun cancelScheduled()
+  /**
+   * T-228: cancels one notification by id, shown or scheduled (a paid
+   * bill's reminder, a weekly nudge replaced by the real summary). Unknown
+   * ids are ignored.
+   */
+  fun cancel(id: Long)
   /** The route of the notification that launched the app, once. */
   fun takeLaunchRoute(): String?
   /**
@@ -525,6 +531,24 @@ interface NotificationsHostApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               api.cancelScheduled()
+              listOf(null)
+            } catch (exception: Throwable) {
+              NotificationsApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.zaghlol.NotificationsHostApi.cancel$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.cancel(idArg)
               listOf(null)
             } catch (exception: Throwable) {
               NotificationsApiPigeonUtils.wrapError(exception)

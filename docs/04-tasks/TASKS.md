@@ -306,6 +306,12 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-220](tasks/T-220.md) | Launch screen matches the app on a cold start | PO 11-23 | Medium | Sonnet | flutter-ui-engineer | T-213 | G | 61 | DONE (batch 61) |
 | [T-221](tasks/T-221.md) | Backend and ops follow-ups: FU-263, FU-264 (1)(2) | FU | Medium | Sonnet | backend-engineer | — | B | 61 | DONE (batch 61) |
 | [T-222](tasks/T-222.md) | App build and launch-route follow-ups: FU-264 (3), FU-272, FU-263 (a) | FU | Medium | Sonnet | flutter-core-engineer | — | D | 61 | DONE (batch 61) |
+| [T-223](tasks/T-223.md) | Charts: drill header dates, Other rows, net-worth thin state | FU | Medium | Sonnet | flutter-ui-engineer | — | G | 62 | DONE (batch 62) |
+| [T-224](tasks/T-224.md) | Launch frame follows the in-app theme choice | T-220 FU | Medium | Sonnet | native-platform-engineer | T-220 | D | 62 | DONE (batch 62) |
+| [T-225](tasks/T-225.md) | Supply-chain pins and narrower secret-scan allowlists | FU | Medium | Sonnet | backend-engineer | — | B | 62 | DONE (batch 62) |
+| [T-226](tasks/T-226.md) | Old follow-up triage FU-233..FU-237 | FU | Medium | Sonnet | flutter-core-engineer | — | G | 62 | DONE (batch 62) |
+| [T-227](tasks/T-227.md) | Old follow-up triage FU-238..240, 248, 249, 258 | FU | Medium | Sonnet | flutter-core-engineer | — | G | 62 | DONE (batch 62) |
+| [T-228](tasks/T-228.md) | Notifications: cancel paid bill reminder, Friday summary, safer action intents | FU-258 | High | Sonnet | native-platform-engineer | — | D | 62 | DONE (batch 62) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

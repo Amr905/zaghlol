@@ -13,6 +13,7 @@ import app.zaghlol.platform.diag.SmsDiagChannel
 import app.zaghlol.platform.device.DeviceSecurityRegistration
 import app.zaghlol.platform.device.SecureWindowState
 import app.zaghlol.platform.keys.SecretStoreRegistration
+import app.zaghlol.platform.launchtheme.LaunchTheme
 import app.zaghlol.platform.notifications.NotificationHandOff
 import app.zaghlol.platform.notifications.NotificationPresenter
 import app.zaghlol.platform.notifications.NotificationRoutes
@@ -50,11 +51,26 @@ class MainActivity : FlutterFragmentActivity() {
     private var notificationsHost: NotificationsHost? = null
     private var notificationEvents: NotificationsEventsApi? = null
 
+    // T-224: the stored in-app theme choice decides which night/day resources
+    // (theme, launch drawable) resolve for this activity, before the first frame.
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(LaunchTheme.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         // T-103: a re-created activity is secured again before its first frame.
         if (SecureWindowState.requested) AndroidDeviceEnv.applyTo(this, true)
         super.onCreate(savedInstanceState)
     }
+    private var launchThemeChannel: MethodChannel? = null
+
+    // T-224 fix: uiMode is in configChanges, so a system theme switch arrives
+    // here; Dart maps its "system" choice to the reported value.
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        launchThemeChannel?.invokeMethod("systemIsDark", LaunchTheme.systemIsDark())
+    }
+
     private var ocrExecutor: ExecutorService? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -77,6 +93,21 @@ class MainActivity : FlutterFragmentActivity() {
         ShareImageRegistration.register(messenger, this)
         // T-120: on-device speech support check (UI engine only).
         SpeechSupportRegistration.register(messenger, this)
+        // T-224: the theme choice (light/dark/system only) for the next cold start.
+        val themeChannel = MethodChannel(messenger, "zaghlol/launch_theme")
+        launchThemeChannel = themeChannel
+        themeChannel.setMethodCallHandler { call, result ->
+            if (call.method == "systemIsDark") {
+                // The phone's real night mode (the activity's own is forced by the choice).
+                result.success(LaunchTheme.systemIsDark())
+            } else if (call.method != "set") {
+                result.notImplemented()
+            } else if (LaunchTheme.write(applicationContext.noBackupFilesDir, call.arguments as? String)) {
+                result.success(null)
+            } else {
+                result.error("invalid", null, null)
+            }
+        }
         // FU-229b: "Open settings" of a denied permission opens the app details page.
         MethodChannel(messenger, "zaghlol/app_settings").setMethodCallHandler { call, result ->
             if (call.method != "open") {
@@ -164,6 +195,8 @@ class MainActivity : FlutterFragmentActivity() {
         ShareImageRegistration.sweepAll(this)
         SpeechSupportRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/app_settings").setMethodCallHandler(null)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/launch_theme").setMethodCallHandler(null)
+        launchThemeChannel = null
         NotificationsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         BackupWorkHostApi.setUp(flutterEngine.dartExecutor.binaryMessenger, null)
         notificationsHost = null

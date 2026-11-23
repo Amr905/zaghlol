@@ -224,7 +224,12 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
       (
         name: 'auto_mark_paid',
         run: () async {
-          await (await recurring()).autoMarkPaid();
+          final marks = await (await recurring()).autoMarkPaid();
+          // T-228: a captured payment paid it; its reminders are stale.
+          await cancelRemindersForMarks(
+            await ref.read(notificationServiceProvider.future),
+            marks,
+          );
         },
       ),
       (

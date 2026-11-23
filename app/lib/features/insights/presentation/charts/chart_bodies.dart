@@ -847,8 +847,11 @@ class _CoveredEarlierNote extends ConsumerWidget {
 // ---------------------------------------------------------- 6 top merchants
 
 class MerchantsBody extends ConsumerWidget {
-  const MerchantsBody({super.key, required this.rows, this.onOpen});
+  const MerchantsBody({super.key, required this.rows, this.onOpen, this.other});
   final List<MerchantSpend> rows;
+
+  /// T-223: the tail beyond [rows], shown as a plain "Other" row.
+  final ({Money amount, int count})? other;
 
   /// A tapped place opens its transactions. Null: rows are plain.
   final ValueChanged<MerchantSpend>? onOpen;
@@ -865,10 +868,20 @@ class MerchantsBody extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
     final digits = ref.watch(digitsModeProvider(lang));
-    final top = rows.map((r) => r.amount.minor).fold<int>(1, math.max);
+    final all = [
+      ...rows,
+      if (other != null)
+        MerchantSpend(
+          merchantNorm: '',
+          name: l.insightsChartsOtherSlice,
+          amount: other!.amount,
+          count: other!.count,
+        ),
+    ];
+    final top = all.map((r) => r.amount.minor).fold<int>(1, math.max);
     return Column(
       children: [
-        for (final r in rows)
+        for (final r in all)
           Builder(
             builder: (context) {
               final count = l.insightsChartsPlaceCount(
@@ -911,7 +924,7 @@ class MerchantsBody extends ConsumerWidget {
                   ),
                 ),
               );
-              if (onOpen == null) return row;
+              if (onOpen == null || r.merchantNorm.isEmpty) return row;
               return Semantics(
                 button: true,
                 label: a11yAmounts(

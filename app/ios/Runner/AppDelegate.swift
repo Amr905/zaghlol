@@ -86,6 +86,29 @@ import UserNotifications
     BackupWorkRegistration.register(with: engineBridge.pluginRegistry)
     // NOTIF-GW: local notifications and the permission prompt.
     NotificationsRegistration.register(with: engineBridge.pluginRegistry)
+    // T-224: the theme choice (light/dark/system only) for the next cold start.
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "ZaghlolLaunchTheme") {
+      let channel = FlutterMethodChannel(
+        name: "zaghlol/launch_theme", binaryMessenger: registrar.messenger())
+      channel.setMethodCallHandler { call, result in
+        guard call.method == "set" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        if LaunchTheme.write(call.arguments as? String) {
+          // FU-290a: apply now, so dark -> system also clears the override.
+          let style = LaunchTheme.style(for: LaunchTheme.read())
+          DispatchQueue.main.async {
+            for scene in UIApplication.shared.connectedScenes {
+              (scene as? UIWindowScene)?.windows.forEach { $0.overrideUserInterfaceStyle = style }
+            }
+          }
+          result(nil)
+        } else {
+          result(FlutterError(code: "invalid", message: nil, details: nil))
+        }
+      }
+    }
     // FU-229b: "Open settings" opens this app's page in Settings.
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "ZaghlolAppSettings") {
       let channel = FlutterMethodChannel(

@@ -14,6 +14,7 @@ import 'package:zaghlol/core/ui/z_money_text.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol/features/insights/domain/chart_summary.dart';
 import 'package:zaghlol/features/insights/presentation/charts/chart_bodies.dart';
+import 'package:zaghlol/features/insights/presentation/charts/chart_thin.dart';
 import 'package:zaghlol/features/insights/presentation/charts/charts_screen.dart';
 import 'package:zaghlol/features/insights/presentation/charts/gold_chart_card.dart';
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
@@ -593,6 +594,56 @@ void main() {
       await _pump(tester);
       final size = tester.getSize(find.byKey(const Key('merchant-m0')));
       expect(size.height, greaterThanOrEqualTo(48));
+    });
+  });
+
+  group('T-223', () {
+    testWidgets('Other row folds the tail and is not tappable', (tester) async {
+      var opened = 0;
+      await _pump(
+        tester,
+        height: 800,
+        child: Scaffold(
+          body: MerchantsBody(
+            rows: [
+              MerchantSpend(
+                merchantNorm: 'm0',
+                name: 'Shop 0',
+                amount: Money.fromStorage(1000, 'EGP'),
+                count: 1,
+              ),
+            ],
+            other: (amount: Money.fromStorage(400, 'EGP'), count: 3),
+            onOpen: (_) => opened++,
+          ),
+        ),
+      );
+      expect(find.text('Other'), findsOneWidget);
+      await tester.tap(find.text('Other'));
+      expect(opened, 0);
+    });
+
+    testWidgets('net-worth thin state shows today\'s number', (tester) async {
+      await _pump(
+        tester,
+        height: 800,
+        child: Scaffold(
+          body: ChartNotEnough(
+            result: ChartNotEnoughData<Object?>(
+              NotEnoughReason.tooFewSnapshots,
+              have: 1,
+              need: 2,
+              current: Money.fromStorage(250000, 'EGP'),
+            ),
+            fallback: 'x',
+          ),
+        ),
+      );
+      expect(find.byKey(const Key('thin-current')), findsOneWidget);
+      expect(
+        (tester.widget<Text>(find.byKey(const Key('thin-current'))).data),
+        contains('2,500'),
+      );
     });
   });
 

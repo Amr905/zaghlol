@@ -57,6 +57,23 @@ class NotificationPresenter(private val context: Context) {
     cancelScheduled()
   }
 
+  /** T-228: one id, shown or scheduled. Unknown ids do nothing. */
+  fun cancel(id: Int) {
+    nm.cancel(id)
+    val pi =
+      PendingIntent.getBroadcast(
+        context,
+        id,
+        Intent(context, NotificationAlarmReceiver::class.java).setPackage(context.packageName),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
+      )
+    if (pi != null) {
+      alarms.cancel(pi)
+      pi.cancel()
+    }
+    pending.remove(id)
+  }
+
   /** FU-267: only the alarms that have not fired; what is already shown stays. */
   fun cancelScheduled() {
     for (id in pending.all()) {

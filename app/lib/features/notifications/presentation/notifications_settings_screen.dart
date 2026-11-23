@@ -114,6 +114,9 @@ class _NotificationsSettingsScreenState
     setState(() => _bools[key] = value);
     final repo = await ref.read(settingsRepositoryProvider.future);
     await repo.set(key, value);
+    if (!value && key == NotificationType.weeklySummary.toggle) {
+      await ref.read(cancelWeeklyNudgeProvider)();
+    }
     final isType = NotificationType.values.any((t) => t.toggle == key);
     if (value && isType && !anyOnBefore || value && isType && _osOff) {
       final ok = await ensureNotificationPermission(ref);

@@ -21,6 +21,7 @@ import 'core/logging/early_error_handlers.dart';
 import 'core/l10n/font_licenses.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/l10n/locale_providers.dart';
+import 'core/platform/launch_theme.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/theme_mode_provider.dart';
 import 'core/theme/app_theme.dart';
@@ -178,6 +179,10 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // T-224: native reads the theme choice before the first frame.
+    ref.listenManual(appThemeModeProvider, (_, mode) {
+      unawaited(ref.read(launchThemeWriterProvider)(mode));
+    }, fireImmediately: true);
     // T-100: the weekly summary (when 7 days have passed) and the duplicate
     // check at start; again on every resume.
     unawaited(ref.read(resumeJobsProvider)(coldStart: true));
@@ -237,7 +242,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     ref.watch(widgetBridgeWiringProvider);
     return ZaghlolApp(
       locale: ref.watch(appLocaleProvider),
-      themeMode: ref.watch(appThemeModeProvider),
+      themeMode: ref.watch(effectiveThemeModeProvider),
     );
   }
 }

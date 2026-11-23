@@ -108,10 +108,15 @@ final class ChartNotEnoughData<T> extends ChartResult<T> {
     this.reason, {
     required this.have,
     required this.need,
+    this.current,
   });
   final NotEnoughReason reason;
   final int have;
   final int need;
+
+  /// T-223: today's number when one exists and only the history is thin
+  /// (net worth with a single snapshot).
+  final Money? current;
 }
 
 /// Minimums behind the "not enough data" states.

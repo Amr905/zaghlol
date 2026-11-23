@@ -4725,6 +4725,12 @@ abstract class AppLocalizations {
   /// **'بحمّل الشارتات'**
   String get insightsChartsLoadingA11y;
 
+  /// T-223: net worth thin state, today's number
+  ///
+  /// In ar, this message translates to:
+  /// **'صافي ثروتك النهارده: {amount}'**
+  String insightsChartsNetWorthNow(String amount);
+
   /// C · donut remainder slice
   ///
   /// In ar, this message translates to:
