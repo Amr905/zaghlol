@@ -315,7 +315,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-229](tasks/T-229.md) | Pin CI/server-kit images by digest; FU-237a path | FU | Low | Haiku | boilerplate-engineer | — | B | 63 | DONE (batch 63) |
 | [T-230](tasks/T-230.md) | Friday nudge and bill reminders survive a restart | FU | Medium | Sonnet | native-platform-engineer | T-228 | D | 63 | DONE (batch 63) |
 | [T-231](tasks/T-231.md) | Emulator run: fix device flow, triage explorer findings, Rive on device | QA | Medium | Sonnet | flutter-ui-engineer | — | G | 64 | TODO |
-| [T-232](tasks/T-232.md) | Mascot: all approved Motion Lab animations in zaghlol.riv + mood preview | PO 11-23 | High | Sonnet | flutter-ui-engineer | T-231 | G | 64 | TODO |
+| [T-232](tasks/T-232.md) | Mascot: all approved Motion Lab animations in zaghlol.riv + mood preview | PO 11-23 | High | Sonnet | flutter-ui-engineer | T-231 | G | 64 | BUILT |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
