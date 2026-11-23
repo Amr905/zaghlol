@@ -896,6 +896,7 @@ Replaces the 85 rows above that only pointed at batch review reports or were mar
 - **FU-288** (batch 60, FIXED (batch 61, T-219)): copy-deck checker reports 24 errors (batch 58 `insights_v2_trends_*` key shape and AR digits; `voiceOnlineConsent_*` key shape) and the voice consent label is over the length limit; other review minors in [batch-60](05-reviews/batch-60.md). (The Settings re-scan keeps its own results panel, so T-213's gate change loses no sheet.)
 - **FU-289** (batch 61, OPEN; T-223 BUILT closes the FU-284 scope notes): T-222's bundletool SHA-256 pin is checked by the dispatched `size-report` run, not by the batch run; FU-284 scope notes (drill header dates, "Other" rows, net-worth thin state) still open. The QA follow-up script's literal dev passwords were removed by the Lead in batch 61. Details in [batch-61](05-reviews/batch-61.md).
 - **FU-290** (batch 62, OPEN): (a), (b), (c), (d), (f) FIXED (c and the image pins in T-229: CI `docker run` images pinned by digest, FU-237a path corrected); still open: (e) the Friday nudge is lost after a reboot until the app runs; launch frames drawn by the OS (iOS launch screen, Android 12+ splash) still follow the system theme. Details in [batch-62](05-reviews/batch-62.md).
+- **FU-291** (batch 63): review minors FIXED by the Lead in the batch (process-wide lock for the schedule store, temp-file + rename writes, manifest comment). Open: a real-phone reboot check of re-armed alerts (steps in T-230.md).
 
 ## Log
 | Date | Event |

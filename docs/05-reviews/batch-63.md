@@ -11,3 +11,6 @@ Minors (proposed FU-291, none block):
 2. `@Synchronized` is per `ScheduleBook` instance; the presenter, alarm receiver and boot receiver each build their own, so there is no cross-instance lock (read-modify-write race on rare overlap). Use a shared lock (companion object) or a process-wide singleton.
 3. `AndroidManifest.xml` top comment still says "no RECEIVE_BOOT_COMPLETED"; now stale.
 4. Corrupt lines are silently skipped and dropped on next save (acceptable, noted).
+
+## Lead delta check
+FU-291 minors fixed in the batch: `ScheduleBook` uses one process-wide lock (companion object) instead of per-instance `@Synchronized`; `FileScheduleStore.save` writes a temp file and renames it; manifest header comment corrected. New Kotlin test: 8 threads over two books on one file write 200 entries with no lost entry and no temp file left. Verified by app-ci on the batch branch.

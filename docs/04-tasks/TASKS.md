@@ -312,8 +312,8 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-226](tasks/T-226.md) | Old follow-up triage FU-233..FU-237 | FU | Medium | Sonnet | flutter-core-engineer | — | G | 62 | DONE (batch 62) |
 | [T-227](tasks/T-227.md) | Old follow-up triage FU-238..240, 248, 249, 258 | FU | Medium | Sonnet | flutter-core-engineer | — | G | 62 | DONE (batch 62) |
 | [T-228](tasks/T-228.md) | Notifications: cancel paid bill reminder, Friday summary, safer action intents | FU-258 | High | Sonnet | native-platform-engineer | — | D | 62 | DONE (batch 62) |
-| [T-229](tasks/T-229.md) | Pin CI/server-kit images by digest; FU-237a path | FU | Low | Haiku | boilerplate-engineer | — | B | 63 | BUILT |
-| [T-230](tasks/T-230.md) | Friday nudge and bill reminders survive a restart | FU | Medium | Sonnet | native-platform-engineer | T-228 | D | 63 | TODO |
+| [T-229](tasks/T-229.md) | Pin CI/server-kit images by digest; FU-237a path | FU | Low | Haiku | boilerplate-engineer | — | B | 63 | DONE (batch 63) |
+| [T-230](tasks/T-230.md) | Friday nudge and bill reminders survive a restart | FU | Medium | Sonnet | native-platform-engineer | T-228 | D | 63 | DONE (batch 63) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
