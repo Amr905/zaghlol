@@ -1,13 +1,13 @@
 package app.zaghlol.platform.launchtheme
 
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 
 class LaunchThemeTest {
-    private fun dir(): File = createTempDir("launch_theme")
+    private fun dir(): File = java.nio.file.Files.createTempDirectory("launch_theme").toFile()
 
     @Test
     fun missingFileFollowsSystem() {
