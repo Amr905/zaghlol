@@ -8,29 +8,29 @@
   <ItemGroup>
     <!-- Runtime -->
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.15" />
     <!-- Persistence (T-122). EF Core, the design-time package and the dotnet-ef tool (.config/dotnet-tools.json) share one version. -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.15" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
-    <PackageVersion Include="Npgsql" Version="10.0.3" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="Npgsql" Version="10.0.4" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.4" />
     <!-- Observability (T-138). Core packages share a version; the instrumentation packages version separately. -->
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.21.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageVersion Include="Serilog.Formatting.Compact" Version="3.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
     <!-- Operator OIDC (T-136): JWS parsing and RS256/ES256 signature validation against the IdP's JWKS; maintained Microsoft
          identity library (8.x line, .NET 9/10 support). Microsoft.IdentityModel.Tokens/Logging/Abstractions come with it. -->
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.23.0" />
@@ -41,15 +41,15 @@
     <!-- The .NET standard resilience pipeline (Polly v8) for the Play client: attempt/total timeouts, retries, circuit breaker.
          10.8.0 is the newest release whose Microsoft.Extensions.* dependencies are 10.0.10, the runtime line pinned above
          (10.9.0+ need 10.0.11+, which central transitive pinning would reject as a downgrade). -->
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.8.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.1" />
     <!-- T-181: App Attest attestation/assertion CBOR (Microsoft's reader; no Apple .NET library exists). 10.0.10 is flagged by GHSA-vmv3-wvjp-wqpj (NU1902); 10.0.15, the newest 10.0.x, is not. No dependencies on net10.0, so it doesn't move the runtime line. -->
     <PackageVersion Include="System.Formats.Cbor" Version="10.0.15" />
     <!-- Tests -->
-    <PackageVersion Include="JsonSchema.Net" Version="7.3.4" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.15.3" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.6.0" />
+    <PackageVersion Include="JsonSchema.Net" Version="7.4.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.2" />
+    <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.21.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.17.0" />
     <!-- Transitive pin: WireMock.Net.Minimal 2.21.0 (test-only) pulls Microsoft.AspNetCore.WebUtilities 2.3.0 (GHSA-6527-9fp8-r4x6);
          2.3.14 is the first 2.3.x without the advisory on nuget.org (checked 2026-11-11). -->
     <PackageVersion Include="Microsoft.AspNetCore.WebUtilities" Version="2.3.14" />
@@ -58,10 +58,10 @@
     <!-- Test-only: an in-process HTTP server standing in for the Play Developer API (T-130). The Minimal package leaves out the
          GraphQL, gRPC/ProtoBuf and OpenTelemetry extras of the WireMock.Net meta-package. 2.21.0 is the newest release on the
          10.0.10 runtime line (2.30.0 needs Microsoft.Extensions.* 10.0.14). -->
-    <PackageVersion Include="WireMock.Net.Minimal" Version="2.21.0" />
+    <PackageVersion Include="WireMock.Net.Minimal" Version="2.32.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
 
 </Project>
