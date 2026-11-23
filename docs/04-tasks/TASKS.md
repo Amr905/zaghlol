@@ -301,11 +301,11 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-215](tasks/T-215.md) | Mascot: wire payday, tap, pull, reading-messages and talk | PO 11-23 | Medium | Sonnet | flutter-ui-engineer | T-212 | G | 60 | DONE (batch 60) |
 | [T-216](tasks/T-216.md) | Follow-up sweep FU-285 (app), FU-286, FU-287 code | FU | Medium | Sonnet | flutter-core-engineer | — | G | 60 | DONE (batch 60) |
 | [T-217](tasks/T-217.md) | Follow-up sweep FU-285 backend | FU | Low | Sonnet | backend-engineer | — | G | 60 | DONE (batch 60) |
-| [T-218](tasks/T-218.md) | Charts follow-ups: FU-286 rest and FU-284 scope notes | FU | Medium | Sonnet | flutter-ui-engineer | — | G | 61 | TODO |
-| [T-219](tasks/T-219.md) | Copy deck clean-up: checker errors and the voice label | FU | Low | Sonnet | flutter-ui-engineer | — | G | 61 | TODO |
-| [T-220](tasks/T-220.md) | Launch screen matches the app on a cold start | PO 11-23 | Medium | Sonnet | flutter-ui-engineer | T-213 | G | 61 | TODO |
-| [T-221](tasks/T-221.md) | Backend and ops follow-ups: FU-263, FU-264 (1)(2) | FU | Medium | Sonnet | backend-engineer | — | B | 61 | TODO |
-| [T-222](tasks/T-222.md) | App build and launch-route follow-ups: FU-264 (3), FU-272, FU-263 (a) | FU | Medium | Sonnet | flutter-core-engineer | — | D | 61 | TODO |
+| [T-218](tasks/T-218.md) | Charts follow-ups: FU-286 rest and FU-284 scope notes | FU | Medium | Sonnet | flutter-ui-engineer | — | G | 61 | DONE (batch 61) |
+| [T-219](tasks/T-219.md) | Copy deck clean-up: checker errors and the voice label | FU | Low | Sonnet | flutter-ui-engineer | — | G | 61 | DONE (batch 61) |
+| [T-220](tasks/T-220.md) | Launch screen matches the app on a cold start | PO 11-23 | Medium | Sonnet | flutter-ui-engineer | T-213 | G | 61 | DONE (batch 61) |
+| [T-221](tasks/T-221.md) | Backend and ops follow-ups: FU-263, FU-264 (1)(2) | FU | Medium | Sonnet | backend-engineer | — | B | 61 | DONE (batch 61) |
+| [T-222](tasks/T-222.md) | App build and launch-route follow-ups: FU-264 (3), FU-272, FU-263 (a) | FU | Medium | Sonnet | flutter-core-engineer | — | D | 61 | DONE (batch 61) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
