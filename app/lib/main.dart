@@ -179,6 +179,10 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // T-224: native reads the theme choice before the first frame.
+    ref.listenManual(appThemeModeProvider, (_, mode) {
+      unawaited(ref.read(launchThemeWriterProvider)(mode));
+    }, fireImmediately: true);
     // T-100: the weekly summary (when 7 days have passed) and the duplicate
     // check at start; again on every resume.
     unawaited(ref.read(resumeJobsProvider)(coldStart: true));
@@ -236,10 +240,6 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     ref.watch(pendingAlertsWatcherProvider); // FU-267
     // T-118: the home-screen widget follows the cycle overview.
     ref.watch(widgetBridgeWiringProvider);
-    // T-224: native reads the theme choice before the first frame.
-    ref.listen(appThemeModeProvider, (_, mode) {
-      ref.read(launchThemeWriterProvider)(mode);
-    }, fireImmediately: true);
     return ZaghlolApp(
       locale: ref.watch(appLocaleProvider),
       themeMode: ref.watch(appThemeModeProvider),
