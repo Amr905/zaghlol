@@ -27,62 +27,63 @@ void main() {
   testWidgets('lock engages after a background trip; secure window follows', (
     t,
   ) async {
-    final semantics = t.ensureSemantics();
-    addTearDown(semantics.dispose);
-    await e.seedReturningUser();
-    e.captureFlutterErrors();
+    await e.guarded(t, () async {
+      await e.seedReturningUser();
+      e.captureFlutterErrors();
 
-    await app.main();
-    e.say('MAIN_RETURNED');
-    await e.waitFor(t, find.text('Home'), what: 'Home');
-    await e.settle(t, 2000);
-    final lockKey = find.byKey(const ValueKey('lock-unlock'));
-    e.check(!e.found(lockKey), 'no lock screen while the lock is off');
-    await e.shot(t, '01-lock-off');
+      await app.main();
+      e.say('MAIN_RETURNED');
+      await e.waitFor(t, find.text('Home'), what: 'Home');
+      await e.settle(t, 2000);
+      final lockKey = find.byKey(const ValueKey('lock-unlock'));
+      e.check(!e.found(lockKey), 'no lock screen while the lock is off');
+      await e.shot(t, '01-lock-off');
 
-    // ---- Lock on (timeout 0: lock at once after a background trip).
-    final repo = await e.container().read(settingsRepositoryProvider.future);
-    await repo.set(Settings.appLockTimeoutS, 0);
-    await repo.set(Settings.appLockEnabled, true);
-    await e.settle(t, 2000);
-    e.check(
-      !e.container().read(appLockControllerProvider).locked,
-      'turning the lock on does not lock the user out at once',
-    );
+      // ---- Lock on (timeout 0: lock at once after a background trip).
+      final repo = await e.container().read(settingsRepositoryProvider.future);
+      await repo.set(Settings.appLockTimeoutS, 0);
+      await repo.set(Settings.appLockEnabled, true);
+      await e.settle(t, 2000);
+      e.check(
+        !e.container().read(appLockControllerProvider).locked,
+        'turning the lock on does not lock the user out at once',
+      );
 
-    // ---- Background and foreground.
-    final b = WidgetsBinding.instance;
-    b.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    b.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
-    b.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    await e.settle(t, 1500);
-    b.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
-    b.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    b.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await e.settle(t, 2000);
-    e.check(
-      e.container().read(appLockControllerProvider).locked,
-      'the controller is locked after the background trip',
-    );
-    await e.waitFor(t, lockKey, what: 'the lock screen');
-    await e.shot(t, '02-locked');
+      // ---- Background and foreground.
+      final b = WidgetsBinding.instance;
+      b.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      b.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      b.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      // No frames are scheduled while paused: wait on the clock, not pump().
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      b.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      b.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      b.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await e.settle(t, 2000);
+      e.check(
+        e.container().read(appLockControllerProvider).locked,
+        'the controller is locked after the background trip',
+      );
+      await e.waitFor(t, lockKey, what: 'the lock screen');
+      await e.shot(t, '02-locked');
 
-    // ---- The window is secure while the lock is on (checked by the script).
-    e.say('SECURE_ON_CHECK');
-    await e.settle(t, 12000);
-    e.check(e.found(lockKey), 'the lock screen is still there');
+      // ---- The window is secure while the lock is on (checked by the script).
+      e.say('SECURE_ON_CHECK');
+      await e.settle(t, 12000);
+      e.check(e.found(lockKey), 'the lock screen is still there');
 
-    // ---- Lock off: the lock screen goes and the window is not secure.
-    await repo.set(Settings.appLockEnabled, false);
-    await e.settle(t, 2500);
-    e.check(!e.found(lockKey), 'the lock screen goes when the lock is off');
-    e.check(
-      !e.container().read(appLockControllerProvider).locked,
-      'the controller is unlocked when the lock is off',
-    );
-    await e.shot(t, '03-lock-off-again');
-    e.say('SECURE_OFF_CHECK');
-    await e.settle(t, 12000);
-    e.finish();
+      // ---- Lock off: the lock screen goes and the window is not secure.
+      await repo.set(Settings.appLockEnabled, false);
+      await e.settle(t, 2500);
+      e.check(!e.found(lockKey), 'the lock screen goes when the lock is off');
+      e.check(
+        !e.container().read(appLockControllerProvider).locked,
+        'the controller is unlocked when the lock is off',
+      );
+      await e.shot(t, '03-lock-off-again');
+      e.say('SECURE_OFF_CHECK');
+      await e.settle(t, 12000);
+      e.finish();
+    });
   });
 }
