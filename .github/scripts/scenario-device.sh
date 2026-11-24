@@ -69,26 +69,31 @@ run_scenario() {
   adb -s "$DEVICE" wait-for-device
   adb -s "$DEVICE" shell "sqlite3 /data/user_de/0/com.android.providers.telephony/databases/mmssms.db 'DELETE FROM sms'" < /dev/null > /dev/null 2>&1 || true
   # ---- the past: into the inbox with their dates, before the first launch
-  # The shell's `content insert` cannot carry a ':' in the body (it answers with
-  # its usage text) and `content query` shows the shell nothing, so the rows go
-  # into the telephony database directly (root), as one SQL file, and are
-  # counted with sqlite3. (Probe on ci/T-233-probe, 2026-11-24.)
-  local ok=0 sqldb=/data/user_de/0/com.android.providers.telephony/databases/mmssms.db
-  : > "$OUT/ins.sql"
+  # The system SMS provider refuses writes and reads from the shell (`content
+  # insert` answers nothing or its usage text, direct sqlite3 rows are never
+  # seen by apps; probe on ci/T-233-probe, 2026-11-24). What works is the
+  # modem, which stamps a message with the device clock: so the clock is set
+  # to each entry's own time (root, auto time off), the message is sent through
+  # the emulator console, and the clock is put back at the end.
+  adb -s "$DEVICE" shell "settings put global auto_time 0" < /dev/null > /dev/null 2>&1 || true
+  adb -s "$DEVICE" shell "settings put global auto_time_zone 0" < /dev/null > /dev/null 2>&1 || true
+  adb -s "$DEVICE" shell "sqlite3 /data/user_de/0/com.android.providers.telephony/databases/mmssms.db 'DELETE FROM sms'" < /dev/null > /dev/null 2>&1 || true
+  local ok=0 bad=0 start_s
+  start_s=$(date -u +%s)
   while IFS=$'\t' read -r id sender mago day time body; do
     read -r ms dmy hm <<< "$(entry_time "$mago" "$day" "$time")"
     body=${body//\{DD-MM-YYYY\}/$dmy}
     body=${body//\{HH:MM\}/$hm}
-    sender=${sender//\'/\'\'}
-    body=${body//\'/\'\'}
-    printf "INSERT INTO sms (address, body, date, date_sent, read, seen, type) VALUES ('%s', '%s', %s, %s, 0, 0, 1);\n" "$sender" "$body" "$ms" "$ms" >> "$OUT/ins.sql"
-    ok=$((ok + 1))
+    adb -s "$DEVICE" shell "date -u $(date -u -d "@$((ms / 1000))" +%m%d%H%M%Y.%S)" < /dev/null > /dev/null 2>&1
+    if sms_live "$sender" "$body"; then ok=$((ok + 1)); else bad=$((bad + 1)); echo "  past send refused: $id ($sender)"; fi
+    sleep 2
   done < <(jq -r '.entries[] | select(.delivery=="inbox") | [.id, .sender, .monthsAgo, .day, .time, .body] | @tsv' "$SCEN")
-  adb -s "$DEVICE" push "$OUT/ins.sql" /data/local/tmp/ins.sql > /dev/null < /dev/null
-  adb -s "$DEVICE" shell "sqlite3 $sqldb < /data/local/tmp/ins.sql" < /dev/null 2>&1 | head -3 | cut -c1-120
-  adb -s "$DEVICE" shell "rm -f /data/local/tmp/ins.sql" < /dev/null
-  rm -f "$OUT/ins.sql"
-  echo "inbox rows prepared: $ok, in the telephony database: $(adb -s "$DEVICE" shell "sqlite3 $sqldb 'SELECT count(*) FROM sms WHERE type=1'" < /dev/null | tr -d '\r')"
+  # the clock back: host time now
+  adb -s "$DEVICE" shell "date -u $(date -u +%m%d%H%M%Y.%S)" < /dev/null > /dev/null 2>&1
+  adb -s "$DEVICE" shell "settings put global auto_time 1" < /dev/null > /dev/null 2>&1 || true
+  adb -s "$DEVICE" shell "settings put global auto_time_zone 1" < /dev/null > /dev/null 2>&1 || true
+  echo "past messages sent: $ok refused: $bad; device date now: $(adb -s "$DEVICE" shell date -u < /dev/null | tr -d '\r')"
+  echo "in the telephony database: $(adb -s "$DEVICE" shell "sqlite3 /data/user_de/0/com.android.providers.telephony/databases/mmssms.db 'SELECT count(*) FROM sms WHERE type=1'" < /dev/null | tr -d '\r')"
   adb -s "$DEVICE" unroot > /dev/null 2>&1 || true
   adb -s "$DEVICE" wait-for-device
   sleep 3
