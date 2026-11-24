@@ -70,7 +70,7 @@ run_test() { # name file [extra]
     > "$OUT/$1.log" 2>&1
   local r=$?
   grep -E "E2E[0-9]+ |Some tests|All tests" "$OUT/$1.log" | cut -c1-240
-  if [ "$r" -ne 0 ]; then echo "---- test log tail"; tail -50 "$OUT/$1.log" | cut -c1-220; fi
+  if [ "$r" -ne 0 ]; then echo "---- test log tail"; grep -m1 -B2 -A28 -E "EXCEPTION CAUGHT|Test failed|Expected:" "$OUT/$1.log" | cut -c1-220; tail -30 "$OUT/$1.log" | cut -c1-220; fi
   pull_files
   adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-$1.png" || true
   return "$r"
@@ -103,7 +103,7 @@ run_lock() {
   wait "$tpid"
   local r=$?
   grep -E "E2E[0-9]+ |Some tests|All tests" "$OUT/e2e11-lock.log" | cut -c1-240
-  if [ "$r" -ne 0 ]; then tail -50 "$OUT/e2e11-lock.log" | cut -c1-220; fi
+  if [ "$r" -ne 0 ]; then grep -m1 -B2 -A28 -E "EXCEPTION CAUGHT|Test failed|Expected:" "$OUT/e2e11-lock.log" | cut -c1-220; tail -30 "$OUT/e2e11-lock.log" | cut -c1-220; fi
   pull_files
   [ "$r" -ne 0 ] && return "$r"
   return "$bad"
@@ -128,7 +128,7 @@ run_wipe() {
   wait "$tpid"
   local r=$?
   grep -E "E2E[0-9]+ |Some tests|All tests" "$OUT/e2e12-wipe.log" | cut -c1-240
-  if [ "$r" -ne 0 ]; then tail -50 "$OUT/e2e12-wipe.log" | cut -c1-220; fi
+  if [ "$r" -ne 0 ]; then grep -m1 -B2 -A28 -E "EXCEPTION CAUGHT|Test failed|Expected:" "$OUT/e2e12-wipe.log" | cut -c1-220; tail -30 "$OUT/e2e12-wipe.log" | cut -c1-220; fi
   pull_files
   [ "$r" -ne 0 ] && return "$r"
   return "$bad"

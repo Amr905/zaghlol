@@ -50,6 +50,7 @@ class E2e {
   /// the end through [finish]. Only the first line of each is kept.
   void captureFlutterErrors() {
     _original = FlutterError.onError;
+    _captured = true;
     FlutterError.onError = (d) {
       final first = d.exceptionAsString().split('\n').first;
       final line =
@@ -59,7 +60,27 @@ class E2e {
     };
   }
 
-  void releaseFlutterErrors() => FlutterError.onError = _original;
+  void releaseFlutterErrors() {
+    if (_captured) FlutterError.onError = _original;
+    _captured = false;
+  }
+
+  bool _captured = false;
+  SemanticsHandle? _semantics;
+
+  /// Runs [body] with semantics on; always gives the FlutterError handler and
+  /// the semantics handle back, so a failing step reports its own error (and
+  /// the test process ends) instead of a framework assertion about them.
+  Future<void> guarded(WidgetTester t, Future<void> Function() body) async {
+    _semantics = t.ensureSemantics();
+    try {
+      await body();
+    } finally {
+      releaseFlutterErrors();
+      _semantics?.dispose();
+      _semantics = null;
+    }
+  }
 
   Future<void> settle(WidgetTester t, [int ms = 800]) async {
     for (var i = 0; i < ms ~/ 100; i++) {

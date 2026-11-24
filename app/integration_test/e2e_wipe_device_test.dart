@@ -27,93 +27,93 @@ void main() {
   final e = E2e('E2E12');
 
   testWidgets('Delete everything returns the app to first launch', (t) async {
-    final semantics = t.ensureSemantics();
-    addTearDown(semantics.dispose);
-    await e.seedReturningUser();
-    e.captureFlutterErrors();
+    await e.guarded(t, () async {
+      await e.seedReturningUser();
+      e.captureFlutterErrors();
 
-    await app.main();
-    e.say('MAIN_RETURNED');
-    await e.waitFor(t, find.text('Home'), what: 'Home');
-    await e.settle(t, 2000);
-    await e.addTransactions([12550, 99900]);
-    await e.settle(t, 800);
+      await app.main();
+      e.say('MAIN_RETURNED');
+      await e.waitFor(t, find.text('Home'), what: 'Home');
+      await e.settle(t, 2000);
+      await e.addTransactions([12550, 99900]);
+      await e.settle(t, 800);
 
-    Future<int> count(ProviderContainer c, String table) async {
-      final db = await c.read(appDatabaseProvider.future);
-      final row = await db
-          .customSelect('SELECT COUNT(*) AS n FROM $table')
-          .getSingle();
-      return row.data['n']! as int;
-    }
+      Future<int> count(ProviderContainer c, String table) async {
+        final db = await c.read(appDatabaseProvider.future);
+        final row = await db
+            .customSelect('SELECT COUNT(*) AS n FROM $table')
+            .getSingle();
+        return row.data['n']! as int;
+      }
 
-    final before = e.container();
-    final txnsBefore = await count(before, 'transactions');
-    e.check(txnsBefore == 2, 'two seeded transactions before the wipe');
-    final repo = await before.read(settingsRepositoryProvider.future);
-    e.check(
-      await repo.get(Settings.language) == LanguagePref.en &&
-          await repo.get(Settings.setupInstalledOn) != null,
-      'the seeded settings are set before the wipe',
-    );
-    await e.shot(t, '01-before');
+      final before = e.container();
+      final txnsBefore = await count(before, 'transactions');
+      e.check(txnsBefore == 2, 'two seeded transactions before the wipe');
+      final repo = await before.read(settingsRepositoryProvider.future);
+      e.check(
+        await repo.get(Settings.language) == LanguagePref.en &&
+            await repo.get(Settings.setupInstalledOn) != null,
+        'the seeded settings are set before the wipe',
+      );
+      await e.shot(t, '01-before');
 
-    // ---- Settings -> Privacy & data -> Delete everything.
-    unawaited(openSettings(rootNavigatorKey.currentContext!));
-    await e.waitFor(t, find.text('Privacy & data'), what: 'Settings rows');
-    await t.ensureVisible(find.text('Privacy & data').first);
-    await t.tap(find.text('Privacy & data').first);
-    final row = find.text('Delete everything');
-    await e.waitFor(t, row, what: 'the Delete everything row');
-    await t.ensureVisible(row.first);
-    await e.settle(t, 500);
-    await t.tap(row.first);
-    await e.waitFor(t, find.text('Confirmation word'), what: 'the dialog');
-    await e.shot(t, '02-dialog');
-    // A wrong word deletes nothing.
-    await t.enterText(find.byType(TextField).last, 'nope');
-    await t.tap(find.text('Delete everything').last);
-    await e.settle(t, 800);
-    e.check(
-      e.found(find.text('Confirmation word')) &&
-          await count(e.container(), 'transactions') == 2,
-      'a wrong confirmation word deletes nothing',
-    );
-    await t.enterText(find.byType(TextField).last, 'DELETE');
-    await e.settle(t, 300);
-    await t.tap(find.text('Delete everything').last);
+      // ---- Settings -> Privacy & data -> Delete everything.
+      unawaited(openSettings(rootNavigatorKey.currentContext!));
+      await e.waitFor(t, find.text('Privacy & data'), what: 'Settings rows');
+      await t.ensureVisible(find.text('Privacy & data').first);
+      await t.tap(find.text('Privacy & data').first);
+      final row = find.text('Delete everything');
+      await e.waitFor(t, row, what: 'the Delete everything row');
+      await t.ensureVisible(row.first);
+      await e.settle(t, 500);
+      await t.tap(row.first);
+      await e.waitFor(t, find.text('Confirmation word'), what: 'the dialog');
+      await e.shot(t, '02-dialog');
+      // A wrong word deletes nothing.
+      await t.enterText(find.byType(TextField).last, 'nope');
+      await t.tap(find.text('Delete everything').last);
+      await e.settle(t, 800);
+      e.check(
+        e.found(find.text('Confirmation word')) &&
+            await count(e.container(), 'transactions') == 2,
+        'a wrong confirmation word deletes nothing',
+      );
+      await t.enterText(find.byType(TextField).last, 'DELETE');
+      await e.settle(t, 300);
+      await t.tap(find.text('Delete everything').last);
 
-    // ---- First-launch state.
-    final welcome = find.byKey(const ValueKey('welcome-start'));
-    await e.waitFor(
-      t,
-      welcome,
-      timeout: const Duration(seconds: 120),
-      what: 'the Welcome screen after the wipe',
-    );
-    await e.settle(t, 2000);
-    await e.shot(t, '03-welcome');
-    final after = ProviderScope.containerOf(t.element(welcome));
-    e.check(
-      await count(after, 'transactions') == 0,
-      'the database holds no transactions',
-    );
-    e.say('ACCOUNTS_AFTER ${await count(after, 'accounts')}');
-    final fresh = await after.read(settingsRepositoryProvider.future);
-    e.check(
-      await fresh.get(Settings.setupInstalledOn) == null,
-      'the first-run marker is gone',
-    );
-    e.check(
-      await fresh.get(Settings.language) == Settings.language.defaultValue,
-      'the language is back at its default',
-    );
-    e.check(
-      await fresh.get(Settings.digits) == Settings.digits.defaultValue,
-      'the digits are back at their default',
-    );
-    e.say('WIPED');
-    await e.settle(t, 10000);
-    e.finish();
+      // ---- First-launch state.
+      final welcome = find.byKey(const ValueKey('welcome-start'));
+      await e.waitFor(
+        t,
+        welcome,
+        timeout: const Duration(seconds: 120),
+        what: 'the Welcome screen after the wipe',
+      );
+      await e.settle(t, 2000);
+      await e.shot(t, '03-welcome');
+      final after = ProviderScope.containerOf(t.element(welcome));
+      e.check(
+        await count(after, 'transactions') == 0,
+        'the database holds no transactions',
+      );
+      e.say('ACCOUNTS_AFTER ${await count(after, 'accounts')}');
+      final fresh = await after.read(settingsRepositoryProvider.future);
+      e.check(
+        await fresh.get(Settings.setupInstalledOn) == null,
+        'the first-run marker is gone',
+      );
+      e.check(
+        await fresh.get(Settings.language) == Settings.language.defaultValue,
+        'the language is back at its default',
+      );
+      e.check(
+        await fresh.get(Settings.digits) == Settings.digits.defaultValue,
+        'the digits are back at their default',
+      );
+      e.say('WIPED');
+      await e.settle(t, 10000);
+      e.finish();
+    });
   });
 }
