@@ -131,7 +131,38 @@ FU-294c: m-3 (`kDebugMode` guard on the export seam).
 FU-294d: m-4 (headless duplicate-charge alerts outside the window).
 FU-294e: m-5 (negative-proof poster, if one becomes available).
 FU-294f: m-7 (time-scoped fault grep).
-Recorded here as proposals only; not yet entered in `implementation-status.md`.
+Entered in `implementation-status.md` as FU-294 in the fix round ((a) and (b) fixed there).
 m-6 is a Lead DoD item.
 
 **Fix round:** only M-1 (T-238). It is a data-integrity major, so it qualifies under the SPRINT rules.
+
+## Fix round (T-238, M-1 + m-1 + m-2)
+Commits `675cb2b5` and the E2E follow-up on `batch/2026-11-24-66` (also pushed to `ci/T-238b`).
+
+**M-1, fixed at the cause.**
+- New `app/lib/core/db/db_handle.dart`. `closeDbHandle(db)` closes `db.executor` directly. It never calls drift's `close()`, which waits on paused `watch()` listeners. drift answers the background executor's close request before its isolate has closed SQLite. For that reason, `openEncryptedExecutor` registers an isolate exit listener (drift `isolateSetup`). The close completes only when the isolate has exited, after it closed the database. The close is idempotent.
+- Closes in flight are recorded by file path. `openDatabaseWith` waits for any handle on the same file that is still closing. If that handle does not close within 10 s, the open returns `unavailable`. It never opens beside an older handle, so an old close cannot delete a new `-wal`/`-shm`. This also covers restarts other than the wipe.
+- `DeleteEverything`: the close step uses `closeDbHandle` through the provider. The 10 s timeout is now only a guard. A close that fails or times out fails the wipe before anything is deleted: the marker keeps every part, `WipeIncomplete` reaches the user ("couldn't delete"), there is no restart, and the next launch finishes the wipe. The remote delete still runs.
+- Provider dispose (`disposeAppDatabase`): `closeDbHandle` runs first, and its errors are not caught. drift's `close()` runs second, for the streams, and its errors are dropped only because the handle is already known closed. That covers m-2.
+
+**Tests.** `delete_everything_test.dart`:
+- Paused `watch()` during the wipe: the wipe completes in under 5 s, the old connection can no longer query, and keys, files and marker are gone. Without the fix this hits the 10 s guard.
+- Restart after the wipe: the new DB's `-wal`/`-shm` and its data survive the old provider's dispose.
+- A hung close now fails safely: keys, files and marker are kept and native is not run. This replaces the old "does not hold the wipe" test.
+
+`db_handle_test.dart`:
+- An open next to a handle that is still closing fails with `unavailable` and creates no file.
+- `closeDbHandle` is idempotent, and an open after it proceeds.
+
+The host could not reproduce the WAL deletion itself: on Linux the old close left the new `-wal` alone. So the restart test is a regression guard, and the negative proofs are the paused-watch timing, the closed-handle check and the "open waits" test.
+
+**m-1.** E2E-12 now schedules an alert before the wipe. The script finds it by its epoch-ms time in `dumpsys alarm` and in `no_backup/notif/schedules.txt`. It must be present before the wipe and absent after it. The time is used because the app schedules its own weekly nudge again after the restart. E2E-12 also logs `WIPE_MS`, from the confirm tap to Welcome, and fails at 10 s or more.
+
+**Device (device-flows, settings job only).**
+- Run 45469150283 (`ci/T-238b`, workflow_dispatch `e2e_settings_only`) passed E2E-09..12.
+- E2E-12 `WIPE_MS 1887`: the wipe ran from the confirm tap to the Welcome screen in 1.9 s, so the close guard never fired. The first run, 45465615984, measured 1451 ms.
+- Test alarm and re-arm entry: 1 and 1 before the wipe, 0 and 0 after it. No notifications were posted.
+- That first run failed only on m-1. It used whole-receiver counts, and those counted the nudge the app schedules again after the restart. The assertion now matches the test alert's time. "Receiver alarm lines" went from 2 to 3 and is only printed, not asserted. It includes the new nudge.
+- Also green on the fix commit: app-ci 45465524080, db-platform 45465524168 and security-scan 45465523992.
+
+**Verdict for T-238 after the fix round:** M-1 resolved; m-1 and m-2 fixed. Lead delta check or a Sonnet delta re-review is still needed (about 250 changed lines).
