@@ -229,6 +229,7 @@ final class DeleteEverything {
     required this._signOutLocal,
     required this._marker,
     this._leaseTimeout = const Duration(seconds: 35),
+    this._closeTimeout = const Duration(seconds: 10),
   });
 
   final Future<InstallCredentials?> Function() _readInstall;
@@ -243,6 +244,12 @@ final class DeleteEverything {
   final Future<void> Function() _signOutLocal;
   final WipeMarker _marker;
   final Duration _leaseTimeout;
+
+  /// A database close that does not finish (T-238: a close waiting on a busy
+  /// connection never returned on the emulator and "Deleting..." stayed for
+  /// ever) must not hold the wipe: the key and the files go next, and the
+  /// restart drops the connection.
+  final Duration _closeTimeout;
 
   Future<WipeReport>? _running;
 
@@ -366,7 +373,10 @@ final class DeleteEverything {
 
     // 4–5. Jobs, then the database.
     await step(WipeSteps.jobs, _cancelJobs);
-    await step(WipeSteps.closeDb, _closeDatabase);
+    await step(
+      WipeSteps.closeDb,
+      () => _closeDatabase().timeout(_closeTimeout, onTimeout: () {}),
+    );
 
     // 6. Crypto-shred: the database key and the backup key. The marker
     //    records it at once, so no later resume deletes a newer key.

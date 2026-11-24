@@ -8,6 +8,7 @@
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../transactions/data/transactions_providers.dart';
@@ -36,8 +37,16 @@ final exportServiceProvider = FutureProvider<ExportService>((ref) async {
   return ExportService(repo);
 }, name: 'exportServiceProvider');
 
+/// Device tests only (T-238): lets an integration test that runs the real app
+/// receive the file bytes instead of the system save dialog, which cannot be
+/// driven from Flutter. Null in every real run (nothing outside tests sets
+/// it); it replaces only where the bytes go, never the Gold check.
+@visibleForTesting
+ExportDestination Function()? exportDestinationForDeviceTest;
+
 /// Builds the destination for one export run.
 final exportDestinationFactoryProvider = Provider<ExportDestination Function()>(
-  (ref) => SystemExportDestination.new,
+  (ref) =>
+      () => exportDestinationForDeviceTest?.call() ?? SystemExportDestination(),
   name: 'exportDestinationFactoryProvider',
 );
