@@ -47,26 +47,6 @@ entry_time() {
   echo "$ms ${d}-${ym2:5:2}-${ym2:0:4} $3"
 }
 
-ins_variant=""
-inbox_insert() { # sender body ms  (a row in the system inbox with its own date)
-  # A: one adb command line. B: the same command from a script file on the
-  # device (no quoting layers). The first variant that works is used for the
-  # rest; failures print the tool's answer with the body cut out.
-  local out
-  if [ "$ins_variant" != B ]; then
-    out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$3 --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
-    if [ -z "$out" ]; then ins_variant=A; return 0; fi
-    out=${out//"$2"/<body>}
-    echo "  variant A answer: ${out:0:160}"
-  fi
-  printf "content insert --uri content://sms/inbox --bind address:s:'%s' --bind body:s:'%s' --bind date:l:%s --bind read:i:0 --bind type:i:1\n" "$1" "$2" "$3" > "$OUT/ins.sh"
-  adb -s "$DEVICE" push "$OUT/ins.sh" /data/local/tmp/ins.sh > /dev/null 2>&1 < /dev/null
-  out=$(adb -s "$DEVICE" shell "sh /data/local/tmp/ins.sh" < /dev/null 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
-  if [ -z "$out" ]; then ins_variant=B; return 0; fi
-  out=${out//"$2"/<body>}
-  echo "  variant B answer: ${out:0:160}"
-  return 1
-}
 sms_live() { # sender body
   local out
   out=$(adb -s "$DEVICE" emu sms send "$1" "$2" < /dev/null 2>&1 | tr -d '\r' | tr '\n' ' ')
@@ -87,17 +67,28 @@ run_scenario() {
   adb -s "$DEVICE" shell am force-stop "$PKG"
   adb -s "$DEVICE" root > /dev/null 2>&1 || true
   adb -s "$DEVICE" wait-for-device
-  adb -s "$DEVICE" shell "content delete --uri content://sms" > /dev/null 2>&1 || true
+  adb -s "$DEVICE" shell "sqlite3 /data/user_de/0/com.android.providers.telephony/databases/mmssms.db 'DELETE FROM sms'" < /dev/null > /dev/null 2>&1 || true
   # ---- the past: into the inbox with their dates, before the first launch
-  local ok=0 bad=0
+  # The shell's `content insert` cannot carry a ':' in the body (it answers with
+  # its usage text) and `content query` shows the shell nothing, so the rows go
+  # into the telephony database directly (root), as one SQL file, and are
+  # counted with sqlite3. (Probe on ci/T-233-probe, 2026-11-24.)
+  local ok=0 sqldb=/data/user_de/0/com.android.providers.telephony/databases/mmssms.db
+  : > "$OUT/ins.sql"
   while IFS=$'\t' read -r id sender mago day time body; do
     read -r ms dmy hm <<< "$(entry_time "$mago" "$day" "$time")"
     body=${body//\{DD-MM-YYYY\}/$dmy}
     body=${body//\{HH:MM\}/$hm}
-    if inbox_insert "$sender" "$body" "$ms"; then ok=$((ok + 1)); else bad=$((bad + 1)); echo "  inbox insert failed: $id ($sender)"; fi
+    sender=${sender//\'/\'\'}
+    body=${body//\'/\'\'}
+    printf "INSERT INTO sms (address, body, date, date_sent, read, seen, type) VALUES ('%s', '%s', %s, %s, 0, 0, 1);\n" "$sender" "$body" "$ms" "$ms" >> "$OUT/ins.sql"
+    ok=$((ok + 1))
   done < <(jq -r '.entries[] | select(.delivery=="inbox") | [.id, .sender, .monthsAgo, .day, .time, .body] | @tsv' "$SCEN")
-  echo "inbox rows written: $ok failed: $bad (variant ${ins_variant:-none})"
-  echo "inbox rows in the system: $(adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address" < /dev/null 2>&1 | tr -d '\r' | grep -c '^Row:')"
+  adb -s "$DEVICE" push "$OUT/ins.sql" /data/local/tmp/ins.sql > /dev/null < /dev/null
+  adb -s "$DEVICE" shell "sqlite3 $sqldb < /data/local/tmp/ins.sql" < /dev/null 2>&1 | head -3 | cut -c1-120
+  adb -s "$DEVICE" shell "rm -f /data/local/tmp/ins.sql" < /dev/null
+  rm -f "$OUT/ins.sql"
+  echo "inbox rows prepared: $ok, in the telephony database: $(adb -s "$DEVICE" shell "sqlite3 $sqldb 'SELECT count(*) FROM sms WHERE type=1'" < /dev/null | tr -d '\r')"
   adb -s "$DEVICE" unroot > /dev/null 2>&1 || true
   adb -s "$DEVICE" wait-for-device
   sleep 3
