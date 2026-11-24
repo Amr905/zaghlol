@@ -59,6 +59,11 @@ send_phase() { # test phase
       echo "E2E_DEVICE NOTIF channels now: $(notif_channels)"
       notif_diag
       ;;
+    e2e05/probe)
+      sleep 3
+      echo "E2E_DEVICE NOTIF after control probe:"
+      notif_diag
+      ;;
     e2e06/x1)
       sms_live NBE 'NBE: Purchase of EGP 1200.00 from NBE Visa **4567 at TALABAT. Balance EGP 9000.00'
       ;;

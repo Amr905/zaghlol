@@ -22,6 +22,7 @@ import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/l10n/money_format.dart';
+import 'package:zaghlol/core/platform/notifications_api.g.dart';
 import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
@@ -130,6 +131,27 @@ void main() {
       );
       e.check(await cycleSpend() == 80000, 'cycle spend after p2 is 80 %');
       e.say('P2_DONE');
+      // Diagnostics: the permission, and a control notification on the same
+      // channel (static text), so the script can tell "alert not shown" from
+      // "this emulator shows nothing".
+      await e.settle(t, 8000);
+      final api = NotificationsHostApi();
+      e.say('NOTIF permission=${(await api.permissionStatus()).name}');
+      e.say(
+        'NOTIF fired_alerts rows later: '
+        '${await e.count(db, 'SELECT COUNT(*) AS n FROM fired_alerts')}',
+      );
+      e.send('probe');
+      await api.show(
+        NotifMsg(
+          id: 424242,
+          channelId: 'zaghlol_alert_budget',
+          title: 'e2e probe',
+          body: 'e2e probe',
+          publicTitle: 'e2e probe',
+        ),
+      );
+      await e.settle(t, 5000);
 
       // ---- safe to spend by the spec, in the provider and on the screen
       final wantSafe = (100000 - 80000) ~/ daysLeft;
