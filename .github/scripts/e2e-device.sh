@@ -112,7 +112,7 @@ run_lock() {
 run_wipe() {
   echo "==== e2e12-wipe"
   fresh_app
-  timeout 600 flutter test integration_test/e2e_wipe_device_test.dart \
+  timeout 900 flutter test integration_test/e2e_wipe_device_test.dart \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     > "$OUT/e2e12-wipe.log" 2>&1 &
   local tpid=$! bad=0 n a
@@ -128,6 +128,9 @@ run_wipe() {
   adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-e2e12.png" || true
   wait "$tpid"
   local r=$?
+  echo "---- logcat after the wipe test (crashes, kills, the app's own tags)"
+  adb -s "$DEVICE" logcat -d 2> /dev/null | grep -E "FATAL|am_proc_died|am_kill|AndroidRuntime|Zaghlol|zaghlol.*(wipe|Wipe)" | cut -c1-200 | tail -25
+  adb -s "$DEVICE" logcat -d -s flutter:V 2> /dev/null | cut -c1-200 | tail -25
   grep -E "E2E[0-9]+ |Some tests|All tests" "$OUT/e2e12-wipe.log" | cut -c1-240
   if [ "$r" -ne 0 ]; then grep -m1 -B2 -A28 -E "EXCEPTION CAUGHT|Test failed|Expected:" "$OUT/e2e12-wipe.log" | cut -c1-220; tail -30 "$OUT/e2e12-wipe.log" | cut -c1-220; fi
   pull_files
