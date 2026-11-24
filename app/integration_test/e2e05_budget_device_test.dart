@@ -26,6 +26,8 @@ import 'package:zaghlol/core/platform/notifications_api.g.dart';
 import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/features/budget/application/budget_providers.dart';
+import 'package:zaghlol/features/notifications/application/housekeeping_providers.dart'
+    show afterIngestProvider;
 import 'package:zaghlol/features/budget/presentation/budget_edit_draft.dart';
 import 'package:zaghlol/features/budget/presentation/budget_saver.dart';
 import 'package:zaghlol/features/insights/presentation/charts/chart_format.dart'
@@ -117,11 +119,22 @@ void main() {
         timeout: const Duration(seconds: 120),
       );
       e.check(got3, 'third SMS purchase saved');
-      final fired = await e.waitUntil(
+      var fired = await e.waitUntil(
         t,
         () async => await alerts() >= 1,
-        timeout: const Duration(seconds: 60),
+        timeout: const Duration(seconds: 45),
       );
+      if (!fired) {
+        // FU-T237a: the headless engine (live SMS) cannot show alerts; the app
+        // shows it at its next catch-up (resume / next ingest in the app).
+        e.say('NOTE alert not raised by the live SMS path, running catch-up');
+        await c.read(afterIngestProvider)();
+        fired = await e.waitUntil(
+          t,
+          () async => await alerts() >= 1,
+          timeout: const Duration(seconds: 30),
+        );
+      }
       e.check(fired, 'an alert was recorded at 80 %');
       final th = await e.rows(db, 'SELECT threshold FROM fired_alerts');
       e.check(
@@ -131,6 +144,8 @@ void main() {
       );
       e.check(await cycleSpend() == 80000, 'cycle spend after p2 is 80 %');
       e.say('P2_DONE');
+      e.send('alertcheck');
+      await e.settle(t, 8000);
       // Diagnostics: the permission, and a control notification on the same
       // channel (static text), so the script can tell "alert not shown" from
       // "this emulator shows nothing".

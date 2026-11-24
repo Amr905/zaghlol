@@ -59,6 +59,11 @@ send_phase() { # test phase
       echo "E2E_DEVICE NOTIF channels now: $(notif_channels)"
       notif_diag
       ;;
+    e2e05/alertcheck)
+      n=$(budget_notifs)
+      echo "E2E_DEVICE NOTIF budget alert posted (count): $n"
+      if [ "${n:-0}" -lt 1 ]; then echo "E2E_DEVICE PROBLEM no budget notification posted"; touch "$OUT/e2e05.fail"; fi
+      ;;
     e2e05/probe)
       sleep 3
       echo "E2E_DEVICE NOTIF after control probe:"
@@ -126,10 +131,7 @@ adb -s "$DEVICE" install -r "$apk" || exit 1
 rc4=0; rc5=0; rc6=0
 run_one e2e04 e2e04_manual_device_test.dart 2>&1 | tee "$OUT/e2e04-script.log"; rc4=${PIPESTATUS[0]}
 run_one e2e05 e2e05_budget_device_test.dart 2>&1 | tee "$OUT/e2e05-script.log"; rc5=${PIPESTATUS[0]}
-# the 80 % alert must be posted (the app is still installed, the alert stays)
-n=$(budget_notifs)
-echo "E2E_DEVICE NOTIF budget channel after 80%: $n; channels: $(notif_channels)"
-if [ "${n:-0}" -lt 1 ]; then echo "E2E_DEVICE PROBLEM no budget notification posted"; rc5=1; fi
+if [ -f "$OUT/e2e05.fail" ]; then rc5=1; fi
 if grep -q "budget channel before 80%: [1-9]" "$OUT/e2e05-script.log"; then echo "E2E_DEVICE PROBLEM alert posted before 80%"; rc5=1; fi
 run_one e2e06 e2e06_transfer_device_test.dart 2>&1 | tee "$OUT/e2e06-script.log"; rc6=${PIPESTATUS[0]}
 adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-e2e.png" || true

@@ -43,7 +43,7 @@ import 'weekly_summary_alert.dart';
 /// (NOTIF-GW: the Pigeon host, local notifications only). Dedupe state is
 /// released when the gateway throws, but a silent gateway shows nothing.
 final notificationGatewayProvider = Provider<NotificationGateway>(
-  (ref) => const _SilentGateway(),
+  (ref) => const SilentNotificationGateway(),
   name: 'notificationGatewayProvider',
 );
 
@@ -114,22 +114,6 @@ final class _NoTaps implements NotificationTapSource {
 
   @override
   Stream<String> get taps => const Stream<String>.empty();
-}
-
-final class _SilentGateway implements NotificationGateway {
-  const _SilentGateway();
-
-  @override
-  Future<void> show(PlatformNotification n) async {}
-
-  @override
-  Future<void> schedule(PlatformNotification n) async {}
-
-  @override
-  Future<void> cancelScheduled() async {}
-
-  @override
-  Future<void> cancel(int id) async {}
 }
 
 /// The strings of the language shown now (the setting, else the device).
