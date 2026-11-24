@@ -47,10 +47,25 @@ entry_time() {
   echo "$ms ${d}-${ym2:5:2}-${ym2:0:4} $3"
 }
 
+ins_variant=""
 inbox_insert() { # sender body ms  (a row in the system inbox with its own date)
+  # A: one adb command line. B: the same command from a script file on the
+  # device (no quoting layers). The first variant that works is used for the
+  # rest; failures print the tool's answer with the body cut out.
   local out
-  out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$3 --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
-  [ -z "$out" ]
+  if [ "$ins_variant" != B ]; then
+    out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$3 --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
+    if [ -z "$out" ]; then ins_variant=A; return 0; fi
+    out=${out//"$2"/<body>}
+    echo "  variant A answer: ${out:0:160}"
+  fi
+  printf "content insert --uri content://sms/inbox --bind address:s:'%s' --bind body:s:'%s' --bind date:l:%s --bind read:i:0 --bind type:i:1\n" "$1" "$2" "$3" > "$OUT/ins.sh"
+  adb -s "$DEVICE" push "$OUT/ins.sh" /data/local/tmp/ins.sh > /dev/null 2>&1 < /dev/null
+  out=$(adb -s "$DEVICE" shell "sh /data/local/tmp/ins.sh" < /dev/null 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
+  if [ -z "$out" ]; then ins_variant=B; return 0; fi
+  out=${out//"$2"/<body>}
+  echo "  variant B answer: ${out:0:160}"
+  return 1
 }
 sms_live() { # sender body
   local out
@@ -81,8 +96,8 @@ run_scenario() {
     body=${body//\{HH:MM\}/$hm}
     if inbox_insert "$sender" "$body" "$ms"; then ok=$((ok + 1)); else bad=$((bad + 1)); echo "  inbox insert failed: $id ($sender)"; fi
   done < <(jq -r '.entries[] | select(.delivery=="inbox") | [.id, .sender, .monthsAgo, .day, .time, .body] | @tsv' "$SCEN")
-  echo "inbox rows written: $ok failed: $bad"
-  adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address" 2>&1 | tr -d '\r' | sed -n 's/^Row: [0-9]* address=//p' | sort | uniq -c | sed 's/^/  inbox: /'
+  echo "inbox rows written: $ok failed: $bad (variant ${ins_variant:-none})"
+  echo "inbox rows in the system: $(adb -s "$DEVICE" shell "content query --uri content://sms/inbox --projection address" < /dev/null 2>&1 | tr -d '\r' | grep -c '^Row:')"
   adb -s "$DEVICE" unroot > /dev/null 2>&1 || true
   adb -s "$DEVICE" wait-for-device
   sleep 3
