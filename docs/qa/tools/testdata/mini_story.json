@@ -1,0 +1,17 @@
+{
+ "version": 1,
+ "description": "Synthetic 3-entry copy of the T-233 format",
+ "entries": [
+  {"id": "m1-01", "monthsAgo": 1, "day": 31, "time": "09:10", "delivery": "inbox", "sender": "CIB",
+   "body": "Salary of EGP 100.00 on {DD-MM-YYYY} {HH:MM}",
+   "expect": {"kind": "income", "amountMinor": 10000, "currency": "EGP", "merchant": null, "category": "income", "internal": false, "status": "posted"}},
+  {"id": "m1-02", "monthsAgo": 1, "day": 3, "time": "12:05", "delivery": "inbox", "sender": "NBE",
+   "body": "Purchase of EGP 40.50",
+   "expect": {"kind": "expense", "amountMinor": 4050, "currency": "EGP", "merchant": "X", "category": "shopping", "internal": false, "status": "posted"}},
+  {"id": "lv-01", "monthsAgo": 0, "day": null, "time": null, "delivery": "live", "sender": "InstaPay",
+   "body": "Sent EGP 10.00",
+   "expect": {"kind": "transfer_out", "amountMinor": 1000, "currency": "EGP", "merchant": null, "category": "instapay", "internal": false, "status": "posted"}},
+  {"id": "man-01", "monthsAgo": 0, "day": 5, "time": "10:00", "delivery": "manual", "account": "cash",
+   "expect": {"kind": "expense", "amountMinor": 500, "currency": "EGP", "merchant": null, "category": null, "internal": false, "status": "posted"}}
+ ]
+}
