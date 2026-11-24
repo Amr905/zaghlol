@@ -53,6 +53,7 @@ import 'package:zaghlol/features/insights/presentation/charts/chart_format.dart'
     show trimZeroFraction;
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
+import 'package:zaghlol/features/settings/debug/debug_sms_diagnostics.dart';
 import 'package:zaghlol/main.dart' as app;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -231,7 +232,23 @@ void main() {
     // ---- 1a. the first-run scan: the past messages
     final scan = await c.read(inboxScanServiceProvider.future);
     check(scan != null, 'the inbox scan service exists');
-    await scan?.startFirstRun();
+    if (scan != null) {
+      final caps = await c.read(captureHostPortProvider).getCapabilities();
+      say('CAPS smsFlavor=${caps.smsFlavor} smsGranted=${caps.smsGranted}');
+      final p = await scan.startFirstRun();
+      say(
+        'SCAN phase=${p.phase.name} scanned=${p.scanned} '
+        'imported=${p.imported} skipped=${p.skipped} code=${p.code}',
+      );
+      final nd = await NativeAndDbSmsDiagnostics(db).read();
+      say('GUARD mode=${nd.guardMode} user=${nd.userState}');
+      for (final e in nd.senders.entries) {
+        say(
+          'SENDER ${e.key} '
+          '${e.value.entries.map((x) => '${x.key}=${x.value}').join(' ')}',
+        );
+      }
+    }
     final pastOk = await waitUntil(t, () async => await txnCount() >= pastSms);
     say('PAST saved=${await txnCount()} of $pastSms (ok=$pastOk)');
 
