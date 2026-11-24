@@ -29,6 +29,12 @@ budget_notifs() { # how many notifications of the budget channel are posted
   adb -s "$DEVICE" shell dumpsys notification --noredact < /dev/null 2> /dev/null | grep -c "channel=zaghlol_alert_budget" || true
 }
 
+notif_diag() { # structure only (ids, channels), no text
+  local d
+  d=$(adb -s "$DEVICE" shell dumpsys notification --noredact < /dev/null 2> /dev/null | tr -d '\r')
+  echo "E2E_DEVICE NOTIF diag: lines=$(echo "$d" | wc -l) records=$(echo "$d" | grep -c NotificationRecord) pkgLines=$(echo "$d" | grep -c "$PKG") budgetChannel=$(echo "$d" | grep -c zaghlol_alert_budget)"
+  echo "$d" | grep "$PKG" | grep -v "^ *\(title\|text\|tickerText\)" | cut -c1-200 | head -8 | sed 's/^/E2E_DEVICE NOTIF   /'
+}
 notif_channels() { # channel ids of the app's posted notifications (no text)
   adb -s "$DEVICE" shell dumpsys notification --noredact < /dev/null 2> /dev/null | grep "pkg=$PKG" | grep -o "channel=[A-Za-z_]*" | sort | uniq -c | tr '\n' ' '
 }
@@ -51,6 +57,7 @@ send_phase() { # test phase
       sms_live NBE 'NBE: Purchase of EGP 200.00 from NBE Visa **4567 at TALABAT. Balance EGP 6510.00'
       sleep 15
       echo "E2E_DEVICE NOTIF channels now: $(notif_channels)"
+      notif_diag
       ;;
     e2e06/x1)
       sms_live NBE 'NBE: Purchase of EGP 1200.00 from NBE Visa **4567 at TALABAT. Balance EGP 9000.00'

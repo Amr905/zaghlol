@@ -96,10 +96,14 @@ void main() {
       await e.shot(t, 'e2e04-1-added');
 
       // ---- 2. edit amount and category from the detail screen
-      await e.reveal(t, homeRow(a));
-      await t.tap(homeRow(a));
+      e.say('STEP open detail via the list');
+      await e.go(t, AppRoutes.transactions);
+      await e.reveal(t, find.byKey(ValueKey(a)));
+      await t.tap(find.byKey(ValueKey(a)));
+      e.say('STEP tapped row');
       await e.waitFor(t, find.byTooltip('Edit'), what: 'detail screen');
       await e.settle(t);
+      e.say('STEP detail open');
       await t.tap(find.byTooltip('Edit'));
       await e.waitFor(t, find.byType(TransactionEditScreen), what: 'edit form');
       await e.settle(t);
@@ -129,6 +133,7 @@ void main() {
       await e.shot(t, 'e2e04-2-edited');
 
       // ---- 3. delete with Undo (detail screen is still open)
+      e.say('STEP delete');
       await t.tap(find.byTooltip('More options'));
       await e.settle(t);
       await t.tap(find.text('Delete').last);
@@ -141,17 +146,21 @@ void main() {
       await e.settle(t, 1500);
       r = await row(a);
       e.check(r['deleted_at'] != null, 'delete: row is soft-deleted');
-      await e.waitFor(t, quickAdd(), what: 'back on Home');
-      e.check(!e.found(homeRow(a)), 'delete: row left the Home list');
+      e.check(
+        !e.found(find.byKey(ValueKey(a))),
+        'delete: row left the transactions list',
+      );
       await e.shot(t, 'e2e04-3-deleted');
       await t.tap(find.text('Undo'));
       await e.settle(t, 1500);
       r = await row(a);
       e.check(r['deleted_at'] == null, 'undo delete: row restored');
       e.check(r['amount_minor'] == 20000, 'undo delete: amount intact');
+      await e.go(t, AppRoutes.home);
       await e.waitFor(t, homeRow(a), what: 'restored row on Home');
       e.check(e.found(homeRow(a)), 'undo delete: row is back on Home');
 
+      e.say('STEP bulk');
       // ---- 4. bulk edit two rows' category, then Undo
       final b = await addViaType('50.00', groceries);
       e.check(
