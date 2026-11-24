@@ -257,6 +257,31 @@ void main() {
     expect(w.store.stored, isNull);
   });
 
+  test('a database close that never returns does not hold the wipe '
+      '(T-238, negative proof)', () async {
+    final w = await _World.open();
+    addTearDown(w.dispose);
+    final wipe = DeleteEverything(
+      readInstall: () async => null,
+      deleteRemote: (_) async => true,
+      rotateSeatKeys: () async {},
+      cancelJobs: () async {},
+      closeDatabase: () => Completer<void>().future,
+      secrets: w.store,
+      files: w.world.files,
+      tempDirectory: () async => w.world.tempDir,
+      native: w.native,
+      signOutLocal: () async {},
+      marker: w.marker,
+      leaseTimeout: const Duration(seconds: 1),
+      closeTimeout: const Duration(milliseconds: 200),
+    );
+    final report = await wipe.run().timeout(const Duration(seconds: 20));
+    expect(report.complete, isTrue);
+    expect(w.store.stored, isNull);
+    expect(await w.world.files.anyExists(), isFalse);
+  });
+
   group('resume never repeats a finished part (batch-20a T-166)', () {
     test('native always fails: a database and key created after the wipe '
         'survive resumePendingWipe (negative proof)', () async {
