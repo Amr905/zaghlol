@@ -27,7 +27,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -146,19 +145,55 @@ void main() {
     ),
   );
 
-  List<String> semanticsLabels(WidgetTester t) {
-    final out = <String>[];
-    void walk(SemanticsNode n) {
-      if (n.label.isNotEmpty) out.add(clean(n.label));
-      n.visitChildren((c) {
-        walk(c);
-        return true;
-      });
+  // A Semantics label holding [want], scrolling the tab's list to find it
+  // (rows far down are built lazily). Downward first, then from the top.
+  Future<bool> seeLabel(WidgetTester t, String want) async {
+    final f = find.byWidgetPredicate(
+      (w) => w is Semantics && clean(w.properties.label ?? '').contains(want),
+    );
+    final vertical = find
+        .byWidgetPredicate(
+          (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+        )
+        .first;
+    if (safeFound(f)) return true;
+    for (var pass = 0; pass < 2; pass++) {
+      try {
+        await t.scrollUntilVisible(
+          f,
+          250,
+          scrollable: vertical,
+          maxScrolls: 60,
+        );
+      } on Object {
+        // not found going down
+      }
+      if (safeFound(f)) return true;
+      try {
+        for (var i = 0; i < 6; i++) {
+          await t.drag(vertical, const Offset(0, 1500));
+          await t.pump(const Duration(milliseconds: 200));
+        }
+      } on Object {
+        // already at the top
+      }
     }
+    return false;
+  }
 
-    final root = t.binding.rootPipelineOwner.semanticsOwner?.rootSemanticsNode;
-    if (root != null) walk(root);
-    return out;
+  Future<void> toTop(WidgetTester t) async {
+    final v = find.byWidgetPredicate(
+      (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+    );
+    if (!safeFound(v)) return;
+    try {
+      for (var i = 0; i < 6; i++) {
+        await t.drag(v.first, const Offset(0, 1500));
+        await t.pump(const Duration(milliseconds: 200));
+      }
+    } on Object {
+      // already at the top
+    }
   }
 
   String ymd(DateTime d) =>
@@ -523,17 +558,13 @@ void main() {
       } else {
         check(false, '$tag overview hero not found');
       }
-      var labels = semanticsLabels(t);
       for (final top
           in (egp.byCategory.entries.toList()
                 ..sort((a, b) => b.value.compareTo(a.value)))
               .take(3)) {
         final want =
             '${catName(top.key, lang, l)}: ${money('EGP', top.value, lang)}';
-        check(
-          labels.any((x) => x.contains(want)),
-          '$tag overview row expected="$want"',
-        );
+        check(await seeLabel(t, want), '$tag overview row expected="$want"');
       }
       // Saved each month: the bars of the three closed months
       for (var ago = 1; ago <= 3; ago++) {
@@ -547,24 +578,22 @@ void main() {
         );
         final amt = money('EGP', m.saved.abs(), lang);
         check(
-          labels.any((x) => x.contains(': $amt') || x.contains(amt)),
+          await seeLabel(t, amt),
           '$tag saved bar month-$ago expected=$amt',
         );
       }
+      await toTop(t);
       await shot(t, 'scn-$lang-1-overview');
 
       // Categories
       await t.tap(find.text(l.insightsV2TabCategories).first);
       await settle(t, 1500);
-      labels = semanticsLabels(t);
       for (final e in egp.byCategory.entries) {
         final want =
             '${catName(e.key, lang, l)}: ${money('EGP', e.value, lang)}';
-        check(
-          labels.any((x) => x.contains(want)),
-          '$tag categories row expected="$want"',
-        );
+        check(await seeLabel(t, want), '$tag categories row expected="$want"');
       }
+      await toTop(t);
       await shot(t, 'scn-$lang-2-categories');
 
       // Trends: three sample days of the heatmap
