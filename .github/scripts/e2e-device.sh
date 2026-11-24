@@ -137,7 +137,11 @@ run_wipe() {
 flutter devices
 echo "==== build and install"
 adb -s "$DEVICE" uninstall "$PKG" > /dev/null 2>&1 || true
-flutter build apk --debug --flavor devSms 2>&1 | tail -3
+for attempt in 1 2 3; do
+  flutter build apk --debug --flavor devSms 2>&1 | tail -25
+  ls build/app/outputs/flutter-apk/*.apk > /dev/null 2>&1 && break
+  echo "build attempt $attempt failed"; sleep 20
+done
 apk=$(ls build/app/outputs/flutter-apk/*.apk 2> /dev/null | grep -i devsms | head -1)
 echo "apk: ${apk:-none}"
 [ -n "$apk" ] || exit 1
