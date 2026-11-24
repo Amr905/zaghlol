@@ -21,7 +21,9 @@ final class NotificationPrefs {
   final bool hideAmounts;
 }
 
-enum AlertOutcome { disabled, duplicate, shown, scheduled }
+/// `unavailable`: the gateway cannot show anything here (headless engine,
+/// tests), so nothing was claimed; a later run in the app shows it.
+enum AlertOutcome { disabled, duplicate, shown, scheduled, unavailable }
 
 final class NotificationService {
   NotificationService({
@@ -63,6 +65,7 @@ final class NotificationService {
   Future<AlertOutcome> notify(AlertRequest r) async {
     final prefs = await loadPrefs();
     if (!prefs.typeEnabled(r.type)) return AlertOutcome.disabled;
+    if (gateway is SilentNotificationGateway) return AlertOutcome.unavailable;
 
     final now = _now();
     final won = await markFired(

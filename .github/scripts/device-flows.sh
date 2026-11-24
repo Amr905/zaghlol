@@ -21,6 +21,10 @@ if [ -n "${NOTIF_ONLY:-}" ]; then
   # T-193 AC5: forged notification intents versus real taps (notif-intents.sh).
   exec bash "$(dirname "$0")/notif-intents.sh"
 fi
+if [ -n "${E2E_ONLY:-}" ]; then
+  # T-237: E2E-04/05/06 (e2e-device.sh).
+  exec bash "$(dirname "$0")/e2e-device.sh"
+fi
 if [ -n "${SCENARIO_ONLY:-}" ]; then
   # T-233: the SMS month story and its charts (scenario-device.sh).
   exec bash "$(dirname "$0")/scenario-device.sh"
