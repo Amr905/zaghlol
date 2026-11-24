@@ -184,8 +184,12 @@ class Explorer {
     FlutterError.onError = _errors.add;
   }
 
+  /// Always restores the handler (idempotent), so a failed run can never end
+  /// in "a test overrode FlutterError.onError" (T-239).
   void uninstall() {
-    FlutterError.onError = _previousOnError;
+    final prev = _previousOnError;
+    if (prev != null) FlutterError.onError = prev;
+    _previousOnError = null;
   }
 
   // ------------------------------------------------------------ driver

@@ -9,6 +9,7 @@ import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/features/home/application/home_cards.dart';
 import 'package:zaghlol/features/home/application/home_mascot.dart';
 import 'package:zaghlol/features/mascot/application/payday_celebration.dart';
+import 'package:zaghlol/features/mascot/presentation/mascot_moments.dart';
 import 'package:zaghlol/features/mascot/presentation/zaghlol_avatar.dart';
 import 'package:zaghlol/features/home/presentation/home_screen.dart'
     show HomeActions;
@@ -78,5 +79,31 @@ void main() {
     );
     await t.pumpAndSettle();
     expect(find.textContaining('under plan'), findsOneWidget);
+  });
+
+  // T-239: tapping the Home tip stays in the app, plays the tap mood and
+  // rotates the line (T-215).
+  testWidgets('tapping the tip keeps the app, tap mood, next line', (t) async {
+    await t.pumpWidget(
+      _host(MascotOnTrack(Currency.of('EGP')), const Locale('en')),
+    );
+    await t.pumpAndSettle();
+    final before = t.widget<ZaghlolTapBubble>(find.byType(ZaghlolTapBubble));
+    expect(find.textContaining('under plan'), findsOneWidget);
+    await t.tap(find.byType(ZaghlolTapBubble));
+    await t.pump();
+    expect(find.textContaining('under plan'), findsNothing);
+    expect(find.byType(ZaghlolTapBubble), findsOneWidget);
+    expect(
+      t.widget<ZaghlolAvatar>(find.byType(ZaghlolAvatar)).moment,
+      ZaghlolMoment.tap,
+    );
+    expect(
+      WidgetsBinding.instance.lifecycleState,
+      isNot(AppLifecycleState.paused),
+    );
+    expect(before.message, contains('under plan'));
+    await t.pumpAndSettle();
+    expect(t.takeException(), isNull);
   });
 }

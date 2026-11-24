@@ -322,6 +322,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-236](tasks/T-236.md) | Device tests: SMS while killed, ignored card, notification capture | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
 | [T-237](tasks/T-237.md) | Device tests: add/edit/delete/undo, budget payday alert, reimbursement | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
 | [T-238](tasks/T-238.md) | Device tests: export Gold/Free, language+digits, app lock, delete everything | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
+| [T-239](tasks/T-239.md) | Explorer survives emulator faults; restores FlutterError.onError | QA | Low | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
