@@ -245,10 +245,12 @@ final class DeleteEverything {
   final WipeMarker _marker;
   final Duration _leaseTimeout;
 
-  /// A database close that does not finish (T-238: a close waiting on a busy
-  /// connection never returned on the emulator and "Deleting..." stayed for
-  /// ever) must not hold the wipe: the key and the files go next, and the
-  /// restart drops the connection.
+  /// A guard only (T-238 fix round, batch-66 M-1): the close completes once
+  /// the SQLite handle is closed and never waits on `watch()` listeners. A
+  /// close that fails or does not finish in time fails the wipe: nothing is
+  /// deleted beside a handle that may still be open (its close would delete
+  /// files by name), the marker stays, the caller tells the user and does
+  /// not restart, and the next launch finishes the wipe.
   final Duration _closeTimeout;
 
   Future<WipeReport>? _running;
@@ -375,8 +377,13 @@ final class DeleteEverything {
     await step(WipeSteps.jobs, _cancelJobs);
     await step(
       WipeSteps.closeDb,
-      () => _closeDatabase().timeout(_closeTimeout, onTimeout: () {}),
+      () => _closeDatabase().timeout(_closeTimeout),
     );
+    if (failed.contains(WipeSteps.closeDb)) {
+      // The handle may still be open: delete nothing now. The marker
+      // (written above) keeps every part pending for the next launch.
+      return _report([...failed, ...pending], creds);
+    }
 
     // 6. Crypto-shred: the database key and the backup key. The marker
     //    records it at once, so no later resume deletes a newer key.

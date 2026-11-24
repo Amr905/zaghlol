@@ -23,6 +23,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart' show SafeException;
 
 import 'app_database.dart';
 import 'db_file_set.dart';
+import 'db_handle.dart';
 import 'encrypted_open.dart';
 import 'key_bootstrap.dart';
 import 'migration_guard.dart';
@@ -272,6 +273,12 @@ Future<DbOpenResult<D>> openDatabaseWith<D extends GeneratedDatabase>({
     ),
     executor: executor,
   );
+  // T-238 (batch-66 M-1): an older handle on this file that is still
+  // closing would delete this open's -wal/-shm by name when it closes. Wait
+  // for it; if it does not close, fail transiently (never open beside it).
+  if (!await awaitDbHandlesClosed(files.mainFile.path)) {
+    return opener.failed(DbOpenFailureCode.unavailable);
+  }
   try {
     return await opener.run();
   } on Object {

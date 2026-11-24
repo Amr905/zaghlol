@@ -17,6 +17,7 @@ import 'package:drift/isolate.dart' show DriftRemoteException;
 import 'package:sqlite3/sqlite3.dart' as sql;
 
 import 'db_errors.dart';
+import 'db_handle.dart';
 import 'key_bootstrap.dart';
 import 'migration_guard.dart';
 
@@ -68,14 +69,27 @@ QueryExecutor openEncryptedExecutor(
   MigrationGuard? guard,
 }) {
   final setup = _setupFor(key, file.path, guard);
+  // T-238 (batch-66 M-1): recorded so closeDbHandle can close the handle
+  // deterministically and an open at the same path waits for that close.
+  final path = file.path;
   if (inBackground) {
-    return NativeDatabase.createInBackground(
+    final exit = IsolateExitSignal();
+    final executor = NativeDatabase.createInBackground(
       file,
       logStatements: driftLogStatements,
       setup: setup,
+      isolateSetup: exit.setup,
     );
+    trackDbHandle(executor, path, exited: exit.exited);
+    return executor;
   }
-  return NativeDatabase(file, logStatements: driftLogStatements, setup: setup);
+  final executor = NativeDatabase(
+    file,
+    logStatements: driftLogStatements,
+    setup: setup,
+  );
+  trackDbHandle(executor, path);
+  return executor;
 }
 
 // Built in its own function so the closure captures only the key, the path

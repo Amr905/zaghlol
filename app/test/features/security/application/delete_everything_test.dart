@@ -19,6 +19,9 @@ import 'package:zaghlol/core/backend/response_signature.dart';
 import 'package:zaghlol/core/backend/transport.dart';
 import 'package:zaghlol/core/crypto/secret_store.dart';
 import 'package:zaghlol/core/db/app_database.dart';
+import 'package:zaghlol/core/db/app_database_providers.dart'
+    show disposeAppDatabase;
+import 'package:zaghlol/core/db/db_handle.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/features/gold/application/trusted_time.dart'
     show trustedTimeStateKey;
@@ -257,10 +260,11 @@ void main() {
     expect(w.store.stored, isNull);
   });
 
-  test('a database close that never returns does not hold the wipe '
-      '(T-238, negative proof)', () async {
+  test('a database close that never returns fails the wipe safely: nothing '
+      'deleted, marker kept (T-238 fix round, negative proof)', () async {
     final w = await _World.open();
     addTearDown(w.dispose);
+    await w.seedSecrets();
     final wipe = DeleteEverything(
       readInstall: () async => null,
       deleteRemote: (_) async => true,
@@ -277,9 +281,107 @@ void main() {
       closeTimeout: const Duration(milliseconds: 200),
     );
     final report = await wipe.run().timeout(const Duration(seconds: 20));
-    expect(report.complete, isTrue);
-    expect(w.store.stored, isNull);
-    expect(await w.world.files.anyExists(), isFalse);
+    expect(report.complete, isFalse);
+    expect(report.failed, contains(WipeSteps.closeDb));
+    // Nothing deleted beside a handle that may still be open.
+    expect(w.store.stored, isNotNull);
+    expect(w.world.mainFile.existsSync(), isTrue);
+    expect(w.native.calls, 0);
+    expect((await w.marker.read())!.pending, WipeSteps.parts.toSet());
+    await closeDbHandle(w.db);
+  });
+
+  group('paused watch() listeners (T-238 fix round, batch-66 M-1)', () {
+    // Riverpod pauses the subscriptions of off-screen providers; drift's
+    // close() never returns while one is paused.
+    DeleteEverything realClose(_World w) => DeleteEverything(
+      readInstall: () async => null,
+      deleteRemote: (_) async => true,
+      rotateSeatKeys: () async {},
+      cancelJobs: () async {},
+      closeDatabase: () => closeDbHandle(w.db),
+      secrets: w.store,
+      files: w.world.files,
+      tempDirectory: () async => w.world.tempDir,
+      native: w.native,
+      signOutLocal: () async {},
+      marker: w.marker,
+      leaseTimeout: const Duration(seconds: 1),
+    );
+
+    Future<StreamSubscription<Object?>> pausedWatch(AppDatabase db) async {
+      final first = Completer<void>();
+      final sub = db
+          .customSelect('SELECT count(*) AS n FROM secure_state')
+          .watch()
+          .listen((_) {
+            if (!first.isCompleted) first.complete();
+          });
+      await first.future;
+      sub.pause();
+      return sub;
+    }
+
+    test('the wipe completes promptly (well inside the 10 s guard): key '
+        'slots, database files and marker gone (negative proof)', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      await w.seedSecrets();
+      final sub = await pausedWatch(w.db);
+      addTearDown(sub.cancel);
+
+      final watch = Stopwatch()..start();
+      final report = await realClose(w).run();
+      watch.stop();
+
+      expect(report.complete, isTrue, reason: '$report');
+      expect(watch.elapsed, lessThan(const Duration(seconds: 5)));
+      // The SQLite handle itself is closed (not just abandoned): the old
+      // connection can no longer run anything.
+      await expectLater(
+        w.db.customSelect('SELECT 1 AS n').get(),
+        throwsA(anything),
+      );
+      expect(w.store.stored, isNull);
+      expect(await w.world.files.anyExists(), isFalse);
+      expect(await w.marker.exists(), isFalse);
+    });
+
+    test('restart after the wipe: the old provider\'s dispose never touches '
+        'the new database files (negative proof)', () async {
+      final w = await _World.open();
+      addTearDown(w.dispose);
+      await w.seedSecrets();
+      final sub = await pausedWatch(w.db);
+
+      expect((await realClose(w).run()).complete, isTrue);
+
+      // The restart: a new key and database at the same path, in WAL mode.
+      final fresh = openedDb(await w.world.open(seed: 62));
+      await SecureStateDao(fresh).write('after', _b('1'), at: 3);
+      final wal = File('${w.world.mainFile.path}-wal');
+      final shm = File('${w.world.mainFile.path}-shm');
+      expect(wal.existsSync(), isTrue);
+
+      // The old container is disposed: its streams are cancelled and the
+      // provider's close runs.
+      final disposed = disposeAppDatabase(w.db);
+      await sub.cancel();
+      await disposed.timeout(const Duration(seconds: 5));
+      // Let a (wrong) close in the old isolate run, if any were pending.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+
+      expect(wal.existsSync(), isTrue, reason: 'new -wal deleted');
+      expect(shm.existsSync(), isTrue, reason: 'new -shm deleted');
+      await SecureStateDao(fresh).write('later', _b('2'), at: 4);
+      await disposeAppDatabase(fresh);
+
+      final again = openedDb(await w.world.open(seed: 62));
+      addTearDown(() => disposeAppDatabase(again));
+      final dao = SecureStateDao(again);
+      expect(await dao.read('after'), isNotNull);
+      expect(await dao.read('later'), isNotNull);
+    });
   });
 
   group('resume never repeats a finished part (batch-20a T-166)', () {

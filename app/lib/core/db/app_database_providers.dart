@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app_database.dart';
 import 'app_database_opener.dart';
+import 'db_handle.dart';
 import 'db_key_providers.dart';
 import 'orphan_wipe.dart';
 
@@ -64,10 +65,7 @@ final appDatabaseProvider = FutureProvider<AppDatabase>(
     );
     switch (result) {
       case DbOpened(:final db):
-        // T-238: a close that fails (drift's stream store can throw while
-        // streams are cancelled, after Delete everything closed it already)
-        // must not surface as an uncaught error of the restart.
-        ref.onDispose(() => unawaited(db.close().onError((_, _) {})));
+        ref.onDispose(() => unawaited(disposeAppDatabase(db)));
         return db;
       case DbOpenFailed(:final code):
         throw DbOpenFailure(code);
@@ -76,3 +74,20 @@ final appDatabaseProvider = FutureProvider<AppDatabase>(
   name: 'appDatabaseProvider',
   retry: _noRetry,
 );
+
+/// T-238 (batch-66 M-1): the provider's close. The SQLite handle first
+/// ([closeDbHandle]: never waits on paused `watch()` listeners, idempotent,
+/// a no-op when "Delete everything" closed it already); a failure there is
+/// not caught (the handle may still be open, and an open at the same path
+/// then refuses to start). Only then drift's stream store: with the handle
+/// known closed, nothing it does touches the file, and the error it can
+/// throw while streams are cancelled under it
+/// (ConcurrentModificationError) is dropped.
+Future<void> disposeAppDatabase(AppDatabase db) async {
+  await closeDbHandle(db);
+  try {
+    await db.close();
+  } on Object {
+    // The handle is closed (above): only stream bookkeeping can fail here.
+  }
+}

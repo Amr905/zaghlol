@@ -3,8 +3,11 @@
 // restart). Afterwards the app must be in its first-launch state: the Welcome
 // screen, an empty database, settings back at their defaults and the first-run
 // marker gone. .github/scripts/e2e-settings-device.sh checks, when the test prints
-// E2E12 WIPED, that the app has no posted notification or pending alarm left
-// and lists the files of its private dir (names only). Synthetic data only.
+// E2E12 WIPED, that the app has no posted notification and no pending
+// notification alarm left, and that the boot re-arm store
+// (noBackup/notif/schedules.txt) is gone; it first checks, at E2E12
+// SCHEDULED, that the alarm and the store entry this test scheduled exist
+// (batch-66 m-1). Synthetic data only.
 //
 // Run: flutter test integration_test/e2e_wipe_device_test.dart
 //      --flavor devSms -d <device> --no-uninstall
@@ -16,11 +19,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/app/app_navigation.dart' show openSettings;
 import 'package:zaghlol/core/db/app_database_providers.dart';
+import 'package:zaghlol/core/db/db_handle.dart';
 import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/features/backup/application/schedule_providers.dart'
     show backupWorkSchedulerProvider;
+import 'package:zaghlol/features/notifications/application/notification_providers.dart'
+    show notificationGatewayProvider;
+import 'package:zaghlol/features/notifications/domain/notification_types.dart'
+    show PlatformNotification;
 import 'package:zaghlol/main.dart' as app;
 
 import 'support/e2e_settings_common.dart';
@@ -59,6 +67,21 @@ void main() {
       );
       await e.shot(t, '01-before');
 
+      // batch-66 m-1: a scheduled alert (an alarm and a boot re-arm store
+      // entry) that the wipe must remove. The script checks both exist now.
+      await before
+          .read(notificationGatewayProvider)
+          .schedule(
+            PlatformNotification(
+              id: 238012,
+              title: 'E2E12 synthetic',
+              body: 'synthetic',
+              at: DateTime.now().add(const Duration(hours: 6)),
+            ),
+          );
+      e.say('SCHEDULED');
+      await e.settle(t, 4000);
+
       // ---- Settings -> Privacy & data -> Delete everything.
       unawaited(openSettings(rootNavigatorKey.currentContext!));
       await e.scrollAndTap(t, find.text('Privacy & data'), 'the Privacy row');
@@ -81,6 +104,7 @@ void main() {
       await t.enterText(find.byType(TextField).last, 'DELETE');
       await e.settle(t, 300);
       await t.tap(find.text('Delete everything').last);
+      final wipeClock = Stopwatch()..start();
 
       // ---- First-launch state.
       final welcome = find.byKey(const ValueKey('welcome-start'));
@@ -108,7 +132,7 @@ void main() {
           final db = await c
               .read(appDatabaseProvider.future)
               .timeout(const Duration(seconds: 20));
-          await db.close().timeout(const Duration(seconds: 20));
+          await closeDbHandle(db).timeout(const Duration(seconds: 20));
           e.say('PROBE close database: returned');
         } on Object catch (x) {
           e.say('PROBE close database: ${x.runtimeType}');
@@ -117,6 +141,14 @@ void main() {
         await e.dumpScreen(t, '04-after-probe', max: 8);
         rethrow;
       }
+      wipeClock.stop();
+      // The confirm tap to the Welcome screen: the wipe and the restart.
+      // Well under the 10 s close guard (batch-66 M-1).
+      e.say('WIPE_MS ${wipeClock.elapsedMilliseconds}');
+      e.check(
+        wipeClock.elapsed < const Duration(seconds: 10),
+        'the wipe finished before the close guard could fire',
+      );
       await e.settle(t, 2000);
       await e.shot(t, '03-welcome');
       final after = ProviderScope.containerOf(t.element(welcome));
