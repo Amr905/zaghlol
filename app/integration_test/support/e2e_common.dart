@@ -161,7 +161,7 @@ class E2e {
             amount: Money(Currency.of('EGP'), amountsMinor[i]),
             occurredAt: at,
             occurredTzOffsetMin: at.timeZoneOffset.inMinutes,
-            merchant: 'E2E SHOP $i',
+            merchant: 'TEST SHOP ${String.fromCharCode(65 + i)}',
           ),
         );
       }
