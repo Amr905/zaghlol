@@ -1,0 +1,33 @@
+==== e2e04
+Success
+e2e04 exit: 0
+E2E_DEVICE E2E04 OK add: amount saved as 12550 minor
+E2E_DEVICE E2E04 OK add: category groceries
+E2E_DEVICE E2E04 OK add: direction expense
+E2E_DEVICE E2E04 OK add: source manual
+E2E_DEVICE E2E04 OK add: row is on the Home list
+E2E_DEVICE E2E04 SHOT e2e04-1-added
+E2E_DEVICE E2E04 STEP open detail via the list
+E2E_DEVICE E2E04 STEP tapped row
+E2E_DEVICE E2E04 STEP detail open
+E2E_DEVICE E2E04 OK edit: amount now 20000 minor
+E2E_DEVICE E2E04 OK edit: category changed
+E2E_DEVICE E2E04 SHOT e2e04-2-edited
+E2E_DEVICE E2E04 STEP delete
+E2E_DEVICE E2E04 OK delete: row is soft-deleted
+E2E_DEVICE E2E04 OK delete: row left the transactions list
+E2E_DEVICE E2E04 SHOT e2e04-3-deleted
+E2E_DEVICE E2E04 OK undo delete: row restored
+E2E_DEVICE E2E04 OK undo delete: amount intact
+E2E_DEVICE E2E04 OK undo delete: row is back on Home
+E2E_DEVICE E2E04 STEP bulk
+E2E_DEVICE E2E04 OK second row added with groceries
+E2E_DEVICE E2E04 SHOT e2e04-4-selected
+E2E_DEVICE E2E04 OK bulk: row A category changed
+E2E_DEVICE E2E04 OK bulk: row B category changed
+E2E_DEVICE E2E04 SHOT e2e04-5-bulk-changed
+E2E_DEVICE E2E04 OK bulk undo: row A back to its category
+E2E_DEVICE E2E04 OK bulk undo: row B back to its category
+E2E_DEVICE E2E04 SHOT e2e04-6-bulk-undone
+E2E_DEVICE E2E04 RESULT problems=0
+00:54 +1: All tests passed!
