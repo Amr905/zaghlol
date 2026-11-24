@@ -37,10 +37,10 @@ jobs:
       matrix:
         flavor: [devSms, devNoSms]
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: '17'
@@ -75,7 +75,7 @@ jobs:
           # Every .so must be Stored (compressed == uncompressed size): the OS then maps it from the APK, no second copy.
           if unzip -v "$APK" | awk '$NF ~ /[.]so$/ && $2 != "Stored" {bad=1; print "compressed lib:", $NF} END{exit bad}'; then echo "all native libs are stored uncompressed"; else echo "::error::compressed native libs in $APK"; exit 1; fi
           if "$AAPT" dump xmltree "$APK" AndroidManifest.xml | grep -iE "extractNativeLibs.*(=true|0xffffffff)"; then echo "::error::extractNativeLibs=true"; exit 1; fi
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: zaghlol-${{ matrix.flavor }}-release-arm64-sideload
           path: ${{ runner.temp }}/sideload/*.apk
@@ -92,10 +92,10 @@ jobs:
     env:
       DEVICE: emulator-5554
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: '17'
@@ -140,7 +140,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: bash .github/scripts/installed-size-run.sh
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: installed-size-report
