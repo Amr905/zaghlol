@@ -316,6 +316,9 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-230](tasks/T-230.md) | Friday nudge and bill reminders survive a restart | FU | Medium | Sonnet | native-platform-engineer | T-228 | D | 63 | DONE (batch 63) |
 | [T-231](tasks/T-231.md) | Emulator run: fix device flow, triage explorer findings, Rive on device | QA | Medium | Sonnet | flutter-ui-engineer | — | G | 64 | DONE (batch 64) |
 | [T-232](tasks/T-232.md) | Mascot: all approved Motion Lab animations in zaghlol.riv + mood preview | PO 11-23 | High | Sonnet | flutter-ui-engineer | T-231 | G | 64 | DONE (batch 64) |
+| [T-233](tasks/T-233.md) | SMS scenario on the emulator → transactions → charts, end to end | PO 11-24 | High | Sonnet | flutter-core-engineer | — | P | 65 | TODO |
+| [T-234](tasks/T-234.md) | Send the SMS scenario to your own emulator (PO tool) | PO 11-24 | Low | Sonnet | flutter-core-engineer | T-233 | P | 65 | TODO |
+| [T-235](tasks/T-235.md) | Explorer dead taps: bill Save, card Save/Hide, Licenses, merchants row | FU-292 | Medium | Sonnet | flutter-ui-engineer | — | G | 65 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
