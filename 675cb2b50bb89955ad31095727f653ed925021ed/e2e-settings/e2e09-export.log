@@ -1,0 +1,63 @@
+Resolving dependencies in `/home/runner/work/zaghlol/zaghlol`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  android_file_picker 2.1.6 (2.2.1 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.1 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_ui 1.1.6 (1.1.7 available)
+  dart_style 3.1.3 (3.1.14 available)
+  dbus 0.8.0 (0.8.1 available)
+  drift 2.35.3 (2.35.4 available)
+  file_picker 13.3.3 (13.4.1 available)
+  file_picker_darwin 2.5.1 (2.5.2 available)
+  file_picker_linux 2.0.4 (2.0.5 available)
+  file_picker_platform_interface 4.2.0 (4.3.0 available)
+  file_picker_web 4.2.1 (4.2.2 available)
+  hashlib 2.4.2 (2.4.4 available)
+  image_picker_ios 0.8.13+15 (0.8.13+16 available)
+  jni 1.1.2 (1.2.1 available)
+  jni_flutter 1.0.4+1 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.11.0 (1.11.1 available)
+  objective_c 9.6.3 (9.6.4 available)
+  package_config 2.2.0 (3.0.0 available)
+  pdfium_dart 0.4.3 (0.4.4 available)
+  pdfium_flutter 0.4.3 (0.4.4 available)
+  pdfrx 3.0.0 (3.1.0 available)
+  pdfrx_engine 0.9.3 (0.9.6 available)
+  pigeon 26.3.2 (30.0.4 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+Got dependencies in `/home/runner/work/zaghlol/zaghlol`!
+32 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_export_device_test.dart
+Running Gradle task 'assembleDevSmsDebug'...                    
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter, rive_native
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDevSmsDebug'...                       33.4s
+✓ Built build/app/outputs/flutter-apk/app-devsms-debug.apk
+Installing build/app/outputs/flutter-apk/app-devsms-debug.apk...      1,802ms
+00:00 +0: Free: preview only; Gold: CSV with header and rows
+E2E09 SEEDED settings
+E2E09 MAIN_RETURNED
+NOTIF_PROBE launch route=false
+E2E09 SEEDED transactions=3
+E2E09 SHOT 01-free-preview
+E2E09 SHOT 02-free-paywall
+E2E09 SHOT 03-gold-export
+E2E09 CSV lines=4 bytes=587
+E2E09 SHOT 04-gold-ready
+E2E09 SUMMARY problems=0 flutterErrors=0
+00:19 +1: (tearDownAll)
+00:19 +1: All tests passed!
