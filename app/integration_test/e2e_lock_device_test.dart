@@ -33,6 +33,7 @@ void main() {
     e.captureFlutterErrors();
 
     await app.main();
+    e.say('MAIN_RETURNED');
     await e.waitFor(t, find.text('Home'), what: 'Home');
     await e.settle(t, 2000);
     final lockKey = find.byKey(const ValueKey('lock-unlock'));

@@ -127,11 +127,10 @@ class E2e {
 
   /// A returning user: the first-run marker is written through the app's own
   /// providers and the real database, so onboarding (system permission
-  /// dialogs) is skipped. Optionally with transactions of [amountsMinor] EGP.
+  /// dialogs) is skipped.
   Future<void> seedReturningUser({
     LanguagePref language = LanguagePref.en,
     DigitsPref digits = DigitsPref.western,
-    List<int> amountsMinor = const [],
   }) async {
     final dir = await resolveDbDirectory();
     final seed = ProviderContainer(
@@ -145,29 +144,35 @@ class E2e {
     );
     await settings.set(Settings.language, language);
     await settings.set(Settings.digits, digits);
-    if (amountsMinor.isNotEmpty) {
-      final accounts = await seed.read(accountsRepositoryProvider.future);
-      final txns = await seed.read(transactionRepositoryProvider.future);
-      final cash = await accounts.ensureDefaultCash(
-        currency: Currency.of('EGP'),
-        label: 'Cash',
-      );
-      for (var i = 0; i < amountsMinor.length; i++) {
-        final at = DateTime.now().subtract(Duration(minutes: 5 + i));
-        await txns.add(
-          NewTransaction(
-            accountId: cash.id,
-            direction: TxnDirection.expense,
-            amount: Money(Currency.of('EGP'), amountsMinor[i]),
-            occurredAt: at,
-            occurredTzOffsetMin: at.timeZoneOffset.inMinutes,
-            merchant: 'TEST SHOP ${String.fromCharCode(65 + i)}',
-          ),
-        );
-      }
-    }
     await (await seed.read(appDatabaseProvider.future)).close();
     seed.dispose();
+    say('SEEDED settings');
+  }
+
+  /// Adds expenses of [amountsMinor] EGP through the running app's own
+  /// providers (after `app.main()`).
+  Future<void> addTransactions(List<int> amountsMinor) async {
+    final c = container();
+    final accounts = await c.read(accountsRepositoryProvider.future);
+    final txns = await c.read(transactionRepositoryProvider.future);
+    final cash = await accounts.ensureDefaultCash(
+      currency: Currency.of('EGP'),
+      label: 'Cash',
+    );
+    for (var i = 0; i < amountsMinor.length; i++) {
+      final at = DateTime.now().subtract(Duration(minutes: 5 + i));
+      await txns.add(
+        NewTransaction(
+          accountId: cash.id,
+          direction: TxnDirection.expense,
+          amount: Money(Currency.of('EGP'), amountsMinor[i]),
+          occurredAt: at,
+          occurredTzOffsetMin: at.timeZoneOffset.inMinutes,
+          merchant: 'TEST SHOP ${String.fromCharCode(65 + i)}',
+        ),
+      );
+    }
+    say('SEEDED transactions=${amountsMinor.length}');
   }
 
   /// Selects tab [i] (0 Home, 1 Money, 2 Insights, 3 Zaghlol) as a tap does.

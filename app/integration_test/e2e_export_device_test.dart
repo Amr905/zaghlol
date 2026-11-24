@@ -41,15 +41,18 @@ void main() {
   testWidgets('Free: preview only; Gold: CSV with header and rows', (t) async {
     final semantics = t.ensureSemantics();
     addTearDown(semantics.dispose);
-    await e.seedReturningUser(amountsMinor: [12550, 99900, 5]);
+    await e.seedReturningUser();
     e.captureFlutterErrors();
     final cap = _Capture();
     exportDestinationForDeviceTest = () => cap;
     addTearDown(() => exportDestinationForDeviceTest = null);
 
     await app.main();
+    e.say('MAIN_RETURNED');
     await e.waitFor(t, find.text('Home'), what: 'Home');
     await e.settle(t, 2000);
+    await e.addTransactions([12550, 99900, 5]);
+    await e.settle(t, 800);
 
     // ---- Free: Settings -> Export & import.
     e.check(
