@@ -319,6 +319,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-233](tasks/T-233.md) | SMS scenario on the emulator → transactions → charts, end to end | PO 11-24 | High | Sonnet | flutter-core-engineer | — | P | 65 | DONE (batch 65) |
 | [T-234](tasks/T-234.md) | Send the SMS scenario to your own emulator (PO tool) | PO 11-24 | Low | Sonnet | flutter-core-engineer | T-233 | P | 65 | DONE (batch 65) |
 | [T-235](tasks/T-235.md) | Explorer dead taps: bill Save, card Save/Hide, Licenses, merchants row | FU-292 | Medium | Sonnet | flutter-ui-engineer | — | G | 65 | DONE (batch 65) |
+| [T-239](tasks/T-239.md) | Explorer survives emulator faults; restores FlutterError.onError | QA | Low | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
