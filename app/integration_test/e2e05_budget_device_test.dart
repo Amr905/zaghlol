@@ -40,132 +40,136 @@ void main() {
 
   testWidgets('payday 25 budget, 80 % alert, safe to spend', (t) async {
     final semantics = t.ensureSemantics();
-    // Quiet hours would delay the alert on a CI clock in the night.
-    final c = await e.boot(
-      t,
-      seed: (s) async {
-        await s.set(Settings.quietHoursEnabled, false);
-      },
-    );
-    final db = await c.read(appDatabaseProvider.future);
+    try {
+      // Quiet hours would delay the alert on a CI clock in the night.
+      final c = await e.boot(
+        t,
+        seed: (s) async {
+          await s.set(Settings.quietHoursEnabled, false);
+        },
+      );
+      final db = await c.read(appDatabaseProvider.future);
 
-    // ---- payday 25 and a 1,000 EGP overall monthly budget (the app's own
-    // store and saver, as the editor uses them)
-    final store = await c.read(paydayScheduleStoreProvider.future);
-    await store.setPayday(25);
-    final save = await c.read(budgetSaverProvider.future);
-    await save(
-      egp,
-      BudgetValidated(
-        total: Money(egp, 100000),
-        limits: const {},
-        thresholds: const [80, 100],
-      ),
-      false,
-    );
-    await e.settle(t, 1000);
+      // ---- payday 25 and a 1,000 EGP overall monthly budget (the app's own
+      // store and saver, as the editor uses them)
+      final store = await c.read(paydayScheduleStoreProvider.future);
+      await store.setPayday(25);
+      final save = await c.read(budgetSaverProvider.future);
+      await save(
+        egp,
+        BudgetValidated(
+          total: Money(egp, 100000),
+          limits: const {},
+          thresholds: const [80, 100],
+        ),
+        false,
+      );
+      await e.settle(t, 1000);
 
-    // ---- the cycle by the spec: 25th .. 24th around today
-    final now = DateTime.now();
-    final today = DateTime.utc(now.year, now.month, now.day);
-    final start = now.day >= 25
-        ? DateTime.utc(now.year, now.month, 25)
-        : DateTime.utc(now.year, now.month - 1, 25);
-    final end = DateTime.utc(start.year, start.month + 1, 24);
-    String iso(DateTime d) =>
-        '${d.year.toString().padLeft(4, '0')}-'
-        '${d.month.toString().padLeft(2, '0')}-'
-        '${d.day.toString().padLeft(2, '0')}';
-    final daysLeft = end.difference(today).inDays + 1;
-    final schedule = await c.read(paydayScheduleProvider.future);
-    final cycle = schedule.cycleOn(CivilDate(now.year, now.month, now.day));
-    e.check(cycle.key == iso(start), 'cycle starts on the 25th');
-    e.check(cycle.end.toIso() == iso(end), 'cycle ends on the 24th');
-    e.say('CYCLE daysLeft=$daysLeft');
+      // ---- the cycle by the spec: 25th .. 24th around today
+      final now = DateTime.now();
+      final today = DateTime.utc(now.year, now.month, now.day);
+      final start = now.day >= 25
+          ? DateTime.utc(now.year, now.month, 25)
+          : DateTime.utc(now.year, now.month - 1, 25);
+      final end = DateTime.utc(start.year, start.month + 1, 24);
+      String iso(DateTime d) =>
+          '${d.year.toString().padLeft(4, '0')}-'
+          '${d.month.toString().padLeft(2, '0')}-'
+          '${d.day.toString().padLeft(2, '0')}';
+      final daysLeft = end.difference(today).inDays + 1;
+      final schedule = await c.read(paydayScheduleProvider.future);
+      final cycle = schedule.cycleOn(CivilDate(now.year, now.month, now.day));
+      e.check(cycle.key == iso(start), 'cycle starts on the 25th');
+      e.check(cycle.end.toIso() == iso(end), 'cycle ends on the 24th');
+      e.say('CYCLE daysLeft=$daysLeft');
 
-    Future<int> txns() async => e.count(
-      db,
-      'SELECT COUNT(*) AS n FROM transactions WHERE deleted_at IS NULL',
-    );
-    Future<int> alerts() async =>
-        e.count(db, 'SELECT COUNT(*) AS n FROM fired_alerts');
-    Future<int> cycleSpend() async {
-      final repo = await c.read(cycleRepositoryProvider.future);
-      return (await repo.totals(cycle))[egp]?.spend.minor ?? 0;
+      Future<int> txns() async => e.count(
+        db,
+        'SELECT COUNT(*) AS n FROM transactions WHERE deleted_at IS NULL',
+      );
+      Future<int> alerts() async =>
+          e.count(db, 'SELECT COUNT(*) AS n FROM fired_alerts');
+      Future<int> cycleSpend() async {
+        final repo = await c.read(cycleRepositoryProvider.future);
+        return (await repo.totals(cycle))[egp]?.spend.minor ?? 0;
+      }
+
+      // ---- 60 %: no alert yet
+      e.send('p1');
+      final got2 = await e.waitUntil(
+        t,
+        () async => await txns() >= 2,
+        timeout: const Duration(seconds: 120),
+      );
+      e.check(got2, 'two SMS purchases saved');
+      await e.settle(t, 8000);
+      e.check(await cycleSpend() == 60000, 'cycle spend after p1 is 60 %');
+      e.check(await alerts() == 0, 'no alert recorded at 60 %');
+      e.say('P1_DONE');
+
+      // ---- 80 %: the alert
+      e.send('p2');
+      final got3 = await e.waitUntil(
+        t,
+        () async => await txns() >= 3,
+        timeout: const Duration(seconds: 120),
+      );
+      e.check(got3, 'third SMS purchase saved');
+      final fired = await e.waitUntil(
+        t,
+        () async => await alerts() >= 1,
+        timeout: const Duration(seconds: 60),
+      );
+      e.check(fired, 'an alert was recorded at 80 %');
+      final th = await e.rows(db, 'SELECT threshold FROM fired_alerts');
+      e.check(
+        th.any((r) => r['threshold'] == 80) &&
+            !th.any((r) => r['threshold'] == 100),
+        'only the 80 threshold fired',
+      );
+      e.check(await cycleSpend() == 80000, 'cycle spend after p2 is 80 %');
+      e.say('P2_DONE');
+
+      // ---- safe to spend by the spec, in the provider and on the screen
+      final wantSafe = (100000 - 80000) ~/ daysLeft;
+      c.invalidate(currentCycleOverviewProvider);
+      final ov = await c.read(currentCycleOverviewProvider.future);
+      e.check(
+        ov.byCurrency[egp]?.safeToSpend?.minor == wantSafe,
+        'safe per day provider equals floor(left / days) = $wantSafe',
+      );
+      e.check(ov.daysRemaining == daysLeft, 'days remaining incl. today');
+
+      unawaited(openBudget(rootNavigatorKey.currentContext!));
+      await e.settle(t, 2500);
+      final l = AppLocalizations.of(rootNavigatorKey.currentContext!);
+      final shownMoney = trimZeroFraction(
+        MoneyFormat.format(
+          Money(egp, wantSafe),
+          languageCode: 'en',
+          digits: DigitsMode.resolve(DigitsPref.auto, 'en'),
+          hidden: false,
+        ),
+      );
+      final want = cleanBidi(l.budgetOverviewSafePerDay(shownMoney));
+      final safeText = find.byWidgetPredicate(
+        (w) => w is Text && cleanBidi(w.data ?? '') == want,
+      );
+      await e.waitFor(
+        t,
+        safeText,
+        timeout: const Duration(seconds: 20),
+        what: 'the safe-per-day line on the Budget screen',
+      );
+      e.check(e.found(safeText), 'Budget screen shows the safe-per-day figure');
+      await e.shot(t, 'e2e05-budget');
+
+      e.say('RESULT problems=${e.problems.length}');
+      expect(e.problems, isEmpty, reason: e.problems.join('; '));
+    } finally {
+      e.restoreErrors();
+      semantics.dispose();
     }
-
-    // ---- 60 %: no alert yet
-    e.send('p1');
-    final got2 = await e.waitUntil(
-      t,
-      () async => await txns() >= 2,
-      timeout: const Duration(seconds: 120),
-    );
-    e.check(got2, 'two SMS purchases saved');
-    await e.settle(t, 8000);
-    e.check(await cycleSpend() == 60000, 'cycle spend after p1 is 60 %');
-    e.check(await alerts() == 0, 'no alert recorded at 60 %');
-    e.say('P1_DONE');
-
-    // ---- 80 %: the alert
-    e.send('p2');
-    final got3 = await e.waitUntil(
-      t,
-      () async => await txns() >= 3,
-      timeout: const Duration(seconds: 120),
-    );
-    e.check(got3, 'third SMS purchase saved');
-    final fired = await e.waitUntil(
-      t,
-      () async => await alerts() >= 1,
-      timeout: const Duration(seconds: 60),
-    );
-    e.check(fired, 'an alert was recorded at 80 %');
-    final th = await e.rows(db, 'SELECT threshold FROM fired_alerts');
-    e.check(
-      th.any((r) => r['threshold'] == 80) &&
-          !th.any((r) => r['threshold'] == 100),
-      'only the 80 threshold fired',
-    );
-    e.check(await cycleSpend() == 80000, 'cycle spend after p2 is 80 %');
-    e.say('P2_DONE');
-
-    // ---- safe to spend by the spec, in the provider and on the screen
-    final wantSafe = (100000 - 80000) ~/ daysLeft;
-    c.invalidate(currentCycleOverviewProvider);
-    final ov = await c.read(currentCycleOverviewProvider.future);
-    e.check(
-      ov.byCurrency[egp]?.safeToSpend?.minor == wantSafe,
-      'safe per day provider equals floor(left / days) = $wantSafe',
-    );
-    e.check(ov.daysRemaining == daysLeft, 'days remaining incl. today');
-
-    unawaited(openBudget(rootNavigatorKey.currentContext!));
-    await e.settle(t, 2500);
-    final l = AppLocalizations.of(rootNavigatorKey.currentContext!);
-    final shownMoney = trimZeroFraction(
-      MoneyFormat.format(
-        Money(egp, wantSafe),
-        languageCode: 'en',
-        digits: DigitsMode.resolve(DigitsPref.auto, 'en'),
-        hidden: false,
-      ),
-    );
-    final want = cleanBidi(l.budgetOverviewSafePerDay(shownMoney));
-    final safeText = find.byWidgetPredicate(
-      (w) => w is Text && cleanBidi(w.data ?? '') == want,
-    );
-    await e.waitFor(
-      t,
-      safeText,
-      timeout: const Duration(seconds: 20),
-      what: 'the safe-per-day line on the Budget screen',
-    );
-    e.check(e.found(safeText), 'Budget screen shows the safe-per-day figure');
-    await e.shot(t, 'e2e05-budget');
-
-    e.say('RESULT problems=${e.problems.length}');
-    semantics.dispose();
-    expect(e.problems, isEmpty, reason: e.problems.join('; '));
   });
 }

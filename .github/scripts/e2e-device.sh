@@ -29,6 +29,10 @@ budget_notifs() { # how many notifications of the budget channel are posted
   adb -s "$DEVICE" shell dumpsys notification --noredact < /dev/null 2> /dev/null | grep -c "channel=zaghlol_alert_budget" || true
 }
 
+notif_channels() { # channel ids of the app's posted notifications (no text)
+  adb -s "$DEVICE" shell dumpsys notification --noredact < /dev/null 2> /dev/null | grep "pkg=$PKG" | grep -o "channel=[A-Za-z_]*" | sort | uniq -c | tr '\n' ' '
+}
+
 send_phase() { # test phase
   local dmy hm ref
   dmy=$(adb -s "$DEVICE" shell date +%d-%m-%Y < /dev/null | tr -d '\r')
@@ -45,6 +49,8 @@ send_phase() { # test phase
       sleep 6
       echo "E2E_DEVICE NOTIF budget channel before 80%: $(budget_notifs)"
       sms_live NBE 'NBE: Purchase of EGP 200.00 from NBE Visa **4567 at TALABAT. Balance EGP 6510.00'
+      sleep 15
+      echo "E2E_DEVICE NOTIF channels now: $(notif_channels)"
       ;;
     e2e06/x1)
       sms_live NBE 'NBE: Purchase of EGP 1200.00 from NBE Visa **4567 at TALABAT. Balance EGP 9000.00'
@@ -91,7 +97,7 @@ run_one() { # name test-file
   r=$?
   echo "$name exit: $r"
   grep -E "E2E_DEVICE|^[0-9:]+ [+-][0-9]+.*(Some tests|All tests)" "$log" | cut -c1-240
-  if [ "$r" -ne 0 ]; then echo "---- $name log tail (no message text is printed)"; tail -40 "$log" | cut -c1-220; fi
+  if [ "$r" -ne 0 ]; then echo "---- $name first exception"; grep -m1 -A12 "EXCEPTION CAUGHT" "$log" | cut -c1-200; echo "---- $name log tail (no message text is printed)"; tail -30 "$log" | cut -c1-220; fi
   adb -s "$DEVICE" logcat -d -b crash 2> /dev/null | tail -10
   pull_files
   return "$r"
@@ -110,7 +116,7 @@ run_one e2e04 e2e04_manual_device_test.dart 2>&1 | tee "$OUT/e2e04-script.log"; 
 run_one e2e05 e2e05_budget_device_test.dart 2>&1 | tee "$OUT/e2e05-script.log"; rc5=${PIPESTATUS[0]}
 # the 80 % alert must be posted (the app is still installed, the alert stays)
 n=$(budget_notifs)
-echo "E2E_DEVICE NOTIF budget channel after 80%: $n"
+echo "E2E_DEVICE NOTIF budget channel after 80%: $n; channels: $(notif_channels)"
 if [ "${n:-0}" -lt 1 ]; then echo "E2E_DEVICE PROBLEM no budget notification posted"; rc5=1; fi
 if grep -q "budget channel before 80%: [1-9]" "$OUT/e2e05-script.log"; then echo "E2E_DEVICE PROBLEM alert posted before 80%"; rc5=1; fi
 run_one e2e06 e2e06_transfer_device_test.dart 2>&1 | tee "$OUT/e2e06-script.log"; rc6=${PIPESTATUS[0]}

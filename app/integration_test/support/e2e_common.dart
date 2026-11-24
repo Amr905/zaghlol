@@ -113,6 +113,31 @@ class E2e {
     if (!ok) fail('timed out waiting for ${what ?? f}');
   }
 
+  /// Scrolls the topmost vertical list until [f] is built, then brings it to
+  /// the middle of the screen (rows below the fold are not hit by a tap).
+  Future<void> reveal(WidgetTester t, Finder f) async {
+    if (!found(f)) {
+      final v = find.byWidgetPredicate(
+        (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+      );
+      await t.scrollUntilVisible(f, 200, scrollable: v.last, maxScrolls: 40);
+    }
+    await Scrollable.ensureVisible(
+      t.element(f.first),
+      alignment: 0.4,
+      duration: const Duration(milliseconds: 200),
+    );
+    await settle(t, 600);
+  }
+
+  /// Puts the error handler back; call in a `finally`.
+  void restoreErrors() {
+    final o = _original;
+    if (o != null) FlutterError.onError = o;
+  }
+
+  void Function(FlutterErrorDetails)? _original;
+
   Future<void> go(WidgetTester t, String route) async {
     rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
     await settle(t, 300);
@@ -143,6 +168,7 @@ class E2e {
     c0.dispose();
 
     final original = FlutterError.onError;
+    _original = original;
     FlutterError.onError = (d) {
       final text = d.exceptionAsString();
       if (text.contains('overflowed') || text.contains('parentDataDirty')) {
@@ -150,7 +176,6 @@ class E2e {
       }
       original?.call(d);
     };
-    addTearDown(() => FlutterError.onError = original);
 
     await app.main();
     await waitFor(t, find.text('Home'), what: 'Home');
