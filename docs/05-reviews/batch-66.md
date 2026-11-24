@@ -166,3 +166,24 @@ The host could not reproduce the WAL deletion itself: on Linux the old close lef
 - Also green on the fix commit: app-ci 45465524080, db-platform 45465524168 and security-scan 45465523992.
 
 **Verdict for T-238 after the fix round:** M-1 resolved; m-1 and m-2 fixed. Lead delta check or a Sonnet delta re-review is still needed (about 250 changed lines).
+
+## Delta re-review (T-238 fix round, Opus)
+Scope: `git diff a0716515..HEAD` (commits `675cb2b5`, `1e1f574e`, `3f29c9d7`). Ran `flutter test --exclude-tags golden test/core test/features/settings`: 1407 passed, 1 skipped. Device run 45469150283: E2E-09..12 green, wipe 1887 ms.
+
+**Checks**
+- **Nothing is deleted unless the handle is proven closed.** `closeDbHandle` awaits `executor.close()` and then the drift isolate's exit (`IsolateExitSignal` through `isolateSetup`; the app uses the background executor with `readPool` 0, so there is exactly one isolate). The wipe's close step has no `onTimeout` any more. A timeout or error adds `closeDb` to `failed`, and `_run` returns before `_deleteKeySlots` / `_deleteDbFiles` / native. **OK.**
+- **Failure: nothing deleted, the user is told, no half-wiped state.** The marker was written in step 1 with every part pending. The provider runs `resume()` once (the memoized close future times out again), then `widget.clear()`, then throws `WipeIncomplete` with no restart. The Settings tests cover the snackbar. On the next launch the DB is not open (`exists` guard), so the close is a no-op and the marker's parts run. The in-process retry uses up 1 of the 3 `maxResumes`, which leaves 2 for launches. **OK.**
+- **No old close after a new open at the same path.** `onDispose` → `disposeAppDatabase` calls `closeDbHandle` synchronously, so the path is in `_pendingByPath` before `AppRestartScope` rebuilds (at least one frame later). `openDatabaseWith` awaits it before `opener.run()`. An entry leaves the set only on isolate exit. **OK.**
+- **No wait can hang forever on a user path.** The wipe has a 10 s guard, and `awaitDbHandlesClosed` has a 10 s timeout. The unawaited dispose close may stay pending, but nothing awaits it. **OK.**
+- **The open refusal cannot brick a normal launch.** The registry lives in memory only. After a crash or a cold start it is empty, so the check returns `true` at once. It refuses only while a handle in this process is still closing. **OK.**
+- **Dispose error swallowing.** Errors from `closeDbHandle` propagate. Only the following `db.close()` (stream bookkeeping, after the handle has closed) is dropped. That closes m-2. **OK.**
+- **Tests.** Meaningful. The paused-`watch()` wipe uses a real background executor and asserts a run under 5 s, the old connection unusable, and keys, files and marker gone. The hung close keeps keys, files and marker and does not call native. The open beside a stuck close returns `unavailable` and creates no file. The close is idempotent. The "new -wal/-shm survive" test is only a regression guard on Linux, as the fix round says.
+
+**Findings (none block)**
+| # | Severity | File:line | Issue | Required change |
+|---|----------|-----------|-------|-----------------|
+| D-1 | minor | `app/lib/core/db/app_database_opener.dart:611-615`, `app/lib/features/backup/application/snapshot_db.dart:283` | Some closes still use drift's `close()`, which does not wait for isolate exit: the opener's failed open (`_openAndConfirm`, followed by `_afterFailure`, which can restore the migration copy over the main file or wipe and create) and the snapshot check. A handle that is still closing at the same path is therefore still possible on these error paths. This predates M-1 and does not affect the wipe. | FU: use `closeDbHandle` (then `db.close()`) in `_openAndConfirm`'s failure branch, and await it before `_afterFailure` touches files. |
+| D-2 | minor | `app/lib/core/db/db_handle.dart:86-97` | A handle whose close fails and whose isolate never exits (or a foreground executor whose close throws) stays in `_pendingByPath` for the rest of the process. Every in-process open at that path then waits 10 s and returns `unavailable` until the app is killed. This fail-safe behaviour is intended and a relaunch recovers. | FU (optional): note it in the code-only diagnostics so a stuck in-process restart can be told apart from a real open failure. |
+| D-3 | nit | `app/lib/core/db/db_handle.dart:48-56` | `IsolateExitSignal` completes on the **first** exit. With a drift `readPool` > 0, a reader's exit would be taken as proof that the writer is closed. | Add a comment or assert that it is valid only for `readPool: 0` (the drift default, and what `openEncryptedExecutor` uses). |
+
+**Verdict T-238: APPROVED.** M-1 is resolved at its cause, m-1 and m-2 are fixed, and D-1 to D-3 are follow-ups.
