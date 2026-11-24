@@ -31,7 +31,7 @@ class T(unittest.TestCase):
         now = datetime.datetime(2026, 3, 15, 8, 0)
         sm = s.summarize(s.load_scenario(MINI, now))
         self.assertEqual(sm["periods"]["2026-02"], {"spend": {"EGP": 4050}, "income": {"EGP": 10000}})
-        self.assertEqual(sm["periods"]["2026-03"]["spend"], {"EGP": 1500})
+        self.assertEqual(sm["periods"]["2026-03"]["spend"], {"EGP": 1000})  # the manual cash entry is not sent, so not counted
         ex = lambda k, a, **kw: {"sender": "X", "period": "p", "expected": dict({"kind": k, "amountMinor": a, "currency": "EGP"}, **kw)}
         sm = s.summarize([ex("expense", 1000), ex("refund", 200), ex("expense", 50, internal=True),
                           ex("expense", 70, status="declined"), ex("ignored", 5), ex("expense", 9, currency="USD")])

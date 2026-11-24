@@ -89,9 +89,14 @@ def summarize(entries):
     """Sender counts and expected spend/income per period and currency.
     Rules (scenarios/README.md): posted only; internal legs and ignored
     excluded; spend = expense/fee/transfer_out, income = income/transfer_in/
-    refund (refunds net against spend via income, as the app counts them)."""
+    refund (refunds net against spend via income, as the app counts them).
+    Manual entries are not SMS and are not sent, so they are left out; the
+    app's cash-cover rule also takes the scenario's one cash payment off
+    spending, so the printed totals match what the charts show."""
     senders, periods, ignored = {}, {}, 0
     for e in entries:
+        if e.get("delivery") == "manual":
+            continue
         if e.get("sender"):
             senders[e["sender"]] = senders.get(e["sender"], 0) + 1
         x = e["expected"]
