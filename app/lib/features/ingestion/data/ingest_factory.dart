@@ -23,6 +23,8 @@ import '../../transactions/application/refund_matching.dart';
 import '../../salary/application/salary_matching.dart';
 import '../../salary/application/salary_matching_hook.dart';
 import '../../transactions/application/refund_matching_hook.dart';
+import '../../transactions/application/transfer_pairing.dart';
+import '../../transactions/application/transfer_pairing_hook.dart';
 import '../../transfers/application/suggestion_hook.dart';
 import '../application/ingest_raw_messages.dart';
 import '../application/ingest_store_port.dart';
@@ -80,6 +82,15 @@ IngestRawMessages buildIngestRawMessages(
     ReimbursementSuggestionHook(db),
     RefundMatchingHook(
       RefundMatching(
+        db,
+        loadSchedule: refundSchedule ?? _dbSchedule(db, zone, clock),
+        clock: clock,
+        events: events,
+      ),
+    ),
+    // T-233: own-account transfers arriving by SMS are paired (internal).
+    TransferPairingHook(
+      TransferPairingUseCase(
         db,
         loadSchedule: refundSchedule ?? _dbSchedule(db, zone, clock),
         clock: clock,

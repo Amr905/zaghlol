@@ -9,7 +9,7 @@
    "time": "09:10",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Salary of EGP 15000.00 credited to A/C *1234. Avl Bal EGP 5000.00",
+   "body": "Salary of EGP 15000.00 credited to A/C *1234. Avl Bal EGP 5007.00",
    "expect": {
     "kind": "income",
     "amountMinor": 1500000,
@@ -117,7 +117,7 @@
    "time": "15:30",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Cash withdrawal of EGP 1000.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5000.00",
+   "body": "Cash withdrawal of EGP 1000.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5014.00",
    "expect": {
     "kind": "expense",
     "amountMinor": 100000,
@@ -158,7 +158,7 @@
     "amountMinor": 19900,
     "currency": "EGP",
     "merchant": "Netflix",
-    "category": null,
+    "category": "subscriptions",
     "internal": false,
     "status": "declined"
    }
@@ -206,7 +206,7 @@
    "time": "21:00",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Purchase of USD 20.00 at NETFLIX.COM with Card ending 1234. Avl Bal EGP 5000.00",
+   "body": "Purchase of USD 20.00 at NETFLIX.COM with Card ending 1234. Avl Bal EGP 5021.00",
    "expect": {
     "kind": "expense",
     "amountMinor": 2000,
@@ -296,7 +296,7 @@
    "time": "22:33",
    "delivery": "inbox",
    "sender": "NBE",
-   "body": "National Bank of Egypt: You received an instant transfer of EGP 2000.00 from Ahmed Ali into your account ending ****7316, ref c4d8b2a6 on {DD-MM-YYYY} {HH:MM}.",
+   "body": "National Bank of Egypt: You received an instant transfer of EGP 2000.00 from Ahmed Ali into your account ending ****9921, ref c4d8b2a6 on {DD-MM-YYYY} {HH:MM}.",
    "expect": {
     "kind": "transfer_in",
     "amountMinor": 200000,
@@ -415,7 +415,7 @@
     "kind": "expense",
     "amountMinor": 60000,
     "currency": "EGP",
-    "merchant": "Shell Maadi",
+    "merchant": "Shell",
     "category": "transport",
     "internal": false,
     "status": "posted"
@@ -518,7 +518,7 @@
    "time": "09:10",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Salary of EGP 15000.00 credited to A/C *1234. Avl Bal EGP 5000.00",
+   "body": "Salary of EGP 15000.00 credited to A/C *1234. Avl Bal EGP 5028.00",
    "expect": {
     "kind": "income",
     "amountMinor": 1500000,
@@ -590,7 +590,7 @@
    "time": "15:30",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Cash withdrawal of EGP 500.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5000.00",
+   "body": "Cash withdrawal of EGP 500.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5035.00",
    "expect": {
     "kind": "expense",
     "amountMinor": 50000,
@@ -662,7 +662,7 @@
    "time": "09:10",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Salary of EGP 14000.00 credited to A/C *1234. Avl Bal EGP 5000.00",
+   "body": "Salary of EGP 14000.00 credited to A/C *1234. Avl Bal EGP 5042.00",
    "expect": {
     "kind": "income",
     "amountMinor": 1400000,
@@ -734,7 +734,7 @@
    "time": "21:00",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Purchase of USD 20.00 at NETFLIX.COM with Card ending 1234. Avl Bal EGP 5000.00",
+   "body": "Purchase of USD 20.00 at NETFLIX.COM with Card ending 1234. Avl Bal EGP 5049.00",
    "expect": {
     "kind": "expense",
     "amountMinor": 2000,
