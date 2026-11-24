@@ -45,12 +45,12 @@
    "time": "13:20",
    "delivery": "inbox",
    "sender": "NBE",
-   "body": "NBE: Purchase of EGP 899.00 from NBE Visa **4567 at AMAZON EG. Balance EGP 2000.00",
+   "body": "NBE: Purchase of EGP 899.00 from NBE Visa **4567 at AMAZON. Balance EGP 2000.00",
    "expect": {
     "kind": "expense",
     "amountMinor": 89900,
     "currency": "EGP",
-    "merchant": "Amazon EG",
+    "merchant": "Amazon",
     "category": "shopping",
     "internal": false,
     "status": "posted"
@@ -81,12 +81,12 @@
    "time": "18:40",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Purchase of EGP 85.00 at UBER EG with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "body": "Purchase of EGP 85.00 at UBER with Card ending 1234. Avl Bal: EGP 4,500.20.",
    "expect": {
     "kind": "expense",
     "amountMinor": 8500,
     "currency": "EGP",
-    "merchant": "Uber EG",
+    "merchant": "Uber",
     "category": "transport",
     "internal": false,
     "status": "posted"
@@ -554,12 +554,12 @@
    "time": "18:40",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Purchase of EGP 120.00 at UBER EG with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "body": "Purchase of EGP 120.00 at UBER with Card ending 1234. Avl Bal: EGP 4,500.20.",
    "expect": {
     "kind": "expense",
     "amountMinor": 12000,
     "currency": "EGP",
-    "merchant": "Uber EG",
+    "merchant": "Uber",
     "category": "transport",
     "internal": false,
     "status": "posted"
@@ -608,12 +608,12 @@
    "time": "13:20",
    "delivery": "inbox",
    "sender": "NBE",
-   "body": "NBE: Purchase of EGP 450.00 from NBE Visa **4567 at AMAZON EG. Balance EGP 2000.00",
+   "body": "NBE: Purchase of EGP 450.00 from NBE Visa **4567 at AMAZON. Balance EGP 2000.00",
    "expect": {
     "kind": "expense",
     "amountMinor": 45000,
     "currency": "EGP",
-    "merchant": "Amazon EG",
+    "merchant": "Amazon",
     "category": "shopping",
     "internal": false,
     "status": "posted"
@@ -698,12 +698,12 @@
    "time": "18:40",
    "delivery": "inbox",
    "sender": "CIB",
-   "body": "Purchase of EGP 90.00 at UBER EG with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "body": "Purchase of EGP 90.00 at UBER with Card ending 1234. Avl Bal: EGP 4,500.20.",
    "expect": {
     "kind": "expense",
     "amountMinor": 9000,
     "currency": "EGP",
-    "merchant": "Uber EG",
+    "merchant": "Uber",
     "category": "transport",
     "internal": false,
     "status": "posted"
