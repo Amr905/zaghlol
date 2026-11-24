@@ -147,14 +147,13 @@ echo "apk: ${apk:-none}"
 [ -n "$apk" ] || exit 1
 adb -s "$DEVICE" install -r "$apk" || exit 1
 
-run_test e2e09-export e2e_export_device_test.dart
-r09=$?
-run_test e2e10-locale e2e_locale_device_test.dart
-r10=$?
-run_lock
-r11=$?
-run_wipe
-r12=$?
+# E2E_ONLY (e.g. "11 12"): run only those tests (re-runs while fixing one).
+want() { [ -z "${E2E_ONLY:-}" ] || [[ " ${E2E_ONLY} " == *" $1 "* ]]; }
+r09=0 r10=0 r11=0 r12=0
+want 09 && { run_test e2e09-export e2e_export_device_test.dart; r09=$?; }
+want 10 && { run_test e2e10-locale e2e_locale_device_test.dart; r10=$?; }
+want 11 && { run_lock; r11=$?; }
+want 12 && { run_wipe; r12=$?; }
 adb -s "$DEVICE" logcat -d -s flutter:V > "$OUT/flutter-logcat.txt" 2> /dev/null || true
 echo "E2E RESULT 09=$r09 10=$r10 11=$r11 12=$r12"
 ls -la "$OUT/screens"
