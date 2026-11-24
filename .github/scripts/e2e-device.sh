@@ -128,6 +128,13 @@ run_wipe() {
   adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-e2e12.png" || true
   wait "$tpid"
   local r=$?
+  if [ "$r" -ne 0 ]; then
+    echo "---- app private files after a failed wipe (names and the wipe marker's step names only)"
+    adb -s "$DEVICE" shell run-as "$PKG" ls -laR files 2> /dev/null | tr -d '\r' | grep -vE "^total" | cut -c1-140 | head -60
+    for m in $(adb -s "$DEVICE" shell run-as "$PKG" find files -name 'wipe_pending*' 2> /dev/null | tr -d '\r'); do
+      echo "marker $m:"; adb -s "$DEVICE" shell run-as "$PKG" cat "$m" 2> /dev/null | tr -d '\r' | cut -c1-300
+    done
+  fi
   echo "---- logcat after the wipe test (crashes, kills, the app's own tags)"
   adb -s "$DEVICE" logcat -d 2> /dev/null | grep -E "FATAL|am_proc_died|am_kill|AndroidRuntime|Zaghlol|zaghlol.*(wipe|Wipe)" | cut -c1-200 | tail -25
   adb -s "$DEVICE" logcat -d -s flutter:V 2> /dev/null | cut -c1-200 | tail -25
