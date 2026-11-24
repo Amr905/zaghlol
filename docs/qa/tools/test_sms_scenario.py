@@ -1,34 +1,42 @@
-import json, os, sys, tempfile, unittest
+import datetime, os, sys, unittest
 sys.path.insert(0, os.path.dirname(__file__))
 import sms_scenario as s
 
+MINI = os.path.join(os.path.dirname(__file__), 'testdata', 'mini_story.json')
 E = {"id": "a1", "sender": "CIB", "body": "it's 5", "date_ms": 1700000000000}
 
 
 class T(unittest.TestCase):
-    def _load(self, data):
-        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
-            json.dump(data, f)
-        try:
-            return s.load_scenario(f.name)
-        finally:
-            os.unlink(f.name)
+    def test_real_format(self):
+        now = datetime.datetime(2026, 3, 15, 8, 0)
+        e = s.load_scenario(MINI, now)
+        self.assertEqual(len(e), 4)
+        # Feb 2026 has 28 days: day 31 clamps to 28
+        d = datetime.datetime.fromtimestamp(e[0]["date_ms"] / 1000)
+        self.assertEqual((d.year, d.month, d.day, d.hour, d.minute), (2026, 2, 28, 9, 10))
+        self.assertIn("28-02-2026 09:10", e[0]["body"])
+        self.assertEqual(e[0]["period"], "2026-02")
+        self.assertEqual(e[2]["period"], "2026-03")
+        # January wrap
+        self.assertEqual(s.entry_datetime(2, 5, "01:02", datetime.datetime(2026, 1, 10)).month, 11)
 
-    def test_formats(self):
-        raw = {"id": "x", "sender": "NBE", "body": "b", "date": 5,
-               "expected": {"kind": "expense", "amountMinor": 12345, "currency": "EGP"}}
-        for data in ([raw], {"entries": [raw]}, {"messages": [raw]}):
-            e = self._load(data)
-            self.assertEqual(e[0]["date_ms"], 5)
-            self.assertEqual(e[0]["sender"], "NBE")
+    def test_select(self):
+        e = s.load_scenario(MINI)
+        self.assertEqual([x["id"] for x in s.select(e, True, False, False)[0]], ["m1-01", "m1-02"])
+        self.assertEqual([x["id"] for x in s.select(e, False, True, False)[0]], ["lv-01"])
+        ch, skipped = s.select(e, False, False, True)
+        self.assertEqual((len(ch), skipped), (3, 1))
 
     def test_summary(self):
-        ex = lambda k, a, c="EGP": {"sender": "X", "body": "b", "expected": {"kind": k, "amountMinor": a, "currency": c}}
-        sm = s.summarize(self._load([ex("expense", 1000), ex("refund", 200), ex("income", 5000),
-              ex("transfer", 900), ex("expense", 100, "USD"), {"sender": "Y", "body": "otp", "expected": {"kind": "ignored"}}]))
-        self.assertEqual(sm["spend"], {"EGP": 800, "USD": 100})
-        self.assertEqual(sm["income"], {"EGP": 5000})
-        self.assertEqual(sm["ignored"], 1)
+        now = datetime.datetime(2026, 3, 15, 8, 0)
+        sm = s.summarize(s.load_scenario(MINI, now))
+        self.assertEqual(sm["periods"]["2026-02"], {"spend": {"EGP": 4050}, "income": {"EGP": 10000}})
+        self.assertEqual(sm["periods"]["2026-03"]["spend"], {"EGP": 1500})
+        ex = lambda k, a, **kw: {"sender": "X", "period": "p", "expected": dict({"kind": k, "amountMinor": a, "currency": "EGP"}, **kw)}
+        sm = s.summarize([ex("expense", 1000), ex("refund", 200), ex("expense", 50, internal=True),
+                          ex("expense", 70, status="declined"), ex("ignored", 5), ex("expense", 9, currency="USD")])
+        self.assertEqual(sm["periods"]["p"], {"spend": {"EGP": 1000, "USD": 9}, "income": {"EGP": 200}})
+        self.assertEqual(sm["ignored"], 3)
 
     def test_money(self):
         self.assertEqual(s._fmt_minor(12345, "EGP"), "123.45")

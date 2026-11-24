@@ -3,7 +3,7 @@
 
 Never prints message bodies: only sender ids, ids and counts.
 """
-import argparse, json, os, shutil, subprocess, sys
+import argparse, calendar, datetime, json, os, shutil, subprocess, sys
 
 DEFAULT_SCENARIO = "app/test/fixtures/sms/scenarios/month_story.json"
 
@@ -34,23 +34,41 @@ def _first(d, keys, default=None):
     return default
 
 
-def load_scenario(path):
-    """Tolerant reader: a list, or an object holding a list under
-    entries/messages/sms. Returns [{id, sender, body, date_ms, expected}]."""
+def entry_datetime(monthsAgo, day, hhmm, now):
+    """Local datetime: monthsAgo before now's month, day clamped to month length."""
+    m = now.year * 12 + (now.month - 1) - int(monthsAgo)
+    y, mo = m // 12, m % 12 + 1
+    last = calendar.monthrange(y, mo)[1]
+    h, mi = (int(x) for x in hhmm.split(":"))
+    return datetime.datetime(y, mo, min(int(day), last), h, mi)
+
+
+def load_scenario(path, now=None):
+    """Reads the T-233 format {version, description, entries}. Returns
+    [{id, delivery, sender, body, date_ms, period, expected}]. Placeholders
+    {DD-MM-YYYY} and {HH:MM} in the body are filled from the entry's local time.
+    Live entries (day null) are dated now."""
+    now = now or datetime.datetime.now()
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     if isinstance(data, dict):
-        data = _first(data, ("entries", "messages", "sms", "items"), [])
+        data = data.get("entries", [])
     out = []
     for i, e in enumerate(data):
-        sender = _first(e, ("sender", "address", "from"))
-        body = _first(e, ("body", "text", "message"))
-        if sender is None or body is None:
+        delivery = e.get("delivery", "inbox")
+        if delivery != "manual" and (e.get("sender") is None or e.get("body") is None):
             raise ValueError("entry %d has no sender/body" % i)
-        date = _first(e, ("date", "dateMs", "date_ms", "epochMs", "timestamp"), 0)
-        exp = _first(e, ("expected", "expect"), {}) or {}
-        out.append({"id": str(_first(e, ("id", "key"), i)), "sender": str(sender),
-                    "body": str(body), "date_ms": int(date), "expected": exp})
+        if e.get("day") is None or e.get("time") is None:
+            dt = now.replace(second=0, microsecond=0)
+        else:
+            dt = entry_datetime(e.get("monthsAgo", 0), e["day"], e["time"], now)
+        body = e.get("body")
+        if body is not None:
+            body = body.replace("{DD-MM-YYYY}", dt.strftime("%d-%m-%Y")).replace("{HH:MM}", dt.strftime("%H:%M"))
+        out.append({"id": str(e.get("id", i)), "delivery": delivery,
+                    "sender": e.get("sender"), "body": body,
+                    "date_ms": int(dt.timestamp() * 1000), "period": dt.strftime("%Y-%m"),
+                    "expected": e.get("expect") or {}})
     return out
 
 
@@ -63,26 +81,50 @@ def _fmt_minor(minor, cur):
     return "%s%d.%0*d" % (sign, minor // 10 ** exp, exp, minor % 10 ** exp)
 
 
+SPEND = ("expense", "fee", "transfer_out")
+INCOME = ("income", "transfer_in", "refund")
+
+
 def summarize(entries):
-    """Per-sender counts and expected spend/income per currency (no bodies)."""
-    senders, spend, income, ignored = {}, {}, {}, 0
+    """Sender counts and expected spend/income per period and currency.
+    Rules (scenarios/README.md): posted only; internal legs and ignored
+    excluded; spend = expense/fee/transfer_out, income = income/transfer_in/
+    refund (refunds net against spend via income, as the app counts them)."""
+    senders, periods, ignored = {}, {}, 0
     for e in entries:
-        senders[e["sender"]] = senders.get(e["sender"], 0) + 1
+        if e.get("sender"):
+            senders[e["sender"]] = senders.get(e["sender"], 0) + 1
         x = e["expected"]
-        kind = str(_first(x, ("kind", "type"), "")).lower()
-        amt = _first(x, ("amountMinor", "amount_minor", "amount"))
-        cur = _first(x, ("currency",), "EGP")
-        if kind in ("ignored", "ignore", "") or amt is None:
+        kind = str(x.get("kind", "")).lower()
+        amt = x.get("amountMinor")
+        if kind in ("ignored", "") or amt is None or x.get("status", "posted") != "posted" or x.get("internal"):
             ignored += 1
             continue
-        if kind in ("income", "salary", "credit"):
-            income[cur] = income.get(cur, 0) + int(amt)
-        elif kind in ("expense", "spend", "purchase", "bill", "cash", "atm"):
-            spend[cur] = spend.get(cur, 0) + int(amt)
-        elif kind == "refund":
-            spend[cur] = spend.get(cur, 0) - int(amt)
-        # transfers and others do not count as spending
-    return {"senders": senders, "spend": spend, "income": income, "ignored": ignored}
+        cur = x.get("currency", "EGP")
+        per = periods.setdefault(e.get("period", "?"), {"spend": {}, "income": {}})
+        if kind in SPEND:
+            per["spend"][cur] = per["spend"].get(cur, 0) + int(amt)
+        elif kind in INCOME:
+            per["income"][cur] = per["income"].get(cur, 0) + int(amt)
+    return {"senders": senders, "periods": periods, "ignored": ignored}
+
+
+def select(entries, historical, live, all_live):
+    """Entries to send plus the number of manual ones skipped."""
+    manual = [e for e in entries if e["delivery"] == "manual"]
+    if all_live:
+        chosen = [e for e in entries if e["delivery"] != "manual"]
+    else:
+        want = (["inbox"] if historical else []) + (["live"] if live else [])
+        chosen = [e for e in entries if e["delivery"] in want]
+    return chosen, len(manual)
+
+
+def print_expected(s):
+    for per, v in sorted(s["periods"].items()):
+        for lab in ("spend", "income"):
+            for cur, n in sorted(v[lab].items()):
+                print("  expected %s %s %s: %s" % (per, lab, cur, _fmt_minor(n, cur)))
 
 
 def live_cmd(adb, serial, e):
@@ -123,7 +165,8 @@ def main(argv=None):
     ap.add_argument("--sender")
     ap.add_argument("--text")
     ap.add_argument("--live", action="store_true")
-    ap.add_argument("--historical", action="store_true")
+    ap.add_argument("--historical", action="store_true", help="send delivery=inbox entries")
+    ap.add_argument("--all-live", action="store_true", help="send every non-manual entry live")
     ap.add_argument("--i-know-this-is-a-real-phone", dest="real", action="store_true")
     a = ap.parse_args(argv)
 
@@ -131,13 +174,11 @@ def main(argv=None):
         entries = load_scenario(a.scenario)
         s = summarize(entries)
         for e in entries:
-            print("%s  %s  %s" % (e["id"], e["sender"], e["expected"].get("kind", "?") if e["expected"] else "?"))
+            print("%s  %s  %s  %s" % (e["id"], e["delivery"], e["sender"] or "-", e["expected"].get("kind", "?")))
         print("entries: %d, ignored: %d" % (len(entries), s["ignored"]))
         for sd, n in sorted(s["senders"].items()):
             print("  sender %s: %d" % (sd, n))
-        for lab in ("spend", "income"):
-            for cur, v in sorted(s[lab].items()):
-                print("  expected %s %s: %s" % (lab, cur, _fmt_minor(v, cur)))
+        print_expected(s)
         return 0
 
     adb = find_adb()
@@ -157,10 +198,15 @@ def main(argv=None):
         return 2
 
     if a.sender and a.text is not None:
-        entries = [{"id": "single", "sender": a.sender, "body": a.text, "date_ms": 0, "expected": {}}]
-        a.live = True
-    elif a.live or a.historical:
-        entries = load_scenario(a.scenario)
+        entries = [{"id": "single", "delivery": "live", "sender": a.sender, "body": a.text,
+                    "date_ms": 0, "period": "?", "expected": {}}]
+        a.live, a.historical, a.all_live = True, False, False
+    elif a.live or a.historical or a.all_live:
+        entries, skipped = select(load_scenario(a.scenario), a.historical, a.live, a.all_live)
+        if skipped:
+            print("skipped %d manual entries (added by the test, not SMS)" % skipped)
+        if a.historical and (a.live or a.all_live):
+            ap.error("--historical cannot be combined with --live/--all-live")
     else:
         ap.error("choose --list, --live, --historical or --sender/--text")
 
@@ -173,11 +219,11 @@ def main(argv=None):
         run([adb, "-s", serial, "wait-for-device"])
     ok = bad = 0
     for e in entries:
-        cmd = insert_cmd(adb, serial, e) if a.historical else live_cmd(adb, serial, e)
+        cmd = insert_cmd(adb, serial, e) if a.historical and not a.all_live else live_cmd(adb, serial, e)
         r = run(cmd)
         out = (r.stdout + r.stderr)
         good = r.returncode == 0 and "error" not in out.lower() and "exception" not in out.lower() \
-            and (a.historical or out.strip().startswith("OK"))
+            and ((a.historical and not a.all_live) or out.strip().startswith("OK"))
         ok, bad = ok + good, bad + (not good)
         if not good:
             print("  failed: %s (%s)" % (e["id"], e["sender"]))
@@ -186,9 +232,7 @@ def main(argv=None):
         s = summarize(entries)
         for sd, n in sorted(s["senders"].items()):
             print("  sender %s: %d" % (sd, n))
-        for lab in ("spend", "income"):
-            for cur, v in sorted(s[lab].items()):
-                print("  expected %s %s: %s" % (lab, cur, _fmt_minor(v, cur)))
+        print_expected(s)
     return 0 if bad == 0 else 1
 
 
