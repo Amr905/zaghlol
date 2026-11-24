@@ -1,0 +1,50 @@
+==== e2e04
+Success
+e2e04 exit: 124
+E2E_DEVICE E2E04 OK add: amount saved as 12550 minor
+E2E_DEVICE E2E04 OK add: category groceries
+E2E_DEVICE E2E04 OK add: direction expense
+E2E_DEVICE E2E04 OK add: source manual
+E2E_DEVICE E2E04 OK add: row is on the Home list
+E2E_DEVICE E2E04 SHOT e2e04-1-added
+---- e2e04 log tail (no message text is printed)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  manual add, edit, delete+undo, bulk edit+undo
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:43 +0 -1: manual add, edit, delete+undo, bulk edit+undo [E]
+  'package:flutter_test/src/binding.dart': Failed assertion: line 1912 pos 9: '_pendingExceptionDetails != null': A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpect
+  dart:core                                                                  _AssertionError._throwNew
+  package:flutter_test/src/binding.dart 1912:9                               TestWidgetsFlutterBinding._runTest.handleUncaughtError
+  package:flutter_test/src/binding.dart 1921:13                              TestWidgetsFlutterBinding._runTest.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                                                 _CustomZone.registerBinaryCallback
+  package:flutter_test/src/binding.dart 1942:5                               TestWidgetsFlutterBinding._runTestBody
+  dart:async                                                                 _CustomZone.runBinary
+  package:flutter_test/src/binding.dart 1927:10                              TestWidgetsFlutterBinding._runTest
+  package:flutter_test/src/binding.dart 3060:12                              LiveTestWidgetsFlutterBinding.runTest
+  package:integration_test/integration_test.dart 237:17                      IntegrationTestWidgetsFlutterBinding.runTest
+  package:flutter_test/src/widget_tester.dart 184:24                         testWidgets.<fn>
+  ===== asynchronous gap ===========================
+  package:stream_channel                                                     _GuaranteeSink.add
+  tmp/flutter_tools.QQJCPQ/flutter_test_listener.RBBJPL/listener.dart 56:22  main.<fn>
+  
+unhandled error during finalization of test:
+/home/runner/work/zaghlol/zaghlol/app/integration_test/e2e04_manual_device_test.dart
+PathNotFoundException: Deletion failed, path = '/tmp/flutter_tools.QQJCPQ/flutter_test_listener.RBBJPL' (OS Error: No such file or directory, errno = 2)
+#0      _Directory._deleteSync (dart:io/directory_impl.dart:216:7)
+#1      FileSystemEntity.deleteSync (dart:io/file_system_entity.dart:425:7)
+#2      ForwardingFileSystemEntity.deleteSync (package:file/src/forwarding/forwarding_file_system_entity.dart:70:16)
+#3      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:717:22)
+#4      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1118:16)
+#5      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:716:12)
+#6      FlutterPlatform._createListenerDart.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:786:15)
+#7      FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:591:26)
+<asynchronous suspension>
+#8      asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
+17:29 +0 -1: (tearDownAll)

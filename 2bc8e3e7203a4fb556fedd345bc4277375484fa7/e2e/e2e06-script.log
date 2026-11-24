@@ -1,0 +1,69 @@
+==== e2e06
+Success
+---- phase e2e06/x1
+  sent: NBE
+---- phase e2e06/x2
+  sent: CIB
+  sent: NBE
+---- phase e2e06/x3
+  sent: InstaPay
+e2e06 exit: 124
+E2E_DEVICE SEND x1
+E2E_DEVICE E2E06 OK phase x1 saved (rows >= 1)
+E2E_DEVICE E2E06 OK the 1,200 purchase is an expense
+E2E_DEVICE SEND x2
+E2E_DEVICE E2E06 OK phase x2 saved (rows >= 3)
+E2E_DEVICE E2E06 OK two 2,000 legs saved
+E2E_DEVICE E2E06 OK both transfer legs are internal
+E2E_DEVICE E2E06 OK the legs are on two different accounts
+E2E_DEVICE E2E06 OK both legs share one pair
+E2E_DEVICE E2E06 OK exactly one transfer pair row
+E2E_DEVICE E2E06 OK before money back: spend is 1,200 only
+E2E_DEVICE E2E06 OK the paired 2,000 is not income
+E2E_DEVICE SEND x3
+E2E_DEVICE E2E06 OK phase x3 saved (rows >= 4)
+E2E_DEVICE E2E06 OK the 400 incoming transfer saved
+E2E_DEVICE E2E06 OK no reimbursement before the assignment
+E2E_DEVICE E2E06 OK before assigning, 400 counts as income
+E2E_DEVICE E2E06 SHOT e2e06-1-list
+---- e2e06 log tail (no message text is printed)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  own transfer paired, reimbursement assigned
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:07 +0 -1: own transfer paired, reimbursement assigned [E]
+  'package:flutter_test/src/binding.dart': Failed assertion: line 1912 pos 9: '_pendingExceptionDetails != null': A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpect
+  dart:core                                                                  _AssertionError._throwNew
+  package:flutter_test/src/binding.dart 1912:9                               TestWidgetsFlutterBinding._runTest.handleUncaughtError
+  package:flutter_test/src/binding.dart 1921:13                              TestWidgetsFlutterBinding._runTest.<fn>
+  ===== asynchronous gap ===========================
+  dart:async                                                                 _CustomZone.registerBinaryCallback
+  package:flutter_test/src/binding.dart 1942:5                               TestWidgetsFlutterBinding._runTestBody
+  dart:async                                                                 _CustomZone.runBinary
+  package:flutter_test/src/binding.dart 1927:10                              TestWidgetsFlutterBinding._runTest
+  package:flutter_test/src/binding.dart 3060:12                              LiveTestWidgetsFlutterBinding.runTest
+  package:integration_test/integration_test.dart 237:17                      IntegrationTestWidgetsFlutterBinding.runTest
+  package:flutter_test/src/widget_tester.dart 184:24                         testWidgets.<fn>
+  ===== asynchronous gap ===========================
+  package:stream_channel                                                     _GuaranteeSink.add
+  tmp/flutter_tools.UNYSZO/flutter_test_listener.IWUOKS/listener.dart 56:22  main.<fn>
+  
+unhandled error during finalization of test:
+/home/runner/work/zaghlol/zaghlol/app/integration_test/e2e06_transfer_device_test.dart
+PathNotFoundException: Deletion failed, path = '/tmp/flutter_tools.UNYSZO/flutter_test_listener.IWUOKS' (OS Error: No such file or directory, errno = 2)
+#0      _Directory._deleteSync (dart:io/directory_impl.dart:216:7)
+#1      FileSystemEntity.deleteSync (dart:io/file_system_entity.dart:425:7)
+#2      ForwardingFileSystemEntity.deleteSync (package:file/src/forwarding/forwarding_file_system_entity.dart:70:16)
+#3      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:717:22)
+#4      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1118:16)
+#5      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:716:12)
+#6      FlutterPlatform._createListenerDart.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:786:15)
+#7      FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:591:26)
+<asynchronous suspension>
+#8      asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
+17:45 +0 -1: (tearDownAll)
