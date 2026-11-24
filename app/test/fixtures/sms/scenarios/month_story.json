@@ -32,7 +32,7 @@
     "kind": "expense",
     "amountMinor": 125050,
     "currency": "EGP",
-    "merchant": "Carrefour Maadi",
+    "merchant": "Carrefour",
     "category": "groceries",
     "internal": false,
     "status": "posted"
@@ -541,7 +541,7 @@
     "kind": "expense",
     "amountMinor": 98000,
     "currency": "EGP",
-    "merchant": "Carrefour Maadi",
+    "merchant": "Carrefour",
     "category": "groceries",
     "internal": false,
     "status": "posted"
@@ -685,7 +685,7 @@
     "kind": "expense",
     "amountMinor": 110000,
     "currency": "EGP",
-    "merchant": "Carrefour Maadi",
+    "merchant": "Carrefour",
     "category": "groceries",
     "internal": false,
     "status": "posted"
@@ -793,7 +793,7 @@
     "kind": "expense",
     "amountMinor": 41025,
     "currency": "EGP",
-    "merchant": "Carrefour Maadi",
+    "merchant": "Carrefour",
     "category": "groceries",
     "internal": false,
     "status": "posted"

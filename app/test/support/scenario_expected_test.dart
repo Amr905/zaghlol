@@ -87,7 +87,7 @@ void main() {
       14000 + 8500,
     );
     final t = n.topMerchants(3);
-    expect(t.top.first.key, 'carrefour maadi');
+    expect(t.top.first.key, 'carrefour');
     expect(t.top.length, 3);
     expect(t.other, greaterThan(0));
   });

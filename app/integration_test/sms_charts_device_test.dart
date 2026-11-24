@@ -181,13 +181,13 @@ void main() {
     final seed = ProviderContainer(
       overrides: [dbDirectoryProvider.overrideWithValue(dir)],
     );
-    final settings = await seed.read(settingsRepositoryProvider.future);
-    await settings.set(
+    final seedSettings = await seed.read(settingsRepositoryProvider.future);
+    await seedSettings.set(
       Settings.setupInstalledOn,
       CivilDate(now.year, now.month, now.day).epochDay,
     );
-    await settings.set(Settings.language, LanguagePref.en);
-    await settings.set(Settings.hideAmountsApp, false);
+    await seedSettings.set(Settings.language, LanguagePref.en);
+    await seedSettings.set(Settings.hideAmountsApp, false);
     await (await seed.read(appDatabaseProvider.future)).close();
     seed.dispose();
 
@@ -208,6 +208,7 @@ void main() {
     await settle(t, 1500);
     final c = ProviderScope.containerOf(rootNavigatorKey.currentContext!);
     final db = await c.read(appDatabaseProvider.future);
+    final settings = await c.read(settingsRepositoryProvider.future);
 
     Future<int> txnCount() async =>
         (await db

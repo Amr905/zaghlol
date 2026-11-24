@@ -49,12 +49,12 @@ entry_time() {
 
 inbox_insert() { # sender body ms  (a row in the system inbox with its own date)
   local out
-  out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$3 --bind read:i:0 --bind type:i:1" 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
+  out=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:'$1' --bind body:s:'$2' --bind date:l:$3 --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -3 | tr '\n' ' ')
   [ -z "$out" ]
 }
 sms_live() { # sender body
   local out
-  out=$(adb -s "$DEVICE" emu sms send "$1" "$2" 2>&1 | tr -d '\r' | tr '\n' ' ')
+  out=$(adb -s "$DEVICE" emu sms send "$1" "$2" < /dev/null 2>&1 | tr -d '\r' | tr '\n' ' ')
   case "$out" in OK*) return 0 ;; *) return 1 ;; esac
 }
 
@@ -88,7 +88,7 @@ run_scenario() {
   sleep 3
   adb -s "$DEVICE" shell am force-stop "$PKG"
   adb -s "$DEVICE" logcat -c || true
-  timeout 1500 flutter test integration_test/sms_charts_device_test.dart \
+  timeout 1200 flutter test integration_test/sms_charts_device_test.dart \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     --dart-define-from-file="$OUT/scenario-define.json" \
     > "$OUT/scenario-device-test.log" 2>&1 &
