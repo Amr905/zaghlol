@@ -319,10 +319,10 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-233](tasks/T-233.md) | SMS scenario on the emulator → transactions → charts, end to end | PO 11-24 | High | Sonnet | flutter-core-engineer | — | P | 65 | DONE (batch 65) |
 | [T-234](tasks/T-234.md) | Send the SMS scenario to your own emulator (PO tool) | PO 11-24 | Low | Sonnet | flutter-core-engineer | T-233 | P | 65 | DONE (batch 65) |
 | [T-235](tasks/T-235.md) | Explorer dead taps: bill Save, card Save/Hide, Licenses, merchants row | FU-292 | Medium | Sonnet | flutter-ui-engineer | — | G | 65 | DONE (batch 65) |
-| [T-236](tasks/T-236.md) | Device tests: SMS while killed, ignored card, notification capture | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
-| [T-237](tasks/T-237.md) | Device tests: add/edit/delete/undo, budget payday alert, reimbursement | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
-| [T-238](tasks/T-238.md) | Device tests: export Gold/Free, language+digits, app lock, delete everything | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
-| [T-239](tasks/T-239.md) | Explorer survives emulator faults; restores FlutterError.onError | QA | Low | Sonnet | flutter-core-engineer | — | P | 66 | TODO |
+| [T-236](tasks/T-236.md) | Device tests: SMS while killed, ignored card, notification capture | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | DONE (batch 66) |
+| [T-237](tasks/T-237.md) | Device tests: add/edit/delete/undo, budget payday alert, reimbursement | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | DONE (batch 66) |
+| [T-238](tasks/T-238.md) | Device tests: export Gold/Free, language+digits, app lock, delete everything | QA | Medium | Sonnet | flutter-core-engineer | — | P | 66 | DONE (batch 66) |
+| [T-239](tasks/T-239.md) | Explorer survives emulator faults; restores FlutterError.onError | QA | Low | Sonnet | flutter-core-engineer | — | P | 66 | DONE (batch 66) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

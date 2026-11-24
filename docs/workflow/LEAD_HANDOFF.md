@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-24 (Cairo) by the Lead session: batch 65 (T-233 SMS scenario e2e + transfer pairing for SMS legs, T-234 PO emulator SMS tool, T-235 explorer dead taps) merging. Update it whenever the state below changes._
+_Last updated: 2026-11-24 (Cairo) by the Lead session: batch 66 (device E2E T-236..T-239; fixes: headless budget alerts, delete-everything close race) merging. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
