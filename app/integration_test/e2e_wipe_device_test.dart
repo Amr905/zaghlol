@@ -59,14 +59,12 @@ void main() {
 
       // ---- Settings -> Privacy & data -> Delete everything.
       unawaited(openSettings(rootNavigatorKey.currentContext!));
-      await e.waitFor(t, find.text('Privacy & data'), what: 'Settings rows');
-      await t.ensureVisible(find.text('Privacy & data').first);
-      await t.tap(find.text('Privacy & data').first);
-      final row = find.text('Delete everything');
-      await e.waitFor(t, row, what: 'the Delete everything row');
-      await t.ensureVisible(row.first);
-      await e.settle(t, 500);
-      await t.tap(row.first);
+      await e.scrollAndTap(t, find.text('Privacy & data'), 'the Privacy row');
+      await e.scrollAndTap(
+        t,
+        find.text('Delete everything'),
+        'the Delete everything row',
+      );
       await e.waitFor(t, find.text('Confirmation word'), what: 'the dialog');
       await e.shot(t, '02-dialog');
       // A wrong word deletes nothing.
