@@ -99,6 +99,12 @@ Future<int> runRegistryLint(
       if (entity is File && entity.path.endsWith('.json')) {
         var rel = entity.path.substring(root.path.length);
         rel = rel.replaceAll(r'\', '/');
+        // `scenarios/` holds multi-bank end-to-end stories (T-233), not
+        // per-template fixtures; their messages are the institutions' own
+        // fixtures already.
+        if (rel.startsWith('/scenarios/') || rel.startsWith('scenarios/')) {
+          continue;
+        }
         fixtures[rel.startsWith('/') ? rel.substring(1) : rel] = reader.read(
           entity,
         );

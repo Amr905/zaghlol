@@ -1,0 +1,833 @@
+{
+ "version": 1,
+ "description": "Synthetic month story for T-233 (see README.md)",
+ "entries": [
+  {
+   "id": "m1-01",
+   "monthsAgo": 1,
+   "day": 2,
+   "time": "09:10",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Salary of EGP 15000.00 credited to A/C *1234. Avl Bal EGP 5007.00",
+   "expect": {
+    "kind": "income",
+    "amountMinor": 1500000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "income",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-02",
+   "monthsAgo": 1,
+   "day": 3,
+   "time": "12:05",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 1250.50 at CARREFOUR MAADI with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 125050,
+    "currency": "EGP",
+    "merchant": "Carrefour",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-03",
+   "monthsAgo": 1,
+   "day": 4,
+   "time": "13:20",
+   "delivery": "inbox",
+   "sender": "NBE",
+   "body": "NBE: Purchase of EGP 899.00 from NBE Visa **4567 at AMAZON. Balance EGP 2000.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 89900,
+    "currency": "EGP",
+    "merchant": "Amazon",
+    "category": "shopping",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-04",
+   "monthsAgo": 1,
+   "day": 5,
+   "time": "10:15",
+   "delivery": "inbox",
+   "sender": "Telda",
+   "body": "Telda: You paid EGP 140.00 at STARBUCKS with Card *9910. Avl Bal EGP 2,360.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 14000,
+    "currency": "EGP",
+    "merchant": "Starbucks",
+    "category": "dining",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-05",
+   "monthsAgo": 1,
+   "day": 5,
+   "time": "18:40",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 85.00 at UBER with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 8500,
+    "currency": "EGP",
+    "merchant": "Uber",
+    "category": "transport",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-06",
+   "monthsAgo": 1,
+   "day": 6,
+   "time": "11:00",
+   "delivery": "inbox",
+   "sender": "myfawry",
+   "body": "myfawry: Purchase of EGP 310.00 with Card *2019 at BREADFAST. Avl Bal EGP 1,190.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 31000,
+    "currency": "EGP",
+    "merchant": "Breadfast",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-07",
+   "monthsAgo": 1,
+   "day": 7,
+   "time": "15:30",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Cash withdrawal of EGP 1000.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5014.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 100000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "cash",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-08",
+   "monthsAgo": 1,
+   "day": 8,
+   "time": "09:45",
+   "delivery": "manual",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "merchant": "Corner shop",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   },
+   "account": "cash"
+  },
+  {
+   "id": "m1-09",
+   "monthsAgo": 1,
+   "day": 8,
+   "time": "20:10",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Transaction of EGP 199.00 at NETFLIX with Card ending 1234 was declined (insufficient funds)",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 19900,
+    "currency": "EGP",
+    "merchant": "Netflix",
+    "category": "subscriptions",
+    "internal": false,
+    "status": "declined"
+   }
+  },
+  {
+   "id": "m1-10",
+   "monthsAgo": 1,
+   "day": 9,
+   "time": "14:00",
+   "delivery": "inbox",
+   "sender": "InstaPay",
+   "body": "InstaPay: You paid EGP 420.00 at WE Home Internet using Card *4567. Ref: IPNBILL44102",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 42000,
+    "currency": "EGP",
+    "merchant": "We Home Internet",
+    "category": "bills",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-11",
+   "monthsAgo": 1,
+   "day": 10,
+   "time": "16:25",
+   "delivery": "inbox",
+   "sender": "HSBC",
+   "body": "HSBC: Purchase of EGP 850.00 at ZARA CAIRO with card ending 5555. Avl limit: EGP 10,000.00.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 85000,
+    "currency": "EGP",
+    "merchant": "Zara",
+    "category": "shopping",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-12",
+   "monthsAgo": 1,
+   "day": 11,
+   "time": "21:00",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of USD 20.00 at NETFLIX.COM with Card ending 1234. Avl Bal EGP 5021.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 2000,
+    "currency": "USD",
+    "merchant": "Netflix.com",
+    "category": "subscriptions",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-13",
+   "monthsAgo": 1,
+   "day": 12,
+   "time": "13:35",
+   "delivery": "inbox",
+   "sender": "QNB",
+   "body": "QNB: Purchase of EGP 300.00 made with Card ****4321 at MCDONALDS. Avl Bal EGP 8,100.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "merchant": "Mcdonalds",
+    "category": "dining",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-14",
+   "monthsAgo": 1,
+   "day": 13,
+   "time": "17:45",
+   "delivery": "inbox",
+   "sender": "InstaPay",
+   "body": "InstaPay: You transferred EGP 1,250.00 to ahmed.ali@instapay from A/C *4567. Ref: 62910482112",
+   "expect": {
+    "kind": "transfer_out",
+    "amountMinor": 125000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "instapay",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-15",
+   "monthsAgo": 1,
+   "day": 14,
+   "time": "12:30",
+   "delivery": "inbox",
+   "sender": "InstaPay",
+   "body": "InstaPay: You received EGP 3,500.00 from SARA MAHMOUD into A/C *1234. Ref: 62910998123",
+   "expect": {
+    "kind": "transfer_in",
+    "amountMinor": 350000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "instapay",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-16",
+   "monthsAgo": 1,
+   "day": 15,
+   "time": "22:32",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "CIB: An instant transfer of EGP 2000.00 was made from your account ending ****7316, ref e7a3c9f1 on {DD-MM-YYYY} {HH:MM}. For more info call 19666.",
+   "expect": {
+    "kind": "transfer_out",
+    "amountMinor": 200000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "instapay",
+    "internal": true,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-17",
+   "monthsAgo": 1,
+   "day": 15,
+   "time": "22:33",
+   "delivery": "inbox",
+   "sender": "NBE",
+   "body": "National Bank of Egypt: You received an instant transfer of EGP 2000.00 from Ahmed Ali into your account ending ****9921, ref c4d8b2a6 on {DD-MM-YYYY} {HH:MM}.",
+   "expect": {
+    "kind": "transfer_in",
+    "amountMinor": 200000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "instapay",
+    "internal": true,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-18",
+   "monthsAgo": 1,
+   "day": 16,
+   "time": "10:50",
+   "delivery": "inbox",
+   "sender": "WEPay",
+   "body": "WE Pay: Purchase of EGP 115.00 at KAZYON. Avl Bal: EGP 485.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 11500,
+    "currency": "EGP",
+    "merchant": "Kazyon",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-19",
+   "monthsAgo": 1,
+   "day": 17,
+   "time": "11:20",
+   "delivery": "inbox",
+   "sender": "OrangeCash",
+   "body": "Orange Cash: You paid EGP 180.00 at FAWRY. Avl Bal: EGP 820.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 18000,
+    "currency": "EGP",
+    "merchant": "Fawry",
+    "category": "bills",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-20",
+   "monthsAgo": 1,
+   "day": 18,
+   "time": "09:00",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Your CIB verification code is 482913. Do not share it with anyone.",
+   "expect": {
+    "kind": "ignored"
+   }
+  },
+  {
+   "id": "m1-21",
+   "monthsAgo": 1,
+   "day": 18,
+   "time": "10:00",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "مسابقة كبرى بقيمة 20000 جنيه جوائز نقدية بترخيص رقم 9 لسنة 2026 تحت إشراف وزارة التضامن.",
+   "expect": {
+    "kind": "ignored"
+   }
+  },
+  {
+   "id": "m1-22",
+   "monthsAgo": 1,
+   "day": 19,
+   "time": "15:10",
+   "delivery": "inbox",
+   "sender": "InstaPay",
+   "body": "InstaPay: EGP 800.00 refunded to A/C *4567. Avl Bal EGP 5,200.00",
+   "expect": {
+    "kind": "refund",
+    "amountMinor": 80000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": null,
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-23",
+   "monthsAgo": 1,
+   "day": 20,
+   "time": "19:05",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 275.00 at ZZQ NOVELTY 77 with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 27500,
+    "currency": "EGP",
+    "merchant": "Zzq Novelty 77",
+    "category": null,
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-24",
+   "monthsAgo": 1,
+   "day": 21,
+   "time": "08:30",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 600.00 at SHELL MAADI with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 60000,
+    "currency": "EGP",
+    "merchant": "Shell",
+    "category": "transport",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-25",
+   "monthsAgo": 1,
+   "day": 22,
+   "time": "12:40",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 350.00 at VODAFONE EGYPT with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 35000,
+    "currency": "EGP",
+    "merchant": "Vodafone Egypt",
+    "category": "bills",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-26",
+   "monthsAgo": 1,
+   "day": 23,
+   "time": "17:15",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 220.00 at EL EZABY with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 22000,
+    "currency": "EGP",
+    "merchant": "El Ezaby",
+    "category": "health",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-27",
+   "monthsAgo": 1,
+   "day": 24,
+   "time": "20:30",
+   "delivery": "inbox",
+   "sender": "NBE",
+   "body": "NBE: Purchase of EGP 260.00 from NBE Visa **4567 at TALABAT. Balance EGP 2000.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 26000,
+    "currency": "EGP",
+    "merchant": "Talabat",
+    "category": "dining",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-28",
+   "monthsAgo": 1,
+   "day": 25,
+   "time": "21:15",
+   "delivery": "inbox",
+   "sender": "Telda",
+   "body": "Telda: You paid EGP 175.00 at TALABAT with Card *9910. Avl Bal EGP 2,360.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 17500,
+    "currency": "EGP",
+    "merchant": "Talabat",
+    "category": "dining",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m1-29",
+   "monthsAgo": 1,
+   "day": 26,
+   "time": "18:00",
+   "delivery": "inbox",
+   "sender": "Telda",
+   "body": "Telda: You paid EGP 480.00 at SPINNEYS with Card *9910. Avl Bal EGP 2,360.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 48000,
+    "currency": "EGP",
+    "merchant": "Spinneys",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-01",
+   "monthsAgo": 2,
+   "day": 2,
+   "time": "09:10",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Salary of EGP 15000.00 credited to A/C *1234. Avl Bal EGP 5028.00",
+   "expect": {
+    "kind": "income",
+    "amountMinor": 1500000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "income",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-02",
+   "monthsAgo": 2,
+   "day": 5,
+   "time": "12:05",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 980.00 at CARREFOUR MAADI with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 98000,
+    "currency": "EGP",
+    "merchant": "Carrefour",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-03",
+   "monthsAgo": 2,
+   "day": 8,
+   "time": "18:40",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 120.00 at UBER with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 12000,
+    "currency": "EGP",
+    "merchant": "Uber",
+    "category": "transport",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-04",
+   "monthsAgo": 2,
+   "day": 11,
+   "time": "20:30",
+   "delivery": "inbox",
+   "sender": "NBE",
+   "body": "NBE: Purchase of EGP 310.00 from NBE Visa **4567 at TALABAT. Balance EGP 2000.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 31000,
+    "currency": "EGP",
+    "merchant": "Talabat",
+    "category": "dining",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-05",
+   "monthsAgo": 2,
+   "day": 13,
+   "time": "15:30",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Cash withdrawal of EGP 500.00 with Card ending 1234 at ATM CAIRO FESTIVAL. Avl Bal EGP 5035.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 50000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "cash",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-06",
+   "monthsAgo": 2,
+   "day": 16,
+   "time": "13:20",
+   "delivery": "inbox",
+   "sender": "NBE",
+   "body": "NBE: Purchase of EGP 450.00 from NBE Visa **4567 at AMAZON. Balance EGP 2000.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 45000,
+    "currency": "EGP",
+    "merchant": "Amazon",
+    "category": "shopping",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-07",
+   "monthsAgo": 2,
+   "day": 20,
+   "time": "11:20",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 340.00 at VODAFONE EGYPT with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 34000,
+    "currency": "EGP",
+    "merchant": "Vodafone Egypt",
+    "category": "bills",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m2-08",
+   "monthsAgo": 2,
+   "day": 24,
+   "time": "10:15",
+   "delivery": "inbox",
+   "sender": "Telda",
+   "body": "Telda: You paid EGP 95.00 at STARBUCKS with Card *9910. Avl Bal EGP 2,360.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 9500,
+    "currency": "EGP",
+    "merchant": "Starbucks",
+    "category": "dining",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m3-01",
+   "monthsAgo": 3,
+   "day": 2,
+   "time": "09:10",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Salary of EGP 14000.00 credited to A/C *1234. Avl Bal EGP 5042.00",
+   "expect": {
+    "kind": "income",
+    "amountMinor": 1400000,
+    "currency": "EGP",
+    "merchant": null,
+    "category": "income",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m3-02",
+   "monthsAgo": 3,
+   "day": 6,
+   "time": "12:05",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 1100.00 at CARREFOUR MAADI with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 110000,
+    "currency": "EGP",
+    "merchant": "Carrefour",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m3-03",
+   "monthsAgo": 3,
+   "day": 9,
+   "time": "18:40",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of EGP 90.00 at UBER with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 9000,
+    "currency": "EGP",
+    "merchant": "Uber",
+    "category": "transport",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m3-04",
+   "monthsAgo": 3,
+   "day": 14,
+   "time": "19:00",
+   "delivery": "inbox",
+   "sender": "Telda",
+   "body": "Telda: You paid EGP 300.00 at SPINNEYS with Card *9910. Avl Bal EGP 2,360.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 30000,
+    "currency": "EGP",
+    "merchant": "Spinneys",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m3-05",
+   "monthsAgo": 3,
+   "day": 18,
+   "time": "21:00",
+   "delivery": "inbox",
+   "sender": "CIB",
+   "body": "Purchase of USD 20.00 at NETFLIX.COM with Card ending 1234. Avl Bal EGP 5049.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 2000,
+    "currency": "USD",
+    "merchant": "Netflix.com",
+    "category": "subscriptions",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "m3-06",
+   "monthsAgo": 3,
+   "day": 22,
+   "time": "16:25",
+   "delivery": "inbox",
+   "sender": "HSBC",
+   "body": "HSBC: Purchase of EGP 600.00 at ZARA CAIRO with card ending 5555. Avl limit: EGP 10,000.00.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 60000,
+    "currency": "EGP",
+    "merchant": "Zara",
+    "category": "shopping",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "lv-01",
+   "monthsAgo": 0,
+   "day": null,
+   "time": null,
+   "delivery": "live",
+   "sender": "CIB",
+   "body": "Purchase of EGP 55.00 at UBER EG with Card ending 1234. Avl Bal: EGP 4,500.20.",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 5500,
+    "currency": "EGP",
+    "merchant": "Uber",
+    "category": "transport",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "lv-02",
+   "monthsAgo": 0,
+   "day": null,
+   "time": null,
+   "delivery": "live",
+   "sender": "NBE",
+   "body": "NBE: Purchase of EGP 410.25 from NBE Visa **4567 at CARREFOUR MAADI. Balance EGP 2000.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 41025,
+    "currency": "EGP",
+    "merchant": "Carrefour",
+    "category": "groceries",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "lv-03",
+   "monthsAgo": 0,
+   "day": null,
+   "time": null,
+   "delivery": "live",
+   "sender": "Telda",
+   "body": "Telda: You paid EGP 66.00 at STARBUCKS with Card *9910. Avl Bal EGP 2,360.00",
+   "expect": {
+    "kind": "expense",
+    "amountMinor": 6600,
+    "currency": "EGP",
+    "merchant": "Starbucks",
+    "category": "dining",
+    "internal": false,
+    "status": "posted"
+   }
+  },
+  {
+   "id": "lv-04",
+   "monthsAgo": 0,
+   "day": null,
+   "time": null,
+   "delivery": "live",
+   "sender": "CIB",
+   "body": "Your CIB verification code is 770412. Do not share it with anyone.",
+   "expect": {
+    "kind": "ignored"
+   }
+  }
+ ]
+}
