@@ -934,12 +934,22 @@ class MerchantsBody extends ConsumerWidget {
                               style: ZType.body.copyWith(color: c.text),
                             ),
                           ),
-                          Text(
-                            count,
-                            style: ZType.caption.copyWith(color: c.textMuted),
+                          Flexible(
+                            child: Text(
+                              count,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: ZType.caption.copyWith(color: c.textMuted),
+                            ),
                           ),
                           const SizedBox(width: ZSpacing.md),
-                          ZMoneyText(text: amount),
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: ZMoneyText(text: amount),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: ZSpacing.xs),
