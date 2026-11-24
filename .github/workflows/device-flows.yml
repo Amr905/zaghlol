@@ -78,7 +78,7 @@ jobs:
   # limit. The explorer is one job per slice, in parallel.
   flows:
     name: android emulator API 34 (device flows, devSms)
-    if: ${{ !inputs.explorer_only && !inputs.scenario_only && !startsWith(github.ref_name, 'ci/TEST-explorer3') && !startsWith(github.ref_name, 'ci/T-233') }}
+    if: ${{ !startsWith(github.ref_name, 'ci/T-238') && !inputs.explorer_only && !inputs.scenario_only && !startsWith(github.ref_name, 'ci/TEST-explorer3') && !startsWith(github.ref_name, 'ci/T-233') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -165,7 +165,7 @@ jobs:
   scenario:
     name: android emulator API 34 (SMS month story, devSms)
     # T-233: the SMS month story and its charts, its own job (60-minute limit).
-    if: ${{ !inputs.explorer_only && !inputs.t165_only && !inputs.notif_only && !inputs.sms_only && !startsWith(github.ref_name, 'ci/TEST-explorer3') && github.ref_name != 'ci/SMS-device' }}
+    if: ${{ !startsWith(github.ref_name, 'ci/T-238') && !inputs.explorer_only && !inputs.t165_only && !inputs.notif_only && !inputs.sms_only && !startsWith(github.ref_name, 'ci/TEST-explorer3') && github.ref_name != 'ci/SMS-device' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -248,7 +248,7 @@ jobs:
   explorer:
     name: explorer ${{ matrix.plan }}
     # Not for the single-purpose runs (SMS, T-165, T-193).
-    if: ${{ !inputs.sms_only && !inputs.t165_only && !inputs.notif_only && !inputs.scenario_only && !startsWith(github.ref_name, 'ci/T-233') && github.ref_name != 'ci/SMS-device' && !startsWith(github.ref_name, 'ci/B53-t193') }}
+    if: ${{ !startsWith(github.ref_name, 'ci/T-238') && !inputs.sms_only && !inputs.t165_only && !inputs.notif_only && !inputs.scenario_only && !startsWith(github.ref_name, 'ci/T-233') && github.ref_name != 'ci/SMS-device' && !startsWith(github.ref_name, 'ci/B53-t193') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
