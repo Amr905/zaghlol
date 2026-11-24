@@ -171,6 +171,7 @@ jobs:
       JOB_LABEL: scenario
       API: ${{ inputs.api || '34' }}
       SCENARIO_ONLY: '1'
+      SCENARIO_PROBE: ${{ endsWith(github.ref_name, '-probe') && '1' || '' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:

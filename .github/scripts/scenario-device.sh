@@ -132,6 +132,32 @@ run_scenario() {
   return "$r"
 }
 
+
+if [ -n "${SCENARIO_PROBE:-}" ]; then
+  # Diagnostics only (ci/T-233-probe): which way puts a dated, colon-bearing
+  # message into the system inbox? Synthetic strings; no APK needed.
+  cnt() { adb -s "$DEVICE" shell "content query --uri content://sms --projection address:date" < /dev/null 2>&1 | tr -d '\r' | grep -c '^Row:'; }
+  adb -s "$DEVICE" root > /dev/null 2>&1 || true
+  adb -s "$DEVICE" wait-for-device
+  echo "probe: id=$(adb -s "$DEVICE" shell id -un < /dev/null | tr -d '\r') sdk=$(adb -s "$DEVICE" shell getprop ro.build.version.sdk < /dev/null | tr -d '\r')"
+  echo "probe: sqlite3=$(adb -s "$DEVICE" shell 'which sqlite3' < /dev/null | tr -d '\r')"
+  adb -s "$DEVICE" shell 'ls -l /data/user_de/0/com.android.providers.telephony/databases/' < /dev/null 2>&1 | tr -d '\r' | head -8
+  echo "probe: count start=$(cnt)"
+  ms=$(( $(date +%s) - 86400 * 40 ))000
+  r=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:CIB --bind body:s:plain_body_no_colon --bind date:l:$ms --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -2 | cut -c1-100)
+  echo "probe T0 plain: answer='$r' count=$(cnt)"
+  r=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:CIB --bind 'body:s:has colon\: here, and comma' --bind date:l:$ms --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -2 | cut -c1-100)
+  echo "probe T1 escaped colon: answer='$r' count=$(cnt)"
+  r=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:CIB --bind 'body:s:has colon: here' --bind date:l:$ms --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -2 | cut -c1-100)
+  echo "probe T2 raw colon: answer='$r' count=$(cnt)"
+  r=$(adb -s "$DEVICE" shell "content insert --uri content://sms/inbox --bind address:s:CIB --bind 'body:s:has comma, only' --bind date:l:$ms --bind read:i:0 --bind type:i:1" < /dev/null 2>&1 | tr -d '\r' | head -2 | cut -c1-100)
+  echo "probe T3 comma: answer='$r' count=$(cnt)"
+  r=$(adb -s "$DEVICE" shell "sqlite3 /data/user_de/0/com.android.providers.telephony/databases/mmssms.db \"INSERT INTO sms (address, body, date, date_sent, read, seen, type) VALUES ('CIB', 'sqlite colon: here, comma', $ms, $ms, 0, 0, 1)\"" < /dev/null 2>&1 | tr -d '\r' | head -2 | cut -c1-120)
+  echo "probe T4 sqlite3: answer='$r' count=$(cnt)"
+  adb -s "$DEVICE" shell "content query --uri content://sms --projection address:date:type" < /dev/null 2>&1 | tr -d '\r' | head -8
+  exit 0
+fi
+
 flutter devices
 run_scenario 2>&1 | tee "$OUT/scenario-device-script.log"
 rc=${PIPESTATUS[0]}

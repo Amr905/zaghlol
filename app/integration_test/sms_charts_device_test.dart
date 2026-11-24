@@ -454,6 +454,9 @@ void main() {
     }
 
     // ---- 4. the screens, English then Arabic, last month
+    // The notifier builds from the saved setting; wait for that first, or the
+    // late build would overwrite the choice.
+    await c.read(chartPeriodSelectionProvider.future);
     await c
         .read(chartPeriodSelectionProvider.notifier)
         .select(const ChartPeriodSelection(ChartPreset.lastMonth));
@@ -461,14 +464,15 @@ void main() {
     final cats = await db
         .customSelect('SELECT id, name_en, name_ar FROM categories')
         .get();
-    String catName(String? id, String lang) {
+    String catName(String? id, String lang, AppLocalizations l) {
+      if (id == null) return l.transactionsListFilterUncategorized;
       for (final r in cats) {
-        if (r.data['id'] == (id == null ? 'sys:other' : 'sys:$id')) {
+        if (r.data['id'] == 'sys:$id') {
           return (lang == 'ar' ? r.data['name_ar'] : r.data['name_en'])!
               as String;
         }
       }
-      return id ?? '';
+      return id;
     }
 
     for (final lang in ['en', 'ar']) {
@@ -508,7 +512,7 @@ void main() {
                 ..sort((a, b) => b.value.compareTo(a.value)))
               .take(3)) {
         final want =
-            '${catName(top.key, lang)}: ${money('EGP', top.value, lang)}';
+            '${catName(top.key, lang, l)}: ${money('EGP', top.value, lang)}';
         check(
           labels.any((x) => x.contains(want)),
           '$tag overview row expected="$want"',
@@ -537,7 +541,8 @@ void main() {
       await settle(t, 1500);
       labels = semanticsLabels(t);
       for (final e in egp.byCategory.entries) {
-        final want = '${catName(e.key, lang)}: ${money('EGP', e.value, lang)}';
+        final want =
+            '${catName(e.key, lang, l)}: ${money('EGP', e.value, lang)}';
         check(
           labels.any((x) => x.contains(want)),
           '$tag categories row expected="$want"',
