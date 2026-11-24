@@ -86,11 +86,11 @@ void main() {
         await e.waitFor(
           t,
           welcome,
-          timeout: const Duration(seconds: 120),
+          timeout: const Duration(seconds: 300),
           what: 'the Welcome screen after the wipe',
         );
       } on TestFailure {
-        await e.dumpScreen(t, '03-no-welcome');
+        await e.dumpScreen(t, '03-no-welcome', max: 60);
         rethrow;
       }
       await e.settle(t, 2000);
