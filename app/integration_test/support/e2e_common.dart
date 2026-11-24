@@ -196,6 +196,24 @@ class E2e {
     say('SEEDED transactions=${amountsMinor.length}');
   }
 
+  /// Scrolls the screen's vertical list until [target] is built and on screen
+  /// (list rows below the fold are not built yet), then taps it.
+  Future<void> scrollAndTap(WidgetTester t, Finder target, String what) async {
+    await settle(t, 1200); // a pushed route finishes its transition first
+    final list = find.byWidgetPredicate(
+      (w) => w is Scrollable && w.axis == Axis.vertical,
+    );
+    for (var i = 0; i < 20 && !found(target); i++) {
+      if (!found(list)) break;
+      await t.drag(list.first, const Offset(0, -300), warnIfMissed: false);
+      await settle(t, 300);
+    }
+    if (!found(target)) fail('could not find $what');
+    await t.ensureVisible(target.first);
+    await settle(t, 600);
+    await t.tap(target.first);
+  }
+
   /// Selects tab [i] (0 Home, 1 Money, 2 Insights, 3 Zaghlol) as a tap does.
   Future<void> selectTab(WidgetTester t, int i) async {
     final bar = find.byType(ZBottomBar);

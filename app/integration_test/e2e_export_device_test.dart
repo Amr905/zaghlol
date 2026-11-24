@@ -62,9 +62,11 @@ void main() {
         'a fresh install is Free',
       );
       unawaited(openSettings(rootNavigatorKey.currentContext!));
-      await e.waitFor(t, find.text('Export & import'), what: 'Settings rows');
-      await t.ensureVisible(find.text('Export & import').first);
-      await t.tap(find.text('Export & import').first);
+      await e.scrollAndTap(
+        t,
+        find.text('Export & import'),
+        'the Export & import row',
+      );
       await e.waitFor(
         t,
         find.byKey(const ValueKey('exportButton')),
