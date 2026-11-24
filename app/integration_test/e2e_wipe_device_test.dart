@@ -29,12 +29,15 @@ void main() {
   testWidgets('Delete everything returns the app to first launch', (t) async {
     final semantics = t.ensureSemantics();
     addTearDown(semantics.dispose);
-    await e.seedReturningUser(amountsMinor: [12550, 99900]);
+    await e.seedReturningUser();
     e.captureFlutterErrors();
 
     await app.main();
+    e.say('MAIN_RETURNED');
     await e.waitFor(t, find.text('Home'), what: 'Home');
     await e.settle(t, 2000);
+    await e.addTransactions([12550, 99900]);
+    await e.settle(t, 800);
 
     Future<int> count(ProviderContainer c, String table) async {
       final db = await c.read(appDatabaseProvider.future);

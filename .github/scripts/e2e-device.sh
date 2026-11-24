@@ -65,7 +65,7 @@ wait_marker() { # log marker pid seconds
 run_test() { # name file [extra]
   echo "==== $1"
   fresh_app
-  timeout 1500 flutter test "integration_test/$2" \
+  timeout 600 flutter test "integration_test/$2" \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     > "$OUT/$1.log" 2>&1
   local r=$?
@@ -79,11 +79,11 @@ run_test() { # name file [extra]
 run_lock() {
   echo "==== e2e11-lock"
   fresh_app
-  timeout 1500 flutter test integration_test/e2e_lock_device_test.dart \
+  timeout 600 flutter test integration_test/e2e_lock_device_test.dart \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     > "$OUT/e2e11-lock.log" 2>&1 &
   local tpid=$! bad=0 s
-  if wait_marker "$OUT/e2e11-lock.log" "E2E11 SECURE_ON_CHECK" "$tpid" 900; then
+  if wait_marker "$OUT/e2e11-lock.log" "E2E11 SECURE_ON_CHECK" "$tpid" 400; then
     sleep 2
     secure_state; s=$?
     echo "E2E11 DEVICE lock on: secure state=$s (0 secure, 1 not, 2 unknown)"
@@ -112,11 +112,11 @@ run_lock() {
 run_wipe() {
   echo "==== e2e12-wipe"
   fresh_app
-  timeout 1500 flutter test integration_test/e2e_wipe_device_test.dart \
+  timeout 600 flutter test integration_test/e2e_wipe_device_test.dart \
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     > "$OUT/e2e12-wipe.log" 2>&1 &
   local tpid=$! bad=0 n a
-  if wait_marker "$OUT/e2e12-wipe.log" "E2E12 WIPED" "$tpid" 900; then
+  if wait_marker "$OUT/e2e12-wipe.log" "E2E12 WIPED" "$tpid" 400; then
     n=$(adb -s "$DEVICE" shell dumpsys notification --noredact < /dev/null 2> /dev/null | grep -c "pkg=$PKG" || true)
     a=$(adb -s "$DEVICE" shell dumpsys alarm < /dev/null 2> /dev/null | grep -c "$PKG" || true)
     echo "E2E12 DEVICE after the wipe: posted notifications=$n, alarm lines=$a"

@@ -38,12 +38,15 @@ void main() {
   testWidgets('language and digits on every tab and sub-screen', (t) async {
     final semantics = t.ensureSemantics();
     addTearDown(semantics.dispose);
-    await e.seedReturningUser(amountsMinor: [123450]);
+    await e.seedReturningUser();
     e.captureFlutterErrors();
 
     await app.main();
+    e.say('MAIN_RETURNED');
     await e.waitFor(t, find.text('Home'), what: 'Home');
     await e.settle(t, 2000);
+    await e.addTransactions([123450]);
+    await e.settle(t, 800);
 
     List<String> texts() => [
       for (final w in t.widgetList<Text>(find.byType(Text)))
