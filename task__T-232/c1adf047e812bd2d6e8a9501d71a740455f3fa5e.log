@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=c1adf047e812bd2d6e8a9501d71a740455f3fa5e
+SKIP sha=c1adf047e812bd2d6e8a9501d71a740455f3fa5e no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-232 c1adf047e812bd2d6e8a9501d71a740455f3fa5e 2026-11-24T11:15:42.4180422+02:00
+
+
+
