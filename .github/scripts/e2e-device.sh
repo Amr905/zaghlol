@@ -125,6 +125,7 @@ run_wipe() {
   else
     echo "E2E12 DEVICE PROBLEM the test never reached the wipe check"; bad=1
   fi
+  adb -s "$DEVICE" exec-out screencap -p > "$OUT/screens/zz-final-e2e12.png" || true
   wait "$tpid"
   local r=$?
   grep -E "E2E[0-9]+ |Some tests|All tests" "$OUT/e2e12-wipe.log" | cut -c1-240

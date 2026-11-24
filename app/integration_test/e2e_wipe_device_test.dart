@@ -82,12 +82,17 @@ void main() {
 
       // ---- First-launch state.
       final welcome = find.byKey(const ValueKey('welcome-start'));
-      await e.waitFor(
-        t,
-        welcome,
-        timeout: const Duration(seconds: 120),
-        what: 'the Welcome screen after the wipe',
-      );
+      try {
+        await e.waitFor(
+          t,
+          welcome,
+          timeout: const Duration(seconds: 120),
+          what: 'the Welcome screen after the wipe',
+        );
+      } on TestFailure {
+        await e.dumpScreen(t, '03-no-welcome');
+        rethrow;
+      }
       await e.settle(t, 2000);
       await e.shot(t, '03-welcome');
       final after = ProviderScope.containerOf(t.element(welcome));
