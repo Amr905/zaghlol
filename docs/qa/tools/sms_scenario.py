@@ -3,7 +3,7 @@
 
 Never prints message bodies: only sender ids, ids and counts.
 """
-import argparse, calendar, datetime, json, os, shutil, subprocess, sys
+import argparse, calendar, datetime, json, os, shutil, subprocess, sys, time
 
 DEFAULT_SCENARIO = "app/test/fixtures/sms/scenarios/month_story.json"
 
@@ -136,11 +136,46 @@ def live_cmd(adb, serial, e):
     return [adb, "-s", serial, "emu", "sms", "send", e["sender"], e["body"]]
 
 
-def insert_cmd(adb, serial, e):
-    q = lambda s: "'" + s.replace("'", "'\\''") + "'"
-    sh = ("content insert --uri content://sms/inbox --bind address:s:%s --bind body:s:%s "
-          "--bind date:l:%d --bind read:i:0 --bind type:i:1") % (q(e["sender"]), q(e["body"]), e["date_ms"])
-    return [adb, "-s", serial, "shell", sh]
+def clock_cmd(adb, serial, when_utc):
+    """Sets the emulator clock (root shell, UTC): `date -u MMDDhhmmYYYY.ss`."""
+    return [adb, "-s", serial, "shell", "date -u " + when_utc.strftime("%m%d%H%M%Y.%S")]
+
+
+def auto_time_cmd(adb, serial, on):
+    return [adb, "-s", serial, "shell", "settings put global auto_time %d" % (1 if on else 0)]
+
+
+def bad_text(s):
+    """Newlines and control characters would end the emulator console command."""
+    return s is None or any(ord(c) < 32 or ord(c) == 127 for c in s)
+
+
+def sent_ok(r):
+    return r.returncode == 0 and r.stdout.replace("\r", "").strip().startswith("OK")
+
+
+def send_historical(adb, serial, entries, runner=None, now=None):
+    """Past entries: the clock is set to each entry's time, the message goes
+    through the emulator modem, and the clock is restored in `finally`.
+    Returns (ok, failed_ids)."""
+    runner = runner or run
+    now = now or (lambda: datetime.datetime.now(datetime.timezone.utc))
+    ok, failed = 0, []
+    runner(auto_time_cmd(adb, serial, False))
+    try:
+        for e in entries:
+            when = datetime.datetime.fromtimestamp(e["date_ms"] / 1000, datetime.timezone.utc)
+            runner(clock_cmd(adb, serial, when))
+            r = runner(live_cmd(adb, serial, e))
+            if sent_ok(r):
+                ok += 1
+            else:
+                failed.append(e["id"])
+            time.sleep(2 if runner is run else 0)
+    finally:
+        runner(clock_cmd(adb, serial, now()))
+        runner(auto_time_cmd(adb, serial, True))
+    return ok, failed
 
 
 def parse_devices(text):
@@ -222,16 +257,24 @@ def main(argv=None):
                   "(not Google Play Store), or use --live.")
             return 3
         run([adb, "-s", serial, "wait-for-device"])
-    ok = bad = 0
     for e in entries:
-        cmd = insert_cmd(adb, serial, e) if a.historical and not a.all_live else live_cmd(adb, serial, e)
-        r = run(cmd)
-        out = (r.stdout + r.stderr)
-        good = r.returncode == 0 and "error" not in out.lower() and "exception" not in out.lower() \
-            and ((a.historical and not a.all_live) or out.strip().startswith("OK"))
-        ok, bad = ok + good, bad + (not good)
-        if not good:
-            print("  failed: %s (%s)" % (e["id"], e["sender"]))
+        if bad_text(e["sender"]) or bad_text(e["body"]):
+            print("entry %s has a newline or control character; refusing (console injection)." % e["id"])
+            return 2
+    if a.historical and not a.all_live:
+        ok, failed = send_historical(adb, serial, entries)
+        bad = len(failed)
+        for i in failed:
+            print("  failed: %s" % i)
+    else:
+        ok = bad = 0
+        for e in entries:
+            r = run(live_cmd(adb, serial, e))
+            if sent_ok(r):
+                ok += 1
+            else:
+                bad += 1
+                print("  failed: %s (%s)" % (e["id"], e["sender"]))
     print("sent %d, failed %d" % (ok, bad))
     if len(entries) > 1:
         s = summarize(entries)

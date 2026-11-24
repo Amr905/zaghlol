@@ -78,6 +78,13 @@ run_scenario() {
   adb -s "$DEVICE" shell "settings put global auto_time 0" < /dev/null > /dev/null 2>&1 || true
   adb -s "$DEVICE" shell "settings put global auto_time_zone 0" < /dev/null > /dev/null 2>&1 || true
   adb -s "$DEVICE" shell "sqlite3 /data/user_de/0/com.android.providers.telephony/databases/mmssms.db 'DELETE FROM sms'" < /dev/null > /dev/null 2>&1 || true
+  restore_clock() {
+    adb -s "$DEVICE" shell "date -u $(date -u +%m%d%H%M%Y.%S)" < /dev/null > /dev/null 2>&1
+    adb -s "$DEVICE" shell "settings put global auto_time 1" < /dev/null > /dev/null 2>&1 || true
+    adb -s "$DEVICE" shell "settings put global auto_time_zone 1" < /dev/null > /dev/null 2>&1 || true
+  }
+  # a cancelled or failed job must not leave the emulator clock in the past
+  trap restore_clock EXIT INT TERM
   local ok=0 bad=0 start_s
   start_s=$(date -u +%s)
   while IFS=$'\t' read -r id sender mago day time body; do

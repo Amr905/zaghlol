@@ -4,7 +4,7 @@
 2. Install the devSms build (`flutter build apk --debug --flavor devSms`, then `adb install -r <apk>`), open it once, and grant SMS and notification permissions (or `adb shell pm grant app.zaghlol.dev android.permission.READ_SMS`, `RECEIVE_SMS`, `POST_NOTIFICATIONS`).
 3. From the repo root (Windows: `powershell docs\qa\tools\sms_scenario.ps1 ...`; elsewhere `python3 docs/qa/tools/sms_scenario.py ...`). adb is found on PATH, `ANDROID_HOME` or `%LOCALAPPDATA%\Android\Sdk\platform-tools`.
    - `--list`: entries, sender counts and the expected spend/income per month and currency (posted only; internal transfer legs, ignored and declined entries excluded; spend = expense/fee/transfer_out, income = income/transfer_in/refund).
-   - `--historical`: the `delivery=inbox` entries go into the inbox with their past dates (needs `adb root`). Do this before the app's first scan, then open the app.
+   - `--historical`: the `delivery=inbox` entries are sent through the emulator modem with the emulator clock set to each entry's own time (auto time off, root), then the clock is put back (also on an error or Ctrl-C). Needs a Google APIs image where `adb root` works. Each entry is reported as sent or failed from the console's `OK`. Do this before the app's first scan, then open the app. Texts with a newline or control character are refused.
    - `--live`: sends the `delivery=live` entries now through the emulator modem while the app runs; `--all-live` sends every non-manual entry that way (current date). `manual` entries are skipped with a note (the test adds them through the app).
    - Dates: each entry is dated from the PC clock (`monthsAgo` months back, day clamped to the month length, at its local time).
    - `--sender CIB --text "..."`: one message.

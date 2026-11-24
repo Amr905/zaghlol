@@ -114,3 +114,10 @@ FU-293 (owner: T-233 lane unless noted):
 
 ## Notes for the Lead
 - Fix round candidates: T-234 #1 and T-235 #1. Both are small. Neither is a money, security, privacy or data issue, so under SPRINT.md you may fold them into FU-293 instead. T-233's ingest change is sound, and its spend/income impact matches T-089's approved rules.
+
+## Fix round
+
+- T-234 (major): `sms_scenario.py --historical` now sets the emulator clock per entry (root, auto time off), sends with `emu sms send`, and restores the clock plus auto time in a `finally`. Success is read from the console's `OK`; failures are listed by id. Newlines/control characters in `--text` and scenario entries are refused before any send. `insert_cmd` removed; unit tests cover clock set/restore order, restore on exception, real failure reporting and newline rejection; `docs/qa/sms-emulator.md` updated (Google APIs image + adb root).
+- Minor: `.github/scripts/scenario-device.sh` has a `restore_clock` trap (EXIT/INT/TERM).
+- T-235 (major): `explorer_allow.dart` no longer has `where: '.*'`. Restore entries pin an exact title as both screen and control; the bill/card entries name the exact screens (`Edit bill`, `Card details`) and the controls the explorer reported; the emoji entry is emoji-only on both. New `app/test/integration_support/explorer_allow_test.dart` asserts neighbouring screens/controls do not match.
+- Checks: `python3 -m unittest` (docs/qa/tools) green; `dart format`, `dart analyze` clean; allow-list test 3/3.
