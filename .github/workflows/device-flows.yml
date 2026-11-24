@@ -19,6 +19,10 @@ on:
         description: 'Run only the SMS device test (SMS-device)'
         type: boolean
         default: false
+      scenario_only:
+        description: 'Run only the SMS month-story scenario job (T-233)'
+        type: boolean
+        default: false
       t165_only:
         description: 'Run only the T-165 backup-exclusion check (t165-backup-emu.sh)'
         type: boolean
@@ -43,6 +47,10 @@ on:
       - 'app/integration_test/device_flows*'
       - 'app/integration_test/app_explorer*'
       - 'app/integration_test/sms_device*'
+      - 'app/integration_test/sms_charts*'
+      - 'app/test/fixtures/sms/scenarios/**'
+      - 'app/test/support/scenario_expected.dart'
+      - '.github/scripts/scenario-device.sh'
       - 'app/integration_test/notification_intents*'
       - 'app/integration_test/rive_mascot*'
       - 'app/integration_test/support/**'
@@ -68,7 +76,7 @@ jobs:
   # limit. The explorer is one job per slice, in parallel.
   flows:
     name: android emulator API 34 (device flows, devSms)
-    if: ${{ !inputs.explorer_only && !startsWith(github.ref_name, 'ci/TEST-explorer3') }}
+    if: ${{ !inputs.explorer_only && !inputs.scenario_only && !startsWith(github.ref_name, 'ci/TEST-explorer3') && !startsWith(github.ref_name, 'ci/T-233') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -152,10 +160,92 @@ jobs:
           done
           echo "could not publish the screenshots"
 
+  scenario:
+    name: android emulator API 34 (SMS month story, devSms)
+    # T-233: the SMS month story and its charts, its own job (60-minute limit).
+    if: ${{ !inputs.explorer_only && !inputs.t165_only && !inputs.notif_only && !inputs.sms_only && !startsWith(github.ref_name, 'ci/TEST-explorer3') && github.ref_name != 'ci/SMS-device' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DEVICE: emulator-5554
+      JOB_LABEL: scenario
+      API: ${{ inputs.api || '34' }}
+      SCENARIO_ONLY: '1'
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Resolve workspace (lockfile must be up to date)
+        run: flutter pub get --enforce-lockfile
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run on the emulator
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: ${{ inputs.api || 34 }}
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/device-flows.sh
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always()
+        with:
+          name: device-flows-android-api34-${{ env.JOB_LABEL }}
+          path: ${{ runner.temp }}/device-flows
+          if-no-files-found: warn
+          retention-days: 14
+      # The Lead's workspace cannot download artifacts (blob storage is blocked),
+      # so the screenshots are also committed to the `device-shots` branch, under
+      # <sha>/<job label>/ (T-231: several jobs publish for one commit, so each
+      # adds its own folder to the branch instead of replacing it).
+      - name: Publish screenshots to the device-shots branch
+        if: always()
+        env:
+          SHOTS: ${{ runner.temp }}/device-flows
+        run: |
+          set -eu
+          ls "$SHOTS"/screens/*.png "$SHOTS"/screens/*/*.png >/dev/null 2>&1 || ls "$SHOTS"/*.log >/dev/null 2>&1 || { echo "no screenshots or logs"; exit 0; }
+          url="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          dir=$(mktemp -d)
+          cd "$dir"
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5 6; do
+            rm -rf ./* 2>/dev/null || true
+            if git fetch -q --depth 1 "$url" device-shots 2>/dev/null; then
+              git checkout -q -B shots FETCH_HEAD
+            else
+              git checkout -q -B shots
+            fi
+            out="$GITHUB_SHA/$JOB_LABEL"
+            mkdir -p "$out"
+            cp -r "$SHOTS"/screens/. "$out"/ 2>/dev/null || true
+            cp "$SHOTS"/*.log "$out"/ 2>/dev/null || true
+            git add -A
+            git commit -qm "device-flows $JOB_LABEL for $GITHUB_SHA ($GITHUB_REF_NAME)" || true
+            if git push -q "$url" HEAD:refs/heads/device-shots; then exit 0; fi
+            sleep $((attempt * 3))
+          done
+          echo "could not publish the screenshots"
+
   explorer:
     name: explorer ${{ matrix.plan }}
     # Not for the single-purpose runs (SMS, T-165, T-193).
-    if: ${{ !inputs.sms_only && !inputs.t165_only && !inputs.notif_only && github.ref_name != 'ci/SMS-device' && !startsWith(github.ref_name, 'ci/B53-t193') }}
+    if: ${{ !inputs.sms_only && !inputs.t165_only && !inputs.notif_only && !inputs.scenario_only && !startsWith(github.ref_name, 'ci/T-233') && github.ref_name != 'ci/SMS-device' && !startsWith(github.ref_name, 'ci/B53-t193') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
