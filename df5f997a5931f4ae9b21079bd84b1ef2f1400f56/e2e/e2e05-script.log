@@ -1,0 +1,32 @@
+==== e2e05
+Success
+---- phase e2e05/p1
+  sent: NBE
+  sent: NBE
+---- phase e2e05/p2
+E2E_DEVICE NOTIF budget channel before 80%: 0
+  sent: NBE
+E2E_DEVICE NOTIF channels now: 
+E2E_DEVICE NOTIF diag: lines=1053 records=4 pkgLines=1 budgetChannel=1
+E2E_DEVICE NOTIF         AppSettings: app.zaghlol.dev (10192) importance=DEFAULT userSet=false
+e2e05 exit: 0
+E2E_DEVICE E2E05 OK cycle starts on the 25th
+E2E_DEVICE E2E05 OK cycle ends on the 24th
+E2E_DEVICE E2E05 CYCLE daysLeft=1
+E2E_DEVICE SEND p1
+E2E_DEVICE E2E05 OK two SMS purchases saved
+E2E_DEVICE E2E05 OK cycle spend after p1 is 60 %
+E2E_DEVICE E2E05 OK no alert recorded at 60 %
+E2E_DEVICE E2E05 P1_DONE
+E2E_DEVICE SEND p2
+E2E_DEVICE E2E05 OK third SMS purchase saved
+E2E_DEVICE E2E05 OK an alert was recorded at 80 %
+E2E_DEVICE E2E05 OK only the 80 threshold fired
+E2E_DEVICE E2E05 OK cycle spend after p2 is 80 %
+E2E_DEVICE E2E05 P2_DONE
+E2E_DEVICE E2E05 OK safe per day provider equals floor(left / days) = 20000
+E2E_DEVICE E2E05 OK days remaining incl. today
+E2E_DEVICE E2E05 OK Budget screen shows the safe-per-day figure
+E2E_DEVICE E2E05 SHOT e2e05-budget
+E2E_DEVICE E2E05 RESULT problems=0
+01:09 +1: All tests passed!
