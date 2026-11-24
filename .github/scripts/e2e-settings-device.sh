@@ -116,25 +116,34 @@ run_wipe() {
     --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
     > "$OUT/e2e12-wipe.log" 2>&1 &
   local tpid=$! bad=0 n a s
-  # batch-66 m-1: the notification alarm and its boot re-arm entry.
-  notif_alarms() { adb -s "$DEVICE" shell dumpsys alarm < /dev/null 2> /dev/null | grep -c "NotificationAlarmReceiver" || true; }
-  rearm_store() { adb -s "$DEVICE" shell run-as "$PKG" ls no_backup/notif/schedules.txt < /dev/null 2> /dev/null | tr -d '\r' | grep -c "schedules.txt" || true; }
-  if wait_marker "$OUT/e2e12-wipe.log" "E2E12 SCHEDULED" "$tpid" 300; then
-    a=$(notif_alarms); s=$(rearm_store)
-    echo "E2E12 DEVICE before the wipe: notification alarms=$a, re-arm store=$s"
-    [ "${a:-0}" -ge 1 ] || { echo "E2E12 DEVICE PROBLEM the scheduled alert has no alarm before the wipe"; bad=1; }
-    [ "${s:-0}" -ge 1 ] || { echo "E2E12 DEVICE PROBLEM no boot re-arm store before the wipe"; bad=1; }
+  # batch-66 m-1: the test's alert, found by its time (epoch ms) in the alarm
+  # list and in the boot re-arm store. After the restart the app schedules its
+  # own nudge again, so only this alert is asserted gone.
+  local at=""
+  ours_alarm() { adb -s "$DEVICE" shell dumpsys alarm < /dev/null 2> /dev/null | grep -c "$at" || true; }
+  ours_store() { adb -s "$DEVICE" shell run-as "$PKG" cat no_backup/notif/schedules.txt < /dev/null 2> /dev/null | grep -c "^$at" || true; }
+  receiver_alarms() { adb -s "$DEVICE" shell dumpsys alarm < /dev/null 2> /dev/null | grep -c "NotificationAlarmReceiver" || true; }
+  if wait_marker "$OUT/e2e12-wipe.log" "E2E12 SCHEDULED_AT" "$tpid" 300; then
+    at=$(grep -m1 -o "E2E12 SCHEDULED_AT [0-9]*" "$OUT/e2e12-wipe.log" | awk '{print $3}')
+    a=$(ours_alarm); s=$(ours_store)
+    echo "E2E12 DEVICE before the wipe: test alarm=$a, test re-arm entry=$s, receiver alarm lines=$(receiver_alarms)"
+    [ "${a:-0}" -ge 1 ] || { echo "E2E12 DEVICE PROBLEM the test alert has no alarm before the wipe"; bad=1; }
+    [ "${s:-0}" -ge 1 ] || { echo "E2E12 DEVICE PROBLEM the test alert is not in the re-arm store before the wipe"; bad=1; }
   else
     echo "E2E12 DEVICE PROBLEM the test never scheduled the alert"; bad=1
   fi
   if wait_marker "$OUT/e2e12-wipe.log" "E2E12 WIPED" "$tpid" 400; then
     n=$(adb -s "$DEVICE" shell dumpsys notification --noredact < /dev/null 2> /dev/null | grep -c "pkg=$PKG" || true)
-    a=$(notif_alarms); s=$(rearm_store)
-    echo "E2E12 DEVICE after the wipe: posted notifications=$n, notification alarms=$a, re-arm store=$s"
+    a=$(ours_alarm); s=$(ours_store)
+    echo "E2E12 DEVICE after the wipe: posted notifications=$n, test alarm=$a, test re-arm entry=$s, receiver alarm lines=$(receiver_alarms)"
     echo "E2E12 DEVICE files:" $(adb -s "$DEVICE" shell run-as "$PKG" ls files databases app_flutter 2> /dev/null | tr -d '\r' | tr '\n' ' ' | cut -c1-300)
     [ "${n:-0}" -eq 0 ] || { echo "E2E12 DEVICE PROBLEM notifications are still posted after the wipe"; bad=1; }
-    [ "${a:-0}" -eq 0 ] || { echo "E2E12 DEVICE PROBLEM a notification alarm is still pending after the wipe"; bad=1; }
-    [ "${s:-0}" -eq 0 ] || { echo "E2E12 DEVICE PROBLEM the boot re-arm store survived the wipe"; bad=1; }
+    [ "${a:-0}" -eq 0 ] || { echo "E2E12 DEVICE PROBLEM the test alert's alarm is still pending after the wipe"; bad=1; }
+    [ "${s:-0}" -eq 0 ] || { echo "E2E12 DEVICE PROBLEM the test alert survived in the re-arm store"; bad=1; }
+    if [ "$bad" -ne 0 ]; then
+      echo "---- alarm entries of the app (system metadata only)"
+      adb -s "$DEVICE" shell dumpsys alarm < /dev/null 2> /dev/null | grep -B1 -A2 "NotificationAlarmReceiver" | tr -d '\r' | cut -c1-200 | head -24
+    fi
   else
     echo "E2E12 DEVICE PROBLEM the test never reached the wipe check"; bad=1
   fi

@@ -5,8 +5,8 @@
 // marker gone. .github/scripts/e2e-settings-device.sh checks, when the test prints
 // E2E12 WIPED, that the app has no posted notification and no pending
 // notification alarm left, and that the boot re-arm store
-// (noBackup/notif/schedules.txt) is gone; it first checks, at E2E12
-// SCHEDULED, that the alarm and the store entry this test scheduled exist
+// (noBackup/notif/schedules.txt) holds no entry for it; it first checks, at
+// E2E12 SCHEDULED_AT, that the alarm and the store entry this test scheduled exist
 // (batch-66 m-1). Synthetic data only.
 //
 // Run: flutter test integration_test/e2e_wipe_device_test.dart
@@ -69,6 +69,14 @@ void main() {
 
       // batch-66 m-1: a scheduled alert (an alarm and a boot re-arm store
       // entry) that the wipe must remove. The script checks both exist now.
+      // Whole seconds: the script finds the alarm and the store entry by
+      // this time (the app schedules its own nudge again after the restart).
+      final atMs =
+          (DateTime.now()
+                  .add(const Duration(hours: 6))
+                  .millisecondsSinceEpoch ~/
+              1000) *
+          1000;
       await before
           .read(notificationGatewayProvider)
           .schedule(
@@ -76,10 +84,10 @@ void main() {
               id: 238012,
               title: 'E2E12 synthetic',
               body: 'synthetic',
-              at: DateTime.now().add(const Duration(hours: 6)),
+              at: DateTime.fromMillisecondsSinceEpoch(atMs, isUtc: true),
             ),
           );
-      e.say('SCHEDULED');
+      e.say('SCHEDULED_AT $atMs');
       await e.settle(t, 4000);
 
       // ---- Settings -> Privacy & data -> Delete everything.
