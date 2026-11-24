@@ -25,6 +25,10 @@ if [ -n "${SCENARIO_ONLY:-}" ]; then
   # T-233: the SMS month story and its charts (scenario-device.sh).
   exec bash "$(dirname "$0")/scenario-device.sh"
 fi
+if [ -n "${KILLED_ONLY:-}" ]; then
+  # T-236: SMS while the app is killed, an ignored card, notification capture.
+  exec bash "$(dirname "$0")/killed-device.sh"
+fi
 cd "$(dirname "$0")/../../app"
 
 # pull_files [subdir]: the screenshots and reports the tests wrote. T-231: the
