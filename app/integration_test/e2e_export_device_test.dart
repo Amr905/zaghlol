@@ -96,7 +96,7 @@ void main() {
       var guard = 0;
       while (!e.found(find.byKey(const ValueKey('exportButton'))) &&
           guard++ < 5) {
-        await t.pageBack();
+        await rootNavigatorKey.currentState!.maybePop();
         await e.settle(t, 800);
       }
       await e.waitFor(

@@ -214,6 +214,17 @@ class E2e {
     await t.tap(target.first);
   }
 
+  /// Prints the visible Text strings (UI copy, at most [max]) and takes a
+  /// screenshot: what the screen shows when a wait timed out.
+  Future<void> dumpScreen(WidgetTester t, String name, {int max = 30}) async {
+    final texts = <String>[
+      for (final w in t.widgetList<Text>(find.byType(Text)))
+        (w.data ?? w.textSpan?.toPlainText() ?? '').replaceAll('\n', ' '),
+    ];
+    say('SCREEN $name texts=${texts.length}: ${texts.take(max).join(' | ')}');
+    await shot(t, name);
+  }
+
   /// Selects tab [i] (0 Home, 1 Money, 2 Insights, 3 Zaghlol) as a tap does.
   Future<void> selectTab(WidgetTester t, int i) async {
     final bar = find.byType(ZBottomBar);
