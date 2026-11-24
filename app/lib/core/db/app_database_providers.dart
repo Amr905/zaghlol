@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // T-016 §4.4: Riverpod wiring for the encrypted database (ADR-001). Plain
 // providers, kept alive. The startup gate (not T-016) overrides
 // dbDirectoryProvider with `await resolveDbDirectory()`, watches
@@ -62,7 +64,10 @@ final appDatabaseProvider = FutureProvider<AppDatabase>(
     );
     switch (result) {
       case DbOpened(:final db):
-        ref.onDispose(db.close);
+        // T-238: a close that fails (drift's stream store can throw while
+        // streams are cancelled, after Delete everything closed it already)
+        // must not surface as an uncaught error of the restart.
+        ref.onDispose(() => unawaited(db.close().onError((_, _) {})));
         return db;
       case DbOpenFailed(:final code):
         throw DbOpenFailure(code);
