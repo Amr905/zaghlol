@@ -19,6 +19,8 @@ import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
+import 'package:zaghlol/features/backup/application/schedule_providers.dart'
+    show backupWorkSchedulerProvider;
 import 'package:zaghlol/main.dart' as app;
 
 import 'support/e2e_common.dart';
@@ -86,11 +88,33 @@ void main() {
         await e.waitFor(
           t,
           welcome,
-          timeout: const Duration(seconds: 300),
+          timeout: const Duration(seconds: 100),
           what: 'the Welcome screen after the wipe',
         );
       } on TestFailure {
         await e.dumpScreen(t, '03-no-welcome', max: 60);
+        // Diagnosis (the wipe is stuck): which of its first steps hangs?
+        final c = e.container();
+        try {
+          await c
+              .read(backupWorkSchedulerProvider)
+              .cancel()
+              .timeout(const Duration(seconds: 20));
+          e.say('PROBE cancel jobs: returned');
+        } on Object catch (x) {
+          e.say('PROBE cancel jobs: ${x.runtimeType}');
+        }
+        try {
+          final db = await c
+              .read(appDatabaseProvider.future)
+              .timeout(const Duration(seconds: 20));
+          await db.close().timeout(const Duration(seconds: 20));
+          e.say('PROBE close database: returned');
+        } on Object catch (x) {
+          e.say('PROBE close database: ${x.runtimeType}');
+        }
+        await e.settle(t, 5000);
+        await e.dumpScreen(t, '04-after-probe', max: 8);
         rethrow;
       }
       await e.settle(t, 2000);
