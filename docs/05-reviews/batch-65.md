@@ -121,3 +121,11 @@ FU-293 (owner: T-233 lane unless noted):
 - Minor: `.github/scripts/scenario-device.sh` has a `restore_clock` trap (EXIT/INT/TERM).
 - T-235 (major): `explorer_allow.dart` no longer has `where: '.*'`. Restore entries pin an exact title as both screen and control; the bill/card entries name the exact screens (`Edit bill`, `Card details`) and the controls the explorer reported; the emoji entry is emoji-only on both. New `app/test/integration_support/explorer_allow_test.dart` asserts neighbouring screens/controls do not match.
 - Checks: `python3 -m unittest` (docs/qa/tools) green; `dart format`, `dart analyze` clean; allow-list test 3/3.
+
+## Delta re-review
+
+Scope: `git diff c01a18ef..HEAD` (7e0d91ed). Ran: `python3 -m unittest` in docs/qa/tools (11 OK), `flutter test test/integration_support` (pass), `bash -n scenario-device.sh` (ok).
+
+- T-234: `--historical` sets auto_time off, sets the clock per entry, sends with `emu sms send`, and restores the clock plus auto_time in `finally`. Success needs the console `OK`, and failed ids are listed. Sender and body are checked for control characters before any send. No `shell=True`, no bodies printed, and the real-phone refusal is unchanged. `scenario-device.sh` installs a trap on EXIT/INT/TERM that restores the clock. Verdict: APPROVED.
+- T-235: no `.*` or catch-all entry remains. Restore entries pin an exact title as both screen and control. The bill and card entries are anchored to exact screens and controls. The emoji entry is emoji-only on both. The new matcher test passes. Verdict: APPROVED.
+- Nit (follow-up): the emoji pattern still matches any short symbol-only title. This is acceptable because the pattern is on both screen and control.
