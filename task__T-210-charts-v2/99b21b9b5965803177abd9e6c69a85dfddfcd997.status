@@ -1,1 +1,0 @@
-﻿FAIL sha=99b21b9b5965803177abd9e6c69a85dfddfcd997 pipeline=quick-app pub-get=0 format=0 analyze=0 lints=1 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=0 apk-devNoSms=0 apk-perms=0 android-unit=0 android-lint=0
