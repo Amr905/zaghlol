@@ -42,7 +42,7 @@ final List<ExplorerAllow> explorerAllow = [
   ExplorerAllow(
     screen: _r('دوّر في الرسايل القديمة|Re-scan old messages'),
     kind: 'dead-tap',
-    where: _r('آخر ٦ شهور|Last 6 months|GestureDetector'),
+    where: _r('آخر ٦ شهور|Last 6 months|Radio.*GestureDetector'),
     reason:
         '"6 months" is already selected; the radio\'s own gesture area '
         'repeats the row tap',
@@ -51,7 +51,7 @@ final List<ExplorerAllow> explorerAllow = [
   ExplorerAllow(
     screen: _r('استرجاع نسخة|Restore from backup|Restore a backup'),
     kind: 'dead-tap',
-    where: _r('Google Drive|GestureDetector'),
+    where: _r('Google Drive|Radio.*GestureDetector'),
     reason: 'Google Drive is already the selected provider (radio)',
   ),
   ExplorerAllow(
@@ -66,7 +66,7 @@ final List<ExplorerAllow> explorerAllow = [
   ExplorerAllow(
     screen: _r('^ملاحظة\$|^Note\$'),
     kind: 'dead-tap',
-    where: _r('GestureDetector'),
+    where: _r('TextField.*GestureDetector|EditableText'),
     reason: 'the text field\'s selection handle / toolbar (system widget)',
   ),
   // Scan: the system image picker.
@@ -86,6 +86,7 @@ final List<ExplorerAllow> explorerAllow = [
   ExplorerAllow(
     screen: _r('ربط تحويلة لنفسي|Link my own transfer'),
     kind: 'dead-tap',
+    where: _r('^(checkbox|radio|inkwell|listtile)\\b|Radio|Checkbox|ListTile'),
     reason:
         'the first candidate is preselected (the sheet keeps `_picked` null '
         'until a tap), so tapping it again changes nothing',
@@ -95,7 +96,7 @@ final List<ExplorerAllow> explorerAllow = [
   ExplorerAllow(
     screen: _r('^رصيد |^Balance of |^مصروف جديد|^New expense|^Add expense'),
     kind: 'dead-tap',
-    where: _r('GestureDetector'),
+    where: _r('TextField.*GestureDetector|EditableText'),
     reason: 'a text field: the tap focuses it (no text change to see)',
   ),
   // Pickers and sheets that close or change on a choice.
@@ -110,13 +111,25 @@ final List<ExplorerAllow> explorerAllow = [
       'Use online speech recognition',
     ),
     kind: 'restore',
+    where: _r('.*'),
     reason: _pickerReason,
+  ),
+  // Saving closes the editor (bill, card) and About > Licenses is the
+  // framework LicensePage route: both leave the screen on purpose.
+  ExplorerAllow(
+    screen: _r('^فاتورة|^Bill|^عدّل فاتورة|Edit bill|كارت|Card'),
+    kind: 'dead-tap',
+    where: _r('حفظ|Save|Hide account|خبّي|Switch'),
+    reason:
+        'Save closes the editor (tested); the hide switch flips and shows a '
+        'snackbar (tested)',
   ),
   // A transaction's detail screen is titled with its category emoji; changing
   // the category changes the title.
   ExplorerAllow(
     screen: _r('^[^A-Za-z؀-ۿ0-9]{1,6}\$'),
     kind: 'restore',
+    where: _r('.*'),
     reason:
         'the detail screen is titled by its category emoji, which a '
         'category change replaces',

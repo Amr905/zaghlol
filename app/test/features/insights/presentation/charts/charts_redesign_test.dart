@@ -597,6 +597,37 @@ void main() {
     });
   });
 
+  group('T-235', () {
+    for (final locale in const [_en, _ar]) {
+      testWidgets('merchant row with a long name fits 320dp at 1.3x '
+          '(${locale.languageCode})', (tester) async {
+        await _pump(
+          tester,
+          locale: locale,
+          scale: 1.3,
+          height: 800,
+          child: Scaffold(
+            body: MerchantsBody(
+              rows: [
+                MerchantSpend(
+                  merchantNorm: 'm0',
+                  name: 'A very long merchant name that keeps going on',
+                  amount: Money.fromStorage(123456789, 'EGP'),
+                  count: 12,
+                ),
+              ],
+              other: null,
+              onOpen: (_) {},
+            ),
+          ),
+        );
+        await tester.binding.setSurfaceSize(const Size(320, 800));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
+
   group('T-223', () {
     testWidgets('Other row folds the tail and is not tappable', (tester) async {
       var opened = 0;

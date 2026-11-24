@@ -662,6 +662,11 @@ void main() {
       await tester.tap(find.text(t.aboutMainLicenses));
       await tester.pumpAndSettle();
       expect(find.byType(LicensePage), findsOneWidget);
+      // T-235: the licenses page has a way back.
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(LicensePage), findsNothing);
+      expect(find.byType(AboutScreen), findsOneWidget);
     });
 
     for (final locale in const [Locale('ar'), Locale('en')]) {
