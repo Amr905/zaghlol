@@ -229,6 +229,7 @@ final class DeleteEverything {
     required this._signOutLocal,
     required this._marker,
     this._leaseTimeout = const Duration(seconds: 35),
+    this._closeTimeout = const Duration(seconds: 10),
   });
 
   final Future<InstallCredentials?> Function() _readInstall;
@@ -243,6 +244,14 @@ final class DeleteEverything {
   final Future<void> Function() _signOutLocal;
   final WipeMarker _marker;
   final Duration _leaseTimeout;
+
+  /// A guard only (T-238 fix round, batch-66 M-1): the close completes once
+  /// the SQLite handle is closed and never waits on `watch()` listeners. A
+  /// close that fails or does not finish in time fails the wipe: nothing is
+  /// deleted beside a handle that may still be open (its close would delete
+  /// files by name), the marker stays, the caller tells the user and does
+  /// not restart, and the next launch finishes the wipe.
+  final Duration _closeTimeout;
 
   Future<WipeReport>? _running;
 
@@ -366,7 +375,15 @@ final class DeleteEverything {
 
     // 4–5. Jobs, then the database.
     await step(WipeSteps.jobs, _cancelJobs);
-    await step(WipeSteps.closeDb, _closeDatabase);
+    await step(
+      WipeSteps.closeDb,
+      () => _closeDatabase().timeout(_closeTimeout),
+    );
+    if (failed.contains(WipeSteps.closeDb)) {
+      // The handle may still be open: delete nothing now. The marker
+      // (written above) keeps every part pending for the next launch.
+      return _report([...failed, ...pending], creds);
+    }
 
     // 6. Crypto-shred: the database key and the backup key. The marker
     //    records it at once, so no later resume deletes a newer key.

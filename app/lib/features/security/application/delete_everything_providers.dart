@@ -15,6 +15,7 @@ import '../../../app/app_restart.dart';
 import '../../../core/backend/backend_client.dart';
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/app_database_opener.dart' show DbOpenFailure;
+import '../../../core/db/db_handle.dart';
 import '../../../core/db/db_key_providers.dart';
 import '../../../core/platform/google_sign_in_gate.dart';
 import '../../../core/platform/seat_key_api.g.dart';
@@ -90,7 +91,11 @@ final deleteEverythingProvider = Provider<DeleteEverything>((ref) {
       if (!ref.read(appDatabaseProvider.exists)) return;
       try {
         final db = await ref.read(appDatabaseProvider.future);
-        await db.close();
+        // T-238 (batch-66 M-1): the SQLite handle itself, not drift's
+        // close(), which never returns while a watch() listener is paused
+        // (Riverpod pauses off-screen tabs). Completes only once the handle
+        // is closed; the provider's dispose then closes the streams.
+        await closeDbHandle(db);
       } on DbOpenFailure {
         // Not open: nothing to close.
       }

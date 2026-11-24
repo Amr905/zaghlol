@@ -117,6 +117,26 @@ abstract interface class NotificationGateway {
   Future<void> cancel(int id);
 }
 
+/// A gateway that shows nothing: the default in tests and in the headless
+/// ingestion engine. T-237: the service must not claim a dedupe key through
+/// it, or the alert is recorded as sent and never shown (the foreground app
+/// then skips it as a duplicate).
+final class SilentNotificationGateway implements NotificationGateway {
+  const SilentNotificationGateway();
+
+  @override
+  Future<void> show(PlatformNotification n) async {}
+
+  @override
+  Future<void> schedule(PlatformNotification n) async {}
+
+  @override
+  Future<void> cancelScheduled() async {}
+
+  @override
+  Future<void> cancel(int id) async {}
+}
+
 /// The notification permission (POST_NOTIFICATIONS on Android 13+, the iOS
 /// authorization). Asked after onboarding and when the user first turns an
 /// alert type on; never from a background path.

@@ -21,9 +21,17 @@ if [ -n "${NOTIF_ONLY:-}" ]; then
   # T-193 AC5: forged notification intents versus real taps (notif-intents.sh).
   exec bash "$(dirname "$0")/notif-intents.sh"
 fi
+if [ -n "${E2E_ONLY:-}" ]; then
+  # T-237: E2E-04/05/06 (e2e-device.sh).
+  exec bash "$(dirname "$0")/e2e-device.sh"
+fi
 if [ -n "${SCENARIO_ONLY:-}" ]; then
   # T-233: the SMS month story and its charts (scenario-device.sh).
   exec bash "$(dirname "$0")/scenario-device.sh"
+fi
+if [ -n "${KILLED_ONLY:-}" ]; then
+  # T-236: SMS while the app is killed, an ignored card, notification capture.
+  exec bash "$(dirname "$0")/killed-device.sh"
 fi
 cd "$(dirname "$0")/../../app"
 
@@ -40,6 +48,10 @@ pull_files() {
 
 flutter devices
 adb -s "$DEVICE" logcat -c || true
+# T-239: the app does not use Bluetooth; the emulator's Bluetooth HAL can abort
+# mid-run (SET_EVENT_MASK) and take the test with it. Switch it off.
+adb -s "$DEVICE" shell cmd bluetooth_manager disable > /dev/null 2>&1 || true
+adb -s "$DEVICE" shell svc bluetooth disable > /dev/null 2>&1 || true
 
 sms_rc=0
 cash_rc=0
@@ -328,6 +340,18 @@ for run in $runs; do
     2>&1 | tee "$OUT/explorer-$mode-p$part.log"
   r=${PIPESTATUS[0]}
   [ "$r" -ne 0 ] && rc2=$r
+  # T-239: a left-app record next to a crash of another process (the
+  # Bluetooth HAL, system_server, a system dialog) is an emulator fault, not an
+  # app issue. A crash of the app's own process is never reported this way.
+  if grep -q "left-app" "$OUT/explorer-$mode-p$part.log" 2> /dev/null; then
+    sys=$(adb -s "$DEVICE" logcat -d 2> /dev/null | grep -E "bluetooth.*(assertion|abort)|Fatal signal.*(bluetooth|system_server)|ANR in com.android" | cut -c1-160 | tail -3)
+    if [ -n "$sys" ]; then
+      echo "EMULATOR-FAULT (not an app issue): left-app in $mode p$part coincides with a system fault:"
+      echo "$sys"
+    else
+      echo "LEFT-APP in $mode p$part has no system fault in logcat: treat as an app issue"
+    fi
+  fi
   pull_files "explorer-$mode-p$part"
 done
 adb -s "$DEVICE" shell settings put system font_scale 1.0 || true
