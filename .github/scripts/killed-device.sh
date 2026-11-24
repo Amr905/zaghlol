@@ -104,7 +104,7 @@ run_phase kill --dart-define=SENT_MS="${sent}000" || rc=1
 echo "---- notification capture"
 A shell cmd notification allow_listener "$LISTENER" 2>&1 | tr -d '\r' | head -2
 A shell settings get secure enabled_notification_listeners | tr -d '\r' | grep -c "$PKG" | sed 's/^/listener entries: /'
-timeout 900 flutter test integration_test/sms_killed_device_test.dart \
+timeout 480 flutter test integration_test/sms_killed_device_test.dart \
   --flavor devSms -d "$DEVICE" --no-uninstall --reporter expanded \
   --dart-define=PHASE=notif > "$OUT/killed-notif-test.log" 2>&1 &
 tpid=$!

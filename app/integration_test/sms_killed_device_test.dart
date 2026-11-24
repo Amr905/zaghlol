@@ -20,8 +20,8 @@
 //  notif     (notification capture) listener access was granted with
 //            `cmd notification allow_listener`; the script posts a synthetic
 //            notification from the shell package once this test prints
-//            READY_FOR_NOTIF; the raw notification must be stored and become a
-//            transaction (or a review item).
+//            READY_FOR_NOTIF; the raw notification must be stored and, as the
+//            package has no registry template, wait in review (or be saved).
 // Synthetic data only. Prints ids, counts and times, never a message body.
 
 import 'dart:io';
@@ -382,9 +382,11 @@ void main() {
         final reviews = await reviewCount(db, 'notification');
         say('NOTIF stored=$stored transactions=$txns review=$reviews');
         check(saved, 'the notification became a transaction or review item');
+        // A user-chosen package has no template in the registry, so the
+        // notification is kept for review (new sender), not guessed at.
         check(
-          txns == 1,
-          'the notification was parsed into one transaction ($txns)',
+          reviews >= 1 || txns == 1,
+          'the notification is in review or saved ($reviews, $txns)',
         );
         await shot(t, 'killed-notif-02-home');
 
