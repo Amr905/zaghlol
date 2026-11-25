@@ -43,7 +43,12 @@ CREATE TABLE accounts (
   is_default_cash INTEGER NOT NULL DEFAULT 0
     CHECK (is_default_cash IN (0, 1) AND (is_default_cash = 0 OR kind = 'cash')),
   created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
+  updated_at INTEGER NOT NULL,
+  -- T-266 (v6, added by ALTER TABLE so it is last): the bank account a debit
+  -- card spends from. Only a debit card can be linked, never to itself; the
+  -- repository checks the target's kind (account, wallet, multi_currency).
+  linked_account_id TEXT REFERENCES accounts(id)
+    CHECK (linked_account_id IS NULL OR (linked_account_id <> id AND kind = 'debit'))
 ) AS AccountRow;
 
 CREATE UNIQUE INDEX ux_accounts_inst_last4 ON accounts (institution_code, last4)
@@ -51,6 +56,9 @@ CREATE UNIQUE INDEX ux_accounts_inst_last4 ON accounts (institution_code, last4)
 -- Exactly one default cash account (FR-ACC-03; database-schema §3).
 CREATE UNIQUE INDEX ux_accounts_default_cash ON accounts (is_default_cash)
   WHERE is_default_cash = 1;
+-- T-266: the cards linked to an account.
+CREATE INDEX ix_accounts_linked ON accounts (linked_account_id)
+  WHERE linked_account_id IS NOT NULL;
 
 CREATE TABLE account_balances (
   account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,

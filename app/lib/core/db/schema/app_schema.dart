@@ -17,10 +17,11 @@ part 'app_schema.g.dart';
 /// financial_b.drift (T-018) and the T-017 review trigger fixes. v4: batch C
 /// in financial_c.drift (T-019) and four batch-B tables rebuilt with stricter
 /// CHECKs. v5: `recurring_items` rebuilt for the quarterly and semi-annual
-/// cadences plus `auto_added_at`, and `recurring_dismissals` (T-196). Must equal
+/// cadences plus `auto_added_at`, and `recurring_dismissals` (T-196). v6:
+/// `accounts.linked_account_id` and its index (T-266). Must equal
 /// [AppSchema.schemaVersion], which drift_dev reads as a literal (a test
 /// checks both).
-const int appSchemaVersion = 5;
+const int appSchemaVersion = 6;
 
 /// Key/value facts about the database itself (T-016), e.g.
 /// `restore_notice_due`. Not user settings (those are `settings`, T-019).
@@ -46,5 +47,5 @@ abstract class AppSchema extends _$AppSchema {
 
   // A literal: drift_dev reads it from the source (make-migrations).
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 }

@@ -167,7 +167,7 @@ void main() {
       addTearDown(db.close);
       expect(opened.migratedFrom, 4);
       expect(db.attemptedUpgradeFrom, 4);
-      expect(await userVersionOf(db), 5);
+      expect(await userVersionOf(db), appSchemaVersion);
       expect(world.files.migrateTmp.existsSync(), isFalse);
       expect(world.files.migratePart.existsSync(), isFalse);
       expect(await metaValue(db, 'marker'), 'v3');
@@ -180,6 +180,15 @@ void main() {
           ], everyElement(isNull));
           rows = [
             for (final r in rows) {...r}..remove('auto_added_at'),
+          ];
+        }
+        if (t == 'accounts') {
+          // v6 (T-266) added `linked_account_id`: NULL for every old row.
+          expect([
+            for (final r in rows) r['linked_account_id'],
+          ], everyElement(isNull));
+          rows = [
+            for (final r in rows) {...r}..remove('linked_account_id'),
           ];
         }
         expect(rows, before[t], reason: t);
@@ -202,7 +211,7 @@ void main() {
 
       final live = await schemaShapeOf(db);
       expect(sameSchemaShape(live, await freshShape()), isTrue);
-      expect(sameSchemaShape(live, await dumpShape(5)), isTrue);
+      expect(sameSchemaShape(live, await dumpShape(appSchemaVersion)), isTrue);
       expect(await db.customSelect('PRAGMA foreign_key_check').get(), isEmpty);
       expect(
         await db
@@ -328,7 +337,7 @@ void main() {
       expect(failed.code, DbOpenFailureCode.migrationFailed);
       expect(failed.restored, isTrue);
       expect(failed.fromVersion, 4);
-      expect(failed.toVersion, 5);
+      expect(failed.toVersion, appSchemaVersion);
       await settle(world);
       expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
       expect(world.wipeLog, isEmpty);
