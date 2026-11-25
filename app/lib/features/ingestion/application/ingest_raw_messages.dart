@@ -881,7 +881,7 @@ final class IngestRawMessages {
       templateVersion: r.templateVersion,
     );
     await _cardNoticeHook.onCardNotice(
-      CardNoticeEvent(rawId: rawId, notice: r),
+      CardNoticeEvent(rawId: rawId, notice: r, receivedAtMs: p.m.receivedAtMs),
     );
     if (r.templateId == null) {
       await _review(

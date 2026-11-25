@@ -70,9 +70,16 @@ typedef CycleKeyOf = String Function(int occurredAtMs, int tzOffsetMin);
 /// transaction. [rawId] is the stored raw message; [notice] carries typed
 /// fields only (last-4, amount due, minimum due, due date, statement date).
 final class CardNoticeEvent {
-  const CardNoticeEvent({required this.rawId, required this.notice});
+  const CardNoticeEvent({
+    required this.rawId,
+    required this.notice,
+    required this.receivedAtMs,
+  });
 
   final String rawId;
+
+  /// When the phone received the message (UTC epoch ms): the order of notices.
+  final int receivedAtMs;
   final ParseNotice notice;
 }
 

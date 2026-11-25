@@ -12059,5 +12059,57 @@
   "paydayAutoDismissA11y": "اقفل الرسالة",
   "@paydayAutoDismissA11y": {
     "description": "Screen-reader label of the banner close button"
+  },
+  "accountsDetailDueAmountMin": "عليك {amount} (الأدنى {min}) لحد {date}",
+  "@accountsDetailDueAmountMin": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "min": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailDueAmount": "عليك {amount} لحد {date}",
+  "@accountsDetailDueAmount": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailDueMin": "الحد الأدنى {min} لحد {date}",
+  "@accountsDetailDueMin": {
+    "description": "L",
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailDueRemaining": "لسه باقي من الحد الأدنى {amount}",
+  "@accountsDetailDueRemaining": {
+    "description": "L",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsDetailDuePaid": "سددت المطلوب للكشف ده",
+  "@accountsDetailDuePaid": {
+    "description": "L"
   }
 }

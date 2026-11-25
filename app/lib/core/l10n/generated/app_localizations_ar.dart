@@ -8767,4 +8767,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get paydayAutoDismissA11y => 'اقفل الرسالة';
+
+  @override
+  String accountsDetailDueAmountMin(String amount, String min, String date) {
+    return 'عليك $amount (الأدنى $min) لحد $date';
+  }
+
+  @override
+  String accountsDetailDueAmount(String amount, String date) {
+    return 'عليك $amount لحد $date';
+  }
+
+  @override
+  String accountsDetailDueMin(String min, String date) {
+    return 'الحد الأدنى $min لحد $date';
+  }
+
+  @override
+  String accountsDetailDueRemaining(String amount) {
+    return 'لسه باقي من الحد الأدنى $amount';
+  }
+
+  @override
+  String get accountsDetailDuePaid => 'سددت المطلوب للكشف ده';
 }

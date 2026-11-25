@@ -41,6 +41,8 @@ import '../account_type.dart';
 import '../edit_card/add_card_flow.dart';
 import '../edit_card/edit_card_providers.dart' show institutionOptionsProvider;
 import '../edit_card/merge_flow.dart';
+import '../../../recurring/data/card_dues_providers.dart';
+import '../../domain/card_due.dart';
 import 'card_detail_providers.dart';
 import '../../../../core/settings/settings_providers.dart';
 import '../../../../core/ui/z_hide_amounts_button.dart';
@@ -125,6 +127,8 @@ class _State extends ConsumerState<CardDetailScreen> {
       cardDetailDataProvider((accountId: account.id, currency: cur.code)),
     );
     final lookups = ref.watch(txnLookupsProvider).value;
+    final noticeDue = ref.watch(cardDueProvider(account.id)).value;
+    final due = noticeDue?.dueDate == null ? null : noticeDue;
     return ListView(
       padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
       children: [
@@ -193,7 +197,9 @@ class _State extends ConsumerState<CardDetailScreen> {
                       ),
                       style: ZType.body.copyWith(color: c.textMuted),
                     ),
-                  if (data.value?.nextDue case final due?)
+                  if (due != null)
+                    ..._dueLines(l, due, fmt, c)
+                  else if (data.value?.nextDue case final due?)
                     Text(
                       l.accountsDetailDue(
                         ZDateFormat.date(
@@ -265,6 +271,41 @@ class _State extends ConsumerState<CardDetailScreen> {
         _CaptureRow(account: account, name: name, onSeeAll: widget.onSeeAll),
       ],
     );
+  }
+
+  /// T-245: the latest due read from a bank notice (D-83).
+  List<Widget> _dueLines(
+    AppLocalizations l,
+    CardDue due,
+    TxnFmt fmt,
+    ZColors c,
+  ) {
+    final d = due.dueDate!;
+    final date = ZDateFormat.date(
+      DateTime.utc(d.year, d.month, d.day),
+      fmt.lang,
+      fmt.digits,
+    );
+    final cur = Currency.of(due.currency);
+    String money(int minor) => fmt.money(Money(cur, minor));
+    final style = ZType.body.copyWith(color: c.textMuted);
+    final amount = due.amountDueMinor;
+    final min = due.minDueMinor;
+    final main = due.isPaid
+        ? l.accountsDetailDuePaid
+        : amount != null && min != null
+        ? l.accountsDetailDueAmountMin(money(amount), money(min), date)
+        : amount != null
+        ? l.accountsDetailDueAmount(money(amount), date)
+        : min != null
+        ? l.accountsDetailDueMin(money(min), date)
+        : l.accountsDetailDue(date);
+    final rest = due.paidMinor > 0 ? due.remainingMinor : null;
+    return [
+      Text(main, style: style),
+      if (rest != null)
+        Text(l.accountsDetailDueRemaining(money(rest)), style: style),
+    ];
   }
 
   List<Widget> _addedEmpty(BuildContext context, Account account, TxnFmt fmt) {

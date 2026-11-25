@@ -8956,5 +8956,10 @@
   "paydayAutoDismissA11y": "Close message",
   "@paydayAutoDismissA11y": {
     "description": "Screen-reader label of the banner close button"
-  }
+  },
+  "accountsDetailDueAmountMin": "Due {amount} (min {min}) by {date}",
+  "accountsDetailDueAmount": "Due {amount} by {date}",
+  "accountsDetailDueMin": "Minimum {min} due by {date}",
+  "accountsDetailDueRemaining": "Still to pay on the minimum: {amount}",
+  "accountsDetailDuePaid": "This statement is paid"
 }
