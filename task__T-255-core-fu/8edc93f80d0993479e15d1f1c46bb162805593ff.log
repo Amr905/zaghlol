@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=8edc93f80d0993479e15d1f1c46bb162805593ff
+SKIP sha=8edc93f80d0993479e15d1f1c46bb162805593ff no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-255-core-fu 8edc93f80d0993479e15d1f1c46bb162805593ff 2026-11-25T18:29:41.8834884+02:00
+
+
+
