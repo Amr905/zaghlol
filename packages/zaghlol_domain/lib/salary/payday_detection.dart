@@ -97,7 +97,7 @@ PaydayDetection detectPayday({
   if (days.length < paydayPatternMonths) {
     return PaydayDetection(day: detected);
   }
-  final differs = (int d) => (d - currentPayday).abs() > paydaySameDayTolerance;
+  bool differs(int d) => (d - currentPayday).abs() > paydaySameDayTolerance;
   if (typedByUser) {
     // Only when every one of the 3 months disagrees (A6).
     return PaydayDetection(day: detected, apply: days.every(differs));

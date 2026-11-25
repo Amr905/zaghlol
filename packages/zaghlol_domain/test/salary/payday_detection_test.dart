@@ -143,9 +143,12 @@ void main() {
             c(2026, 10, d2.clamp(1, 30)),
             c(2026, 12, d1.clamp(1, 31)),
           ]);
-          if (r.apply)
+          if (r.apply) {
             expect(r.day, allOf(greaterThanOrEqualTo(1), lessThan(29)));
-          if (r.day != null) expect(r.day, inInclusiveRange(1, 28));
+          }
+          if (r.day != null) {
+            expect(r.day, inInclusiveRange(1, 28));
+          }
         }
       }
     });
