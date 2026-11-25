@@ -233,6 +233,22 @@ void _negativeBalanceTests() {
       );
       expect(r.balance?.minor, -50000);
     });
+    for (final b in [
+      'Available balance is EGP-500.00.',
+      'Balance: -EGP 500.00',
+      'Balance: - 500.00 EGP',
+    ]) {
+      test('sign before/glued to marker: $b', () {
+        final r = g('Purchase of EGP 170.10 at SHOP card 6128. $b');
+        expect(r.balance?.minor, -50000);
+      });
+    }
+    test('ambiguous doubled sign gives no balance', () {
+      final r = g(
+        'Purchase of EGP 170.10 at SHOP card 6128. Balance: --500.00 EGP',
+      );
+      expect(r.balance, isNull);
+    });
     test('positive balance unchanged', () {
       final r = g(
         'Purchase of EGP 170.10 at SHOP card 6128. Balance: 500.00 EGP',
