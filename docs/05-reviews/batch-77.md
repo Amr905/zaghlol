@@ -139,3 +139,31 @@ Verdict: **APPROVED**
 ## Follow-ups opened
 
 FU-355 to FU-360 (above). Owners: T-266 lane (FU-355, FU-356), T-269 lane (FU-357 to FU-359), T-270 lane (FU-360).
+
+---
+
+## Delta re-review (Sonnet)
+
+Scope: `git diff 08f7a49f cb6deae1 -- app/lib` (fix/fix77). Analyze clean; `flutter test -x golden test/features/accounts test/features/export_import test/features/wealth` all green (505).
+
+### M1 (T-266): RESOLVED
+- (a)/(b): `_unlinkIn` now runs for the source card (linked elsewhere than the target) and for every card linked to the source when the target cannot hold cards, before the transactions and balances move. The re-anchor happens while the ledger still counts the card. Cards follow the source only via `repointLinked` when the target holds cards.
+- (c): a merge into a linked card throws `ACC_LINKED` right after `_live(targetId)`, before any write, inside the transaction. The picker excludes `isLinked` accounts. `card_details_screen` and the merge snackbar show the new `accountsLinkBlocked` string (ar and en added).
+- Settings fallback (`_settings ?? SettingsDao(db)`): `OpeningBalances.moveAccount` returns `this` when the source has no entry or `from == to`, so a no-link merge without typed balances writes nothing; with typed balances, only the source's entries move and the newer instant wins per currency. It cannot drop or move a balance wrongly. It also fixes a latent skip when the repository was built without a settings DAO.
+- Fail-before: replacing only the two `_unlinkIn` calls in `merge` with a bare `setLinked(null)` fails the two new M1 ledger tests, `card_link_test.dart` (a) and (b). Restored; green.
+
+### M2 (T-269): RESOLVED
+- The key is now cash side (`out`: expense/fee/transfer_out; `in`: income/refund/transfer_in) plus amount and currency, within the same local day. The search covers the account plus its live linked cards (`linkedCardsOf`, hidden included); `withLinkedCards` defaults to false, so CSV is unchanged.
+- Greediness: the match is count-based (`nth <= existing count`). With one SMS-captured purchase and two statement rows of the same amount and day, only the first is flagged and the second is imported. A flagged row is not silent. It is listed in `duplicateRows`, counted in the summary, shown per row in the preview, and can be kept with "Add anyway" (`_keepDuplicates`). Only the genuine "two real same-day purchases, one captured" case (SMS and statement both showing both) mislabels one row, and the user can override it. Acceptable.
+- Internal transfers: a statement row matching an SMS `transfer_out`/`transfer_in` leg on the same account (or its card) is treated as the same money and skipped by default, which is the intended result. A leg stored on the user's other account is not searched, so a statement of A does not collide with a leg on B.
+- Fail-before: changing only the key back to `d.code` fails the 5 new direction tests in `drift_statement_import_test.dart` (transfer_out, fee, transfer_in, refund, Add anyway). The linked-card test is not affected by that revert (it depends on `withLinkedCards`, not the key), so it was not separately reverted; the picked-up wiring is the one-line `withLinkedCards: true`.
+
+### New findings
+No new blocker or major.
+
+Minor (follow-up):
+- **FU-361.** `import_statement_pdf.dart` `_isOutflow`/`_key`: a statement row dated the day after an SMS (value-date lag) still misses. Same as FU-359 (±1 day); keep with it.
+- **FU-362.** `import_statement_pdf.dart:_existingCounts`: a `transfer_out` and an unrelated `expense` of the same amount on the same day count as one pool. Two distinct real movements can therefore make two statement rows look like duplicates; visible and overridable, so low priority.
+- **FU-363.** `merge_flow.dart`: the merge confirm still has no hint that card links end (FU-356 still open); the picker now hides linked cards but still offers card-holding accounts.
+
+Verdict: **APPROVED** (T-266 M1 and T-269 M2 closed).
