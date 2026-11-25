@@ -71,3 +71,10 @@ No blockers, no majors. Minors go to FU-305…FU-308.
 
 ## Follow-ups to record
 FU-305 (cue-word name collision in signatures), FU-306 (cap the diagnostics query), FU-307 (Ask month-name year inference vs cycle names), FU-308 (manual salary rows count for payday).
+
+## Lead delta check (`fix/fix69-ask`)
+
+25 production lines, read by the Lead; both new tests fail on the old code (fix agent).
+- **FU-307 FIXED:** a month name without a year resolves to the nearest non-future cycle carrying that name (up to 14 cycles back), else the old calendar rule; payday 1 unchanged.
+- **FU-308 FIXED:** only captured `salary.state` entries count as tied; manual rows (anchored on the expected payday) count only if they pass the other salary tests.
+- Checks: `dart analyze --fatal-infos` clean; `flutter test -x golden test/features/ask test/features/salary` green.
