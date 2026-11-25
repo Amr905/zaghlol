@@ -70,3 +70,8 @@ The FU-051/084/118 dispositions are correct (spot-check: U+2060/U+00AD stripped 
 T-254 and T-255: none. Gate for T-254: db-platform (attestation pin) and app-ci (Kotlin compile, Android unit tests) green on the batch run.
 
 Follow-ups: FU-330 to FU-334 (owners: T-254 lane native for 330-333, core lane for 334).
+
+## Lead delta check (fix round)
+
+- **M-1 RESOLVED** (`fix/fix72-parse`, ~30 net lines, read by the Lead): `_balanceSign` reads the gap between the balance anchor and the number; a single minus with only spaces or a currency token next to the number negates (`EGP-500.00`, `-EGP 500.00`, `- 500.00 EGP`, `EGP -500.00`); a minus glued to digits (`2026-500`) is not a sign; two minuses → no balance. Four new tests fail on the old code (fix agent). PO suite 12/12; parsing package 1675 tests green.
+- **FU-330/331/333/334 FIXED** (`fix/fix72-native`): telephony provider package refused; CSV MIME aliases (+ `.csv` octet-stream); AssetFileDescriptor closed when `createInputStream` throws; `tick()` `@visibleForTesting`. Kotlin not compiled in the workspace (no kotlinc/Android SDK) — the batch app-ci Android build and unit tests are the gate. FU-332 stays OPEN.
