@@ -14,7 +14,10 @@ import 'package:zaghlol/features/ingestion/data/ingest_factory.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
 import 'package:zaghlol/features/recurring/data/recurring_repository.dart';
 import 'package:zaghlol/ingestion/bundled_registry.dart';
-import 'package:zaghlol_domain/zaghlol_domain.dart' show CivilDate;
+import 'package:zaghlol/features/ingestion/domain/ingest_ports.dart';
+import 'package:zaghlol/features/recurring/data/card_dues.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart'
+    show CivilDate, Currency, Money;
 import 'package:zaghlol_parsing/zaghlol_parsing.dart' hide CategorySource;
 
 import '../features/ingestion/support/ingest_harness.dart';
@@ -211,6 +214,84 @@ void main() {
       "SELECT statement_due_day FROM accounts WHERE id = 'acc_6603'",
     );
     expect(acc.single['statement_due_day'], 25);
+  });
+
+  // The parser drops zero amounts, so the zero statement is fed to the dues
+  // layer directly (the hook contract carries typed amounts).
+  Future<void> zero(String last4, CivilDate due) =>
+      CardDues(w.db, nowMs: () => _rx, newId: w.newId).onNotice(
+        CardNoticeEvent(
+          rawId: 'r',
+          receivedAtMs: _rx + 30 * _day,
+          notice: ParseNotice(
+            kind: NoticeKind.ccStatement,
+            language: 'ar',
+            confidencePermille: 900,
+            institutionCode: 'cib',
+            last4: last4,
+            amountDue: Money(Currency.of('EGP'), 0),
+            minDue: Money(Currency.of('EGP'), 0),
+            dueDate: DateTime(due.year, due.month, due.day),
+          ),
+        ),
+        receivedAtMs: _rx + 30 * _day,
+      );
+
+  test('T-249 FU-301: a newer notice moves the reminder day with the card; '
+      'the next sync does not move the date back', () async {
+    await card('cib', '6603', dueDay: 10, updatedAt: _rx - 5 * _day);
+    await repo().syncCardDues(); // the reminder item exists with due_day 10
+    await ingest('CIB', _statement('6603', '100.00', '30.00', '25/11'), _rx);
+    final it = (await item('acc_6603'))!;
+    expect(it['due_day'], 25);
+    expect(it['next_due_date'], '2026-11-25');
+    // The clock is past the 25th: the old code reset this to 2026-12-25.
+    await repo().syncCardDues();
+    expect((await item('acc_6603'))!['next_due_date'], '2026-11-25');
+  });
+
+  test('T-249 FU-304: a statement with zero total and minimum closes the '
+      'reminder and shows nothing due; one with only a zero minimum does '
+      'not', () async {
+    await card('cib', '1234');
+    await ingest('CIB', _statement('1234', '100.00', '30.00', '25/11'), _rx);
+    await ingest('CIB', _payment('50.00'), _rx + 1000); // item -> 25/12
+    await zero('1234', CivilDate(2026, 12, 25));
+    final d = (await stored('cib', '1234'))!;
+    expect(d.nothingDue, isTrue);
+    expect(d.isPaid, isTrue);
+    final it = (await item('acc_1234'))!;
+    expect(it['next_due_date'], '2027-01-25');
+    expect(it['amount_minor'], 0);
+    expect(it['paid_count'], 1); // no payment counted
+  });
+
+  test(
+    'T-249 FU-304: a zero statement creates no reminder for a new card',
+    () async {
+      await card('cib', '4321');
+      await zero('4321', CivilDate(2026, 11, 25));
+      expect((await stored('cib', '4321'))!.nothingDue, isTrue);
+      expect(await item('acc_4321'), isNull);
+    },
+  );
+
+  test('T-249 FU-302: a failed reminder update leaves the payment uncounted '
+      '(both writes roll back)', () async {
+    await card('cib', '1234');
+    await ingest('CIB', _statement('1234', '100.00', '30.00', '25/11'), _rx);
+    await w.db.customStatement(
+      'CREATE TRIGGER t249_fail BEFORE UPDATE ON recurring_items '
+      "BEGIN SELECT RAISE(ABORT, 'injected'); END",
+    );
+    await ingest('CIB', _payment('10.00'), _rx + 1000);
+    // The transaction itself is kept; the due did not count it.
+    expect(await w.count('transactions'), 1);
+    final d = (await stored('cib', '1234'))!;
+    expect(d.paidMinor, 0);
+    expect(d.paidTxnIds, isEmpty);
+    await w.db.customStatement('DROP TRIGGER t249_fail');
+    expect((await item('acc_1234'))!['amount_minor'], 10000);
   });
 
   group('payments', () {
