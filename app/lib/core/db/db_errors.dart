@@ -129,6 +129,7 @@ final class DbReadException extends SafeException {
 /// keep working; the message is the constant [code], never the stored text.
 final class DbCorruptException extends SafeException
     implements FormatException {
+  // ignore: safe_exception_required - every caller passes an UPPER_SNAKE literal, never stored text
   DbCorruptException(super.code);
 
   @override
