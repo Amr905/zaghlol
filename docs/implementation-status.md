@@ -552,11 +552,11 @@ Closed entries above are struck through with the commit or file that fixes them.
 | FU-116 | backend | Account-token expiry code, nextMoveAt checks | - |
 | FU-120 | backend | Apple root fingerprint confirm; Play Integrity quota alert | PO, hosting |
 | FU-129 | backend | T-131/T-134/T-184/T-185 minors; per-replica budgets, shared 10/day table | hosting go-live |
-| FU-029 | core | riverpod_lint not in pubspec; verify it reports in CI | - |
-| FU-031 | core | no_ui_string_literals only checks build methods | - |
-| FU-032 | core | no_print_outside_debug misses core.print/stdout/developer.log | - |
-| FU-033 | core | safe_exception_required gaps (direct throw, enum exceptions) | - |
-| FU-038 | core | Failure.toString uses runtimeType (obfuscated in release) | - |
+| FU-029 | core | riverpod_lint not in pubspec; verify it reports in CI | CLOSED T-252: riverpod_lint runs as analyzer plugin; app-ci "riverpod_lint plugin is active (probe)" step fails if it is missing |
+| FU-031 | core | no_ui_string_literals only checks build methods | CLOSED T-252: already fixed (widget helpers + argument-boundary allow-list, fixtures ui_strings_*) |
+| FU-032 | core | no_print_outside_debug misses core.print/stdout/developer.log | CLOSED T-252: already fixed (core/developer/stdout/stderr sinks and print tear-offs, fixture print_violations) |
+| FU-033 | core | safe_exception_required gaps (direct throw, enum exceptions) | CLOSED T-252: enum/mixin exceptions, more throw types, SafeException code must be UPPER_SNAKE literal (own static const allowed); 2 narrow ignores |
+| FU-038 | core | Failure.toString uses runtimeType (obfuscated in release) | CLOSED T-252: already fixed, Failure.toString uses `Failure($code)` (packages/zaghlol_domain/lib/core/failure.dart) |
 | FU-071 | core | T-016/T-032 schema CHECK compare, T-033 lint timeout items | - |
 | FU-074 | core | T-016/T-032 schema CHECK compare, T-033 lint timeout items | - |
 | FU-090 | core | Production-signed seed and catalog identity alignment before store build | PO/hosting (KMS key) |
@@ -607,7 +607,7 @@ Closed entries above are struck through with the commit or file that fixes them.
 | FU-118 | parsing | Voice parser spoken-number and catalog keyword gaps | - |
 | FU-223 | parsing | Confirm guessed bank SMS sender IDs | PO |
 | FU-241 | parsing | Synthetic-unverified templates; Zakah gaps; PO client IDs for sign-in | PO |
-| FU-076 | test | 50k search benchmark CI job; purge clock docs | - |
+| FU-076 | test | 50k search benchmark CI job; purge clock docs | CLOSED T-252: 50k benchmark runs in db-platform.yml (tag benchmark, not a merge gate by design); rest owned by other tasks |
 | FU-027 | ui | Soften explainCashFlow "finish in the black" tip copy | - |
 | FU-028 | ui | Roast lines emoji in chat; confirm bubbles count as mascot lines; Q-23 sign-off before zakah/smart_roi flags | PO |
 | FU-039 | ui | privacy_delete_body wording about security keys | - |

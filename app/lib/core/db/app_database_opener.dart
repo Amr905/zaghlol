@@ -192,6 +192,7 @@ final class DbOpenFailed<D> extends DbOpenResult<D> {
 
 /// [DbOpenFailed] as an exception for `appDatabaseProvider`.
 final class DbOpenFailure extends SafeException {
+  // ignore: safe_exception_required - code is DbOpenFailureCode.code, a closed enum of UPPER_SNAKE constants
   DbOpenFailure(this.failure) : super(failure.code);
 
   final DbOpenFailureCode failure;
