@@ -1,0 +1,12 @@
+{
+  "body": "القاهرة - 19999\nفرع النزهة\n13/11/2026\nالإجمالي\nالخصم\nالمدفوع\nالمتبقي\n573.00\n.00\n.00\n-573.00",
+  "receivedAt": "2026-11-25T20:00:00",
+  "expect": {
+    "amount": "573.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": null,
+    "date": "2026-11-13",
+    "confidence": 550
+  }
+}

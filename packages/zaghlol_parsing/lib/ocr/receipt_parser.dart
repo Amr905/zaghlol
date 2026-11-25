@@ -36,14 +36,54 @@ final RegExp _totalLabel = RegExp(
 /// Lines that are never the total: subtotal, tax, discount, tender, change,
 /// item counts. `incl. VAT` after a total is removed first.
 final RegExp _skipLine = RegExp(
-  r'(?<![a-z])(?:sub ?total|vat|tax|discount|disc|paid|cash|change|tendered|tender|received|returned|refund|savings?|saved|balance|card|visa|mastercard|change due|items?|qty|quantity)(?![a-z])'
-  r'|المجموع الفرعي|قبل الخصم|ضريبه|خصم|المدفوع|مدفوع|الباقي|نقدي|نقدا|عدد|الكميه|المستلم|المرتجع|مرتجع|توفير|وفرت|الرصيد|فيزا|بطاقه',
+  r'(?<![a-z])(?:sub ?total|vat|tax|discount|disc|paid|cash|change|tendered|tender|received|returned|refund|savings?|saved|balance|remaining|outstanding|card|visa|mastercard|change due|items?|qty|quantity)(?![a-z])'
+  r'|المجموع الفرعي|قبل الخصم|ضريبه|خصم|المدفوع|مدفوع|الباقي|نقدي|نقدا|عدد|الكميه|المستلم|المرتجع|مرتجع|توفير|وفرت|الرصيد|المتبقي|متبقي|فيزا|بطاقه',
 );
 final RegExp _inclTax = RegExp(
   r'(?:incl\w*\.?|inc\.?|with|including|شامل(?: ال)?)\s*(?:vat|tax|ضريبه)',
 );
 final RegExp _phoneLine = RegExp(
   r'(?<![a-z])(?:tel|phone|mob|mobile|fax|hotline)(?![a-z])|هاتف|تليفون|موبايل|محمول',
+);
+
+/// Merchant lines that are not a name: a city alone, a branch, a seller or
+/// customer field, delivery/address fields, table headers. Folded text.
+final RegExp _notMerchantWords = RegExp(
+  r'^(?:فرع|branch)(?![a-z\u0621-\u064A])'
+  r'|(?<![a-z])(?:cashier|seller|customer|delivery|address|item|items|qty|quantity|price|branch|salesman|served by)(?![a-z])'
+  r'|بائع|عميل|كاشير|مستلم|توصيل|دليفري|عنوان|صنف|كميه|سعر',
+);
+const Set<String> _cityKeys = {
+  'القاهره',
+  'الجيزه',
+  'الاسكندريه',
+  'اسكندريه',
+  'القليوبيه',
+  'الشرقيه',
+  'الدقهليه',
+  'الغربيه',
+  'المنوفيه',
+  'البحيره',
+  'طنطا',
+  'المنصوره',
+  'اسيوط',
+  'الاقصر',
+  'اسوان',
+  'بورسعيد',
+  'السويس',
+  'الاسماعيليه',
+  'الفيوم',
+  'سوهاج',
+  'cairo',
+  'giza',
+  'alexandria',
+  'alex',
+};
+final RegExp _nonLetters = RegExp(r'[^a-z\u0621-\u064A]');
+final RegExp _priceLike = RegExp(r'[0-9]+[.,][0-9]{2}');
+final RegExp _longDigits = RegExp(r'[0-9]{4,}');
+final RegExp _valueCell = RegExp(
+  r'^[\s\-+]*(?:[0-9][0-9,]*)?(?:\.[0-9]+)?[\s\-+]*$',
 );
 
 final RegExp _numberToken = RegExp(
@@ -58,6 +98,7 @@ final RegExp _dmy = RegExp(
 );
 final RegExp _ymd = RegExp(r'(?<![0-9])(\d{4})-(\d{1,2})-(\d{1,2})(?![0-9])');
 final RegExp _time = RegExp(r'(?<![0-9])(\d{1,2}):(\d{2})(?![0-9:])');
+final RegExp _alnum = RegExp(r'[a-z0-9\u0621-\u064A]');
 final RegExp _letters = RegExp(r'[a-zء-ي]');
 final RegExp _qtyBefore = RegExp(
   r'(?:(?:^|[^a-z])[x×]|qty|quantity|الكميه|كميه|#|no\.?|number|ref|رقم)\s*:?\s*$',
@@ -115,7 +156,10 @@ final class _Line {
   bool get hasLetters => _letters.hasMatch(_stripCurrency(s));
 
   /// Only an amount (and maybe a currency): a value cell.
-  bool get isNum => cands.isNotEmpty && !hasLetters;
+  bool get isNum =>
+      !hasLetters &&
+      (cands.isNotEmpty ||
+          (s.contains(RegExp(r'[0-9]')) && _valueCell.hasMatch(s)));
 
   /// Only words: a label cell.
   bool get isLab => cands.isEmpty && hasLetters;
@@ -215,7 +259,12 @@ CleanedMerchant? _readMerchant(String text, MerchantCleaningConfig cleaning) {
         _headingWords.any(key.contains) ||
         _totalLabel.hasMatch(key) ||
         _skipLine.hasMatch(key) ||
-        _phoneLine.hasMatch(key)) {
+        _phoneLine.hasMatch(key) ||
+        key.endsWith(':') ||
+        _notMerchantWords.hasMatch(key) ||
+        _priceLike.hasMatch(key) ||
+        _longDigits.hasMatch(key) ||
+        _cityKeys.contains(key.replaceAll(_nonLetters, ''))) {
       continue;
     }
     final cleaned = cleanMerchant(line, config: cleaning);
@@ -252,9 +301,12 @@ _Line _buildLine(String s, Currency currency) {
       if (_percentAfter.hasMatch(after) ||
           _qtyAfter.hasMatch(after) ||
           _qtyBefore.hasMatch(before) ||
-          (!hasPoint &&
-              ((m.start > 0 && s[m.start - 1] == '-') ||
-                  (after.isNotEmpty && after[0] == '-')))) {
+          (m.start > 0 &&
+              s[m.start - 1] == '-' &&
+              (hasPoint
+                  ? (m.start == 1 || !_alnum.hasMatch(s[m.start - 2]))
+                  : true)) ||
+          (!hasPoint && after.isNotEmpty && after[0] == '-')) {
         continue;
       }
       final money = parseAmount(tok, currency: currency).valueOrNull;
@@ -270,10 +322,57 @@ _Line _buildLine(String s, Currency currency) {
       cands.add(_Cand(m.start, m.end, money, strong));
     }
   }
+  if (isSkip) {
+    final seg = _splitSegments(s, cands);
+    if (seg != null) {
+      return _Line(s, seg.$2, false, seg.$1);
+    }
+  }
   final labels = isSkip
       ? const <RegExpMatch>[]
       : _totalLabel.allMatches(s).toList(growable: false);
   return _Line(s, cands, isSkip, labels);
+}
+
+/// A row with several label-value pairs (`total: 573.00 discount .00`, or
+/// RTL `.00 discount 573.00 :total`): each label owns the segment after it
+/// (label-first rows) or before it (amount-first rows). The total label
+/// counts only when its own segment holds an amount, so a skip word elsewhere
+/// on the row doesn't hide it, and `total tax 5.00` stays a skip row.
+(List<RegExpMatch>, List<_Cand>)? _splitSegments(String s, List<_Cand> cands) {
+  final skips = _skipLine
+      .allMatches(s.replaceAllMapped(_inclTax, (m) => ' ' * m.group(0)!.length))
+      .toList(growable: false);
+  final totals = [
+    for (final t in _totalLabel.allMatches(s))
+      if (!skips.any((k) => t.start < k.end && t.end > k.start)) t,
+  ];
+  if (totals.isEmpty) {
+    return null;
+  }
+  final all = <(int, int, bool)>[
+    for (final t in totals) (t.start, t.end, true),
+    for (final k in skips) (k.start, k.end, false),
+  ]..sort((a, b) => a.$1.compareTo(b.$1));
+  final amountFirst = s.substring(0, all.first.$1).contains(RegExp(r'[0-9]'));
+  final keptLabels = <RegExpMatch>[];
+  final keptCands = <_Cand>[];
+  for (var k = 0; k < all.length; k++) {
+    if (!all[k].$3) {
+      continue;
+    }
+    final from = amountFirst ? (k == 0 ? 0 : all[k - 1].$2) : all[k].$1;
+    final to = amountFirst
+        ? all[k].$2
+        : (k + 1 < all.length ? all[k + 1].$1 : s.length);
+    final own = cands.where((c) => c.start >= from && c.end <= to).toList();
+    if (own.isEmpty) {
+      continue;
+    }
+    keptLabels.add(totals.firstWhere((t) => t.start == all[k].$1));
+    keptCands.addAll(own);
+  }
+  return keptLabels.isEmpty ? null : (keptLabels, keptCands);
 }
 
 _Cand? _pick(Iterable<_Cand> cands) {
