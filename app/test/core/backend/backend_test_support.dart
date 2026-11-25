@@ -53,7 +53,7 @@ final class TestSigningKey {
 }
 
 /// An in-memory [BackendStateStore] that appends every mutation to [log].
-final class FakeBackendStore implements BackendStateStore {
+base class FakeBackendStore implements BackendStateStore {
   FakeBackendStore(this.log);
 
   final List<String> log;
