@@ -77,7 +77,7 @@ class ShareIntake(
         // FU-070 C2: the provider's own MIME decides when it reports one; the
         // sender's intent type counts only when the provider reports none.
         val providerMime = ShareClassifier.normalizeMime(source.resolverType())
-        val kind = (if (providerMime != null) ShareClassifier.kindForMime(providerMime) else ShareClassifier.kindForMime(source.intentType))
+        val kind = (if (providerMime != null) ShareClassifier.kindForMime(providerMime, source.streamFileName) else ShareClassifier.kindForMime(source.intentType, source.streamFileName))
             ?: return reject(ShareRejectReason.UNSUPPORTED_TYPE)
         // Fail fast when the caps are reached, before reading anything from the sender.
         store.ensureCapacity()

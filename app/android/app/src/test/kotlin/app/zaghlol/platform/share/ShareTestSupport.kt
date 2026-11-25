@@ -62,6 +62,7 @@ class FakeShareSource(
     override val streamHost: String? = null,
     override val streamHasUserInfo: Boolean = false,
     override val streamProviderPackage: String? = null,
+    override val streamFileName: String? = null,
     private val resolverMime: String? = null,
     private val opener: () -> InputStream? = { null },
 ) : ShareSource {

@@ -12,6 +12,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/backend/backend_client.dart';
@@ -378,6 +379,7 @@ final class EntitlementService {
   /// The foreground tick (FU-138). Skipped while [handleBody] is applying a
   /// signed body: its half-written state would publish a stale phase for a
   /// moment, and [handleBody] evaluates again when it is done.
+  @visibleForTesting
   Future<void> tick() async {
     if (_applying > 0) return;
     await evaluate();
