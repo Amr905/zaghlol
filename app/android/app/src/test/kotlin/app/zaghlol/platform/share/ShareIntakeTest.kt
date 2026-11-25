@@ -216,6 +216,36 @@ class ShareIntakeTest {
         assertEquals(ShareKind.CSV, accepted(intake.accept(source)).kind)
     }
 
+    /** FU-330: a Telephony provider is refused by package even under an unknown authority. */
+    @Test
+    fun telephonyProviderPackageIsRefusedWhateverTheAuthority() {
+        val source = FakeShareSource(
+            intentType = "text/plain",
+            streamScheme = "content",
+            streamHost = "sms-changes",
+            streamProviderPackage = "com.android.providers.telephony",
+            resolverMime = "text/plain",
+            opener = { "SYNTHETIC".byteInputStream() },
+        )
+        assertEquals(ShareRejectReason.UNSUPPORTED_TYPE, rejected(intake.accept(source)))
+    }
+
+    /** FU-331: CSV MIME aliases, and octet-stream only for a .csv name. */
+    @Test
+    fun csvAliasesAndNamedOctetStreamAreAccepted() {
+        for (mime in listOf("text/comma-separated-values", "text/x-csv", "application/csv")) {
+            val s = FakeShareSource(intentType = "text/csv", streamScheme = "content", streamHost = "com.example.provider",
+                resolverMime = mime, opener = { "a,b\n1,2\n".byteInputStream() })
+            assertEquals(mime, ShareKind.CSV, accepted(intake.accept(s)).kind)
+        }
+        val named = FakeShareSource(intentType = "text/csv", streamScheme = "content", streamHost = "com.example.provider",
+            streamFileName = "Stmt.CSV", resolverMime = "application/octet-stream", opener = { "a,b\n".byteInputStream() })
+        assertEquals(ShareKind.CSV, accepted(intake.accept(named)).kind)
+        val unnamed = FakeShareSource(intentType = "text/csv", streamScheme = "content", streamHost = "com.example.provider",
+            streamFileName = "stmt.bin", resolverMime = "application/octet-stream", opener = { "a,b\n".byteInputStream() })
+        assertEquals(ShareRejectReason.UNSUPPORTED_TYPE, rejected(intake.accept(unnamed)))
+    }
+
     /** FU-070 S2: providers our SMS/contacts/call-log permissions unlock are never read. */
     @Test
     fun systemProvidersOurPermissionsUnlockAreRefused() {

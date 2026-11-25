@@ -15,12 +15,16 @@ object ShareClassifier {
         return base.ifEmpty { null }
     }
 
+    private val CSV_ALIASES = setOf("text/comma-separated-values", "text/x-csv", "application/csv")
+
     /** Maps a declared MIME to a share kind, or null when it is not one we accept. */
-    fun kindForMime(mime: String?): ShareKind? {
+    fun kindForMime(mime: String?, fileName: String? = null): ShareKind? {
         val m = normalizeMime(mime) ?: return null
         return when {
             m == "text/plain" -> ShareKind.TEXT
-            m == "text/csv" -> ShareKind.CSV
+            m == "text/csv" || m in CSV_ALIASES -> ShareKind.CSV
+            // FU-331: generic type is accepted only for a file named *.csv.
+            m == "application/octet-stream" && fileName?.lowercase()?.endsWith(".csv") == true -> ShareKind.CSV
             m == "application/pdf" -> ShareKind.PDF
             m.startsWith("image/") -> ShareKind.IMAGE
             else -> null

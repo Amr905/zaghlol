@@ -58,6 +58,18 @@ class IntentShareSource(
     @Volatile private var cancelled = false
     @Volatile private var opened: InputStream? = null
 
+    override val streamFileName: String? by lazy {
+        try {
+            uri?.let { u ->
+                resolver.query(u, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                    if (c.moveToFirst() && !c.isNull(0)) c.getString(0) else null
+                } ?: u.lastPathSegment
+            }
+        } catch (_: RuntimeException) {
+            null
+        }
+    }
+
     override fun resolverType(): String? = try {
         uri?.let { resolver.getType(it) }
     } catch (_: RuntimeException) {
@@ -70,7 +82,17 @@ class IntentShareSource(
     override fun open(): InputStream? {
         if (cancelled) return null
         val stream = try {
-            uri?.let { resolver.openAssetFileDescriptor(it, "r", signal)?.createInputStream() }
+            uri?.let { u ->
+                resolver.openAssetFileDescriptor(u, "r", signal)?.let { afd ->
+                    // FU-333: do not leak the descriptor when the stream cannot be created.
+                    try {
+                        afd.createInputStream()
+                    } catch (e: Exception) {
+                        runCatching { afd.close() }
+                        throw e
+                    }
+                }
+            }
         } catch (_: android.os.OperationCanceledException) {
             null
         } ?: return null
