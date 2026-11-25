@@ -26,6 +26,7 @@ import app.zaghlol.platform.ocr.OcrHostApi
 import app.zaghlol.platform.ocr.OcrHosts
 import app.zaghlol.platform.share.ShareDescriptor
 import app.zaghlol.platform.share.ShareHandOff
+import app.zaghlol.platform.share.withOcrPath
 import app.zaghlol.platform.share.ShareIntakeEventsApi
 import app.zaghlol.platform.share.ShareIntakeHost
 import app.zaghlol.platform.share.ShareIntakeHostApi
@@ -270,7 +271,7 @@ class MainActivity : FlutterFragmentActivity() {
         val store = shareStore ?: return
         IO.execute {
             val pending: List<ShareDescriptor> = try {
-                store.list()
+                store.list().map { it.withOcrPath() }
             } catch (_: Exception) {
                 emptyList()
             }

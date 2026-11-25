@@ -9,4 +9,6 @@
     <string name="native_android_captureNotifTitle">Zaghlol is saving a transaction</string>
     <!-- T-118: home-screen widget picker description (copy deck: key requested from T-087). -->
     <string name="native_android_widgetSafeToSpendDescription">Safe to spend today and days to payday</string>
+    <!-- T-263: share of several images. -->
+    <string name="native_android_shareMultipleFirstOnly">You shared several photos. I opened the first one.</string>
 </resources>

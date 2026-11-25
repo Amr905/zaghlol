@@ -128,6 +128,13 @@
                 <data android:mimeType="application/pdf"/>
                 <data android:mimeType="text/csv"/>
             </intent-filter>
+            <!-- T-263: several photos selected in Gallery/Files/WhatsApp are
+                 offered Zaghlol too; only the first is read (the user is told). -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
         </activity>
         <!-- T-041: WorkManager (the ingestion worker, every flavour) merges
              SystemJobService (exported, BIND_JOB_SERVICE: only the system can
