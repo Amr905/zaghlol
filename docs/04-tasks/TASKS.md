@@ -333,6 +333,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-247](tasks/T-247.md) | Cycle after day 20 named as the next month | D-82 | Medium | Sonnet | flutter-core-engineer | T-246 | A | 69 | DONE (batch 69) |
 | [T-251](tasks/T-251.md) | Backend follow-ups (FU-004/010/052/059/063/064/116) | follow-ups | Medium | Sonnet | backend-engineer | — | B | 71 | TODO |
 | [T-252](tasks/T-252.md) | Lint and core follow-ups (FU-029/031/032/033/038/076) | follow-ups | Medium | Sonnet | flutter-core-engineer | — | C | 71 | TODO |
+| [T-253](tasks/T-253.md) | Copy follow-ups (FU-027/039/040) | follow-ups | Low | Sonnet | flutter-ui-engineer | — | U | 71 | TODO |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
