@@ -1,0 +1,11 @@
+{
+  "body": "صيدلية العينة\n77.25 الاجمالي\nتليفون 0225551234\n٢٣/١٠/٢٠٢٦ ٠٩:١٥",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "77.25",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "صيدلية العينة",
+    "date": "2026-10-23"
+  }
+}

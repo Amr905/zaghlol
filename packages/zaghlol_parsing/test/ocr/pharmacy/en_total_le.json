@@ -1,0 +1,11 @@
+{
+  "body": "Sample Pharmacy\nTotal L.E 89.50\n23-10-2026",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "89.50",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "Sample Pharmacy",
+    "date": "2026-10-23"
+  }
+}
