@@ -5,11 +5,11 @@
   "expect": {
     "template": "hsbc.cc_payment_transfer.en",
     "event": "cc_payment",
-    "direction": "expense",
+    "direction": "income",
     "currency": "EGP",
     "amount": "1200.00",
     "last4": "4062",
-    "balance": "500.50",
+    "balance": null,
     "date": "2026-11-03",
     "counterparty": "002-388***-001"
   }

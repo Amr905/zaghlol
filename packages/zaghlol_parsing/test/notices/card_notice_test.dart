@@ -64,10 +64,14 @@ void main() {
       expect(r.dueDate, DateTime.utc(2026, 11, 25));
     });
 
-    test('case 7: an undated due date is the nearest future date', () {
-      final r =
+    test('case 7: an undated due date is the nearest future date, with a '
+        '7-day grace', () {
+      final late =
           parse(_case7, 'CIB', DateTime.utc(2026, 11, 26, 9)) as ParseNotice;
-      expect(r.dueDate, DateTime.utc(2027, 11, 25));
+      expect(late.dueDate, DateTime.utc(2026, 11, 25));
+      final later =
+          parse(_case7, 'CIB', DateTime.utc(2026, 12, 5, 9)) as ParseNotice;
+      expect(later.dueDate, DateTime.utc(2027, 11, 25));
     });
 
     test('case 8: CIB statement, total and minimum due', () {
@@ -164,6 +168,24 @@ void main() {
       },
     );
     expect(bad.registry, isNull);
+  });
+
+  test('a notice event must declare direction neutral (FU-295 n-1)', () {
+    RegistryLoadResult load(String dir) => RegistryLoader.load(
+      manifest: '{"schema":1,"registryVersion":1,"institutions":["xbank"]}',
+      shared: File('$_assets/registry/shared.json').readAsStringSync(),
+      institutions: {
+        'xbank.json':
+            '{"code":"xbank","names":{"ar":"x","en":"x"},"country":"EG",'
+            '"defaultCurrency":"EGP","senders":[{"match":"exact","value":"X"}],'
+            '"templates":[{"id":"x.due","version":1,"lang":"en",'
+            '"event":"cc_statement",$dir"baseConfidence":0.9,'
+            '"pattern":"due (?<amount>[\\\\d.]+) (?<cur>egp)"}]}',
+      },
+    );
+    expect(load('').registry, isNull, reason: 'missing direction');
+    final ok = load('"direction":"neutral",');
+    expect(ok.registry, isNotNull, reason: '${ok.issues}');
   });
 
   // T-241 fix (M-1): a completed debit or payment with a due or statement

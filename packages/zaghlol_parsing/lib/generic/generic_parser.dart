@@ -1266,8 +1266,9 @@ bool _nameAli(String c, FoldedText folded, String original, int start) {
 // ---------------------------------------------------------------------------
 // T-243: fee footer, counterparty, balance.
 
-/// True when every sentence that holds a fee or terms wording is the only
-/// place a charge is named: no other sentence has a completed-transaction cue.
+/// True when the conditional or terms sentences are the only place a charge
+/// is named: no other sentence has a completed-transaction cue, and a
+/// conditional sentence with a past-tense money-moved cue counts as a charge.
 bool _onlyFeeFooter(String t) {
   if (_hits(t, feeFooterKeywords, null).isEmpty) {
     return false;
@@ -1280,7 +1281,9 @@ bool _onlyFeeFooter(String t) {
         (t.codeUnitAt(i) == 0x2E &&
             (i + 1 == t.length || t.codeUnitAt(i + 1) == 0x20))) {
       final sentence = t.substring(from, end ? i : i + 1);
-      if (_hits(sentence, feeFooterKeywords, null).isEmpty) {
+      // A conditional sentence that also says money moved is no footer.
+      if (_hits(sentence, feeFooterKeywords, null).isEmpty ||
+          _hits(sentence, noticeMoneyMovedCues, null).isNotEmpty) {
         rest.write('$sentence ');
       }
       from = i + 1;

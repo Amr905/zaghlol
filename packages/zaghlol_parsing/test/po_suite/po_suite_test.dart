@@ -183,12 +183,14 @@ const List<_Case> _cases = [
     'Your available balance is EGP 0.00',
     {
       'kind': 'transaction',
-      'direction': 'expense',
+      // Money into the card (the PO's "outflow" is the unidentified source
+      // account); its trailing available balance is not the card's.
+      'direction': 'income',
       'minor': 219995,
       'currency': 'EGP',
       'last4': '4062',
       'date': '2026-10-28',
-      'balanceMinor': 0,
+      'balanceMinor': null,
     },
   ),
   _Case(
@@ -199,12 +201,12 @@ const List<_Case> _cases = [
     'Your available balance is EGP 41',
     {
       'kind': 'transaction',
-      'direction': 'expense',
+      'direction': 'income',
       'minor': 4782,
       'currency': 'EGP',
       'last4': '7748',
       'date': '2026-10-29',
-      'balanceMinor': 4100,
+      'balanceMinor': null,
     },
   ),
   _Case(

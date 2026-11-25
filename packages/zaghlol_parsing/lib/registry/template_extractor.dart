@@ -358,6 +358,9 @@ int? _monthNumber(String text) {
   return i < 0 ? null : i + 1;
 }
 
+/// Days after its due day a due reminder still resolves to that day.
+const int dueGraceDays = 7;
+
 /// Parses a date capture by [policy.format]. Returns null for any shape or
 /// calendar mismatch (31/2, month 13) instead of rolling over.
 DateTime? parseTemplateDate(
@@ -366,7 +369,7 @@ DateTime? parseTemplateDate(
   DateTime receivedAt, {
 
   /// T-241: a due date; with `nearest_future` and no year it resolves to the
-  /// nearest date on or after the day of receipt.
+  /// nearest date on or after the day of receipt, less [dueGraceDays].
   bool due = false,
 }) {
   final tokens = RegExp(r'd{1,2}|M{1,3}|y{4}|y{2}|[/.-]')
@@ -420,9 +423,12 @@ DateTime? parseTemplateDate(
   }
   final today = DateTime.utc(receivedAt.year, receivedAt.month, receivedAt.day);
   if (due && policy.nearestFuture) {
-    for (var ahead = 0; ahead <= 4; ahead++) {
+    // FU-295 m-1: a reminder that arrives or is backfilled up to
+    // [dueGraceDays] after its due day keeps that day (not next year).
+    final earliest = today.subtract(const Duration(days: dueGraceDays));
+    for (var ahead = -1; ahead <= 4; ahead++) {
       final d = build(receivedAt.year + ahead);
-      if (d != null && !d.isBefore(today)) {
+      if (d != null && !d.isBefore(earliest)) {
         return d;
       }
     }

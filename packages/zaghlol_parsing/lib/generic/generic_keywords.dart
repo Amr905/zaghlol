@@ -713,22 +713,23 @@ final List<String> limitAnchors = _fold(const [
   'الحد المتاح',
 ]);
 
-/// Wording of a fee or terms footer: a hypothetical charge, not a payment.
+/// Conditional or terms wording of a footer: a hypothetical charge, not a
+/// payment. Fee nouns alone (`late fee`, `غرامه تاخير`) are not listed: a
+/// posted fee is a real transaction.
 /// A message whose other sentences hold no completed-transaction cue is not
 /// a transaction (T&C footer, T-243).
 final List<String> feeFooterKeywords = _fold(const [
   'terms and conditions',
   'terms apply',
-  'late fee',
-  'late payment fee',
-  'fee of',
   'fees apply',
   'applies if',
   'apply if',
   'may be charged',
   'will be charged',
-  'غرامه تاخير',
-  'رسوم تاخير',
+  'if not paid',
+  'if unpaid',
+  'في حاله عدم السداد',
+  'في حاله التاخير',
   'الشروط والاحكام',
   'تطبق الشروط',
 ]);
