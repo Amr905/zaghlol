@@ -2,9 +2,9 @@
 // could be auto-saved as spending. Re-parse now offers such a transaction in
 // review ("This was a payment-due reminder, not spending — remove it?").
 // This is the only code that acts on that offer, and only on the user's tap:
-// - Remove: re-checks the offer, then deletes through the shared delete path
-//   (TxnBulkActions: undo image, TransactionsChanged for totals and budgets,
-//   pair and offset clean-up), then resolves the item. Undo restores it.
+// - Remove: re-checks the offer, then resolves the item and deletes through the shared
+//   delete path (TxnBulkActions: undo image, TransactionsChanged, pair and
+//   offset clean-up), all in one transaction. Undo restores it.
 // - Keep: resolves the item and marks the transaction user-verified.
 // Nothing here logs.
 
@@ -20,18 +20,17 @@ final class OldDueReview {
   /// Deletes the transaction of the old-due item [itemId] and resolves the
   /// item. Returns the undo batch id, or null when the offer no longer
   /// applies (resolved, edited or deleted meanwhile): then nothing changed.
-  Future<String?> remove(String itemId) async {
+  Future<String?> remove(String itemId) => _reviews.inTransaction(() async {
+    // FU-316: check, resolve and delete in ONE transaction. The resolve is
+    // conditional and comes first, so a Keep that landed after the check
+    // wins (nothing is deleted); a failing delete rolls the resolve back, so
+    // the item stays open and the Undo always matches what happened.
     final txnId = await _reviews.oldDueTxnToRemove(itemId);
     if (txnId == null) return null;
+    if (!await _reviews.markOldDueRemoved(itemId)) return null;
     final r = await _txns.delete({txnId});
-    if (!await _reviews.markOldDueRemoved(itemId)) {
-      // Another actor (a Keep on a second screen) resolved the item between
-      // the check and the delete: its answer wins, so put the row back.
-      await _txns.undo(r.batchId);
-      return null;
-    }
     return r.batchId;
-  }
+  });
 
   /// Puts back what [remove] deleted (the item stays resolved, so the same
   /// transaction is not offered again).

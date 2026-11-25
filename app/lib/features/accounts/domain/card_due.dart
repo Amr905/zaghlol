@@ -150,7 +150,11 @@ CardDue? mergeNotice(CardDue? existing, CardDue incoming) {
     currency: incoming.currency,
     noticeAtMs: incoming.noticeAtMs,
     amountDueMinor: incoming.amountDueMinor ?? existing.amountDueMinor,
-    minDueMinor: incoming.minDueMinor ?? existing.minDueMinor,
+    // A newer explicit total of 0 with no minimum is "nothing due": it must
+    // not inherit the old minimum.
+    minDueMinor:
+        incoming.minDueMinor ??
+        (incoming.amountDueMinor == 0 ? 0 : existing.minDueMinor),
     dueDate: incoming.dueDate,
     statementDate: incoming.statementDate ?? existing.statementDate,
     paidMinor: existing.paidMinor,

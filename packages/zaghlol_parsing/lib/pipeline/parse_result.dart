@@ -106,7 +106,16 @@ final class WallTime {
 enum CounterpartyKind { ipaAddress, phone, name }
 
 final class Counterparty {
-  const Counterparty({required this.kind, this.name, this.ipa, this.phone});
+  const Counterparty({
+    required this.kind,
+    this.name,
+    this.ipa,
+    this.phone,
+    this.ownAccount = false,
+  });
+
+  /// The template declared this counterparty is the user's own account.
+  final bool ownAccount;
 
   /// `ipaAddress` when an IPA was found, else `phone`, else `name`.
   final CounterpartyKind kind;

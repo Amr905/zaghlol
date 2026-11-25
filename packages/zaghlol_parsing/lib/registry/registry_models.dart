@@ -175,6 +175,7 @@ final class Template {
     required this.isAvailableLimit,
     required this.groupNames,
     this.strongSenderOnly = false,
+    this.counterpartyOwnAccount = false,
   });
 
   final String id;
@@ -183,6 +184,10 @@ final class Template {
   /// T-248: skipped when the sender only matched a `templateOnly` rule (a
   /// generic id such as `EG`); for broad shapes with no bank-specific marker.
   final bool strongSenderOnly;
+
+  /// Fix 70 (M-1): the wording itself proves the counterparty is the user's
+  /// own account (`to your credit card`). Only then is it stored `own_account`.
+  final bool counterpartyOwnAccount;
 
   /// `ar` or `en`.
   final String lang;

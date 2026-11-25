@@ -96,6 +96,19 @@ void main() {
     });
   });
 
+  test(
+    'FU-315: an explicit 0.00 on a statement is kept, never a transaction',
+    () {
+      final r = parse(_case8.replaceAll('51.77', '0.00'), 'CIB') as ParseNotice;
+      expect(r.amountDue, egp('0.00'));
+      expect(r.minDue, egp('0.00'));
+      expect(r.last4, '6603');
+      // A zero amount on a purchase stays a problem, not a transaction.
+      final p = parse('Purchase of EGP 0.00 at X card ending 1234', 'CIB');
+      expect(p, isNot(isA<ParseParsed>()));
+    },
+  );
+
   group('generic notice gate (known bank, no template)', () {
     test(
       'the same wording from another bank is a notice, not a transaction',

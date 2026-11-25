@@ -177,6 +177,12 @@ ExtractedFields extractFields(
     return resolveCurrencyMarker(folded, institution.defaultCurrency);
   }
 
+  // FU-315: a card statement or due notice may state an explicit 0.00 (the
+  // "nothing due" case). Every other event still rejects a zero amount.
+  final keepsZero =
+      template.event == TemplateEvent.ccDue ||
+      template.event == TemplateEvent.ccStatement;
+
   Money? money(String key, Currency? currency, String field) {
     final raw = groups[key];
     if (raw == null) {
@@ -207,7 +213,9 @@ ExtractedFields extractFields(
     );
     final value = result.valueOrNull;
     if (value == null ||
-        ((key == 'amount' || key == 'mindue') && !value.isPositive)) {
+        ((key == 'amount' || key == 'mindue') &&
+            !value.isPositive &&
+            !(value.isZero && keepsZero))) {
       problems.add(field);
       return null;
     }
