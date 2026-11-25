@@ -102,6 +102,12 @@ EventDisposition dispositionOf(
       return const BalanceOnlyEvent();
     case TemplateEvent.fxConversion:
       return const DeferredEvent();
+    case TemplateEvent.ccDue:
+    case TemplateEvent.ccStatement:
+      // T-241: the pipeline returns a `ParseNotice` for these, never a
+      // `ParseParsed`. If one ever got here the safe answer is review, never
+      // a transaction.
+      return const UndirectedEvent();
   }
 }
 

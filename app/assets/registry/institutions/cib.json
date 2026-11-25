@@ -416,6 +416,50 @@
         "yearPolicy": "nearest_past"
       },
       "source": "synthetic-unverified"
+    },
+    {
+      "id": "cib.cc_due.ar",
+      "version": 7,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_due",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "po-sample",
+      "pattern": "سيتم خصم (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) من حسابكم لسداد بطاقتك المنتهيه ب (?<last4>\\d{4}) في (?<duedate>\\d{1,2}/\\d{1,2})",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_future"
+      }
+    },
+    {
+      "id": "cib.cc_statement.ar",
+      "version": 7,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_statement",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "po-sample",
+      "pattern": "كشف حساب شهر \\S+(?: \\d{4})? لبطاقتك (?:الائتمانيه )?المنتهيه ب (?<last4>\\d{4}) هو (?<amount>[\\d,.]+) (?<cur>جم|جنيه|egp) ?،? ?الحد الادني للسداد قبل (?<duedate>\\d{1,2}/\\d{1,2}) هو (?<mindue>[\\d,.]+) (?:جم|جنيه|egp)",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "d/M",
+        "yearPolicy": "nearest_future"
+      }
     }
   ]
 }

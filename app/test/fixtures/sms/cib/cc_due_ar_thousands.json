@@ -1,0 +1,17 @@
+{
+  "sender": "CIB",
+  "body": "عميلنا العزيز، سيتم خصم 12,345.50 جم من حسابكم لسداد بطاقتك المنتهية بـ 5490  في 05/12, في حالة أن يوم السداد يزامن عطلة رسمية سوف يتم الخصم قبل العطلات الرسمية. يمكنك الاطلاع على تفاصيل كشف الحساب من خلال الرابط التالي: https://example.invalid/x1",
+  "receivedAt": "2026-11-25T10:00:00+02:00",
+  "expect": {
+    "template": "cib.cc_due.ar",
+    "event": "cc_due",
+    "direction": "neutral",
+    "currency": "EGP",
+    "balance": null,
+    "available": null,
+    "merchantClean": null,
+    "amount": "12345.50",
+    "last4": "5490",
+    "dueDate": "2026-12-05"
+  }
+}

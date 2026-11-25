@@ -1,0 +1,18 @@
+{
+  "sender": "HSBC",
+  "body": "HSBC Credit Card ending *** ٢٨٥٩ Statement Date ٠٣/١٠/٢٠٢٦. Total Amt Due EGP ٤٧٫٨٢, Due Date ٢٨/١٠/٢٠٢٦. Min. Amt Due EGP ٤٧٫٨٢. Please ignore if paid.",
+  "receivedAt": "2026-10-03T10:00:00+02:00",
+  "expect": {
+    "template": "hsbc.cc_statement.en",
+    "event": "cc_statement",
+    "direction": "neutral",
+    "currency": "EGP",
+    "balance": null,
+    "available": null,
+    "amount": "47.82",
+    "minDue": "47.82",
+    "last4": "2859",
+    "statementDate": "2026-10-03",
+    "dueDate": "2026-10-28"
+  }
+}

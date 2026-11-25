@@ -586,3 +586,67 @@ final List<String> cardSettlementDebitWords = _fold(const [
   'تم سحب',
   'من حسابك',
 ]);
+
+/// T-241 notice gate: wording of a **future** deduction or a payment that is
+/// due. Money has not moved, so the message is never a transaction. Past
+/// tense (`تم الخصم ... لسداد`, `was debited`) is deliberately absent.
+final List<String> noticeFutureKeywords = _fold(const [
+  'سيتم خصم',
+  'سوف يتم خصم',
+  'سيتم سحب',
+  'سيتم تحصيل',
+  'will be debited',
+  'will be deducted',
+  'will be auto debited',
+  'payment due',
+  'payment is due',
+  'due date',
+  'last date for payment',
+  'موعد السداد',
+  'موعد سداد',
+  'تاريخ الاستحقاق',
+  'تاريخ استحقاق',
+]);
+
+/// T-241 notice gate: statement wording.
+final List<String> noticeStatementKeywords = _fold(const [
+  'statement date',
+  'statement balance',
+  'total amt due',
+  'total amount due',
+  'min. amt due',
+  'min amt due',
+  'minimum amt due',
+  'minimum amount due',
+  'minimum payment due',
+  'min payment due',
+  'الحد الادني للسداد',
+  'الحد الادني للدفع',
+  'الحد الادني المستحق',
+]);
+
+/// Tails that are boilerplate, never part of a field (`يمكنك الاطلاع على
+/// التفاصيل ...`, `please ignore if paid`). The notice gate reads the text
+/// before the first one, so `كشف الحساب` in a link sentence is not a
+/// statement cue.
+final List<String> noticeBoilerplateMarkers = _fold(const [
+  'يمكنك الاطلاع',
+  'للمزيد اتصل',
+  'please ignore if paid',
+  'ignore if paid',
+  'ignore this message if',
+]);
+
+/// A completed purchase or withdrawal. A notice cue beside one of these is
+/// not trusted either way (review, never a transaction, never a notice).
+final List<String> noticePurchaseConflictCues = _fold(const [
+  'has been used',
+  'was used',
+  'purchase of',
+  'purchase at',
+  'تم شراء',
+  'عمليه شراء',
+  'تم استخدام',
+  'تم سحب نقدي',
+  'cash withdrawal',
+]);

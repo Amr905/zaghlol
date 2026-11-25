@@ -46,6 +46,10 @@ IngestRawMessages buildIngestRawMessages(
   CycleKeyOf? cycleKeyOf,
   List<PostPersistHook> hooks = const [],
 
+  /// T-241: receives card due reminders and statements (T-245 plugs the dues
+  /// layer in here). The default does nothing.
+  CardNoticeHook cardNoticeHook = const NoopCardNoticeHook(),
+
   /// FU-142: every stored or edited row is offered to refund matching
   /// (T-090) inside the message's savepoint. The schedule is read from the
   /// settings on this connection unless [refundSchedule] replaces it.
@@ -109,6 +113,7 @@ IngestRawMessages buildIngestRawMessages(
       ),
     ),
   ],
+  cardNoticeHook: cardNoticeHook,
   diag: diag,
   events: events,
 );

@@ -944,6 +944,8 @@ List<String> _allStrings(ParseResult r) {
       return [?r.institutionCode, ?r.templateId];
     case ParseGeneric():
       return [r.language, ?r.last4, ?r.merchant?.display, ?r.merchant?.key];
+    case ParseNotice():
+      return [r.language, ?r.institutionCode, ?r.templateId, ?r.last4];
     case ParseParsed():
       final f = r.fields;
       return [
