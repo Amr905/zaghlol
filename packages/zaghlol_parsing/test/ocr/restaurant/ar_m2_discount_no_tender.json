@@ -1,0 +1,12 @@
+{
+  "body": "كافيه تجريبي\nلاتيه 2 45.00 90.00\nكرواسون 2 30.00 60.00\nالمجموع الفرعي 150.00\nخصم 15.00\nالاجمالي 135.00",
+  "receivedAt": "2026-11-14T20:00:00",
+  "expect": {
+    "amount": "135.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "كافيه تجريبي",
+    "date": null,
+    "confidence": 600
+  }
+}
