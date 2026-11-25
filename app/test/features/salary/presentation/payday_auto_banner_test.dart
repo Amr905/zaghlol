@@ -74,6 +74,39 @@ void main() {
     });
   }
 
+  for (final locale in const [Locale('ar', 'EG'), Locale('en')]) {
+    final isAr = locale.languageCode == 'ar';
+    testWidgets('capped salary (${locale.languageCode}): names the real day', (
+      tester,
+    ) async {
+      final h = SettingsHarness();
+      addTearDown(h.db.close);
+      const state = PaydayAutoState(
+        autoDay: 28,
+        salaryDay: 30,
+        bannerPending: true,
+      );
+      await tester.pumpWidget(
+        h.app(
+          const Scaffold(body: PaydayAutoBanner()),
+          locale: locale,
+          overrides: [
+            paydayAutoProvider.overrideWith((ref) => Stream.value(state)),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(isAr ? 'يوم القبض ٢٨' : 'payday to day 28'),
+        findsOne,
+      );
+      expect(
+        find.textContaining(isAr ? 'بينزل يوم ٣٠' : 'lands on day 30'),
+        findsOne,
+      );
+    });
+  }
+
   testWidgets('no banner when nothing is pending', (tester) async {
     final h = SettingsHarness();
     addTearDown(h.db.close);

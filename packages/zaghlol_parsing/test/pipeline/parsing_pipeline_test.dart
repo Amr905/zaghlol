@@ -345,8 +345,26 @@ void main() {
 
     test('known source, no template', () {
       final r = pipeline.parse(_req('NBE: welcome to our new app'));
-      expect(_why(r), UnrecognizedReason.noTemplateMatched);
+      expect(_why(r), UnrecognizedReason.genericNoAmount);
       expect((r as ParseUnrecognized).institutionCode, 'nbe');
+    });
+
+    test('T-244: known sender keeps the generic declined/promotion reason', () {
+      final declined = pipeline.parse(
+        _req('NBE: your transaction of EGP 50.00 was declined, card 1234'),
+      );
+      expect(_why(declined), UnrecognizedReason.genericDeclined);
+      expect((declined as ParseUnrecognized).institutionCode, 'nbe');
+      final promo = pipeline.parse(
+        _req(
+          'بنفكرك إن فاضل 7 أيام على السحب الجاي. اربط شهادة الدهب دلوقتي '
+          'لضمان فرصتك في دخول السحب على كيلو دهب أو جنيه من 50 جنيه دهب. '
+          'شهادة الدهب متاحة لفترة محدودة. تطبق الشروط والأحكام.',
+          source: 'NBE',
+        ),
+      );
+      expect(_why(promo), UnrecognizedReason.genericPromotion);
+      expect((promo as ParseUnrecognized).institutionCode, 'nbe');
     });
 
     test('empty, blank and invisible-only bodies', () {
@@ -363,7 +381,7 @@ void main() {
       final r = pipeline.parse(_req('1' * (maxParseBodyLength + 1)));
       expect(_why(r), UnrecognizedReason.bodyTooLong);
       final atCap = pipeline.parse(_req('1' * maxParseBodyLength));
-      expect(_why(atCap), UnrecognizedReason.noTemplateMatched);
+      expect(_why(atCap), UnrecognizedReason.genericNoAmount);
     });
 
     test('channel filter: SMS templates do not match a notification', () {

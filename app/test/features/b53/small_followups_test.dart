@@ -161,9 +161,10 @@ void main() {
       await c.read(salaryPlanProvider.future);
       await c.read(salaryStateProvider.future);
       expect(c.read(setupSalaryCreditProvider).value, isNull);
+      // T-246 / n-1: the payday is never a setup suggestion any more.
       expect(
         nextSetupSuggestion(ctx())?.kind,
-        isNot(SetupSuggestionKind.payday),
+        isNot(SetupSuggestionKind.budget),
       );
     });
 

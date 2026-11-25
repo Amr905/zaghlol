@@ -441,7 +441,7 @@ void main() {
         final item = (await w.reviews()).single;
         expect(item['raw_message_id'], o.rawId);
         expect(jsonDecode(item['payload']! as String), {
-          'reason': 'noTemplateMatched',
+          'reason': 'genericNoAmount',
           'institutionCode': 'zbank',
         });
       },

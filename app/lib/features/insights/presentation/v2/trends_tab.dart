@@ -5,7 +5,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart' show DateFormat;
+
+import '../../../../core/l10n/date_format.dart';
+
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
@@ -132,7 +134,7 @@ class _InOutBody extends ConsumerWidget {
     final cur = Currency.of(code);
     final lang = Localizations.localeOf(context).languageCode;
     String month(InOutBar b) =>
-        DateFormat.MMM(lang).format(DateTime(b.to.year, b.to.month));
+        ZDateFormat.cycleMonthName(b.from, lang, short: true);
     String money(int m) => chartMoney(ref, context, Money(cur, m));
     final items = [
       for (final b in bars)

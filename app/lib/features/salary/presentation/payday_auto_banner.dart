@@ -20,13 +20,17 @@ class PaydayAutoBanner extends ConsumerWidget {
     if (state == null || !state.bannerPending || day == null) {
       return const SizedBox.shrink();
     }
+    final salary = state.salaryDay;
     final l = AppLocalizations.of(context);
     final format = HomeFormat.of(context, ref);
     Future<PaydayAutoService> service() =>
         ref.read(paydayAutoServiceProvider.future);
     return ZBanner(
       key: const ValueKey('payday-auto-banner'),
-      message: l.paydayAutoBanner(format.count(day)),
+      // m-6: a 29..31 salary sets 28; the copy names the real salary day.
+      message: salary != null && salary != day
+          ? l.paydayAutoBannerCapped(format.count(day), format.count(salary))
+          : l.paydayAutoBanner(format.count(day)),
       actionLabel: l.paydayAutoUndo,
       onAction: () async => (await service()).undo(),
       onDismiss: () async => (await service()).dismissBanner(),

@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-25 (Cairo) by the Lead session: SMS parsing v2 + payday loop (PO 2026-11-25), batch 67 merging; batches 68–69 queued. Update it whenever the state below changes._
+_Last updated: 2026-11-25 (Cairo) by the Lead session: SMS parsing v2 + payday loop (PO 2026-11-25) complete — batches 67 (#116), 68 (#117), 69 merged or merging. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-295**
+Next free follow-up number: **FU-309**
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
@@ -241,7 +241,8 @@ Meanwhile the Lead clears follow-ups in batches of up to 5 lanes, and the explor
 The PO asked the Lead to work through T-240…T-247 in a loop (build → one review → CI → merge → next batch) and to take assumptions instead of blocking; assumptions are in `docs/03-technical/sms-parsing-v2-plan.md` §8 and `PO_DECISIONS.md` SMS-V2 / PAYDAY-AUTO. PO input (synthetic copy): `docs/qa/po-sms-suite-2026-11-25.md`; the suite test prints `po_suite: X/12 pass`.
 - **Batch 67** (`batch/2026-11-25-67`): T-240, T-241 (C4), T-246. 3 majors fixed in one round + delta re-review. PO suite 5/12.
 - **Batch 68** (`batch/2026-11-25-68`, merging; PO suite 12/12; 2 majors fixed, see batch-68.md): T-242 templates (cases 1, 3, 5, 10, 11), T-243 generic reader (2, 4, footer negative), T-245 card dues into reminders (+ FU-295). Check in review: HSBC `cc_payment_transfer.en` is direction `expense` with the card as last-4, while T-245 counts card payments as `transfer_in` on the card — confirm the settlement is booked as a transfer (SMS-AUTO) and reaches the due.
-- **Batch 69** (queued): T-244 diagnostics signatures, T-247 cycle naming (+ FU-296).
+- **Batch 69** (`batch/2026-11-25-69`): T-244, T-247 + FU-296, FU-307/308 fixed. Loop complete: T-240…T-247 DONE.
+- **PO to confirm:** Ask "this month" follows the pay cycle when payday ≠ 1 (chart presets stay calendar months); HSBC card payments stored as transfer_in on the card without the source account's balance; FU-295 (m-2) cleanup of due reminders auto-saved as spending before batch 67 (deletes data, so it waits for the PO).
 - PO still to describe the real Arab Bank issue (he withdrew the "two folders" report).
 
 ## Waiting on the PO (Amr)

@@ -6,8 +6,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:zaghlol_domain/zaghlol_domain.dart';
-
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_button.dart';
@@ -60,7 +58,6 @@ class HomeContextualCards extends ConsumerWidget {
           SuggestionCard(
             key: const ValueKey('home-card-suggestion'),
             suggestion: s,
-            salary: cards.salary,
             openSetBudget: openSetBudget,
             openBackup: openBackup,
           ),
@@ -86,13 +83,11 @@ class SuggestionCard extends ConsumerWidget {
   const SuggestionCard({
     super.key,
     required this.suggestion,
-    this.salary,
     this.openSetBudget,
     this.openBackup,
   });
 
   final SetupSuggestion suggestion;
-  final Money? salary;
   final VoidCallback? openSetBudget;
   final VoidCallback? openBackup;
 
@@ -100,22 +95,12 @@ class SuggestionCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
-    final format = HomeFormat.of(context, ref);
     final actions = ref.read(homeCardActionsProvider);
     final kind = suggestion.kind;
-    final day = suggestion.paydayDay;
     final String message;
     final String yes;
     final Future<void> Function() onYes;
     switch (kind) {
-      case SetupSuggestionKind.payday:
-        final d = day ?? 1;
-        message = l.homePromptPayday(
-          salary == null ? '' : format.money(salary!),
-          format.count(d),
-        );
-        yes = l.homePromptPaydayYes(format.count(d));
-        onYes = () => actions.acceptPayday(d);
       case SetupSuggestionKind.budget:
         message = l.homePromptBudget;
         yes = l.homePromptBudgetYes;

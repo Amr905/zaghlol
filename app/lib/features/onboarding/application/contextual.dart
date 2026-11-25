@@ -9,9 +9,6 @@ import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_repository.dart';
 
 enum SetupSuggestionKind {
-  /// «ده ميعاد قبضك؟»
-  payday('payday', 'suggestPayday'),
-
   /// First full cycle finished and no budget set.
   budget('budget', 'suggestBudget'),
 
@@ -28,21 +25,16 @@ enum SetupSuggestionKind {
 }
 
 final class SetupSuggestion {
-  const SetupSuggestion(this.kind, {this.paydayDay});
+  const SetupSuggestion(this.kind);
 
   final SetupSuggestionKind kind;
 
-  /// For [SetupSuggestionKind.payday]: the proposed day, 1..28 (BR-BUD-01).
-  final int? paydayDay;
-
   @override
   bool operator ==(Object other) =>
-      other is SetupSuggestion &&
-      other.kind == kind &&
-      other.paydayDay == paydayDay;
+      other is SetupSuggestion && other.kind == kind;
 
   @override
-  int get hashCode => Object.hash(kind, paydayDay);
+  int get hashCode => kind.hashCode;
 }
 
 /// A-65: days since install before the backup suggestion.

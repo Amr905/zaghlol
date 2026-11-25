@@ -1215,6 +1215,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeroSpentThisCycle => 'صرفت الدورة دي';
 
   @override
+  String homeHeroSpentInCycleMonth(String month) {
+    return 'صرفت في $month';
+  }
+
+  @override
   String get homeHeroSetBudgetHint => 'حط ميزانية عشان تعرف تصرف كام في اليوم';
 
   @override
@@ -8760,6 +8765,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String paydayAutoBanner(String day) {
     return 'خلّيت يوم القبض $day لأن مرتبك بينزل يوم $day';
+  }
+
+  @override
+  String paydayAutoBannerCapped(String day, String salaryDay) {
+    return 'خلّيت يوم القبض $day لأن مرتبك بينزل يوم $salaryDay';
   }
 
   @override

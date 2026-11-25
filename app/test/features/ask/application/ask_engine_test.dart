@@ -166,7 +166,8 @@ void main() {
         final a = await ask<AskSpendAnswer>('صرفت كام بكارت CIB الشهر ده؟');
         expect(a.target, AskTarget.card);
         expect(a.targetLabel, 'CIB');
-        expect(a.period.key, '2026-11-01..2026-11-30');
+        // D-82: "this month" is the cycle that holds today (payday 25).
+        expect(a.period.key, '2026-10-25..2026-11-24');
         // acc1 only: 100000 + 50000 EGP and 2500 GBP; never summed together.
         expect(a.figures, [Money(egp, 150000), Money(gbp, 2500)]);
       },
@@ -306,11 +307,37 @@ void main() {
     });
   });
 
+  group('cycle naming (D-82, T-247)', () {
+    // Payday 24, today 25 Nov: "this month" is the cycle named December
+    // (24 Nov .. 23 Dec); "last month" is the one named November.
+    AskEngine engine24() => AskEngine(
+      charts: charts,
+      accounts: () async => accounts,
+      cycleBudgets: () async => budgets,
+      schedule: () async => PaydaySchedule.single(24),
+      entities: () async => ents,
+      today: () => CivilDate(2026, 11, 25),
+    );
+
+    test('"how much did I spend this month" with payday 24', () async {
+      await add('c1', amount: 7000, when: at(2026, 11, 26));
+      final a = await engine24().ask('how much did I spend this month');
+      expect(a, isA<AskSpendAnswer>());
+      final spend = a as AskSpendAnswer;
+      expect(spend.period.key, '2026-11-24..2026-12-23');
+      // Only the 26 Nov row: the 3 Nov rows are in the cycle named November.
+      expect(spend.figures, [Money(egp, 7000)]);
+      final last = await engine24().ask('how much did I spend last month');
+      expect((last as AskSpendAnswer).period.key, '2026-10-24..2026-11-23');
+      expect(last.figures, [Money(egp, 180000), Money(gbp, 2500)]);
+    });
+  });
+
   group('compare', () {
     test('this month against last, per currency, with the change', () async {
       final a = await ask<AskCompareAnswer>('قارن الشهر ده بالشهر اللي فات');
-      expect(a.current.key, '2026-11-01..2026-11-30');
-      expect(a.previous.key, '2026-10-01..2026-10-31');
+      expect(a.current.key, '2026-10-25..2026-11-24');
+      expect(a.previous.key, '2026-09-25..2026-10-24');
       expect(a.figures.length, 2);
       final e = a.figures[0];
       expect(e.current, Money(egp, 180000));

@@ -31,8 +31,15 @@ ChartPeriod resolveAskPeriod(
       final start = today.plusDays(-back + 7 * _clamp(p.offset));
       return ChartPeriod(start, start.plusDays(6));
     case AskPeriodKind.month:
-      final idx = today.year * 12 + (today.month - 1) + _clamp(p.offset);
-      return ChartPeriod.month(idx ~/ 12, idx % 12 + 1);
+      // D-82 / T-247: the cycle is the reporting unit, named by its label
+      // month ("this month" is the cycle that holds today). With payday 1 a
+      // cycle is the calendar month, so nothing changes there.
+      var c = schedule.cycleOn(today);
+      final o = _clamp(p.offset);
+      for (var i = 0; i < o.abs(); i++) {
+        c = o < 0 ? schedule.before(c) : schedule.after(c);
+      }
+      return ChartPeriod.cycle(c);
     case AskPeriodKind.year:
       final y = today.year + _clamp(p.offset);
       return ChartPeriod(CivilDate(y, 1, 1), CivilDate(y, 12, 31));
@@ -48,10 +55,41 @@ ChartPeriod resolveAskPeriod(
       return ChartPeriod(today.plusDays(1 - n), today);
     case AskPeriodKind.monthOfYear:
       final m = p.month < 1 || p.month > 12 ? today.month : p.month;
+      if (p.year == null) {
+        final named = _nearestCycleNamed(schedule, today, m);
+        if (named != null) return named;
+      }
       final y = p.year ?? (m <= today.month ? today.year : today.year - 1);
-      return ChartPeriod.month(y < 1 ? 1 : (y > 9999 ? 9999 : y), m);
+      final year = y < 1 ? 1 : (y > 9999 ? 9999 : y);
+      return _cycleNamed(schedule, year, m) ?? ChartPeriod.month(year, m);
     case AskPeriodKind.allTime:
       final f = firstDay != null && firstDay <= today ? firstDay : today;
       return ChartPeriod(f, today);
   }
+}
+
+/// The cycle named after [month] of [year] (D-82), or null when none of the
+/// cycles around the middle of that month is (an odd payday history).
+ChartPeriod? _cycleNamed(PaydaySchedule schedule, int year, int month) {
+  final mid = schedule.cycleOn(CivilDate(year, month, 15));
+  for (final c in [mid, schedule.before(mid), schedule.after(mid)]) {
+    final m = cycleLabelMonth(c.start);
+    if (m.year == year && m.month == month) return ChartPeriod.cycle(c);
+  }
+  return null;
+}
+
+/// FU-307: the nearest cycle named [month] that is not in the future (the
+/// current cycle counts), found among the cycles around today.
+ChartPeriod? _nearestCycleNamed(
+  PaydaySchedule schedule,
+  CivilDate today,
+  int month,
+) {
+  var c = schedule.cycleOn(today);
+  for (var i = 0; i < 14; i++) {
+    if (cycleLabelMonth(c.start).month == month) return ChartPeriod.cycle(c);
+    c = schedule.before(c);
+  }
+  return null;
 }

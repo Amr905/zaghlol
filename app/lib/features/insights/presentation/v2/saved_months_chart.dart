@@ -7,7 +7,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart' show DateFormat;
+
+import '../../../../core/l10n/date_format.dart';
+
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
@@ -229,10 +231,14 @@ class _SavedPainter extends CustomPainter {
       old.averageLabel != averageLabel;
 }
 
-/// The month name of [bar] (a payday cycle is named after the month it ends in).
+/// The month name of [bar] (a payday cycle that starts on day 21 or later is
+/// named after the next month, D-82; a calendar month after itself).
 String savedMonthName(BuildContext context, SavedBar bar) =>
-    DateFormat.MMM(Localizations.localeOf(context).languageCode)
-        .format(DateTime(bar.to.year, bar.to.month));
+    ZDateFormat.cycleMonthName(
+      bar.from,
+      Localizations.localeOf(context).languageCode,
+      short: true,
+    );
 
 /// The Overview / Trends card.
 class SavedMonthsCard extends ConsumerWidget {

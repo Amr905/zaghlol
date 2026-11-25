@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
@@ -258,7 +259,14 @@ class _CycleLine extends ConsumerWidget {
         Expanded(
           child: Text(
             [
-              if (data.calendarMonth) l.budgetOverviewCalendarMonth else range,
+              if (data.calendarMonth)
+                l.budgetOverviewCalendarMonth
+              else ...[
+                // D-82: a cycle starting on day 21 or later is named after
+                // the next month.
+                ZDateFormat.cycleMonthName(data.cycle.start, lang),
+                range,
+              ],
               ?left,
             ].join(' · '),
             style: ZType.bodySmall.copyWith(color: c.textMuted),

@@ -10,7 +10,8 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/theme/z_tokens.dart';
-import '../../budget/application/budget_providers.dart' show todayProvider;
+import '../../budget/application/budget_providers.dart'
+    show paydayScheduleProvider, todayProvider;
 import '../../budget/presentation/budget_providers_ui.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../domain/ask_models.dart';
@@ -316,6 +317,7 @@ class _MessageView extends ConsumerWidget {
       digits: ref.watch(digitsModeProvider(lang)),
       hidden: ref.watch(hideAmountsProvider),
       today: ref.watch(todayProvider),
+      schedule: ref.watch(paydayScheduleProvider).value,
       categoryNames: {
         for (final e in names.entries)
           e.key: lang == 'ar' ? e.value.ar : e.value.en,

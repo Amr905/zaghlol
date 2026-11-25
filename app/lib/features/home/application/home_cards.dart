@@ -86,13 +86,11 @@ final setupContextProvider = FutureProvider<SetupContext>((ref) async {
 final class HomeCards {
   const HomeCards({
     this.suggestion,
-    this.salary,
     this.offerAppLock = false,
     this.stepsLeft = 0,
   });
 
   final SetupSuggestion? suggestion;
-  final Money? salary;
   final bool offerAppLock;
   final int stepsLeft;
 
@@ -108,11 +106,9 @@ final homeCardsProvider = FutureProvider.family<HomeCards, bool>((
   final lockOn = await ref.watch(appLockEnabledProvider.future);
   final progress = await ref.watch(setupProgressProvider.future);
   final ctx = await ref.watch(setupContextProvider.future);
-  final salary = ref.watch(setupSalaryCreditProvider).value;
   final s = nextSetupSuggestion(ctx, handled: handled);
   return HomeCards(
     suggestion: s,
-    salary: s?.kind == SetupSuggestionKind.payday ? salary?.amount : null,
     offerAppLock:
         hasTransactions && !lockOn && !handled.contains(appLockOfferSlug),
     stepsLeft: stepsLeft(progress).length,
@@ -127,12 +123,6 @@ class HomeCardActions {
   Future<void> handle(SetupSuggestionKind kind) async {
     final repo = await _ref.read(settingsRepositoryProvider.future);
     await SetupSuggestionStore(repo).markHandled(kind);
-  }
-
-  Future<void> acceptPayday(int day) async {
-    final store = await _ref.read(paydayScheduleStoreProvider.future);
-    await store.setPayday(day);
-    await handle(SetupSuggestionKind.payday);
   }
 
   /// Turns app lock on (OS check first). Also hides amounts in notifications
