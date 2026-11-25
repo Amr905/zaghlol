@@ -36,7 +36,7 @@ final RegExp _totalLabel = RegExp(
 /// Lines that are never the total: subtotal, tax, discount, tender, change,
 /// item counts. `incl. VAT` after a total is removed first.
 final RegExp _skipLine = RegExp(
-  r'(?<![a-z])(?:sub ?total|vat|tax|discount|disc|paid|cash|change|tendered|tender|received|returned|refund|savings?|saved|balance|remaining|outstanding|card|visa|mastercard|change due|items?|qty|quantity|net sales|service)(?![a-z])'
+  r'(?<![a-z])(?:sub ?total|vat|tax|discount|disc|paid|cash|change|tendered|tender|received|returned|refund|savings?|saved|balance|remaining|outstanding|card|visa|mastercard|change due|items?|qty|quantity|net sales|service|approved|approval|authori[sz]ation)(?![a-z])'
   r'|المجموع الفرعي|قبل الخصم|ضريبه|خصم|المدفوع|مدفوع|الباقي|نقدي|نقدا|عدد|الكميه|المستلم|المرتجع|مرتجع|توفير|وفرت|الرصيد|المتبقي|متبقي|فيزا|بطاقه',
 );
 final RegExp _inclTax = RegExp(
@@ -62,6 +62,17 @@ final RegExp _cashLabel = RegExp(
 );
 final RegExp _mergedCells = RegExp(
   r'(?<![0-9.,])([0-9]+\.[0-9]{2})([0-9]+\.[0-9]{2})(?![0-9])',
+);
+final RegExp _discountLabel = RegExp(
+  r'(?<![a-z])(?:discount|disc)(?![a-z])|خصم',
+);
+
+/// Digits that are not an amount: right after a mask (`****4321`,
+/// `XXXX 4321`), right before one (`45XX`) or after `Card No` / `رقم البطاقة`.
+final RegExp _maskBefore = RegExp(r'(?:^|[^a-z])(?:x{2,}|[*•]+)[\s\-]*$');
+final RegExp _maskAfter = RegExp(r'^\s*(?:x{2}|[*•])');
+final RegExp _cardNoBefore = RegExp(
+  r'(?:(?:card|بطاقه)\s*(?:no|number|num|رقم)\.?|رقم\s*(?:ال)?بطاقه)\s*#?:?\s*$',
 );
 final RegExp _meridiem = RegExp(r'^\s*([ap])\.?m\b');
 
@@ -340,7 +351,10 @@ _Line _buildLine(String input, Currency currency) {
       }
       final before = s.substring(0, m.start);
       final after = s.substring(m.end);
-      if (_percentAfter.hasMatch(after) ||
+      if (_maskBefore.hasMatch(before) ||
+          _maskAfter.hasMatch(after) ||
+          _cardNoBefore.hasMatch(before) ||
+          _percentAfter.hasMatch(after) ||
           _qtyAfter.hasMatch(after) ||
           _qtyBefore.hasMatch(before) ||
           (m.start > 0 &&
@@ -453,7 +467,7 @@ void _markHeaderCells(List<_Line> lines) {
   return keptLabels.isEmpty ? null : (keptLabels, keptCands);
 }
 
-_Cand? _pick(Iterable<_Cand> cands) {
+_Cand? _pick(Iterable<_Cand> cands, {bool strongOnly = false}) {
   _Cand? first;
   for (final c in cands) {
     first ??= c;
@@ -461,7 +475,7 @@ _Cand? _pick(Iterable<_Cand> cands) {
       return c;
     }
   }
-  return first;
+  return strongOnly ? null : first;
 }
 
 /// The amount for [label] on line [i]: after it, before it, on one of the
@@ -471,21 +485,24 @@ _Cand? _pick(Iterable<_Cand> cands) {
   int i,
   RegExpMatch label, {
   bool loose = true,
+  bool strongOnly = false,
 }) {
   final line = lines[i];
   final after = _pick(
     line.cands.where((c) => c.start >= label.end && c.start - label.end <= 40),
+    strongOnly: strongOnly,
   );
   if (after != null) {
     return (after.money, _receiptConfidencePermille, after.decimal);
   }
   final before = _pick(
     line.cands.where((c) => c.end <= label.start).toList().reversed,
+    strongOnly: strongOnly,
   );
   if (before != null) {
     return (before.money, _receiptConfidencePermille, before.decimal);
   }
-  final block = _columnAmount(lines, i, strict: true);
+  final block = _columnAmount(lines, i, strict: true, strongOnly: strongOnly);
   if (block != null) {
     return block;
   }
@@ -494,12 +511,12 @@ _Cand? _pick(Iterable<_Cand> cands) {
     if (next.isSkip || next.labels.isNotEmpty || !next.isNum) {
       break;
     }
-    final c = _pick(next.cands);
+    final c = _pick(next.cands, strongOnly: strongOnly);
     if (c != null) {
       return (c.money, _receiptConfidencePermille, c.decimal);
     }
   }
-  return loose ? _columnAmount(lines, i) : null;
+  return loose ? _columnAmount(lines, i, strongOnly: strongOnly) : null;
 }
 
 /// Labels and values in separate blocks: the label's row in its run of
@@ -510,6 +527,7 @@ _Cand? _pick(Iterable<_Cand> cands) {
   List<_Line> lines,
   int i, {
   bool strict = false,
+  bool strongOnly = false,
 }) {
   if (!lines[i].isLab) {
     return null;
@@ -539,7 +557,7 @@ _Cand? _pick(Iterable<_Cand> cands) {
   if (nAfter >= (strict ? 2 : 1) && nAfter <= labCount && plausible) {
     final k = (i - a) - (labCount - nAfter);
     if (k >= 0) {
-      final c = _pick(lines[b + 1 + k].cands);
+      final c = _pick(lines[b + 1 + k].cands, strongOnly: strongOnly);
       if (c != null) {
         return (c.money, _columnConfidencePermille, c.decimal);
       }
@@ -553,7 +571,7 @@ _Cand? _pick(Iterable<_Cand> cands) {
     s--;
   }
   if (a - s == labCount) {
-    final c = _pick(lines[s + (i - a)].cands);
+    final c = _pick(lines[s + (i - a)].cands, strongOnly: strongOnly);
     if (c != null) {
       return (c.money, _columnConfidencePermille, c.decimal);
     }
@@ -603,7 +621,7 @@ final RegExp _zeroAfter = RegExp(r'^[\s:=\-]*0+(?:\.0+)?(?![0-9.,])');
 
 /// Values of every line labelled by [label] (same row, next value row or
 /// column block); zero and unreadable values are dropped.
-List<Money> _tenders(List<_Line> lines, RegExp label) {
+List<Money> _tenders(List<_Line> lines, RegExp label, {bool strong = false}) {
   final out = <Money>[];
   for (var i = 0; i < lines.length && out.length < 8; i++) {
     final l = lines[i];
@@ -611,13 +629,29 @@ List<Money> _tenders(List<_Line> lines, RegExp label) {
       if (_zeroAfter.hasMatch(l.s.substring(m.end))) {
         continue;
       }
-      final v = _amountFor(lines, i, m, loose: false);
+      final v = _amountFor(lines, i, m, loose: false, strongOnly: strong);
       if (v != null && v.$1.isPositive) {
         out.add(v.$1);
       }
     }
   }
   return out;
+}
+
+/// Sum of the largest strong amount of every priced row without a label,
+/// including rows that hold prices only (column blocks, lost words).
+int _pricedSum(List<_Line> lines) {
+  var sum = 0;
+  for (final l in lines) {
+    if (l.isSkip || l.labels.isNotEmpty) {
+      continue;
+    }
+    final strong = l.cands.where((c) => c.strong).toList();
+    if (strong.isNotEmpty) {
+      sum += strong.map((c) => c.money.minor).reduce((a, b) => a > b ? a : b);
+    }
+  }
+  return sum;
 }
 
 /// The labelled total by cross-checks. Candidates come from every total
@@ -644,11 +678,20 @@ _Pick? _pickTotal(List<_Line> lines) {
   final items = _itemTotals(lines);
   final itemSum = items.fold<int>(0, (a, b) => a + b);
   final itemsReadable = items.length >= _minItemsForSum;
+  // Price-only rows (no words) and priced lines the item sum may miss make
+  // the sum doubtful: a labelled total then survives the 3x rule.
+  final allSum = _pricedSum(lines);
+  final itemsDoubtful = lines.any(
+    (l) => !l.isSkip && l.labels.isEmpty && !l.hasLetters && l.cands.isNotEmpty,
+  );
   if (itemsReadable) {
-    found = [
+    final kept = [
       for (final f in found)
         if (f.money.minor <= itemSum * _maxTotalOverItems) f,
     ];
+    if (kept.isNotEmpty || !itemsDoubtful) {
+      found = kept;
+    }
   }
   if (found.any((f) => f.decimal)) {
     found = [
@@ -662,7 +705,7 @@ _Pick? _pickTotal(List<_Line> lines) {
     }
     // Every labelled total was rejected: a lone card charge at least as big as
     // every item is the best remaining reading, offered as a guess.
-    final card = _tenders(lines, _cardLabel);
+    final card = _tenders(lines, _cardLabel, strong: true);
     final top = items.isEmpty ? 0 : items.reduce((a, b) => a > b ? a : b);
     if (card.length == 1 && card.first.minor >= top) {
       return _Pick(card.first, _fallbackConfidencePermille, guess: true);
@@ -680,15 +723,35 @@ _Pick? _pickTotal(List<_Line> lines) {
     lines,
     _serviceLabel,
   ).fold<int>(0, (a, m) => a + m.minor);
-  final cards = _tenders(lines, _cardLabel).map((m) => m.minor).toList();
-  final cash = _tenders(lines, _cashLabel).map((m) => m.minor).toList();
-  final netTaxAvailable = net != null && tax > 0;
+  final discount = _tenders(
+    lines,
+    _discountLabel,
+    strong: true,
+  ).fold<int>(0, (a, m) => a + m.minor);
+  final cards = _tenders(
+    lines,
+    _cardLabel,
+    strong: true,
+  ).map((m) => m.minor).toList();
+  final cash = _tenders(
+    lines,
+    _cashLabel,
+    strong: true,
+  ).map((m) => m.minor).toList();
+  final netTaxAvailable = net != null && (tax > 0 || discount > 0);
 
   bool near(int a, int b) => (a - b).abs() <= 1;
   bool netOk(int c) =>
-      netTaxAvailable && (near(net! + tax, c) || near(net + tax + service, c));
+      netTaxAvailable &&
+      (near(net! - discount + tax, c) ||
+          near(net - discount + tax + service, c));
   bool tenderOk(int c) => [...cards, ...cash].any((t) => near(t, c));
-  bool itemsOk(int c) => itemSum > 0 && near(itemSum, c);
+  bool itemsOk(int c) =>
+      itemSum > 0 &&
+      (near(itemSum, c) ||
+          near(itemSum - discount, c) ||
+          near(allSum, c) ||
+          near(allSum - discount, c));
   int confirms(int c) =>
       (netOk(c) ? 1 : 0) + (tenderOk(c) ? 1 : 0) + (itemsOk(c) ? 1 : 0);
 
@@ -713,7 +776,7 @@ _Pick? _pickTotal(List<_Line> lines) {
     contradicts++;
   }
   if (itemsReadable) {
-    if (c < itemSum - 1) {
+    if (c < itemSum - discount - 1) {
       contradicts++;
     } else if (!netTaxAvailable) {
       neutral++;

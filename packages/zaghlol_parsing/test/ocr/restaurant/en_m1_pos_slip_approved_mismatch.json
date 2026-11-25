@@ -1,0 +1,12 @@
+{
+  "body": "Total 150.00\nVisa ****1234\nApproved 150.00",
+  "receivedAt": "2026-11-14T20:00:00",
+  "expect": {
+    "amount": "150.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": null,
+    "date": null,
+    "confidence": 600
+  }
+}

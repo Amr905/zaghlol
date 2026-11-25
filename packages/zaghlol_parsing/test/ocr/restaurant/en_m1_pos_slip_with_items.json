@@ -1,0 +1,12 @@
+{
+  "body": "Sample Cafe\nLatte 60.00\nCroissant 90.00\nTotal 150.00\nVisa ****1234\nApproved 150.00",
+  "receivedAt": "2026-11-14T20:00:00",
+  "expect": {
+    "amount": "150.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "Sample Cafe",
+    "date": null,
+    "confidence": 600
+  }
+}

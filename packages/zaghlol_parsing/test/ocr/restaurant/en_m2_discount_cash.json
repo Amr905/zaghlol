@@ -1,0 +1,12 @@
+{
+  "body": "Sample Cafe\nLatte 2 45.00 90.00\nCroissant 2 30.00 60.00\nSubtotal 150.00\nDiscount 15.00\nTotal 135.00\nCash 200.00\nChange 65.00",
+  "receivedAt": "2026-11-14T20:00:00",
+  "expect": {
+    "amount": "135.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "Sample Cafe",
+    "date": null,
+    "confidence": 600
+  }
+}
