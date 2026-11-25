@@ -173,3 +173,64 @@ Verdict: **APPROVED**
 |------|----------|---------------|
 | app UI/l10n (T-262) | B1 | 1 line: Lead delta check |
 | parsing (T-267) | M1, M2 + fixtures | over 30 lines: delta-only Sonnet re-review |
+
+---
+
+## Delta re-review (Sonnet)
+
+Scope: `git diff 7d81e534 b088cdd7 -- packages/zaghlol_parsing` (T-267 fix, `receipt_parser.dart` +81/−18, 8 new fixtures) and commit `7d81e534` (B1).
+
+Checks (worktree at `b088cdd7`): `dart analyze --fatal-infos` clean; `dart test` in `packages/zaghlol_parsing` 1740 pass (all new fixtures included); `flutter test test/features/home/presentation/home_screen_test.dart` 31 pass.
+
+### Verdicts
+
+| Finding | Verdict | Note |
+|---------|---------|------|
+| B1 (home empty-filter test) | **RESOLVED** | One-line test change to `this month`; the test file passes. |
+| M1 (masked card digits, card guess) | **RESOLVED** | Tender values now need a strong amount (`strongOnly`), digits next to a mask or after `Card No` / `رقم البطاقة` are not amounts, and the 3x rule keeps a lone labelled total when price-only rows make the item sum doubtful. |
+| M2 (discount contradicts total) | **RESOLVED** | Discount is read as a strong tender-style value and counted in `net − discount + VAT` and `itemSum − discount` (and the all-priced-rows sum). |
+
+New blocker/major: **none.** One new minor (FU-353) and two small ones below.
+
+### Probe table (`ParsingPipeline.parseOcr`, scratch test, not committed)
+
+Format: new result; where old (`b088cdd7^1`) differed it is shown.
+
+| Text | New | Old |
+|------|-----|-----|
+| `… Total 161.00` + `**** **** **** 4321` | 161.00, 600 | 161.00, 400 |
+| `… Total 161.00` + `xxxx-4321` | 161.00, 600 | 161.00, 400 |
+| `… Total 161.00` + `Visa 4321` | 161.00, 600 | 4321.00, 400 |
+| `… الاجمالي 161.00` + `رقم البطاقة 4321` | 161.00, 600 | 4321.00, 400 |
+| `Latte 60.00 / Croissant 90.00 / Card 150.00` (no total label) | 90.00, 400 | same (pre-existing) |
+| `Card 150.00` alone | unrecognized | same |
+| `Total 150` with integer items | 150.00, 600 | same |
+| `Total 150` / `Cash 200` / `Change 50`, integer items | 150.00, 600 | same |
+| `Total 150` alone | 150.00, 600 | same |
+| `Discount 10% 15.00`, total 135.00 | 135.00, 600 | 400 |
+| integer discount `Discount 15` / `Total 135` (with and without cash) | 135.00, 600 | same |
+| `Discount 10%` only, total 135.00 | 135.00, 400 | same (no amount to confirm; acceptable) |
+| discount 50 larger than items 30, `Total 30` | 30.00, 600 | 30.00 |
+| same, wrong `Total 1.00` | 1.00, 600 | 1.00, 400 (see FU-354) |
+| Net 150, discount 15, VAT 18.90, `Total 153.90`, cash 200 | 153.90, 600 | 400 |
+| Net 150, discount 15, VAT 21, `Total 171.00` (total ignores discount) | 171.00, 400 | 600 (see FU-354) |
+| items 150, discount 100, `Total 50.00` | 50.00, 600 | 400 |
+| items 150, discount 15, `Total 150.00` | 150.00, 600 | same |
+| `Total 150.00` + `Approved 150.00` | 150.00, 600 | 400 |
+| `Approved Total 150.00`, `Authorization Total 150.00`, `Authorisation 123456` after a total | 150.00, 600 | same |
+| `Total Approved 150.00` with 2 items | **90.00, 400** | 150.00, 600 |
+| `Amount Approved 150.00` with 2 items | **90.00, 400** | 150.00, 600 |
+| `Total Approved 150.00` / `Total Amount Approved 150.00` alone | **unrecognized** | 150.00, 600 |
+| `Card 45XX 1234`, `Visa XXXX4321 150.00`, `Total 150` + `Card 150`, `Tax ID **** 150.00`, `* Total 150.00`, `Max Total 150.00`, `Latte x 60.00` / `xx 60.00` | 150.00, 600 | same |
+| Pharmacy PO layout (`الإجمالي: 573.00 الخصم .00`) | **573.00, 600** | same |
+| Restaurant PO layout (Net Sales / VAT / Amount Due 436.00 / Paid 0 / Visa 436.00 / Change 0) | **436.00, 600** | same |
+
+### Findings
+
+- **FU-353 (minor, money, low confidence only).** `receipt_parser.dart:39` (`_skipLine`). The new skip words `approved|approval|authori[sz]ation` hide a real total when the word sits on the total's own line and no other total label exists: `Total Approved 150.00`, `Amount Approved 150.00` and `Total Amount Approved 150.00` now give a wrong item amount (90.00, fallback, 400) or no result, where the old code read 150.00 at 600. This is the "can the new words hide a real total" case. It is not silent: the amount is a 400 guess that always needs review, or the receipt falls to manual entry. It is a rare layout (most slips have a plain `Total`), so not a major. Suggested change: let a line that also holds a total label win over the `approved` skip word, or limit the skip to a line that has no total label.
+- **FU-354 (minor).** `receipt_parser.dart` `_pickTotal`. With a discount at or above the item sum, `c < itemSum − discount − 1` can never contradict, so a wrong tiny total passes at 600 (`Latte 10 / Croissant 20 / Discount 50 / Total 1.00`). A receipt whose total ignores a printed discount (`Total 171.00` with net 150, discount 15, VAT 21) now drops from 600 to 400 (amount is still right). Both are contrived; consider clamping the item-sum floor at the largest single item.
+- **FU-352** (tip on a card tender, from the first round) is unchanged and still open.
+
+### Lead action
+
+Verdict for the delta: **APPROVED** for B1, M1 and M2. No fix round needed; FU-353 and FU-354 go to the follow-up list.
