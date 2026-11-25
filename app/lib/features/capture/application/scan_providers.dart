@@ -4,6 +4,7 @@ import 'dart:io' show File;
 
 import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter/foundation.dart' show TargetPlatform;
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
@@ -11,6 +12,7 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 import '../../../core/ocr/ocr_port.dart';
 import '../../../core/ocr/unavailable_ocr_engine.dart';
 import '../../../core/platform/pigeon_ocr.dart';
+import '../../../ingestion/ingestion_config.dart' show kIsDevBuild;
 import '../../budget/application/budget_providers.dart' show localZoneProvider;
 import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import 'capture_providers.dart' show captureRegistryLoaderProvider;
@@ -29,22 +31,42 @@ final ocrEngineProvider = Provider<OcrEngine>(
   name: 'ocrEngineProvider',
 );
 
-/// Lets the user pick an image from the photo library and returns the path of
-/// its encrypted copy in the OCR host's spool, or null when the user
-/// cancelled. Throws [OcrException] when sealing is not available.
-typedef ScanImagePicker = Future<String?> Function();
+/// Where a scanned image comes from (T-264).
+enum ScanImageSource { camera, gallery }
+
+/// The camera could not be opened because the permission was denied; the UI
+/// offers the gallery instead.
+final class ScanCameraDeniedException implements Exception {
+  const ScanCameraDeniedException();
+}
+
+/// Lets the user take a photo or pick one from the library and returns the
+/// path of its encrypted copy in the OCR host's spool, or null when the user
+/// cancelled. Throws [OcrException] when sealing is not available and
+/// [ScanCameraDeniedException] when the camera permission is denied.
+typedef ScanImagePicker = Future<String?> Function(ScanImageSource source);
 
 final scanImagePickerProvider = Provider<ScanImagePicker?>((ref) {
   final engine = ref.watch(ocrEngineProvider);
-  return () async {
-    // Gallery only: the system Photo Picker (Android 13+) or PHPicker (iOS),
-    // so the app never holds a photo-library permission.
+  return (source) async {
+    // Gallery: the system Photo Picker (Android 13+) or PHPicker (iOS), so
+    // the app never holds a photo-library permission. Camera: the system
+    // camera intent on Android (no CAMERA permission declared) and
+    // UIImagePickerController on iOS (NSCameraUsageDescription).
     final XFile? picked;
     try {
       picked = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
+        source: source == ScanImageSource.camera
+            ? ImageSource.camera
+            : ImageSource.gallery,
         requestFullMetadata: false,
       );
+    } on PlatformException catch (e) {
+      if (source == ScanImageSource.camera &&
+          e.code == 'camera_access_denied') {
+        throw const ScanCameraDeniedException();
+      }
+      return null;
     } on Object {
       return null;
     }
@@ -70,6 +92,14 @@ final scanDiagnosticsProvider = Provider<ScanDiagnostics>(
   name: 'scanDiagnosticsProvider',
 );
 
+/// Dev flavours only (same gate as the SMS diagnostics): the scan screens can
+/// show the text the OCR read. A compile-time constant, so it is gone from
+/// staging and prod.
+final scanReadTextEnabledProvider = Provider<bool>(
+  (ref) => kIsDevBuild,
+  name: 'scanReadTextEnabledProvider',
+);
+
 final scanServiceProvider = Provider<ScanService>((ref) {
   final registry = ref.watch(captureRegistryLoaderProvider)();
   final clock = ref.watch(clockProvider);
@@ -78,6 +108,7 @@ final scanServiceProvider = Provider<ScanService>((ref) {
     engine: ref.watch(ocrEngineProvider),
     pipeline: ParsingPipeline(registry),
     diagnostics: ref.watch(scanDiagnosticsProvider),
+    keepReadText: ref.watch(scanReadTextEnabledProvider),
     wallClock: () {
       final utc = clock().toUtc();
       return utc.add(

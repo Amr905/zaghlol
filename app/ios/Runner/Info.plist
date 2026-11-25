@@ -107,6 +107,9 @@
 	<string>Zaghlol listens so you can tell it what you spent. It does not keep a recording of your voice.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Zaghlol turns your speech into text on your phone to log expenses. If your phone cannot do Arabic offline, your voice is sent to Apple's speech service only if you agree.</string>
+	<!-- T-264 (US-P03): Add > Scan > Camera. The photo is read on the phone and deleted; nothing is saved to Photos. Localised in InfoPlist.xcstrings. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Zaghlol uses the camera to photograph a receipt and read it on your phone. The photo is deleted after reading and is not saved to your photos.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Zaghlol uses Face ID to unlock the app and keep your money data private.</string>
 </dict>

@@ -100,6 +100,7 @@ class TransactionEditScreen extends ConsumerStatefulWidget {
     this.initialType = TxnEditType.expense,
     this.prefill,
     this.bannerText,
+    this.extraActions = const [],
     this.title,
   });
 
@@ -112,6 +113,9 @@ class TransactionEditScreen extends ConsumerStatefulWidget {
 
   /// Replaces the "from shared" banner (e.g. the scan banner of S-32).
   final String? bannerText;
+
+  /// Extra app-bar buttons before Save (T-264: dev-only "what I read").
+  final List<Widget> extraActions;
 
   /// Replaces the app bar title.
   final String? title;
@@ -634,6 +638,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           ),
           title: Text(title),
           actions: [
+            ...widget.extraActions,
             Padding(
               padding: const EdgeInsetsDirectional.only(end: ZSpacing.sm),
               child: ZButton(

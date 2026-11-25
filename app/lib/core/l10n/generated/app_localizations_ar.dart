@@ -4468,6 +4468,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get captureScanChoose => 'اختار صورة';
 
   @override
+  String get captureScanCamera => 'صوّر بالكاميرا';
+
+  @override
+  String get captureScanGallery => 'اختار من المعرض';
+
+  @override
+  String get captureScanCameraDenied =>
+      'زغلول مش قادر يفتح الكاميرا. افتحهاله من الإعدادات، أو اختار صورة من المعرض.';
+
+  @override
+  String get captureScanWhatIRead => 'اللي اتقرأ';
+
+  @override
+  String get captureScanWhatIReadTitle => 'الموبايل قرا إيه';
+
+  @override
+  String get captureScanWhatIReadEmpty => 'مفيش حاجة اتقرأت.';
+
+  @override
   String get captureScanChooseAnother => 'اختار صورة تانية';
 
   @override

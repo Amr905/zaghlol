@@ -2915,6 +2915,30 @@
   "@captureScanChoose": {
     "description": "B"
   },
+  "captureScanCamera": "Take a photo",
+  "@captureScanCamera": {
+    "description": "B"
+  },
+  "captureScanGallery": "Choose from gallery",
+  "@captureScanGallery": {
+    "description": "B"
+  },
+  "captureScanCameraDenied": "Zaghlol can't use the camera. Allow it in Settings, or choose a photo from the gallery.",
+  "@captureScanCameraDenied": {
+    "description": "B"
+  },
+  "captureScanWhatIRead": "What I read",
+  "@captureScanWhatIRead": {
+    "description": "B"
+  },
+  "captureScanWhatIReadTitle": "What the phone read",
+  "@captureScanWhatIReadTitle": {
+    "description": "B"
+  },
+  "captureScanWhatIReadEmpty": "Nothing was read.",
+  "@captureScanWhatIReadEmpty": {
+    "description": "B"
+  },
   "captureScanChooseAnother": "Choose another image",
   "@captureScanChooseAnother": {
     "description": "B"
