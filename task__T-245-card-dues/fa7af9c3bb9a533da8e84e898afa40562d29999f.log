@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=fa7af9c3bb9a533da8e84e898afa40562d29999f
+SKIP sha=fa7af9c3bb9a533da8e84e898afa40562d29999f no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-245-card-dues fa7af9c3bb9a533da8e84e898afa40562d29999f 2026-11-25T11:32:25.4131712+02:00
+
+
+
