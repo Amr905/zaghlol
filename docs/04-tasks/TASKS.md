@@ -344,7 +344,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-258](tasks/T-258.md) | Lint minors (FU-309…FU-312) | follow-ups | Low | Sonnet | flutter-core-engineer | — | C | 73 | DONE (batch 73) |
 | [T-259](tasks/T-259.md) | Native follow-ups (FU-332, FU-113 native) | follow-ups | Medium | Sonnet | native-platform-engineer | — | N | 73 | DONE (batch 73) |
 | [T-260](tasks/T-260.md) | Till receipts (pharmacy) read: amount around the total label, wider labels, clear empty states | PO report 2026-11-25 | High | Sonnet | parsing-engine-engineer | — | P | 74 | DONE (batch 74) |
-| [T-261](tasks/T-261.md) | PO pharmacy receipt: total on a shared row, no city/hotline/seller as merchant | PO report 2026-11-25 | Medium | Sonnet | parsing-engine-engineer | T-260 | P | 75 | TODO |
+| [T-261](tasks/T-261.md) | PO pharmacy receipt: total on a shared row, no city/hotline/seller as merchant | PO report 2026-11-25 | Medium | Sonnet | parsing-engine-engineer | T-260 | P | 75 | DONE (batch 75) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |
