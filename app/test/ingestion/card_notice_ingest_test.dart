@@ -10,7 +10,6 @@ import 'package:zaghlol/features/ingestion/data/ingest_factory.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_ports.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
 import 'package:zaghlol/ingestion/bundled_registry.dart';
-import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart' hide CategorySource;
 
 import '../features/ingestion/support/ingest_harness.dart';

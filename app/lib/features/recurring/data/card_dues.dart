@@ -140,7 +140,10 @@ class CardDues {
       }
       final sameCurrency = card.defaultCurrency == due.currency;
       final amount = sameCurrency
-          ? (due.remainingMinor ?? due.amountDueMinor ?? 0)
+          ? (due.paidMinor > 0
+                    ? due.remainingMinor
+                    : due.amountDueMinor ?? due.minDueMinor) ??
+                0
           : 0;
       final item = await _item(card.id);
       if (item == null) {
