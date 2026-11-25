@@ -1,0 +1,16 @@
+{
+  "sender": "Arab Bank",
+  "body": "EG\nA Trx using Card XXXX8216 from SPINNEYS for EGP 1,263.50 on 18-Nov-2026 at 13:05 GMT+2. Available balance is EGP 36,156.47.",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.card_trx.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "1263.50",
+    "last4": "8216",
+    "balance": "36156.47",
+    "date": "2026-11-18",
+    "time": "13:05"
+  }
+}

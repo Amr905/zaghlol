@@ -1,0 +1,16 @@
+{
+  "sender": "ArabBank",
+  "body": "A Trx using Card XXXX8216 from GEIDEAE Nour Market for EGP 263.00 on 20-Nov-2026 at 01:21 GMT+2. Available balance is EGP 36156.47.",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.card_trx.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "263.00",
+    "last4": "8216",
+    "balance": "36156.47",
+    "date": "2026-11-20",
+    "time": "01:21"
+  }
+}
