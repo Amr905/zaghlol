@@ -69,20 +69,21 @@ void main() {
         runner = FakeRunner(preview_: samplePreview());
       });
 
-      testWidgets('lists every source; statement sources are disabled', (
-        t,
-      ) async {
-        final l = await pump(t);
-        expect(find.text(l.importFlowTitle), findsOneWidget);
-        expect(find.text(l.importFlowGroupEgypt), findsOneWidget);
-        expect(find.text(l.importFlowGroupOnline), findsOneWidget);
-        expect(find.text(l.importFlowBankNbe), findsOneWidget);
-        expect(find.text(l.importFlowBankRevolut), findsOneWidget);
-        expect(find.textContaining(l.importFlowSoon), findsNWidgets(7));
-        await t.tap(find.text(l.importFlowBankNbe), warnIfMissed: false);
-        await t.pumpAndSettle();
-        expect(picker.calls, 0);
-      });
+      testWidgets(
+        'lists every source; online-bank CSVs are still coming soon',
+        (t) async {
+          final l = await pump(t);
+          expect(find.text(l.importFlowTitle), findsOneWidget);
+          expect(find.text(l.importFlowGroupEgypt), findsOneWidget);
+          expect(find.text(l.importFlowGroupOnline), findsOneWidget);
+          expect(find.text(l.importFlowBankNbe), findsOneWidget);
+          expect(find.text(l.importFlowBankRevolut), findsOneWidget);
+          expect(find.textContaining(l.importFlowSoon), findsNWidgets(3));
+          await t.tap(find.text(l.importFlowBankRevolut), warnIfMissed: false);
+          await t.pumpAndSettle();
+          expect(picker.calls, 0);
+        },
+      );
 
       testWidgets('text scale 1.3 does not overflow', (t) async {
         await pump(t, scale: 1.3);

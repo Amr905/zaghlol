@@ -150,6 +150,18 @@ class ImportStatementPdfUseCase {
     } finally {
       bytes.fillRange(0, bytes.length, 0);
     }
+    return openFragments(fragments, bankKey: bankKey);
+  }
+
+  /// Finds the table in text that is already read (photos of a statement,
+  /// read by the OCR reader, T-269).
+  Future<StatementReading> openFragments(
+    List<PdfTextFragment> fragments, {
+    required String bankKey,
+  }) async {
+    if (fragments.isEmpty) {
+      throw const StatementImportException(StatementImportFailure.noText);
+    }
     final template = await _templates.load(bankKey);
     final table = buildStatementTable(
       fragments,
@@ -191,7 +203,10 @@ class ImportStatementPdfUseCase {
   /// A real import needs [confirmedYear] when [needsYear] and a decision in
   /// [decisions] (by row number, see [StatementRow.number]) for every flagged
   /// row; otherwise it throws `yearNotConfirmed` / `reviewRequired` and
-  /// writes nothing.
+  /// writes nothing. A decision on a clean row is optional: `skip` drops it,
+  /// `asExpense` / `asIncome` flips its direction (T-269). A row that matches
+  /// an existing transaction is skipped as a duplicate unless its number is in
+  /// [keepDuplicates].
   Future<ImportSummary> run(
     StatementReading reading,
     StatementMapping mapping, {
@@ -200,6 +215,7 @@ class ImportStatementPdfUseCase {
     bool saveTemplate = true,
     int? confirmedYear,
     Map<int, StatementReviewChoice> decisions = const {},
+    Set<int> keepDuplicates = const {},
   }) async {
     final parsed = parse(reading, mapping, confirmedYear: confirmedYear);
     if (!dryRun) {
@@ -219,7 +235,24 @@ class ImportStatementPdfUseCase {
       }
     }
     // Decided rows join the clean ones in table order.
-    final accepted = <StatementRow>[...parsed.rows];
+    final accepted = <StatementRow>[];
+    for (final r in parsed.rows) {
+      final d = decisions[r.number];
+      if (d == StatementReviewChoice.skip) continue;
+      accepted.add(
+        d == StatementReviewChoice.asExpense ||
+                d == StatementReviewChoice.asIncome
+            ? StatementRow(
+                date: r.date,
+                description: r.description,
+                isExpense: d == StatementReviewChoice.asExpense,
+                amount: r.amount,
+                balance: r.balance,
+                number: r.number,
+              )
+            : r,
+      );
+    }
     for (final r in parsed.review) {
       final d = decisions[r.number];
       if (d == null || d == StatementReviewChoice.skip) continue;
@@ -249,7 +282,15 @@ class ImportStatementPdfUseCase {
             StatementImportFailure.unknownAccount,
           );
         }
-        return _apply(parsed, accepted, accountId, dryRun, newIds, decisions);
+        return _apply(
+          parsed,
+          accepted,
+          accountId,
+          dryRun,
+          newIds,
+          decisions,
+          keepDuplicates,
+        );
       });
     } on StatementImportException {
       rethrow;
@@ -285,7 +326,9 @@ class ImportStatementPdfUseCase {
     bool dryRun,
     List<String> newIds,
     Map<int, StatementReviewChoice> decisions,
+    Set<int> keepDuplicates,
   ) async {
+    final duplicateRows = <int>[];
     // Existing rows per local day, read once.
     final existing = <String, Map<String, int>>{};
     final seen = <String, int>{};
@@ -309,8 +352,11 @@ class ImportStatementPdfUseCase {
       final k = '$day|${_key(dir, r.amount)}';
       final nth = seen.update(k, (n) => n + 1, ifAbsent: () => 1);
       if (nth <= (counts[_key(dir, r.amount)] ?? 0)) {
-        duplicates++;
-        continue;
+        duplicateRows.add(r.number);
+        if (!keepDuplicates.contains(r.number)) {
+          duplicates++;
+          continue;
+        }
       }
       if (!dryRun) {
         newIds.add(
@@ -358,6 +404,7 @@ class ImportStatementPdfUseCase {
       earliest: earliest,
       latest: latest,
       needsReview: pending,
+      duplicateRows: duplicateRows,
     );
   }
 

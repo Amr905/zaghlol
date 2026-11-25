@@ -7299,6 +7299,258 @@
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
   },
+  "stmtImportTitle": "{bank} statement",
+  "@stmtImportTitle": {
+    "description": "T-269 screen title",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportSub": "Pick the PDF, or photos of its pages. It is read on your phone only, and nothing is saved until you confirm.",
+  "@stmtImportSub": {
+    "description": "T-269 intro"
+  },
+  "stmtImportPickPdf": "Choose a PDF",
+  "@stmtImportPickPdf": {
+    "description": "T-269 button"
+  },
+  "stmtImportPickImages": "Choose photos of the pages",
+  "@stmtImportPickImages": {
+    "description": "T-269 button"
+  },
+  "stmtImportErrNoRows": "I could not find a table of transactions in this file. Try the PDF from your bank's app, or clearer photos.",
+  "@stmtImportErrNoRows": {
+    "description": "T-269 failure: no table"
+  },
+  "stmtImportErrNoText": "There is no readable text in this file. If it is a scan, try clearer photos.",
+  "@stmtImportErrNoText": {
+    "description": "T-269 failure: no text"
+  },
+  "stmtImportErrNoOcr": "This phone cannot read text from pictures, so scanned statements won't work here. A PDF straight from the bank's app does.",
+  "@stmtImportErrNoOcr": {
+    "description": "T-269 failure: OCR not available on this phone"
+  },
+  "stmtImportErrPassword": "This PDF has a password and I did not get it. Pick the file again and type the password.",
+  "@stmtImportErrPassword": {
+    "description": "T-269 failure: password not given"
+  },
+  "stmtImportErrSave": "I could not save, so nothing was added. Try again.",
+  "@stmtImportErrSave": {
+    "description": "T-269 failure: save failed"
+  },
+  "stmtImportErrYear": "Pick the year first.",
+  "@stmtImportErrYear": {
+    "description": "T-269 failure: year missing"
+  },
+  "stmtMapTitle": "Which column is what?",
+  "@stmtMapTitle": {
+    "description": "T-269 mapping step title"
+  },
+  "stmtMapHint": "I could not tell the columns by their titles. Tell me once and I will remember it for this bank.",
+  "@stmtMapHint": {
+    "description": "T-269 mapping step hint"
+  },
+  "stmtMapColumn": "Column {n}",
+  "@stmtMapColumn": {
+    "description": "T-269 mapping column fallback title",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtMapRoleDate": "Date",
+  "@stmtMapRoleDate": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleDescription": "Description",
+  "@stmtMapRoleDescription": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleDebit": "Money out",
+  "@stmtMapRoleDebit": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleCredit": "Money in",
+  "@stmtMapRoleCredit": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleAmount": "Amount (with sign)",
+  "@stmtMapRoleAmount": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleBalance": "Balance",
+  "@stmtMapRoleBalance": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleIgnore": "Ignore",
+  "@stmtMapRoleIgnore": {
+    "description": "T-269 column role"
+  },
+  "stmtMapDayFirst": "Day comes before the month",
+  "@stmtMapDayFirst": {
+    "description": "T-269 date order switch"
+  },
+  "stmtMapCurrency": "Currency",
+  "@stmtMapCurrency": {
+    "description": "T-269 currency picker label"
+  },
+  "stmtMapInvalid": "Pick one date, one description and the money columns.",
+  "@stmtMapInvalid": {
+    "description": "T-269 mapping invalid hint"
+  },
+  "stmtImportReviewTitle": "Check the rows",
+  "@stmtImportReviewTitle": {
+    "description": "T-269 review title"
+  },
+  "stmtImportNothingSaved": "Nothing is saved until you tap the button at the bottom.",
+  "@stmtImportNothingSaved": {
+    "description": "T-269 review reassurance"
+  },
+  "stmtImportAccountTitle": "Which account is this?",
+  "@stmtImportAccountTitle": {
+    "description": "T-269 account section"
+  },
+  "stmtImportCurrencyLabel": "Currency from the statement",
+  "@stmtImportCurrencyLabel": {
+    "description": "T-269 currency label"
+  },
+  "stmtImportAccountNew": "New account",
+  "@stmtImportAccountNew": {
+    "description": "T-269 account choice"
+  },
+  "stmtImportAccountName": "Account name",
+  "@stmtImportAccountName": {
+    "description": "T-269 new account field"
+  },
+  "stmtImportAccountLast4": "Last 4 digits (optional)",
+  "@stmtImportAccountLast4": {
+    "description": "T-269 new account field"
+  },
+  "stmtImportAccountNoneYet": "You have no {currency} account yet. Create one for this statement.",
+  "@stmtImportAccountNoneYet": {
+    "description": "T-269 no matching account",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportYearTitle": "Which year is this statement from?",
+  "@stmtImportYearTitle": {
+    "description": "T-269 year prompt"
+  },
+  "stmtImportYearBody": "The dates in it have no year. Pick the year of the latest one.",
+  "@stmtImportYearBody": {
+    "description": "T-269 year prompt body"
+  },
+  "stmtImportSectionAnswer": "Needs your answer ({n})",
+  "@stmtImportSectionAnswer": {
+    "description": "T-269 review section",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportSectionRows": "Rows to add ({n})",
+  "@stmtImportSectionRows": {
+    "description": "T-269 review section",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportSectionDup": "Already in Zaghlol ({n})",
+  "@stmtImportSectionDup": {
+    "description": "T-269 review section",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportReasonDirection": "I cannot tell if this one is money in or out.",
+  "@stmtImportReasonDirection": {
+    "description": "T-269 flagged row reason"
+  },
+  "stmtImportReasonBalance": "The balance printed after this row does not add up.",
+  "@stmtImportReasonBalance": {
+    "description": "T-269 flagged row reason"
+  },
+  "stmtImportChoiceKeep": "Keep as read",
+  "@stmtImportChoiceKeep": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportChoiceOut": "Money out",
+  "@stmtImportChoiceOut": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportChoiceIn": "Money in",
+  "@stmtImportChoiceIn": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportChoiceSkip": "Skip",
+  "@stmtImportChoiceSkip": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportRowSkipped": "Skipped",
+  "@stmtImportRowSkipped": {
+    "description": "T-269 row state"
+  },
+  "stmtImportRowUndo": "Undo",
+  "@stmtImportRowUndo": {
+    "description": "T-269 row action"
+  },
+  "stmtImportRowEdit": "Change this row",
+  "@stmtImportRowEdit": {
+    "description": "T-269 row menu a11y label"
+  },
+  "stmtImportDupNote": "Looks like one you already have, so it will be skipped.",
+  "@stmtImportDupNote": {
+    "description": "T-269 duplicate row note"
+  },
+  "stmtImportDupAddAnyway": "Add anyway",
+  "@stmtImportDupAddAnyway": {
+    "description": "T-269 duplicate row action"
+  },
+  "stmtImportBlockedAnswers": "Answer the rows marked above first.",
+  "@stmtImportBlockedAnswers": {
+    "description": "T-269 confirm hint"
+  },
+  "stmtImportBlockedYear": "Pick the year first.",
+  "@stmtImportBlockedYear": {
+    "description": "T-269 confirm hint"
+  },
+  "stmtImportBlockedAccount": "Choose or create the account first.",
+  "@stmtImportBlockedAccount": {
+    "description": "T-269 confirm hint"
+  },
+  "stmtImportNothingToAdd": "Nothing left to add.",
+  "@stmtImportNothingToAdd": {
+    "description": "T-269 confirm hint when every row is skipped or a duplicate"
+  },
+  "stmtImportRowSemantics": "{date}, {description}, {amount}, {direction}",
+  "@stmtImportRowSemantics": {
+    "description": "T-269 row a11y label",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "description": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
   "commonAmountsHide": "Hide amounts",
   "@commonAmountsHide": {
     "description": "D-67 eye button label and tooltip: hide every amount in the app"

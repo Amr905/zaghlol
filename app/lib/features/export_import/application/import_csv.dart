@@ -166,6 +166,7 @@ final class ImportSummary {
     this.earliest,
     this.latest,
     this.needsReview = 0,
+    this.duplicateRows = const [],
     this.autoCategorised = 0,
     this.needCategory = 0,
     this.topCategories = const [],
@@ -182,6 +183,10 @@ final class ImportSummary {
   /// PDF statements: rows held back for the user to keep, fix or skip. A real
   /// import refuses to run while a row has no decision.
   final int needsReview;
+
+  /// PDF statements: numbers of the rows that matched an existing
+  /// transaction (a dry run lists them so the user can keep one anyway).
+  final List<int> duplicateRows;
 
   /// Data rows in the file (header excluded).
   final int totalRows;

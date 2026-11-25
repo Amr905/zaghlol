@@ -565,4 +565,69 @@ void main() {
       expect(ImportStatementPdfUseCase.needsYear(reading), isFalse);
     });
   });
+
+  group('review decisions on clean rows and kept duplicates (T-269)', () {
+    test('skip drops a clean row, a direction flip changes it', () async {
+      final uc = make(FakeExtractor(statement()));
+      final reading = await uc.open(pdfBytes(), bankKey: 'cib');
+      final s = await uc.run(
+        reading,
+        mapping(),
+        accountId: 'a1',
+        decisions: {
+          1: StatementReviewChoice.skip,
+          3: StatementReviewChoice.asExpense,
+        },
+      );
+      expect(s.imported, 2);
+      expect(store.rows.map((r) => r.direction), [
+        TxnDirection.expense,
+        TxnDirection.expense,
+      ]);
+    });
+
+    test(
+      'a dry run lists duplicate rows; keepDuplicates imports them',
+      () async {
+        final uc = make(FakeExtractor(statement()));
+        await uc.run(
+          await uc.open(pdfBytes(), bankKey: 'cib'),
+          mapping(),
+          accountId: 'a1',
+        );
+        final reading = await uc.open(pdfBytes(), bankKey: 'cib');
+        final dry = await uc.run(
+          reading,
+          mapping(),
+          accountId: 'a1',
+          dryRun: true,
+        );
+        expect(dry.duplicateRows, [1, 2, 3]);
+        expect(dry.imported, 0);
+        final s = await uc.run(
+          reading,
+          mapping(),
+          accountId: 'a1',
+          keepDuplicates: {2},
+        );
+        expect(s.imported, 1);
+        expect(s.duplicates, 2);
+        expect(store.rows, hasLength(4));
+      },
+    );
+
+    test('openFragments with no text is noText', () async {
+      final uc = make(FakeExtractor(const []));
+      await expectLater(
+        uc.openFragments(const [], bankKey: 'cib'),
+        throwsA(
+          isA<StatementImportException>().having(
+            (e) => e.kind,
+            'kind',
+            StatementImportFailure.noText,
+          ),
+        ),
+      );
+    });
+  });
 }

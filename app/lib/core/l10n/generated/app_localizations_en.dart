@@ -7576,6 +7576,194 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importFlowUnavailable => 'This source isn\'t ready yet';
 
   @override
+  String stmtImportTitle(String bank) {
+    return '$bank statement';
+  }
+
+  @override
+  String get stmtImportSub =>
+      'Pick the PDF, or photos of its pages. It is read on your phone only, and nothing is saved until you confirm.';
+
+  @override
+  String get stmtImportPickPdf => 'Choose a PDF';
+
+  @override
+  String get stmtImportPickImages => 'Choose photos of the pages';
+
+  @override
+  String get stmtImportErrNoRows =>
+      'I could not find a table of transactions in this file. Try the PDF from your bank\'s app, or clearer photos.';
+
+  @override
+  String get stmtImportErrNoText =>
+      'There is no readable text in this file. If it is a scan, try clearer photos.';
+
+  @override
+  String get stmtImportErrNoOcr =>
+      'This phone cannot read text from pictures, so scanned statements won\'t work here. A PDF straight from the bank\'s app does.';
+
+  @override
+  String get stmtImportErrPassword =>
+      'This PDF has a password and I did not get it. Pick the file again and type the password.';
+
+  @override
+  String get stmtImportErrSave =>
+      'I could not save, so nothing was added. Try again.';
+
+  @override
+  String get stmtImportErrYear => 'Pick the year first.';
+
+  @override
+  String get stmtMapTitle => 'Which column is what?';
+
+  @override
+  String get stmtMapHint =>
+      'I could not tell the columns by their titles. Tell me once and I will remember it for this bank.';
+
+  @override
+  String stmtMapColumn(String n) {
+    return 'Column $n';
+  }
+
+  @override
+  String get stmtMapRoleDate => 'Date';
+
+  @override
+  String get stmtMapRoleDescription => 'Description';
+
+  @override
+  String get stmtMapRoleDebit => 'Money out';
+
+  @override
+  String get stmtMapRoleCredit => 'Money in';
+
+  @override
+  String get stmtMapRoleAmount => 'Amount (with sign)';
+
+  @override
+  String get stmtMapRoleBalance => 'Balance';
+
+  @override
+  String get stmtMapRoleIgnore => 'Ignore';
+
+  @override
+  String get stmtMapDayFirst => 'Day comes before the month';
+
+  @override
+  String get stmtMapCurrency => 'Currency';
+
+  @override
+  String get stmtMapInvalid =>
+      'Pick one date, one description and the money columns.';
+
+  @override
+  String get stmtImportReviewTitle => 'Check the rows';
+
+  @override
+  String get stmtImportNothingSaved =>
+      'Nothing is saved until you tap the button at the bottom.';
+
+  @override
+  String get stmtImportAccountTitle => 'Which account is this?';
+
+  @override
+  String get stmtImportCurrencyLabel => 'Currency from the statement';
+
+  @override
+  String get stmtImportAccountNew => 'New account';
+
+  @override
+  String get stmtImportAccountName => 'Account name';
+
+  @override
+  String get stmtImportAccountLast4 => 'Last 4 digits (optional)';
+
+  @override
+  String stmtImportAccountNoneYet(String currency) {
+    return 'You have no $currency account yet. Create one for this statement.';
+  }
+
+  @override
+  String get stmtImportYearTitle => 'Which year is this statement from?';
+
+  @override
+  String get stmtImportYearBody =>
+      'The dates in it have no year. Pick the year of the latest one.';
+
+  @override
+  String stmtImportSectionAnswer(String n) {
+    return 'Needs your answer ($n)';
+  }
+
+  @override
+  String stmtImportSectionRows(String n) {
+    return 'Rows to add ($n)';
+  }
+
+  @override
+  String stmtImportSectionDup(String n) {
+    return 'Already in Zaghlol ($n)';
+  }
+
+  @override
+  String get stmtImportReasonDirection =>
+      'I cannot tell if this one is money in or out.';
+
+  @override
+  String get stmtImportReasonBalance =>
+      'The balance printed after this row does not add up.';
+
+  @override
+  String get stmtImportChoiceKeep => 'Keep as read';
+
+  @override
+  String get stmtImportChoiceOut => 'Money out';
+
+  @override
+  String get stmtImportChoiceIn => 'Money in';
+
+  @override
+  String get stmtImportChoiceSkip => 'Skip';
+
+  @override
+  String get stmtImportRowSkipped => 'Skipped';
+
+  @override
+  String get stmtImportRowUndo => 'Undo';
+
+  @override
+  String get stmtImportRowEdit => 'Change this row';
+
+  @override
+  String get stmtImportDupNote =>
+      'Looks like one you already have, so it will be skipped.';
+
+  @override
+  String get stmtImportDupAddAnyway => 'Add anyway';
+
+  @override
+  String get stmtImportBlockedAnswers => 'Answer the rows marked above first.';
+
+  @override
+  String get stmtImportBlockedYear => 'Pick the year first.';
+
+  @override
+  String get stmtImportBlockedAccount => 'Choose or create the account first.';
+
+  @override
+  String get stmtImportNothingToAdd => 'Nothing left to add.';
+
+  @override
+  String stmtImportRowSemantics(
+    String date,
+    String description,
+    String amount,
+    String direction,
+  ) {
+    return '$date, $description, $amount, $direction';
+  }
+
+  @override
   String get commonAmountsHide => 'Hide amounts';
 
   @override
