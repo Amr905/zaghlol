@@ -50,4 +50,18 @@ void main() {
     expect(shapeSignature('x ' * 500).length, lessThanOrEqualTo(80));
     expect(shapeSignature(''), '');
   });
+
+  test(
+    'T-248: a Title Case or ALL CAPS name equal to a cue word is masked',
+    () {
+      // Cue words survive in lower case; the same words as names do not.
+      final lower = shapeSignature('payment received');
+      expect(lower, contains('payment'));
+      for (final b in ['Payment received', 'PAYMENT received']) {
+        final sig = shapeSignature(b);
+        expect(sig, isNot(contains('payment')), reason: b);
+        expect(sig, contains('received'));
+      }
+    },
+  );
 }

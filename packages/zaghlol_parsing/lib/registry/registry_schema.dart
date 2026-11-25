@@ -571,6 +571,7 @@ Template? _template(ObjReader r, List<RegistryIssue> out) {
       sourceText != 'synthetic-unverified') {
     out.add(RegistryIssue('${r.path}.source', RegistryIssueCode.badValue));
   }
+  final strongSenderOnly = r.boolean('strongSenderOnly') ?? false;
   var isAvailableLimit = false;
   final flags = r.object('flags');
   if (flags != null) {
@@ -596,6 +597,7 @@ Template? _template(ObjReader r, List<RegistryIssue> out) {
     event: event,
     direction: direction,
     baseConfidencePermille: confidence,
+    strongSenderOnly: strongSenderOnly,
     pattern: pattern,
     currencyMap: currencyMap,
     date: date,

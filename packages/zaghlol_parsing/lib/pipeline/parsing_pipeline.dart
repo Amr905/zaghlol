@@ -165,7 +165,14 @@ final class ParsingPipeline {
     // Stage 3: first matching template, message language first.
     final language = detectLanguage(folded.text);
     ParseUnrecognized? firstFatal;
+    final weakSender = registry.isTemplateOnlySource(
+      institution,
+      request.source,
+    );
     for (final template in _candidates(institution, request, language)) {
+      if (weakSender && template.strongSenderOnly) {
+        continue;
+      }
       final groups = matchTemplateOriginal(template, folded, body);
       if (groups == null) {
         continue;

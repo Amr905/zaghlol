@@ -51,6 +51,11 @@ class _Shapes extends _Fake {
 }
 
 void main() {
+  test('T-248: the unread query is capped (FU-306)', () {
+    expect(kDiagUnreadLimit, 500);
+    expect(kDiagNote, contains('500'));
+  });
+
   test('a phone number is never named', () {
     expect(diagSenderLabel('+20 100 123 4567'), '(number)');
     expect(diagSenderLabel('01001234567'), '(number)');

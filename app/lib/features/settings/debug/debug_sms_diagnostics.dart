@@ -15,6 +15,9 @@ import '../../../core/db/app_database.dart';
 import '../../../core/db/app_database_providers.dart';
 import '../../../ingestion/ingestion_config.dart' show kIsDevBuild;
 
+/// Newest unresolved unrecognized rows read per refresh (T-248, FU-306).
+const int kDiagUnreadLimit = 500;
+
 /// One read of the counters.
 final class SmsDiagSnapshot {
   const SmsDiagSnapshot({
@@ -148,7 +151,8 @@ final class NativeAndDbSmsDiagnostics implements SmsDiagnosticsSource {
           'SELECT r.sender AS sender, r.body AS body, v.payload AS payload '
           'FROM review_items v JOIN raw_messages r ON r.id = v.raw_message_id '
           "WHERE r.channel = 'sms' AND v.resolved_at IS NULL "
-          "AND v.kind = 'unrecognized'",
+          "AND v.kind = 'unrecognized' "
+          'ORDER BY v.created_at DESC LIMIT $kDiagUnreadLimit',
           readsFrom: {_db.rawMessages, _db.reviewItems},
         )
         .get();
