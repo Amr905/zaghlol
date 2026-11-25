@@ -1,0 +1,12 @@
+{
+  "body": "١٩٩٩٩ - القاهرة\nفرع النزهة\n53فاتورة رقم 13/11/2026 :تاريخ 15:09:35\n138.00 1.00DUSPATALIN RETARD 200M\n300.00 2.00GLUCOPHAGE XR 1000MG\n135.00 1.00METHYLTECHNO (VIT. B12)\n.00 الخصم 573.00 :الإجمالـــي\n.00 المدفوع\n-573.00 :المتبقـــى\nHotline 19999\n730-773-728",
+  "receivedAt": "2026-11-25T20:00:00",
+  "expect": {
+    "amount": "573.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": null,
+    "date": "2026-11-13",
+    "confidence": 600
+  }
+}

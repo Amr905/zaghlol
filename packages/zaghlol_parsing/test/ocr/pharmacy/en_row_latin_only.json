@@ -1,0 +1,12 @@
+{
+  "body": "- 19999\n15:09:35 13/11/2026 53\ndoctor7 51234\n01000000000\n1111\n1.00DUSPATALIN RETARD 200M 138.00\n2.00GLUCOPHAGE XR 1000MG 300.00\n1.00METHYLTECHNO (VIT. B12) 135.00\n573.00 .00\n.00\n-573.00\nHotline 19999\n730-773-728\n13/11/2026 15:09:39",
+  "receivedAt": "2026-11-25T20:00:00",
+  "expect": {
+    "amount": "573.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.fallback",
+    "merchant": null,
+    "date": "2026-11-13",
+    "confidence": 400
+  }
+}
