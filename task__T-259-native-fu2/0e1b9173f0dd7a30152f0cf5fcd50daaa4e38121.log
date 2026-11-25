@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=0e1b9173f0dd7a30152f0cf5fcd50daaa4e38121
+SKIP sha=0e1b9173f0dd7a30152f0cf5fcd50daaa4e38121 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-259-native-fu2 0e1b9173f0dd7a30152f0cf5fcd50daaa4e38121 2026-11-25T18:30:26.6377078+02:00
+
+
+
