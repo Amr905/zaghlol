@@ -415,10 +415,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get commonPeriodThisCycle => 'This cycle';
+  String get commonPeriodThisCycle => 'This pay month';
 
   @override
-  String get commonPeriodLastCycle => 'Last cycle';
+  String get commonPeriodLastCycle => 'Last pay month';
 
   @override
   String get commonPeriodThisMonth => 'This month';
@@ -1173,7 +1173,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeHeroSpentThisMonth => 'Spent this month';
 
   @override
-  String get homeHeroSpentThisCycle => 'Spent this cycle';
+  String get homeHeroSpentThisCycle => 'Spent this month';
 
   @override
   String homeHeroSpentInCycleMonth(String month) {
@@ -1189,7 +1189,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeHeroBudgetUsedUp =>
-      'This cycle\'s budget is used up — go easy on the rest';
+      'This month\'s budget is used up — go easy on the rest';
 
   @override
   String get homeHeroKpiIncome => 'Income';
@@ -1218,7 +1218,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeMascotShockedCategory(String category, String percent) {
-    return 'Heads up! $category is at $percent of its budget and the cycle\'s still young.';
+    return 'Heads up! $category is at $percent of its budget and the month\'s still young.';
   }
 
   @override
@@ -1265,11 +1265,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeMascotProudSavedMore(String amount) {
-    return 'Look at you! $amount more saved than last cycle 👏';
+    return 'Look at you! $amount more saved than last month 👏';
   }
 
   @override
-  String get homeMascotProudGoal => 'Goal hit this cycle! 🎯 You\'ve got this';
+  String get homeMascotProudGoal => 'Goal hit this month! 🎯 You\'ve got this';
 
   @override
   String homeMascotPayday(String amount) {
@@ -1299,7 +1299,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homePromptBudget =>
-      'First full cycle done! Want to set a budget for the next one?';
+      'First full month done! Want to set a budget for the next one?';
 
   @override
   String get homePromptBudgetYes => 'Let\'s do it';
@@ -1423,7 +1423,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeEmptyFilter(String cards) {
-    return 'No transactions for $cards this cycle';
+    return 'No transactions for $cards this month';
   }
 
   @override
@@ -3333,9 +3333,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String insightsDeepProjection(String state, String projected) {
     String _temp0 = intl.Intl.selectLogic(state, {
       'over':
-          'At this pace you\'ll finish the cycle at $projected, over your budget',
+          'At this pace you\'ll finish the month at $projected, over your budget',
       'other':
-          'At this pace you\'ll finish the cycle at $projected, within your budget',
+          'At this pace you\'ll finish the month at $projected, within your budget',
     });
     return '$_temp0';
   }
@@ -3908,10 +3908,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get budgetOverviewEdit => 'Edit budgets';
 
   @override
-  String get budgetOverviewPrevA11y => 'Previous cycle';
+  String get budgetOverviewPrevA11y => 'Previous month';
 
   @override
-  String get budgetOverviewNextA11y => 'Next cycle';
+  String get budgetOverviewNextA11y => 'Next month';
 
   @override
   String get budgetOverviewEmptyTitle =>
@@ -3962,7 +3962,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get budgetEditRolloverHint =>
-      'Unspent budget is added to the next cycle.';
+      'Unspent budget is added to the next month.';
 
   @override
   String get budgetEditAnnual => 'Annual budgets';
@@ -4970,10 +4970,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatPeriodLastWeek => 'last week';
 
   @override
-  String get chatPeriodThisCycle => 'this cycle';
+  String get chatPeriodThisCycle => 'this pay month';
 
   @override
-  String get chatPeriodLastCycle => 'last cycle';
+  String get chatPeriodLastCycle => 'last pay month';
 
   @override
   String get chatPeriodThisMonth => 'this month';
@@ -6075,7 +6075,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goldPaywallBenefitCharts =>
-      'Deeper chart insight: compare with last cycle and see where it ends';
+      'Deeper chart insight: compare with last month and see where it ends';
 
   @override
   String get goldPaywallBenefitVoice => 'Unlimited voice logging';
@@ -6932,11 +6932,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose a day from the 1st up to the 28th';
 
   @override
-  String get settingsPrefsPaydayChangeTitle => 'Change payday mid-cycle?';
+  String get settingsPrefsPaydayChangeTitle => 'Change payday mid-month?';
 
   @override
   String get settingsPrefsPaydayChangeBody =>
-      'Your current cycle will end early and a new one starts from the new payday.';
+      'Your current month will end early and a new one starts from the new payday.';
 
   @override
   String get settingsPrefsIncome => 'Monthly income target';
@@ -7025,12 +7025,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String shareStudioCardBudget(String percent) {
-    return 'I finished the cycle $percent under budget!';
+    return 'I finished the month $percent under budget!';
   }
 
   @override
   String shareStudioCardBudgetAmount(String amount) {
-    return 'I finished the cycle $amount under budget!';
+    return 'I finished the month $amount under budget!';
   }
 
   @override
@@ -7787,7 +7787,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String commonPeriodLastCycles(String n) {
-    return 'Last $n cycles';
+    return 'Last $n pay months';
   }
 
   @override

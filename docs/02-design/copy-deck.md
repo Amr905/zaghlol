@@ -425,8 +425,8 @@ A mascot line names its **Rive state** (`ZaghlolAvatar` input: `tourGuide`, `pro
 | `common_date_hoursAgo` | `{count, plural, =1{من ساعة} =2{من ساعتين} few{من {n} ساعات} many{من {n} ساعة} other{من {n} ساعة}}` | `{count, plural, =1{1 hr ago} other{{n} hr ago}}` | C · count:int, n · whole hours, 1–23; 24 or more → `{date}`. 0 can't occur (that's minutes), so no `=0` (listed in §0.4) |
 | `common_date_dateTime` | {date}، {time} | {date}, {time} | L |
 | `common_date_range` | {start} – {end} | {start} – {end} | L · en dash; RTL reads start first (from the right) |
-| `common_period_thisCycle` | الدورة دي | This cycle | C |
-| `common_period_lastCycle` | الدورة اللي فاتت | Last cycle | C |
+| `common_period_thisCycle` | شهر المرتب ده | This pay month | C |
+| `common_period_lastCycle` | شهر المرتب اللي فات | Last pay month | C |
 | `common_period_thisMonth` | الشهر ده | This month | C |
 | `common_period_pickMonth` | شهر معين | A month | C |
 | `common_period_custom` | من تاريخ لتاريخ | Custom range | C |
@@ -676,10 +676,10 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 | `home_hero_daysToPayday` | `{count, plural, =0{القبض النهارده} =1{فاضل يوم على القبض} =2{فاضل يومين على القبض} few{فاضل {n} أيام على القبض} many{فاضل {n} يوم على القبض} other{فاضل {n} يوم على القبض}}` | `{count, plural, =0{Payday is today} =1{1 day to payday} other{{n} days to payday}}` | L · count:int, n · followed by ` · ` and `common_date_range` |
 | `home_hero_calendarMonth` | لحد ما تقولي ميعاد قبضك | until you tell me your payday | S · A-43, replaces the payday line when no payday is set |
 | `home_hero_spentThisMonth` | صرفت الشهر ده | Spent this month | L · no payday and no budget (first visit, mockup 25) |
-| `home_hero_spentThisCycle` | صرفت الدورة دي | Spent this cycle | L · payday set, no budget (EC-24) |
+| `home_hero_spentThisCycle` | صرفت الشهر ده | Spent this month | L · payday set, no budget (EC-24) |
 | `home_hero_setBudgetHint` | حط ميزانية عشان تعرف تصرف كام في اليوم | Set a budget to see what's safe to spend each day | S · replaces safe-to-spend, never shows zeros |
 | `home_hero_setBudget` | حط ميزانية | Set a budget | B · opens S-23 |
-| `home_hero_budgetUsedUp` | ميزانية الدورة دي خلصت، حاسب على الباقي | This cycle's budget is used up — go easy on the rest | S · safe-to-spend = 0 with budget > 0 (BR-BUD-03 clamps it with `max(0, …)`, so it's never negative). The hero still shows the amount `0`, with this as its caption. Calm, no joke. See Q-06 |
+| `home_hero_budgetUsedUp` | ميزانية الشهر ده خلصت، حاسب على الباقي | This month's budget is used up — go easy on the rest | S · safe-to-spend = 0 with budget > 0 (BR-BUD-03 clamps it with `max(0, …)`, so it's never negative). The hero still shows the amount `0`, with this as its caption. Calm, no joke. See Q-06 |
 | `home_hero_kpiIncome` | دخلك | Income | C · C-10 |
 | `home_hero_kpiSpent` | صرفت | Spent | C · tap opens S-11 filtered |
 | `home_hero_kpiLeft` | فاضلك | Left | C |
@@ -689,7 +689,7 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 ### Mascot banner (C-14, one at a time, dismissible per message ID, at most once per cycle)
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `home_mascot_shockedCategory` | حاسب يا كبير! {category} وصل {percent} من ميزانيته ولسه بدري في الدورة. | Heads up! {category} is at {percent} of its budget and the cycle's still young. | M · Rive `shocked` · BR-MAS-01a: category ≥ 85% before day 20 |
+| `home_mascot_shockedCategory` | حاسب يا كبير! {category} وصل {percent} من ميزانيته ولسه بدري في الشهر. | Heads up! {category} is at {percent} of its budget and the month's still young. | M · Rive `shocked` · BR-MAS-01a: category ≥ 85% before day 20 |
 | `home_mascot_shockedCategoryAlt` | {category} قرّب يخلص يا كبير، {percent} راحوا ولسه بدري. نهدّي شوية؟ | {category} is nearly gone — {percent} used already. Ease off a little? | M · Rive `shocked` · same trigger, alternate line |
 | `home_mascot_shockedDining` | الأكل بره والدليفري زايدين {percent} عن العادي بتاعك. المطبخ وحشك؟ 🍳 | Eating out and delivery are up {percent} on your usual. Missing your kitchen? 🍳 | M · Rive `shocked` · BR-MAS-01b: more than 30% above the 3-cycle average |
 | `home_mascot_detectiveDuplicate` | اتخصم منك {amount} مرتين من {merchant} في دقايق. بص عليها كده. | {merchant} charged you {amount} twice within minutes. Worth a look. | M · Rive `detective` · BR-MAS-03 duplicate POS (A-34). Money alert, so no emoji |
@@ -699,8 +699,8 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 | `home_mascot_detectiveSubscriptionNot` | مش اشتراك | Not a subscription | B |
 | `home_mascot_detectiveSelfTransfer` | {amount} راحوا من {fromCard} لـ {toCard}. دي تحويلة لنفسك، فمش هحسبها مصروف 👌 | {amount} moved from {fromCard} to {toCard}. That's you paying you, so it's not spending 👌 | M · Rive `detective` · BR-MAS-03 / BR-XFR-01 self-transfer paired |
 | `home_mascot_proudOnTrack` | عاش يا وحش! صارف أقل من خطتك لحد دلوقتي 👏 | Nice one! You're spending under plan so far 👏 | M · Rive `proud` · BR-MAS-02: under the ideal burn line, ≥ 7 days into the cycle |
-| `home_mascot_proudSavedMore` | عاش يا وحش! وفرت {amount} زيادة عن الدورة اللي فاتت 👏 | Look at you! {amount} more saved than last cycle 👏 | M · Rive `proud` · BR-MAS-02, only when the computed delta is > 0 |
-| `home_mascot_proudGoal` | هدف الدورة اتحقق! 🎯 إنت قدها | Goal hit this cycle! 🎯 You've got this | M · Rive `proud` · BR-MAS-02 goal met |
+| `home_mascot_proudSavedMore` | عاش يا وحش! وفرت {amount} زيادة عن الشهر اللي فات 👏 | Look at you! {amount} more saved than last month 👏 | M · Rive `proud` · BR-MAS-02, only when the computed delta is > 0 |
+| `home_mascot_proudGoal` | هدف الشهر اتحقق! 🎯 إنت قدها | Goal hit this month! 🎯 You've got this | M · Rive `proud` · BR-MAS-02 goal met |
 | `home_mascot_payday` | المرتب نزل! {amount} 🎉 يلا نخطط له من أوله | Payday! {amount} just landed 🎉 Let's plan it from day one | M · Rive `payday` · salary detected (D-35), once per payday. `domain-algorithms.md` §7 treats `payday` as motion-only, and the C-14 priority list has no payday slot. Proposed slot: above `proud`, below `detective`. See Q-18 |
 | `home_mascot_dismissA11y` | اقفل الرسالة | Dismiss message | A · × on C-14 |
 
@@ -709,9 +709,9 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 |---|---|---|---|
 | `home_prompt_payday` | لقيت مرتب {amount} بينزل يوم {day} كل شهر. ده ميعاد قبضك؟ | I spotted a salary of {amount} landing on day {day} each month. Is that your payday? | M · Rive `detective` · salary-like credit detected |
 | `home_prompt_paydayYes` | أيوه، يوم {day} | Yes, day {day} | B · only when the detected day is 1–28 (BR-BUD-01). The second button is `common_action_no` |
-| `home_prompt_paydayMonthStart` | لقيت مرتب {amount} بينزل آخر الشهر. نحسب الدورة من أول الشهر لآخره؟ | I spotted a salary of {amount} arriving at the end of the month. Shall we track each calendar month, from the 1st? | M · Rive `detective` · D-68: salary detected on day 29, 30 or 31 → suggest payday = 1 (calendar month). The salary counts in the month it arrives; no copy needed for that |
+| `home_prompt_paydayMonthStart` | لقيت مرتب {amount} بينزل آخر الشهر. نحسب شهرك من أول الشهر لآخره؟ | I spotted a salary of {amount} arriving at the end of the month. Shall we track each calendar month, from the 1st? | M · Rive `detective` · D-68: salary detected on day 29, 30 or 31 → suggest payday = 1 (calendar month). The salary counts in the month it arrives; no copy needed for that |
 | `home_prompt_paydayMonthStartYes` | أيوه، من أول الشهر | Yes, from the 1st | B · D-68; the second button is `common_action_no` |
-| `home_prompt_budget` | خلصت أول دورة معايا! تحب نحط ميزانية للدورة الجاية؟ | First full cycle done! Want to set a budget for the next one? | M · Rive `tourGuide` · first full cycle completed |
+| `home_prompt_budget` | خلصت أول شهر معايا! تحب نحط ميزانية للشهر الجاي؟ | First full month done! Want to set a budget for the next one? | M · Rive `tourGuide` · first full cycle completed |
 | `home_prompt_budgetYes` | يلا | Let's do it | B · opens S-23 |
 | `home_prompt_backup` | بقالك أسبوع بتسجل معايا. اعمل نسخة احتياطية ببلاش عشان بياناتك تفضل في أمان لو حصل حاجة للموبايل. | A week of data so far. Make a free backup so it's safe if anything happens to your phone. | M · Rive `tourGuide` · A-65, 7 days of data |
 | `home_prompt_backupYes` | اعمل نسخة | Back up | B · opens S-66 |
@@ -742,7 +742,7 @@ States: loading (skeleton, no copy) · scanning · empty · no budget · budget 
 | `home_empty_bodyWaiting` | أول ما توصلك رسالة بنك هتظهر هنا لوحدها. | They'll show up here as soon as a bank message arrives. | S · Android with SMS on: no button |
 | `home_empty_bodyAdd` | سجّل أول مصروف وأنا أكمّل معاك. | Log your first expense and I'll take it from there. | S · every other case |
 | `home_empty_add` | ضيف أول مصروف | Add first expense | B · opens S-30 |
-| `home_empty_filter` | مفيش حركات لـ {cards} في الدورة دي | No transactions for {cards} this cycle | S · filter-caused empty + `common_action_clearFilter`. cards = a card label or `common_cardFilter_count` |
+| `home_empty_filter` | مفيش حركات لـ {cards} في الشهر ده | No transactions for {cards} this month | S · filter-caused empty + `common_action_clearFilter`. cards = a card label or `common_cardFilter_count` |
 
 ## 1.10 Transaction row (C-05, used on S-10, S-11, S-41) — `transactions_row_*`
 | Key | AR | EN | Notes |
@@ -1380,7 +1380,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_charts_context` | {cards} · {currency} · {period} | {cards} · {currency} · {period} | L · filter context line under each chart title (C-13). period = `common_period_*` or `common_date_range` |
 | `insights_charts_explain` | اشرحلي يا زغلول | Explain this | B · the FR-CHT-03 name. Also the S-21 button |
 | `insights_charts_lockedSub` | شوف الشارت كله مع جولد | See the full chart with Gold | S · C-13 locked, blurred preview + `common_gold_unlock` |
-| `insights_charts_emptyCycle` | هيشتغل بعد أول دورة كاملة | Comes alive after your first full cycle | S · C-13 empty (EC-23) |
+| `insights_charts_emptyCycle` | هيشتغل بعد أول شهر كامل | Comes alive after your first full month | S · C-13 empty (EC-23) |
 | `insights_charts_emptyNetWorth` | ضيف حسابات أو أصول علشان الشارت ده يشتغل | Add accounts or assets to bring this chart to life | S · charts 8 and 11 when they have nothing to show |
 | `insights_charts_emptyNetWorthAction` | افتح فلوسي | Open Money | B · opens S-40 |
 | `insights_charts_emptyFilter` | مفيش بيانات للفلتر ده في الفترة دي | No data for this filter in this period | S · plus `common_action_clearFilter` |
@@ -1394,7 +1394,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_chartTitle_rule503020` | ميزان خمسين تلاتين عشرين | 50/30/20 balance | T · chart 4 (Gold) |
 | `insights_chartTitle_weekPattern` | إمتى بتصرف؟ | When you spend | T · chart 5 (Gold), day of week and hour |
 | `insights_chartTitle_merchants` | أكتر الأماكن اللي بتاخد فلوسك | Top merchants | T · chart 6 (Free, top five) |
-| `insights_chartTitle_vsAverage` | الدورة دي قصاد متوسط تلات دورات | This cycle vs your 3-cycle average | T · chart 7 (Gold) |
+| `insights_chartTitle_vsAverage` | الشهر ده قصاد متوسط تلات شهور | This month vs your 3-month average | T · chart 7 (Gold) |
 | `insights_chartTitle_installments` | أقساطك في الستة شهور الجايين | Installments, next 6 months | T · chart 8 (Gold) |
 | `insights_chartTitle_subscriptions` | الاشتراكات في السنة كلها | Subscriptions over a year | T · chart 9 (Gold) |
 | `insights_chartTitle_cards` | الصرف على كروتك ومحافظك | Cards & wallets | T · chart 10 (Gold) |
@@ -1412,7 +1412,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_legend_savings` | تحويش | Savings | C |
 | `insights_legend_target` | المثالي | Target | C · chart 4 target mark |
 | `insights_legend_average` | متوسطك | Your average | C · chart 7 |
-| `insights_legend_thisCycle` | الدورة دي | This cycle | C · chart 7 |
+| `insights_legend_thisCycle` | الشهر ده | This month | C · chart 7 |
 | `insights_legend_installments` | أقساط | Installments | C · chart 8 |
 | `insights_legend_cardDues` | كروت وجمعية | Cards & gameya | C · chart 8 |
 | `insights_legend_monthly` | في الشهر | Per month | C · chart 9 |
@@ -1425,7 +1425,7 @@ States: loading (chart-shaped skeletons) · populated · empty (less than one fu
 | `insights_chartA11y_rule503020` | ميزان خمسين تلاتين عشرين: {needsPct} أساسيات، {wantsPct} رفاهيات، {savingsPct} تحويش | 50/30/20: {needsPct} needs, {wantsPct} wants, {savingsPct} savings | A |
 | `insights_chartA11y_weekPattern` | إمتى بتصرف: أعلى يوم {peakDay} بمتوسط {amount} | When you spend: busiest day is {peakDay}, averaging {amount} | A |
 | `insights_chartA11y_merchants` | أكتر الأماكن: {merchant} الأول بـ {amount} | Top merchants: {merchant} first with {amount} | A |
-| `insights_chartA11y_vsAverage` | الدورة دي قصاد متوسطك: أكبر زيادة في {category} بـ {percent} | This cycle vs average: biggest rise is {category} at {percent} | A |
+| `insights_chartA11y_vsAverage` | الشهر ده قصاد متوسطك: أكبر زيادة في {category} بـ {percent} | This month vs average: biggest rise is {category} at {percent} | A |
 | `insights_chartA11y_installments` | الأقساط: الشهر ده {sum} | Installments: {sum} due this month | A |
 | `insights_chartA11y_subscriptions` | الاشتراكات: {monthly} في الشهر، يعني {yearly} في السنة | Subscriptions: {monthly} a month, {yearly} a year | A |
 | `insights_chartA11y_cards` | الكروت: {card} الأكبر بـ {percent} من الصرف | Cards: {card} is the largest at {percent} of spending | A |
@@ -1525,12 +1525,12 @@ States: populated · explainer closed (button) · typing (≤ 600 ms) · explain
 | `insights_chartDetail_typingA11y` | زغلول بيكتب | Zaghlol is typing | A · Rive `professor`, typing dots |
 | `insights_chartDetail_tipLabel` | نصيحة | Tip | C · label on the tip line |
 | `insights_chartDetail_deepLabel` | تحليل أعمق | Deeper look | C · with `common_gold_badge`; shown on the deep part |
-| `insights_chartDetail_deepUpsell` | عايز تحليل أعمق؟ جولد بيقارن بالدورة اللي فاتت ويتوقع آخر الدورة. | Want a deeper look? Gold compares with last cycle and projects your cycle's end. | S · Free only, once under the basic tip, plus `common_gold_unlock` |
-| `insights_chartDetail_needsData` | `{need, select, cycle{محتاج دورة كاملة علشان أشرحلك الشارت ده} months{محتاج تلات دورات علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}` | `{need, select, cycle{I need one full cycle before I can explain this chart} months{I need three cycles to compare you with yourself} accounts{Add accounts or assets and I'll explain} installments{Add an installment or commitment and I'll explain} subscriptions{No subscriptions yet. I'll explain once I spot one} other{I need more data to explain this chart}}` | M · `need:select` (cycle/months/accounts/installments/subscriptions/other) · empty explainer |
+| `insights_chartDetail_deepUpsell` | عايز تحليل أعمق؟ جولد بيقارن بالشهر اللي فات ويتوقع آخر الشهر. | Want a deeper look? Gold compares with last month and projects your month's end. | S · Free only, once under the basic tip, plus `common_gold_unlock` |
+| `insights_chartDetail_needsData` | `{need, select, cycle{محتاج شهر كامل علشان أشرحلك الشارت ده} months{محتاج تلات شهور علشان أقارنك بنفسك} accounts{ضيف حسابات أو أصول وأنا أشرحلك} installments{ضيف قسط أو التزام وأنا أشرحلك} subscriptions{لسه مفيش اشتراكات. أول ما ألاقي واحد هشرحلك} other{محتاج بيانات أكتر علشان أشرح الشارت ده}}` | `{need, select, cycle{I need one full month before I can explain this chart} months{I need three months to compare you with yourself} accounts{Add accounts or assets and I'll explain} installments{Add an installment or commitment and I'll explain} subscriptions{No subscriptions yet. I'll explain once I spot one} other{I need more data to explain this chart}}` | M · `need:select` (cycle/months/accounts/installments/subscriptions/other) · empty explainer |
 | `insights_chartDetail_explainFailed` | معرفتش أشرح الشارت ده دلوقتي | Couldn't explain this chart right now | N · bubble hidden, chart stays |
 | `insights_chartDetail_lockedTitle` | الشارت ده في جولد | This chart is part of Gold | T · whole-screen locked state + `common_gold_unlock` |
 | `insights_chartDetail_lockedBody` | اتفرج على شكله، وافتحه كله مع جولد | Take a look, then unlock it with Gold | S |
-| `insights_deep_projection` | `{state, select, over{بالسرعة دي هتقفل الدورة على {projected}، يعني فوق ميزانيتك} other{بالسرعة دي هتقفل الدورة على {projected}، يعني في حدود ميزانيتك}}` | `{state, select, over{At this pace you'll finish the cycle at {projected}, over your budget} other{At this pace you'll finish the cycle at {projected}, within your budget}}` | S · Gold deep, charts 1, 2, 3, 5, 7 · `state:select(over/other)`. Only when a budget exists |
+| `insights_deep_projection` | `{state, select, over{بالسرعة دي هتقفل الشهر على {projected}، يعني فوق ميزانيتك} other{بالسرعة دي هتقفل الشهر على {projected}، يعني في حدود ميزانيتك}}` | `{state, select, over{At this pace you'll finish the month at {projected}, over your budget} other{At this pace you'll finish the month at {projected}, within your budget}}` | S · Gold deep, charts 1, 2, 3, 5, 7 · `state:select(over/other)`. Only when a budget exists |
 | `insights_deep_drivers` | أكتر التجار اللي ورا التغيير: {merchant} و{merchant2} و{merchant3} | The merchants behind the change: {merchant}, {merchant2} and {merchant3} | S · Gold deep · only when three merchants qualify |
 
 ## 2.4 Chart explanation templates — `insights_explain<Chart>_*`
@@ -1539,33 +1539,33 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 ### Chart 1 — Cash flow
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `insights_explainCashFlow_basic` | `{state, select, short{الدورة دي دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{الدورة دي دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}` | `{state, select, short{This cycle you earned {income} and spent {spent}, so you're {gap} over your income. Let's sort it out together.} other{This cycle you earned {income} and spent {spent}, so you saved {saved}. That's {percent} of your income. Well done!}}` | E · `state:select(short/other)`: short = spent more than earned. No emoji in the short branch |
-| `insights_explainCashFlow_tip` | `{state, select, short{لو قللت {category} بـ {target} الدورة الجاية، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}` | `{state, select, short{Trimming {category} by {target} next cycle would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}` | S · `state`, category = largest category, target |
-| `insights_explainCashFlow_deep` | `{trend, select, up{صافي الدورة دي أحسن من الدورة اللي فاتت بـ {delta}.} down{صافي الدورة دي أقل من الدورة اللي فاتت بـ {delta}.} other{صافي الدورة دي زي الدورة اللي فاتت تقريباً.}}` | `{trend, select, up{This cycle's net is {delta} better than last cycle.} down{This cycle's net is {delta} lower than last cycle.} other{This cycle's net is about the same as last cycle.}}` | E · Gold · `trend` (up = better) |
-| `insights_explainCashFlow_deepTip` | ثبّت هدف تحوّش {target} كل دورة، يعني {yearly} في السنة. | Set a goal of saving {target} every cycle. That's {yearly} a year. | S · Gold |
+| `insights_explainCashFlow_basic` | `{state, select, short{في {now} دخلك {income} وصرفت {spent}، يعني صرفت أكتر من دخلك بـ {gap}. خلينا نظبطها سوا.} other{في {now} دخلك {income} وصرفت {spent}، يعني حوشت {saved}. ده {percent} من دخلك. الله ينور!}}` | `{state, select, short{Over {now} you earned {income} and spent {spent}, so you're {gap} over your income. Let's sort it out together.} other{Over {now} you earned {income} and spent {spent}, so you saved {saved}. That's {percent} of your income. Well done!}}` | E · `state:select(short/other)`: short = spent more than earned. No emoji in the short branch |
+| `insights_explainCashFlow_tip` | `{state, select, short{لو قللت {category} بـ {target} الشهر الجاي، ده هيساعدك تقفل الفرق.} other{حوّل {target} على الأقل من الفايض ده للتحويش قبل ما يتصرف.}}` | `{state, select, short{Trimming {category} by {target} next month would help close the gap.} other{Move at least {target} of this surplus into savings before it gets spent.}}` | S · `state`, category = largest category, target |
+| `insights_explainCashFlow_deep` | `{trend, select, up{صافي {now} أحسن من {prev} بـ {delta}.} down{صافي {now} أقل من {prev} بـ {delta}.} other{صافي {now} زي {prev} تقريباً.}}` | `{trend, select, up{Net over {now} is {delta} better than {prev}.} down{Net over {now} is {delta} lower than {prev}.} other{Net over {now} is about the same as {prev}.}}` | E · Gold · `trend` (up = better) |
+| `insights_explainCashFlow_deepTip` | ثبّت هدف تحوّش {target} كل شهر، يعني {yearly} في السنة. | Set a goal of saving {target} every month. That's {yearly} a year. | S · Gold |
 
 ### Chart 2 — Where your money went
 | Key | AR | EN | Notes |
 |---|---|---|---|
 | `insights_explainCategories_basic` | {category} واخد {percent} من صرفك، يعني {amount}. وبعده {category2} بـ {percent2}. | {category} takes {percent} of your spending, that's {amount}. {category2} is next at {percent2}. | E |
-| `insights_explainCategories_tip` | حط سقف لـ{category} أقل بـ {target} من الدورة دي، وهتوفر الفرق. | Cap {category} {target} below this cycle and keep the difference. | S |
-| `insights_explainCategories_deep` | `{trend, select, up{{category} زاد عن الدورة اللي فاتت بـ {delta}.} down{{category} قل عن الدورة اللي فاتت بـ {delta}.} other{{category} تقريباً زي الدورة اللي فاتت.}}` | `{trend, select, up{{category} is up {delta} on last cycle.} down{{category} is down {delta} on last cycle.} other{{category} is about the same as last cycle.}}` | E · Gold |
-| `insights_explainCategories_deepTip` | قلّل {category} بـ {target} كل دورة، يعني {yearly} في السنة. | Bring {category} down by {target} each cycle. That's {yearly} a year. | S · Gold |
+| `insights_explainCategories_tip` | حط سقف لـ{category} أقل بـ {target} من الشهر ده، وهتوفر الفرق. | Cap {category} {target} below this month and keep the difference. | S |
+| `insights_explainCategories_deep` | `{trend, select, up{{category} زاد عن {prev} بـ {delta}.} down{{category} قل عن {prev} بـ {delta}.} other{{category} تقريباً زي {prev}.}}` | `{trend, select, up{{category} is up {delta} on {prev}.} down{{category} is down {delta} on {prev}.} other{{category} is about the same as {prev}.}}` | E · Gold |
+| `insights_explainCategories_deepTip` | قلّل {category} بـ {target} كل شهر، يعني {yearly} في السنة. | Bring {category} down by {target} each month. That's {yearly} a year. | S · Gold |
 
 ### Chart 3 — Burn rate to payday
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `insights_explainBurnRate_basic` | `{state, select, over{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الدورة وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}` | `{state, select, over{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, above the ideal pace. What's left covers {perDay} a day.} other{You're on day {cycleDay} of the cycle and have spent {spent} of {budget}, under the ideal pace. You can spend {perDay} a day.}}` | E · `state:select(over/other)`. perDay = BR-BUD-03 |
-| `insights_explainBurnRate_tip` | `{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الدورة. تقدر تصرف {perDay} في اليوم.}}` | `{state, select, over{Bring your daily spending down to {perDay} until payday so the budget lasts.} other{Keep this pace and the gap becomes surplus at the end of the cycle. You can spend {perDay} a day.}}` | S |
-| `insights_explainBurnRate_deep` | `{trend, select, up{في نفس اليوم الدورة اللي فاتت كنت صارف أقل بـ {delta}.} down{في نفس اليوم الدورة اللي فاتت كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الدورة اللي فاتت تقريباً.}}` | `{trend, select, up{At this point last cycle you had spent {delta} less.} down{At this point last cycle you had spent {delta} more.} other{Your spending is about the same as this point last cycle.}}` | E · Gold · `trend` (up = spending more than last cycle) |
+| `insights_explainBurnRate_basic` | `{state, select, over{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني فوق الخط المثالي. الباقي يكفي {perDay} في اليوم بس.} other{إنت في اليوم {cycleDay} من الشهر وصارف {spent} من {budget}، يعني تحت الخط المثالي. مسموحلك {perDay} في اليوم.}}` | `{state, select, over{You're on day {cycleDay} of the month and have spent {spent} of {budget}, above the ideal pace. What's left covers {perDay} a day.} other{You're on day {cycleDay} of the month and have spent {spent} of {budget}, under the ideal pace. You can spend {perDay} a day.}}` | E · `state:select(over/other)`. perDay = BR-BUD-03 |
+| `insights_explainBurnRate_tip` | `{state, select, over{نزّل صرفك اليومي لـ {perDay} لحد القبض علشان الميزانية تكفي.} other{كمّل على نفس الإيقاع، والفرق ده هيبقى فايض آخر الشهر. تقدر تصرف {perDay} في اليوم.}}` | `{state, select, over{Bring your daily spending down to {perDay} until payday so the budget lasts.} other{Keep this pace and the gap becomes surplus at the end of the month. You can spend {perDay} a day.}}` | S |
+| `insights_explainBurnRate_deep` | `{trend, select, up{في نفس اليوم في الشهر اللي فات كنت صارف أقل بـ {delta}.} down{في نفس اليوم في الشهر اللي فات كنت صارف أكتر بـ {delta}.} other{صرفك زي نفس اليوم في الشهر اللي فات تقريباً.}}` | `{trend, select, up{At this point last month you had spent {delta} less.} down{At this point last month you had spent {delta} more.} other{Your spending is about the same as this point last month.}}` | E · Gold · `trend` (up = spending more than last cycle) |
 | `insights_explainBurnRate_deepTip` | لو قللت {target} من صرفك اليومي هتفضل تحت الخط لحد القبض. | Cut {target} from your daily spending and you'll stay under the line until payday. | S · Gold |
 
 ### Chart 4 — 50/30/20 balance
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `insights_explainRule503020_basic` | `{state, select, wantsHigh{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك الدورة دي: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}` | `{state, select, wantsHigh{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Wants are above the usual rule.} savingsLow{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Savings are below the usual rule.} other{This cycle: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. That's close to the usual rule.}}` | E · `state:select(wantsHigh/savingsLow/other)`. The rule is fifty, thirty, twenty; the chart title carries it |
-| `insights_explainRule503020_tip` | `{state, select, wantsHigh{نزّل الرفاهيات {target} الدورة الجاية وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الدورة الجاية.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}` | `{state, select, wantsHigh{Trim wants by {target} next cycle and move it to savings.} savingsLow{Try to add {target} to your savings next cycle.} other{Keep this up, and add {target} more if you can.}}` | S |
-| `insights_explainRule503020_deep` | `{trend, select, up{التحويش زاد عن الدورة اللي فاتت لـ {savingsPct}.} down{التحويش نزل عن الدورة اللي فاتت لـ {savingsPct}.} other{التحويش ثابت تقريباً عن الدورة اللي فاتت.}}` | `{trend, select, up{Savings rose from last cycle to {savingsPct}.} down{Savings fell from last cycle to {savingsPct}.} other{Savings are about the same as last cycle.}}` | E · Gold |
+| `insights_explainRule503020_basic` | `{state, select, wantsHigh{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. الرفاهيات أعلى من القاعدة المعروفة.} savingsLow{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. التحويش أقل من القاعدة المعروفة.} other{صرفك في {now}: {needsPct} أساسيات و{wantsPct} رفاهيات و{savingsPct} تحويش. ده قريب من القاعدة المعروفة.}}` | `{state, select, wantsHigh{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Wants are above the usual rule.} savingsLow{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. Savings are below the usual rule.} other{Over {now}: {needsPct} needs, {wantsPct} wants, {savingsPct} savings. That's close to the usual rule.}}` | E · `state:select(wantsHigh/savingsLow/other)`. The rule is fifty, thirty, twenty; the chart title carries it |
+| `insights_explainRule503020_tip` | `{state, select, wantsHigh{نزّل الرفاهيات {target} الشهر الجاي وحوّلهم للتحويش.} savingsLow{حاول تزود التحويش {target} الشهر الجاي.} other{حافظ على التحويش ده، وزوده {target} لو قدرت.}}` | `{state, select, wantsHigh{Trim wants by {target} next month and move it to savings.} savingsLow{Try to add {target} to your savings next month.} other{Keep this up, and add {target} more if you can.}}` | S |
+| `insights_explainRule503020_deep` | `{trend, select, up{التحويش زاد عن {prev} لـ {savingsPct}.} down{التحويش نزل عن {prev} لـ {savingsPct}.} other{التحويش ثابت تقريباً عن {prev}.}}` | `{trend, select, up{Savings rose from {prev} to {savingsPct}.} down{Savings fell from {prev} to {savingsPct}.} other{Savings are about the same as {prev}.}}` | E · Gold |
 | `insights_explainRule503020_deepTip` | لو التحويش وصل لـ {percent}، هتحوّش {yearly} في السنة. | If savings reach {percent}, you'll save {yearly} a year. | S · Gold · percent = the next 5-point step |
 
 ### Chart 5 — When you spend
@@ -1573,7 +1573,7 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 |---|---|---|---|
 | `insights_explainWeekPattern_basic` | يوم {peakDay} و{peakDay2} واخدين {percent} من صرفك الأسبوعي، وأكتر وقت إيدك بتفرط فيه حوالين {time}. | {peakDay} and {peakDay2} take {percent} of your weekly spending, and your busiest hour is around {time}. | E |
 | `insights_explainWeekPattern_tip` | حط سقف {target} ليوم {peakDay} الجاي. | Set a {target} limit for next {peakDay}. | S |
-| `insights_explainWeekPattern_deep` | `{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من الدورة اللي فاتت.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من الدورة اللي فاتت.} other{متوسط صرفك يوم {peakDay} {amount}، زي الدورة اللي فاتت تقريباً.}}` | `{trend, select, up{Your average on {peakDay} is {amount}, higher than last cycle.} down{Your average on {peakDay} is {amount}, lower than last cycle.} other{Your average on {peakDay} is {amount}, about the same as last cycle.}}` | E · Gold |
+| `insights_explainWeekPattern_deep` | `{trend, select, up{متوسط صرفك يوم {peakDay} {amount}، وده أعلى من {prev}.} down{متوسط صرفك يوم {peakDay} {amount}، وده أقل من {prev}.} other{متوسط صرفك يوم {peakDay} {amount}، زي {prev} تقريباً.}}` | `{trend, select, up{Your average on {peakDay} is {amount}, higher than {prev}.} down{Your average on {peakDay} is {amount}, lower than {prev}.} other{Your average on {peakDay} is {amount}, about the same as {prev}.}}` | E · Gold |
 | `insights_explainWeekPattern_deepTip` | لو قللت خروجة {peakDay} بـ {target} كل أسبوع، هتوفر {yearly} في السنة. | Spend {target} less each {peakDay} and you'll save {yearly} a year. | S · Gold |
 
 ### Chart 6 — Top merchants
@@ -1581,16 +1581,16 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 |---|---|---|---|
 | `insights_explainMerchants_basic` | {merchant} في المركز الأول بـ {amount} ({visits})، وبعده {merchant2} بـ {amount2}. | {merchant} is first with {amount} ({visits}), then {merchant2} with {amount2}. | E · visits = `common_unit_visits` |
 | `insights_explainMerchants_tip` | جمّع مشترياتك من {merchant} في زيارة واحدة كل أسبوع. | Group your {merchant} shopping into one visit a week. | S |
-| `insights_explainMerchants_deep` | `أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن الدورة اللي فاتت بـ {delta}.} down{و{merchant} قل عن الدورة اللي فاتت بـ {delta}.} other{و{merchant} زي الدورة اللي فاتت تقريباً.}}` | `Your top three merchants take {percent} of your spending. {trend, select, up{{merchant} is up {delta} on last cycle.} down{{merchant} is down {delta} on last cycle.} other{{merchant} is about the same as last cycle.}}` | E · Gold |
-| `insights_explainMerchants_deepTip` | لو قللت {merchant} بالربع هتوفر {target} في الدورة، يعني {yearly} في السنة. | Cut {merchant} by a quarter and you'll save {target} a cycle, {yearly} a year. | S · Gold |
+| `insights_explainMerchants_deep` | أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن {prev} بـ {delta}.} down{و{merchant} قل عن {prev} بـ {delta}.} other{و{merchant} زي {prev} تقريباً.}} | Your top three merchants take {percent} of your spending. {trend, select, up{{merchant} is up {delta} on {prev}.} down{{merchant} is down {delta} on {prev}.} other{{merchant} is about the same as {prev}.}} | E · Gold |
+| `insights_explainMerchants_deepTip` | لو قللت {merchant} بالربع هتوفر {target} في الشهر، يعني {yearly} في السنة. | Cut {merchant} by a quarter and you'll save {target} a month, {yearly} a year. | S · Gold |
 
 ### Chart 7 — This cycle vs your 3-cycle average
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `insights_explainVsAverage_basic` | `{state, select, both{{category} زاد {percent} عن متوسط آخر تلات دورات، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات دورات.} drop{{category2} نزل {percent2} عن متوسط آخر تلات دورات. برافو عليك.} other{صرفك الدورة دي قريب من متوسط آخر تلات دورات.}}` | `{state, select, both{{category} is up {percent} on your 3-cycle average, but {category2} is down {percent2}. Nice work on that.} rise{{category} is up {percent} on your 3-cycle average.} drop{{category2} is down {percent2} on your 3-cycle average. Nice work.} other{This cycle is close to your 3-cycle average.}}` | E · `state:select(both/rise/drop/other)`. Needs three earlier cycles (`insights_chartDetail_needsData`) |
+| `insights_explainVsAverage_basic` | `{state, select, both{{category} زاد {percent} عن متوسط آخر تلات شهور، لكن {category2} نزل {percent2}. برافو على ده.} rise{{category} زاد {percent} عن متوسط آخر تلات شهور.} drop{{category2} نزل {percent2} عن متوسط آخر تلات شهور. برافو عليك.} other{صرفك الشهر ده قريب من متوسط آخر تلات شهور.}}` | `{state, select, both{{category} is up {percent} on your 3-month average, but {category2} is down {percent2}. Nice work on that.} rise{{category} is up {percent} on your 3-month average.} drop{{category2} is down {percent2} on your 3-month average. Nice work.} other{This month is close to your 3-month average.}}` | E · `state:select(both/rise/drop/other)`. Needs three earlier cycles (`insights_chartDetail_needsData`) |
 | `insights_explainVsAverage_tip` | `{state, select, both{لو رجّعت {category} لمتوسطك هتوفر {target}.} rise{لو رجّعت {category} لمتوسطك هتوفر {target}.} drop{كمّل على نفس النظام في {category2}.} other{كمّل على نفس الإيقاع.}}` | `{state, select, both{Bring {category} back to your average and you'll save {target}.} rise{Bring {category} back to your average and you'll save {target}.} drop{Keep doing what you're doing with {category2}.} other{Keep this pace.}}` | S |
 | `insights_explainVsAverage_deep` | `{trend, select, up{في الإجمالي إنت فوق متوسطك بـ {delta}.} down{في الإجمالي إنت تحت متوسطك بـ {delta}.} other{في الإجمالي إنت على متوسطك تقريباً.}}` | `{trend, select, up{Overall you're {delta} above your average.} down{Overall you're {delta} below your average.} other{Overall you're right on your average.}}` | E · Gold |
-| `insights_explainVsAverage_deepTip` | حط حد لـ {category} على قد متوسطك، يعني {target} في الدورة. | Set {category}'s limit at your average, that's {target} a cycle. | S · Gold |
+| `insights_explainVsAverage_deepTip` | حط حد لـ {category} على قد متوسطك، يعني {target} في الشهر. | Set {category}'s limit at your average, that's {target} a month. | S · Gold |
 
 ### Chart 8 — Installments, next 6 months
 | Key | AR | EN | Notes |
@@ -1613,8 +1613,8 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 |---|---|---|---|
 | `insights_explainCards_basic` | `{state, select, credit{{percent} من صرفك طلع من {card}، وبعده {card2} بـ {percent2}. استخدامك من ليميت الكريدت {utilisation}.} other{{percent} من صرفك طلع من {card}، وبعده {card2} بـ {percent2}.}}` | `{state, select, credit{{percent} of your spending came from {card}, then {card2} at {percent2}. You've used {utilisation} of your credit limit.} other{{percent} of your spending came from {card}, then {card2} at {percent2}.}}` | E · `state:select(credit/other)`: credit when the top card is a credit card with a limit |
 | `insights_explainCards_tip` | `{state, select, credit{خلّي استخدام الكريدت تحت النص وسدّده قبل ميعاده.} other{ركّز مصاريفك اليومية على كارت واحد علشان تتابعها أسهل.}}` | `{state, select, credit{Keep credit use under half the limit and pay it before the due date.} other{Keep daily spending on one card so it's easier to follow.}}` | S |
-| `insights_explainCards_deep` | `{trend, select, up{نصيب {card} من صرفك زاد عن الدورة اللي فاتت.} down{نصيب {card} من صرفك قل عن الدورة اللي فاتت.} other{نصيب {card} من صرفك ثابت عن الدورة اللي فاتت.}}` | `{trend, select, up{{card}'s share of your spending rose since last cycle.} down{{card}'s share of your spending fell since last cycle.} other{{card}'s share of your spending is unchanged since last cycle.}}` | E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10) |
-| `insights_explainCards_deepTip` | صرفت {amount} من {card} الدورة دي. حط له سقف {target} للدورة الجاية. | You spent {amount} on {card} this cycle. Set a {target} limit for the next one. | S · Gold |
+| `insights_explainCards_deep` | `{trend, select, up{نصيب {card} من صرفك زاد عن {prev}.} down{نصيب {card} من صرفك قل عن {prev}.} other{نصيب {card} من صرفك ثابت عن {prev}.}}` | `{trend, select, up{{card}'s share of your spending rose since {prev}.} down{{card}'s share of your spending fell since {prev}.} other{{card}'s share of your spending is unchanged since {prev}.}}` | E · Gold · the apostrophe after a brace needs the early gen-l10n check (§0.10) |
+| `insights_explainCards_deepTip` | صرفت {amount} من {card} الشهر ده. حط له سقف {target} للشهر الجاي. | You spent {amount} on {card} this month. Set a {target} limit for the next one. | S · Gold |
 
 ### Chart 11 — Net worth growth
 | Key | AR | EN | Notes |
@@ -1654,10 +1654,10 @@ States: loading · populated · empty (no budgets, spending still shown) · no p
 | `budget_overview_notBudgeted` | من غير ميزانية | Not budgeted | L |
 | `budget_overview_notBudgetedSub` | صرف في تصنيفات ملهاش حد | Spending in categories with no limit | S · opens S-11 filtered |
 | `budget_overview_edit` | عدّل الميزانية | Edit budgets | B · opens S-23 |
-| `budget_overview_prevA11y` | الدورة اللي قبلها | Previous cycle | A · arrow mirrors in RTL |
-| `budget_overview_nextA11y` | الدورة اللي بعدها | Next cycle | A · arrow mirrors in RTL |
+| `budget_overview_prevA11y` | الشهر اللي قبله | Previous month | A · arrow mirrors in RTL |
+| `budget_overview_nextA11y` | الشهر اللي بعده | Next month | A · arrow mirrors in RTL |
 | `budget_overview_emptyTitle` | حط حدود وشوف مسموحلك تصرف كام | Set limits and see what's safe to spend | T · C-28, Rive `tourGuide` |
-| `budget_overview_emptyBody` | صرف الدورة دي ظاهر تحت لحد ما تحط ميزانية. | Your spending shows below until you set a budget. | S |
+| `budget_overview_emptyBody` | صرف الشهر ده ظاهر تحت لحد ما تحط ميزانية. | Your spending shows below until you set a budget. | S |
 | `budget_overview_emptyAction` | حط ميزانية | Set budgets | B · opens S-23 |
 | `budget_overview_loadingA11y` | بحمّل الميزانية | Loading budget | A |
 
@@ -1676,8 +1676,8 @@ States: clean · unsaved (discard dialog uses `common_discard_*`) · validation 
 | `budget_edit_alerts` | نبّهني لما أوصل لـ | Alert me at | L · FR-BUD-03 |
 | `budget_edit_alertFirst` | التنبيه الأول | First alert | L · percentage field |
 | `budget_edit_alertSecond` | التنبيه التاني | Second alert | L · percentage field |
-| `budget_edit_rollover` | رحّل اللي فاضل للدورة الجاية | Roll over what's left | L · switch, FR-BUD-05 |
-| `budget_edit_rolloverHint` | اللي ما اتصرفش بيتضاف لميزانية الدورة الجاية. | Unspent budget is added to the next cycle. | S |
+| `budget_edit_rollover` | رحّل اللي فاضل للشهر الجاي | Roll over what's left | L · switch, FR-BUD-05 |
+| `budget_edit_rolloverHint` | اللي ما اتصرفش بيتضاف لميزانية الشهر الجاي. | Unspent budget is added to the next month. | S |
 | `budget_edit_annual` | ميزانيات سنوية | Annual budgets | L · opens the annual list, FR-BUD-06 |
 | `budget_edit_annualHint` | للحاجات اللي بتتدفع مرة في السنة، زي المصاريف المدرسية | For once-a-year costs like school fees | S |
 | `budget_edit_payday` | يوم القبض | Payday | L · opens the S-72 stepper |
@@ -2001,8 +2001,8 @@ Tapping a chip sends its text as the question. The default period is the current
 | `chat_period_yesterday` | امبارح | yesterday | C |
 | `chat_period_thisWeek` | الأسبوع ده | this week | C |
 | `chat_period_lastWeek` | الأسبوع اللي فات | last week | C |
-| `chat_period_thisCycle` | الدورة دي | this cycle | C |
-| `chat_period_lastCycle` | الدورة اللي فاتت | last cycle | C |
+| `chat_period_thisCycle` | شهر المرتب ده | this pay month | C |
+| `chat_period_lastCycle` | شهر المرتب اللي فات | last pay month | C |
 | `chat_period_thisMonth` | الشهر ده | this month | C |
 | `chat_period_lastMonth` | الشهر اللي فات | last month | C |
 | `chat_period_sinceYearStart` | من أول السنة | since the start of the year | L |
@@ -2710,8 +2710,8 @@ The app lock row follows A-10 and the S-05 strings. States: normal · digits row
 | `settings_prefs_paydayDay` | يوم {day} | Day {day} | C · stepper value, 1 to 28 |
 | `settings_prefs_paydayMonth` | أول الشهر | Month start | C · calendar month option |
 | `settings_prefs_paydayRange` | اختار يوم من أول الشهر لحد تمانية وعشرين | Choose a day from the 1st up to the 28th | S · validation |
-| `settings_prefs_paydayChangeTitle` | تغيّر يوم القبض في نص الدورة؟ | Change payday mid-cycle? | T · EC-21 |
-| `settings_prefs_paydayChangeBody` | الدورة الحالية هتخلص بدري، وهتبدأ دورة جديدة من يوم القبض الجديد. | Your current cycle will end early and a new one starts from the new payday. | S |
+| `settings_prefs_paydayChangeTitle` | تغيّر يوم القبض في نص الشهر؟ | Change payday mid-month? | T · EC-21 |
+| `settings_prefs_paydayChangeBody` | الشهر الحالي هيخلص بدري، وهيبدأ شهر جديد من يوم القبض الجديد. | Your current month will end early and a new one starts from the new payday. | S |
 | `settings_prefs_income` | هدف الدخل الشهري | Monthly income target | L |
 | `settings_prefs_incomeOptional` | اختياري | Optional | C |
 | `settings_prefs_incomeNegative` | المبلغ ميكونش بالسالب | The amount can't be negative | S |
@@ -2740,8 +2740,8 @@ The image text is part of the share card (C-34, 1080 by 1350). Amounts are hidde
 | `share_studio_cardSavingsAmount` | وفرت {amount} الشهر ده! | I saved {amount} this month! | T · card, amount version |
 | `share_studio_cardDelivery` | قللت الدليفري {percent} الشهر ده! | I cut my delivery spending by {percent} this month! | T · card, percentage version |
 | `share_studio_cardDeliveryAmount` | قللت الدليفري {amount} الشهر ده! | I cut {amount} from my delivery spending this month! | T · card, amount version |
-| `share_studio_cardBudget` | خلصت الدورة تحت الميزانية بـ {percent}! | I finished the cycle {percent} under budget! | T · card, percentage version |
-| `share_studio_cardBudgetAmount` | خلصت الدورة تحت الميزانية بـ {amount}! | I finished the cycle {amount} under budget! | T · card, amount version |
+| `share_studio_cardBudget` | خلصت الشهر تحت الميزانية بـ {percent}! | I finished the month {percent} under budget! | T · card, percentage version |
+| `share_studio_cardBudgetAmount` | خلصت الشهر تحت الميزانية بـ {amount}! | I finished the month {amount} under budget! | T · card, amount version |
 | `share_studio_hashtag` | #زغلول_ضبط_الميزانية | #ZaghlolOnBudget | L · FR-SHR-03. One hashtag per card |
 | `share_studio_share` | شارك | Share | B · opens the system share sheet |
 | `share_studio_previewA11y` | معاينة الكارت: {text} | Card preview: {text} | A |

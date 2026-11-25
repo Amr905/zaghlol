@@ -137,8 +137,8 @@
   "commonDateHoursAgo": "{count, plural, =1{1 hr ago} other{{n} hr ago}}",
   "commonDateDateTime": "{date}, {time}",
   "commonDateRange": "{start} – {end}",
-  "commonPeriodThisCycle": "This cycle",
-  "commonPeriodLastCycle": "Last cycle",
+  "commonPeriodThisCycle": "This pay month",
+  "commonPeriodLastCycle": "Last pay month",
   "commonPeriodThisMonth": "This month",
   "commonPeriodPickMonth": "A month",
   "commonPeriodCustom": "Custom range",
@@ -336,17 +336,17 @@
   "homeHeroDaysToPayday": "{count, plural, =0{Payday is today} =1{1 day to payday} other{{n} days to payday}}",
   "homeHeroCalendarMonth": "until you tell me your payday",
   "homeHeroSpentThisMonth": "Spent this month",
-  "homeHeroSpentThisCycle": "Spent this cycle",
+  "homeHeroSpentThisCycle": "Spent this month",
   "homeHeroSpentInCycleMonth": "Spent in {month}",
   "homeHeroSetBudgetHint": "Set a budget to see what's safe to spend each day",
   "homeHeroSetBudget": "Set a budget",
-  "homeHeroBudgetUsedUp": "This cycle's budget is used up — go easy on the rest",
+  "homeHeroBudgetUsedUp": "This month's budget is used up — go easy on the rest",
   "homeHeroKpiIncome": "Income",
   "homeHeroKpiSpent": "Spent",
   "homeHeroKpiLeft": "Left",
   "homeHeroApproxTitle": "Everything, roughly in {currency}",
   "homeHeroSummaryA11y": "Safe to spend today: {amount}. {payday}. Income {income}, spent {spent}, left {left}.",
-  "homeMascotShockedCategory": "Heads up! {category} is at {percent} of its budget and the cycle's still young.",
+  "homeMascotShockedCategory": "Heads up! {category} is at {percent} of its budget and the month's still young.",
   "homeMascotShockedCategoryAlt": "{category} is nearly gone — {percent} used already. Ease off a little?",
   "homeMascotShockedDining": "Eating out and delivery are up {percent} on your usual. Missing your kitchen? 🍳",
   "homeMascotDetectiveDuplicate": "{merchant} charged you {amount} twice within minutes. Worth a look.",
@@ -356,15 +356,15 @@
   "homeMascotDetectiveSubscriptionNot": "Not a subscription",
   "homeMascotDetectiveSelfTransfer": "{amount} moved from {fromCard} to {toCard}. That's you paying you, so it's not spending 👌",
   "homeMascotProudOnTrack": "Nice one! You're spending under plan so far 👏",
-  "homeMascotProudSavedMore": "Look at you! {amount} more saved than last cycle 👏",
-  "homeMascotProudGoal": "Goal hit this cycle! 🎯 You've got this",
+  "homeMascotProudSavedMore": "Look at you! {amount} more saved than last month 👏",
+  "homeMascotProudGoal": "Goal hit this month! 🎯 You've got this",
   "homeMascotPayday": "Payday! {amount} just landed 🎉 Let's plan it from day one",
   "homeMascotDismissA11y": "Dismiss message",
   "homePromptPayday": "I spotted a salary of {amount} landing on day {day} each month. Is that your payday?",
   "homePromptPaydayYes": "Yes, day {day}",
   "homePromptPaydayMonthStart": "I spotted a salary of {amount} arriving at the end of the month. Shall we track each calendar month, from the 1st?",
   "homePromptPaydayMonthStartYes": "Yes, from the 1st",
-  "homePromptBudget": "First full cycle done! Want to set a budget for the next one?",
+  "homePromptBudget": "First full month done! Want to set a budget for the next one?",
   "homePromptBudgetYes": "Let's do it",
   "homePromptBackup": "A week of data so far. Make a free backup so it's safe if anything happens to your phone.",
   "homePromptBackupYes": "Back up",
@@ -387,7 +387,7 @@
   "homeEmptyBodyWaiting": "They'll show up here as soon as a bank message arrives.",
   "homeEmptyBodyAdd": "Log your first expense and I'll take it from there.",
   "homeEmptyAdd": "Add first expense",
-  "homeEmptyFilter": "No transactions for {cards} this cycle",
+  "homeEmptyFilter": "No transactions for {cards} this month",
   "transactionsRowSubtitle": "{card} · {time} · {source}",
   "transactionsRowInternalTitle": "To yourself",
   "transactionsInstapayTitle": "InstaPay",
@@ -1390,7 +1390,7 @@
   "@insightsChartDetailLockedBody": {
     "description": "S"
   },
-  "insightsDeepProjection": "{state, select, over{At this pace you'll finish the cycle at {projected}, over your budget} other{At this pace you'll finish the cycle at {projected}, within your budget}}",
+  "insightsDeepProjection": "{state, select, over{At this pace you'll finish the month at {projected}, over your budget} other{At this pace you'll finish the month at {projected}, within your budget}}",
   "@insightsDeepProjection": {
     "description": "S · Gold deep, charts 1, 2, 3, 5, 7 · state:select(over/other). Only when a budget exists",
     "placeholders": {
@@ -2249,11 +2249,11 @@
   "@budgetOverviewEdit": {
     "description": "B · opens S-23"
   },
-  "budgetOverviewPrevA11y": "Previous cycle",
+  "budgetOverviewPrevA11y": "Previous month",
   "@budgetOverviewPrevA11y": {
     "description": "A · arrow mirrors in RTL"
   },
-  "budgetOverviewNextA11y": "Next cycle",
+  "budgetOverviewNextA11y": "Next month",
   "@budgetOverviewNextA11y": {
     "description": "A · arrow mirrors in RTL"
   },
@@ -2317,7 +2317,7 @@
   "@budgetEditRollover": {
     "description": "L · switch, FR-BUD-05"
   },
-  "budgetEditRolloverHint": "Unspent budget is added to the next cycle.",
+  "budgetEditRolloverHint": "Unspent budget is added to the next month.",
   "@budgetEditRolloverHint": {
     "description": "S"
   },
@@ -3822,11 +3822,11 @@
   "@chatPeriodLastWeek": {
     "description": "C"
   },
-  "chatPeriodThisCycle": "this cycle",
+  "chatPeriodThisCycle": "this pay month",
   "@chatPeriodThisCycle": {
     "description": "C"
   },
-  "chatPeriodLastCycle": "last cycle",
+  "chatPeriodLastCycle": "last pay month",
   "@chatPeriodLastCycle": {
     "description": "C"
   },
@@ -5429,7 +5429,7 @@
   "@goldPaywallHeadline": {
     "description": "T"
   },
-  "goldPaywallBenefitCharts": "Deeper chart insight: compare with last cycle and see where it ends",
+  "goldPaywallBenefitCharts": "Deeper chart insight: compare with last month and see where it ends",
   "@goldPaywallBenefitCharts": {
     "description": "S"
   },
@@ -6474,11 +6474,11 @@
   "@settingsPrefsPaydayRange": {
     "description": "S · validation"
   },
-  "settingsPrefsPaydayChangeTitle": "Change payday mid-cycle?",
+  "settingsPrefsPaydayChangeTitle": "Change payday mid-month?",
   "@settingsPrefsPaydayChangeTitle": {
     "description": "T · EC-21"
   },
-  "settingsPrefsPaydayChangeBody": "Your current cycle will end early and a new one starts from the new payday.",
+  "settingsPrefsPaydayChangeBody": "Your current month will end early and a new one starts from the new payday.",
   "@settingsPrefsPaydayChangeBody": {
     "description": "S"
   },
@@ -6595,7 +6595,7 @@
       }
     }
   },
-  "shareStudioCardBudget": "I finished the cycle {percent} under budget!",
+  "shareStudioCardBudget": "I finished the month {percent} under budget!",
   "@shareStudioCardBudget": {
     "description": "T · card, percentage version",
     "placeholders": {
@@ -6604,7 +6604,7 @@
       }
     }
   },
-  "shareStudioCardBudgetAmount": "I finished the cycle {amount} under budget!",
+  "shareStudioCardBudgetAmount": "I finished the month {amount} under budget!",
   "@shareStudioCardBudgetAmount": {
     "description": "T · card, amount version",
     "placeholders": {
@@ -7581,7 +7581,7 @@
   "@insightsChartsPeriodPrevRange": {
     "description": "S-20 chart period (T-188)"
   },
-  "commonPeriodLastCycles": "Last {n} cycles",
+  "commonPeriodLastCycles": "Last {n} pay months",
   "@commonPeriodLastCycles": {
     "description": "S-20 chart period (T-188)",
     "placeholders": {
