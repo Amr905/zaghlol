@@ -31,6 +31,8 @@ import '../../transactions/application/transfer_pairing_hook.dart';
 import '../../transfers/application/suggestion_hook.dart';
 import '../application/ingest_raw_messages.dart';
 import '../application/ingest_store_port.dart';
+import '../../recurring/data/card_dues.dart';
+import '../../recurring/data/card_notice_hooks.dart';
 import '../domain/ingest_ports.dart';
 import 'device_local_zone.dart';
 import 'drift_ingest_store.dart';
@@ -49,9 +51,9 @@ IngestRawMessages buildIngestRawMessages(
   CycleKeyOf? cycleKeyOf,
   List<PostPersistHook> hooks = const [],
 
-  /// T-241: receives card due reminders and statements (T-245 plugs the dues
-  /// layer in here). The default does nothing.
-  CardNoticeHook cardNoticeHook = const NoopCardNoticeHook(),
+  /// T-241: receives card due reminders and statements. The default is the
+  /// dues layer (T-245); tests replace it.
+  CardNoticeHook? cardNoticeHook,
 
   /// FU-142: every stored or edited row is offered to refund matching
   /// (T-090) inside the message's savepoint. The schedule is read from the
@@ -115,10 +117,13 @@ IngestRawMessages buildIngestRawMessages(
         events: events,
       ),
     ),
+    // T-245: a payment on a card counts against its due.
+    CardDuePaymentHook(_cardDues(db, clock, newId)),
     // T-246: the payday follows the salary (after the matcher tagged it).
     PaydayAutoHook(_paydayAuto(db, zone, clock)),
   ],
-  cardNoticeHook: cardNoticeHook,
+  cardNoticeHook:
+      cardNoticeHook ?? DriftCardNoticeHook(_cardDues(db, clock, newId)),
   diag: diag,
   events: events,
 );
@@ -158,3 +163,13 @@ PaydayAutoService _paydayAuto(
     nowUtcMs: nowMs,
   );
 }
+
+CardDues _cardDues(
+  AppDatabase db,
+  IngestClock? clock,
+  IngestIdGenerator newId,
+) => CardDues(
+  db,
+  nowMs: () => (clock ?? DateTime.now)().toUtc().millisecondsSinceEpoch,
+  newId: newId,
+);

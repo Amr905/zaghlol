@@ -88,5 +88,5 @@ bool genericAutoSaveEligible(ParseResult result) {
       (g.fieldConfidence[GenericField.currency] ?? 0) < 850) {
     return false;
   }
-  return g.last4 != null || g.merchant != null;
+  return g.last4 != null || g.merchant != null || g.counterparty != null;
 }

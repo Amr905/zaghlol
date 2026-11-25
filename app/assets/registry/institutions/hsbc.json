@@ -182,6 +182,28 @@
         "format": "dd/MM/yyyy",
         "yearPolicy": "nearest_future"
       }
+    },
+    {
+      "id": "hsbc.cc_payment_transfer.en",
+      "version": 9,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_payment",
+      "direction": "income",
+      "baseConfidence": 0.95,
+      "pattern": "from hsbc: (?<date>\\d{1,2}[a-z]{3}\\d{2}) transfer from (?<counterparty>[\\d*-]+) (?<cur>[a-z]{3}) (?<amount>[\\d,.]+-?) to your credit card ending (?:with )?[*x ]{0,8}(?<last4>\\d{4})(?: as per your instruction)?\\.?(?: your available balance is (?:[a-z]{3} )?[\\d,.]+)?",
+      "date": {
+        "format": "ddMMMyy",
+        "yearPolicy": "nearest_past"
+      },
+      "source": "po-sample",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      }
     }
   ]
 }

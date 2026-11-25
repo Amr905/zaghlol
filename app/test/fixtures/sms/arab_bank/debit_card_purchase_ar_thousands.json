@@ -1,0 +1,16 @@
+{
+  "sender": "ArabBank",
+  "body": "تم خصم 12,500.75 EGP من بطاقة الخصم المباشر رقم 4471 عند CARREFOUR MAADI يوم 20/11/26 الساعه 18:30 المتاح 1,234,567.89EGP للمزيد إتصل ب 19623",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.debit_card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "12500.75",
+    "last4": "4471",
+    "balance": "1234567.89",
+    "date": "2026-11-20",
+    "time": "18:30"
+  }
+}

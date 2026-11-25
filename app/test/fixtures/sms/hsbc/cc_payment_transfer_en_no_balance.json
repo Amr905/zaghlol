@@ -1,0 +1,16 @@
+{
+  "sender": "HSBC",
+  "body": "From HSBC: 05nov26 Transfer from 002-388***-001 EGP 300.00 to your Credit Card ending with 4062 as per your instruction.",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "hsbc.cc_payment_transfer.en",
+    "event": "cc_payment",
+    "direction": "income",
+    "currency": "EGP",
+    "amount": "300.00",
+    "last4": "4062",
+    "balance": null,
+    "date": "2026-11-05",
+    "counterparty": "002-388***-001"
+  }
+}

@@ -186,7 +186,9 @@ ExtractedFields extractFields(
       problems.add(field);
       return null;
     }
-    var text = _dropTrailingPunctuation(raw);
+    // T-242: `2,199.95-` is a sign marker (the template's direction already
+    // says outflow), never a negative amount.
+    var text = stripTrailingSignMarker(_dropTrailingPunctuation(raw));
     // FU-078: an overdrawn balance (`-500.00`, `−500.00`) is a real negative
     // amount. One leading sign, balance and available only; an amount with
     // a sign stays a problem (a charge is never negative).
@@ -342,6 +344,23 @@ String _dropTrailingPunctuation(String raw) {
   return t;
 }
 
+const List<String> _months = [
+  'jan', 'feb', 'mar', 'apr', 'may', 'jun', //
+  'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+];
+
+/// English month name or abbreviation (`oct`, `october`) to 1..12.
+int? _monthNumber(String text) {
+  if (text.length < 3) {
+    return null;
+  }
+  final i = _months.indexOf(text.substring(0, 3));
+  return i < 0 ? null : i + 1;
+}
+
+/// Days after its due day a due reminder still resolves to that day.
+const int dueGraceDays = 7;
+
 /// Parses a date capture by [policy.format]. Returns null for any shape or
 /// calendar mismatch (31/2, month 13) instead of rolling over.
 DateTime? parseTemplateDate(
@@ -350,14 +369,16 @@ DateTime? parseTemplateDate(
   DateTime receivedAt, {
 
   /// T-241: a due date; with `nearest_future` and no year it resolves to the
-  /// nearest date on or after the day of receipt.
+  /// nearest date on or after the day of receipt, less [dueGraceDays].
   bool due = false,
 }) {
-  final tokens = RegExp(r'd{1,2}|M{1,2}|y{4}|y{2}|[/.-]')
+  final tokens = RegExp(r'd{1,2}|M{1,3}|y{4}|y{2}|[/.-]')
       .allMatches(policy.format)
       .map((m) => m.group(0)!)
       .toList();
-  final parts = RegExp(r'[0-9]+|[/.-]').allMatches(foldKey(raw)).toList();
+  final parts = RegExp(r'[0-9]+|[a-z]+|[/.-]')
+      .allMatches(foldKey(raw))
+      .toList();
   if (parts.length != tokens.length) {
     return null;
   }
@@ -373,7 +394,7 @@ DateTime? parseTemplateDate(
       }
       continue;
     }
-    final value = int.tryParse(text);
+    final value = token == 'MMM' ? _monthNumber(text) : int.tryParse(text);
     if (value == null) {
       return null;
     }
@@ -402,9 +423,12 @@ DateTime? parseTemplateDate(
   }
   final today = DateTime.utc(receivedAt.year, receivedAt.month, receivedAt.day);
   if (due && policy.nearestFuture) {
-    for (var ahead = 0; ahead <= 4; ahead++) {
+    // FU-295 m-1: a reminder that arrives or is backfilled up to
+    // [dueGraceDays] after its due day keeps that day (not next year).
+    final earliest = today.subtract(const Duration(days: dueGraceDays));
+    for (var ahead = -1; ahead <= 4; ahead++) {
       final d = build(receivedAt.year + ahead);
-      if (d != null && !d.isBefore(today)) {
+      if (d != null && !d.isBefore(earliest)) {
         return d;
       }
     }

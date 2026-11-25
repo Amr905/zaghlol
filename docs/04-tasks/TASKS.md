@@ -325,10 +325,10 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-239](tasks/T-239.md) | Explorer survives emulator faults; restores FlutterError.onError | QA | Low | Sonnet | flutter-core-engineer | — | P | 66 | DONE (batch 66) |
 | [T-240](tasks/T-240.md) | PO SMS suite: 12 synthetic fixtures + parse-quality report | SMS-V2 | Low | Sonnet | parsing-engine-engineer | — | P | 67 | DONE (batch 67) |
 | [T-241](tasks/T-241.md) | Card due reminders and statements are dues, never transactions | SMS-V2 / D-83 | High (C4) | Sonnet | parsing-engine-engineer | T-240 | P | 67 | DONE (batch 67) |
-| [T-242](tasks/T-242.md) | Templates: HSBC card payment, Arab Bank purchases, trailing minus | SMS-V2 | Medium | Sonnet | parsing-engine-engineer | T-241 | P | 68 | TODO |
-| [T-243](tasks/T-243.md) | Generic reader: last-4, counterparty, balance, cues, junk merchants | SMS-V2 | High | Sonnet | parsing-engine-engineer | T-241 | P | 68 | TODO |
+| [T-242](tasks/T-242.md) | Templates: HSBC card payment, Arab Bank purchases, trailing minus | SMS-V2 | Medium | Sonnet | parsing-engine-engineer | T-241 | P | 68 | DONE (batch 68) |
+| [T-243](tasks/T-243.md) | Generic reader: last-4, counterparty, balance, cues, junk merchants | SMS-V2 | High | Sonnet | parsing-engine-engineer | T-241 | P | 68 | DONE (batch 68) |
 | [T-244](tasks/T-244.md) | Real unread reason + shape signatures in SMS diagnostics | SMS-V2 | Medium | Sonnet | parsing-engine-engineer | T-243 | P | 69 | TODO |
-| [T-245](tasks/T-245.md) | Card dues from notices into the dues reminders | D-83 | High | Sonnet | flutter-core-engineer | T-241 | A | 68 | TODO |
+| [T-245](tasks/T-245.md) | Card dues from notices into the dues reminders | D-83 | High | Sonnet | flutter-core-engineer | T-241 | A | 68 | DONE (batch 68) |
 | [T-246](tasks/T-246.md) | Payday follows the salary (first of month, 3-month pattern, auto-set + Undo) | D-81 | High | Sonnet | flutter-core-engineer | — | A | 67 | DONE (batch 67) |
 | [T-247](tasks/T-247.md) | Cycle after day 20 named as the next month | D-82 | Medium | Sonnet | flutter-core-engineer | T-246 | A | 69 | TODO |
 

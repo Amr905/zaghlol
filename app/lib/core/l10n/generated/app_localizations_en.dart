@@ -8604,4 +8604,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paydayAutoDismissA11y => 'Close message';
+
+  @override
+  String accountsDetailDueAmountMin(String amount, String min, String date) {
+    return 'Due $amount (min $min) by $date';
+  }
+
+  @override
+  String accountsDetailDueAmount(String amount, String date) {
+    return 'Due $amount by $date';
+  }
+
+  @override
+  String accountsDetailDueMin(String min, String date) {
+    return 'Minimum $min due by $date';
+  }
+
+  @override
+  String accountsDetailDueRemaining(String amount) {
+    return 'Still to pay on the minimum: $amount';
+  }
+
+  @override
+  String get accountsDetailDuePaid => 'This statement is paid';
 }

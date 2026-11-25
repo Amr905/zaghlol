@@ -1,0 +1,16 @@
+{
+  "sender": "ArabBank",
+  "body": "تم خصم ١٢٠.٥٠ EGP  من بطاقة الخصم المباشر رقم ٤٤٧١  عند TALABAT MART  يوم ٢١/١١/٢٦  الساعه ٠٩:٠٥  المتاح ٢٠٠٠.٠٠EGP",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.debit_card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "120.50",
+    "last4": "4471",
+    "balance": "2000.00",
+    "date": "2026-11-21",
+    "time": "09:05"
+  }
+}

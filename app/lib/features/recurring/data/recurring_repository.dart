@@ -19,6 +19,7 @@ import '../../../core/db/daos/write_errors.dart';
 import '../../../core/db/money_columns.dart';
 import '../../transactions/data/drift_transaction_repository.dart'
     show Clock, IdGenerator;
+import 'card_dues.dart';
 import '../../transactions/data/transactions_providers.dart'
     show clockProvider, idGeneratorProvider;
 
@@ -575,6 +576,12 @@ class RecurringRepository {
           touched++;
         }
       }
+      // T-245: a notice that arrived before its card existed is applied now.
+      touched += await CardDues(
+        _db,
+        nowMs: () => _now,
+        newId: _newId,
+      ).applyPending();
       return touched;
     }),
   );

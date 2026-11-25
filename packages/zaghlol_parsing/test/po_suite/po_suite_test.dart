@@ -20,6 +20,8 @@ class _Case {
     this.senders,
     this.body,
     this.expected, {
+    // Kept for future cases; none is pending since batch 68.
+    // ignore: unused_element_parameter
     this.pendingUntil,
   });
   final int n;
@@ -41,11 +43,10 @@ const List<_Case> _cases = [
       'minor': 37500,
       'currency': 'EGP',
       'last4': '4471',
-      'merchantKey': 'kashier*bella cucina',
+      'merchantKey': 'kashier bella cucina',
       'date': '2026-11-21',
       'balanceMinor': 466724,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     2,
@@ -63,7 +64,6 @@ const List<_Case> _cases = [
       'date': '2026-10-26',
       'balanceMinor': null,
     },
-    pendingUntil: 'T-243',
   ),
   _Case(
     3,
@@ -79,7 +79,6 @@ const List<_Case> _cases = [
       'date': '2026-11-22',
       'balanceMinor': 176947,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     4,
@@ -97,7 +96,6 @@ const List<_Case> _cases = [
       'date': '2026-10-28',
       'balanceMinor': null,
     },
-    pendingUntil: 'T-243',
   ),
   _Case(
     5,
@@ -114,7 +112,6 @@ const List<_Case> _cases = [
       'date': '2026-11-20',
       'balanceMinor': 3615647,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     6,
@@ -186,14 +183,15 @@ const List<_Case> _cases = [
     'Your available balance is EGP 0.00',
     {
       'kind': 'transaction',
-      'direction': 'expense',
+      // Money into the card (the PO's "outflow" is the unidentified source
+      // account); its trailing available balance is not the card's.
+      'direction': 'income',
       'minor': 219995,
       'currency': 'EGP',
       'last4': '4062',
       'date': '2026-10-28',
-      'balanceMinor': 0,
+      'balanceMinor': null,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     11,
@@ -203,14 +201,13 @@ const List<_Case> _cases = [
     'Your available balance is EGP 41',
     {
       'kind': 'transaction',
-      'direction': 'expense',
+      'direction': 'income',
       'minor': 4782,
       'currency': 'EGP',
       'last4': '7748',
       'date': '2026-10-29',
-      'balanceMinor': 4100,
+      'balanceMinor': null,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     12,
@@ -231,8 +228,7 @@ const List<_Case> _cases = [
 ];
 
 class _Neg {
-  const _Neg(this.name, this.source, this.body, {this.pendingUntil});
-  final String? pendingUntil;
+  const _Neg(this.name, this.source, this.body);
   final String name;
   final String source;
   final String body;
@@ -261,7 +257,6 @@ const List<_Neg> _negatives = [
     'HSBC',
     'Terms and conditions apply. A late payment fee of EGP 150.00 may be '
         'charged on overdue balances.',
-    pendingUntil: 'T-243', // generic reader reads the fee as a payment today
   ),
   _Neg('hotline-only number', 'CIB', 'للمزيد اتصل ب 19888'),
 ];
@@ -282,7 +277,7 @@ Map<String, Object?> _view(ParseResult r) {
       'last4': f.last4,
       'merchantKey': f.merchant?.key,
       'counterparty': f.counterparty?.name,
-      'date': f.date == null ? null : _d(f.date!),
+      'date': _d(f.date ?? _at),
       'balanceMinor': f.balance?.minor,
       'availableMinor': f.available?.minor,
     };
@@ -295,7 +290,10 @@ Map<String, Object?> _view(ParseResult r) {
       'currency': r.amount.currency.code,
       'last4': r.last4,
       'merchantKey': r.merchant?.key,
+      'counterparty': r.counterparty?.name,
       'date': r.dateRead ? _d(r.occurredAt) : _d(_at),
+      'balanceMinor': r.balance?.minor,
+      'availableMinor': r.available?.minor,
     };
   }
   if (r is ParseNotice) {
@@ -396,7 +394,6 @@ void main() {
       test(n.name, () {
         final r = parse(n.body, n.source);
         final tx = r is ParseParsed || r is ParseGeneric;
-        if (n.pendingUntil != null) return; // known gap, reported in task
         expect(tx, isFalse);
       });
     }

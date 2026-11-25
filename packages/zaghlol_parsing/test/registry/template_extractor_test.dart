@@ -23,6 +23,27 @@ void main() {
     return extractFields(i, t, groups, at);
   }
 
+  group('due date grace (FU-295 m-1)', () {
+    const pol = DatePolicy('d/M', true, nearestFuture: true);
+    String? due(String raw, DateTime at) {
+      final d = parseTemplateDate(raw, pol, at, due: true);
+      return d?.toIso8601String().substring(0, 10);
+    }
+
+    test('up to 7 days after the due day keeps the year', () {
+      expect(due('25/11', DateTime.utc(2026, 11, 25)), '2026-11-25');
+      expect(due('25/11', DateTime.utc(2026, 11, 26)), '2026-11-25');
+      expect(due('25/11', DateTime.utc(2026, 12, 2)), '2026-11-25');
+    });
+    test('8 days after rolls to next year; future dates are unchanged', () {
+      expect(due('25/11', DateTime.utc(2026, 12, 3)), '2027-11-25');
+      expect(due('28/11', DateTime.utc(2026, 11, 25)), '2026-11-28');
+    });
+    test('the grace crosses the new year', () {
+      expect(due('28/12', DateTime.utc(2027, 1, 2)), '2026-12-28');
+    });
+  });
+
   group('parseTemplateDate', () {
     DatePolicy p(String f, {bool nearest = true}) => DatePolicy(f, nearest);
     final rows = <(String, String, DatePolicy, DateTime, String?)>[

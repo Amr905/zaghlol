@@ -1,0 +1,16 @@
+{
+  "sender": "ArabBank",
+  "body": "A Trx using Card XXXX8216 from FAWRY PAY for EGP 15.00 on 17-Nov-2026 at 22:10 GMT+2.",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.card_trx.en",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "15.00",
+    "last4": "8216",
+    "balance": null,
+    "date": "2026-11-17",
+    "time": "22:10"
+  }
+}

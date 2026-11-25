@@ -881,7 +881,7 @@ final class IngestRawMessages {
       templateVersion: r.templateVersion,
     );
     await _cardNoticeHook.onCardNotice(
-      CardNoticeEvent(rawId: rawId, notice: r),
+      CardNoticeEvent(rawId: rawId, notice: r, receivedAtMs: p.m.receivedAtMs),
     );
     if (r.templateId == null) {
       await _review(
@@ -1458,6 +1458,9 @@ final class IngestRawMessages {
           'last4': ?g.last4,
           'merchant': ?_nonEmpty(g.merchant?.display),
           'merchantKey': ?_nonEmpty(g.merchant?.key),
+          // T-243: the other party of a transfer, stored like InstaPay's.
+          'counterpartyKind': ?_counterpartyOf(g.counterparty)?.$1,
+          'counterpartyValue': ?_counterpartyOf(g.counterparty)?.$2,
           'event': ?g.event?.name,
           'eventCategory': ?genericEventCategoryOf(
             g.event,
@@ -1494,10 +1497,13 @@ final class IngestRawMessages {
     );
     final merchantNorm = _nonEmpty(g.merchant?.key);
     final merchantRaw = _nonEmpty(g.merchant?.display);
+    final counterparty = _counterpartyOf(g.counterparty);
     final category = await _categorize(
       b.categorizer,
       merchantRaw: merchantRaw,
       merchantNorm: merchantNorm,
+      counterpartyKind: counterparty?.$1,
+      counterpartyValue: counterparty?.$2,
       eventCategoryId: genericEventCategoryOf(
         g.event,
         instapay: hasInstapayCue(p.m.body),
@@ -1519,6 +1525,8 @@ final class IngestRawMessages {
         tzOffsetMin: offsetMin,
         merchantRaw: merchantRaw,
         merchantNorm: merchantNorm,
+        counterpartyKind: counterparty?.$1,
+        counterpartyValue: counterparty?.$2,
         catalogMerchantId: category.catalogMerchantId,
         categoryId: category.categoryId,
         categorySource: category.source,
