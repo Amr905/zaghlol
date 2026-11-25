@@ -222,6 +222,19 @@ ParseResult parseGeneric({
 final RegExp _payBy = RegExp(r'\bpay(?:ment)? by [0-9]');
 final RegExp _statementIs = RegExp(r'كشف حساب[^.\n]{0,80}? هو ');
 
+/// True when [head] has a past-tense "money moved" cue (a future `سيتم خصم`
+/// does not count, nor `يتم الخصم`: a preceding `ي`).
+bool _movedHits(String head) {
+  for (final h in _hits(head, noticeMoneyMovedCues, null)) {
+    final i = h.start;
+    if (i >= 1 && head.codeUnitAt(i - 1) == 0x64A) {
+      continue;
+    }
+    return true;
+  }
+  return false;
+}
+
 /// The notice gate (T-241). Reads the text before any boilerplate tail.
 /// Returns null when the message has no notice cue.
 ParseResult? _noticeGate(
@@ -247,7 +260,8 @@ ParseResult? _noticeGate(
   if (!statement && !future) {
     return null;
   }
-  if (_hits(head, noticePurchaseConflictCues, null).isNotEmpty) {
+  if (_hits(head, noticePurchaseConflictCues, null).isNotEmpty ||
+      _movedHits(head)) {
     return const ParseUnrecognized(UnrecognizedReason.genericNoticeConflict);
   }
   final amounts = {for (final c in _candidates(head, const [])) c.money};
