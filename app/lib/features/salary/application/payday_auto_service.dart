@@ -55,12 +55,14 @@ class PaydayAutoService {
     final day = detection.day;
     if (!detection.apply || day == null || day == current) return null;
     if (state.suppressed.contains(day)) return null;
+    final erasBefore = (await _settings.get(Settings.paydayEras))?.toJson();
     await _store.setPayday(day);
     await _settings.set(
       Settings.paydayAuto,
       state.copyWith(
         autoDay: day,
         previous: current,
+        previousEras: erasBefore,
         clearPrevious: current == null,
         bannerPending: true,
       ),
@@ -68,14 +70,25 @@ class PaydayAutoService {
     return day;
   }
 
-  /// The banner's Undo: restores the previous value (day 1, the default,
+  /// The banner's Undo: restores the previous `payday_eras` exactly (unset
   /// when none was set) and never auto-sets the same pattern again.
   Future<void> undo() async {
     final state = await _settings.get(Settings.paydayAuto);
     final auto = state.autoDay;
     if (auto == null) return;
     final now = await _settings.get(Settings.paydayDay);
-    if (now == auto) await _store.setPayday(state.previous ?? 1);
+    if (now == auto) {
+      final text = state.previousEras;
+      final prev = state.previous;
+      if (text == null && prev != null) {
+        // State saved before the eras were kept.
+        await _store.setPayday(prev);
+      } else {
+        await _store.restore(
+          text == null ? null : PaydaySchedule.tryFromJson(text),
+        );
+      }
+    }
     await _settings.set(
       Settings.paydayAuto,
       state

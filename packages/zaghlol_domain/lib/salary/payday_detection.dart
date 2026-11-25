@@ -110,6 +110,7 @@ final class PaydayAutoState {
   const PaydayAutoState({
     this.autoDay,
     this.previous,
+    this.previousEras,
     this.bannerPending = false,
     this.suppressed = const [],
   });
@@ -121,6 +122,9 @@ final class PaydayAutoState {
 
   /// The value before that change; null means the payday was never set.
   final int? previous;
+
+  /// The `payday_eras` text from before that change; null when none was set.
+  final String? previousEras;
 
   /// The "I changed it" banner has not been closed yet.
   final bool bannerPending;
@@ -137,11 +141,13 @@ final class PaydayAutoState {
     bool clearAutoDay = false,
     int? previous,
     bool clearPrevious = false,
+    String? previousEras,
     bool? bannerPending,
     List<int>? suppressed,
   }) => PaydayAutoState(
     autoDay: clearAutoDay ? null : (autoDay ?? this.autoDay),
     previous: clearPrevious ? null : (previous ?? this.previous),
+    previousEras: clearPrevious ? null : (previousEras ?? this.previousEras),
     bannerPending: bannerPending ?? this.bannerPending,
     suppressed: suppressed ?? this.suppressed,
   );
@@ -160,17 +166,24 @@ final class PaydayAutoState {
       other is PaydayAutoState &&
       other.autoDay == autoDay &&
       other.previous == previous &&
+      other.previousEras == previousEras &&
       other.bannerPending == bannerPending &&
       other.suppressed.join(',') == suppressed.join(',');
 
   @override
-  int get hashCode =>
-      Object.hash(autoDay, previous, bannerPending, suppressed.join(','));
+  int get hashCode => Object.hash(
+    autoDay,
+    previous,
+    previousEras,
+    bannerPending,
+    suppressed.join(','),
+  );
 
   String toJson() => jsonEncode({
     'v': 1,
     if (autoDay != null) 'a': autoDay,
     if (previous != null) 'p': previous,
+    if (previousEras != null) 'e': previousEras,
     'b': bannerPending,
     's': suppressed,
   });
@@ -186,11 +199,13 @@ final class PaydayAutoState {
     if (j is! Map<String, Object?> || j['v'] != 1) return null;
     final a = j['a'];
     final p = j['p'];
+    final e = j['e'];
     final b = j['b'];
     final s = j['s'];
     bool day(Object? v) => v is int && v >= 1 && v <= paydayMaxDay;
     if (a != null && !day(a)) return null;
     if (p != null && !day(p)) return null;
+    if (e != null && (e is! String || e.length > 16384)) return null;
     if (b is! bool) return null;
     if (s is! List || s.length > paydayMaxSuppressed || !s.every(day)) {
       return null;
@@ -198,6 +213,7 @@ final class PaydayAutoState {
     return PaydayAutoState(
       autoDay: a as int?,
       previous: p as int?,
+      previousEras: e as String?,
       bannerPending: b,
       suppressed: List<int>.unmodifiable(s.cast<int>()),
     );
