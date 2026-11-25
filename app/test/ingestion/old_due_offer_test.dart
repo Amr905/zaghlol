@@ -70,16 +70,15 @@ void main() {
     String? note,
     String categorySource = 'heuristic',
   }) async {
+    // A different link per row, so the body hashes differ.
+    final body = _case7.replaceAll('x1', txnId);
     await DriftIngestStore(w.db).insertRaw(
       RawInsert(
         id: 'raw_$txnId',
         channel: 'sms',
         sender: 'CIB',
-        body: _case7,
-        bodyHash: bodyHashV1(
-          senderKey: senderKeyOf('sms', 'CIB'),
-          body: _case7,
-        ),
+        body: body,
+        bodyHash: bodyHashV1(senderKey: senderKeyOf('sms', 'CIB'), body: body),
         receivedAtMs: _rx,
         parseStatus: RawStatus.parsed,
         registryVersion: 1,
@@ -140,7 +139,7 @@ void main() {
   /// Live spending total in EGP minor units (what totals read).
   Future<int> spendingTotal() async =>
       (await w.rows(
-            "SELECT coalesce(sum(amount_minor), 0) AS s FROM transactions "
+            'SELECT coalesce(sum(amount_minor), 0) AS s FROM transactions '
             "WHERE deleted_at IS NULL AND direction = 'expense' "
             "AND currency = 'EGP'",
           )).single['s']!
@@ -268,6 +267,31 @@ void main() {
     expect(await offers(), hasLength(1));
   });
 
+  test('two actors: a Keep that lands between the check and the delete '
+      'wins; the row is put back', () async {
+    await oldAutoSaved();
+    await reparse();
+    final itemId = (await offers()).single['id']! as String;
+    final repo = _KeepRaces(
+      w.db,
+      clock: () => DateTime.fromMillisecondsSinceEpoch(_rx + 5000, isUtc: true),
+      newId: w.newId,
+    );
+    final review = OldDueReview(
+      reviews: repo,
+      txns: BulkActions(
+        bulk: BulkEditUseCase(w.db, newId: w.newId, loadSchedule: schedule),
+        pairing: TransferPairingUseCase(w.db, loadSchedule: schedule),
+        refunds: RefundMatching(w.db, loadSchedule: schedule),
+      ),
+    );
+    expect(await review.remove(itemId), isNull);
+    final t = (await w.txns()).single;
+    expect(t['deleted_at'], isNull);
+    expect(t['is_user_verified'], 1);
+    expect((await offers()).single['resolution'], ReviewResolution.kept);
+  });
+
   test('an edit after the offer locks it: Remove refuses', () async {
     await oldAutoSaved();
     await reparse();
@@ -279,4 +303,16 @@ void main() {
     expect((await w.txns()).single['deleted_at'], isNull);
     expect((await offers()).single['resolved_at'], isNull);
   });
+}
+
+/// Runs a Keep right after Remove's check, like a second screen would.
+final class _KeepRaces extends ReviewRepository {
+  _KeepRaces(super.db, {required super.clock, required super.newId});
+
+  @override
+  Future<String?> oldDueTxnToRemove(String itemId) async {
+    final id = await super.oldDueTxnToRemove(itemId);
+    await keepOldDue(itemId);
+    return id;
+  }
 }

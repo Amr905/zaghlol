@@ -24,7 +24,12 @@ final class OldDueReview {
     final txnId = await _reviews.oldDueTxnToRemove(itemId);
     if (txnId == null) return null;
     final r = await _txns.delete({txnId});
-    await _reviews.markOldDueRemoved(itemId);
+    if (!await _reviews.markOldDueRemoved(itemId)) {
+      // Another actor (a Keep on a second screen) resolved the item between
+      // the check and the delete: its answer wins, so put the row back.
+      await _txns.undo(r.batchId);
+      return null;
+    }
     return r.batchId;
   }
 
