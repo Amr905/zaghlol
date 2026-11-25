@@ -6039,6 +6039,30 @@
   "@captureScanChoose": {
     "description": "B"
   },
+  "captureScanCamera": "صوّر بالكاميرا",
+  "@captureScanCamera": {
+    "description": "B"
+  },
+  "captureScanGallery": "اختار من المعرض",
+  "@captureScanGallery": {
+    "description": "B"
+  },
+  "captureScanCameraDenied": "زغلول مش قادر يفتح الكاميرا. افتحهاله من الإعدادات، أو اختار صورة من المعرض.",
+  "@captureScanCameraDenied": {
+    "description": "B"
+  },
+  "captureScanWhatIRead": "اللي اتقرأ",
+  "@captureScanWhatIRead": {
+    "description": "B"
+  },
+  "captureScanWhatIReadTitle": "الموبايل قرا إيه",
+  "@captureScanWhatIReadTitle": {
+    "description": "B"
+  },
+  "captureScanWhatIReadEmpty": "مفيش حاجة اتقرأت.",
+  "@captureScanWhatIReadEmpty": {
+    "description": "B"
+  },
   "captureScanChooseAnother": "اختار صورة تانية",
   "@captureScanChooseAnother": {
     "description": "B"

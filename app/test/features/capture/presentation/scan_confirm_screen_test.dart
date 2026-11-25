@@ -4,8 +4,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderContainer;
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+// ignore: depend_on_referenced_packages
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:zaghlol/core/ocr/ocr_port.dart';
 import 'package:zaghlol/core/ocr/unavailable_ocr_engine.dart';
 import 'package:zaghlol/features/capture/application/capture_providers.dart';
@@ -82,7 +86,9 @@ List<Override> scanOverrides(
   FakeEditor editor,
   OcrEngine engine, {
   ScanImagePicker? picker,
+  bool devReadText = false,
 }) => [
+  scanReadTextEnabledProvider.overrideWithValue(devReadText),
   transactionEditorProvider.overrideWith((ref) async => editor),
   ocrEngineProvider.overrideWithValue(engine),
   scanImagePickerProvider.overrideWithValue(picker),
@@ -98,12 +104,13 @@ Future<void> pumpScan(
   Locale locale = const Locale('en'),
   double textScale = 1.0,
   bool dark = false,
+  bool devReadText = false,
 }) async {
   await tester.binding.setSurfaceSize(const Size(390, 844));
   addTearDown(() => tester.binding.setSurfaceSize(null));
   await tester.pumpWidget(
     harnessApp(
-      scanOverrides(editor, engine, picker: picker),
+      scanOverrides(editor, engine, picker: picker, devReadText: devReadText),
       ScanConfirmScreen(request: request),
       locale: locale,
       textScale: textScale,
@@ -145,7 +152,7 @@ void main() {
       ed,
       ocr,
       const ScanPick(),
-      picker: () async => '/spool/files/img1.bin',
+      picker: (_) async => '/spool/files/img1.bin',
     );
     expect(find.text('Choose an image'), findsWidgets);
     await tester.tap(find.byKey(const Key('scan-choose')));
@@ -340,7 +347,7 @@ void main() {
       FakeEditor(),
       const UnavailableOcrEngine(),
       const ScanPick(),
-      picker: () async => '/never',
+      picker: (_) async => '/never',
     );
     expect(
       find.text("Reading images isn't ready on this phone yet"),
@@ -466,7 +473,7 @@ void main() {
       FakeEditor(),
       ocr,
       const ScanPick(),
-      picker: () => ocr.sealImage('/tmp/pick.jpg'),
+      picker: (_) => ocr.sealImage('/tmp/pick.jpg'),
     );
     await tester.tap(find.byKey(const Key('scan-choose')));
     await tester.pumpAndSettle();
@@ -481,7 +488,7 @@ void main() {
       FakeEditor(),
       FakeOcr(_enReceipt),
       const ScanPick(),
-      picker: () => throw const OcrException(OcrFailureCode.notAvailable),
+      picker: (_) => throw const OcrException(OcrFailureCode.notAvailable),
     );
     await tester.tap(find.byKey(const Key('scan-choose')));
     await tester.pumpAndSettle();
@@ -490,4 +497,221 @@ void main() {
       findsOneWidget,
     );
   });
+
+  group('T-264 camera and gallery', () {
+    testWidgets('both sources are offered', (tester) async {
+      await pumpScan(
+        tester,
+        FakeEditor(),
+        FakeOcr(_enReceipt),
+        const ScanPick(),
+        picker: (_) async => null,
+      );
+      expect(find.byKey(const Key('scan-camera')), findsOneWidget);
+      expect(find.byKey(const Key('scan-choose')), findsOneWidget);
+      expect(find.text('Take a photo'), findsOneWidget);
+      expect(find.text('Choose from gallery'), findsOneWidget);
+    });
+
+    testWidgets('camera result flows to the confirm screen', (tester) async {
+      final ocr = FakeOcr(_enReceipt);
+      final asked = <ScanImageSource>[];
+      await pumpScan(
+        tester,
+        FakeEditor(),
+        ocr,
+        const ScanPick(),
+        picker: (s) async {
+          asked.add(s);
+          return '/spool/files/cam.bin';
+        },
+      );
+      await tester.tap(find.byKey(const Key('scan-camera')));
+      await tester.pumpAndSettle();
+      expect(asked, [ScanImageSource.camera]);
+      expect(ocr.paths, ['/spool/files/cam.bin']);
+      expect(find.text("Here's what I found"), findsOneWidget);
+      expect(find.text('1250.00'), findsOneWidget);
+    });
+
+    testWidgets('cancelling the camera reads nothing', (tester) async {
+      final ocr = FakeOcr(_enReceipt);
+      await pumpScan(
+        tester,
+        FakeEditor(),
+        ocr,
+        const ScanPick(),
+        picker: (_) async => null,
+      );
+      await tester.tap(find.byKey(const Key('scan-camera')));
+      await tester.pumpAndSettle();
+      expect(ocr.paths, isEmpty);
+      expect(find.byKey(const Key('scan-camera')), findsOneWidget);
+    });
+
+    for (final locale in [const Locale('en'), const Locale('ar', 'EG')]) {
+      testWidgets('camera denied: message and gallery ($locale)', (
+        tester,
+      ) async {
+        final ocr = FakeOcr(_enReceipt);
+        await pumpScan(
+          tester,
+          FakeEditor(),
+          ocr,
+          const ScanPick(),
+          locale: locale,
+          textScale: 1.3,
+          picker: (s) async => s == ScanImageSource.camera
+              ? throw const ScanCameraDeniedException()
+              : '/spool/files/g.bin',
+        );
+        await tester.tap(find.byKey(const Key('scan-camera')));
+        await tester.pumpAndSettle();
+        expect(
+          find.text(
+            locale.languageCode == 'en'
+                ? "Zaghlol can't use the camera. Allow it in Settings, or "
+                      'choose a photo from the gallery.'
+                : 'زغلول مش قادر يفتح الكاميرا. افتحهاله من الإعدادات، أو '
+                      'اختار صورة من المعرض.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('scan-camera')), findsNothing);
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.byKey(const Key('scan-choose')));
+        await tester.pumpAndSettle();
+        expect(ocr.paths, ['/spool/files/g.bin']);
+      });
+    }
+  });
+
+  group('T-264 what I read (dev only)', () {
+    Future<void> scan(
+      WidgetTester tester,
+      String text, {
+      required bool dev,
+      Locale locale = const Locale('en'),
+    }) => pumpScan(
+      tester,
+      FakeEditor(),
+      FakeOcr(text),
+      const ScanImagePath('/spool/files/x.bin'),
+      devReadText: dev,
+      locale: locale,
+    );
+
+    testWidgets('release: no button in found, no-text or no-total', (
+      tester,
+    ) async {
+      for (final t in [_enReceipt, '', 'Shop name\n23/10/2026 11:14 hello']) {
+        await scan(tester, t, dev: false);
+        expect(find.byKey(const Key('scan-what-i-read')), findsNothing);
+      }
+    });
+
+    testWidgets('dev: found shows the read text', (tester) async {
+      await scan(tester, _enReceipt, dev: true);
+      await tester.tap(find.byKey(const Key('scan-what-i-read')));
+      await tester.pumpAndSettle();
+      expect(find.text('What the phone read'), findsOneWidget);
+      expect(find.textContaining('Reference: 62910482112'), findsOneWidget);
+    });
+
+    testWidgets('dev: no-text empty state has the button', (tester) async {
+      await scan(tester, '', dev: true);
+      await tester.tap(find.byKey(const Key('scan-what-i-read')));
+      await tester.pumpAndSettle();
+      expect(find.text('Nothing was read.'), findsOneWidget);
+    });
+
+    testWidgets('dev: no-total empty state has the button (ar)', (
+      tester,
+    ) async {
+      await scan(
+        tester,
+        'Fresh Market\nThank you for visiting us again',
+        dev: true,
+        locale: const Locale('ar', 'EG'),
+      );
+      expect(find.byKey(const Key('scan-enter-amount')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('scan-what-i-read')));
+      await tester.pumpAndSettle();
+      expect(find.text('الموبايل قرا إيه'), findsOneWidget);
+      expect(find.textContaining('Fresh Market'), findsOneWidget);
+    });
+  });
+
+  test('the captured file is deleted after reading, also on failure', () async {
+    final dir = Directory.systemTemp.createTempSync('t264');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final prev = ImagePickerPlatform.instance;
+    addTearDown(() => ImagePickerPlatform.instance = prev);
+    for (final fail in [false, true]) {
+      final f = File('${dir.path}/shot$fail.jpg')..writeAsStringSync('x');
+      ImagePickerPlatform.instance = _FakePicker(f.path);
+      final ocr = _SealOcr(failSeal: fail);
+      final c = ProviderContainer(
+        overrides: [ocrEngineProvider.overrideWithValue(ocr)],
+      );
+      addTearDown(c.dispose);
+      final pick = c.read(scanImagePickerProvider)!;
+      if (fail) {
+        await expectLater(
+          pick(ScanImageSource.camera),
+          throwsA(isA<OcrException>()),
+        );
+      } else {
+        expect(await pick(ScanImageSource.camera), '/spool/sealed.bin');
+      }
+      expect(f.existsSync(), isFalse, reason: 'fail=$fail');
+      expect(ocr.sealed, [f.path]);
+    }
+  });
+
+  test('camera permission denied maps to ScanCameraDeniedException', () async {
+    final prev = ImagePickerPlatform.instance;
+    addTearDown(() => ImagePickerPlatform.instance = prev);
+    ImagePickerPlatform.instance = _FakePicker(
+      null,
+      error: PlatformException(code: 'camera_access_denied'),
+    );
+    final c = ProviderContainer(
+      overrides: [ocrEngineProvider.overrideWithValue(FakeOcr(''))],
+    );
+    addTearDown(c.dispose);
+    final pick = c.read(scanImagePickerProvider)!;
+    await expectLater(
+      pick(ScanImageSource.camera),
+      throwsA(isA<ScanCameraDeniedException>()),
+    );
+    expect(await pick(ScanImageSource.gallery), isNull);
+  });
+}
+
+class _SealOcr extends FakeOcr {
+  _SealOcr({required this.failSeal}) : super('');
+  final bool failSeal;
+
+  @override
+  Future<String> sealImage(String plainImagePath) async {
+    sealed.add(plainImagePath);
+    if (failSeal) throw const OcrException(OcrFailureCode.notAvailable);
+    return '/spool/sealed.bin';
+  }
+}
+
+class _FakePicker extends ImagePickerPlatform {
+  _FakePicker(this.path, {this.error});
+  final String? path;
+  final PlatformException? error;
+
+  @override
+  Future<XFile?> getImageFromSource({
+    required ImageSource source,
+    ImagePickerOptions options = const ImagePickerOptions(),
+  }) async {
+    if (error != null && source == ImageSource.camera) throw error!;
+    return path == null ? null : XFile(path!);
+  }
 }

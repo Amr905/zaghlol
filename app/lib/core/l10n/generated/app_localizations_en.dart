@@ -4347,6 +4347,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get captureScanChoose => 'Choose an image';
 
   @override
+  String get captureScanCamera => 'Take a photo';
+
+  @override
+  String get captureScanGallery => 'Choose from gallery';
+
+  @override
+  String get captureScanCameraDenied =>
+      'Zaghlol can\'t use the camera. Allow it in Settings, or choose a photo from the gallery.';
+
+  @override
+  String get captureScanWhatIRead => 'What I read';
+
+  @override
+  String get captureScanWhatIReadTitle => 'What the phone read';
+
+  @override
+  String get captureScanWhatIReadEmpty => 'Nothing was read.';
+
+  @override
   String get captureScanChooseAnother => 'Choose another image';
 
   @override

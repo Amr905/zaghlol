@@ -6327,6 +6327,42 @@ abstract class AppLocalizations {
   /// B
   ///
   /// In ar, this message translates to:
+  /// **'صوّر بالكاميرا'**
+  String get captureScanCamera;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار من المعرض'**
+  String get captureScanGallery;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول مش قادر يفتح الكاميرا. افتحهاله من الإعدادات، أو اختار صورة من المعرض.'**
+  String get captureScanCameraDenied;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي اتقرأ'**
+  String get captureScanWhatIRead;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'الموبايل قرا إيه'**
+  String get captureScanWhatIReadTitle;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة اتقرأت.'**
+  String get captureScanWhatIReadEmpty;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
   /// **'اختار صورة تانية'**
   String get captureScanChooseAnother;
 
