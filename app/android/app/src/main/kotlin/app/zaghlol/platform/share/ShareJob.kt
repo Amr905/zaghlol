@@ -18,11 +18,38 @@ class ShareJob(val id: String, private val post: (Runnable) -> Unit) {
     private var outcome: ShareOutcome? = null
     private var listener: ((ShareOutcome) -> Unit)? = null
     private var delivered = false
+    private var committing = false
 
     /** Sets the outcome from any thread; false when one was already set. */
     fun complete(result: ShareOutcome): Boolean {
         synchronized(this) {
             if (outcome != null) return false
+            outcome = result
+        }
+        post(Runnable { deliverIfReady() })
+        return true
+    }
+
+    /**
+     * FU-070 C3: the worker asks this right before it commits the encrypted
+     * file. False when an outcome is already set (the give-up timer refused
+     * the share): the worker must not commit. True marks the job as
+     * committing, after which [giveUp] no longer sets an outcome; the
+     * worker's own outcome follows the commit.
+     */
+    fun beginCommit(): Boolean = synchronized(this) {
+        if (outcome != null) {
+            false
+        } else {
+            committing = true
+            true
+        }
+    }
+
+    /** The give-up timer: sets [result] unless an outcome is set or a commit is in progress. */
+    fun giveUp(result: ShareOutcome): Boolean {
+        synchronized(this) {
+            if (committing || outcome != null) return false
             outcome = result
         }
         post(Runnable { deliverIfReady() })
@@ -79,6 +106,13 @@ object ShareJobs {
     fun finish(job: ShareJob, outcome: ShareOutcome): Boolean {
         val first = job.complete(outcome)
         if (first && outcome is ShareOutcome.Rejected) ShareIntakeState.setRejected(outcome.reason)
+        return first
+    }
+
+    /** The give-up timer's [finish] (FU-070 C3): yields to a commit in progress. */
+    fun giveUp(job: ShareJob, outcome: ShareOutcome.Rejected): Boolean {
+        val first = job.giveUp(outcome)
+        if (first) ShareIntakeState.setRejected(outcome.reason)
         return first
     }
 }

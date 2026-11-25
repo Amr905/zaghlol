@@ -186,6 +186,32 @@ void main() {
     expect(senders.reads, 2);
   });
 
+  test('FU-121 048-3: after an INVALID_ARGUMENT restart progress counts each '
+      'row once, own earlier imports are not skipped, first page is small '
+      'again', () async {
+    var calls = 0;
+    final seen = <String>{};
+    store.outcome = (m) => seen.add(m.deliveryId)
+        ? IngestInserted('t${m.deliveryId}')
+        : const IngestDuplicate();
+    final inner = inboxOf([for (var i = 1; i <= 150; i++) row(i, 'ZBANK')]);
+    host.onQueryInbox = (q) async {
+      calls++;
+      if (calls == 2) throw hostError('INVALID_ARGUMENT');
+      return inner(q);
+    };
+    final p = await scanner.run(req());
+    expect(p.phase, ScanPhase.done);
+    expect(p.restarts, 1);
+    expect(p.scanned, 150);
+    expect(p.imported, 150);
+    expect(p.skipped, 0);
+    expect(
+      [for (final q in host.inboxQueries) q.pageSize],
+      [kFirstPageSize, kPageSize, kFirstPageSize, kPageSize],
+    );
+  });
+
   test(
     'a cursor that keeps being refused ends as failed after the restart cap',
     () async {

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.CancellationSignal
 import java.io.InputStream
 
 /** [ShareSource] over an ACTION_SEND intent. Malformed extras are treated as absent, never thrown. */
@@ -57,15 +58,44 @@ class IntentShareSource(
     @Volatile private var cancelled = false
     @Volatile private var opened: InputStream? = null
 
+    override val streamFileName: String? by lazy {
+        try {
+            uri?.let { u ->
+                resolver.query(u, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                    if (c.moveToFirst() && !c.isNull(0)) c.getString(0) else null
+                } ?: u.lastPathSegment
+            }
+        } catch (_: RuntimeException) {
+            null
+        }
+    }
+
     override fun resolverType(): String? = try {
         uri?.let { resolver.getType(it) }
     } catch (_: RuntimeException) {
         null
     }
 
+    /** FU-070 S1: passed to the provider, so a cancelled read can also end a blocked `openFile`. */
+    private val signal = CancellationSignal()
+
     override fun open(): InputStream? {
         if (cancelled) return null
-        val stream = uri?.let { resolver.openInputStream(it) } ?: return null
+        val stream = try {
+            uri?.let { u ->
+                resolver.openAssetFileDescriptor(u, "r", signal)?.let { afd ->
+                    // FU-333: do not leak the descriptor when the stream cannot be created.
+                    try {
+                        afd.createInputStream()
+                    } catch (e: Exception) {
+                        runCatching { afd.close() }
+                        throw e
+                    }
+                }
+            }
+        } catch (_: android.os.OperationCanceledException) {
+            null
+        } ?: return null
         opened = stream
         // cancel() may have run between the check above and the assignment.
         if (cancelled) {
@@ -77,6 +107,7 @@ class IntentShareSource(
 
     override fun cancel() {
         cancelled = true
+        runCatching { signal.cancel() }
         opened?.let { runCatching { it.close() } }
     }
 }

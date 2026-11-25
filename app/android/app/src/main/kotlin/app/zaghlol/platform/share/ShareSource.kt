@@ -23,6 +23,9 @@ interface ShareSource {
     /** Package of the provider the resolver would actually use for the stream, when it can be resolved. */
     val streamProviderPackage: String?
 
+    /** Display name of the shared file when known (used only to rescue generic CSV MIME types). */
+    val streamFileName: String? get() = null
+
     /** The provider's own MIME type for the stream, when it reports one. */
     fun resolverType(): String?
 
@@ -51,8 +54,18 @@ object ShareUriPolicy {
         if (host.isNullOrEmpty()) return false
         val own = ownPackage.lowercase()
         if (host == own || host.startsWith("$own.")) return false
+        // FU-070 S2: providers our own permissions unlock (READ_SMS, contacts, call log):
+        // a sender could make us copy the user's messages into a share.
+        if (host in SYSTEM_AUTHORITIES) return false
         // Belt and braces: whatever the authority looks like, never read from a provider of our own.
         if (source.streamProviderPackage == ownPackage) return false
+        // FU-330: other Telephony authorities (sms-changes, OEM/RCS) are refused by the provider package.
+        if (source.streamProviderPackage in SYSTEM_PROVIDER_PACKAGES) return false
         return true
     }
+
+    val SYSTEM_PROVIDER_PACKAGES: Set<String> = setOf("com.android.providers.telephony")
+
+    /** FU-070 S2: authorities of system providers our permissions can read. `media` is allowed (gallery shares). */
+    val SYSTEM_AUTHORITIES: Set<String> = setOf("sms", "mms", "mms-sms", "call_log", "com.android.contacts", "contacts")
 }

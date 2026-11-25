@@ -21,6 +21,7 @@ const _entKey = BackendStateKeys.entitlementToken;
 String? _cached(Harness h) => h.store.text(_entKey);
 
 void main() {
+  fu138Tests();
   group('verification and decision', () {
     test(
       'a verified, bound, active token is Gold; grace from hw >= exp',
@@ -638,4 +639,53 @@ void main() {
       },
     );
   });
+}
+
+/// A store whose token write waits for [gate] (FU-138).
+final class _GatedStore extends FakeBackendStore {
+  _GatedStore(super.log, this.gate);
+  final Completer<void> gate;
+  final Completer<void> reached = Completer<void>();
+
+  @override
+  Future<void> write(String key, Uint8List value) async {
+    if (key == BackendStateKeys.entitlementToken) {
+      reached.complete();
+      await gate.future;
+    }
+    await super.write(key, value);
+  }
+}
+
+void fu138Tests() {
+  test(
+    'FU-138: the 60 s tick does not publish while a body is applied',
+    () async {
+      final h = Harness(boot: 1);
+      final gate = Completer<void>();
+      final store = _GatedStore(h.log, gate);
+      final service = EntitlementService(
+        backend: h.backend,
+        store: store,
+        time: TrustedTime(store: store, clock: h.clock),
+        anchor: h.anchor,
+        keys: ResponseSignatureVerifier([h.key.publicKey], allowDevKeys: false),
+        sink: h.sink,
+      );
+      final body = SignedBody(
+        serverTime: iso(h.clock.wall),
+        entitlementToken: h.token(entClaims(iatMs: t0)),
+      );
+      final applying = service.handleBody(body);
+      await store.reached.future;
+      final before = h.sink.phases.length;
+      await service.tick();
+      expect(h.sink.phases.length, before, reason: 'tick skipped mid-apply');
+      gate.complete();
+      await applying;
+      expect(h.sink.last, EntitlementPhase.active);
+      await service.tick();
+      expect(h.sink.phases.length, greaterThan(before));
+    },
+  );
 }
