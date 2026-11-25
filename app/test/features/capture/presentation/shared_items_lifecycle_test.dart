@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/app/onboarding_gate.dart' show onboardingNeededProvider;
+import 'package:zaghlol/core/ocr/ocr_port.dart';
 import 'package:zaghlol/core/platform/share_intake_api.g.dart'
     show ShareIntakeHostApi;
 import 'package:zaghlol/core/platform/share_intake_service.dart';
@@ -66,7 +67,7 @@ void main() {
   Future<ShareIntakeService> pump(
     WidgetTester tester,
     _Host host, {
-    bool ocrInstalled = true,
+    OcrEngine? ocr,
   }) async {
     lock = _Lock();
     final service = ShareIntakeService(host: host);
@@ -76,7 +77,7 @@ void main() {
     await tester.pumpWidget(
       harnessApp(
         [
-          ...scanOverrides(FakeEditor(), FakeOcr(_receipt)),
+          ...scanOverrides(FakeEditor(), ocr ?? FakeOcr(_receipt)),
           captureShareIntakeProvider.overrideWithValue(service),
           appLockControllerProvider.overrideWith(() => lock),
           onboardingNeededProvider.overrideWith((ref) async => false),
@@ -142,11 +143,37 @@ void main() {
     expect(host.discarded, ['i1']);
   });
 
-  testWidgets('an image with no OCR path says not available, then is dropped', (
+  testWidgets('T-263: an image announced without an ocrPath is still read', (
     tester,
   ) async {
+    // The warm-start announcement used to omit ocrPath for images; the share
+    // id is the OCR handle on Android.
+    final ocr = FakeOcr(_receipt);
     final host = _Host([_d('i2', ShareKind.image)]);
-    final service = await pump(tester, host);
+    final service = await pump(tester, host, ocr: ocr);
+    lock.open();
+    await service.pollPending();
+    await tester.pumpAndSettle();
+    expect(find.text('1250.00'), findsOneWidget);
+    expect(ocr.paths, ['i2']);
+    expect(
+      find.text("Reading images isn't ready on this phone yet"),
+      findsNothing,
+    );
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(host.discarded, ['i2']);
+  });
+
+  testWidgets('T-263: no OCR on the phone shows the not-available screen', (
+    tester,
+  ) async {
+    final host = _Host([_d('i3', ShareKind.image, ocrPath: 'i3')]);
+    final service = await pump(
+      tester,
+      host,
+      ocr: FakeOcr('', fail: OcrFailureCode.notAvailable),
+    );
     lock.open();
     await service.pollPending();
     await tester.pumpAndSettle();
@@ -154,9 +181,23 @@ void main() {
       find.text("Reading images isn't ready on this phone yet"),
       findsOneWidget,
     );
+    expect(find.textContaining('implemented'), findsNothing);
     await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
-    expect(host.discarded, ['i2']);
+    expect(host.discarded, ['i3']);
+  });
+
+  testWidgets('T-263: a warm-start event for an image is read too', (
+    tester,
+  ) async {
+    final ocr = FakeOcr(_receipt);
+    final host = _Host(const []);
+    final service = await pump(tester, host, ocr: ocr);
+    lock.open();
+    service.onShareReceived(_d('i4', ShareKind.image, ocrPath: 'i4'));
+    await tester.pumpAndSettle();
+    expect(find.text('1250.00'), findsOneWidget);
+    expect(ocr.paths, ['i4']);
   });
 
   testWidgets('a refused share shows a message and opens nothing', (
