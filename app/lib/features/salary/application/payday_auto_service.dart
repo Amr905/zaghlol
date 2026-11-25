@@ -151,7 +151,12 @@ class PaydayAutoService {
   /// the user merely filed under Income (a gift) does not move the payday.
   Future<List<QueryRow>> _salaryRows({String? onlyId}) async {
     final salaryState = await _settings.get(Settings.salaryState);
-    final tied = {for (final e in salaryState.entries) e.txnId};
+    // Manual rows carry the expected payday as anchor, so they cannot be told
+    // from a real arrival: only captured entries count as tied (FU-308).
+    final tied = {
+      for (final e in salaryState.entries)
+        if (e.captured) e.txnId,
+    };
     final from = _nowUtcMs() - _lookbackDays * 86400000;
     final rows = await _db
         .customSelect(
