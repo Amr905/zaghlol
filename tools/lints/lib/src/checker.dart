@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/source/line_info.dart';
 
 import 'class_graph.dart';
@@ -164,6 +165,9 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
         'integer minor units instead.',
       );
     }
+    if (node.target == null) {
+      _checkSafeCode(node.methodName.name, node.argumentList, node.offset);
+    }
     _checkPrint(node);
     _checkUnmaskedAmount(node);
     super.visitMethodInvocation(node);
@@ -285,6 +289,7 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
     final type = node.constructorName.type.toSource();
+    _checkSafeCode(stripGenerics(type), node.argumentList, node.offset);
     if (!scope.isL10n && type == 'NumberFormat') {
       _report(
         ruleNoUnmaskedAmount,
@@ -535,6 +540,109 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
 
   // FU-033: a direct `throw FormatException(..)` (or any platform exception
   // type) in the parsing and db layers.
+  static const Set<String> _throwableExceptionTypes = {
+    'FormatException',
+    'Exception',
+    'TimeoutException',
+    'FileSystemException',
+    'HttpException',
+    'SocketException',
+  };
+
+  static final RegExp _codeShape = RegExp(r'^[A-Z][A-Z0-9_]{0,63}$');
+
+  // FU-033: the code of a SafeException must be a plain string literal in
+  // UPPER_SNAKE_CASE (no interpolation, no variables), so free text and user
+  // data cannot reach it. The runtime `assert` only runs in debug builds.
+  void _checkSafeCode(String type, ArgumentList args, int offset) {
+    if (!scope.inParsingOrDbLayer || type != 'SafeException') return;
+    final first = args.arguments.isEmpty ? null : args.arguments.first;
+    final e = first is NamedExpression ? first.expression : first;
+    final ok =
+        (e is SimpleStringLiteral && _codeShape.hasMatch(e.value)) ||
+        _isOwnStaticConst(e, args);
+    if (!ok) {
+      _report(
+        ruleSafeExceptionRequired,
+        offset,
+        'SafeException code must be an UPPER_SNAKE_CASE string literal.',
+      );
+    }
+  }
+
+  // A bare identifier naming a `static const` of the enclosing class (the
+  // value is a literal checked at its declaration by the runtime assert).
+  static bool _isOwnStaticConst(Expression? e, AstNode at) {
+    if (e is! SimpleIdentifier) return false;
+    for (AstNode? p = at; p != null; p = p.parent) {
+      if (p is ClassDeclaration) {
+        for (final m in p.members.whereType<FieldDeclaration>()) {
+          if (m.isStatic &&
+              m.fields.isConst &&
+              m.fields.variables.any((v) => v.name.lexeme == e.name)) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+    return false;
+  }
+
+  @override
+  void visitSuperConstructorInvocation(SuperConstructorInvocation node) {
+    final parent = node.parent;
+    final cls = parent is ConstructorDeclaration ? parent.parent : null;
+    // Only direct subclasses of SafeException pass a code up.
+    if (cls is ClassDeclaration &&
+        ClassGraph.directSupertypes(cls).contains('SafeException') &&
+        node.constructorName == null) {
+      _checkSafeCode('SafeException', node.argumentList, node.offset);
+    }
+    super.visitSuperConstructorInvocation(node);
+  }
+
+  @override
+  void visitEnumDeclaration(EnumDeclaration node) {
+    _checkNonClassThrowable(
+      node.name,
+      node.implementsClause?.interfaces,
+      node.withClause?.mixinTypes,
+    );
+    super.visitEnumDeclaration(node);
+  }
+
+  @override
+  void visitMixinDeclaration(MixinDeclaration node) {
+    _checkNonClassThrowable(
+      node.name,
+      node.implementsClause?.interfaces,
+      node.onClause?.superclassConstraints,
+    );
+    super.visitMixinDeclaration(node);
+  }
+
+  // FU-033: enums and mixins can implement Exception too.
+  void _checkNonClassThrowable(
+    Token name,
+    List<NamedType>? a,
+    List<NamedType>? b,
+  ) {
+    if (!scope.inParsingOrDbLayer) return;
+    final ancestors = <String>{};
+    for (final t in [...?a, ...?b]) {
+      ancestors.addAll(graph.ancestors(stripGenerics(t.toSource())));
+    }
+    if (ancestors.any(throwableRoots.contains) &&
+        !ancestors.contains('SafeException')) {
+      _report(
+        ruleSafeExceptionRequired,
+        name.offset,
+        'Exceptions in the parsing and db layers must extend SafeException.',
+      );
+    }
+  }
+
   @override
   void visitThrowExpression(ThrowExpression node) {
     final e = node.expression;
@@ -549,7 +657,7 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
     if (scope.inParsingOrDbLayer && type != null) {
       // Errors (ArgumentError, StateError, ...) are programmer-error asserts and
       // carry no stored data; only Exception types are in scope.
-      if (type == 'FormatException' || type == 'Exception') {
+      if (_throwableExceptionTypes.contains(type)) {
         _report(
           ruleSafeExceptionRequired,
           node.offset,
