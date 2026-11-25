@@ -129,6 +129,19 @@ void main() {
       );
     });
 
+    test('FU-307: a month name picks the nearest non-future cycle', () {
+      const dec = AskPeriod(AskPeriodKind.monthOfYear, month: 12);
+      const nov = AskPeriod(AskPeriodKind.monthOfYear, month: 11);
+      expect(at24(dec, d(2026, 11, 26)), '2026-11-24..2026-12-23');
+      expect(at24(nov, d(2026, 11, 26)), '2026-10-24..2026-11-23');
+      final c = resolveAskPeriod(
+        dec,
+        d(2026, 11, 26),
+        PaydaySchedule.single(1),
+      );
+      expect('${c.from.toIso()}..${c.to.toIso()}', '2025-12-01..2025-12-31');
+    });
+
     test('before payday 24 "this month" is still the cycle named November', () {
       expect(
         at24(const AskPeriod(AskPeriodKind.month), d(2026, 11, 10)),

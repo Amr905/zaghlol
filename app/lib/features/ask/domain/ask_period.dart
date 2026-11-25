@@ -55,6 +55,10 @@ ChartPeriod resolveAskPeriod(
       return ChartPeriod(today.plusDays(1 - n), today);
     case AskPeriodKind.monthOfYear:
       final m = p.month < 1 || p.month > 12 ? today.month : p.month;
+      if (p.year == null) {
+        final named = _nearestCycleNamed(schedule, today, m);
+        if (named != null) return named;
+      }
       final y = p.year ?? (m <= today.month ? today.year : today.year - 1);
       final year = y < 1 ? 1 : (y > 9999 ? 9999 : y);
       return _cycleNamed(schedule, year, m) ?? ChartPeriod.month(year, m);
@@ -71,6 +75,21 @@ ChartPeriod? _cycleNamed(PaydaySchedule schedule, int year, int month) {
   for (final c in [mid, schedule.before(mid), schedule.after(mid)]) {
     final m = cycleLabelMonth(c.start);
     if (m.year == year && m.month == month) return ChartPeriod.cycle(c);
+  }
+  return null;
+}
+
+/// FU-307: the nearest cycle named [month] that is not in the future (the
+/// current cycle counts), found among the cycles around today.
+ChartPeriod? _nearestCycleNamed(
+  PaydaySchedule schedule,
+  CivilDate today,
+  int month,
+) {
+  var c = schedule.cycleOn(today);
+  for (var i = 0; i < 14; i++) {
+    if (cycleLabelMonth(c.start).month == month) return ChartPeriod.cycle(c);
+    c = schedule.before(c);
   }
   return null;
 }

@@ -251,13 +251,32 @@ void main() {
             for (final i in [0, 1, 2])
               SalaryEntry(
                 txnId: 'x$i',
-                captured: i != 1,
+                captured: true,
                 anchor: CivilDate(2026, 9 + i, 24),
               ),
           ],
         ),
       );
       expect(await service.run(), 23);
+    });
+
+    test('FU-308: manual rows on the expected date do not move it', () async {
+      await pattern(source: 'user');
+      await settings.set(
+        Settings.salaryState,
+        SalaryState(
+          entries: [
+            for (final i in [0, 1, 2])
+              SalaryEntry(
+                txnId: 'x$i',
+                captured: false,
+                anchor: CivilDate(2026, 9 + i, 24),
+              ),
+          ],
+        ),
+      );
+      expect(await service.run(), isNull);
+      expect(await settings.get(Settings.paydayEras), isNull);
     });
 
     test('m-1: only a stored salary credit runs the rule', () async {
