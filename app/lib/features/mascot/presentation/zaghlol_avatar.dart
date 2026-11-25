@@ -76,6 +76,12 @@ class ZaghlolAvatar extends ConsumerWidget {
 
   static const stillAsset = 'assets/mascot/zaghlol_still.png';
 
+  /// T-268: the shipped still has zero transparent margin (its left thumb-up
+  /// hand outline touches pixel column 0) and the Rive widget clips to its box,
+  /// so any rotate/scale or ancestor clip nibbled the hand. The art is painted
+  /// inside this inset on every side (symmetric, so RTL needs no branching).
+  static const paintInsetFraction = 0.06;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reduce =
@@ -86,20 +92,21 @@ class ZaghlolAvatar extends ConsumerWidget {
     // Reduce motion: still pose only. Otherwise an explicit artboard override
     // wins, then the illustrator's Rive file when bundled (T-088), else the
     // interim Flutter animation of the brand still (T-099).
+    final inner = size * (1 - 2 * paintInsetFraction);
     final hasRive = ref.watch(zaghlolRivePresentProvider).value ?? false;
     final Widget body = reduce
         ? Image.asset(
             stillAsset,
-            width: size,
-            height: size,
+            width: inner,
+            height: inner,
             fit: BoxFit.contain,
             excludeFromSemantics: true,
           )
         : artboard != null
-        ? artboard(context, moment, talk, size)
+        ? artboard(context, moment, talk, inner)
         : hasRive
-        ? RiveMascot(moment: moment, talk: talk, size: size)
-        : InterimMascot(moment: moment, talk: talk, size: size);
+        ? RiveMascot(moment: moment, talk: talk, size: inner)
+        : InterimMascot(moment: moment, talk: talk, size: inner);
 
     return IgnorePointer(
       child: Semantics(
@@ -109,7 +116,7 @@ class ZaghlolAvatar extends ConsumerWidget {
         child: SizedBox.square(
           key: const ValueKey('zaghlol-avatar'),
           dimension: size,
-          child: ExcludeSemantics(child: body),
+          child: Center(child: ExcludeSemantics(child: body)),
         ),
       ),
     );

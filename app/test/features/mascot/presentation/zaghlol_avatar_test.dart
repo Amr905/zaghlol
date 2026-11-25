@@ -25,6 +25,7 @@ Widget _wrap(
 }
 
 void main() {
+  mascotInsetTests();
   for (final rtl in [true, false]) {
     final l = rtl ? 'ar' : 'en';
     testWidgets('renders still pose, 15 moments ($l)', (tester) async {
@@ -115,4 +116,28 @@ void main() {
     await tester.pumpWidget(_wrap(const ZaghlolAvatar(), osReduce: true));
     expect(tester.hasRunningAnimations, isFalse);
   });
+}
+
+void mascotInsetTests() {
+  for (final dir in TextDirection.values) {
+    testWidgets('T-268 art stays inside the box with an inset ($dir)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: Directionality(
+              textDirection: dir,
+              child: const Center(child: ZaghlolAvatar(size: 100)),
+            ),
+          ),
+        ),
+      );
+      final box = tester.getRect(find.byKey(const ValueKey('zaghlol-avatar')));
+      final img = tester.getRect(find.byType(Image));
+      expect(img.left - box.left, closeTo(6, 0.01));
+      expect(box.right - img.right, closeTo(6, 0.01));
+    });
+  }
 }
