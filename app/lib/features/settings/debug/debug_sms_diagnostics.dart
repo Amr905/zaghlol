@@ -4,9 +4,12 @@
 // Guard kept/dropped by reason, spooled, inbox scan); the database supplies
 // what the app made of it (parsed, saved, in review).
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' show shapeSignature;
 
 import '../../../core/db/app_database.dart';
 import '../../../core/db/app_database_providers.dart';
@@ -19,7 +22,15 @@ final class SmsDiagSnapshot {
     required this.userState,
     required this.pending,
     required this.senders,
+    this.unreadReasons = const {},
+    this.signatures = const {},
   });
+
+  /// sender -> unread reason (parser reason code) -> count.
+  final Map<String, Map<String, int>> unreadReasons;
+
+  /// sender -> top shape signatures (text-free, see `shapeSignature`).
+  final Map<String, List<MapEntry<String, int>>> signatures;
 
   /// Native Guard mode (`full`, `base_only`, `invalid`...); `?` when unknown.
   final String guardMode;
@@ -132,11 +143,43 @@ final class NativeAndDbSmsDiagnostics implements SmsDiagnosticsSource {
         r.read<int>('n'),
       );
     }
+    final unread = await _db
+        .customSelect(
+          'SELECT r.sender AS sender, r.body AS body, v.payload AS payload '
+          'FROM review_items v JOIN raw_messages r ON r.id = v.raw_message_id '
+          "WHERE r.channel = 'sms' AND v.resolved_at IS NULL "
+          "AND v.kind = 'unrecognized'",
+          readsFrom: {_db.rawMessages, _db.reviewItems},
+        )
+        .get();
+    final reasons = <String, Map<String, int>>{};
+    final sigCounts = <String, Map<String, int>>{};
+    for (final r in unread) {
+      final label = diagSenderLabel(r.read<String?>('sender'));
+      final reason = _reasonOf(r.read<String?>('payload'));
+      final rm = reasons.putIfAbsent(label, () => {});
+      rm[reason] = (rm[reason] ?? 0) + 1;
+      final sig = shapeSignature(r.read<String>('body'));
+      final sm = sigCounts.putIfAbsent(label, () => {});
+      sm[sig] = (sm[sig] ?? 0) + 1;
+    }
+    final top = <String, List<MapEntry<String, int>>>{
+      for (final e in sigCounts.entries)
+        e.key:
+            (e.value.entries.toList()..sort((a, b) {
+                  final c = b.value.compareTo(a.value);
+                  return c != 0 ? c : a.key.compareTo(b.key);
+                }))
+                .take(5)
+                .toList(),
+    };
     return SmsDiagSnapshot(
       guardMode: mode,
       userState: user,
       pending: pending,
       senders: senders,
+      unreadReasons: reasons,
+      signatures: top,
     );
   }
 
@@ -148,6 +191,19 @@ final class NativeAndDbSmsDiagnostics implements SmsDiagnosticsSource {
       // Nothing native to reset.
     }
   }
+}
+
+String _reasonOf(String? payload) {
+  if (payload == null) return 'unknown';
+  try {
+    final d = jsonDecode(payload);
+    final r = d is Map ? d['reason'] : null;
+    // Reason codes are our own enum names; anything else is dropped.
+    if (r is String && RegExp(r'^[A-Za-z]{1,40}$').hasMatch(r)) return r;
+  } on Object {
+    // Fall through.
+  }
+  return 'unknown';
 }
 
 /// Whether the screen exists at all: dev flavours only.

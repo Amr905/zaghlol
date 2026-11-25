@@ -2,6 +2,7 @@
 // names, nothing else, and exists in dev builds only.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/settings/debug/debug_sms_diagnostics.dart';
 import 'package:zaghlol/features/settings/debug/debug_sms_diagnostics_screen.dart';
@@ -29,6 +30,24 @@ class _Fake implements SmsDiagnosticsSource {
 
   @override
   Future<void> reset() async => resets++;
+}
+
+class _Shapes extends _Fake {
+  @override
+  Future<SmsDiagSnapshot> read() async => const SmsDiagSnapshot(
+    guardMode: 'full',
+    userState: 'OK',
+    pending: 0,
+    senders: {
+      'NBE': {'received': 3},
+    },
+    unreadReasons: {
+      'NBE': {'genericNoAmount': 2, 'genericDeclined': 1},
+    },
+    signatures: {
+      'NBE': [MapEntry('A debited 9 A', 2)],
+    },
+  );
 }
 
 void main() {
@@ -59,6 +78,31 @@ void main() {
     await t.pumpAndSettle();
     expect(fake.resets, 1);
   });
+
+  for (final loc in const [Locale('en'), Locale('ar')]) {
+    testWidgets('unread reasons and shapes show, ${loc.languageCode}', (
+      t,
+    ) async {
+      final src = _Shapes();
+      await t.pumpWidget(
+        ProviderScope(
+          overrides: [
+            smsDiagnosticsSourceProvider.overrideWith((ref) async => src),
+          ],
+          child: MaterialApp(
+            locale: loc,
+            supportedLocales: const [Locale('en'), Locale('ar')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: const DebugSmsDiagnosticsScreen(),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(find.text('unread:genericNoAmount: 2'), findsOneWidget);
+      expect(find.text('unread:genericDeclined: 1'), findsOneWidget);
+      expect(find.text('shape x2: A debited 9 A'), findsOneWidget);
+    });
+  }
 
   testWidgets('About shows the row only when the dev switch is on', (t) async {
     final h = SettingsHarness();

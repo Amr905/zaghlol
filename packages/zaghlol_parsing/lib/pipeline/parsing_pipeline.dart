@@ -227,12 +227,11 @@ final class ParsingPipeline {
     if (generic is ParseGeneric || generic is ParseNotice) {
       return generic;
     }
-    // T-241: keep the notice-conflict reason; the other reasons stay hidden
-    // behind `noTemplateMatched` (T-244 surfaces them).
+    // T-241/T-244: keep the generic reader's real reason (codes only).
     if (generic is ParseUnrecognized &&
-        generic.reason == UnrecognizedReason.genericNoticeConflict) {
+        _keptGenericReasons.contains(generic.reason)) {
       return ParseUnrecognized(
-        UnrecognizedReason.genericNoticeConflict,
+        generic.reason,
         institutionCode: institution.code,
       );
     }
@@ -241,6 +240,13 @@ final class ParsingPipeline {
       institutionCode: institution.code,
     );
   }
+
+  static const Set<UnrecognizedReason> _keptGenericReasons = {
+    UnrecognizedReason.genericNoticeConflict,
+    UnrecognizedReason.genericNoAmount,
+    UnrecognizedReason.genericDeclined,
+    UnrecognizedReason.genericPromotion,
+  };
 
   Iterable<Template> _candidates(
     Institution institution,
