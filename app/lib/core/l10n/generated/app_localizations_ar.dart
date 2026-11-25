@@ -2022,6 +2022,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ingestionReviewOldDueRemoved => 'شلناه من مصاريفك';
 
   @override
+  String get ingestionReviewOldDueAlreadyHandled =>
+      'اتعامل معاها قبل كده، مفيش حاجة تتعمل هنا';
+
+  @override
   String get ingestionReviewOldDueKept => 'تمام، هيفضل زي ما هو';
 
   @override

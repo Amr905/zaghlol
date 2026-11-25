@@ -425,6 +425,8 @@ final class DriftIngestStore implements IngestStorePort {
           'AND t.transfer_pair_id IS NULL AND t.is_internal = 0 '
           'AND NOT EXISTS (SELECT 1 FROM split_participants s '
           'WHERE s.expense_txn_id = t.id) '
+          'AND NOT EXISTS (SELECT 1 FROM recurring_occurrences ro '
+          'WHERE ro.txn_id = t.id) '
           'AND NOT EXISTS (SELECT 1 FROM offset_links o '
           'WHERE o.expense_txn_id = t.id OR o.source_txn_id = t.id) '
           'AND NOT EXISTS (SELECT 1 FROM review_items i WHERE i.txn_id = t.id '
@@ -439,6 +441,7 @@ final class DriftIngestStore implements IngestStorePort {
             _db.transactions,
             _db.splitParticipants,
             _db.offsetLinks,
+            _db.recurringOccurrences,
             _db.reviewItems,
           },
         )

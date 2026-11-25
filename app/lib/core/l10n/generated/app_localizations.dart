@@ -3082,6 +3082,12 @@ abstract class AppLocalizations {
   /// **'شلناه من مصاريفك'**
   String get ingestionReviewOldDueRemoved;
 
+  /// T-257: snackbar when Remove finds the offer no longer applies
+  ///
+  /// In ar, this message translates to:
+  /// **'اتعامل معاها قبل كده، مفيش حاجة تتعمل هنا'**
+  String get ingestionReviewOldDueAlreadyHandled;
+
   /// T-250: snackbar after Keep
   ///
   /// In ar, this message translates to:
