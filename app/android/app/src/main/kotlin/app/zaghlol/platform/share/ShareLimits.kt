@@ -35,6 +35,9 @@ object ShareLimits {
     /** Extra time after [INTAKE_TIMEOUT_MS] before the share activity gives up on the worker. */
     const val INTAKE_GRACE_MS = 3_000L
 
+    /** FU-332: longest a started commit (encrypt + write) may take before the share is given up as `unreadable`. */
+    const val COMMIT_TIMEOUT_MS = 20_000L
+
     /** A share that Dart has not picked up after this long is deleted. */
     const val STALE_AFTER_MS = 24L * 60 * 60 * 1000
 
