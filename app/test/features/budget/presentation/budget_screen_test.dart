@@ -163,6 +163,16 @@ void main() {
         expect(find.text(l.budgetOverviewSetPayday), findsOneWidget);
       });
 
+      testWidgets('cycle line names the cycle after its month (D-82)', (
+        tester,
+      ) async {
+        await initDateFormatting();
+        await pump(tester, locale, ok(data([egpView()])));
+        // The fixture cycle starts on 25 Oct: the November cycle.
+        final november = locale.languageCode == 'ar' ? 'نوفمبر' : 'November';
+        expect(find.textContaining('$november · '), findsOneWidget);
+      });
+
       testWidgets('loading', (tester) async {
         final never = Completer<BudgetScreenData>();
         await pump(

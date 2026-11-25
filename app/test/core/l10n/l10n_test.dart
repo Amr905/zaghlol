@@ -125,6 +125,32 @@ void main() {
         contains('٢٠٢٦'),
       );
     });
+    test('cycleMonthName (D-82): a cycle from day 21 is the next month', () {
+      expect(
+        ZDateFormat.cycleMonthName(CivilDate(2026, 11, 20), 'en'),
+        'November',
+      );
+      expect(
+        ZDateFormat.cycleMonthName(CivilDate(2026, 11, 24), 'en'),
+        'December',
+      );
+      expect(
+        ZDateFormat.cycleMonthName(CivilDate(2026, 11, 24), 'en', short: true),
+        'Dec',
+      );
+      expect(
+        ZDateFormat.cycleMonthName(CivilDate(2026, 12, 24), 'en'),
+        'January',
+      );
+      expect(
+        ZDateFormat.cycleMonthName(CivilDate(2026, 12, 24), 'ar'),
+        'يناير',
+      );
+      expect(
+        ZDateFormat.cycleMonthName(CivilDate(2026, 11, 24), 'ar'),
+        'ديسمبر',
+      );
+    });
     test('month boundary uses the local zone', () {
       final d = DateTime.utc(2026, 12, 31, 23).toLocal();
       expect(

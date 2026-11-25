@@ -82,8 +82,11 @@ HomeModel model({
   int review = 0,
   bool scanning = false,
   Set<String> filter = const {},
+  Cycle? cycle,
 }) => HomeModel(
-  cycle: Cycle(start: CivilDate(2026, 10, 25), end: CivilDate(2026, 11, 24)),
+  cycle:
+      cycle ??
+      Cycle(start: CivilDate(2026, 10, 25), end: CivilDate(2026, 11, 24)),
   today: CivilDate(2026, 11, 10),
   daysRemaining: 14,
   currencies: currencies ?? [figs(egp)],
