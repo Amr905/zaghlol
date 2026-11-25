@@ -370,7 +370,17 @@ final class EntitlementService {
       _sink.apply(EntitlementPhase.pendingVerification);
     }
     await evaluate();
-    _timer ??= Timer.periodic(_tick, (_) => unawaited(evaluate()));
+    _timer ??= Timer.periodic(_tick, (_) => unawaited(tick()));
+  }
+
+  int _applying = 0;
+
+  /// The foreground tick (FU-138). Skipped while [handleBody] is applying a
+  /// signed body: its half-written state would publish a stale phase for a
+  /// moment, and [handleBody] evaluates again when it is done.
+  Future<void> tick() async {
+    if (_applying > 0) return;
+    await evaluate();
   }
 
   Future<void> stop() async {
@@ -614,6 +624,15 @@ final class EntitlementService {
 
   /// Applies a signature-verified body (R4-2 time rules, R5-1 binding).
   Future<void> handleBody(SignedBody b) async {
+    _applying++;
+    try {
+      await _applyBody(b);
+    } finally {
+      _applying--;
+    }
+  }
+
+  Future<void> _applyBody(SignedBody b) async {
     final reading = await _time.sample();
     await _time.advance(reading);
     final serverMs = DateTime.tryParse(b.serverTime)
