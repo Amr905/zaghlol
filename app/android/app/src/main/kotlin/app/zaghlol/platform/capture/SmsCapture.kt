@@ -2,8 +2,11 @@ package app.zaghlol.platform.capture
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import app.zaghlol.platform.guard.AndroidGuardChannel
 import app.zaghlol.platform.ingest.IngestTrace
 import app.zaghlol.platform.ingest.safely
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 /**
  * The SMS side of capture after `goAsync()` (T-040 design note sections 3
@@ -40,6 +43,38 @@ class SmsIntake(
  */
 object SmsCapture {
     val dispatch: BoundedDispatch by lazy { BoundedDispatch.daemon("sms") }
+
+    /** FU-086 I-5: its own thread, so a stalled status write never delays the timer's `finish()`. */
+    private val missedThread: Executor by lazy {
+        Executors.newSingleThreadExecutor { r -> Thread(r, "zaghlol-sms-missed").apply { isDaemon = true } }
+    }
+
+    /**
+     * FU-086 I-5: the `onAbandoned` of an SMS broadcast. The 5 s budget ended
+     * the broadcast before the intake did, so the process may be killed with
+     * the message unstored: record it as missed at its receive time
+     * (`firstMissedSmsAtMs`), so the next catch-up starts at or before it even
+     * after later SMS moved the watermark. A time only, never the sender or
+     * the body. If the intake did finish after all, the catch-up just
+     * re-reads a stored message and dedupes it.
+     */
+    fun missedRecorder(context: Context, wallMs: Long): () -> Unit = missedRecorder(missedThread, wallMs) { at ->
+        CaptureRuntime.get(context).status.recordMissed(AndroidGuardChannel.SMS.wire, at)
+    }
+
+    internal fun missedRecorder(thread: Executor, wallMs: Long, record: (Long) -> Unit): () -> Unit = {
+        try {
+            thread.execute {
+                try {
+                    record(wallMs)
+                } catch (_: Throwable) {
+                    // Best effort: the catch-up still runs from the watermark on the next app open.
+                }
+            }
+        } catch (_: Throwable) {
+            // Executor gone: nothing to record with.
+        }
+    }
 
     @Volatile
     private var testIntake: SmsIntake? = null

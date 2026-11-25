@@ -27,6 +27,13 @@ class ShareIntake(
     private val imageProbe: ImageBoundsProbe,
     private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
 ) {
+    /**
+     * FU-070 C3: asked right before a commit; false when the share already
+     * has an outcome (the give-up timer announced `unreadable`). Then nothing
+     * is committed, so a share is never both stored and refused.
+     */
+    private var mayCommit: () -> Boolean = { true }
+
     /** Thrown internally when the deadline passes; maps to `unreadable`. */
     private class TimedOut : IOException("share intake timed out")
 
@@ -34,7 +41,8 @@ class ShareIntake(
      * [deadlineAtMs] is on [clock]'s time base (F3). Past it, the read is
      * aborted, nothing is committed and the share is refused as `unreadable`.
      */
-    fun accept(source: ShareSource, deadlineAtMs: Long = Long.MAX_VALUE): ShareOutcome {
+    fun accept(source: ShareSource, deadlineAtMs: Long = Long.MAX_VALUE, mayCommit: () -> Boolean = { true }): ShareOutcome {
+        this.mayCommit = mayCommit
         return try {
             checkDeadline(deadlineAtMs)
             if (source.streamScheme != null) acceptStream(source, deadlineAtMs) else acceptText(source, deadlineAtMs)
@@ -66,8 +74,10 @@ class ShareIntake(
 
     private fun acceptStream(source: ShareSource, deadlineAtMs: Long): ShareOutcome {
         if (!ShareUriPolicy.isAllowed(source, ownPackage)) return reject(ShareRejectReason.UNSUPPORTED_TYPE)
-        val kind = ShareClassifier.kindForMime(source.resolverType())
-            ?: ShareClassifier.kindForMime(source.intentType)
+        // FU-070 C2: the provider's own MIME decides when it reports one; the
+        // sender's intent type counts only when the provider reports none.
+        val providerMime = ShareClassifier.normalizeMime(source.resolverType())
+        val kind = (if (providerMime != null) ShareClassifier.kindForMime(providerMime) else ShareClassifier.kindForMime(source.intentType))
             ?: return reject(ShareRejectReason.UNSUPPORTED_TYPE)
         // Fail fast when the caps are reached, before reading anything from the sender.
         store.ensureCapacity()
@@ -125,7 +135,7 @@ class ShareIntake(
                 writer.write(buf, 0, n)
             }
             checkDeadline(deadlineAtMs)
-            return ShareOutcome.Accepted(writer.commit())
+            return commit(writer)
         } catch (e: Throwable) {
             writer.abort()
             throw e
@@ -165,11 +175,19 @@ class ShareIntake(
         try {
             writer.write(bytes, 0, bytes.size)
             checkDeadline(deadlineAtMs)
-            return ShareOutcome.Accepted(writer.commit())
+            return commit(writer)
         } catch (e: Throwable) {
             writer.abort()
             throw e
         }
+    }
+
+    private fun commit(writer: ShareStore.Writer): ShareOutcome {
+        if (!mayCommit()) {
+            writer.abort()
+            return reject(ShareRejectReason.UNREADABLE)
+        }
+        return ShareOutcome.Accepted(writer.commit())
     }
 
     private fun readUpTo(input: InputStream, buf: ByteArray, deadlineAtMs: Long): Int {
