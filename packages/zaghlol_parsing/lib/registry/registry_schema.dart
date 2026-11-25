@@ -572,6 +572,7 @@ Template? _template(ObjReader r, List<RegistryIssue> out) {
     out.add(RegistryIssue('${r.path}.source', RegistryIssueCode.badValue));
   }
   final strongSenderOnly = r.boolean('strongSenderOnly') ?? false;
+  final counterpartyOwnAccount = r.boolean('counterpartyOwnAccount') ?? false;
   var isAvailableLimit = false;
   final flags = r.object('flags');
   if (flags != null) {
@@ -598,6 +599,7 @@ Template? _template(ObjReader r, List<RegistryIssue> out) {
     direction: direction,
     baseConfidencePermille: confidence,
     strongSenderOnly: strongSenderOnly,
+    counterpartyOwnAccount: counterpartyOwnAccount,
     pattern: pattern,
     currencyMap: currencyMap,
     date: date,

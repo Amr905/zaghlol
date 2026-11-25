@@ -490,13 +490,18 @@ final class IngestRawMessages {
       ),
     );
     if (!done) throw const _RaceLost();
-    await _cardNoticeHook.onCardNotice(
-      CardNoticeEvent(
-        rawId: row.id,
-        notice: result,
-        receivedAtMs: row.receivedAtMs,
-      ),
-    );
+    // Fix 70 (M-2): a due date already behind us (device local date) is a
+    // statement the user long settled; re-parse never replays its payments,
+    // so applying it would show an unpaid due and move the reminder back.
+    if (!_dueIsPast(result.dueDate)) {
+      await _cardNoticeHook.onCardNotice(
+        CardNoticeEvent(
+          rawId: row.id,
+          notice: result,
+          receivedAtMs: row.receivedAtMs,
+        ),
+      );
+    }
     final offers = await _store.oldDueOfferTxns(row.id);
     for (final txnId in offers) {
       await _review(
@@ -507,6 +512,17 @@ final class IngestRawMessages {
       );
     }
     return offers.isEmpty ? ReparseOutcome.unchanged : ReparseOutcome.offered;
+  }
+
+  /// [due] carries y/m/d at UTC midnight; compared with today's local date.
+  bool _dueIsPast(DateTime? due) {
+    if (due == null) return false;
+    final now = DateTime.fromMillisecondsSinceEpoch(_nowMs());
+    return DateTime.utc(
+      due.year,
+      due.month,
+      due.day,
+    ).isBefore(DateTime.utc(now.year, now.month, now.day));
   }
 
   // ---------------------------------------------------------------------
@@ -1805,19 +1821,12 @@ final class IngestRawMessages {
         c.phone!.trim(),
       ),
       _ when _nonEmpty(c.name) != null => (
-        _isMaskedAccount(c.name!) ? 'own_account' : 'person',
+        c.ownAccount ? 'own_account' : 'person',
         c.name!.trim(),
       ),
       _ => null,
     };
   }
-
-  /// T-248 (FU-298): `002-411***-001`, `xxx1888`, `419*5015` are accounts,
-  /// not people. A name never holds a digit or a mask run.
-  static bool _isMaskedAccount(String name) =>
-      RegExp(r'[0-9]').hasMatch(name) &&
-      RegExp(r'[*xX\u00d7\u2022]{2,}|[0-9][*\u2022]|[*\u2022][0-9]')
-          .hasMatch(name);
 
   static String? _nonEmpty(String? s) {
     if (s == null) return null;

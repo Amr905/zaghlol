@@ -251,6 +251,10 @@ class ReviewRepository {
     return txnId;
   });
 
+  /// Runs [body] in one write transaction (any throw rolls everything back).
+  Future<T> inTransaction<T>(Future<T> Function() body) =>
+      guardRead(() => _db.transaction(body));
+
   /// Resolves the old-due item [itemId] as `removed` after the user's Remove
   /// deleted its transaction. False when it was resolved already.
   Future<bool> markOldDueRemoved(String itemId) => _act(itemId, (item) async {
