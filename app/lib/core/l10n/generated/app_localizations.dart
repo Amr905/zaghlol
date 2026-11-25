@@ -12580,6 +12580,36 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اقفل الرسالة'**
   String get paydayAutoDismissA11y;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'عليك {amount} (الأدنى {min}) لحد {date}'**
+  String accountsDetailDueAmountMin(String amount, String min, String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'عليك {amount} لحد {date}'**
+  String accountsDetailDueAmount(String amount, String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'الحد الأدنى {min} لحد {date}'**
+  String accountsDetailDueMin(String min, String date);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه باقي من الحد الأدنى {amount}'**
+  String accountsDetailDueRemaining(String amount);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'سددت المطلوب للكشف ده'**
+  String get accountsDetailDuePaid;
 }
 
 class _AppLocalizationsDelegate
