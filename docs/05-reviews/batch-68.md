@@ -104,3 +104,11 @@ Commands run:
 - Fix round: T-242 M-1 (parsing lane, registry + suite + one app ingest test) and T-243 M-2 (parsing lane, same files as T-243). Both are in the parsing lane; one fix agent can take both.
 - M-1 changes the PO suite expectation for cases 10/11 (`direction`, `balanceMinor`). The PO note for those cases ("internal card settlement to avoid double-counting") supports a transfer into the card; record the change in the batch PR.
 - Follow-ups: FU-298 … FU-304 as listed above.
+
+## Lead delta check (fix round, `fix/fix68-parse`)
+
+About 40 production lines; read in full by the Lead, each new test confirmed failing on the old tree by the fix agent.
+- **M-1 RESOLVED:** `hsbc.cc_payment_transfer.en` v9 is `income` (transfer_in on the card), the source account's available balance is matched but not captured; registryVersion 9, guard bases regenerated; app test: statement then case 10 → one transfer_in on the card, no balance row, due paid. PO suite cases 10/11 now expect `income` and no balance (PO note: internal card settlement).
+- **M-2 RESOLVED:** fee nouns removed from `feeFooterKeywords`; a conditional sentence with a money-moved cue is never a footer; the four posted-fee probes stay transactions; the T&C-footer negative still rejects.
+- **FU-295 m-1 FIXED:** `nearest_future` keeps a due day up to 7 days late (year scan starts one year back for January backfills). **n-1:** schema already required `direction` (neutral for notices); regression test added.
+- Checks: `dart analyze --fatal-infos` clean; PO suite 12/12; parsing notices/generic suites green.

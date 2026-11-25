@@ -240,7 +240,7 @@ Meanwhile the Lead clears follow-ups in batches of up to 5 lanes, and the explor
 
 The PO asked the Lead to work through T-240…T-247 in a loop (build → one review → CI → merge → next batch) and to take assumptions instead of blocking; assumptions are in `docs/03-technical/sms-parsing-v2-plan.md` §8 and `PO_DECISIONS.md` SMS-V2 / PAYDAY-AUTO. PO input (synthetic copy): `docs/qa/po-sms-suite-2026-11-25.md`; the suite test prints `po_suite: X/12 pass`.
 - **Batch 67** (`batch/2026-11-25-67`): T-240, T-241 (C4), T-246. 3 majors fixed in one round + delta re-review. PO suite 5/12.
-- **Batch 68** (queued, task branches built from batch 67): T-242 templates (cases 1, 3, 5, 10, 11), T-243 generic reader (2, 4, footer negative), T-245 card dues into reminders (+ FU-295). Check in review: HSBC `cc_payment_transfer.en` is direction `expense` with the card as last-4, while T-245 counts card payments as `transfer_in` on the card — confirm the settlement is booked as a transfer (SMS-AUTO) and reaches the due.
+- **Batch 68** (`batch/2026-11-25-68`, merging; PO suite 12/12; 2 majors fixed, see batch-68.md): T-242 templates (cases 1, 3, 5, 10, 11), T-243 generic reader (2, 4, footer negative), T-245 card dues into reminders (+ FU-295). Check in review: HSBC `cc_payment_transfer.en` is direction `expense` with the card as last-4, while T-245 counts card payments as `transfer_in` on the card — confirm the settlement is booked as a transfer (SMS-AUTO) and reaches the due.
 - **Batch 69** (queued): T-244 diagnostics signatures, T-247 cycle naming (+ FU-296).
 - PO still to describe the real Arab Bank issue (he withdrew the "two folders" report).
 
