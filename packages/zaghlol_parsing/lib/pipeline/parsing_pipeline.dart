@@ -40,6 +40,23 @@ final class ParsingPipeline {
     }
   }
 
+  /// Merchant and date read from OCR text that holds no amount (T-260), to
+  /// prefill manual entry. Total; nothing is kept beyond the typed fields.
+  ReceiptHints readOcrHints(String text) {
+    try {
+      if (text.length > maxParseBodyLength) {
+        return const ReceiptHints();
+      }
+      return readReceiptHints(
+        text: text,
+        folded: foldKey(text),
+        cleaning: registry.shared.merchantCleaning,
+      );
+    } on Object catch (_) {
+      return const ReceiptHints();
+    }
+  }
+
   ParseResult _parseOcr(String text, DateTime r) {
     final receivedAt = DateTime.utc(r.year, r.month, r.day, r.hour, r.minute);
     if (text.length > maxParseBodyLength) {

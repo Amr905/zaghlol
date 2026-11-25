@@ -1,0 +1,11 @@
+{
+  "body": "صيدلية العينة\nقيمة الفاتورة: 45.00 جنيه\nالمدفوع 50.00\nالباقي 5.00",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "45.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "صيدلية العينة",
+    "date": null
+  }
+}

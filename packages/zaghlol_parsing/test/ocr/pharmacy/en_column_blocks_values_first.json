@@ -1,0 +1,12 @@
+{
+  "body": "140.00\n19.60\n159.60\nSubtotal\nVAT\nTotal",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "159.60",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": null,
+    "date": null,
+    "confidence": 550
+  }
+}

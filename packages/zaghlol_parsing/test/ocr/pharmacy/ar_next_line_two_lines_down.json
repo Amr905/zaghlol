@@ -1,0 +1,11 @@
+{
+  "body": "صيدلية العينة\nالمبلغ المستحق\n\n٨٩٫٥٠ ج\n٢٣/١٠/٢٠٢٦",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "89.50",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "صيدلية العينة",
+    "date": "2026-10-23"
+  }
+}

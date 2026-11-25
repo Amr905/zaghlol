@@ -1,0 +1,9 @@
+{
+  "body": "Sample Pharmacy\nPanadol 24.50\n23/10/2026\nThank you",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "unrecognized": true,
+    "hintMerchant": "Sample Pharmacy",
+    "hintDate": "2026-10-23"
+  }
+}

@@ -4492,10 +4492,20 @@ class AppLocalizationsAr extends AppLocalizations {
       'ده اللي فهمته من الصورة اللي بعتها. راجعه واحفظ.';
 
   @override
-  String get captureScanEmptyTitle => 'مش لاقي دفعة في الصورة دي';
+  String get captureScanNoTextTitle => 'مقدرتش أقرا كلام في الصورة دي';
 
   @override
-  String get captureScanEmptyBody => 'جرّب صورة أوضح، أو اكتب الحركة بإيدك.';
+  String get captureScanNoTextBody =>
+      'جرّب صورة أوضح وفيها نور كويس، أو اكتب الحركة بإيدك.';
+
+  @override
+  String get captureScanNoTotalTitle => 'قريت الفاتورة بس مش لاقي الإجمالي';
+
+  @override
+  String get captureScanNoTotalBody => 'اكتب المبلغ بنفسك وأنا هكمّل الباقي.';
+
+  @override
+  String get captureScanEnterAmount => 'اكتب المبلغ';
 
   @override
   String get captureScanDuplicateTitle => 'اتسجلت قبل كده من رسالة البنك';

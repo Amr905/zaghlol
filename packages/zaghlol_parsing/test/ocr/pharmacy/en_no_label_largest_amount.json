@@ -1,0 +1,12 @@
+{
+  "body": "Sample Pharmacy\nPanadol 24.50\nCough Syrup 62.00\nThank you",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "62.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.fallback",
+    "merchant": "Sample Pharmacy",
+    "date": null,
+    "confidence": 400
+  }
+}

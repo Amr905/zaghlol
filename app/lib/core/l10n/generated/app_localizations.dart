@@ -6396,17 +6396,35 @@ abstract class AppLocalizations {
   /// **'ده اللي فهمته من الصورة اللي بعتها. راجعه واحفظ.'**
   String get captureScanFromShare;
 
-  /// T · Rive oops; actions capture_scan_chooseAnother and common_action_typeInstead
+  /// T · scan: OCR failed or found almost no text; actions capture_scan_chooseAnother and common_action_typeInstead
   ///
   /// In ar, this message translates to:
-  /// **'مش لاقي دفعة في الصورة دي'**
-  String get captureScanEmptyTitle;
+  /// **'مقدرتش أقرا كلام في الصورة دي'**
+  String get captureScanNoTextTitle;
 
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'جرّب صورة أوضح، أو اكتب الحركة بإيدك.'**
-  String get captureScanEmptyBody;
+  /// **'جرّب صورة أوضح وفيها نور كويس، أو اكتب الحركة بإيدك.'**
+  String get captureScanNoTextBody;
+
+  /// T · scan: text was read but no total amount; action capture_scan_enterAmount opens manual entry prefilled with merchant and date
+  ///
+  /// In ar, this message translates to:
+  /// **'قريت الفاتورة بس مش لاقي الإجمالي'**
+  String get captureScanNoTotalTitle;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب المبلغ بنفسك وأنا هكمّل الباقي.'**
+  String get captureScanNoTotalBody;
+
+  /// B · opens the manual editor with the merchant and date read from the receipt
+  ///
+  /// In ar, this message translates to:
+  /// **'اكتب المبلغ'**
+  String get captureScanEnterAmount;
 
   /// T · same amount and reference or time
   ///

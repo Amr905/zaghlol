@@ -32,6 +32,8 @@ export 'registry/registry_schema.dart'
     show registrySchemaVersion, maxRegistryFileBytes;
 export 'registry/template_extractor.dart';
 export 'normalize/currency_markers.dart';
+export 'ocr/receipt_parser.dart'
+    show ReceiptHints, receiptFallbackTemplateId, receiptLabelTemplateId;
 export 'merchant/merchant_cleaner.dart';
 export 'normalize/text_normalizer.dart';
 export 'chat/ask_grammar.dart' show categoryAliases;

@@ -2960,13 +2960,25 @@
   "@captureScanFromShare": {
     "description": "S"
   },
-  "captureScanEmptyTitle": "I couldn't find a payment in this image",
-  "@captureScanEmptyTitle": {
-    "description": "T · Rive oops; actions capture_scan_chooseAnother and common_action_typeInstead"
+  "captureScanNoTextTitle": "I couldn't read any text in this image",
+  "@captureScanNoTextTitle": {
+    "description": "T · scan: OCR failed or found almost no text; actions capture_scan_chooseAnother and common_action_typeInstead"
   },
-  "captureScanEmptyBody": "Try a clearer image, or type the transaction.",
-  "@captureScanEmptyBody": {
+  "captureScanNoTextBody": "Try a sharper photo with good light, or type the transaction.",
+  "@captureScanNoTextBody": {
     "description": "S"
+  },
+  "captureScanNoTotalTitle": "I read the receipt but couldn't find the total",
+  "@captureScanNoTotalTitle": {
+    "description": "T · scan: text was read but no total amount; action capture_scan_enterAmount opens manual entry prefilled with merchant and date"
+  },
+  "captureScanNoTotalBody": "Type the amount yourself and I'll fill in the rest.",
+  "@captureScanNoTotalBody": {
+    "description": "S"
+  },
+  "captureScanEnterAmount": "Enter the amount",
+  "@captureScanEnterAmount": {
+    "description": "B · opens the manual editor with the merchant and date read from the receipt"
   },
   "captureScanDuplicateTitle": "Already captured from a bank message",
   "@captureScanDuplicateTitle": {

@@ -1,0 +1,11 @@
+{
+  "body": "Sample Pharmacy\nHotline 19999\nDate 23/10/2026 09:15\nTotal\n77.25\nTel 0225551234",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "77.25",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "Sample Pharmacy",
+    "date": "2026-10-23"
+  }
+}

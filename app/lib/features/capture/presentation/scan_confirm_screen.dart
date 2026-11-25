@@ -4,7 +4,7 @@
 // image and its text are never kept or logged; the OCR host deletes the file.
 //
 // States: choose, reading, found (the S-13 editor, prefilled, source `ocr`),
-// nothing found, and "not available on this phone" (no OCR host, FR-ING-I-08).
+// no text read, text read but no total (T-260: manual entry prefilled), and "not available on this phone" (no OCR host, FR-ING-I-08).
 
 import 'dart:async';
 
@@ -62,7 +62,7 @@ Future<void> showScanScreen(
   ),
 );
 
-enum _Phase { choose, reading, found, empty, unavailable }
+enum _Phase { choose, reading, found, noText, noTotal, unavailable }
 
 class ScanConfirmScreen extends ConsumerStatefulWidget {
   const ScanConfirmScreen({super.key, this.request = const ScanPick()});
@@ -78,6 +78,7 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
   TxnPrefill? _prefill;
   bool _fromShare = false;
   ScanOrigin _origin = ScanOrigin.image;
+  ScanNoTotal? _noTotal;
 
   @override
   void initState() {
@@ -120,11 +121,11 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
       _set(
         e.code == OcrFailureCode.notAvailable
             ? _Phase.unavailable
-            : _Phase.empty,
+            : _Phase.noText,
       );
       return;
     } on Object {
-      _set(_Phase.empty);
+      _set(_Phase.noText);
       return;
     }
     if (path == null || !mounted) return;
@@ -142,8 +143,14 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
           _origin = draft.origin;
           _phase = _Phase.found;
         });
-      case ScanEmpty() || ScanFailed():
-        _set(_Phase.empty);
+      case ScanNoText() || ScanFailed():
+        _set(_Phase.noText);
+      case final ScanNoTotal n:
+        if (!mounted) return;
+        setState(() {
+          _noTotal = n;
+          _phase = _Phase.noTotal;
+        });
       case ScanUnavailable():
         _set(_Phase.unavailable);
     }
@@ -268,14 +275,14 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
             ),
           ],
         );
-      case _Phase.empty:
+      case _Phase.noText:
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             message(
               Icons.search_off_rounded,
-              l.captureScanEmptyTitle,
-              l.captureScanEmptyBody,
+              l.captureScanNoTextTitle,
+              l.captureScanNoTextBody,
             ),
             const SizedBox(height: ZSpacing.lg),
             if (widget.request is ScanPick)
@@ -291,6 +298,30 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
               variant: ZButtonVariant.text,
               onPressed: _typeInstead,
             ),
+          ],
+        );
+      case _Phase.noTotal:
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            message(
+              Icons.receipt_long_outlined,
+              l.captureScanNoTotalTitle,
+              l.captureScanNoTotalBody,
+            ),
+            const SizedBox(height: ZSpacing.lg),
+            ZButton(
+              key: const Key('scan-enter-amount'),
+              label: l.captureScanEnterAmount,
+              onPressed: _enterAmount,
+            ),
+            if (widget.request is ScanPick)
+              ZButton(
+                key: const Key('scan-choose-another'),
+                label: l.captureScanChooseAnother,
+                variant: ZButtonVariant.text,
+                onPressed: _choose,
+              ),
           ],
         );
       case _Phase.unavailable:
@@ -313,6 +344,28 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
       case _Phase.found:
         return const SizedBox.shrink();
     }
+  }
+
+  /// Manual entry prefilled with the merchant and date read from the
+  /// receipt. Nothing is saved until the user taps Save.
+  void _enterAmount() {
+    final n = _noTotal;
+    final nav = Navigator.of(context);
+    unawaited(
+      nav.pushReplacement<void, void>(
+        MaterialPageRoute<void>(
+          fullscreenDialog: true,
+          builder: (_) => TransactionEditScreen(
+            prefill: TxnPrefill(
+              type: TxnEditType.expense,
+              merchant: n?.merchant,
+              date: n?.date,
+              source: TxnSource.ocr,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _typeInstead() {
