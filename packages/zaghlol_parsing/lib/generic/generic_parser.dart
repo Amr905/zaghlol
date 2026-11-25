@@ -1393,6 +1393,25 @@ bool _onlyFeeFooter(String t) {
 
 /// Balance and available limit after their anchors: `(balance, limit)`.
 /// Glued currency (`4667.24EGP`) is read; no currency inherits [fallback].
+/// A `-` or `−` right before the number at [numStart], itself not glued to a
+/// digit or letter (so a date or reference such as `2026-500` is not a sign).
+bool _leadingMinus(String t, int numStart) {
+  if (numStart < 1) {
+    return false;
+  }
+  final c = t.codeUnitAt(numStart - 1);
+  if (c != 0x2D && c != 0x2212) {
+    return false;
+  }
+  if (numStart < 2) {
+    return true;
+  }
+  final p = t.codeUnitAt(numStart - 2);
+  final digit = p >= 0x30 && p <= 0x39;
+  final letter = (p >= 0x41 && p <= 0x5A) || (p >= 0x61 && p <= 0x7A);
+  return !digit && !letter;
+}
+
 (Money?, Money?) _balances(String t, Currency fallback) {
   Money? balance;
   Money? limit;
@@ -1428,6 +1447,11 @@ bool _onlyFeeFooter(String t) {
     final money = parsed is Ok<Money, ParseFailure> ? parsed.value : null;
     if (money == null || negative) {
       return null;
+    }
+    // FU-078: a leading sign marks an overdrawn balance. It is kept negative,
+    // never read as a positive one.
+    if (_leadingMinus(t, numStart)) {
+      return -money;
     }
     return money;
   }
