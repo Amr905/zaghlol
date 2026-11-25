@@ -488,11 +488,11 @@
       }
     }
   },
-  "commonPeriodThisCycle": "الدورة دي",
+  "commonPeriodThisCycle": "شهر المرتب ده",
   "@commonPeriodThisCycle": {
     "description": "C"
   },
-  "commonPeriodLastCycle": "الدورة اللي فاتت",
+  "commonPeriodLastCycle": "شهر المرتب اللي فات",
   "@commonPeriodLastCycle": {
     "description": "C"
   },
@@ -1437,7 +1437,7 @@
   "@homeHeroSpentThisMonth": {
     "description": "L · no payday and no budget (first visit, mockup 25)"
   },
-  "homeHeroSpentThisCycle": "صرفت الدورة دي",
+  "homeHeroSpentThisCycle": "صرفت الشهر ده",
   "@homeHeroSpentThisCycle": {
     "description": "L · payday set, no budget (EC-24)"
   },
@@ -1456,7 +1456,7 @@
   "@homeHeroSetBudget": {
     "description": "B · opens S-23"
   },
-  "homeHeroBudgetUsedUp": "ميزانية الدورة دي خلصت، حاسب على الباقي",
+  "homeHeroBudgetUsedUp": "ميزانية الشهر ده خلصت، حاسب على الباقي",
   "@homeHeroBudgetUsedUp": {
     "description": "S · safe-to-spend = 0 with budget > 0 (BR-BUD-03 clamps it with max(0, …), so it's never negative). The hero still shows the amount 0, with this as its caption. Calm, no joke. See Q-06"
   },
@@ -1502,7 +1502,7 @@
       }
     }
   },
-  "homeMascotShockedCategory": "حاسب يا كبير! {category} وصل {percent} من ميزانيته ولسه بدري في الدورة.",
+  "homeMascotShockedCategory": "حاسب يا كبير! {category} وصل {percent} من ميزانيته ولسه بدري في الشهر.",
   "@homeMascotShockedCategory": {
     "description": "M · Rive shocked · BR-MAS-01a: category ≥ 85% before day 20",
     "placeholders": {
@@ -1590,7 +1590,7 @@
   "@homeMascotProudOnTrack": {
     "description": "M · Rive proud · BR-MAS-02: under the ideal burn line, ≥ 7 days into the cycle"
   },
-  "homeMascotProudSavedMore": "عاش يا وحش! وفرت {amount} زيادة عن الدورة اللي فاتت 👏",
+  "homeMascotProudSavedMore": "عاش يا وحش! وفرت {amount} زيادة عن الشهر اللي فات 👏",
   "@homeMascotProudSavedMore": {
     "description": "M · Rive proud · BR-MAS-02, only when the computed delta is > 0",
     "placeholders": {
@@ -1599,7 +1599,7 @@
       }
     }
   },
-  "homeMascotProudGoal": "هدف الدورة اتحقق! 🎯 إنت قدها",
+  "homeMascotProudGoal": "هدف الشهر اتحقق! 🎯 إنت قدها",
   "@homeMascotProudGoal": {
     "description": "M · Rive proud · BR-MAS-02 goal met"
   },
@@ -1637,7 +1637,7 @@
       }
     }
   },
-  "homePromptPaydayMonthStart": "لقيت مرتب {amount} بينزل آخر الشهر. نحسب الدورة من أول الشهر لآخره؟",
+  "homePromptPaydayMonthStart": "لقيت مرتب {amount} بينزل آخر الشهر. نحسب شهرك من أول الشهر لآخره؟",
   "@homePromptPaydayMonthStart": {
     "description": "M · Rive detective · D-68: salary detected on day 29, 30 or 31 → suggest payday = 1 (calendar month). The salary counts in the month it arrives; no copy needed for that",
     "placeholders": {
@@ -1650,7 +1650,7 @@
   "@homePromptPaydayMonthStartYes": {
     "description": "B · D-68; the second button is common_action_no"
   },
-  "homePromptBudget": "خلصت أول دورة معايا! تحب نحط ميزانية للدورة الجاية؟",
+  "homePromptBudget": "خلصت أول شهر معايا! تحب نحط ميزانية للشهر الجاي؟",
   "@homePromptBudget": {
     "description": "M · Rive tourGuide · first full cycle completed"
   },
@@ -1784,7 +1784,7 @@
   "@homeEmptyAdd": {
     "description": "B · opens S-30"
   },
-  "homeEmptyFilter": "مفيش حركات لـ {cards} في الدورة دي",
+  "homeEmptyFilter": "مفيش حركات لـ {cards} في الشهر ده",
   "@homeEmptyFilter": {
     "description": "S · filter-caused empty + common_action_clearFilter. cards = a card label or common_cardFilter_count",
     "placeholders": {
@@ -4502,7 +4502,7 @@
   "@insightsChartDetailLockedBody": {
     "description": "S"
   },
-  "insightsDeepProjection": "{state, select, over{بالسرعة دي هتقفل الدورة على {projected}، يعني فوق ميزانيتك} other{بالسرعة دي هتقفل الدورة على {projected}، يعني في حدود ميزانيتك}}",
+  "insightsDeepProjection": "{state, select, over{بالسرعة دي هتقفل الشهر على {projected}، يعني فوق ميزانيتك} other{بالسرعة دي هتقفل الشهر على {projected}، يعني في حدود ميزانيتك}}",
   "@insightsDeepProjection": {
     "description": "S · Gold deep, charts 1, 2, 3, 5, 7 · state:select(over/other). Only when a budget exists",
     "placeholders": {
@@ -5361,11 +5361,11 @@
   "@budgetOverviewEdit": {
     "description": "B · opens S-23"
   },
-  "budgetOverviewPrevA11y": "الدورة اللي قبلها",
+  "budgetOverviewPrevA11y": "الشهر اللي قبله",
   "@budgetOverviewPrevA11y": {
     "description": "A · arrow mirrors in RTL"
   },
-  "budgetOverviewNextA11y": "الدورة اللي بعدها",
+  "budgetOverviewNextA11y": "الشهر اللي بعده",
   "@budgetOverviewNextA11y": {
     "description": "A · arrow mirrors in RTL"
   },
@@ -5373,7 +5373,7 @@
   "@budgetOverviewEmptyTitle": {
     "description": "T · C-28, Rive tourGuide"
   },
-  "budgetOverviewEmptyBody": "صرف الدورة دي ظاهر تحت لحد ما تحط ميزانية.",
+  "budgetOverviewEmptyBody": "صرف الشهر ده ظاهر تحت لحد ما تحط ميزانية.",
   "@budgetOverviewEmptyBody": {
     "description": "S"
   },
@@ -5425,11 +5425,11 @@
   "@budgetEditAlertSecond": {
     "description": "L · percentage field"
   },
-  "budgetEditRollover": "رحّل اللي فاضل للدورة الجاية",
+  "budgetEditRollover": "رحّل اللي فاضل للشهر الجاي",
   "@budgetEditRollover": {
     "description": "L · switch, FR-BUD-05"
   },
-  "budgetEditRolloverHint": "اللي ما اتصرفش بيتضاف لميزانية الدورة الجاية.",
+  "budgetEditRolloverHint": "اللي ما اتصرفش بيتضاف لميزانية الشهر الجاي.",
   "@budgetEditRolloverHint": {
     "description": "S"
   },
@@ -6946,11 +6946,11 @@
   "@chatPeriodLastWeek": {
     "description": "C"
   },
-  "chatPeriodThisCycle": "الدورة دي",
+  "chatPeriodThisCycle": "شهر المرتب ده",
   "@chatPeriodThisCycle": {
     "description": "C"
   },
-  "chatPeriodLastCycle": "الدورة اللي فاتت",
+  "chatPeriodLastCycle": "شهر المرتب اللي فات",
   "@chatPeriodLastCycle": {
     "description": "C"
   },
@@ -8553,7 +8553,7 @@
   "@goldPaywallHeadline": {
     "description": "T"
   },
-  "goldPaywallBenefitCharts": "تحليل أعمق للشارتات: قارن بالدورة اللي فاتت واعرف هتخلص فين",
+  "goldPaywallBenefitCharts": "تحليل أعمق للشارتات: قارن بالشهر اللي فات واعرف هتخلص فين",
   "@goldPaywallBenefitCharts": {
     "description": "S"
   },
@@ -9598,11 +9598,11 @@
   "@settingsPrefsPaydayRange": {
     "description": "S · validation"
   },
-  "settingsPrefsPaydayChangeTitle": "تغيّر يوم القبض في نص الدورة؟",
+  "settingsPrefsPaydayChangeTitle": "تغيّر يوم القبض في نص الشهر؟",
   "@settingsPrefsPaydayChangeTitle": {
     "description": "T · EC-21"
   },
-  "settingsPrefsPaydayChangeBody": "الدورة الحالية هتخلص بدري، وهتبدأ دورة جديدة من يوم القبض الجديد.",
+  "settingsPrefsPaydayChangeBody": "الشهر الحالي هيخلص بدري، وهيبدأ شهر جديد من يوم القبض الجديد.",
   "@settingsPrefsPaydayChangeBody": {
     "description": "S"
   },
@@ -9719,7 +9719,7 @@
       }
     }
   },
-  "shareStudioCardBudget": "خلصت الدورة تحت الميزانية بـ {percent}!",
+  "shareStudioCardBudget": "خلصت الشهر تحت الميزانية بـ {percent}!",
   "@shareStudioCardBudget": {
     "description": "T · card, percentage version",
     "placeholders": {
@@ -9728,7 +9728,7 @@
       }
     }
   },
-  "shareStudioCardBudgetAmount": "خلصت الدورة تحت الميزانية بـ {amount}!",
+  "shareStudioCardBudgetAmount": "خلصت الشهر تحت الميزانية بـ {amount}!",
   "@shareStudioCardBudgetAmount": {
     "description": "T · card, amount version",
     "placeholders": {
@@ -10705,7 +10705,7 @@
   "@insightsChartsPeriodPrevRange": {
     "description": "S-20 chart period (T-188)"
   },
-  "commonPeriodLastCycles": "آخر {n} دورات",
+  "commonPeriodLastCycles": "آخر {n} شهور مرتب",
   "@commonPeriodLastCycles": {
     "description": "S-20 chart period (T-188)",
     "placeholders": {

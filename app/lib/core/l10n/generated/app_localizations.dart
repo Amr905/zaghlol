@@ -825,13 +825,13 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي'**
+  /// **'شهر المرتب ده'**
   String get commonPeriodThisCycle;
 
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي فاتت'**
+  /// **'شهر المرتب اللي فات'**
   String get commonPeriodLastCycle;
 
   /// C
@@ -1953,7 +1953,7 @@ abstract class AppLocalizations {
   /// L · payday set, no budget (EC-24)
   ///
   /// In ar, this message translates to:
-  /// **'صرفت الدورة دي'**
+  /// **'صرفت الشهر ده'**
   String get homeHeroSpentThisCycle;
 
   /// L · payday set, no budget (EC-24, D-82): the cycle named after its month
@@ -1977,7 +1977,7 @@ abstract class AppLocalizations {
   /// S · safe-to-spend = 0 with budget > 0 (BR-BUD-03 clamps it with max(0, …), so it's never negative). The hero still shows the amount 0, with this as its caption. Calm, no joke. See Q-06
   ///
   /// In ar, this message translates to:
-  /// **'ميزانية الدورة دي خلصت، حاسب على الباقي'**
+  /// **'ميزانية الشهر ده خلصت، حاسب على الباقي'**
   String get homeHeroBudgetUsedUp;
 
   /// C · C-10
@@ -2019,7 +2019,7 @@ abstract class AppLocalizations {
   /// M · Rive shocked · BR-MAS-01a: category ≥ 85% before day 20
   ///
   /// In ar, this message translates to:
-  /// **'حاسب يا كبير! {category} وصل {percent} من ميزانيته ولسه بدري في الدورة.'**
+  /// **'حاسب يا كبير! {category} وصل {percent} من ميزانيته ولسه بدري في الشهر.'**
   String homeMascotShockedCategory(String category, String percent);
 
   /// M · Rive shocked · same trigger, alternate line
@@ -2083,13 +2083,13 @@ abstract class AppLocalizations {
   /// M · Rive proud · BR-MAS-02, only when the computed delta is > 0
   ///
   /// In ar, this message translates to:
-  /// **'عاش يا وحش! وفرت {amount} زيادة عن الدورة اللي فاتت 👏'**
+  /// **'عاش يا وحش! وفرت {amount} زيادة عن الشهر اللي فات 👏'**
   String homeMascotProudSavedMore(String amount);
 
   /// M · Rive proud · BR-MAS-02 goal met
   ///
   /// In ar, this message translates to:
-  /// **'هدف الدورة اتحقق! 🎯 إنت قدها'**
+  /// **'هدف الشهر اتحقق! 🎯 إنت قدها'**
   String get homeMascotProudGoal;
 
   /// M · Rive payday · salary detected (D-35), once per payday. domain-algorithms.md §7 treats payday as motion-only, and the C-14 priority list has no payday slot. Proposed slot: above proud, below detective. See Q-18
@@ -2119,7 +2119,7 @@ abstract class AppLocalizations {
   /// M · Rive detective · D-68: salary detected on day 29, 30 or 31 → suggest payday = 1 (calendar month). The salary counts in the month it arrives; no copy needed for that
   ///
   /// In ar, this message translates to:
-  /// **'لقيت مرتب {amount} بينزل آخر الشهر. نحسب الدورة من أول الشهر لآخره؟'**
+  /// **'لقيت مرتب {amount} بينزل آخر الشهر. نحسب شهرك من أول الشهر لآخره؟'**
   String homePromptPaydayMonthStart(String amount);
 
   /// B · D-68; the second button is common_action_no
@@ -2131,7 +2131,7 @@ abstract class AppLocalizations {
   /// M · Rive tourGuide · first full cycle completed
   ///
   /// In ar, this message translates to:
-  /// **'خلصت أول دورة معايا! تحب نحط ميزانية للدورة الجاية؟'**
+  /// **'خلصت أول شهر معايا! تحب نحط ميزانية للشهر الجاي؟'**
   String get homePromptBudget;
 
   /// B · opens S-23
@@ -2269,7 +2269,7 @@ abstract class AppLocalizations {
   /// S · filter-caused empty + common_action_clearFilter. cards = a card label or common_cardFilter_count
   ///
   /// In ar, this message translates to:
-  /// **'مفيش حركات لـ {cards} في الدورة دي'**
+  /// **'مفيش حركات لـ {cards} في الشهر ده'**
   String homeEmptyFilter(String cards);
 
   /// L · source = common_source_*; separators are not mirrored
@@ -5122,7 +5122,7 @@ abstract class AppLocalizations {
   /// S · Gold deep, charts 1, 2, 3, 5, 7 · state:select(over/other). Only when a budget exists
   ///
   /// In ar, this message translates to:
-  /// **'{state, select, over{بالسرعة دي هتقفل الدورة على {projected}، يعني فوق ميزانيتك} other{بالسرعة دي هتقفل الدورة على {projected}، يعني في حدود ميزانيتك}}'**
+  /// **'{state, select, over{بالسرعة دي هتقفل الشهر على {projected}، يعني فوق ميزانيتك} other{بالسرعة دي هتقفل الشهر على {projected}، يعني في حدود ميزانيتك}}'**
   String insightsDeepProjection(String state, String projected);
 
   /// S · Gold deep · only when three merchants qualify
@@ -5637,13 +5637,13 @@ abstract class AppLocalizations {
   /// A · arrow mirrors in RTL
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي قبلها'**
+  /// **'الشهر اللي قبله'**
   String get budgetOverviewPrevA11y;
 
   /// A · arrow mirrors in RTL
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي بعدها'**
+  /// **'الشهر اللي بعده'**
   String get budgetOverviewNextA11y;
 
   /// T · C-28, Rive tourGuide
@@ -5655,7 +5655,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'صرف الدورة دي ظاهر تحت لحد ما تحط ميزانية.'**
+  /// **'صرف الشهر ده ظاهر تحت لحد ما تحط ميزانية.'**
   String get budgetOverviewEmptyBody;
 
   /// B · opens S-23
@@ -5733,13 +5733,13 @@ abstract class AppLocalizations {
   /// L · switch, FR-BUD-05
   ///
   /// In ar, this message translates to:
-  /// **'رحّل اللي فاضل للدورة الجاية'**
+  /// **'رحّل اللي فاضل للشهر الجاي'**
   String get budgetEditRollover;
 
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'اللي ما اتصرفش بيتضاف لميزانية الدورة الجاية.'**
+  /// **'اللي ما اتصرفش بيتضاف لميزانية الشهر الجاي.'**
   String get budgetEditRolloverHint;
 
   /// L · opens the annual list, FR-BUD-06
@@ -7281,13 +7281,13 @@ abstract class AppLocalizations {
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'الدورة دي'**
+  /// **'شهر المرتب ده'**
   String get chatPeriodThisCycle;
 
   /// C
   ///
   /// In ar, this message translates to:
-  /// **'الدورة اللي فاتت'**
+  /// **'شهر المرتب اللي فات'**
   String get chatPeriodLastCycle;
 
   /// C
@@ -8890,7 +8890,7 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'تحليل أعمق للشارتات: قارن بالدورة اللي فاتت واعرف هتخلص فين'**
+  /// **'تحليل أعمق للشارتات: قارن بالشهر اللي فات واعرف هتخلص فين'**
   String get goldPaywallBenefitCharts;
 
   /// L
@@ -10158,13 +10158,13 @@ abstract class AppLocalizations {
   /// T · EC-21
   ///
   /// In ar, this message translates to:
-  /// **'تغيّر يوم القبض في نص الدورة؟'**
+  /// **'تغيّر يوم القبض في نص الشهر؟'**
   String get settingsPrefsPaydayChangeTitle;
 
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'الدورة الحالية هتخلص بدري، وهتبدأ دورة جديدة من يوم القبض الجديد.'**
+  /// **'الشهر الحالي هيخلص بدري، وهيبدأ شهر جديد من يوم القبض الجديد.'**
   String get settingsPrefsPaydayChangeBody;
 
   /// L
@@ -10290,13 +10290,13 @@ abstract class AppLocalizations {
   /// T · card, percentage version
   ///
   /// In ar, this message translates to:
-  /// **'خلصت الدورة تحت الميزانية بـ {percent}!'**
+  /// **'خلصت الشهر تحت الميزانية بـ {percent}!'**
   String shareStudioCardBudget(String percent);
 
   /// T · card, amount version
   ///
   /// In ar, this message translates to:
-  /// **'خلصت الدورة تحت الميزانية بـ {amount}!'**
+  /// **'خلصت الشهر تحت الميزانية بـ {amount}!'**
   String shareStudioCardBudgetAmount(String amount);
 
   /// L · FR-SHR-03. One hashtag per card
@@ -11447,7 +11447,7 @@ abstract class AppLocalizations {
   /// S-20 chart period (T-188)
   ///
   /// In ar, this message translates to:
-  /// **'آخر {n} دورات'**
+  /// **'آخر {n} شهور مرتب'**
   String commonPeriodLastCycles(String n);
 
   /// S-20 chart period (T-188)
