@@ -4384,12 +4384,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Here\'s what I read from the image you sent. Check it and save.';
 
   @override
-  String get captureScanEmptyTitle =>
-      'I couldn\'t find a payment in this image';
+  String get captureScanNoTextTitle =>
+      'I couldn\'t read any text in this image';
 
   @override
-  String get captureScanEmptyBody =>
-      'Try a clearer image, or type the transaction.';
+  String get captureScanNoTextBody =>
+      'Try a sharper photo with good light, or type the transaction.';
+
+  @override
+  String get captureScanNoTotalTitle =>
+      'I read the receipt but couldn\'t find the total';
+
+  @override
+  String get captureScanNoTotalBody =>
+      'Type the amount yourself and I\'ll fill in the rest.';
+
+  @override
+  String get captureScanEnterAmount => 'Enter the amount';
 
   @override
   String get captureScanDuplicateTitle =>

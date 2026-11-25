@@ -265,14 +265,14 @@ void main() {
     await pumpScan(
       tester,
       ed,
-      FakeOcr('Hello there\nNo money here'),
+      FakeOcr('Hello there\nNo money here at all'),
       const ScanImagePath('/p'),
     );
     expect(
-      find.text("I couldn't find a payment in this image"),
+      find.text("I read the receipt but couldn't find the total"),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('scan-type')), findsOneWidget);
+    expect(find.byKey(const Key('scan-enter-amount')), findsOneWidget);
     expect(ed.added, isEmpty);
   });
 
@@ -285,10 +285,51 @@ void main() {
       FakeOcr('', fail: OcrFailureCode.ocrFailed),
       const ScanImagePath('/p'),
     );
-    expect(
-      find.text("I couldn't find a payment in this image"),
-      findsOneWidget,
+    expect(find.text("I couldn't read any text in this image"), findsOneWidget);
+  });
+
+  testWidgets('no total: Enter the amount opens the editor prefilled', (
+    tester,
+  ) async {
+    final ed = FakeEditor();
+    await pumpScan(
+      tester,
+      ed,
+      FakeOcr('Sample Pharmacy\nPanadol 24.50\n23/10/2026\nThank you'),
+      const ScanImagePath('/p'),
     );
+    expect(find.byKey(const Key('scan-enter-amount')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('scan-enter-amount')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sample Pharmacy'), findsOneWidget);
+    expect(ed.added, isEmpty, reason: 'never auto-saved');
+  });
+
+  testWidgets('no total, Arabic (RTL), text scale 1.3', (tester) async {
+    await pumpScan(
+      tester,
+      FakeEditor(),
+      FakeOcr('Hello there\nNo money here at all'),
+      const ScanImagePath('/p'),
+      locale: const Locale('ar'),
+      textScale: 1.3,
+    );
+    expect(find.text('قريت الفاتورة بس مش لاقي الإجمالي'), findsOneWidget);
+    expect(find.text('اكتب المبلغ'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('no text, Arabic (RTL), text scale 1.3', (tester) async {
+    await pumpScan(
+      tester,
+      FakeEditor(),
+      FakeOcr('', fail: OcrFailureCode.ocrFailed),
+      const ScanImagePath('/p'),
+      locale: const Locale('ar'),
+      textScale: 1.3,
+    );
+    expect(find.text('مقدرتش أقرا كلام في الصورة دي'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Android before its OCR host: clear not-available state', (
@@ -359,7 +400,7 @@ void main() {
       const ScanSharedText('see you at lunch tomorrow'),
     );
     expect(
-      find.text("I couldn't find a payment in this image"),
+      find.text("I read the receipt but couldn't find the total"),
       findsOneWidget,
     );
   });

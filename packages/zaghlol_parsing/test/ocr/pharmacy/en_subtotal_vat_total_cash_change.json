@@ -1,0 +1,11 @@
+{
+  "body": "Sample Pharmacy\nPanadol 100.00\nSubtotal 100.00\nVAT 14% 14.00\nTotal 114.00\nCash 150.00\nChange 36.00",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "114.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "Sample Pharmacy",
+    "date": null
+  }
+}

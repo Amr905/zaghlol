@@ -1,0 +1,11 @@
+{
+  "body": "صيدلية العينة\nبنادول 24.50\n156.75 جم :الإجمالي\n٢٣/١٠/٢٠٢٦",
+  "receivedAt": "2026-10-23T18:00:00",
+  "expect": {
+    "amount": "156.75",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "صيدلية العينة",
+    "date": "2026-10-23"
+  }
+}

@@ -6087,13 +6087,25 @@
   "@captureScanFromShare": {
     "description": "S"
   },
-  "captureScanEmptyTitle": "مش لاقي دفعة في الصورة دي",
-  "@captureScanEmptyTitle": {
-    "description": "T · Rive oops; actions capture_scan_chooseAnother and common_action_typeInstead"
+  "captureScanNoTextTitle": "مقدرتش أقرا كلام في الصورة دي",
+  "@captureScanNoTextTitle": {
+    "description": "T · scan: OCR failed or found almost no text; actions capture_scan_chooseAnother and common_action_typeInstead"
   },
-  "captureScanEmptyBody": "جرّب صورة أوضح، أو اكتب الحركة بإيدك.",
-  "@captureScanEmptyBody": {
+  "captureScanNoTextBody": "جرّب صورة أوضح وفيها نور كويس، أو اكتب الحركة بإيدك.",
+  "@captureScanNoTextBody": {
     "description": "S"
+  },
+  "captureScanNoTotalTitle": "قريت الفاتورة بس مش لاقي الإجمالي",
+  "@captureScanNoTotalTitle": {
+    "description": "T · scan: text was read but no total amount; action capture_scan_enterAmount opens manual entry prefilled with merchant and date"
+  },
+  "captureScanNoTotalBody": "اكتب المبلغ بنفسك وأنا هكمّل الباقي.",
+  "@captureScanNoTotalBody": {
+    "description": "S"
+  },
+  "captureScanEnterAmount": "اكتب المبلغ",
+  "@captureScanEnterAmount": {
+    "description": "B · opens the manual editor with the merchant and date read from the receipt"
   },
   "captureScanDuplicateTitle": "اتسجلت قبل كده من رسالة البنك",
   "@captureScanDuplicateTitle": {
