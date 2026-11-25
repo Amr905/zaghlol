@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-25 (Cairo) by the Lead session: SMS parsing v2 + payday loop complete (batches 67–69, PRs #116–#118); follow-up batches 70 (#121), 71 (#119), 72 (#120) merged; batch 73 (T-257…T-259, last no-input follow-ups) merged. What remains needs the PO (samples, device runs, hosting, decisions) — see "Waiting on the PO" and the open FU rows. Update it whenever the state below changes._
+_Last updated: 2026-11-26 (Cairo) by the Lead session: PO phone feedback 2 (stories `docs/01-requirements/user-stories-2026-11-25.md`, T-262…T-271). Batch 76 merging; batch 77 = T-266 card↔account link (building), T-269 statement import UI, T-270 backup setup message (built). T-268 mascot inset held on `task/T-268-po2` until the PO shows where the hand is cut. PO owes: Google OAuth client IDs (Drive backup + Google sign-in), multi-currency design choice (`docs/02-design/multi-currency-options.md`), local backup file decision. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-335**
+Next free follow-up number: **FU-355**
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
