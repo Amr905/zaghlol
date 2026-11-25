@@ -7,7 +7,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart' show DateFormat;
+
+import '../../../../core/l10n/date_format.dart';
+
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../../core/db/app_database.dart' show CategoryRow;
@@ -477,9 +479,11 @@ class _TrendCard extends ConsumerWidget {
       ),
       data: (bars) {
         final cur = Currency.of(code);
-        String period(CategoryTrendBar b) =>
-            DateFormat.MMM(Localizations.localeOf(context).languageCode)
-                .format(DateTime(b.period.to.year, b.period.to.month));
+        String period(CategoryTrendBar b) => ZDateFormat.cycleMonthName(
+          b.period.from,
+          Localizations.localeOf(context).languageCode,
+          short: true,
+        );
         String money(int m) => chartMoney(ref, context, Money(cur, m));
         final items = [
           for (final b in bars)

@@ -3,6 +3,8 @@
 
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart'
+    show CivilDate, cycleLabelMonth;
 
 import 'digits_mode.dart';
 
@@ -44,4 +46,20 @@ abstract final class ZDateFormat {
 
   static String time(DateTime when, String languageCode, DigitsMode digits) =>
       _fmt(DateFormat.jm(languageCode), when, digits);
+
+  /// T-247 (D-82): the month a payday cycle starting on [cycleStart] is
+  /// named after (`November`; [short]: `Nov`). A cycle starting on day 21 or
+  /// later is the next month's. Month names only, so no digit rendering.
+  static String cycleMonthName(
+    CivilDate cycleStart,
+    String languageCode, {
+    bool short = false,
+  }) {
+    final m = cycleLabelMonth(cycleStart);
+    final when = DateTime(m.year, m.month);
+    return (short
+            ? DateFormat.MMM(languageCode)
+            : DateFormat.MMMM(languageCode))
+        .format(when);
+  }
 }

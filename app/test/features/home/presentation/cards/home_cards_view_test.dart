@@ -48,28 +48,6 @@ void main() {
     expect(find.byKey(const ValueKey('home-card-app-lock')), findsNothing);
   });
 
-  testWidgets('payday card quotes the salary and accepts the day', (
-    tester,
-  ) async {
-    final a = FakeCardActions();
-    await pumpCards(
-      tester,
-      locale: _en,
-      cards: HomeCards(
-        suggestion: const SetupSuggestion(
-          SetupSuggestionKind.payday,
-          paydayDay: 25,
-        ),
-        salary: salary,
-      ),
-      actions: a,
-    );
-    expect(find.textContaining('32,000'), findsOneWidget);
-    await tester.tap(find.text('Yes, day 25'));
-    await tester.pump();
-    expect(a.calls, ['payday:25']);
-  });
-
   testWidgets('budget card: yes opens set budget, no only dismisses', (
     tester,
   ) async {

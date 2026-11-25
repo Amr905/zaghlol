@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol/core/brand/institution_brand.dart';
 import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/core/l10n/card_number.dart';
@@ -91,7 +92,8 @@ void main() {
     );
     expect(find.text('Set a budget'), findsOneWidget);
     expect(find.text('Safe to spend today'), findsNothing);
-    expect(find.text('Spent this cycle'), findsOneWidget);
+    // D-82: the cycle starting 25 Oct is the November cycle.
+    expect(find.text('Spent in November'), findsOneWidget);
   });
 
   testWidgets('two currencies: pager with dots, figures never summed', (
@@ -331,5 +333,59 @@ void main() {
     final pager = tester.getSize(find.byKey(const ValueKey('home-pager')));
     final hero = tester.getSize(find.byType(HomeHero).first);
     expect(pager.height, closeTo(hero.height, 0.5));
+  });
+
+  group('cycle naming (D-82, T-247)', () {
+    final noBudget = [figs(egp, safe: null)];
+
+    testWidgets('a cycle starting on day 24 is named after the next month', (
+      tester,
+    ) async {
+      await pumpHome(
+        tester,
+        locale: _en,
+        platform: TargetPlatform.iOS,
+        value: model(
+          currencies: noBudget,
+          cycle: Cycle(
+            start: CivilDate(2026, 11, 24),
+            end: CivilDate(2026, 12, 23),
+          ),
+        ),
+      );
+      expect(find.text('Spent in December'), findsOneWidget);
+    });
+
+    testWidgets('Dec 24 is January, in Arabic', (tester) async {
+      await pumpHome(
+        tester,
+        locale: _ar,
+        platform: TargetPlatform.iOS,
+        value: model(
+          currencies: noBudget,
+          cycle: Cycle(
+            start: CivilDate(2026, 12, 24),
+            end: CivilDate(2027, 1, 23),
+          ),
+        ),
+      );
+      expect(find.text('صرفت في يناير'), findsOneWidget);
+    });
+
+    testWidgets('a cycle starting on day 20 is its own month', (tester) async {
+      await pumpHome(
+        tester,
+        locale: _en,
+        platform: TargetPlatform.iOS,
+        value: model(
+          currencies: noBudget,
+          cycle: Cycle(
+            start: CivilDate(2026, 11, 20),
+            end: CivilDate(2026, 12, 19),
+          ),
+        ),
+      );
+      expect(find.text('Spent in November'), findsOneWidget);
+    });
   });
 }

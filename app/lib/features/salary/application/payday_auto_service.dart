@@ -8,7 +8,7 @@
 // pattern. Only dates and currency codes are read, never amounts or text.
 // Nothing here logs.
 
-import 'package:drift/drift.dart' show Variable;
+import 'package:drift/drift.dart' show QueryRow, Variable;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/db/app_database.dart' hide Settings;
@@ -56,17 +56,22 @@ class PaydayAutoService {
     if (!detection.apply || day == null || day == current) return null;
     if (state.suppressed.contains(day)) return null;
     final erasBefore = (await _settings.get(Settings.paydayEras))?.toJson();
-    await _store.setPayday(day);
-    await _settings.set(
-      Settings.paydayAuto,
-      state.copyWith(
-        autoDay: day,
-        previous: current,
-        previousEras: erasBefore,
-        clearPrevious: current == null,
-        bannerPending: true,
-      ),
-    );
+    // FU-296 m-4: the change and its memory (banner, Undo) are one write; a
+    // failure in between never leaves a changed payday without them.
+    await _db.transaction(() async {
+      await _store.setPayday(day);
+      await _settings.set(
+        Settings.paydayAuto,
+        state.copyWith(
+          autoDay: day,
+          previous: current,
+          previousEras: erasBefore,
+          clearPrevious: current == null,
+          salaryDay: detection.salaryDay,
+          bannerPending: true,
+        ),
+      );
+    });
     return day;
   }
 
@@ -76,29 +81,31 @@ class PaydayAutoService {
     final state = await _settings.get(Settings.paydayAuto);
     final auto = state.autoDay;
     if (auto == null) return;
-    final now = await _settings.get(Settings.paydayDay);
-    if (now == auto) {
-      final text = state.previousEras;
-      final prev = state.previous;
-      if (text == null && prev != null) {
-        // State saved before the eras were kept.
-        await _store.setPayday(prev);
-      } else {
-        await _store.restore(
-          text == null ? null : PaydaySchedule.tryFromJson(text),
-        );
+    await _db.transaction(() async {
+      final now = await _settings.get(Settings.paydayDay);
+      if (now == auto) {
+        final text = state.previousEras;
+        final prev = state.previous;
+        if (text == null && prev != null) {
+          // State saved before the eras were kept.
+          await _store.setPayday(prev);
+        } else {
+          await _store.restore(
+            text == null ? null : PaydaySchedule.tryFromJson(text),
+          );
+        }
       }
-    }
-    await _settings.set(
-      Settings.paydayAuto,
-      state
-          .withSuppressed(auto)
-          .copyWith(
-            clearAutoDay: true,
-            clearPrevious: true,
-            bannerPending: false,
-          ),
-    );
+      await _settings.set(
+        Settings.paydayAuto,
+        state
+            .withSuppressed(auto)
+            .copyWith(
+              clearAutoDay: true,
+              clearPrevious: true,
+              bannerPending: false,
+            ),
+      );
+    });
   }
 
   /// Closes the banner without undoing.
@@ -111,33 +118,19 @@ class PaydayAutoService {
     );
   }
 
-  /// Salary credits: income, posted, not internal, not deleted, with the
-  /// income category (salary template and "this is my salary" mark) or tied
-  /// in `salary.state`.
+  /// FU-296 m-1: the post-persist entry. Only a stored salary credit can
+  /// move the payday, so any other row (an expense, a transfer, a plain
+  /// income) costs one indexed read and no 12-month query.
+  Future<int?> onPersisted(String txnId) async {
+    if (txnId.isEmpty) return null;
+    final rows = await _salaryRows(onlyId: txnId);
+    if (rows.isEmpty) return null;
+    return run();
+  }
+
+  /// Salary credits of the last 12 months, by date and currency only.
   Future<List<PaydayCredit>> _credits() async {
-    final salaryState = await _settings.get(Settings.salaryState);
-    final ids = [
-      for (final e in salaryState.entries)
-        if (e.captured) e.txnId,
-    ];
-    final from = _nowUtcMs() - _lookbackDays * 86400000;
-    final marks = [for (var i = 0; i < ids.length; i++) '?${i + 2}'];
-    final rows = await _db
-        .customSelect(
-          'SELECT occurred_at, occurred_tz_offset_min, currency '
-          'FROM transactions '
-          "WHERE deleted_at IS NULL AND status = 'posted' "
-          "AND is_internal = 0 AND direction = 'income' "
-          'AND occurred_at >= ?1 '
-          "AND (category_id = 'sys:income'"
-          '${ids.isEmpty ? '' : ' OR id IN (${marks.join(',')})'})',
-          variables: [
-            Variable.withInt(from),
-            for (final id in ids) Variable.withString(id),
-          ],
-          readsFrom: {_db.transactions},
-        )
-        .get();
+    final rows = await _salaryRows();
     return [
       for (final r in rows)
         PaydayCredit(
@@ -148,5 +141,49 @@ class PaydayAutoService {
           r.read<String>('currency'),
         ),
     ];
+  }
+
+  /// FU-296 m-2: what counts as a salary. Income, posted, not internal, not
+  /// deleted rows that either are tied in `salary.state` (the matcher's tag
+  /// and "this is my salary" / "it arrived" entries) or carry the income
+  /// category from the salary template event (`heuristic`), from a rule the
+  /// user made (`user_rule`), or look like a salary by their text. A credit
+  /// the user merely filed under Income (a gift) does not move the payday.
+  Future<List<QueryRow>> _salaryRows({String? onlyId}) async {
+    final salaryState = await _settings.get(Settings.salaryState);
+    final tied = {for (final e in salaryState.entries) e.txnId};
+    final from = _nowUtcMs() - _lookbackDays * 86400000;
+    final rows = await _db
+        .customSelect(
+          'SELECT id, occurred_at, occurred_tz_offset_min, currency, '
+          'category_id, category_source, merchant_raw, counterparty_value, '
+          'note FROM transactions '
+          "WHERE deleted_at IS NULL AND status = 'posted' "
+          "AND is_internal = 0 AND direction = 'income' "
+          'AND occurred_at >= ?1'
+          '${onlyId == null ? '' : ' AND id = ?2'}',
+          variables: [
+            Variable.withInt(from),
+            if (onlyId != null) Variable.withString(onlyId),
+          ],
+          readsFrom: {_db.transactions},
+        )
+        .get();
+    return [
+      for (final r in rows)
+        if (_countsAsSalary(r, tied)) r,
+    ];
+  }
+
+  static bool _countsAsSalary(QueryRow r, Set<String> tied) {
+    if (tied.contains(r.read<String>('id'))) return true;
+    if (r.readNullable<String>('category_id') != 'sys:income') return false;
+    final source = r.readNullable<String>('category_source');
+    if (source == 'heuristic' || source == 'user_rule') return true;
+    return salaryLooksLikeSalary([
+      r.readNullable<String>('merchant_raw'),
+      r.readNullable<String>('counterparty_value'),
+      r.readNullable<String>('note'),
+    ]);
   }
 }

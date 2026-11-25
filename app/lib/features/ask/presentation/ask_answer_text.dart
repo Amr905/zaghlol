@@ -42,7 +42,12 @@ class AskAnswerTextBuilder {
     required this.hidden,
     required this.today,
     required this.categoryNames,
+    this.schedule,
   });
+
+  /// The payday schedule (D-82): the cycle that holds [today] is "this
+  /// month" and the one before is "last month". Null: calendar months.
+  final PaydaySchedule? schedule;
 
   final AppLocalizations l;
   final String languageCode;
@@ -71,6 +76,14 @@ class AskAnswerTextBuilder {
       ZDateFormat.date(DateTime(d.year, d.month, d.day), languageCode, digits);
 
   String _span(ChartPeriod p) {
+    final sched = schedule;
+    if (sched != null) {
+      final cur = sched.cycleOn(today);
+      if (p == ChartPeriod.cycle(cur)) return l.chatPeriodThisMonth;
+      if (p == ChartPeriod.cycle(sched.before(cur))) {
+        return l.chatPeriodLastMonth;
+      }
+    }
     final m = ChartPeriod.month(today.year, today.month);
     if (p == m) return l.chatPeriodThisMonth;
     final prev = today.month == 1

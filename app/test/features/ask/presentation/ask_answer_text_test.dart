@@ -3,6 +3,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/ask/domain/ask_models.dart';
@@ -45,5 +46,39 @@ void main() {
 
   test('Arabic keeps the Arabic comma', () {
     expect(line('ar', DigitsMode.arabicIndic), contains('، '));
+  });
+
+  group('cycle naming (D-82)', () {
+    setUpAll(initDateFormatting);
+    final spend = AskSpendAnswer(
+      target: AskTarget.everything,
+      period: ChartPeriod(CivilDate(2026, 11, 24), CivilDate(2026, 12, 23)),
+      periodDefaulted: false,
+      figures: [Money(egp, 7000)],
+    );
+
+    String text(String lang, {PaydaySchedule? schedule}) =>
+        AskAnswerTextBuilder(
+          l: lookupAppLocalizations(Locale(lang)),
+          languageCode: lang,
+          digits: DigitsMode.western,
+          hidden: false,
+          today: CivilDate(2026, 11, 25),
+          categoryNames: const {},
+          schedule: schedule,
+        ).build(spend).lines.single;
+
+    test('with payday 24 the current cycle reads as "this month"', () {
+      final en = text('en', schedule: PaydaySchedule.single(24));
+      expect(en, contains('this month'));
+      expect(
+        text('ar', schedule: PaydaySchedule.single(24)),
+        contains('الشهر ده'),
+      );
+    });
+
+    test('without a schedule the dates are shown', () {
+      expect(text('en'), isNot(contains('this month')));
+    });
   });
 }

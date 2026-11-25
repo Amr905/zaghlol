@@ -8,6 +8,7 @@ import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/categories_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
+import 'package:zaghlol/core/settings/setting_key.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_repository.dart';
 import 'package:zaghlol/features/budget/data/payday_schedule_store.dart';
@@ -35,6 +36,9 @@ void main() {
     String? category = 'sys:income',
     String direction = 'income',
     int internal = 0,
+    // FU-296 m-2: the salary template event gives `heuristic`.
+    String source = 'heuristic',
+    String? merchant,
   }) async {
     await TransactionsDao(db).insert(
       TransactionsCompanion.insert(
@@ -48,7 +52,8 @@ void main() {
         occurredTzOffsetMin: 120,
         categoryId: Value(category),
         isInternal: Value(internal),
-        categorySource: 'none',
+        categorySource: source,
+        merchantRaw: Value(merchant),
         createdAt: t0,
         updatedAt: t0,
       ),
@@ -204,4 +209,125 @@ void main() {
     );
     expect(await settings.get(Settings.paydayEras), isNull);
   });
+
+  group('FU-296', () {
+    Future<void> pattern({
+      String source = 'heuristic',
+      String? merchant,
+    }) async {
+      await credit(CivilDate(2026, 9, 24), source: source, merchant: merchant);
+      await credit(CivilDate(2026, 10, 23), source: source, merchant: merchant);
+      await credit(CivilDate(2026, 11, 24), source: source, merchant: merchant);
+    }
+
+    test(
+      'm-2: income the user filed under Income (a gift) is no salary',
+      () async {
+        await pattern(source: 'user');
+        expect(await service.run(), isNull);
+        expect(await settings.get(Settings.paydayEras), isNull);
+      },
+    );
+
+    test('m-2: a user rule, a salary word or a tied entry counts', () async {
+      await pattern(source: 'user_rule');
+      expect(await service.run(), 23);
+    });
+
+    test(
+      'm-2: a salary word in the text counts for a user-filed credit',
+      () async {
+        await pattern(source: 'user', merchant: 'ACME Salary');
+        expect(await service.run(), 23);
+      },
+    );
+
+    test('m-2: a credit tied in salary.state counts', () async {
+      await pattern(source: 'user');
+      await settings.set(
+        Settings.salaryState,
+        SalaryState(
+          entries: [
+            for (final i in [0, 1, 2])
+              SalaryEntry(
+                txnId: 'x$i',
+                captured: i != 1,
+                anchor: CivilDate(2026, 9 + i, 24),
+              ),
+          ],
+        ),
+      );
+      expect(await service.run(), 23);
+    });
+
+    test('m-1: only a stored salary credit runs the rule', () async {
+      await pattern();
+      await credit(CivilDate(2026, 11, 20), direction: 'expense');
+      await credit(CivilDate(2026, 11, 21), source: 'user'); // x4: a gift
+      final hook = PaydayAutoHook(service);
+      for (final id in ['x3', 'x4', 'nope', '']) {
+        await hook.afterPersist(
+          PersistedTxn(txnId: id, accountId: 'a', inserted: true),
+        );
+      }
+      expect(await settings.get(Settings.paydayEras), isNull);
+      await hook.afterPersist(
+        const PersistedTxn(txnId: 'x2', accountId: 'a', inserted: true),
+      );
+      expect(await payday(), 23);
+    });
+
+    test(
+      'm-4: a failure writing the memory leaves the payday untouched',
+      () async {
+        await pattern();
+        final failing = PaydayAutoService(
+          db,
+          _FailingSettings(SettingsDao(db), nowMs: () => nowMs),
+          PaydayScheduleStore(
+            settings,
+            nowUtcMs: () => nowMs,
+            zone: const FixedLocalZone(120),
+          ),
+          nowUtcMs: () => nowMs,
+        );
+        await expectLater(failing.run(), throwsA(isA<StateError>()));
+        expect(await settings.get(Settings.paydayEras), isNull);
+        expect((await settings.get(Settings.paydayAuto)).autoDay, isNull);
+        // Retrying with a working store applies it with banner and Undo.
+        expect(await service.run(), 23);
+        expect((await settings.get(Settings.paydayAuto)).bannerPending, isTrue);
+      },
+    );
+
+    test(
+      'm-6: the memory keeps the real salary day behind a capped payday',
+      () async {
+        await credit(CivilDate(2026, 8, 31));
+        await credit(CivilDate(2026, 10, 30));
+        await credit(CivilDate(2026, 11, 30));
+        expect(await service.run(), 28);
+        final s = await settings.get(Settings.paydayAuto);
+        expect(s.autoDay, 28);
+        expect(s.salaryDay, 30);
+      },
+    );
+
+    test('m-3: 28 / 30 / 1 month-end shifts agree end to end', () async {
+      await credit(CivilDate(2026, 8, 28));
+      await credit(CivilDate(2026, 9, 30));
+      await credit(CivilDate(2026, 11, 1));
+      expect(await service.run(), 28);
+    });
+  });
+}
+
+class _FailingSettings extends SettingsRepository {
+  _FailingSettings(super.dao, {super.nowMs});
+
+  @override
+  Future<void> set<T>(SettingKey<T> key, T value) async {
+    if (key.name == Settings.paydayAuto.name) throw StateError('disk full');
+    return super.set(key, value);
+  }
 }

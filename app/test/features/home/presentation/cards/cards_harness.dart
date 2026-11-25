@@ -21,9 +21,6 @@ class FakeCardActions implements HomeCardActions {
       calls.add('handle:${kind.slug}');
 
   @override
-  Future<void> acceptPayday(int day) async => calls.add('payday:$day');
-
-  @override
   Future<EnableLockResult> enableAppLock(String reason) async {
     calls.add('lock');
     return lockResult;

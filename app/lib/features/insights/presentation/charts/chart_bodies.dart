@@ -158,9 +158,12 @@ class _CashFlowBodyState extends ConsumerState<CashFlowBody> {
             digits,
           );
         case ChartBucketKind.month:
-        case ChartBucketKind.cycle:
+          // A calendar bucket (the first may be clipped): named by its end.
           final e = p.period.to;
           return DateFormat.MMMM(lang).format(DateTime(e.year, e.month));
+        case ChartBucketKind.cycle:
+          // D-82: a cycle starting on day 21 or later is the next month's.
+          return ZDateFormat.cycleMonthName(p.period.from, lang);
       }
     }
 

@@ -1176,6 +1176,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeHeroSpentThisCycle => 'Spent this cycle';
 
   @override
+  String homeHeroSpentInCycleMonth(String month) {
+    return 'Spent in $month';
+  }
+
+  @override
   String get homeHeroSetBudgetHint =>
       'Set a budget to see what\'s safe to spend each day';
 
@@ -8597,6 +8602,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String paydayAutoBanner(String day) {
     return 'I set your payday to day $day because your salary lands on day $day';
+  }
+
+  @override
+  String paydayAutoBannerCapped(String day, String salaryDay) {
+    return 'I set your payday to day $day because your salary lands on day $salaryDay';
   }
 
   @override
