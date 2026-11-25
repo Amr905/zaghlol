@@ -21,6 +21,7 @@ import '../../wealth/data/approx_view_providers.dart';
 import '../../wealth/domain/approx_view.dart';
 import '../domain/account.dart';
 import 'account_type.dart';
+import 'card_detail/card_detail_providers.dart' show cardDetailAccountProvider;
 import 'money_overview_provider.dart';
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
@@ -622,6 +623,14 @@ class _AccountRow extends ConsumerWidget {
         } else {
           primary = _fmt(context, ref, owed);
         }
+      }
+    } else if (account.linkedAccountId case final target?) {
+      // T-266: a linked card has no balance of its own; its account has.
+      final linked = ref.watch(cardDetailAccountProvider(target)).value;
+      if (linked != null) {
+        sub = l10n.accountsOverviewLinkedTo(
+          formatAccountWithCard(linked.account.label, linked.account.last4),
+        );
       }
     } else if (first != null) {
       sub = l10n.accountsOverviewAsOf(

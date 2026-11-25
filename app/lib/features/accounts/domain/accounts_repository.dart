@@ -4,6 +4,9 @@
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import 'account.dart';
+import 'card_link.dart';
+
+export 'card_link.dart';
 
 abstract interface class AccountsRepository {
   /// Finds the account for (institution, last-4) or creates it
@@ -65,4 +68,31 @@ abstract interface class AccountsRepository {
   /// transaction (soft-deleted ones too) and recurring item, moves the
   /// balances per currency, and marks the source merged. All or none.
   Future<Account> merge({required String sourceId, required String targetId});
+
+  /// T-266: links the live debit card [cardId] to the live account
+  /// [accountId] (kind account, wallet or multi-currency), in one
+  /// transaction. The card's stored and typed balances move to the account
+  /// per currency (the newer instant wins); its transactions stay on the card
+  /// and count on the account from now on. A card linked elsewhere is
+  /// unlinked first (see [unlinkCard]). Linking to the same account again
+  /// changes nothing. Never called without the user's tap. Throws
+  /// `ACC_NOT_LINKABLE` for a wrong kind or itself, `ACC_NOT_FOUND` /
+  /// `ACC_MERGED` for a missing or merged account.
+  Future<Account> linkCard({required String cardId, required String accountId});
+
+  /// T-266: unlinks [cardId], in one transaction. Where the card's
+  /// transactions counted on the account after its anchor, the account is
+  /// re-anchored at its current figure (a typed balance as of now), so the
+  /// account's balance doesn't move. History stays; the card's balance is
+  /// unknown until a message or the user sets it. An unlinked card is
+  /// returned unchanged.
+  Future<Account> unlinkCard(String cardId);
+
+  /// T-266: the live cards linked to [accountId], oldest first.
+  Future<List<Account>> cardsLinkedTo(String accountId);
+
+  /// T-266: the live accounts [cardId] could be linked to, best first (see
+  /// [orderLinkTargets]); hidden ones left out. Empty for a card that can't
+  /// be linked.
+  Future<List<LinkTarget>> linkTargets(String cardId);
 }

@@ -27,10 +27,7 @@ import 'migration_v5_test.dart' show v4SampleTables;
 import 'schema_v5_database.dart';
 
 /// Every table of a v5 file the samples fill.
-const List<String> v5SampleTables = [
-  ...v4SampleTables,
-  'recurring_dismissals',
-];
+const List<String> v5SampleTables = [...v4SampleTables, 'recurring_dismissals'];
 
 Future<void> prepareV5(DbWorld world, {List<String> extra = const []}) async {
   final first = openedDb(await world.open(executor: foregroundExecutor));

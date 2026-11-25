@@ -3826,6 +3826,108 @@ abstract class AppLocalizations {
   /// **'هيظهر مع أول رسالة فيها رصيد'**
   String get accountsDetailBalanceUnknown;
 
+  /// L · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الحساب المربوط'**
+  String get accountsLinkTitle;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده مش مربوط بحساب'**
+  String get accountsLinkNone;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'اربطه بحساب'**
+  String get accountsLinkPick;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر'**
+  String get accountsLinkChange;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'فك الربط'**
+  String get accountsLinkUnlink;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده على حسابك في {account}؟'**
+  String accountsLinkSuggest(String account);
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه، اربطه'**
+  String get accountsLinkSuggestYes;
+
+  /// T · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده بيصرف من أنهي حساب؟'**
+  String get accountsLinkSheetTitle;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'صرف الكارت والرصيد اللي في رسايله هيتحسبوا على الحساب ده. مش هنربط حاجة من غير ما تختار.'**
+  String get accountsLinkSheetHint;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف حساب البنك الأول، وبعدين اربط الكارت بيه.'**
+  String get accountsLinkNoTargets;
+
+  /// C · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد على حساب {account}'**
+  String accountsLinkBalanceOn(String account);
+
+  /// T · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'تفك ربط الكارت؟'**
+  String get accountsLinkUnlinkTitle;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي فات هيفضل زي ما هو. من دلوقتي صرف الكارت هيتحسب على الكارت لوحده، ورصيد الحساب مش هيتغير.'**
+  String get accountsLinkUnlinkBody;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفناش نحفظ الربط، جرّب تاني.'**
+  String get accountsLinkFailed;
+
+  /// T · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكروت على الحساب ده'**
+  String get accountsCardsOnAccount;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'حط المبلغ اللي في الحساب دلوقتي'**
+  String get accountsSetCurrentAmount;
+
+  /// C · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'كارت على {account}'**
+  String accountsOverviewLinkedTo(String account);
+
   /// L
   ///
   /// In ar, this message translates to:
