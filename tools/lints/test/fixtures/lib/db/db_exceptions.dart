@@ -5,5 +5,5 @@ import '../core/safe_exception.dart';
 class BadDbException implements Exception {}
 
 class GoodDbException extends SafeException {
-  const GoodDbException() : super('db');
+  const GoodDbException() : super('DB');
 }
