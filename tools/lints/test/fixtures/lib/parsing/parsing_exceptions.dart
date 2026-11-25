@@ -64,3 +64,49 @@ class CodeGood extends SafeException {
 SafeException make(String c) =>
     // expect_lint: safe_exception_required
     SafeException(c);
+
+// FU-309: a static const only counts when its value is UPPER_SNAKE.
+class StaticConstGood extends SafeException {
+  const StaticConstGood() : super(_code);
+  static const _code = 'STATIC_GOOD';
+}
+
+class StaticConstBad extends SafeException {
+  // expect_lint: safe_exception_required
+  const StaticConstBad() : super(_code);
+  static const _code = 'not upper';
+}
+
+class StaticConstNonLiteral extends SafeException {
+  // expect_lint: safe_exception_required
+  const StaticConstNonLiteral() : super(_code);
+  static const _code =
+      'A'
+      'B';
+}
+
+// FU-310: named constructors and super.code forwarding.
+class NamedGood extends SafeException {
+  const NamedGood() : super.named('NAMED_OK');
+}
+
+class NamedBad extends SafeException {
+  // expect_lint: safe_exception_required
+  const NamedBad(String c) : super.named(c);
+}
+
+class SuperCodeForward extends SafeException {
+  // expect_lint: safe_exception_required
+  const SuperCodeForward(super.code);
+}
+
+SafeException makeNamedGood() => const SafeException.named('MADE_OK');
+
+SafeException makeNamedBad(String c) =>
+    // expect_lint: safe_exception_required
+    SafeException.named(c);
+
+class SuperCodeWithConstants extends SafeException {
+  const SuperCodeWithConstants(super.code);
+  static const String one = 'ONE_CODE';
+}

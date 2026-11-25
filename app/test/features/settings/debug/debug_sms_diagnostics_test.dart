@@ -1,6 +1,8 @@
 // SMS-device: the debug-only diagnostics screen shows counts and sender
 // names, nothing else, and exists in dev builds only.
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:zaghlol/core/db/app_database.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,6 +56,31 @@ void main() {
   test('T-248: the unread query is capped (FU-306)', () {
     expect(kDiagUnreadLimit, 500);
     expect(kDiagNote, contains('500'));
+  });
+
+  test('T-257 FU-314: the query reads only the newest 500 unread rows', () async {
+    final db = AppDatabase(NativeDatabase.memory(), validateSchema: false);
+    addTearDown(db.close);
+    const n = 501;
+    for (var i = 0; i < n; i++) {
+      await db.customStatement(
+        'INSERT INTO raw_messages (id, channel, sender, body, body_hash, '
+        "received_at, parse_status, registry_version, created_at) VALUES ('r$i', 'sms', "
+        "'S$i', 'b$i', lower(hex(randomblob(32))), 1, 'review', 1, 1)",
+      );
+      await db.customStatement(
+        'INSERT INTO review_items (id, kind, raw_message_id, created_at) '
+        "VALUES ('v$i', 'unrecognized', 'r$i', ${1000 + i})",
+      );
+    }
+    final snap = await NativeAndDbSmsDiagnostics(db).read();
+    final read = snap.unreadReasons.values
+        .expand((m) => m.values)
+        .fold<int>(0, (a, b) => a + b);
+    expect(read, kDiagUnreadLimit);
+    // The oldest row (created_at 1000, sender S0) was left out.
+    expect(snap.unreadReasons.containsKey('S0'), isFalse);
+    expect(snap.unreadReasons.containsKey('S500'), isTrue);
   });
 
   test('a phone number is never named', () {

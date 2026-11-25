@@ -64,4 +64,9 @@ void main() {
       }
     },
   );
+
+  test('T-257 FU-313: tashkeel does not split or hide a word', () {
+    expect(shapeSignature('مُبلغ ١٠٠ جنيه'), shapeSignature('مبلغ ١٠٠ جنيه'));
+    expect(shapeSignature('مَـبْلَغ 100'), shapeSignature('مبلغ 100'));
+  });
 }

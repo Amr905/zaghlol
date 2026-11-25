@@ -115,6 +115,8 @@ class ReviewItemsDao {
   });
 
   /// Deletes items resolved before [cutoff]. Returns the rows deleted.
+  /// Callers must keep resolved `oldDueNotice` items: the old-due offer is
+  /// idempotent only because they stay (T-257, FU-317).
   Future<int> purgeResolvedBefore(int cutoff) => guardWrite(
     () => (_db.delete(
       _db.reviewItems,

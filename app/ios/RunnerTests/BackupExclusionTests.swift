@@ -205,4 +205,24 @@ final class BackupExclusionTests: XCTestCase {
     XCTAssertTrue(LocalDataWiper.shouldDelete(service: "app.zaghlol.spool"))
     XCTAssertTrue(LocalDataWiper.shouldDelete(service: nil))
   }
+
+  // FU-113: the diag hook delivers the code only, and is safe to call from many threads while it is swapped.
+  func testNativeDiagHookDeliversCodesAndSurvivesConcurrentUse() {
+    let seen = NSMutableArray()
+    let seenLock = NSLock()
+    NativeDiagHook.handler = { code in
+      seenLock.lock()
+      seen.add(code)
+      seenLock.unlock()
+    }
+    defer { NativeDiagHook.handler = nil }
+    DispatchQueue.concurrentPerform(iterations: 200) { i in
+      if i % 50 == 0 { NativeDiagHook.handler = NativeDiagHook.handler }
+      NativeDiagHook.report(ZaghlolDirectories.backupExclusionFailedCode)
+    }
+    seenLock.lock()
+    XCTAssertEqual(seen.count, 200)
+    XCTAssertTrue(seen.allSatisfy { ($0 as? String) == "BACKUP_EXCLUSION_FAILED" })
+    seenLock.unlock()
+  }
 }

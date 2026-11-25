@@ -53,7 +53,8 @@ bool _looksLikeName(String token) {
 String shapeSignature(String body) {
   final cues = _cueWords();
   final parts = <String>[];
-  for (final m in _token.allMatches(body)) {
+  // FU-313: drop tashkeel/tatweel first so a marked word is one token.
+  for (final m in _token.allMatches(foldForMatching(body))) {
     final orig = m.group(0)!;
     final t = foldKey(orig);
     final String piece;

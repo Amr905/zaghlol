@@ -3,5 +3,7 @@
 abstract class SafeException implements Exception {
   const SafeException(this.code);
 
+  const SafeException.named(this.code);
+
   final String code;
 }

@@ -114,4 +114,48 @@ class ShareJobTest {
         drain()
         assertEquals(listOf<ShareOutcome>(accepted), got)
     }
+
+    /** FU-332: a stalled commit is bounded: the watchdog sets the outcome even though the commit has begun. */
+    @Test
+    fun aStalledCommitIsAbandonedAndDeliveredOnce() {
+        val job = ShareJob("j", queue::addLast)
+        val got = mutableListOf<ShareOutcome>()
+        job.attach { got += it }
+        assertTrue(job.beginCommit())
+        assertTrue(ShareJobs.abandonCommit(job, timedOut))
+        assertEquals("Dart learns of the refusal", ShareRejectReason.UNREADABLE, ShareIntakeState.takeRejection())
+        drain()
+        assertEquals(listOf<ShareOutcome>(timedOut), got)
+        assertTrue(job.commitAbandoned)
+    }
+
+    /** FU-332: the late commit result is not shown, and the share it stored is discarded. */
+    @Test
+    fun aCommitThatLandsAfterTheWatchdogIsDiscardedNotShownTwice() {
+        val job = ShareJob("j", queue::addLast)
+        val got = mutableListOf<ShareOutcome>()
+        job.attach { got += it }
+        job.beginCommit()
+        ShareJobs.abandonCommit(job, timedOut)
+        val discarded = mutableListOf<String>()
+        assertFalse(ShareJobs.finish(job, accepted, discardLate = { discarded += it }))
+        drain()
+        assertEquals(listOf<ShareOutcome>(timedOut), got)
+        assertEquals(listOf(accepted.descriptor.id), discarded)
+    }
+
+    /** FU-332: the commit watchdog does nothing before a commit starts or after the worker finished. */
+    @Test
+    fun theCommitWatchdogIgnoresJobsThatAreNotCommitting() {
+        val before = ShareJob("a", queue::addLast)
+        assertFalse(before.abandonCommit(timedOut))
+        val after = ShareJob("b", queue::addLast)
+        after.beginCommit()
+        after.complete(accepted)
+        assertFalse(after.abandonCommit(timedOut))
+        assertFalse(after.commitAbandoned)
+        val discarded = mutableListOf<String>()
+        assertFalse(ShareJobs.finish(after, accepted, discardLate = { discarded += it }))
+        assertTrue("a normal duplicate is not discarded", discarded.isEmpty())
+    }
 }

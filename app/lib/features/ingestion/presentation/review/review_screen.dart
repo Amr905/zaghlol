@@ -373,7 +373,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     messenger.hideCurrentSnackBar();
     if (batchId == null) {
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n.reviewErrorSaveFailed)),
+        SnackBar(content: Text(l10n.ingestionReviewOldDueAlreadyHandled)),
       );
       return;
     }
