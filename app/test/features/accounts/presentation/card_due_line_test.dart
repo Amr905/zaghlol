@@ -68,6 +68,24 @@ void main() {
     expect(find.text('This statement is paid'), findsOneWidget);
   });
 
+  testWidgets('T-249: zero total and minimum says paid, never "Due EGP 0"', (
+    t,
+  ) async {
+    await show(
+      t,
+      CardDue(
+        currency: 'EGP',
+        noticeAtMs: 1,
+        amountDueMinor: 0,
+        minDueMinor: 0,
+        dueDate: CivilDate(2026, 11, 25),
+      ),
+    );
+    expect(find.text('This statement is paid'), findsOneWidget);
+    expect(find.textContaining('Due EGP'), findsNothing);
+    expect(find.textContaining('min '), findsNothing);
+  });
+
   testWidgets('no notice keeps the old due line', (t) async {
     await show(t, null);
     expect(find.text('Statement due Nov 15, 2026'), findsOneWidget);
