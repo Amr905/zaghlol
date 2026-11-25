@@ -262,7 +262,7 @@
 | ~~FU-013~~ | T-006 #6, #13, #15, #16 | Remove `installs.os_major` from backend-schema.md (**before T-122**); global UTC-`Z` JSON converter + InstallId UUID v4 pattern (T-124); pin openapi-generator version (T-141) | solution-architect / T-124 / T-141 | CLOSED (docs/code: architect decisions merged (commit "architect decisions for FU-006..009, FU-013#16, FU-001", FU-api-decisions PR); code refs in AppleCallbackEndpoint, CatalogKeys, InstallId) |
 | FU-012 | T-006 decision 2 (PO APPROVED 2026-11-05; recording in SRS v1.4) | Record that server-issued version cursors (flagsVersion, pricesAsOf, entitlementIssuedAt, registryVersion) fall under BR-SYNC-03 "catalog/app version" | product owner | OPEN (PO confirm) |
 
-- **FU-027** (T-027 review #2): `insights_explainCashFlow_tip` short branch ("you'll finish in the black") reads as a guarantee; soften it. Owner: T-058.
+- **FU-027** (T-027 review #2): `insights_explainCashFlow_tip` short branch ("you'll finish in the black") reads as a guarantee; soften it. Owner: T-058. **CLOSED (T-253): copy deck already softened (copy-deck.md line ~1543: "would help close the gap"); no ARB key exists yet, T-058 must use the deck text.**
 - **FU-028** (T-027 review #3): roast lines carry emoji in chat; confirm chat bubbles count as mascot lines (voice doc §4). Owner: T-058. Note: Q-23 (disclaimer + Zakah scholar sign-off) must close before the `zakah` and `smart_roi` flags go on.
 - **FU-029** (T-002 review #1): `riverpod_lint` not added (custom_lint unusable on Dart 3.13; riverpod_lint 3.x analyzer plugin unverified). Owner: T-024, together with `flutter_riverpod`; verify it reports in CI.
 - **FU-030** (T-002 review #2, #6): **Done (lint hardening, 2026-11-10).** `no_double_money` now flags `double.parse/tryParse`, `num.parse/tryParse`, `.toDouble()`, double literals, `/` and `/=`, and double/num types in `money/`, `zaghlol_parsing` and `zaghlol_domain`; amount-named inferred doubles elsewhere. Scanning a root with zero lintable files exits 2. Allow-list: `// ignore: no_double_money - reason`. No real hits in current code.
@@ -274,8 +274,8 @@
 - ~~FU-036~~ closed (MascotPose enum in mascot_rules.dart) — (T-014 review #4): `MascotTrigger` `pose`/`reason` should be enums or documented constants. Owner: T-098.
 - ~~FU-037~~ closed (TransactionsChanged tests in zaghlol_domain core_test (FU-037)) — (T-014 review #5): make `TransactionsChanged` sets unmodifiable; align names with docs (`accounts`, `cycles`). Owner: T-046.
 - **FU-038** (T-014 review #6): `Failure.toString` uses `runtimeType` (obfuscated in release). Owner: T-021.
-- **FU-039** (T-028 review #2, #6): `privacy_delete_body` says "security keys" are deleted but iPhone seat keys stay; reword. Owner: T-058.
-- **FU-040** (T-028 review #3): delete-everything dialog should say Drive/iCloud backups, the store purchase and the account are untouched (check FR-ONB-08). Owner: T-087.
+- **FU-039** (T-028 review #2, #6): `privacy_delete_body` says "security keys" are deleted but iPhone seat keys stay; reword. Owner: T-058. **CLOSED (T-253): app_*.arb privacyDeleteBody has no keys claim; iOS seat keys said by privacyDeleteIosKeys; deck synced in T-253.**
+- **FU-040** (T-028 review #3): delete-everything dialog should say Drive/iCloud backups, the store purchase and the account are untouched (check FR-ONB-08). Owner: T-087. **CLOSED (T-253): dialog already shows privacyDeleteBackupsKept + privacyDeleteStoreAccountKept; tested in privacy_delete_test.dart.**
 - **FU-041** (T-028 review #4, #5): PO/security decide whether redacted budget alerts keep the category name (Q-33); UX picks «احذف» vs «امسح» for the delete confirmation word (Q-39). Owner: PO / UX.
 - ~~FU-042~~ closed (app/tool/generate_pigeon.sh) — (T-004 #1): the Pigeon stale check watches three fixed output dirs; fail if an output path falls outside them. Owner: T-008.
 - **FU-043** (T-004 #2): add the generated `.g.swift` files to the Runner target and confirm it builds. Owner: first iOS native task (T-009/T-062).
@@ -608,10 +608,7 @@ Closed entries above are struck through with the commit or file that fixes them.
 | FU-223 | parsing | Confirm guessed bank SMS sender IDs | PO |
 | FU-241 | parsing | Synthetic-unverified templates; Zakah gaps; PO client IDs for sign-in | PO |
 | FU-076 | test | 50k search benchmark CI job; purge clock docs | - |
-| FU-027 | ui | Soften explainCashFlow "finish in the black" tip copy | - |
 | FU-028 | ui | Roast lines emoji in chat; confirm bubbles count as mascot lines; Q-23 sign-off before zakah/smart_roi flags | PO |
-| FU-039 | ui | privacy_delete_body wording about security keys | - |
-| FU-040 | ui | Delete-everything dialog: backups/purchase/account untouched | - |
 | FU-047 | ui | Dark tokens (warning, danger, zaghlolBg, incomeBg) undefined; 1.3x goldens for chips etc. | PO/UX |
 | FU-087 | ui | OEM battery guidance screen | device |
 | FU-089 | ui | Review capture channel name copy (EG-Arabic) | PO/UX |
