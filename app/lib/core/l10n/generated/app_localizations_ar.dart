@@ -2618,6 +2618,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountsLinkFailed => 'معرفناش نحفظ الربط، جرّب تاني.';
 
   @override
+  String get accountsLinkBlocked =>
+      'الكارت ده مربوط بحساب، والتغيير ده هيفك الربط. فك ربط الكارت الأول وبعدين جرّب تاني.';
+
+  @override
   String get accountsCardsOnAccount => 'الكروت على الحساب ده';
 
   @override

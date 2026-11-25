@@ -133,12 +133,15 @@ abstract interface class CsvImportStore {
   /// Live transactions of [accountId] with `fromMs <= occurredAt < toMs`
   /// (T-156: statements carry a day, not an instant). With [settledOnly],
   /// only `posted`/`pending` rows count (declined/reversed ones are not
-  /// real money movements, so they must not block a statement row).
+  /// real money movements, so they must not block a statement row). With
+  /// [withLinkedCards] (T-266), the live debit cards linked to [accountId]
+  /// are searched too: a bank statement lists their purchases.
   Future<List<ExistingTxnKey>> existingBetween(
     String accountId,
     int fromMs,
     int toMs, {
     bool settledOnly = false,
+    bool withLinkedCards = false,
   });
 
   /// Inserts the row and returns its new id.

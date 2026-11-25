@@ -3420,6 +3420,10 @@
   "@accountsLinkFailed": {
     "description": "S · T-266"
   },
+  "accountsLinkBlocked": "الكارت ده مربوط بحساب، والتغيير ده هيفك الربط. فك ربط الكارت الأول وبعدين جرّب تاني.",
+  "@accountsLinkBlocked": {
+    "description": "S · T-266 · ACC_LINKED: a merge or retype would break a card link"
+  },
   "accountsCardsOnAccount": "الكروت على الحساب ده",
   "@accountsCardsOnAccount": {
     "description": "T · T-266"

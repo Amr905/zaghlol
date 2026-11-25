@@ -59,6 +59,7 @@ class FakeStore implements CsvImportStore {
     int from,
     int to, {
     bool settledOnly = false,
+    bool withLinkedCards = false,
   }) async => [
     for (final r in rows)
       if (r.accountId == a &&

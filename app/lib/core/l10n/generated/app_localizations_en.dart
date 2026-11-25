@@ -2542,6 +2542,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountsLinkFailed => 'Couldn\'t save the link. Try again.';
 
   @override
+  String get accountsLinkBlocked =>
+      'This would break a card\'s link to its account. Unlink the card first, then try again.';
+
+  @override
   String get accountsCardsOnAccount => 'Cards on this account';
 
   @override
