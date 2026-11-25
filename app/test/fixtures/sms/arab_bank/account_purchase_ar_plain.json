@@ -1,0 +1,14 @@
+{
+  "sender": "ArabBank",
+  "body": "EG\nشراء بمبلغ EGP 170.10 من حساب 419*6128 .الرصيد المتوفر 1769.47 .",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.account_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "170.10",
+    "last4": "6128",
+    "balance": "1769.47"
+  }
+}

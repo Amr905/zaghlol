@@ -147,3 +147,14 @@ Result<Money, ParseFailure> parseMoneyText(
   }
   return parseAmount(numberText, currency: currency, locale: locale);
 }
+
+final RegExp _trailingSign = RegExp(r'[0-9][ ]?[-+\u2212]$');
+
+/// T-242: drops one sign marker written right after a number (`2,199.95-`
+/// outflow, `500.00+` inflow). The marker never makes the amount negative;
+/// direction comes from the template or the generic reader's own rules.
+/// Shared by the template extractor and any reader of bank amounts.
+String stripTrailingSignMarker(String token) {
+  final t = token.trim();
+  return _trailingSign.hasMatch(t) ? t.substring(0, t.length - 1).trim() : t;
+}

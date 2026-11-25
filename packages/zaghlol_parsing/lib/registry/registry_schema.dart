@@ -24,7 +24,8 @@ final RegExp _groupName = RegExp(r'\(\?<([A-Za-z][A-Za-z0-9]*)>');
 final RegExp _codeShape = RegExp(r'^[a-z][a-z0-9_]{1,31}$');
 final RegExp _idShape = RegExp(r'^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$');
 final RegExp _dateFormatShape = RegExp(
-  r'^(?:d{1,2}|M{1,2}|y{2}|y{4})(?:[/.-](?:d{1,2}|M{1,2}|y{2}|y{4})){1,2}$',
+  r'^(?:(?:d{1,2}|M{1,3}|y{2}|y{4})(?:[/.-](?:d{1,2}|M{1,3}|y{2}|y{4})){1,2}'
+  r'|d{1,2}MMMy{2}(?:y{2})?)$',
 );
 final RegExp _permille = RegExp(r'^(?:0(?:\.(\d{1,3}))?|1(?:\.0{1,3})?)$');
 

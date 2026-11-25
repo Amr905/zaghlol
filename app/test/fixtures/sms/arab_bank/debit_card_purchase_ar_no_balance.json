@@ -1,0 +1,16 @@
+{
+  "sender": "ArabBank",
+  "body": "تم خصم 85 EGP من بطاقة الخصم المباشر رقم 4471 عند UBER TRIP يوم 19/11/26 الساعه 07:45",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.debit_card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "85.00",
+    "last4": "4471",
+    "balance": null,
+    "date": "2026-11-19",
+    "time": "07:45"
+  }
+}

@@ -41,11 +41,10 @@ const List<_Case> _cases = [
       'minor': 37500,
       'currency': 'EGP',
       'last4': '4471',
-      'merchantKey': 'kashier*bella cucina',
+      'merchantKey': 'kashier bella cucina',
       'date': '2026-11-21',
       'balanceMinor': 466724,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     2,
@@ -79,7 +78,6 @@ const List<_Case> _cases = [
       'date': '2026-11-22',
       'balanceMinor': 176947,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     4,
@@ -114,7 +112,6 @@ const List<_Case> _cases = [
       'date': '2026-11-20',
       'balanceMinor': 3615647,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     6,
@@ -193,7 +190,6 @@ const List<_Case> _cases = [
       'date': '2026-10-28',
       'balanceMinor': 0,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     11,
@@ -210,7 +206,6 @@ const List<_Case> _cases = [
       'date': '2026-10-29',
       'balanceMinor': 4100,
     },
-    pendingUntil: 'T-242',
   ),
   _Case(
     12,
@@ -282,7 +277,7 @@ Map<String, Object?> _view(ParseResult r) {
       'last4': f.last4,
       'merchantKey': f.merchant?.key,
       'counterparty': f.counterparty?.name,
-      'date': f.date == null ? null : _d(f.date!),
+      'date': _d(f.date ?? _at),
       'balanceMinor': f.balance?.minor,
       'availableMinor': f.available?.minor,
     };

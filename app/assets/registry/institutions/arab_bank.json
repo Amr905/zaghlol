@@ -37,7 +37,10 @@
   "walletCardNames": [
     "Arab Bank"
   ],
-  "last4": [],
+  "last4": [
+    "الخصم المباشر رقم ([0-9]{4})",
+    "card x{1,8}([0-9]{4})"
+  ],
   "drop": [],
   "templates": [
     {
@@ -108,6 +111,53 @@
       "pattern": "قيد راتب بمبلغ (?<cur>[a-z]{3}) (?<amount>[\\d,.]+) لحساب \\d{0,4}\\*{1,4}(?<last4>\\d{4}) بتاريخ (?<date>\\d{1,2}/\\d{1,2}/\\d{4})(?: ?\\.)?(?: الرصيد المتوفر (?<acur>[a-z]{3}) (?<balance>[\\d,.]+))?",
       "date": {
         "format": "d/M/yyyy",
+        "yearPolicy": "nearest_past"
+      },
+      "source": "po-sample"
+    },
+    {
+      "id": "arab_bank.debit_card_purchase.ar",
+      "version": 8,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "تم خصم (?<amount>[\\d,.]+) ?(?<cur>egp|جم|جنيه) من بطاقة الخصم المباشر رقم (?<last4>\\d{4}) عند (?<merchant>.+?) يوم (?<date>\\d{1,2}/\\d{1,2}/\\d{2,4}) الساعه (?<time>\\d{1,2}:\\d{2})(?: المتاح (?<balance>[\\d,.]+) ?(?:egp|جم|جنيه)?)?",
+      "date": {
+        "format": "d/M/yy",
+        "yearPolicy": "nearest_past"
+      },
+      "source": "po-sample"
+    },
+    {
+      "id": "arab_bank.account_purchase.ar",
+      "version": 8,
+      "lang": "ar",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "شراء بمبلغ (?<cur>[a-z]{3}) (?<amount>[\\d,.]+) من حساب \\d{0,4}\\*{1,4}(?<last4>\\d{4})(?: ?\\.)?(?: ?الرصيد المتوفر (?:(?<acur>[a-z]{3}) )?(?<balance>[\\d,.]+))?",
+      "source": "po-sample"
+    },
+    {
+      "id": "arab_bank.card_trx.en",
+      "version": 8,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "card_purchase",
+      "direction": "expense",
+      "baseConfidence": 0.95,
+      "pattern": "a trx using card [x*]{0,8}(?<last4>\\d{4}) from (?<merchant>.+?) for (?<cur>[a-z]{3}) (?<amount>[\\d,.]+) on (?<date>\\d{1,2}-[a-z]{3}-\\d{4}) at (?<time>\\d{1,2}:\\d{2})(?: gmt[+-]\\d{1,2})?\\.?(?: available balance is (?:(?<acur>[a-z]{3}) )?(?<balance>[\\d,.]+))?",
+      "date": {
+        "format": "dd-MMM-yyyy",
         "yearPolicy": "nearest_past"
       },
       "source": "po-sample"

@@ -1,6 +1,6 @@
 {
  "v": 4,
- "registryVersion": 7,
+ "registryVersion": 8,
  "senders": [
   {
    "match": "exact",
@@ -715,6 +715,10 @@
  "last4": {
   "alrajhi": [
    "(?:by|card|بطاقه|بواسطه):? ?([0-9]{4})"
+  ],
+  "arab_bank": [
+   "الخصم المباشر رقم ([0-9]{4})",
+   "card x{1,8}([0-9]{4})"
   ],
   "hdfc": [
    "card x{1,2}([0-9]{4})"

@@ -1,0 +1,16 @@
+{
+  "sender": "ArabBank",
+  "body": "تم خصم 375 EGP  من بطاقة الخصم المباشر رقم 4471  عند KASHIER*BELLA CUCINA  يوم 21/11/26  الساعه 16:53  المتاح 4667.24EGP  للمزيد إتصل ب ١٩٦٢٣",
+  "receivedAt": "2026-11-22T10:00:00+02:00",
+  "expect": {
+    "template": "arab_bank.debit_card_purchase.ar",
+    "event": "card_purchase",
+    "direction": "expense",
+    "currency": "EGP",
+    "amount": "375.00",
+    "last4": "4471",
+    "balance": "4667.24",
+    "date": "2026-11-21",
+    "time": "16:53"
+  }
+}
