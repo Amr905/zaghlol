@@ -21,6 +21,14 @@ enum AccountKind {
   /// balances are a debt or a limit, so they stay out of asset totals.
   bool get isAsset => this != credit && this != bnpl;
 
+  /// T-266: only a debit card can be linked to a bank account.
+  bool get canBeLinked => this == debit;
+
+  /// T-266: the kinds a debit card can be linked to (a bank account, a
+  /// wallet or a multi-currency account; never a card, cash or BNPL).
+  bool get canHoldCards =>
+      this == account || this == wallet || this == multiCurrency;
+
   static AccountKind fromCode(String code) => values.firstWhere(
     (v) => v.code == code,
     orElse: () => throw AccountsException(AccountsException.corruptRow),
@@ -43,6 +51,7 @@ final class Account {
     this.creditLimit,
     this.statementDueDay,
     this.mergedIntoId,
+    this.linkedAccountId,
   });
 
   final String id;
@@ -69,6 +78,13 @@ final class Account {
   final DateTime updatedAt;
 
   bool get isMerged => mergedIntoId != null;
+
+  /// T-266: the bank account this debit card spends from. While set, the
+  /// card has no balance of its own: its transactions and the balances its
+  /// messages report count on that account.
+  final String? linkedAccountId;
+
+  bool get isLinked => linkedAccountId != null;
 }
 
 /// The balance of one account in one currency (FR-ACC-02, FR-ACC-06).
@@ -216,7 +232,10 @@ String normalizeDigits(String input) {
 /// `ACC_INVALID`: the input failed a pre-check. `ACC_MERGED`: the account was
 /// already merged into another. `ACC_DEFAULT_CASH`: the operation would
 /// remove or retype the default cash account. `ACC_CORRUPT_ROW`: a stored
-/// value is not a known code.
+/// value is not a known code. `ACC_LINKED` (T-266): the change would break a
+/// card link (retyping a linked card, or an account with linked cards, to a
+/// kind that can't keep the link); unlink first. `ACC_NOT_LINKABLE`: the
+/// card or the target can't be linked (kinds, itself, merged).
 final class AccountsException extends SafeException {
   AccountsException(super.code);
 
@@ -225,4 +244,6 @@ final class AccountsException extends SafeException {
   static const String merged = 'ACC_MERGED';
   static const String defaultCash = 'ACC_DEFAULT_CASH';
   static const String corruptRow = 'ACC_CORRUPT_ROW';
+  static const String linked = 'ACC_LINKED';
+  static const String notLinkable = 'ACC_NOT_LINKABLE';
 }

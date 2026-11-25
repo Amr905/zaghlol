@@ -4694,6 +4694,17 @@ class Accounts extends Table with TableInfo<Accounts, AccountRow> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  static const VerificationMeta _linkedAccountIdMeta = const VerificationMeta(
+    'linkedAccountId',
+  );
+  late final GeneratedColumn<String> linkedAccountId = GeneratedColumn<String>(
+    'linked_account_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'REFERENCES accounts(id) CHECK (linked_account_id IS NULL OR(linked_account_id <> id AND kind = \'debit\'))',
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4709,6 +4720,7 @@ class Accounts extends Table with TableInfo<Accounts, AccountRow> {
     isDefaultCash,
     createdAt,
     updatedAt,
+    linkedAccountId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4827,6 +4839,15 @@ class Accounts extends Table with TableInfo<Accounts, AccountRow> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('linked_account_id')) {
+      context.handle(
+        _linkedAccountIdMeta,
+        linkedAccountId.isAcceptableOrUnknown(
+          data['linked_account_id']!,
+          _linkedAccountIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4888,6 +4909,10 @@ class Accounts extends Table with TableInfo<Accounts, AccountRow> {
         DriftSqlType.int,
         data['${effectivePrefix}updated_at'],
       )!,
+      linkedAccountId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linked_account_id'],
+      ),
     );
   }
 
@@ -4914,6 +4939,11 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
   final int isDefaultCash;
   final int createdAt;
   final int updatedAt;
+
+  /// T-266 (v6, added by ALTER TABLE so it is last): the bank account a debit
+  /// card spends from. Only a debit card can be linked, never to itself; the
+  /// repository checks the target's kind (account, wallet, multi_currency).
+  final String? linkedAccountId;
   const AccountRow({
     required this.id,
     this.institutionCode,
@@ -4928,6 +4958,7 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
     required this.isDefaultCash,
     required this.createdAt,
     required this.updatedAt,
+    this.linkedAccountId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4955,6 +4986,9 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
     map['is_default_cash'] = Variable<int>(isDefaultCash);
     map['created_at'] = Variable<int>(createdAt);
     map['updated_at'] = Variable<int>(updatedAt);
+    if (!nullToAbsent || linkedAccountId != null) {
+      map['linked_account_id'] = Variable<String>(linkedAccountId);
+    }
     return map;
   }
 
@@ -4983,6 +5017,9 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
       isDefaultCash: Value(isDefaultCash),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      linkedAccountId: linkedAccountId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkedAccountId),
     );
   }
 
@@ -5005,6 +5042,7 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
       isDefaultCash: serializer.fromJson<int>(json['is_default_cash']),
       createdAt: serializer.fromJson<int>(json['created_at']),
       updatedAt: serializer.fromJson<int>(json['updated_at']),
+      linkedAccountId: serializer.fromJson<String?>(json['linked_account_id']),
     );
   }
   @override
@@ -5024,6 +5062,7 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
       'is_default_cash': serializer.toJson<int>(isDefaultCash),
       'created_at': serializer.toJson<int>(createdAt),
       'updated_at': serializer.toJson<int>(updatedAt),
+      'linked_account_id': serializer.toJson<String?>(linkedAccountId),
     };
   }
 
@@ -5041,6 +5080,7 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
     int? isDefaultCash,
     int? createdAt,
     int? updatedAt,
+    Value<String?> linkedAccountId = const Value.absent(),
   }) => AccountRow(
     id: id ?? this.id,
     institutionCode: institutionCode.present
@@ -5061,6 +5101,9 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
     isDefaultCash: isDefaultCash ?? this.isDefaultCash,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
+    linkedAccountId: linkedAccountId.present
+        ? linkedAccountId.value
+        : this.linkedAccountId,
   );
   AccountRow copyWithCompanion(AccountsCompanion data) {
     return AccountRow(
@@ -5089,6 +5132,9 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
           : this.isDefaultCash,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      linkedAccountId: data.linkedAccountId.present
+          ? data.linkedAccountId.value
+          : this.linkedAccountId,
     );
   }
 
@@ -5107,7 +5153,8 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
           ..write('mergedIntoId: $mergedIntoId, ')
           ..write('isDefaultCash: $isDefaultCash, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('linkedAccountId: $linkedAccountId')
           ..write(')'))
         .toString();
   }
@@ -5127,6 +5174,7 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
     isDefaultCash,
     createdAt,
     updatedAt,
+    linkedAccountId,
   );
   @override
   bool operator ==(Object other) =>
@@ -5144,7 +5192,8 @@ class AccountRow extends DataClass implements Insertable<AccountRow> {
           other.mergedIntoId == this.mergedIntoId &&
           other.isDefaultCash == this.isDefaultCash &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.linkedAccountId == this.linkedAccountId);
 }
 
 class AccountsCompanion extends UpdateCompanion<AccountRow> {
@@ -5161,6 +5210,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
   final Value<int> isDefaultCash;
   final Value<int> createdAt;
   final Value<int> updatedAt;
+  final Value<String?> linkedAccountId;
   final Value<int> rowid;
   const AccountsCompanion({
     this.id = const Value.absent(),
@@ -5176,6 +5226,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
     this.isDefaultCash = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.linkedAccountId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AccountsCompanion.insert({
@@ -5192,6 +5243,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
     this.isDefaultCash = const Value.absent(),
     required int createdAt,
     required int updatedAt,
+    this.linkedAccountId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        kind = Value(kind),
@@ -5213,6 +5265,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
     Expression<int>? isDefaultCash,
     Expression<int>? createdAt,
     Expression<int>? updatedAt,
+    Expression<String>? linkedAccountId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5229,6 +5282,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
       if (isDefaultCash != null) 'is_default_cash': isDefaultCash,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (linkedAccountId != null) 'linked_account_id': linkedAccountId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5247,6 +5301,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
     Value<int>? isDefaultCash,
     Value<int>? createdAt,
     Value<int>? updatedAt,
+    Value<String?>? linkedAccountId,
     Value<int>? rowid,
   }) {
     return AccountsCompanion(
@@ -5263,6 +5318,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
       isDefaultCash: isDefaultCash ?? this.isDefaultCash,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      linkedAccountId: linkedAccountId ?? this.linkedAccountId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5309,6 +5365,9 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<int>(updatedAt.value);
     }
+    if (linkedAccountId.present) {
+      map['linked_account_id'] = Variable<String>(linkedAccountId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5331,6 +5390,7 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
           ..write('isDefaultCash: $isDefaultCash, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('linkedAccountId: $linkedAccountId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -18211,6 +18271,10 @@ abstract class _$AppSchema extends GeneratedDatabase {
     'ux_accounts_default_cash',
     'CREATE UNIQUE INDEX ux_accounts_default_cash ON accounts (is_default_cash) WHERE is_default_cash = 1',
   );
+  late final Index ixAccountsLinked = Index(
+    'ix_accounts_linked',
+    'CREATE INDEX ix_accounts_linked ON accounts (linked_account_id) WHERE linked_account_id IS NOT NULL',
+  );
   late final AccountBalances accountBalances = AccountBalances(this);
   late final Index uxRawBodyHash = Index(
     'ux_raw_body_hash',
@@ -18354,6 +18418,7 @@ abstract class _$AppSchema extends GeneratedDatabase {
     trgSplitParticipantMove,
     uxAccountsInstLast4,
     uxAccountsDefaultCash,
+    ixAccountsLinked,
     accountBalances,
     uxRawBodyHash,
     ixTxnAccountTime,
@@ -21314,6 +21379,7 @@ typedef $AccountsCreateCompanionBuilder = AccountsCompanion Function({
   Value<int> isDefaultCash,
   required int createdAt,
   required int updatedAt,
+  Value<String?> linkedAccountId,
   Value<int> rowid,
 });
 typedef $AccountsUpdateCompanionBuilder = AccountsCompanion Function({
@@ -21330,6 +21396,7 @@ typedef $AccountsUpdateCompanionBuilder = AccountsCompanion Function({
   Value<int> isDefaultCash,
   Value<int> createdAt,
   Value<int> updatedAt,
+  Value<String?> linkedAccountId,
   Value<int> rowid,
 });
 
@@ -21348,6 +21415,23 @@ final class $AccountsReferences
       $_db.accounts,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_mergedIntoIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static Accounts _linkedAccountIdTable(_$AppSchema db) =>
+      db.accounts.createAlias('accounts__linked_account_id__accounts__id');
+
+  $AccountsProcessedTableManager? get linkedAccountId {
+    final $_column = $_itemColumn<String>('linked_account_id');
+    if ($_column == null) return null;
+    final manager = $AccountsTableManager(
+      $_db,
+      $_db.accounts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_linkedAccountIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -21483,6 +21567,29 @@ class $AccountsFilterComposer extends Composer<_$AppSchema, Accounts> {
     final $AccountsFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.mergedIntoId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $AccountsFilterComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $AccountsFilterComposer get linkedAccountId {
+    final $AccountsFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.linkedAccountId,
       referencedTable: $db.accounts,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -21668,6 +21775,29 @@ class $AccountsOrderingComposer extends Composer<_$AppSchema, Accounts> {
     );
     return composer;
   }
+
+  $AccountsOrderingComposer get linkedAccountId {
+    final $AccountsOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.linkedAccountId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $AccountsOrderingComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $AccountsAnnotationComposer extends Composer<_$AppSchema, Accounts> {
@@ -21728,6 +21858,29 @@ class $AccountsAnnotationComposer extends Composer<_$AppSchema, Accounts> {
     final $AccountsAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.mergedIntoId,
+      referencedTable: $db.accounts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $AccountsAnnotationComposer(
+            $db: $db,
+            $table: $db.accounts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $AccountsAnnotationComposer get linkedAccountId {
+    final $AccountsAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.linkedAccountId,
       referencedTable: $db.accounts,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -21838,6 +21991,7 @@ class $AccountsTableManager
           AccountRow,
           PrefetchHooks Function({
             bool mergedIntoId,
+            bool linkedAccountId,
             bool transactionsRefs,
             bool recurringItemsRefs,
             bool accountBalancesRefs,
@@ -21869,6 +22023,7 @@ class $AccountsTableManager
                 Value<int> isDefaultCash = const Value.absent(),
                 Value<int> createdAt = const Value.absent(),
                 Value<int> updatedAt = const Value.absent(),
+                Value<String?> linkedAccountId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AccountsCompanion(
                 id: id,
@@ -21884,6 +22039,7 @@ class $AccountsTableManager
                 isDefaultCash: isDefaultCash,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                linkedAccountId: linkedAccountId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -21901,6 +22057,7 @@ class $AccountsTableManager
                 Value<int> isDefaultCash = const Value.absent(),
                 required int createdAt,
                 required int updatedAt,
+                Value<String?> linkedAccountId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AccountsCompanion.insert(
                 id: id,
@@ -21916,6 +22073,7 @@ class $AccountsTableManager
                 isDefaultCash: isDefaultCash,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                linkedAccountId: linkedAccountId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -21929,6 +22087,7 @@ class $AccountsTableManager
           prefetchHooksCallback:
               ({
                 mergedIntoId = false,
+                linkedAccountId = false,
                 transactionsRefs = false,
                 recurringItemsRefs = false,
                 accountBalancesRefs = false,
@@ -21964,6 +22123,17 @@ class $AccountsTableManager
                                 ._mergedIntoIdTable(db),
                             referencedColumn: $AccountsReferences
                                 ._mergedIntoIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (linkedAccountId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.linkedAccountId,
+                            referencedTable: $AccountsReferences
+                                ._linkedAccountIdTable(db),
+                            referencedColumn: $AccountsReferences
+                                ._linkedAccountIdTable(db)
                                 .id,
                           ) as T;
                         }
@@ -22051,6 +22221,7 @@ typedef $AccountsProcessedTableManager =
       AccountRow,
       PrefetchHooks Function({
         bool mergedIntoId,
+        bool linkedAccountId,
         bool transactionsRefs,
         bool recurringItemsRefs,
         bool accountBalancesRefs,

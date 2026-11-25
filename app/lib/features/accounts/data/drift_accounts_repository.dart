@@ -18,6 +18,7 @@ import '../../../core/db/db_errors.dart';
 import '../../../core/db/money_columns.dart';
 import '../../transactions/data/drift_transaction_repository.dart'
     show Clock, IdGenerator, newUuidV4;
+import '../../wealth/data/account_ledger.dart';
 import '../domain/account.dart';
 import '../domain/accounts_repository.dart';
 
@@ -195,9 +196,13 @@ class DriftAccountsRepository implements AccountsRepository {
 
   @override
   Future<Map<Currency, Money>> totalsByCurrency() async {
+    final live = await _dao.listLive(includeHidden: true);
+    // T-266: a linked card's figures are its account's; never counted twice.
+    final linked = {for (final v in linkedCardsOf(live).values) ...v};
     final assets = {
-      for (final a in await _dao.listLive(includeHidden: true))
-        if (AccountKind.fromCode(a.kind).isAsset) a.id,
+      for (final a in live)
+        if (AccountKind.fromCode(a.kind).isAsset && !linked.contains(a.id))
+          a.id,
     };
     final totals = <Currency, Money>{};
     for (final b in await _dao.balancesOfLive()) {
@@ -219,6 +224,15 @@ class DriftAccountsRepository implements AccountsRepository {
           current.isDefaultCash != 0 &&
           kind != AccountKind.cash) {
         throw AccountsException(AccountsException.defaultCash);
+      }
+      // T-266: a link is never broken silently by a retype.
+      if (kind != null) {
+        if (current.linkedAccountId != null && !kind.canBeLinked) {
+          throw AccountsException(AccountsException.linked);
+        }
+        if (!kind.canHoldCards && (await _dao.cardsLinkedTo(id)).isNotEmpty) {
+          throw AccountsException(AccountsException.linked);
+        }
       }
       final limit = edit.creditLimit;
       if (limit != null) {
@@ -276,6 +290,20 @@ class DriftAccountsRepository implements AccountsRepository {
       await _dao.relinkTransactions(sourceId, targetId, at: now);
       await _dao.relinkRecurring(sourceId, targetId);
       await _dao.repointMerged(sourceId, targetId, at: now);
+      // T-266: cards linked to the source follow it when the target can hold
+      // cards; else they are unlinked (they count on their own again).
+      final target = await _live(targetId);
+      final targetHolds = AccountKind.fromCode(target.kind).canHoldCards;
+      await _dao.repointLinked(
+        sourceId,
+        targetHolds ? targetId : null,
+        at: now,
+      );
+      // A linked card merged into another card stops being linked, so the
+      // target never inherits a stale link through the source row.
+      if (source.linkedAccountId != null) {
+        await _dao.setLinked(sourceId, null, at: now);
+      }
       for (final b in await _dao.balancesOf(sourceId)) {
         final theirs = await _dao.balanceOf(targetId, b.currency);
         if (theirs == null) {
@@ -305,6 +333,122 @@ class DriftAccountsRepository implements AccountsRepository {
       return _require(targetId);
     });
   }
+
+  @override
+  Future<Account> linkCard({
+    required String cardId,
+    required String accountId,
+  }) async {
+    if (cardId.isEmpty || accountId.isEmpty) _invalid();
+    if (cardId == accountId) _notLinkable();
+    return _dao.inTransaction(() async {
+      final card = await _live(cardId);
+      final target = await _live(accountId);
+      if (!AccountKind.fromCode(card.kind).canBeLinked ||
+          !AccountKind.fromCode(target.kind).canHoldCards) {
+        _notLinkable();
+      }
+      if (card.linkedAccountId == accountId) return _toAccount(card);
+      if (card.linkedAccountId != null) await _unlinkIn(card);
+      final now = _nowMs();
+      // The card's balances are its account's: move them, newer wins per
+      // currency (the merge rule); a card row never stays to count twice.
+      for (final b in await _dao.balancesOf(cardId)) {
+        final theirs = await _dao.balanceOf(accountId, b.currency);
+        if (theirs != null && b.asOf <= theirs.asOf) {
+          await _dao.deleteBalance(cardId, b.currency);
+          continue;
+        }
+        if (theirs != null) await _dao.deleteBalance(accountId, b.currency);
+        await _dao.moveBalance(cardId, accountId, b.currency);
+      }
+      final settings = _settingsDao;
+      final key = keys.Settings.openingBalances;
+      final before = key.parse(await settings.read(key.name));
+      final after = before.moveAccount(cardId, accountId);
+      if (!identical(before, after)) {
+        await settings.write(key.name, key.format(after), at: now);
+      }
+      if (await _dao.setLinked(cardId, accountId, at: now) != 1) _notFound();
+      return _require(cardId);
+    });
+  }
+
+  @override
+  Future<Account> unlinkCard(String cardId) async {
+    if (cardId.isEmpty) _invalid();
+    return _dao.inTransaction(() async {
+      final card = await _live(cardId);
+      if (card.linkedAccountId == null) return _toAccount(card);
+      await _unlinkIn(card);
+      return _require(cardId);
+    });
+  }
+
+  /// Unlinks [card] inside the caller's transaction. Where the card's
+  /// transactions counted on the account after its anchor, the account's
+  /// current figure becomes a typed balance as of now first, so the account's
+  /// balance does not move when the card's transactions stop counting there.
+  Future<void> _unlinkIn(AccountRow card) async {
+    final targetId = card.linkedAccountId!;
+    final now = _now().toUtc();
+    final ledger = AccountLedger(_dao.db);
+    final lines = [
+      for (final l in await ledger.lines(now))
+        if (l.refId == targetId && l.isAccount) l,
+    ];
+    final settings = _settingsDao;
+    final key = keys.Settings.openingBalances;
+    final before = key.parse(await settings.read(key.name));
+    var next = before;
+    for (final l in lines) {
+      final amount = l.amount;
+      final asOf = l.asOf;
+      if (amount == null || asOf == null) continue;
+      final mine = await ledger.totalsAfter([card.id], l.unit, asOf);
+      if (mine.count == 0) continue;
+      try {
+        next = next.withEntry(targetId, amount, now);
+      } on ArgumentError {
+        // The typed-balance setting is full: refuse rather than move money.
+        _invalid();
+      }
+    }
+    final at = now.millisecondsSinceEpoch;
+    if (next != before) {
+      await settings.write(key.name, key.format(next), at: at);
+    }
+    if (await _dao.setLinked(card.id, null, at: at) != 1) _notFound();
+  }
+
+  @override
+  Future<List<Account>> cardsLinkedTo(String accountId) async => [
+    for (final r in await _dao.cardsLinkedTo(accountId)) _toAccount(r),
+  ];
+
+  @override
+  Future<List<LinkTarget>> linkTargets(String cardId) async {
+    final row = await _dao.byId(cardId);
+    if (row == null) return const [];
+    final live = await _dao.listLive(includeHidden: false);
+    final reported = <String, Map<String, ReportedFigure>>{};
+    for (final b in await _dao.balancesOfLive()) {
+      final m = b.balanceMinor;
+      final cur = Currency.tryOf(b.currency);
+      if (m == null || cur == null) continue;
+      (reported[b.accountId] ??= {})[b.currency] = (
+        amount: Money(cur, m),
+        asOf: DateTime.fromMillisecondsSinceEpoch(b.asOf, isUtc: true),
+      );
+    }
+    return orderLinkTargets(
+      card: _toAccount(row),
+      accounts: [for (final r in live) _toAccount(r)],
+      reported: reported,
+    );
+  }
+
+  SettingsDao get _settingsDao => _settings ?? SettingsDao(_dao.db);
 
   /// The live account for (institution, last-4), following a merge to its
   /// target; null when none exists.
@@ -352,6 +496,7 @@ class DriftAccountsRepository implements AccountsRepository {
     statementDueDay: r.statementDueDay,
     isHidden: r.isHidden == 1,
     mergedIntoId: r.mergedIntoId,
+    linkedAccountId: r.linkedAccountId,
     isDefaultCash: r.isDefaultCash == 1,
     createdAt: DateTime.fromMillisecondsSinceEpoch(r.createdAt, isUtc: true),
     updatedAt: DateTime.fromMillisecondsSinceEpoch(r.updatedAt, isUtc: true),
@@ -401,4 +546,7 @@ class DriftAccountsRepository implements AccountsRepository {
   static Never _invalid() => throw AccountsException(AccountsException.invalid);
 
   static Never _merged() => throw AccountsException(AccountsException.merged);
+
+  static Never _notLinkable() =>
+      throw AccountsException(AccountsException.notLinkable);
 }

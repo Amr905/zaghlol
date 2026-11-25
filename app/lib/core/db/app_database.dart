@@ -16,6 +16,7 @@ import 'migrations/v2_financial_a.dart';
 import 'migrations/v3_financial_b.dart';
 import 'migrations/v4_financial_c.dart';
 import 'migrations/v5_recurring_cadence.dart';
+import 'migrations/v6_linked_account.dart';
 import 'schema/app_schema.dart';
 import 'schema/app_schema.steps.dart';
 import 'schema_shape.dart';
@@ -53,7 +54,7 @@ class AppDatabase extends AppSchema {
   int? get attemptedUpgradeFrom => _upgradeFrom;
 
   /// The version steps, `from` → `to` (T-017: v1 → v2; T-018: v2 → v3;
-  /// T-019: v3 → v4; T-196: v4 → v5).
+  /// T-019: v3 → v4; T-196: v4 → v5; T-266: v5 → v6).
   /// Any other pair is refused before anything runs. Runs inside the upgrade
   /// transaction set up by [migration]; tests override this
   /// (FakeNextDatabase).
@@ -70,6 +71,7 @@ class AppDatabase extends AppSchema {
         from2To3: (m, _) => _from2To3(),
         from3To4: (m, _) => _from3To4(),
         from4To5: (m, _) => _from4To5(),
+        from5To6: (m, _) => _from5To6(),
       ),
     );
   }
@@ -153,6 +155,16 @@ class AppDatabase extends AppSchema {
       await customStatement(sql);
     }
     for (final (_, sql) in v5AddedObjects) {
+      await customStatement(sql);
+    }
+  }
+
+  /// v5 → v6 (T-266): the frozen statements of
+  /// migrations/v6_linked_account.dart: `accounts.linked_account_id` (added,
+  /// NULL for every row) and its partial index.
+  Future<void> _from5To6() async {
+    await customStatement(v6AddLinkedAccountColumn);
+    for (final (_, sql) in v6AddedObjects) {
       await customStatement(sql);
     }
   }

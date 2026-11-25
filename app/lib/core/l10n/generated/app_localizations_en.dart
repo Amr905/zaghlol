@@ -2492,6 +2492,67 @@ class AppLocalizationsEn extends AppLocalizations {
       'Shows up with the first message that has a balance';
 
   @override
+  String get accountsLinkTitle => 'Linked account';
+
+  @override
+  String get accountsLinkNone => 'This card isn\'t linked to an account';
+
+  @override
+  String get accountsLinkPick => 'Link to an account';
+
+  @override
+  String get accountsLinkChange => 'Change';
+
+  @override
+  String get accountsLinkUnlink => 'Unlink';
+
+  @override
+  String accountsLinkSuggest(String account) {
+    return 'Is this card on your $account account?';
+  }
+
+  @override
+  String get accountsLinkSuggestYes => 'Yes, link it';
+
+  @override
+  String get accountsLinkSheetTitle =>
+      'Which account does this card spend from?';
+
+  @override
+  String get accountsLinkSheetHint =>
+      'The card\'s spending and the balance in its messages will count on that account. Nothing is linked until you pick.';
+
+  @override
+  String get accountsLinkNoTargets =>
+      'Add your bank account first, then link the card to it.';
+
+  @override
+  String accountsLinkBalanceOn(String account) {
+    return 'The balance is on $account';
+  }
+
+  @override
+  String get accountsLinkUnlinkTitle => 'Unlink this card?';
+
+  @override
+  String get accountsLinkUnlinkBody =>
+      'Its history stays. From now on its spending counts on the card itself, and the account\'s balance stays as it is.';
+
+  @override
+  String get accountsLinkFailed => 'Couldn\'t save the link. Try again.';
+
+  @override
+  String get accountsCardsOnAccount => 'Cards on this account';
+
+  @override
+  String get accountsSetCurrentAmount => 'Set current amount';
+
+  @override
+  String accountsOverviewLinkedTo(String account) {
+    return 'Card on $account';
+  }
+
+  @override
   String accountsDetailDue(String date) {
     return 'Statement due $date';
   }

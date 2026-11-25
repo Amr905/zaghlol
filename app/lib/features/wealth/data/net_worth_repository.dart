@@ -17,6 +17,8 @@
 //   account already carries a balance in that currency is not counted again.
 // - Unknown balances (NULL), archived assets and merged accounts are left
 //   out; an asset without a value is left out, never counted as zero.
+// - T-266: account lines come from AccountLedger (account_ledger.dart); a
+//   linked debit card has no line, its transactions count on its account.
 // - Nothing here logs; failures are typed codes.
 
 // ignore_for_file: prefer_initializing_formals
@@ -27,8 +29,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/db/daos/assets_dao.dart';
 import '../../../core/db/daos/prices_dao.dart';
-import '../../../core/db/daos/settings_dao.dart';
-import '../../../core/settings/settings_keys.dart' as keys;
+import 'account_ledger.dart';
 import 'prices_repository.dart';
 import '../domain/price_feed.dart';
 
@@ -137,7 +138,7 @@ class NetWorthRepository {
     DateTime? now,
   }) async {
     final at = (now ?? _clock()).toUtc();
-    final lines = <BreakdownLine>[...await _accountLines(at)];
+    final lines = <BreakdownLine>[...await AccountLedger(_db).lines(at)];
     final carded = <String>{}; // 'accountId|currency' with a counted owed
     for (final l in lines) {
       if (l.isLiability && l.isAccount && l.amount != null) {
@@ -213,130 +214,6 @@ class NetWorthRepository {
       units: buildUnitBreakdowns(lines),
       worth: worth,
       assetsLeftOut: assetsLeftOut,
-    );
-  }
-
-  /// One line per (account, currency) pair of every live account (hidden
-  /// ones count, merged ones are gone): reported row, user-entered balance,
-  /// and any currency the account has posted transactions in; an account with
-  /// none of these is listed once, in its default currency.
-  Future<List<BreakdownLine>> _accountLines(DateTime now) async {
-    final accounts =
-        await (_db.select(_db.accounts)
-              ..where((a) => a.mergedIntoId.isNull())
-              ..orderBy([
-                (a) => OrderingTerm.asc(a.createdAt),
-                (a) => OrderingTerm.asc(a.id),
-              ]))
-            .get();
-    final balances = <String, Map<String, AccountBalanceRow>>{};
-    for (final b in await _db.select(_db.accountBalances).get()) {
-      (balances[b.accountId] ??= {})[b.currency] = b;
-    }
-    final opening = keys.Settings.openingBalances.parse(
-      await SettingsDao(_db).read(keys.Settings.openingBalances.name),
-    );
-    final txnCurrencies = <String, Set<String>>{};
-    final rows = await _db
-        .customSelect(
-          'SELECT DISTINCT account_id, currency FROM transactions '
-          "WHERE deleted_at IS NULL AND status = 'posted'",
-          readsFrom: {_db.transactions},
-        )
-        .get();
-    for (final r in rows) {
-      (txnCurrencies[r.read<String>('account_id')] ??= {}).add(
-        r.read<String>('currency'),
-      );
-    }
-
-    final out = <BreakdownLine>[];
-    for (final a in accounts) {
-      final liability = a.kind == 'credit' || a.kind == 'bnpl';
-      final currencies = <String>{
-        ...?balances[a.id]?.keys,
-        ...opening.forAccount(a.id).keys,
-        ...?txnCurrencies[a.id],
-      };
-      // An account with nothing at all is listed in its own currency.
-      if (currencies.isEmpty) currencies.add(a.defaultCurrency);
-      for (final code in currencies.toList()..sort()) {
-        final cur = Currency.tryOf(code);
-        if (cur == null) continue;
-        final row = balances[a.id]?[code];
-        final user = opening.of(a.id, code);
-        final limit = a.creditLimitMinor == null
-            ? null
-            : Money.tryFromStorage(a.creditLimitMinor!, a.defaultCurrency);
-        final anchor = pickAnchor(
-          currency: cur,
-          isLiability: liability,
-          reportedBalance: row?.balanceMinor == null
-              ? null
-              : Money.fromStorage(row!.balanceMinor!, code),
-          reportedAvailable: row?.availableMinor == null
-              ? null
-              : Money.fromStorage(row!.availableMinor!, code),
-          creditLimit: limit,
-          reportedAsOf: row == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(row.asOf, isUtc: true),
-          userBalance: user?.amount,
-          userAsOf: user?.asOf,
-          now: now,
-        );
-        final totals = anchor == null
-            ? const TxnTotals()
-            : await _totalsAfter(a.id, code, anchor.asOf);
-        out.add(
-          resolveAccountLine(
-            accountId: a.id,
-            label: a.label,
-            accountKind: a.kind,
-            currency: cur,
-            isLiability: liability,
-            now: now,
-            anchor: anchor,
-            totals: totals,
-            institutionCode: a.institutionCode,
-            last4: a.last4,
-            isHidden: a.isHidden != 0,
-          ),
-        );
-      }
-    }
-    return out;
-  }
-
-  /// The counted transactions of one pair strictly after [after]: live,
-  /// posted, own currency; the cash-side effect by direction. Internal
-  /// (paired) transfers count: they move real money between accounts.
-  Future<TxnTotals> _totalsAfter(
-    String accountId,
-    String currency,
-    DateTime after,
-  ) async {
-    final r = await _db
-        .customSelect(
-          'SELECT COUNT(*) AS n, '
-          "COALESCE(SUM(CASE WHEN direction IN ('income','refund','transfer_in') "
-          'THEN amount_minor '
-          "WHEN direction IN ('expense','fee','transfer_out') "
-          'THEN -amount_minor ELSE 0 END), 0) AS eff '
-          'FROM transactions WHERE account_id = ?1 AND currency = ?2 '
-          "AND deleted_at IS NULL AND status = 'posted' AND occurred_at > ?3 "
-          "AND direction IN ('income','refund','transfer_in','expense','fee','transfer_out')",
-          variables: [
-            Variable.withString(accountId),
-            Variable.withString(currency),
-            Variable.withInt(after.millisecondsSinceEpoch),
-          ],
-          readsFrom: {_db.transactions},
-        )
-        .getSingle();
-    return TxnTotals(
-      cashEffectMinor: r.read<int>('eff'),
-      count: r.read<int>('n'),
     );
   }
 

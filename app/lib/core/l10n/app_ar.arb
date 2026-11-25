@@ -3354,6 +3354,89 @@
   "@accountsDetailBalanceUnknown": {
     "description": "S"
   },
+  "accountsLinkTitle": "الحساب المربوط",
+  "@accountsLinkTitle": {
+    "description": "L · T-266"
+  },
+  "accountsLinkNone": "الكارت ده مش مربوط بحساب",
+  "@accountsLinkNone": {
+    "description": "S · T-266"
+  },
+  "accountsLinkPick": "اربطه بحساب",
+  "@accountsLinkPick": {
+    "description": "B · T-266"
+  },
+  "accountsLinkChange": "غيّر",
+  "@accountsLinkChange": {
+    "description": "B · T-266"
+  },
+  "accountsLinkUnlink": "فك الربط",
+  "@accountsLinkUnlink": {
+    "description": "B · T-266"
+  },
+  "accountsLinkSuggest": "الكارت ده على حسابك في {account}؟",
+  "@accountsLinkSuggest": {
+    "description": "S · T-266",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsLinkSuggestYes": "أيوه، اربطه",
+  "@accountsLinkSuggestYes": {
+    "description": "B · T-266"
+  },
+  "accountsLinkSheetTitle": "الكارت ده بيصرف من أنهي حساب؟",
+  "@accountsLinkSheetTitle": {
+    "description": "T · T-266"
+  },
+  "accountsLinkSheetHint": "صرف الكارت والرصيد اللي في رسايله هيتحسبوا على الحساب ده. مش هنربط حاجة من غير ما تختار.",
+  "@accountsLinkSheetHint": {
+    "description": "S · T-266"
+  },
+  "accountsLinkNoTargets": "ضيف حساب البنك الأول، وبعدين اربط الكارت بيه.",
+  "@accountsLinkNoTargets": {
+    "description": "S · T-266"
+  },
+  "accountsLinkBalanceOn": "الرصيد على حساب {account}",
+  "@accountsLinkBalanceOn": {
+    "description": "C · T-266",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "accountsLinkUnlinkTitle": "تفك ربط الكارت؟",
+  "@accountsLinkUnlinkTitle": {
+    "description": "T · T-266"
+  },
+  "accountsLinkUnlinkBody": "اللي فات هيفضل زي ما هو. من دلوقتي صرف الكارت هيتحسب على الكارت لوحده، ورصيد الحساب مش هيتغير.",
+  "@accountsLinkUnlinkBody": {
+    "description": "S · T-266"
+  },
+  "accountsLinkFailed": "معرفناش نحفظ الربط، جرّب تاني.",
+  "@accountsLinkFailed": {
+    "description": "S · T-266"
+  },
+  "accountsCardsOnAccount": "الكروت على الحساب ده",
+  "@accountsCardsOnAccount": {
+    "description": "T · T-266"
+  },
+  "accountsSetCurrentAmount": "حط المبلغ اللي في الحساب دلوقتي",
+  "@accountsSetCurrentAmount": {
+    "description": "B · T-266"
+  },
+  "accountsOverviewLinkedTo": "كارت على {account}",
+  "@accountsOverviewLinkedTo": {
+    "description": "C · T-266",
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
   "accountsDetailDue": "ميعاد السداد {date}",
   "@accountsDetailDue": {
     "description": "L",

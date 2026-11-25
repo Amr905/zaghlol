@@ -9,10 +9,37 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import '../app_database.dart';
 import 'write_errors.dart';
 
+/// The account kinds a debit card can be linked to (mirrors
+/// `AccountKind.canHoldCards`; this layer reads the stored codes).
+const Set<String> cardHolderKinds = {'account', 'wallet', 'multi_currency'};
+
+/// The live linked cards of each live account that can hold cards: target
+/// id -> card ids (sorted). A link to a merged-away or wrong-kind account is
+/// ignored (the card counts on its own), so a damaged row never hides money.
+Map<String, List<String>> linkedCardsOf(Iterable<AccountRow> live) {
+  final byId = {for (final a in live) a.id: a};
+  final out = <String, List<String>>{};
+  for (final a in live) {
+    final target = a.linkedAccountId;
+    if (target == null || a.kind != 'debit') continue;
+    final t = byId[target];
+    if (t == null || !cardHolderKinds.contains(t.kind)) continue;
+    (out[target] ??= []).add(a.id);
+  }
+  for (final v in out.values) {
+    v.sort();
+  }
+  return out;
+}
+
 class AccountsDao {
   AccountsDao(this._db);
 
   final AppDatabase _db;
+
+  /// The database (T-266: the card-link use cases read the ledger in the
+  /// same transaction).
+  AppDatabase get db => _db;
 
   Future<void> insert(AccountsCompanion row) =>
       guardWrite(() => _db.into(_db.accounts).insert(row));
@@ -134,6 +161,10 @@ class AccountsDao {
   /// a live (not merged) account. Returns true when a row was inserted or
   /// replaced. [balance] and [available] are in [currency]. An equal
   /// `as_of` replaces.
+  ///
+  /// T-266: for a debit card linked to a live account, the row is written to
+  /// that account (a card message's balance is the account's). The target is
+  /// resolved inside the same statement, so it can't race a link or unlink.
   Future<bool> upsertBalanceIfNotOlder({
     required String accountId,
     required Currency currency,
@@ -152,9 +183,14 @@ class AccountsDao {
         'INSERT INTO account_balances '
         '(account_id, currency, balance_minor, available_minor, as_of, '
         'source_txn_id) '
-        'SELECT ?1, ?2, ?3, ?4, ?5, ?6 '
-        'WHERE EXISTS (SELECT 1 FROM accounts '
-        'WHERE id = ?1 AND merged_into_id IS NULL) '
+        'SELECT t.id, ?2, ?3, ?4, ?5, ?6 '
+        'FROM accounts a JOIN accounts t ON t.id = '
+        "CASE WHEN a.kind = 'debit' AND a.linked_account_id IS NOT NULL "
+        'AND EXISTS (SELECT 1 FROM accounts l WHERE l.id = a.linked_account_id '
+        "AND l.merged_into_id IS NULL AND l.kind IN ('account', 'wallet', "
+        "'multi_currency')) THEN a.linked_account_id ELSE a.id END "
+        'WHERE a.id = ?1 AND a.merged_into_id IS NULL '
+        'AND t.merged_into_id IS NULL '
         'ON CONFLICT (account_id, currency) DO UPDATE SET '
         'balance_minor = excluded.balance_minor, '
         'available_minor = excluded.available_minor, '
@@ -234,6 +270,50 @@ class AccountsDao {
               _db.accounts,
             )..where((a) => a.mergedIntoId.equals(from))).write(
               AccountsCompanion(mergedIntoId: Value(to), updatedAt: Value(at)),
+            ),
+      );
+
+  /// T-266: sets (or with null clears) the account a debit card is linked
+  /// to. Returns the rows changed (0 or 1).
+  Future<int> setLinked(String cardId, String? accountId, {required int at}) =>
+      guardWrite(
+        () =>
+            (_db.update(_db.accounts)..where((a) => a.id.equals(cardId))).write(
+              AccountsCompanion(
+                linkedAccountId: Value(accountId),
+                updatedAt: Value(at),
+              ),
+            ),
+      );
+
+  /// T-266: the live cards linked to [accountId], oldest first.
+  Future<List<AccountRow>> cardsLinkedTo(String accountId) => guardRead(
+    () =>
+        (_db.select(_db.accounts)
+              ..where(
+                (a) =>
+                    a.linkedAccountId.equals(accountId) &
+                    a.mergedIntoId.isNull(),
+              )
+              ..orderBy([
+                (a) => OrderingTerm.asc(a.createdAt),
+                (a) => OrderingTerm.asc(a.id),
+              ]))
+            .get(),
+  );
+
+  /// T-266: points every card linked to [from] at [to] (null: unlinks them).
+  /// Returns the number changed.
+  Future<int> repointLinked(String from, String? to, {required int at}) =>
+      guardWrite(
+        () =>
+            (_db.update(
+              _db.accounts,
+            )..where((a) => a.linkedAccountId.equals(from))).write(
+              AccountsCompanion(
+                linkedAccountId: Value(to),
+                updatedAt: Value(at),
+              ),
             ),
       );
 }

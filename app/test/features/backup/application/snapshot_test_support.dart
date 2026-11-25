@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:drift/drift.dart' show GeneratedDatabase;
+import 'package:drift/drift.dart' show GeneratedDatabase, Value;
 import 'package:sqlite3/sqlite3.dart' as sql;
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/encrypted_open.dart';
@@ -124,6 +124,18 @@ Future<void> populateSource(AppDatabase db) async {
         '$t0)',
   ]);
   await db.into(db.accounts).insert(account('acc1'));
+  // T-266: a bank account with a debit card linked to it.
+  await db
+      .into(db.accounts)
+      .insert(account('accBank', kind: 'account', last4: null));
+  await db
+      .into(db.accounts)
+      .insert(
+        account(
+          'accCard',
+          last4: '4321',
+        ).copyWith(linkedAccountId: const Value('accBank')),
+      );
   await db.into(db.rawMessages).insert(rawMessage('m1', hash: 1));
   await db.customStatement(
     'INSERT INTO raw_messages (id, channel, body, body_hash, received_at, '

@@ -192,7 +192,12 @@ class TransferPairingUseCase {
           throw TransferPairingException(TransferPairingException.notFound);
         }
         if (!o.isOut || i.isOut) _invalid();
-        if (o.currency == i.currency && o.accountId == i.accountId) _invalid();
+        final ledger = await _ledgerIds();
+        if (o.currency == i.currency &&
+            (ledger[o.accountId] ?? o.accountId) ==
+                (ledger[i.accountId] ?? i.accountId)) {
+          _invalid();
+        }
         final kind = o.currency == i.currency
             ? TransferPairKind.manual
             : TransferPairKind.crossCurrency;
@@ -384,7 +389,11 @@ class TransferPairingUseCase {
       return skipped;
     }
     final account = await _accounts.byId(self.accountId);
-    final leg = _legOf(self);
+    // T-266: a linked debit card and its account are one ledger: their legs
+    // never pair with each other (a card <-> its own account is no transfer).
+    final ledger = await _ledgerIds();
+    TransferLeg legOf(_Row r) => _legOf(r, ledger);
+    final leg = legOf(self);
     final unlinked = await _unlinkedFrom(txnId);
     final pool = await _freeLegs(
       self,
@@ -392,7 +401,7 @@ class TransferPairingUseCase {
       skip: unlinked,
     );
 
-    switch (decideSameCurrency(leg, pool.values.map(_legOf))) {
+    switch (decideSameCurrency(leg, pool.values.map(legOf))) {
       case PairWith(:final counterpart):
         final other = pool[counterpart.id]!;
         final o = self.isOut ? self : other;
@@ -423,12 +432,12 @@ class TransferPairingUseCase {
 
     // Two legs of one conversion inside a multi-currency account.
     if (account?.kind == 'multi_currency') {
-      final cands = fxConversionCandidates(leg, pool.values.map(_legOf));
+      final cands = fxConversionCandidates(leg, pool.values.map(legOf));
       if (cands.isNotEmpty) {
         final unique =
             cands.length == 1 &&
             fxConversionCandidates(cands.single, [
-                  ...pool.values.map(_legOf),
+                  ...pool.values.map(legOf),
                   leg,
                 ]).length ==
                 1;
@@ -468,11 +477,11 @@ class TransferPairingUseCase {
       within: crossCurrencyWindow,
       skip: unlinked,
     );
-    final rates = await _ratesFor(wide.values.map(_legOf), leg);
+    final rates = await _ratesFor(wide.values.map(legOf), leg);
     final no = await _dismissedFx(txnId);
     final cross = crossCurrencyCandidates(
       leg,
-      wide.values.map(_legOf).where((c) => !no.contains(c.id)),
+      wide.values.map(legOf).where((c) => !no.contains(c.id)),
       (from, to) => rates['${from.code}>${to.code}'],
     );
     if (cross.isNotEmpty) {
@@ -740,9 +749,23 @@ class TransferPairingUseCase {
     offsetMin: r.occurredTzOffsetMin,
   );
 
-  TransferLeg _legOf(_Row r) => TransferLeg(
+  /// T-266: the account each live linked debit card counts on (card id ->
+  /// account id). Accounts not in the map are their own ledger.
+  Future<Map<String, String>> _ledgerIds() async {
+    final live = await (_db.select(
+      _db.accounts,
+    )..where((a) => a.mergedIntoId.isNull())).get();
+    return {
+      for (final e in linkedCardsOf(live).entries)
+        for (final card in e.value) card: e.key,
+    };
+  }
+
+  /// The domain leg of [r]; its account is the ledger it counts on
+  /// ([ledger], see [_ledgerIds]).
+  TransferLeg _legOf(_Row r, Map<String, String> ledger) => TransferLeg(
     id: r.id,
-    accountId: r.accountId,
+    accountId: ledger[r.accountId] ?? r.accountId,
     isOut: r.isOut,
     amount: Money(Currency.of(r.currency), r.amountMinor),
     occurredAt: DateTime.fromMillisecondsSinceEpoch(r.occurredAt, isUtc: true),

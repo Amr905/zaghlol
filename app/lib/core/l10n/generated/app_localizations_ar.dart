@@ -2569,6 +2569,66 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountsDetailBalanceUnknown => 'هيظهر مع أول رسالة فيها رصيد';
 
   @override
+  String get accountsLinkTitle => 'الحساب المربوط';
+
+  @override
+  String get accountsLinkNone => 'الكارت ده مش مربوط بحساب';
+
+  @override
+  String get accountsLinkPick => 'اربطه بحساب';
+
+  @override
+  String get accountsLinkChange => 'غيّر';
+
+  @override
+  String get accountsLinkUnlink => 'فك الربط';
+
+  @override
+  String accountsLinkSuggest(String account) {
+    return 'الكارت ده على حسابك في $account؟';
+  }
+
+  @override
+  String get accountsLinkSuggestYes => 'أيوه، اربطه';
+
+  @override
+  String get accountsLinkSheetTitle => 'الكارت ده بيصرف من أنهي حساب؟';
+
+  @override
+  String get accountsLinkSheetHint =>
+      'صرف الكارت والرصيد اللي في رسايله هيتحسبوا على الحساب ده. مش هنربط حاجة من غير ما تختار.';
+
+  @override
+  String get accountsLinkNoTargets =>
+      'ضيف حساب البنك الأول، وبعدين اربط الكارت بيه.';
+
+  @override
+  String accountsLinkBalanceOn(String account) {
+    return 'الرصيد على حساب $account';
+  }
+
+  @override
+  String get accountsLinkUnlinkTitle => 'تفك ربط الكارت؟';
+
+  @override
+  String get accountsLinkUnlinkBody =>
+      'اللي فات هيفضل زي ما هو. من دلوقتي صرف الكارت هيتحسب على الكارت لوحده، ورصيد الحساب مش هيتغير.';
+
+  @override
+  String get accountsLinkFailed => 'معرفناش نحفظ الربط، جرّب تاني.';
+
+  @override
+  String get accountsCardsOnAccount => 'الكروت على الحساب ده';
+
+  @override
+  String get accountsSetCurrentAmount => 'حط المبلغ اللي في الحساب دلوقتي';
+
+  @override
+  String accountsOverviewLinkedTo(String account) {
+    return 'كارت على $account';
+  }
+
+  @override
   String accountsDetailDue(String date) {
     return 'ميعاد السداد $date';
   }
