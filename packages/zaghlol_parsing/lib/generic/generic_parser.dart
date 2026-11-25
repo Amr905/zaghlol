@@ -1391,27 +1391,38 @@ bool _onlyFeeFooter(String t) {
   return null;
 }
 
-/// Balance and available limit after their anchors: `(balance, limit)`.
-/// Glued currency (`4667.24EGP`) is read; no currency inherits [fallback].
-/// A `-` or `−` right before the number at [numStart], itself not glued to a
-/// digit or letter (so a date or reference such as `2026-500` is not a sign).
-bool _leadingMinus(String t, int numStart) {
-  if (numStart < 1) {
-    return false;
+/// Sign of the balance number at [numStart], read from the text between the
+/// anchor end [from] and the number: -1 negative, 0 none, 2 ambiguous.
+/// A minus is a sign when only spaces or a currency marker sit between it and
+/// the number and it is not glued to a digit or lowercase letter (so dates and
+/// references such as `2026-500` are not signs). `EGP-500`, `-EGP 500` and
+/// `- 500` are signs; a doubled minus is ambiguous.
+int _balanceSign(String t, int from, int numStart) {
+  final gap = t.substring(from, numStart);
+  final minus = RegExp('[-\u2212]').allMatches(gap).toList();
+  if (minus.isEmpty) {
+    return 0;
   }
-  final c = t.codeUnitAt(numStart - 1);
-  if (c != 0x2D && c != 0x2212) {
-    return false;
+  if (minus.length > 1) {
+    return 2;
   }
-  if (numStart < 2) {
-    return true;
+  final k = minus.single.start;
+  final before = gap.substring(0, k);
+  final after = gap.substring(k + 1).trim();
+  if (after.isNotEmpty && !RegExp(r'^[A-Za-z$£€]{1,4}\.?$').hasMatch(after)) {
+    return 0;
   }
-  final p = t.codeUnitAt(numStart - 2);
-  final digit = p >= 0x30 && p <= 0x39;
-  final letter = (p >= 0x41 && p <= 0x5A) || (p >= 0x61 && p <= 0x7A);
-  return !digit && !letter;
+  if (before.isEmpty || before.endsWith(' ')) {
+    return before.isNotEmpty && RegExp(r'\d\s*$').hasMatch(before) ? 0 : -1;
+  }
+  if (after.isEmpty && _markerBefore(t, from + k) != null) {
+    return -1;
+  }
+  return 0;
 }
 
+/// Balance and available limit after their anchors: `(balance, limit)`.
+/// Glued currency (`4667.24EGP`) is read; no currency inherits [fallback].
 (Money?, Money?) _balances(String t, Currency fallback) {
   Money? balance;
   Money? limit;
@@ -1450,7 +1461,11 @@ bool _leadingMinus(String t, int numStart) {
     }
     // FU-078: a leading sign marks an overdrawn balance. It is kept negative,
     // never read as a positive one.
-    if (_leadingMinus(t, numStart)) {
+    final sign = _balanceSign(t, end, numStart);
+    if (sign == 2) {
+      return null;
+    }
+    if (sign == -1) {
       return -money;
     }
     return money;
