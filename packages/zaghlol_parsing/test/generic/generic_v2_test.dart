@@ -19,6 +19,7 @@ ParsingPipeline _pipeline() {
 }
 
 void main() {
+  _negativeBalanceTests();
   final pipeline = _pipeline();
   ParseResult parse(String body) => pipeline.parse(
     ParseRequest(
@@ -202,6 +203,41 @@ void main() {
         'Terms and conditions apply.',
       );
       expect(r is ParseGeneric || r is ParseParsed, isFalse);
+    });
+  });
+}
+
+// T-256 / FU-078: an overdrawn balance stays negative in the generic reader.
+void _negativeBalanceTests() {
+  final pipeline = _pipeline();
+  ParseGeneric g(String body) => pipeline.parse(
+    ParseRequest(
+      body: body,
+      source: 'SOMEBANK',
+      channel: RegistryChannel.share,
+      receivedAt: _at,
+    ),
+  ) as ParseGeneric;
+  group('FU-078 negative balance (generic)', () {
+    test('available balance is EGP -500.00', () {
+      final r = g(
+        'Purchase of EGP 170.10 at SHOP card 6128. '
+        'Available balance is EGP -500.00.',
+      );
+      expect(r.amount.minor, 17010);
+      expect(r.balance?.minor, -50000);
+    });
+    test('balance: -500.00 EGP', () {
+      final r = g(
+        'Purchase of EGP 170.10 at SHOP card 6128. Balance: -500.00 EGP',
+      );
+      expect(r.balance?.minor, -50000);
+    });
+    test('positive balance unchanged', () {
+      final r = g(
+        'Purchase of EGP 170.10 at SHOP card 6128. Balance: 500.00 EGP',
+      );
+      expect(r.balance?.minor, 50000);
     });
   });
 }

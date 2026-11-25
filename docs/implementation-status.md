@@ -594,10 +594,10 @@ Closed entries above are struck through with the commit or file that fixes them.
 | FU-121 | native | Personal-sender consent line and 3-month scan opt-in UI; device benchmark | PO copy, device |
 | FU-128 | native | Real-device sleep/Doze/reboot tests | device |
 | FU-137 | native | iOS LAContext strong ref; device test of prompt | device |
-| FU-051 | parsing | Template capture edge cases (trailing separator, 0,123, U+2060) | - |
-| FU-078 | parsing | Signed (negative) balance parse | - |
-| FU-084 | parsing | Sender spoofing: (a) partly superseded by SMS-AUTO, rest open (rate limit exists) | - |
-| FU-118 | parsing | Voice parser spoken-number and catalog keyword gaps | - |
+| FU-051 | parsing | CLOSED (T-256): trailing `.`/`,` dropped by template extractor and generic reader; `0,123` rejected by `parseAmount`; U+2060/U+00AD stripped (`text_normalizer.dart`). `$` fallback = template policy, left as is; vacuous fuzz check = test nit, not fixed | - |
+| FU-078 | parsing | CLOSED (T-256): template path negative balance in `template_extractor.dart` (earlier); generic reader read `-500.00` as +500.00, now negative (`generic_parser.dart`, test in `generic_v2_test.dart`) | - |
+| FU-084 | parsing | (b) rate limit and catch-up and (c) ADR-005 residual already in place (ADR-005 threats). (a) template-matched spoof from a registry sender auto-saves: accepted residual in ADR-005; any pipeline-side gate needs `parsing_pipeline.dart`, OPEN until after batch 70 | - |
+| FU-118 | parsing | `ألف ألف` fixed earlier (`voice_parser.dart`). OPEN: spoken catalog keywords (T-059 seed data), `دينار` currency picker (voice UI), unhandled formats | - |
 | FU-223 | parsing | Confirm guessed bank SMS sender IDs | PO |
 | FU-241 | parsing | Synthetic-unverified templates; Zakah gaps; PO client IDs for sign-in | PO |
 | FU-076 | test | 50k search benchmark CI job; purge clock docs | - |
