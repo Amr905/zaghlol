@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/l10n/card_number.dart';
+import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_button.dart';
@@ -69,7 +70,14 @@ class HomeHero extends StatelessWidget {
     );
     final label = hasBudget
         ? l.homeHeroSafeToSpend
-        : (paydaySet ? l.homeHeroSpentThisCycle : l.homeHeroSpentThisMonth);
+        : (paydaySet
+              ? l.homeHeroSpentInCycleMonth(
+                  ZDateFormat.cycleMonthName(
+                    model.cycle.start,
+                    format.languageCode,
+                  ),
+                )
+              : l.homeHeroSpentThisMonth);
     final main = safe ?? figures.spend;
     final caption = paydaySet
         ? '${l.homeHeroDaysToPayday(days, format.count(days))} · $rangeText'

@@ -1956,6 +1956,12 @@ abstract class AppLocalizations {
   /// **'صرفت الدورة دي'**
   String get homeHeroSpentThisCycle;
 
+  /// L · payday set, no budget (EC-24, D-82): the cycle named after its month
+  ///
+  /// In ar, this message translates to:
+  /// **'صرفت في {month}'**
+  String homeHeroSpentInCycleMonth(String month);
+
   /// S · replaces safe-to-spend, never shows zeros
   ///
   /// In ar, this message translates to:
@@ -12568,6 +12574,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'خلّيت يوم القبض {day} لأن مرتبك بينزل يوم {day}'**
   String paydayAutoBanner(String day);
+
+  /// Home banner when a salary on day 29-31 set the payday to 28 (T-247, FU-296 m-6)
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّيت يوم القبض {day} لأن مرتبك بينزل يوم {salaryDay}'**
+  String paydayAutoBannerCapped(String day, String salaryDay);
 
   /// Undo button on the payday-auto banner
   ///

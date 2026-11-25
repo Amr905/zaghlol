@@ -3,6 +3,7 @@ library;
 
 export 'budget/cash_pool.dart';
 export 'budget/civil_date.dart';
+export 'budget/cycle_label.dart';
 export 'budget/cycle_totals.dart';
 export 'budget/payday_schedule.dart';
 export 'budget/safe_to_spend.dart';

@@ -27,14 +27,15 @@ void main() {
       r(const AskPeriod(AskPeriodKind.week, offset: -1)),
       '2026-10-31..2026-11-06',
     );
-    expect(r(const AskPeriod(AskPeriodKind.month)), '2026-11-01..2026-11-30');
+    // D-82 (T-247): "month" is the payday cycle that holds today.
+    expect(r(const AskPeriod(AskPeriodKind.month)), '2026-10-25..2026-11-24');
     expect(
       r(const AskPeriod(AskPeriodKind.month, offset: -1)),
-      '2026-10-01..2026-10-31',
+      '2026-09-25..2026-10-24',
     );
     expect(
       r(const AskPeriod(AskPeriodKind.month, offset: -11)),
-      '2025-12-01..2025-12-31',
+      '2025-11-25..2025-12-24',
     );
     expect(
       r(const AskPeriod(AskPeriodKind.year, offset: -1)),
@@ -61,18 +62,19 @@ void main() {
       r(const AskPeriod(AskPeriodKind.lastDays, count: 30)),
       '2026-10-12..2026-11-10',
     );
+    // A named month is the cycle named after it (payday 25: starts 25 Feb).
     expect(
       r(const AskPeriod(AskPeriodKind.monthOfYear, month: 3)),
-      '2026-03-01..2026-03-31',
+      '2026-02-25..2026-03-24',
     );
     // A month still ahead this year means last year's.
     expect(
       r(const AskPeriod(AskPeriodKind.monthOfYear, month: 12)),
-      '2025-12-01..2025-12-31',
+      '2025-11-25..2025-12-24',
     );
     expect(
       r(const AskPeriod(AskPeriodKind.monthOfYear, month: 2, year: 2024)),
-      '2024-02-01..2024-02-29',
+      '2024-01-25..2024-02-24',
     );
     expect(
       r(const AskPeriod(AskPeriodKind.allTime), first: d(2026, 1, 5)),
@@ -106,5 +108,51 @@ void main() {
       schedule,
     );
     expect(bad.from.year, 1);
+  });
+
+  group('cycle naming (D-82)', () {
+    // Payday 24, today 25 Nov: the cycle 24 Nov .. 23 Dec is "December".
+    final p24 = PaydaySchedule.single(24);
+    String at24(AskPeriod p, CivilDate today) {
+      final c = resolveAskPeriod(p, today, p24);
+      return '${c.from.toIso()}..${c.to.toIso()}';
+    }
+
+    test('"this month" after payday 24 is the cycle named December', () {
+      expect(
+        at24(const AskPeriod(AskPeriodKind.month), d(2026, 11, 25)),
+        '2026-11-24..2026-12-23',
+      );
+      expect(
+        at24(const AskPeriod(AskPeriodKind.month, offset: -1), d(2026, 11, 25)),
+        '2026-10-24..2026-11-23',
+      );
+    });
+
+    test('before payday 24 "this month" is still the cycle named November', () {
+      expect(
+        at24(const AskPeriod(AskPeriodKind.month), d(2026, 11, 10)),
+        '2026-10-24..2026-11-23',
+      );
+    });
+
+    test('a named month is the cycle named after it, across the new year', () {
+      expect(
+        at24(
+          const AskPeriod(AskPeriodKind.monthOfYear, month: 1, year: 2027),
+          d(2027, 2, 1),
+        ),
+        '2026-12-24..2027-01-23',
+      );
+    });
+
+    test('payday 1: a month is the calendar month, as before', () {
+      final c = resolveAskPeriod(
+        const AskPeriod(AskPeriodKind.month),
+        d(2026, 11, 25),
+        PaydaySchedule.single(1),
+      );
+      expect(c.key, '2026-11-01..2026-11-30');
+    });
   });
 }

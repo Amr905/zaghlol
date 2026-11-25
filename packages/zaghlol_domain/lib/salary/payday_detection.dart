@@ -26,7 +26,7 @@ final class PaydayCredit {
 
 /// What [detectPayday] found.
 final class PaydayDetection {
-  const PaydayDetection({this.day, this.apply = false});
+  const PaydayDetection({this.day, this.apply = false, this.salaryDay});
 
   /// The detected payday (1..28), or null when there is no clear pattern.
   final int? day;
@@ -34,12 +34,19 @@ final class PaydayDetection {
   /// The setting should change to [day].
   final bool apply;
 
-  @override
-  bool operator ==(Object other) =>
-      other is PaydayDetection && other.day == day && other.apply == apply;
+  /// The real day of the month the salary lands (1..31): differs from [day]
+  /// when a salary on 29..31 was capped to 28.
+  final int? salaryDay;
 
   @override
-  int get hashCode => Object.hash(day, apply);
+  bool operator ==(Object other) =>
+      other is PaydayDetection &&
+      other.day == day &&
+      other.apply == apply &&
+      other.salaryDay == salaryDay;
+
+  @override
+  int get hashCode => Object.hash(day, apply, salaryDay);
 
   @override
   String toString() => 'PaydayDetection($day, apply: $apply)';
@@ -48,9 +55,14 @@ final class PaydayDetection {
 /// A credit on this day or later belongs to the next month (A4, plan 6).
 const int paydayNextMonthFromDay = 21;
 
-/// The first salary day (capped at 28, A8) of each month, newest month first,
-/// at most [paydayPatternMonths] months. A credit from day 21 on counts to
-/// the next month, so 25 Oct and 5 Nov are the same month and the 25th wins.
+/// Days of the ring the month end and month start sit on (capped days 1..28):
+/// 28 and 1 are neighbours so a weekend shift over the month end still
+/// agrees (FU-296 m-3).
+const int _ring = paydayMaxDay;
+
+/// The first salary date of each month, newest month first, at most
+/// [paydayPatternMonths] months. A credit from day 21 on counts to the next
+/// month, so 25 Oct and 5 Nov are the same month and the 25th wins.
 List<int> _latestFirstDays(Iterable<PaydayCredit> credits, String currency) {
   final first = <int, CivilDate>{}; // year * 12 + month - 1 -> earliest date
   for (final c in credits) {
@@ -64,16 +76,32 @@ List<int> _latestFirstDays(Iterable<PaydayCredit> credits, String currency) {
     if (cur == null || c.date.epochDay < cur.epochDay) first[key] = c.date;
   }
   final keys = first.keys.toList()..sort((a, b) => b.compareTo(a));
-  return [
-    for (final k in keys.take(paydayPatternMonths))
-      first[k]!.day > paydayMaxDay ? paydayMaxDay : first[k]!.day,
-  ];
+  return [for (final k in keys.take(paydayPatternMonths)) first[k]!.day];
 }
 
-bool _agree(List<int> days) {
-  final lo = days.reduce((a, b) => a < b ? a : b);
-  final hi = days.reduce((a, b) => a > b ? a : b);
-  return hi - lo <= paydaySameDayTolerance;
+int _cap(int day) => day > paydayMaxDay ? paydayMaxDay : day;
+
+/// Steps forward from [from] to [to] around the ring (0..27).
+int _forward(int from, int to) => (to - from) % _ring;
+
+/// The shortest arc of the ring holding every day: where it starts and how
+/// many days it spans.
+({int start, int span}) _arc(List<int> days) {
+  var best = (start: days.first, span: _ring);
+  for (final s in days) {
+    final span = days
+        .map((d) => _forward(s, d))
+        .reduce((a, b) => a > b ? a : b);
+    if (span < best.span || (span == best.span && s < best.start)) {
+      best = (start: s, span: span);
+    }
+  }
+  return best;
+}
+
+int _ringDistance(int a, int b) {
+  final d = _forward(a, b);
+  return d < _ring - d ? d : _ring - d;
 }
 
 /// Detects the payday from [credits] (the caller passes the last 12 months).
@@ -86,23 +114,40 @@ PaydayDetection detectPayday({
   required int? currentPayday,
   required bool typedByUser,
 }) {
-  final days = _latestFirstDays(credits, currency);
-  if (days.isEmpty) return const PaydayDetection();
-  if (!_agree(days)) return const PaydayDetection();
-  final detected = days.reduce((a, b) => a < b ? a : b); // earliest wins
+  final raw = _latestFirstDays(credits, currency);
+  if (raw.isEmpty) return const PaydayDetection();
+  final days = [for (final d in raw) _cap(d)]; // A8
+  final arc = _arc(days);
+  if (arc.span > paydaySameDayTolerance) return const PaydayDetection();
+  // The earliest day of the pattern wins; the real salary day behind it is
+  // the smallest actual day (29..31 are capped to 28 for the payday).
+  final detected = arc.start;
+  final salaryDay = [
+    for (var i = 0; i < raw.length; i++)
+      if (days[i] == detected) raw[i],
+  ].reduce((a, b) => a < b ? a : b);
   if (currentPayday == null) {
     // Never set: one salary (or two or three that agree) is enough (A7).
-    return PaydayDetection(day: detected, apply: true);
+    return PaydayDetection(day: detected, apply: true, salaryDay: salaryDay);
   }
   if (days.length < paydayPatternMonths) {
-    return PaydayDetection(day: detected);
+    return PaydayDetection(day: detected, salaryDay: salaryDay);
   }
-  bool differs(int d) => (d - currentPayday).abs() > paydaySameDayTolerance;
+  bool differs(int d) =>
+      _ringDistance(d, currentPayday) > paydaySameDayTolerance;
   if (typedByUser) {
     // Only when every one of the 3 months disagrees (A6).
-    return PaydayDetection(day: detected, apply: days.every(differs));
+    return PaydayDetection(
+      day: detected,
+      apply: days.every(differs),
+      salaryDay: salaryDay,
+    );
   }
-  return PaydayDetection(day: detected, apply: differs(detected));
+  return PaydayDetection(
+    day: detected,
+    apply: differs(detected),
+    salaryDay: salaryDay,
+  );
 }
 
 /// The memory of automatic payday changes (setting `payday_auto`).
@@ -111,6 +156,7 @@ final class PaydayAutoState {
     this.autoDay,
     this.previous,
     this.previousEras,
+    this.salaryDay,
     this.bannerPending = false,
     this.suppressed = const [],
   });
@@ -125,6 +171,10 @@ final class PaydayAutoState {
 
   /// The `payday_eras` text from before that change; null when none was set.
   final String? previousEras;
+
+  /// The real day the salary lands (1..31) behind [autoDay]; null for state
+  /// saved before this was kept (the banner then names [autoDay]).
+  final int? salaryDay;
 
   /// The "I changed it" banner has not been closed yet.
   final bool bannerPending;
@@ -142,12 +192,14 @@ final class PaydayAutoState {
     int? previous,
     bool clearPrevious = false,
     String? previousEras,
+    int? salaryDay,
     bool? bannerPending,
     List<int>? suppressed,
   }) => PaydayAutoState(
     autoDay: clearAutoDay ? null : (autoDay ?? this.autoDay),
     previous: clearPrevious ? null : (previous ?? this.previous),
     previousEras: clearPrevious ? null : (previousEras ?? this.previousEras),
+    salaryDay: clearAutoDay ? null : (salaryDay ?? this.salaryDay),
     bannerPending: bannerPending ?? this.bannerPending,
     suppressed: suppressed ?? this.suppressed,
   );
@@ -167,6 +219,7 @@ final class PaydayAutoState {
       other.autoDay == autoDay &&
       other.previous == previous &&
       other.previousEras == previousEras &&
+      other.salaryDay == salaryDay &&
       other.bannerPending == bannerPending &&
       other.suppressed.join(',') == suppressed.join(',');
 
@@ -175,6 +228,7 @@ final class PaydayAutoState {
     autoDay,
     previous,
     previousEras,
+    salaryDay,
     bannerPending,
     suppressed.join(','),
   );
@@ -184,6 +238,7 @@ final class PaydayAutoState {
     if (autoDay != null) 'a': autoDay,
     if (previous != null) 'p': previous,
     if (previousEras != null) 'e': previousEras,
+    if (salaryDay != null) 'd': salaryDay,
     'b': bannerPending,
     's': suppressed,
   });
@@ -200,12 +255,14 @@ final class PaydayAutoState {
     final a = j['a'];
     final p = j['p'];
     final e = j['e'];
+    final d = j['d'];
     final b = j['b'];
     final s = j['s'];
     bool day(Object? v) => v is int && v >= 1 && v <= paydayMaxDay;
     if (a != null && !day(a)) return null;
     if (p != null && !day(p)) return null;
     if (e != null && (e is! String || e.length > 16384)) return null;
+    if (d != null && (d is! int || d < 1 || d > 31)) return null;
     if (b is! bool) return null;
     if (s is! List || s.length > paydayMaxSuppressed || !s.every(day)) {
       return null;
@@ -214,6 +271,7 @@ final class PaydayAutoState {
       autoDay: a as int?,
       previous: p as int?,
       previousEras: e as String?,
+      salaryDay: d as int?,
       bannerPending: b,
       suppressed: List<int>.unmodifiable(s.cast<int>()),
     );

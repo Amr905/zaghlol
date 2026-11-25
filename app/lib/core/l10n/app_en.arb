@@ -337,6 +337,7 @@
   "homeHeroCalendarMonth": "until you tell me your payday",
   "homeHeroSpentThisMonth": "Spent this month",
   "homeHeroSpentThisCycle": "Spent this cycle",
+  "homeHeroSpentInCycleMonth": "Spent in {month}",
   "homeHeroSetBudgetHint": "Set a budget to see what's safe to spend each day",
   "homeHeroSetBudget": "Set a budget",
   "homeHeroBudgetUsedUp": "This cycle's budget is used up — go easy on the rest",
@@ -8949,6 +8950,7 @@
       "day": {"type": "String", "description": "Day of month, digits per locale"}
     }
   },
+  "paydayAutoBannerCapped": "I set your payday to day {day} because your salary lands on day {salaryDay}",
   "paydayAutoUndo": "Undo",
   "@paydayAutoUndo": {
     "description": "Undo button on the payday-auto banner"
