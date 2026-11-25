@@ -7688,6 +7688,191 @@ class AppLocalizationsAr extends AppLocalizations {
   String get importFlowUnavailable => 'المصدر ده لسه مش جاهز';
 
   @override
+  String stmtImportTitle(String bank) {
+    return 'كشف $bank';
+  }
+
+  @override
+  String get stmtImportSub =>
+      'اختار الكشف PDF أو صور صفحاته. بيتقرا على موبايلك بس، ومفيش حاجة بتتحفظ غير لما تأكّد.';
+
+  @override
+  String get stmtImportPickPdf => 'اختار ملف PDF';
+
+  @override
+  String get stmtImportPickImages => 'اختار صور الصفحات';
+
+  @override
+  String get stmtImportErrNoRows =>
+      'ملقيتش جدول حركات في الملف ده. جرّب PDF من تطبيق البنك، أو صور أوضح.';
+
+  @override
+  String get stmtImportErrNoText =>
+      'مفيش كلام أقدر أقراه في الملف ده. لو ده سكان، جرّب صور أوضح.';
+
+  @override
+  String get stmtImportErrNoOcr =>
+      'الموبايل ده مش بيقرا الكلام من الصور، فالكشوف المصوّرة مش هتشتغل هنا. جرّب PDF نازل من تطبيق البنك.';
+
+  @override
+  String get stmtImportErrPassword =>
+      'الـ PDF ده عليه كلمة سر ومعرفتش أفتحه. اختار الملف تاني واكتب كلمة السر.';
+
+  @override
+  String get stmtImportErrSave => 'معرفتش أحفظ، فمفيش حاجة اتضافت. جرّب تاني.';
+
+  @override
+  String get stmtImportErrYear => 'اختار السنة الأول.';
+
+  @override
+  String get stmtMapTitle => 'أنهي عمود إيه؟';
+
+  @override
+  String get stmtMapHint =>
+      'معرفتش أميّز الأعمدة من عناوينها. قولّي مرة واحدة وهفتكرها للبنك ده.';
+
+  @override
+  String stmtMapColumn(String n) {
+    return 'عمود $n';
+  }
+
+  @override
+  String get stmtMapRoleDate => 'التاريخ';
+
+  @override
+  String get stmtMapRoleDescription => 'الوصف';
+
+  @override
+  String get stmtMapRoleDebit => 'فلوس خارجة';
+
+  @override
+  String get stmtMapRoleCredit => 'فلوس داخلة';
+
+  @override
+  String get stmtMapRoleAmount => 'المبلغ (بعلامته)';
+
+  @override
+  String get stmtMapRoleBalance => 'الرصيد';
+
+  @override
+  String get stmtMapRoleIgnore => 'تجاهل';
+
+  @override
+  String get stmtMapDayFirst => 'اليوم قبل الشهر';
+
+  @override
+  String get stmtMapCurrency => 'العملة';
+
+  @override
+  String get stmtMapInvalid => 'اختار عمود تاريخ، وعمود وصف، وأعمدة الفلوس.';
+
+  @override
+  String get stmtImportReviewTitle => 'راجع الصفوف';
+
+  @override
+  String get stmtImportNothingSaved =>
+      'مفيش حاجة بتتحفظ غير لما تدوس الزرار اللي تحت.';
+
+  @override
+  String get stmtImportAccountTitle => 'الكشف ده لأنهي حساب؟';
+
+  @override
+  String get stmtImportCurrencyLabel => 'عملة الكشف';
+
+  @override
+  String get stmtImportAccountNew => 'حساب جديد';
+
+  @override
+  String get stmtImportAccountName => 'اسم الحساب';
+
+  @override
+  String get stmtImportAccountLast4 => 'آخر ٤ أرقام (اختياري)';
+
+  @override
+  String stmtImportAccountNoneYet(String currency) {
+    return 'معندكش حساب بـ$currency لسه. اعمل واحد للكشف ده.';
+  }
+
+  @override
+  String get stmtImportYearTitle => 'الكشف ده من سنة كام؟';
+
+  @override
+  String get stmtImportYearBody =>
+      'التواريخ اللي فيه من غير سنة. اختار سنة آخر تاريخ.';
+
+  @override
+  String stmtImportSectionAnswer(String n) {
+    return 'محتاجين رأيك ($n)';
+  }
+
+  @override
+  String stmtImportSectionRows(String n) {
+    return 'صفوف هتتضاف ($n)';
+  }
+
+  @override
+  String stmtImportSectionDup(String n) {
+    return 'موجودة عندك أصلًا ($n)';
+  }
+
+  @override
+  String get stmtImportReasonDirection => 'مش عارف دي فلوس داخلة ولا خارجة.';
+
+  @override
+  String get stmtImportReasonBalance =>
+      'الرصيد المكتوب بعد الصف ده مش مظبوط مع اللي قبله.';
+
+  @override
+  String get stmtImportChoiceKeep => 'سيبه زي ما اتقرأ';
+
+  @override
+  String get stmtImportChoiceOut => 'فلوس خارجة';
+
+  @override
+  String get stmtImportChoiceIn => 'فلوس داخلة';
+
+  @override
+  String get stmtImportChoiceSkip => 'تخطّى';
+
+  @override
+  String get stmtImportRowSkipped => 'اتخطّى';
+
+  @override
+  String get stmtImportRowUndo => 'رجّعه';
+
+  @override
+  String get stmtImportRowEdit => 'غيّر الصف ده';
+
+  @override
+  String get stmtImportDupNote => 'شبه حركة عندك فعلًا، فهيتخطّى.';
+
+  @override
+  String get stmtImportDupAddAnyway => 'ضيفه برضو';
+
+  @override
+  String get stmtImportBlockedAnswers => 'جاوب على الصفوف اللي فوق الأول.';
+
+  @override
+  String get stmtImportBlockedYear => 'اختار السنة الأول.';
+
+  @override
+  String get stmtImportBlockedAccount =>
+      'اختار الحساب أو اعمل واحد جديد الأول.';
+
+  @override
+  String get stmtImportNothingToAdd => 'مفيش حاجة تتضاف.';
+
+  @override
+  String stmtImportRowSemantics(
+    String date,
+    String description,
+    String amount,
+    String direction,
+  ) {
+    return '$date، $description، $amount، $direction';
+  }
+
+  @override
   String get commonAmountsHide => 'إخفاء المبالغ';
 
   @override

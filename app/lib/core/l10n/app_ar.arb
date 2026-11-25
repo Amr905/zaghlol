@@ -10399,6 +10399,258 @@
   "@importFlowUnavailable": {
     "description": "S-67 hint for a coming-soon source"
   },
+  "stmtImportTitle": "كشف {bank}",
+  "@stmtImportTitle": {
+    "description": "T-269 screen title",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportSub": "اختار الكشف PDF أو صور صفحاته. بيتقرا على موبايلك بس، ومفيش حاجة بتتحفظ غير لما تأكّد.",
+  "@stmtImportSub": {
+    "description": "T-269 intro"
+  },
+  "stmtImportPickPdf": "اختار ملف PDF",
+  "@stmtImportPickPdf": {
+    "description": "T-269 button"
+  },
+  "stmtImportPickImages": "اختار صور الصفحات",
+  "@stmtImportPickImages": {
+    "description": "T-269 button"
+  },
+  "stmtImportErrNoRows": "ملقيتش جدول حركات في الملف ده. جرّب PDF من تطبيق البنك، أو صور أوضح.",
+  "@stmtImportErrNoRows": {
+    "description": "T-269 failure: no table"
+  },
+  "stmtImportErrNoText": "مفيش كلام أقدر أقراه في الملف ده. لو ده سكان، جرّب صور أوضح.",
+  "@stmtImportErrNoText": {
+    "description": "T-269 failure: no text"
+  },
+  "stmtImportErrNoOcr": "الموبايل ده مش بيقرا الكلام من الصور، فالكشوف المصوّرة مش هتشتغل هنا. جرّب PDF نازل من تطبيق البنك.",
+  "@stmtImportErrNoOcr": {
+    "description": "T-269 failure: OCR not available on this phone"
+  },
+  "stmtImportErrPassword": "الـ PDF ده عليه كلمة سر ومعرفتش أفتحه. اختار الملف تاني واكتب كلمة السر.",
+  "@stmtImportErrPassword": {
+    "description": "T-269 failure: password not given"
+  },
+  "stmtImportErrSave": "معرفتش أحفظ، فمفيش حاجة اتضافت. جرّب تاني.",
+  "@stmtImportErrSave": {
+    "description": "T-269 failure: save failed"
+  },
+  "stmtImportErrYear": "اختار السنة الأول.",
+  "@stmtImportErrYear": {
+    "description": "T-269 failure: year missing"
+  },
+  "stmtMapTitle": "أنهي عمود إيه؟",
+  "@stmtMapTitle": {
+    "description": "T-269 mapping step title"
+  },
+  "stmtMapHint": "معرفتش أميّز الأعمدة من عناوينها. قولّي مرة واحدة وهفتكرها للبنك ده.",
+  "@stmtMapHint": {
+    "description": "T-269 mapping step hint"
+  },
+  "stmtMapColumn": "عمود {n}",
+  "@stmtMapColumn": {
+    "description": "T-269 mapping column fallback title",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtMapRoleDate": "التاريخ",
+  "@stmtMapRoleDate": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleDescription": "الوصف",
+  "@stmtMapRoleDescription": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleDebit": "فلوس خارجة",
+  "@stmtMapRoleDebit": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleCredit": "فلوس داخلة",
+  "@stmtMapRoleCredit": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleAmount": "المبلغ (بعلامته)",
+  "@stmtMapRoleAmount": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleBalance": "الرصيد",
+  "@stmtMapRoleBalance": {
+    "description": "T-269 column role"
+  },
+  "stmtMapRoleIgnore": "تجاهل",
+  "@stmtMapRoleIgnore": {
+    "description": "T-269 column role"
+  },
+  "stmtMapDayFirst": "اليوم قبل الشهر",
+  "@stmtMapDayFirst": {
+    "description": "T-269 date order switch"
+  },
+  "stmtMapCurrency": "العملة",
+  "@stmtMapCurrency": {
+    "description": "T-269 currency picker label"
+  },
+  "stmtMapInvalid": "اختار عمود تاريخ، وعمود وصف، وأعمدة الفلوس.",
+  "@stmtMapInvalid": {
+    "description": "T-269 mapping invalid hint"
+  },
+  "stmtImportReviewTitle": "راجع الصفوف",
+  "@stmtImportReviewTitle": {
+    "description": "T-269 review title"
+  },
+  "stmtImportNothingSaved": "مفيش حاجة بتتحفظ غير لما تدوس الزرار اللي تحت.",
+  "@stmtImportNothingSaved": {
+    "description": "T-269 review reassurance"
+  },
+  "stmtImportAccountTitle": "الكشف ده لأنهي حساب؟",
+  "@stmtImportAccountTitle": {
+    "description": "T-269 account section"
+  },
+  "stmtImportCurrencyLabel": "عملة الكشف",
+  "@stmtImportCurrencyLabel": {
+    "description": "T-269 currency label"
+  },
+  "stmtImportAccountNew": "حساب جديد",
+  "@stmtImportAccountNew": {
+    "description": "T-269 account choice"
+  },
+  "stmtImportAccountName": "اسم الحساب",
+  "@stmtImportAccountName": {
+    "description": "T-269 new account field"
+  },
+  "stmtImportAccountLast4": "آخر ٤ أرقام (اختياري)",
+  "@stmtImportAccountLast4": {
+    "description": "T-269 new account field"
+  },
+  "stmtImportAccountNoneYet": "معندكش حساب بـ{currency} لسه. اعمل واحد للكشف ده.",
+  "@stmtImportAccountNoneYet": {
+    "description": "T-269 no matching account",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportYearTitle": "الكشف ده من سنة كام؟",
+  "@stmtImportYearTitle": {
+    "description": "T-269 year prompt"
+  },
+  "stmtImportYearBody": "التواريخ اللي فيه من غير سنة. اختار سنة آخر تاريخ.",
+  "@stmtImportYearBody": {
+    "description": "T-269 year prompt body"
+  },
+  "stmtImportSectionAnswer": "محتاجين رأيك ({n})",
+  "@stmtImportSectionAnswer": {
+    "description": "T-269 review section",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportSectionRows": "صفوف هتتضاف ({n})",
+  "@stmtImportSectionRows": {
+    "description": "T-269 review section",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportSectionDup": "موجودة عندك أصلًا ({n})",
+  "@stmtImportSectionDup": {
+    "description": "T-269 review section",
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "stmtImportReasonDirection": "مش عارف دي فلوس داخلة ولا خارجة.",
+  "@stmtImportReasonDirection": {
+    "description": "T-269 flagged row reason"
+  },
+  "stmtImportReasonBalance": "الرصيد المكتوب بعد الصف ده مش مظبوط مع اللي قبله.",
+  "@stmtImportReasonBalance": {
+    "description": "T-269 flagged row reason"
+  },
+  "stmtImportChoiceKeep": "سيبه زي ما اتقرأ",
+  "@stmtImportChoiceKeep": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportChoiceOut": "فلوس خارجة",
+  "@stmtImportChoiceOut": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportChoiceIn": "فلوس داخلة",
+  "@stmtImportChoiceIn": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportChoiceSkip": "تخطّى",
+  "@stmtImportChoiceSkip": {
+    "description": "T-269 row choice"
+  },
+  "stmtImportRowSkipped": "اتخطّى",
+  "@stmtImportRowSkipped": {
+    "description": "T-269 row state"
+  },
+  "stmtImportRowUndo": "رجّعه",
+  "@stmtImportRowUndo": {
+    "description": "T-269 row action"
+  },
+  "stmtImportRowEdit": "غيّر الصف ده",
+  "@stmtImportRowEdit": {
+    "description": "T-269 row menu a11y label"
+  },
+  "stmtImportDupNote": "شبه حركة عندك فعلًا، فهيتخطّى.",
+  "@stmtImportDupNote": {
+    "description": "T-269 duplicate row note"
+  },
+  "stmtImportDupAddAnyway": "ضيفه برضو",
+  "@stmtImportDupAddAnyway": {
+    "description": "T-269 duplicate row action"
+  },
+  "stmtImportBlockedAnswers": "جاوب على الصفوف اللي فوق الأول.",
+  "@stmtImportBlockedAnswers": {
+    "description": "T-269 confirm hint"
+  },
+  "stmtImportBlockedYear": "اختار السنة الأول.",
+  "@stmtImportBlockedYear": {
+    "description": "T-269 confirm hint"
+  },
+  "stmtImportBlockedAccount": "اختار الحساب أو اعمل واحد جديد الأول.",
+  "@stmtImportBlockedAccount": {
+    "description": "T-269 confirm hint"
+  },
+  "stmtImportNothingToAdd": "مفيش حاجة تتضاف.",
+  "@stmtImportNothingToAdd": {
+    "description": "T-269 confirm hint when every row is skipped or a duplicate"
+  },
+  "stmtImportRowSemantics": "{date}، {description}، {amount}، {direction}",
+  "@stmtImportRowSemantics": {
+    "description": "T-269 row a11y label",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "description": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
   "commonAmountsHide": "إخفاء المبالغ",
   "@commonAmountsHide": {
     "description": "D-67 eye button label and tooltip: hide every amount in the app"
