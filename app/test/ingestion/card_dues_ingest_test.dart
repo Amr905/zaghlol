@@ -272,6 +272,8 @@ void main() {
       expect(t.single['direction'], 'transfer_in');
       expect(t.single['account_id'], 'acc_2859');
       expect(t.single['amount_minor'], 4782);
+      // T-248 (FU-298): the masked source account is not a person.
+      expect(t.single['counterparty_kind'], 'own_account');
       expect(t.single['balance_after_minor'], isNull);
       expect(await w.count('account_balances'), 0);
       expect((await stored('hsbc', '2859'))!.isPaid, isTrue);

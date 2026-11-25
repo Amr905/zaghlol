@@ -174,10 +174,15 @@ final class Template {
     required this.locale,
     required this.isAvailableLimit,
     required this.groupNames,
+    this.strongSenderOnly = false,
   });
 
   final String id;
   final int version;
+
+  /// T-248: skipped when the sender only matched a `templateOnly` rule (a
+  /// generic id such as `EG`); for broad shapes with no bank-specific marker.
+  final bool strongSenderOnly;
 
   /// `ar` or `en`.
   final String lang;

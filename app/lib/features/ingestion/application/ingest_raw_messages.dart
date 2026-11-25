@@ -1755,10 +1755,20 @@ final class IngestRawMessages {
         'phone',
         c.phone!.trim(),
       ),
-      _ when _nonEmpty(c.name) != null => ('person', c.name!.trim()),
+      _ when _nonEmpty(c.name) != null => (
+        _isMaskedAccount(c.name!) ? 'own_account' : 'person',
+        c.name!.trim(),
+      ),
       _ => null,
     };
   }
+
+  /// T-248 (FU-298): `002-411***-001`, `xxx1888`, `419*5015` are accounts,
+  /// not people. A name never holds a digit or a mask run.
+  static bool _isMaskedAccount(String name) =>
+      RegExp(r'[0-9]').hasMatch(name) &&
+      RegExp(r'[*xX\u00d7\u2022]{2,}|[0-9][*\u2022]|[*\u2022][0-9]')
+          .hasMatch(name);
 
   static String? _nonEmpty(String? s) {
     if (s == null) return null;

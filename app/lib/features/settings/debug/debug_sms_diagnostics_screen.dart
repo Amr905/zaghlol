@@ -15,7 +15,7 @@ const String kDiagReset = 'Reset counts';
 const String kDiagEmpty = 'Nothing counted yet';
 const String kDiagNote =
     'received -> Guard kept / dropped (reason) -> spooled -> stored -> saved / '
-    'review. inbox_* is the historical scan. Counts only, never message text.';
+    'review. inbox_* is the historical scan. Counts only, never message text. Unread shapes cover the newest 500.';
 
 /// The status line (a plain function: not UI scope for the string lint).
 /// One unread-reason row (T-244): reason code and count, no message text.
