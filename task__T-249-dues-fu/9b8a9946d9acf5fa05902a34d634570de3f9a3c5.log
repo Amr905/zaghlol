@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=9b8a9946d9acf5fa05902a34d634570de3f9a3c5
+SKIP sha=9b8a9946d9acf5fa05902a34d634570de3f9a3c5 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-249-dues-fu 9b8a9946d9acf5fa05902a34d634570de3f9a3c5 2026-11-25T18:28:58.1141375+02:00
+
+
+
