@@ -37,6 +37,15 @@ final RegExp _token = RegExp(r'[\p{L}\p{N}]+', unicode: true);
 final RegExp _arabic = RegExp(r'[؀-ۿ]');
 final RegExp _hasDigit = RegExp(r'\p{N}', unicode: true);
 
+/// T-248 (FU-305): a Latin token in Title Case or ALL CAPS may be a name or
+/// merchant that equals a cue word, so it is not kept as a cue. Cue words in
+/// lower case and Arabic words are kept.
+bool _looksLikeName(String token) {
+  if (_arabic.hasMatch(token)) return false;
+  final c = token[0];
+  return c != c.toLowerCase();
+}
+
 /// A text-free shape of [body] for diagnostics: digit-bearing tokens become
 /// `9`, Latin words `A`, Arabic words `ع`; only dictionary cue words survive.
 /// Pure and deterministic; no digit or letter of the message other than a
@@ -44,12 +53,13 @@ final RegExp _hasDigit = RegExp(r'\p{N}', unicode: true);
 String shapeSignature(String body) {
   final cues = _cueWords();
   final parts = <String>[];
-  for (final m in _token.allMatches(foldKey(body))) {
-    final t = m.group(0)!;
+  for (final m in _token.allMatches(body)) {
+    final orig = m.group(0)!;
+    final t = foldKey(orig);
     final String piece;
     if (_hasDigit.hasMatch(t)) {
       piece = '9';
-    } else if (cues.contains(t)) {
+    } else if (cues.contains(t) && !_looksLikeName(orig)) {
       piece = t;
     } else {
       piece = _arabic.hasMatch(t) ? 'ع' : 'A';

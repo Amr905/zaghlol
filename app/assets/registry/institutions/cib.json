@@ -419,7 +419,7 @@
     },
     {
       "id": "cib.cc_due.ar",
-      "version": 7,
+      "version": 10,
       "lang": "ar",
       "channel": [
         "sms"
@@ -441,7 +441,7 @@
     },
     {
       "id": "cib.cc_statement.ar",
-      "version": 7,
+      "version": 10,
       "lang": "ar",
       "channel": [
         "sms"

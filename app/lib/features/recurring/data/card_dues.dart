@@ -120,7 +120,9 @@ class CardDues {
     CardDue due,
   ) async {
     final date = due.dueDate;
-    if (date != null && !due.isPaid) {
+    if (date != null && due.nothingDue) {
+      await _closeNothingDue(card, date);
+    } else if (date != null && !due.isPaid) {
       // A settled due leaves the reminder alone (it already moved on).
       // The typed due day changes only when empty or when the notice is
       // newer than the account's last edit.
@@ -166,6 +168,9 @@ class CardDues {
         await _recurring.updateItem(
           item.id,
           RecurringItemsCompanion(
+            // T-249: keep the reminder's day in step with the card, so the
+            // next syncCardDues sees no change and does not move the date.
+            dueDay: Value(day),
             nextDueDate: Value(date.toIso()),
             amountMinor: Value(amount),
           ),
@@ -175,10 +180,38 @@ class CardDues {
     await _write(inst, last4, due.copyWith(applied: true));
   }
 
+  /// T-249 (FU-304): a statement with nothing due leaves no reminder for that
+  /// date: an existing item on exactly that date moves to the next cycle
+  /// with amount 0, without counting a payment. No item is created.
+  Future<void> _closeNothingDue(AccountRow card, CivilDate date) async {
+    final item = await _item(card.id);
+    final next = item?.nextDueDate;
+    final day = item?.dueDay;
+    if (item == null || next == null || day == null) return;
+    // Only the reminder that points at this very date: an earlier one is an
+    // older, possibly unpaid due and stays (never closed on doubt).
+    if (next != date.toIso()) return;
+    await _recurring.updateItem(
+      item.id,
+      RecurringItemsCompanion(
+        nextDueDate: Value(nextDueOnOrAfter(date.plusDays(1), day).toIso()),
+        amountMinor: const Value(0),
+      ),
+    );
+  }
+
   // ---- payments ----
 
   /// Counts a stored inbound transfer on a credit card against its due.
-  Future<void> onPayment(PersistedTxn txn) async {
+  ///
+  /// T-249 (FU-302): the counted marker (settings) and the reminder update
+  /// are one savepoint; a failure after the first write rolls both back and
+  /// rethrows (the hook swallows it), so "counted" never outlives a reminder
+  /// that did not move.
+  Future<void> onPayment(PersistedTxn txn) =>
+      _db.transaction(() => _onPayment(txn));
+
+  Future<void> _onPayment(PersistedTxn txn) async {
     if (!txn.inserted) return;
     final t = await (_db.select(
       _db.transactions,

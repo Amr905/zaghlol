@@ -165,7 +165,14 @@ final class ParsingPipeline {
     // Stage 3: first matching template, message language first.
     final language = detectLanguage(folded.text);
     ParseUnrecognized? firstFatal;
+    final weakSender = registry.isTemplateOnlySource(
+      institution,
+      request.source,
+    );
     for (final template in _candidates(institution, request, language)) {
+      if (weakSender && template.strongSenderOnly) {
+        continue;
+      }
       final groups = matchTemplateOriginal(template, folded, body);
       if (groups == null) {
         continue;
@@ -345,7 +352,10 @@ final class ParsingPipeline {
     }
     final (occurredAt, source) = resolveOccurredAt(date, time, receivedAt);
 
-    final counterparty = _counterparty(extracted);
+    final counterparty = _counterparty(
+      extracted,
+      ownAccount: template.counterpartyOwnAccount,
+    );
     if (template.event != TemplateEvent.balanceOnly &&
         extracted.last4 == null &&
         extracted.merchant == null &&
@@ -394,7 +404,7 @@ final class ParsingPipeline {
     );
   }
 
-  Counterparty? _counterparty(ExtractedFields f) {
+  Counterparty? _counterparty(ExtractedFields f, {bool ownAccount = false}) {
     if (f.ipa == null && f.phone == null && f.counterparty == null) {
       return null;
     }
@@ -407,6 +417,7 @@ final class ParsingPipeline {
       name: f.counterparty,
       ipa: f.ipa,
       phone: f.phone,
+      ownAccount: ownAccount && f.counterparty != null,
     );
   }
 }

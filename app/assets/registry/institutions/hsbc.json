@@ -185,7 +185,8 @@
     },
     {
       "id": "hsbc.cc_payment_transfer.en",
-      "version": 9,
+      "version": 11,
+      "counterpartyOwnAccount": true,
       "lang": "en",
       "channel": [
         "sms"

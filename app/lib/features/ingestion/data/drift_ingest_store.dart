@@ -412,4 +412,37 @@ final class DriftIngestStore implements IngestStorePort {
       linked: rows.single.read<int>('linked') != 0,
     );
   });
+
+  @override
+  Future<List<String>> oldDueOfferTxns(String rawId) => guardRead(() async {
+    final rows = await _db
+        .customSelect(
+          'SELECT t.id FROM transactions t WHERE t.raw_message_id = ?1 '
+          'AND t.deleted_at IS NULL AND t.is_user_verified = 0 '
+          "AND t.source IN ('sms', 'notification', 'shortcut', 'apple_pay') "
+          "AND t.direction IN ('expense', 'fee') "
+          "AND t.category_source <> 'user' AND t.note IS NULL "
+          'AND t.transfer_pair_id IS NULL AND t.is_internal = 0 '
+          'AND NOT EXISTS (SELECT 1 FROM split_participants s '
+          'WHERE s.expense_txn_id = t.id) '
+          'AND NOT EXISTS (SELECT 1 FROM offset_links o '
+          'WHERE o.expense_txn_id = t.id OR o.source_txn_id = t.id) '
+          'AND NOT EXISTS (SELECT 1 FROM review_items i WHERE i.txn_id = t.id '
+          "AND json_valid(i.payload) AND json_extract(i.payload, '\$.reason') "
+          '= ?2) '
+          'ORDER BY t.id',
+          variables: [
+            Variable.withString(rawId),
+            Variable.withString(ReviewReason.oldDueNotice),
+          ],
+          readsFrom: {
+            _db.transactions,
+            _db.splitParticipants,
+            _db.offsetLinks,
+            _db.reviewItems,
+          },
+        )
+        .get();
+    return [for (final r in rows) r.read<String>('id')];
+  });
 }

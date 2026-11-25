@@ -389,6 +389,24 @@ void main() {
     test('no unmarked case fails', () => expect(failures, isEmpty));
   });
 
+  group('T-248 strong-sender-only template', () {
+    const body =
+        'EG\nشراء بمبلغ EGP 170.10 من حساب 419*6128 .الرصيد المتوفر 1769.47 .';
+    test(
+      'the generic EG sender never reaches arab_bank.account_purchase.ar',
+      () {
+        final r = parse(body, 'EG');
+        expect(r, isNot(isA<ParseParsed>()));
+        expect(r is ParseUnrecognized, isTrue);
+      },
+    );
+    test('the Arab Bank sender still matches it', () {
+      final r = parse(body, 'ArabBank');
+      expect(r, isA<ParseParsed>());
+      expect((r as ParseParsed).templateId, 'arab_bank.account_purchase.ar');
+    });
+  });
+
   group('negatives never become a transaction', () {
     for (final n in _negatives) {
       test(n.name, () {

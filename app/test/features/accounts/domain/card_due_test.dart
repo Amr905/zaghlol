@@ -38,6 +38,24 @@ CardDue? pay(
 );
 
 void main() {
+  group('nothingDue (T-249)', () {
+    test('zero total and zero minimum is settled; never counts payments', () {
+      final d = due(amt: 0, min: 0);
+      expect(d.nothingDue, isTrue);
+      expect(d.isPaid, isTrue);
+      expect(pay(d, 1000), isNull);
+    });
+
+    test('a lone zero total is nothing due; doubt cases are not', () {
+      expect(due(amt: 0, min: null).nothingDue, isTrue);
+      expect(due(amt: null, min: 0).nothingDue, isTrue);
+      expect(due(amt: 5000, min: 0).nothingDue, isFalse);
+      expect(due(amt: 0, min: 100).nothingDue, isFalse);
+      expect(due(amt: null, min: null).nothingDue, isFalse);
+      expect(due(amt: null, min: null).isPaid, isFalse);
+    });
+  });
+
   group('mergeNotice', () {
     test('first notice is stored', () {
       expect(mergeNotice(null, due())!.noticeAtMs, 1000);

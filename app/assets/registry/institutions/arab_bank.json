@@ -134,7 +134,8 @@
     },
     {
       "id": "arab_bank.account_purchase.ar",
-      "version": 8,
+      "version": 10,
+      "strongSenderOnly": true,
       "lang": "ar",
       "channel": [
         "sms"

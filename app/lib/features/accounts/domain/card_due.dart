@@ -54,7 +54,20 @@ final class CardDue {
   /// the notice carried neither (never paid on doubt).
   int? get threshold => minDueMinor ?? amountDueMinor;
 
+  /// T-249: the statement itself says nothing is due (every amount it
+  /// carries is zero, and it carries at least one). A zero total with a
+  /// non-zero minimum, or a lone zero minimum next to a total, is not this.
+  bool get nothingDue {
+    final a = amountDueMinor;
+    final m = minDueMinor;
+    if (a == null && m == null) return false;
+    return (a ?? 0) == 0 && (m ?? 0) == 0;
+  }
+
+  /// Settled: nothing was due, or payments reached the threshold. Never true
+  /// when the notice carried no amount (doubt never marks paid).
   bool get isPaid {
+    if (nothingDue) return true;
     final t = threshold;
     return t != null && t > 0 && paidMinor >= t;
   }
@@ -137,7 +150,11 @@ CardDue? mergeNotice(CardDue? existing, CardDue incoming) {
     currency: incoming.currency,
     noticeAtMs: incoming.noticeAtMs,
     amountDueMinor: incoming.amountDueMinor ?? existing.amountDueMinor,
-    minDueMinor: incoming.minDueMinor ?? existing.minDueMinor,
+    // A newer explicit total of 0 with no minimum is "nothing due": it must
+    // not inherit the old minimum.
+    minDueMinor:
+        incoming.minDueMinor ??
+        (incoming.amountDueMinor == 0 ? 0 : existing.minDueMinor),
     dueDate: incoming.dueDate,
     statementDate: incoming.statementDate ?? existing.statementDate,
     paidMinor: existing.paidMinor,

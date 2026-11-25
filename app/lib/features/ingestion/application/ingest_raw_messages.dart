@@ -22,7 +22,8 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 // T-075's `CategorySource` is mapped to the stored one by code.
 import 'package:zaghlol_parsing/zaghlol_parsing.dart' hide CategorySource;
 
-import '../../../core/db/daos/review_items_dao.dart' show ReviewKind;
+import '../../../core/db/daos/review_items_dao.dart'
+    show ReviewKind, ReviewReason;
 import '../../../core/db/db_errors.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/domain/accounts_repository.dart';
@@ -310,6 +311,8 @@ final class IngestRawMessages {
   ///   when that transaction is live, not user-verified, not part of a
   ///   transfer pair and consistent with the new parse. Amount, direction,
   ///   status and category are never changed.
+  /// - `parsed` row that now reads as a card due notice (T-250): see
+  ///   [_reparseNotice]; at most a Remove/Keep review item, once.
   /// - A user-verified or deleted transaction is never written.
   /// - Nothing is ever deleted.
   /// A row the user or another engine changed since it was read is skipped
@@ -402,6 +405,9 @@ final class IngestRawMessages {
       return done ? ReparseOutcome.unchanged : ReparseOutcome.skipped;
     }
 
+    if (row.parseStatus == RawStatus.parsed && result is ParseNotice) {
+      return _reparseNotice(row, result, registryVersion);
+    }
     if (row.parseStatus == RawStatus.parsed) {
       if (result is! ParseParsed || create == null) return stamp();
       final changed =
@@ -458,6 +464,65 @@ final class IngestRawMessages {
       IngestBalanceOnly() => ReparseOutcome.converted,
       _ => throw const _RaceLost(),
     };
+  }
+
+  /// T-250 (D-83): a `parsed` row that now reads as a card due notice. Before
+  /// batch 67 such a message could be auto-saved as spending. The row is
+  /// stamped (conditional on its state), the notice goes to the dues layer
+  /// (newer-wins, so an old notice never replaces a newer due) and every
+  /// untouched auto-saved transaction of the row gets ONE Remove/Keep review
+  /// item. Nothing is deleted or changed here: only the user's tap removes.
+  Future<ReparseOutcome> _reparseNotice(
+    StoredRaw row,
+    ParseNotice result,
+    int registryVersion,
+  ) async {
+    final done = await _store.promoteRaw(
+      PromoteRaw(
+        id: row.id,
+        fromStatus: RawStatus.parsed,
+        toStatus: RawStatus.parsed,
+        registryVersion: registryVersion,
+        atMs: _nowMs(),
+        institutionCode: result.institutionCode,
+        templateId: result.templateId,
+        templateVersion: result.templateVersion,
+      ),
+    );
+    if (!done) throw const _RaceLost();
+    // Fix 70 (M-2): a due date already behind us (device local date) is a
+    // statement the user long settled; re-parse never replays its payments,
+    // so applying it would show an unpaid due and move the reminder back.
+    if (!_dueIsPast(result.dueDate)) {
+      await _cardNoticeHook.onCardNotice(
+        CardNoticeEvent(
+          rawId: row.id,
+          notice: result,
+          receivedAtMs: row.receivedAtMs,
+        ),
+      );
+    }
+    final offers = await _store.oldDueOfferTxns(row.id);
+    for (final txnId in offers) {
+      await _review(
+        kind: ReviewKind.lowConfidence,
+        rawId: row.id,
+        txnId: txnId,
+        payload: const {'reason': ReviewReason.oldDueNotice},
+      );
+    }
+    return offers.isEmpty ? ReparseOutcome.unchanged : ReparseOutcome.offered;
+  }
+
+  /// [due] carries y/m/d at UTC midnight; compared with today's local date.
+  bool _dueIsPast(DateTime? due) {
+    if (due == null) return false;
+    final now = DateTime.fromMillisecondsSinceEpoch(_nowMs());
+    return DateTime.utc(
+      due.year,
+      due.month,
+      due.day,
+    ).isBefore(DateTime.utc(now.year, now.month, now.day));
   }
 
   // ---------------------------------------------------------------------
@@ -1755,7 +1820,10 @@ final class IngestRawMessages {
         'phone',
         c.phone!.trim(),
       ),
-      _ when _nonEmpty(c.name) != null => ('person', c.name!.trim()),
+      _ when _nonEmpty(c.name) != null => (
+        c.ownAccount ? 'own_account' : 'person',
+        c.name!.trim(),
+      ),
       _ => null,
     };
   }
