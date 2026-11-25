@@ -253,5 +253,28 @@ void main() {
       expect((await stored('cib', '1234'))!.paidMinor, 0);
       expect((await item('acc_1234'))!['next_due_date'], '2026-11-25');
     });
+
+    // Batch 68 T-242 M-1: the HSBC transfer SMS (PO case 10) pays the card:
+    // a transfer into it, no balance from the source account, due paid.
+    test('an HSBC transfer to the card is a transfer_in that pays the due '
+        'and writes no card balance', () async {
+      await card('hsbc', '2859');
+      await ingest('HSBC', _case12, _rx);
+      await ingest(
+        'HSBC',
+        'From HSBC: 28OCT26 Transfer from 002-388***-001 EGP 47.82- to your '
+            'Credit Card ending with 2859 as per your instruction. '
+            'Your available balance is EGP 0.00',
+        _rx + 1000,
+      );
+      final t = await w.txns();
+      expect(t, hasLength(1));
+      expect(t.single['direction'], 'transfer_in');
+      expect(t.single['account_id'], 'acc_2859');
+      expect(t.single['amount_minor'], 4782);
+      expect(t.single['balance_after_minor'], isNull);
+      expect(await w.count('account_balances'), 0);
+      expect((await stored('hsbc', '2859'))!.isPaid, isTrue);
+    });
   });
 }

@@ -184,5 +184,24 @@ void main() {
       );
       expect(g.amount.minor, 15000);
     });
+    test('a posted fee is still a transaction (batch 68 M-2)', () {
+      for (final body in [
+        'A late fee of EGP 150.00 has been charged to your card ending 1234.',
+        'Late fee EGP 150.00 debited from card 1234',
+        'تم خصم غرامه تاخير 150 جم من بطاقتك 1234',
+        'Annual fee of EGP 300.00 debited from card 1234',
+      ]) {
+        final g = generic(body);
+        expect(g.direction, TemplateDirection.expense, reason: body);
+        expect(g.last4, '1234', reason: body);
+      }
+    });
+    test('a conditional fee sentence is a footer', () {
+      final r = parse(
+        'A late fee of EGP 150.00 will be charged if not paid. '
+        'Terms and conditions apply.',
+      );
+      expect(r is ParseGeneric || r is ParseParsed, isFalse);
+    });
   });
 }
