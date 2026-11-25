@@ -83,14 +83,8 @@ SetupSuggestion? nextSetupSuggestion(
 }) {
   bool open(SetupSuggestionKind k) => !handled.contains(k.slug);
 
-  final salary = c.latestSalaryCredit;
-  if (open(SetupSuggestionKind.payday) &&
-      !c.paydayConfigured &&
-      salary != null) {
-    // BR-BUD-01: payday is 1..28; a salary on 29-31 proposes 28.
-    final day = salary.day > 28 ? 28 : salary.day;
-    return SetupSuggestion(SetupSuggestionKind.payday, paydayDay: day);
-  }
+  // T-246 (D-81): the payday is no longer suggested; it follows the salary
+  // by itself (PaydayAutoService) and Home shows an Undo banner instead.
   final end = c.firstCycleEnd;
   if (open(SetupSuggestionKind.budget) &&
       !c.hasBudgets &&

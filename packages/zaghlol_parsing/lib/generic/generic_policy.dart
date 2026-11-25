@@ -65,7 +65,12 @@ bool isGenericCandidate({
 /// (amount or currency, D-28); a card last-4 or a merchant was read.
 /// Anything else goes to review. Never a function of the 700 confidence
 /// ceiling, which stays below the template auto-accept threshold.
-bool genericAutoSaveEligible(ParseGeneric g) {
+///
+/// T-241: only a [ParseGeneric] can be eligible. A [ParseNotice] (due
+/// reminder or statement), a parsed template result or anything else is not.
+bool genericAutoSaveEligible(ParseResult result) {
+  if (result is! ParseGeneric) return false;
+  final g = result;
   if (g.institutionCode == null || g.direction == null) return false;
   if (!g.amount.isPositive) return false;
   // Money in needs a named event (refund, deposit, settlement ...): promos

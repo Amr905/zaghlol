@@ -8941,5 +8941,20 @@
   "devMoodTap": "Tap the bird",
   "@devMoodTap": {
     "description": "Dev only: mood button"
+  },
+  "paydayAutoBanner": "I set your payday to day {day} because your salary lands on day {day}",
+  "@paydayAutoBanner": {
+    "description": "Home banner after the payday followed the salary (T-246, D-81)",
+    "placeholders": {
+      "day": {"type": "String", "description": "Day of month, digits per locale"}
+    }
+  },
+  "paydayAutoUndo": "Undo",
+  "@paydayAutoUndo": {
+    "description": "Undo button on the payday-auto banner"
+  },
+  "paydayAutoDismissA11y": "Close message",
+  "@paydayAutoDismissA11y": {
+    "description": "Screen-reader label of the banner close button"
   }
 }

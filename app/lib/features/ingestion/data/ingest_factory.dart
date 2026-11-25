@@ -15,11 +15,14 @@ import '../../../core/db/daos/categories_dao.dart';
 import '../../../core/db/daos/merchant_rules_dao.dart';
 import '../../../core/db/daos/settings_dao.dart';
 import '../../../core/settings/settings_repository.dart';
+import '../../budget/data/cycle_cache_invalidator.dart';
 import '../../budget/data/payday_schedule_store.dart';
 import '../../accounts/data/drift_accounts_repository.dart';
 import '../../categorization/data/categorizer_ports.dart';
 import '../../categorization/data/rules_repository.dart';
 import '../../transactions/application/refund_matching.dart';
+import '../../salary/application/payday_auto_hook.dart';
+import '../../salary/application/payday_auto_service.dart';
 import '../../salary/application/salary_matching.dart';
 import '../../salary/application/salary_matching_hook.dart';
 import '../../transactions/application/refund_matching_hook.dart';
@@ -45,6 +48,10 @@ IngestRawMessages buildIngestRawMessages(
   IngestStorePort? store,
   CycleKeyOf? cycleKeyOf,
   List<PostPersistHook> hooks = const [],
+
+  /// T-241: receives card due reminders and statements (T-245 plugs the dues
+  /// layer in here). The default does nothing.
+  CardNoticeHook cardNoticeHook = const NoopCardNoticeHook(),
 
   /// FU-142: every stored or edited row is offered to refund matching
   /// (T-090) inside the message's savepoint. The schedule is read from the
@@ -108,7 +115,10 @@ IngestRawMessages buildIngestRawMessages(
         events: events,
       ),
     ),
+    // T-246: the payday follows the salary (after the matcher tagged it).
+    PaydayAutoHook(_paydayAuto(db, zone, clock)),
   ],
+  cardNoticeHook: cardNoticeHook,
   diag: diag,
   events: events,
 );
@@ -124,4 +134,27 @@ Future<PaydaySchedule> Function() _dbSchedule(
     zone: zone,
   );
   return store.load;
+}
+
+PaydayAutoService _paydayAuto(
+  AppDatabase db,
+  LocalZone zone,
+  IngestClock? clock,
+) {
+  int nowMs() => (clock ?? DateTime.now)().toUtc().millisecondsSinceEpoch;
+  final settings = SettingsRepository(SettingsDao(db), nowMs: nowMs);
+  final invalidator = CycleCacheInvalidator(db);
+  return PaydayAutoService(
+    db,
+    settings,
+    PaydayScheduleStore(
+      settings,
+      nowUtcMs: nowMs,
+      zone: zone,
+      invalidateCycles: () async {
+        await invalidator.invalidateAll();
+      },
+    ),
+    nowUtcMs: nowMs,
+  );
 }

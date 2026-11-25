@@ -131,6 +131,15 @@ final class IngestReview extends IngestOutcome {
   String get kind => 'review';
 }
 
+/// T-241: a card due reminder or statement. The raw row is stored (status
+/// `parsed`), the dues hook was told, and **no transaction** was written.
+final class IngestNotice extends IngestOutcome {
+  const IngestNotice(this.rawId);
+  final String rawId;
+  @override
+  String get kind => 'card_notice';
+}
+
 /// A balance notice: raw row stored, balance recorded, no transaction.
 final class IngestBalanceOnly extends IngestOutcome {
   const IngestBalanceOnly(this.rawId);

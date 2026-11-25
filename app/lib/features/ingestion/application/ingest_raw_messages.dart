@@ -83,6 +83,7 @@ final class IngestRawMessages {
     LocalZone? zone,
     this._cycleKeyOf,
     List<PostPersistHook> hooks = const [],
+    this._cardNoticeHook = const NoopCardNoticeHook(),
     this._diag = const NoDiag(),
     this._events,
   }) : _now = clock ?? DateTime.now,
@@ -99,6 +100,7 @@ final class IngestRawMessages {
   final LocalZone _zone;
   final CycleKeyOf? _cycleKeyOf;
   final List<PostPersistHook> _hooks;
+  final CardNoticeHook _cardNoticeHook;
   final DiagSink _diag;
   final DomainEventBus? _events;
 
@@ -788,12 +790,14 @@ final class IngestRawMessages {
   static String? _institutionOf(ParseResult r) => switch (r) {
     ParseParsed(:final institutionCode) => institutionCode,
     ParseUnrecognized(:final institutionCode) => institutionCode,
+    ParseNotice(:final institutionCode) => institutionCode,
     _ => null,
   };
 
   static String? _templateIdOf(ParseResult r) => switch (r) {
     ParseParsed(:final templateId) => templateId,
     ParseUnrecognized(:final templateId) => templateId,
+    ParseNotice(:final templateId) => templateId,
     _ => null,
   };
 
@@ -817,6 +821,8 @@ final class IngestRawMessages {
         return _unrecognized(p, result);
       case ParseGeneric():
         return _generic(p, b, local, result);
+      case ParseNotice():
+        return _notice(p, result);
       case ParseParsed():
         return switch (dispositionOf(result.event, result.direction)) {
           CreateTxn(:final direction, :final status) => _parsed(
@@ -837,7 +843,7 @@ final class IngestRawMessages {
   /// True for the results that end in a review item (or a stored review raw
   /// row) instead of a transaction, balance or deferred row.
   static bool _wouldGoToReview(ParseResult r) => switch (r) {
-    ParseUnrecognized() || ParseGeneric() => true,
+    ParseUnrecognized() || ParseGeneric() || ParseNotice() => true,
     ParseParsed() => dispositionOf(r.event, r.direction) is UndirectedEvent,
     ParseDropped() => false,
   };
@@ -859,6 +865,35 @@ final class IngestRawMessages {
       },
     );
     return IngestReview(rawId, ReviewKind.unrecognized);
+  }
+
+  /// T-241: a card due reminder or statement. Stores the raw message as
+  /// `parsed` and tells the dues hook. Writes no transaction and no review
+  /// item for a templated notice: this is the only place a [ParseNotice] is
+  /// handled. A notice found by the generic gate (no template) also gets a
+  /// review item until T-245, so a gate mistake stays visible.
+  Future<IngestOutcome> _notice(_Prepared p, ParseNotice r) async {
+    final rawId = await _insertRaw(
+      p,
+      status: RawStatus.parsed,
+      institution: r.institutionCode,
+      templateId: r.templateId,
+      templateVersion: r.templateVersion,
+    );
+    await _cardNoticeHook.onCardNotice(
+      CardNoticeEvent(rawId: rawId, notice: r),
+    );
+    if (r.templateId == null) {
+      await _review(
+        kind: ReviewKind.lowConfidence,
+        rawId: rawId,
+        payload: {
+          'reason': 'genericNotice',
+          'institutionCode': ?r.institutionCode,
+        },
+      );
+    }
+    return IngestNotice(rawId);
   }
 
   Future<IngestOutcome> _deferred(_Prepared p, ParseParsed r) async {

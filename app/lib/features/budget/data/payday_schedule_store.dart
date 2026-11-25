@@ -76,4 +76,18 @@ class PaydayScheduleStore {
     await _invalidateCycles?.call();
     return next;
   }
+
+  /// Undo of an automatic change: puts back exactly [eras] (null: the payday
+  /// was never set, so both keys are unset) and drops the cycle caches.
+  Future<void> restore(PaydaySchedule? eras) async {
+    await _invalidateCycles?.call();
+    if (eras == null) {
+      await _settings.reset(Settings.paydayEras);
+      await _settings.reset(Settings.paydayDay);
+    } else {
+      await _settings.set(Settings.paydayEras, eras);
+      await _settings.set(Settings.paydayDay, eras.currentDay);
+    }
+    await _invalidateCycles?.call();
+  }
 }

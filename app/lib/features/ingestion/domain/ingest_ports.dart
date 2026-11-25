@@ -1,7 +1,8 @@
 // T-046: the ports IngestRawMessages is built from (design note §1). Pure
 // Dart. Implementations live in data/ (or in tests as fakes).
 
-import 'package:zaghlol_parsing/zaghlol_parsing.dart' show Categorizer;
+import 'package:zaghlol_parsing/zaghlol_parsing.dart'
+    show Categorizer, ParseNotice;
 
 /// Diagnostics: fixed codes and counts only (§12). Never ids (ULIDs encode
 /// receive times), never message text, senders, amounts or last-4.
@@ -64,3 +65,28 @@ abstract interface class PostPersistHook {
 
 /// The payday-cycle key (`2026-11`) of a transaction's local time.
 typedef CycleKeyOf = String Function(int occurredAtMs, int tzOffsetMin);
+
+/// T-241: a card due reminder or statement that was read (D-83). Never a
+/// transaction. [rawId] is the stored raw message; [notice] carries typed
+/// fields only (last-4, amount due, minimum due, due date, statement date).
+final class CardNoticeEvent {
+  const CardNoticeEvent({required this.rawId, required this.notice});
+
+  final String rawId;
+  final ParseNotice notice;
+}
+
+/// T-241: where the dues layer (T-245) learns of a card notice. Runs inside
+/// the message's savepoint after the raw row is stored; a throw rolls the
+/// message back like any other per-message failure. The default does
+/// nothing, so a notice is only kept as a raw message until T-245 lands.
+abstract interface class CardNoticeHook {
+  Future<void> onCardNotice(CardNoticeEvent event);
+}
+
+final class NoopCardNoticeHook implements CardNoticeHook {
+  const NoopCardNoticeHook();
+
+  @override
+  Future<void> onCardNotice(CardNoticeEvent event) async {}
+}

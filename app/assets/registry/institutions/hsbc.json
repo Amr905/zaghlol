@@ -160,6 +160,28 @@
         "جنيه": "EGP",
         "egp": "EGP"
       }
+    },
+    {
+      "id": "hsbc.cc_statement.en",
+      "version": 7,
+      "lang": "en",
+      "channel": [
+        "sms"
+      ],
+      "event": "cc_statement",
+      "direction": "neutral",
+      "baseConfidence": 0.9,
+      "source": "po-sample",
+      "pattern": "credit card ending (?:with )?[*x]{0,8} ?(?<last4>\\d{4}) statement date (?<stmtdate>\\d{1,2}/\\d{1,2}/\\d{4})\\. total amt due (?<cur>egp) (?<amount>[\\d,.]+), due date (?<duedate>\\d{1,2}/\\d{1,2}/\\d{4})\\. min\\. amt due (?:egp )?(?<mindue>[\\d,.]+)",
+      "currencyMap": {
+        "جم": "EGP",
+        "جنيه": "EGP",
+        "egp": "EGP"
+      },
+      "date": {
+        "format": "dd/MM/yyyy",
+        "yearPolicy": "nearest_future"
+      }
     }
   ]
 }

@@ -8756,4 +8756,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get devMoodTap => 'دوس على زغلول';
+
+  @override
+  String paydayAutoBanner(String day) {
+    return 'خلّيت يوم القبض $day لأن مرتبك بينزل يوم $day';
+  }
+
+  @override
+  String get paydayAutoUndo => 'تراجع';
+
+  @override
+  String get paydayAutoDismissA11y => 'اقفل الرسالة';
 }

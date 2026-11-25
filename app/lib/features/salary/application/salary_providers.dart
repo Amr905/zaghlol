@@ -12,11 +12,30 @@ import '../../budget/application/budget_providers.dart';
 import '../../budget/application/cycle_app_wiring.dart'
     show domainEventBusProvider;
 import '../../transactions/data/transactions_providers.dart';
+import 'payday_auto_service.dart';
 import 'salary_matching.dart';
 import 'salary_service.dart';
 
 final salaryPlanProvider = settingProvider<SalaryPlan?>(Settings.salaryPlan);
+final paydayAutoProvider = settingProvider<PaydayAutoState>(
+  Settings.paydayAuto,
+);
 final salaryStateProvider = settingProvider<SalaryState>(Settings.salaryState);
+
+/// T-246: the payday-follows-salary service.
+final FutureProvider<PaydayAutoService> paydayAutoServiceProvider =
+    FutureProvider<PaydayAutoService>((ref) async {
+      final db = await ref.watch(appDatabaseProvider.future);
+      final settings = await ref.watch(settingsRepositoryProvider.future);
+      final store = await ref.watch(paydayScheduleStoreProvider.future);
+      final clock = ref.watch(clockProvider);
+      return PaydayAutoService(
+        db,
+        settings,
+        store,
+        nowUtcMs: () => clock().toUtc().millisecondsSinceEpoch,
+      );
+    }, name: 'paydayAutoServiceProvider');
 
 // Declared types: housekeeping (reached from the transactions repository
 // provider) reads these, which would otherwise be a cycle for inference.

@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-24 (Cairo) by the Lead session: batch 66 (device E2E T-236..T-239; fixes: headless budget alerts, delete-everything close race) merging. Update it whenever the state below changes._
+_Last updated: 2026-11-25 (Cairo) by the Lead session: SMS parsing v2 + payday loop (PO 2026-11-25), batch 67 merging; batches 68–69 queued. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -235,6 +235,14 @@ All board tasks left (19) wait on PO inputs or devices; see `PO_DECISIONS.md` Pa
 - T-175, T-176 and T-177 are release work, after hosting and store accounts.
 
 Meanwhile the Lead clears follow-ups in batches of up to 5 lanes, and the explorer and device tests rerun on the emulator after big changes.
+
+## SMS parsing v2 + payday (PO 2026-11-25): autonomous loop
+
+The PO asked the Lead to work through T-240…T-247 in a loop (build → one review → CI → merge → next batch) and to take assumptions instead of blocking; assumptions are in `docs/03-technical/sms-parsing-v2-plan.md` §8 and `PO_DECISIONS.md` SMS-V2 / PAYDAY-AUTO. PO input (synthetic copy): `docs/qa/po-sms-suite-2026-11-25.md`; the suite test prints `po_suite: X/12 pass`.
+- **Batch 67** (`batch/2026-11-25-67`): T-240, T-241 (C4), T-246. 3 majors fixed in one round + delta re-review. PO suite 5/12.
+- **Batch 68** (queued, task branches built from batch 67): T-242 templates (cases 1, 3, 5, 10, 11), T-243 generic reader (2, 4, footer negative), T-245 card dues into reminders (+ FU-295). Check in review: HSBC `cc_payment_transfer.en` is direction `expense` with the card as last-4, while T-245 counts card payments as `transfer_in` on the card — confirm the settlement is booked as a transfer (SMS-AUTO) and reaches the due.
+- **Batch 69** (queued): T-244 diagnostics signatures, T-247 cycle naming (+ FU-296).
+- PO still to describe the real Arab Bank issue (he withdrew the "two folders" report).
 
 ## Waiting on the PO (Amr)
 

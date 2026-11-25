@@ -32,6 +32,9 @@ const Set<String> _expectKeys = {
   'ref',
   'date',
   'time',
+  'minDue',
+  'dueDate',
+  'statementDate',
   'problems',
   ...pipelineExpectKeys,
 };
@@ -103,7 +106,11 @@ FixtureOutcome runFixture(
   final sender = r.string('sender');
   final package = r.string('package');
   final channelText = r.string('channel');
-  final body = r.string('body', required: true);
+  final body = r.string(
+    'body',
+    required: true,
+    maxLength: maxFixtureBodyLength,
+  );
   final receivedText = r.string('receivedAt', required: true);
   final expect = r.object('expect');
   if (expect == null) {
@@ -234,6 +241,11 @@ FixtureOutcome runFixture(
     'ref': fields.ref,
     'date': fields.date == null ? null : _isoDate(fields.date!),
     'time': fields.time,
+    'minDue': fields.minDue?.toCanonicalString(),
+    'dueDate': fields.dueDate == null ? null : _isoDate(fields.dueDate!),
+    'statementDate': fields.statementDate == null
+        ? null
+        : _isoDate(fields.statementDate!),
   };
   for (final entry in expected.entries) {
     final key = entry.key;
@@ -285,6 +297,19 @@ void _checkPipeline(
   void Function(RegistryIssueCode, [String]) fail,
 ) {
   final result = ParsingPipeline(registry).parse(request);
+  if (result is ParseNotice) {
+    // T-241: a notice has no review flag, reasons or occurredAt.
+    final got = <String, String?>{
+      'confidence': result.confidencePermille.toString(),
+      'language': result.language,
+    };
+    final keys = pipelineExpectKeys.where(expected.containsKey);
+    if (result.templateId != templateId ||
+        keys.any((k) => !got.containsKey(k) || got[k] != expected[k])) {
+      fail(RegistryIssueCode.fixtureFailed, 'pipeline');
+    }
+    return;
+  }
   if (result is! ParseParsed || result.templateId != templateId) {
     fail(RegistryIssueCode.fixtureFailed, 'pipeline');
     return;
