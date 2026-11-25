@@ -109,6 +109,30 @@ class _Body extends StatelessWidget {
                 ),
               ),
             ),
+          for (final e
+              in (snapshot.unreadReasons[name]?.entries.toList() ??
+                  const <MapEntry<String, int>>[]))
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 12),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  'unread:${e.key}: ${e.value}',
+                  key: Key('sms-diag-$name-unread-${e.key}'),
+                ),
+              ),
+            ),
+          for (final e in (snapshot.signatures[name] ?? const []))
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 12),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Text(
+                  'shape x${e.value}: ${e.key}',
+                  key: Key('sms-diag-$name-shape-${e.key}'),
+                ),
+              ),
+            ),
           const SizedBox(height: 12),
         ],
       ],

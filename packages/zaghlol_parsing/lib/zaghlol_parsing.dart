@@ -15,6 +15,7 @@ export 'guard/guard_types.dart';
 export 'guard/guard_user_config.dart';
 export 'guard/sender_rate_limiter.dart';
 export 'generic/generic_policy.dart';
+export 'generic/shape_signature.dart';
 export 'generic/generic_template.dart';
 export 'normalize/amount_parser.dart';
 export 'pipeline/parse_result.dart';
