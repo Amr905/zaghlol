@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=7f097bb200bcaeea71816097b86a5568fa3c4576
+SKIP sha=7f097bb200bcaeea71816097b86a5568fa3c4576 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-244-diag-signatures 7f097bb200bcaeea71816097b86a5568fa3c4576 2026-11-25T11:33:20.2636639+02:00
+
+
+
