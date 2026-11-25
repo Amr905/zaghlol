@@ -650,3 +650,37 @@ final List<String> noticePurchaseConflictCues = _fold(const [
   'تم سحب نقدي',
   'cash withdrawal',
 ]);
+
+/// Past-tense "money moved" wording (T-241 fix). Beside a notice cue it means
+/// the message may be a real transaction, so it goes to review, never a
+/// notice. Future forms (`will be debited`, `سيتم خصم`) are not listed; the
+/// parser also skips an Arabic hit preceded by `ي` (`يتم`).
+final List<String> noticeMoneyMovedCues = _fold(const [
+  'تم خصم',
+  'تم الخصم',
+  'تم سداد',
+  'تم دفع',
+  'تم تحويل',
+  'تم استلام',
+  'تم تحصيل',
+  'تم اضافه',
+  'تم ايداع',
+  'خصم من',
+  'was debited',
+  'has been debited',
+  'have been debited',
+  'was charged',
+  'has been charged',
+  'have been charged',
+  'was deducted',
+  'has been deducted',
+  'was credited',
+  'has been credited',
+  'was paid',
+  'has been paid',
+  'installment paid',
+  'payment received',
+  'received',
+  'we have received',
+  'successfully paid',
+]);

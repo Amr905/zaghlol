@@ -96,12 +96,26 @@ void main() {
   }
 
   test('NEGATIVE PROOF: the same wording from another known bank (generic '
-      'gate) is also never saved', () async {
+      'gate) is never saved and leaves a review item', () async {
     for (final body in [_case7, _case8, _case12]) {
       final (w, outcome) = await ingest('NBE', body);
       expect(outcome, isA<IngestNotice>());
       expect(await w.txns(), isEmpty);
+      expect(await w.count('review_items'), 1);
     }
+  });
+
+  test('a past-tense debit with a due-date tail is a transaction or a '
+      'review item, never a silent notice', () async {
+    final (w, outcome) = await ingest(
+      'NBE',
+      'Your card 1234 was charged EGP 450.00 at UBER. Payment due 25/12',
+    );
+    expect(outcome, isNot(isA<IngestNotice>()));
+    expect(
+      (await w.txns()).length + await w.count('review_items'),
+      greaterThan(0),
+    );
   });
 
   test('the default hook does nothing and the message still stores', () async {

@@ -869,7 +869,9 @@ final class IngestRawMessages {
 
   /// T-241: a card due reminder or statement. Stores the raw message as
   /// `parsed` and tells the dues hook. Writes no transaction and no review
-  /// item: this is the only place a [ParseNotice] is handled.
+  /// item for a templated notice: this is the only place a [ParseNotice] is
+  /// handled. A notice found by the generic gate (no template) also gets a
+  /// review item until T-245, so a gate mistake stays visible.
   Future<IngestOutcome> _notice(_Prepared p, ParseNotice r) async {
     final rawId = await _insertRaw(
       p,
@@ -881,6 +883,16 @@ final class IngestRawMessages {
     await _cardNoticeHook.onCardNotice(
       CardNoticeEvent(rawId: rawId, notice: r),
     );
+    if (r.templateId == null) {
+      await _review(
+        kind: ReviewKind.lowConfidence,
+        rawId: rawId,
+        payload: {
+          'reason': 'genericNotice',
+          'institutionCode': ?r.institutionCode,
+        },
+      );
+    }
     return IngestNotice(rawId);
   }
 

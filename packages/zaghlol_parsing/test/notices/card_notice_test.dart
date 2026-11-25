@@ -165,4 +165,53 @@ void main() {
     );
     expect(bad.registry, isNull);
   });
+
+  // T-241 fix (M-1): a completed debit or payment with a due or statement
+  // tail is never a notice (it would vanish without a trace).
+  const moved = {
+    'purchase with due date line':
+        'تم خصم 200 جم من بطاقتك 1234 لدى كارفور. تاريخ الاستحقاق 25/12',
+    'was charged with payment due':
+        'Your card 1234 was charged EGP 450.00 at UBER. Payment due 25/12',
+    'loan debit with next due date ar':
+        'تم خصم 500.00 جم من حسابك لسداد قسط القرض. موعد السداد القادم 05/12',
+    'loan debit with next due date en':
+        'Your account was debited EGP 1,250.00 for loan installment. '
+        'Next due date 05/12/2026',
+    'card payment made ar':
+        'تم سداد 3000 جم لبطاقتك المنتهية ب 1234. الحد الأدنى للسداد 0 جم',
+    'card payment received with statement balance':
+        'Payment of EGP 3,000.00 received for credit card ending 1234. '
+        'Statement balance EGP 0.00',
+    'valU installment paid': 'تم دفع قسط 750 جم. موعد سداد القسط القادم 1/1',
+  };
+  for (final e in moved.entries) {
+    test('NEGATIVE PROOF: ${e.key} is not a notice', () {
+      final r = parse(e.value, 'BanqueMisr');
+      expect(r, isNot(isA<ParseNotice>()));
+      expect(r, isA<ParseUnrecognized>());
+      expect(
+        (r as ParseUnrecognized).reason,
+        UnrecognizedReason.genericNoticeConflict,
+      );
+    });
+  }
+
+  test('future tense stays a notice', () {
+    expect(
+      parse(
+        'سيتم خصم 51.77 جم من حسابكم لسداد بطاقتك المنتهية بـ 5490 في 25/11',
+        'BanqueMisr',
+      ),
+      isA<ParseNotice>(),
+    );
+    expect(
+      parse(
+        'EGP 51.77 will be debited from your account for card 5490. '
+            'Payment due 25/11',
+        'BanqueMisr',
+      ),
+      isA<ParseNotice>(),
+    );
+  });
 }
