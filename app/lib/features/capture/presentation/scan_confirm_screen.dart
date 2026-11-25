@@ -4,7 +4,8 @@
 // image and its text are never kept or logged; the OCR host deletes the file.
 //
 // States: choose, reading, found (the S-13 editor, prefilled, source `ocr`),
-// no text read, text read but no total (T-260: manual entry prefilled), and "not available on this phone" (no OCR host, FR-ING-I-08).
+// no text read, text read but no total (T-260: manual entry prefilled), and
+// "not available on this phone" (no OCR host, FR-ING-I-08).
 
 import 'dart:async';
 
