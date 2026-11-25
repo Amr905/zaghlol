@@ -14,6 +14,7 @@ import '../../../core/platform/pigeon_ocr.dart';
 import '../../budget/application/budget_providers.dart' show localZoneProvider;
 import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import 'capture_providers.dart' show captureRegistryLoaderProvider;
+import 'scan_diagnostics.dart';
 import 'scan_service.dart';
 
 /// On-device OCR through the platform host: Vision on iOS (T-160), Tesseract
@@ -63,6 +64,12 @@ final scanImagePickerProvider = Provider<ScanImagePicker?>((ref) {
   };
 }, name: 'scanImagePickerProvider');
 
+/// Outcome counters of this session (dev builds read them; no text inside).
+final scanDiagnosticsProvider = Provider<ScanDiagnostics>(
+  (ref) => ScanDiagnostics(),
+  name: 'scanDiagnosticsProvider',
+);
+
 final scanServiceProvider = Provider<ScanService>((ref) {
   final registry = ref.watch(captureRegistryLoaderProvider)();
   final clock = ref.watch(clockProvider);
@@ -70,6 +77,7 @@ final scanServiceProvider = Provider<ScanService>((ref) {
   return ScanService(
     engine: ref.watch(ocrEngineProvider),
     pipeline: ParsingPipeline(registry),
+    diagnostics: ref.watch(scanDiagnosticsProvider),
     wallClock: () {
       final utc = clock().toUtc();
       return utc.add(
