@@ -340,9 +340,9 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-254](tasks/T-254.md) | Native capture hardening follow-ups | follow-ups | High (C4) | Opus | native-platform-engineer | — | N | 72 | DONE (batch 72) |
 | [T-255](tasks/T-255.md) | Core follow-ups (FU-110/113/114/126/138/144) | follow-ups | Medium | Sonnet | flutter-core-engineer | — | A | 72 | DONE (batch 72) |
 | [T-256](tasks/T-256.md) | Parsing follow-ups (FU-051/078/084/118) | follow-ups | Medium | Sonnet | parsing-engine-engineer | — | P | 72 | DONE (batch 72) |
-| [T-257](tasks/T-257.md) | Ingest/diagnostics minors (FU-313/314/317) | follow-ups | Low | Sonnet | parsing-engine-engineer | — | P | 73 | TODO |
-| [T-258](tasks/T-258.md) | Lint minors (FU-309…FU-312) | follow-ups | Low | Sonnet | flutter-core-engineer | — | C | 73 | TODO |
-| [T-259](tasks/T-259.md) | Native follow-ups (FU-332, FU-113 native) | follow-ups | Medium | Sonnet | native-platform-engineer | — | N | 73 | TODO |
+| [T-257](tasks/T-257.md) | Ingest/diagnostics minors (FU-313/314/317) | follow-ups | Low | Sonnet | parsing-engine-engineer | — | P | 73 | DONE (batch 73) |
+| [T-258](tasks/T-258.md) | Lint minors (FU-309…FU-312) | follow-ups | Low | Sonnet | flutter-core-engineer | — | C | 73 | DONE (batch 73) |
+| [T-259](tasks/T-259.md) | Native follow-ups (FU-332, FU-113 native) | follow-ups | Medium | Sonnet | native-platform-engineer | — | N | 73 | DONE (batch 73) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

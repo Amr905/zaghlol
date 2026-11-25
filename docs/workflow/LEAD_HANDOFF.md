@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-25 (Cairo) by the Lead session: SMS parsing v2 + payday loop complete (batches 67–69, PRs #116–#118); follow-up batches 70 (#121), 71 (#119), 72 (#120) merged; batch 73 (T-257…T-259, last no-input follow-ups) in flight. Update it whenever the state below changes._
+_Last updated: 2026-11-25 (Cairo) by the Lead session: SMS parsing v2 + payday loop complete (batches 67–69, PRs #116–#118); follow-up batches 70 (#121), 71 (#119), 72 (#120) merged; batch 73 (T-257…T-259, last no-input follow-ups) merged. What remains needs the PO (samples, device runs, hosting, decisions) — see "Waiting on the PO" and the open FU rows. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 

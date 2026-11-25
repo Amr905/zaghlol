@@ -25,3 +25,7 @@ Ran: `flutter analyze` (clean); lints package tests (41 pass) and lint run over 
 - FU-337: use a lambda for `discardLate` in `ShareActivity`.
 
 No blockers or majors. Batch verdict: APPROVED.
+
+## Lead delta check
+
+- **FU-337 FIXED** by the Lead (one line): `ShareActivity` passes `discardLate = { store.discard(it) }`, so the lazy store is only created when a late commit must actually be discarded. Kotlin compiled and unit-tested by the batch app-ci run.

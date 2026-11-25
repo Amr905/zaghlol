@@ -98,7 +98,7 @@ class ShareActivity : Activity() {
                 cancelRead.cancel(false)
                 giveUp.cancel(false)
                 commitGiveUp.get()?.cancel(false)
-                ShareJobs.finish(newJob, outcome, discardLate = store::discard)
+                ShareJobs.finish(newJob, outcome, discardLate = { store.discard(it) })
             },
             onRejected = {
                 // FU-070 S1: every worker is held and the queue is full: refuse now.
