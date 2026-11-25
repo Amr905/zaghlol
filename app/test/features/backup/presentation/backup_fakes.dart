@@ -6,8 +6,11 @@ import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/features/backup/application/drive_backup_providers.dart';
 import 'package:zaghlol/features/backup/application/schedule_providers.dart';
 import 'package:zaghlol/features/backup/application/snapshot_tables.dart';
+import 'package:zaghlol/features/backup/data/drive_auth.dart'
+    show DriveBackupSetup;
 import 'package:zaghlol/features/backup/presentation/backup_ports.dart';
 import 'package:zaghlol/features/backup/presentation/backup_screen.dart';
 
@@ -84,6 +87,9 @@ class FakeActions implements BackupActions {
   Object? hasKeyError;
   Object? backupError;
   Completer<void>? backupGate;
+
+  /// False: iCloud took the file but has not confirmed the upload (T-270).
+  bool confirmed = true;
   final calls = <String>[];
   final wrongCurrent = <String>{};
 
@@ -109,10 +115,11 @@ class FakeActions implements BackupActions {
   Future<void> recoverKey(String p) async => calls.add('recover:$p');
 
   @override
-  Future<void> backupNow(BackupDestinationPref where) async {
+  Future<bool> backupNow(BackupDestinationPref where) async {
     calls.add('backup:${where.name}');
     if (backupGate != null) await backupGate!.future;
     if (backupError != null) throw backupError!;
+    return confirmed;
   }
 
   @override
@@ -129,7 +136,9 @@ List<Override> baseOverrides({
   FakeActions? actions,
   DateTime? last,
   bool holdsLocalData = false,
+  DriveBackupSetup driveSetup = DriveBackupSetup.ready,
 }) => [
+  driveBackupSetupProvider.overrideWithValue(driveSetup),
   restoreReplacesLocalDataProvider.overrideWith((ref) async => holdsLocalData),
   languageProviderOverride(lang),
   digitsProvider.overrideWith((ref) => Stream.value(DigitsPref.auto)),

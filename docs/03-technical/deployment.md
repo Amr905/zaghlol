@@ -34,6 +34,8 @@ tag vX:  build prodSms + prodNoSms AAB (signed via Play App Signing upload key f
 - Apple: Sign in with Apple offered whenever Google sign-in is offered on iOS.
 - Apple: account deletion in-app (FR-ACCT-04).
 
+**Google sign-in client IDs (Drive backup, account sign-in; T-270):** every app build that should offer Google Drive backup must pass `--dart-define=ZAGHLOL_GOOGLE_SERVER_CLIENT_ID=<Web OAuth client ID>` (Android) and `--dart-define=ZAGHLOL_GOOGLE_IOS_CLIENT_ID=<iOS OAuth client ID>` (iOS, plus its reversed ID as a URL scheme in `Info.plist`). They come from the PO's Google Cloud project, which also needs an Android OAuth client for each package (`app.zaghlol`, `app.zaghlol.dev`, `app.zaghlol.staging`) with the SHA-1 of the key that signs that build, the Drive API enabled and the `drive.appdata` scope on the consent screen. Without the define, Drive backup and restore refuse with `DRIVE_NOT_CONFIGURED` before calling Google: S-66 says so before the passphrase step (dev/staging builds name the missing define; prod builds say Drive backup isn't available in this version) and S-04 shows the same text. As of T-270 no workflow or release script passes these defines yet.
+
 **Versioning:**
 - App: semver `MAJOR.MINOR.PATCH+build`.
 - `registryVersion` (SMS templates) and the bundled `catalogVersion` are recorded in the build and in About.

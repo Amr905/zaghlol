@@ -18,6 +18,7 @@ import 'package:zaghlol/features/backup/data/drive_backup_exception.dart';
 import 'package:zaghlol/features/backup/data/drive_store.dart';
 import 'package:zaghlol/features/backup/data/secure_state_seq_store.dart';
 
+import '../../../core/db/financial_fixtures.dart' show txn;
 import '../data/fake_drive.dart';
 import 'snapshot_test_support.dart';
 
@@ -187,6 +188,29 @@ void main() {
     }
     final seqs = [for (final e in await serviceOf(a).list()) e.labelSeq];
     expect(seqs, [8, 7, 6, 5, 4]);
+  });
+
+  test('T-270 (US-P09): the Free slot round-trips: back up, change data, '
+      'back up again (keep 1) → one file, which restores the newer state on '
+      'phone B', () async {
+    await backupA(keep: 1);
+    await a.db.into(a.db.transactions).insert(txn('e2'));
+    final source = await dump(a.db, backedUpTables);
+    final second = await backupA(keep: 1);
+    expect(cloud.names, [second.entry.name]);
+
+    final onB = serviceOf(b);
+    final listed = await onB.list();
+    expect(listed.single.name, second.entry.name);
+    final restored = await onB.restore(listed.single, passphrase);
+    expect(restored.keyStored, isTrue);
+    final after = await dump(b.db, backedUpTables);
+    expect(after, source);
+    final ids = await b.db
+        .customSelect('SELECT id FROM transactions ORDER BY id')
+        .map((r) => r.read<String>('id'))
+        .get();
+    expect(ids, containsAll(['e1', 'e2', 'i1']));
   });
 
   test('seq: max(stored, highest listed) + 1, stored after the upload; a '

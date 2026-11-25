@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/backup/crypto/backup_crypto_exception.dart';
+import 'package:zaghlol/features/backup/data/drive_auth.dart'
+    show DriveBackupSetup;
 import 'package:zaghlol/features/backup/data/drive_backup_exception.dart';
 import 'package:zaghlol/features/backup/presentation/backup_screen.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
@@ -27,6 +29,7 @@ void main() {
         DateTime? last,
         bool gold = false,
         bool icloud = false,
+        DriveBackupSetup driveSetup = DriveBackupSetup.ready,
       }) async {
         await t.binding.setSurfaceSize(const Size(360, 900));
         addTearDown(() => t.binding.setSurfaceSize(null));
@@ -39,6 +42,7 @@ void main() {
               actions: actions,
               gateway: gw,
               last: last,
+              driveSetup: driveSetup,
             ),
             paywallTriggerProvider.overrideWithValue((_) => paywall++),
           ],
@@ -165,6 +169,82 @@ void main() {
           expect(find.text(l.backupSettingsDone), findsOneWidget);
         });
       }
+
+      // T-270 (US-P09): a build without the Google client ID names the reason
+      // before the passphrase step, and never offers a Try again that can't
+      // work.
+      testWidgets('T-270: Drive not configured in a dev build: says why up '
+          'front, no passphrase step, no backup call', (t) async {
+        actions.key = false;
+        final l = await pump(t, driveSetup: DriveBackupSetup.missingInDevBuild);
+        expect(
+          find.text(l.backupSettingsErrorNotConfiguredDev),
+          findsOneWidget,
+        );
+        expect(l.backupSettingsErrorNotConfiguredDev, contains('ZAGHLOL_'));
+        expect(find.text(l.commonActionTryAgain), findsNothing);
+        await t.tap(find.text(l.backupSettingsNow));
+        await t.pumpAndSettle();
+        expect(find.byType(TextField), findsNothing);
+        expect(actions.calls, isEmpty);
+        expect(find.text(l.backupSettingsDone), findsNothing);
+      });
+
+      testWidgets('T-270: Drive not configured in a store build: user wording, '
+          'no build details', (t) async {
+        final l = await pump(t, driveSetup: DriveBackupSetup.missingInRelease);
+        expect(find.text(l.backupSettingsErrorNotConfigured), findsOneWidget);
+        expect(l.backupSettingsErrorNotConfigured, isNot(contains('ZAGHLOL_')));
+        expect(find.text(l.backupSettingsErrorNotConfiguredDev), findsNothing);
+        await t.tap(find.text(l.backupSettingsNow));
+        await t.pumpAndSettle();
+        expect(actions.calls, isEmpty);
+      });
+
+      testWidgets('T-270: DRIVE_NOT_CONFIGURED from the sign-in is named, not '
+          'the generic error, and has no Try again', (t) async {
+        actions.backupError = DriveBackupException(
+          DriveBackupErrorCode.notConfigured,
+        );
+        final l = await pump(t, last: now);
+        await t.tap(find.text(l.backupSettingsNow));
+        await t.pumpAndSettle();
+        expect(find.text(l.backupSettingsErrorNotConfigured), findsOneWidget);
+        expect(find.text(l.backupSettingsErrorGeneric), findsNothing);
+        expect(find.text(l.commonActionTryAgain), findsNothing);
+      });
+
+      testWidgets('T-270: Drive not configured, iCloud still works on iPhone', (
+        t,
+      ) async {
+        final l = await pump(
+          t,
+          icloud: true,
+          driveSetup: DriveBackupSetup.missingInRelease,
+        );
+        expect(find.text(l.backupSettingsErrorNotConfigured), findsOneWidget);
+        await t.tap(find.text(l.backupRestoreOptionICloud));
+        await t.pumpAndSettle();
+        expect(find.text(l.backupSettingsErrorNotConfigured), findsNothing);
+        await t.tap(find.text(l.backupSettingsNow));
+        await t.pumpAndSettle();
+        expect(actions.calls, ['hasKey', 'backup:icloud']);
+        expect(find.text(l.backupSettingsDone), findsOneWidget);
+      });
+
+      testWidgets(
+        'T-270: iCloud still uploading is shown as pending, not done',
+        (t) async {
+          actions.confirmed = false;
+          final l = await pump(t, icloud: true);
+          await t.tap(find.text(l.backupRestoreOptionICloud));
+          await t.pumpAndSettle();
+          await t.tap(find.text(l.backupSettingsNow));
+          await t.pumpAndSettle();
+          expect(find.text(l.backupSettingsPendingUpload), findsOneWidget);
+          expect(find.text(l.backupSettingsDone), findsNothing);
+        },
+      );
 
       testWidgets('key mismatch asks for the passphrase and continues', (
         t,

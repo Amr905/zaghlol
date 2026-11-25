@@ -8292,6 +8292,18 @@
   "@backupSettingsErrorGeneric": {
     "description": "S"
   },
+  "backupSettingsErrorNotConfiguredDev": "النسخة الاحتياطية على Google Drive مش هتشتغل في نسخة التجربة دي: اتعملت من غير الـ client ID بتاع تسجيل الدخول بجوجل (ZAGHLOL_GOOGLE_SERVER_CLIENT_ID على أندرويد، ZAGHLOL_GOOGLE_IOS_CLIENT_ID على الآيفون). بياناتك في أمان على موبايلك. اعمل build للتطبيق تاني بالـ client ID من مشروع Google Cloud.",
+  "@backupSettingsErrorNotConfiguredDev": {
+    "description": "S · T-270 · dev/staging builds only, DRIVE_NOT_CONFIGURED; the define names stay in Latin"
+  },
+  "backupSettingsErrorNotConfigured": "النسخة الاحتياطية على Google Drive مش متاحة في النسخة دي من زغلول. بياناتك في أمان على موبايلك. حدّث التطبيق وجرّب تاني.",
+  "@backupSettingsErrorNotConfigured": {
+    "description": "S · T-270 · store builds, DRIVE_NOT_CONFIGURED"
+  },
+  "backupSettingsPendingUpload": "النسخة اتحفظت في iCloud على الموبايل، بس لسه بتترفع. هتتحسب نسختك الاحتياطية أول ما الرفع يخلص، فخلّي الموبايل على النت.",
+  "@backupSettingsPendingUpload": {
+    "description": "S · T-270 · iCloud took the file but hasn't confirmed the upload"
+  },
   "backupPassphraseTitle": "اختار كلمة سر للنسخة",
   "@backupPassphraseTitle": {
     "description": "T · first backup"

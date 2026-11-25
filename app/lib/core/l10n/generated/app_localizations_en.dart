@@ -5850,6 +5850,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The backup didn\'t work. Try again.';
 
   @override
+  String get backupSettingsErrorNotConfiguredDev =>
+      'Google Drive backup can\'t run in this test build: it was built without the Google sign-in client ID (ZAGHLOL_GOOGLE_SERVER_CLIENT_ID on Android, ZAGHLOL_GOOGLE_IOS_CLIENT_ID on iPhone). Your data is safe on this phone. Build the app again with the client ID from the Google Cloud project.';
+
+  @override
+  String get backupSettingsErrorNotConfigured =>
+      'Google Drive backup isn\'t available in this version of Zaghlol. Your data is safe on this phone. Update the app and try again.';
+
+  @override
+  String get backupSettingsPendingUpload =>
+      'Saved to iCloud on this phone, but it\'s still uploading. It counts as your backup once the upload finishes, so keep the phone online.';
+
+  @override
   String get backupPassphraseTitle => 'Choose a backup passphrase';
 
   @override

@@ -133,6 +133,12 @@ void main() {
       ),
       RestoreFailureKind.signIn,
     );
+    expect(
+      restoreFailureKindOf(
+        DriveBackupException(DriveBackupErrorCode.notConfigured),
+      ),
+      RestoreFailureKind.notConfigured,
+    );
     expect(restoreFailureKindOf(StateError('x')), RestoreFailureKind.other);
   });
 }

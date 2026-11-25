@@ -5146,6 +5146,18 @@
   "@backupSettingsErrorGeneric": {
     "description": "S"
   },
+  "backupSettingsErrorNotConfiguredDev": "Google Drive backup can't run in this test build: it was built without the Google sign-in client ID (ZAGHLOL_GOOGLE_SERVER_CLIENT_ID on Android, ZAGHLOL_GOOGLE_IOS_CLIENT_ID on iPhone). Your data is safe on this phone. Build the app again with the client ID from the Google Cloud project.",
+  "@backupSettingsErrorNotConfiguredDev": {
+    "description": "S · T-270 · dev/staging builds only, DRIVE_NOT_CONFIGURED; the define names stay in Latin"
+  },
+  "backupSettingsErrorNotConfigured": "Google Drive backup isn't available in this version of Zaghlol. Your data is safe on this phone. Update the app and try again.",
+  "@backupSettingsErrorNotConfigured": {
+    "description": "S · T-270 · store builds, DRIVE_NOT_CONFIGURED"
+  },
+  "backupSettingsPendingUpload": "Saved to iCloud on this phone, but it's still uploading. It counts as your backup once the upload finishes, so keep the phone online.",
+  "@backupSettingsPendingUpload": {
+    "description": "S · T-270 · iCloud took the file but hasn't confirmed the upload"
+  },
   "backupPassphraseTitle": "Choose a backup passphrase",
   "@backupPassphraseTitle": {
     "description": "T · first backup"

@@ -5978,6 +5978,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'النسخة الاحتياطية ماتعملتش. جرّب تاني.';
 
   @override
+  String get backupSettingsErrorNotConfiguredDev =>
+      'النسخة الاحتياطية على Google Drive مش هتشتغل في نسخة التجربة دي: اتعملت من غير الـ client ID بتاع تسجيل الدخول بجوجل (ZAGHLOL_GOOGLE_SERVER_CLIENT_ID على أندرويد، ZAGHLOL_GOOGLE_IOS_CLIENT_ID على الآيفون). بياناتك في أمان على موبايلك. اعمل build للتطبيق تاني بالـ client ID من مشروع Google Cloud.';
+
+  @override
+  String get backupSettingsErrorNotConfigured =>
+      'النسخة الاحتياطية على Google Drive مش متاحة في النسخة دي من زغلول. بياناتك في أمان على موبايلك. حدّث التطبيق وجرّب تاني.';
+
+  @override
+  String get backupSettingsPendingUpload =>
+      'النسخة اتحفظت في iCloud على الموبايل، بس لسه بتترفع. هتتحسب نسختك الاحتياطية أول ما الرفع يخلص، فخلّي الموبايل على النت.';
+
+  @override
   String get backupPassphraseTitle => 'اختار كلمة سر للنسخة';
 
   @override

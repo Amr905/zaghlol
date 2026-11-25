@@ -19,6 +19,8 @@ import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
+import '../application/drive_backup_providers.dart';
+import '../data/drive_auth.dart' show DriveBackupSetup;
 import 'backup_labels.dart';
 import 'backup_ports.dart';
 import 'restore_flow.dart';
@@ -403,6 +405,10 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
     final message = switch (kind) {
       RestoreFailureKind.network => l10n.backupRestoreErrorNetwork(provider),
       RestoreFailureKind.signIn => l10n.backupRestoreErrorSignIn(provider),
+      RestoreFailureKind.notConfigured =>
+        ref.read(driveBackupSetupProvider) == DriveBackupSetup.missingInDevBuild
+            ? l10n.backupSettingsErrorNotConfiguredDev
+            : l10n.backupSettingsErrorNotConfigured,
       RestoreFailureKind.newer => l10n.backupRestoreErrorNewer,
       RestoreFailureKind.corrupted => l10n.backupRestoreErrorCorrupted,
       _ => l10n.backupSettingsErrorGeneric,
@@ -430,6 +436,8 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
                     onPressed: flow.tryOlder,
                   )
                 : const SizedBox.shrink(),
+          // Trying again can't help a build without the client ID (T-270).
+          RestoreFailureKind.notConfigured => const SizedBox.shrink(),
           _ => ZButton(
             label: l10n.commonActionTryAgain,
             expand: true,

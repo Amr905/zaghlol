@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/features/backup/crypto/backup_crypto_exception.dart';
+import 'package:zaghlol/features/backup/data/drive_auth.dart'
+    show DriveBackupSetup;
 import 'package:zaghlol/features/backup/data/drive_backup_exception.dart';
 import 'package:zaghlol/features/backup/presentation/backup_ports.dart';
 import 'package:zaghlol/features/backup/presentation/restore_screen.dart';
@@ -25,6 +27,7 @@ void main() {
         bool icloud = false,
         bool replaces = false,
         bool hasData = false,
+        DriveBackupSetup driveSetup = DriveBackupSetup.ready,
       }) async {
         await t.binding.setSurfaceSize(const Size(360, 780));
         addTearDown(() => t.binding.setSurfaceSize(null));
@@ -37,6 +40,7 @@ void main() {
               gateway: gw,
               effects: fx,
               holdsLocalData: hasData,
+              driveSetup: driveSetup,
             ),
             child: host(
               RestoreScreen(
@@ -190,6 +194,25 @@ void main() {
         await t.tap(find.text(l.commonActionTryAgain));
         await t.pumpAndSettle();
         expect(find.text(l.backupRestoreFoundTitle), findsOneWidget);
+      });
+
+      testWidgets('T-270: Drive not configured names the build setting, not '
+          'a sign-in problem; no Try again', (t) async {
+        gw.listError = DriveBackupException(DriveBackupErrorCode.notConfigured);
+        final l = await pump(t, driveSetup: DriveBackupSetup.missingInDevBuild);
+        await t.tap(find.text(l.commonActionContinue));
+        await t.pumpAndSettle();
+        expect(
+          find.text(l.backupSettingsErrorNotConfiguredDev),
+          findsOneWidget,
+        );
+        expect(
+          find.text(l.backupRestoreErrorSignIn(l.backupRestoreOptionDrive)),
+          findsNothing,
+        );
+        expect(find.text(l.commonActionTryAgain), findsNothing);
+        await t.tap(find.text(l.backupRestoreStartFresh));
+        expect(fresh, 1);
       });
 
       testWidgets('newer version offers the update', (t) async {
