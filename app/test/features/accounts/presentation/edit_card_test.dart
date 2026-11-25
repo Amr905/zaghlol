@@ -23,6 +23,7 @@ Account acc(
   String? last4,
   bool hidden = false,
   int? due,
+  String? linkedTo,
 }) => Account(
   id: id,
   kind: kind,
@@ -35,12 +36,20 @@ Account acc(
   institutionCode: inst,
   last4: last4,
   statementDueDay: due,
+  linkedAccountId: linkedTo,
 );
 
 class FakeRepo implements AccountsRepository {
-  FakeRepo(this.items, {this.failUpdate = false});
+  FakeRepo(
+    this.items, {
+    this.failUpdate = false,
+    this.updateError,
+    this.mergeError,
+  });
   final List<Account> items;
   final bool failUpdate;
+  final Object? updateError;
+  final Object? mergeError;
   final calls = <String>[];
   AccountEdit? lastEdit;
   AccountHint? lastHint;
@@ -69,6 +78,7 @@ class FakeRepo implements AccountsRepository {
   @override
   Future<Account> update(String id, AccountEdit edit) async {
     if (failUpdate) throw StateError('x');
+    if (updateError != null) throw updateError!;
     calls.add('update');
     lastEdit = edit;
     return items.firstWhere((a) => a.id == id);
@@ -85,6 +95,7 @@ class FakeRepo implements AccountsRepository {
     required String sourceId,
     required String targetId,
   }) async {
+    if (mergeError != null) throw mergeError!;
     calls.add('merge:$sourceId>$targetId');
     return items.firstWhere((a) => a.id == targetId);
   }
@@ -509,6 +520,63 @@ void main() {
         await t.tap(find.byKey(const Key('merge-confirm-yes')));
         await t.pumpAndSettle();
         expect(repo.calls, ['merge:a>b']);
+      });
+
+      testWidgets('merge: a linked card is not offered as a target; '
+          'ACC_LINKED shows the unlink-first message', (t) async {
+        final a = acc('a', 'Old', last4: '1234');
+        final b = acc('b', 'New', last4: '5678');
+        final linked = acc(
+          'l',
+          'Linked',
+          kind: AccountKind.debit,
+          last4: '4321',
+          linkedTo: 'acct',
+        );
+        final repo = FakeRepo([
+          a,
+          b,
+          linked,
+        ], mergeError: AccountsException(AccountsException.linked));
+        await pumpTall(
+          t,
+          host(
+            CardDetailsScreen.edit(account: a),
+            repo: repo,
+            locale: locale,
+          ),
+        );
+        await t.pumpAndSettle();
+        await t.ensureVisible(find.byKey(const Key('card-merge')));
+        await t.tap(find.byKey(const Key('card-merge')));
+        await t.pumpAndSettle();
+        expect(find.byKey(const Key('merge-target-l')), findsNothing);
+        await t.tap(find.byKey(const Key('merge-target-b')));
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('merge-confirm-yes')));
+        await t.pumpAndSettle();
+        expect(find.text(l10nOf(t).accountsLinkBlocked), findsOneWidget);
+        expect(repo.calls, isEmpty);
+      });
+
+      testWidgets('retype refused with ACC_LINKED shows the unlink-first '
+          'message', (t) async {
+        final a = acc('a', 'Main', kind: AccountKind.debit, last4: '1111');
+        await pumpTall(
+          t,
+          host(
+            CardDetailsScreen.edit(account: a),
+            repo: FakeRepo([
+              a,
+            ], updateError: AccountsException(AccountsException.linked)),
+            locale: locale,
+          ),
+        );
+        await t.pumpAndSettle();
+        await t.tap(find.byKey(const Key('card-save')));
+        await t.pumpAndSettle();
+        expect(find.byKey(const Key('card-save-error')), findsOneWidget);
+        expect(find.text(l10nOf(t).accountsLinkBlocked), findsOneWidget);
       });
 
       testWidgets('merge across banks warns first', (t) async {

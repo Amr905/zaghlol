@@ -381,6 +381,70 @@ void main() {
     );
   });
 
+  group('merge that ends a link keeps the figures (M1)', () {
+    test('(a) a linked card merged into another card: the account keeps its '
+        'figure, the card spend moves with the card', () async {
+      await dao.insert(account('deb2', last4: '5678'));
+      await report('acc', 1000000, 1);
+      await repo.linkCard(cardId: 'deb', accountId: 'acc');
+      await spend('deb', 50000, 2);
+      expect(await amountOf('acc'), 950000);
+
+      clock = DateTime.fromMillisecondsSinceEpoch(t0 + 10 * hour, isUtc: true);
+      await repo.merge(sourceId: 'deb', targetId: 'deb2');
+      expect(await amountOf('acc'), 950000);
+      expect((await opening()).of('acc', 'EGP')!.asOf, clock);
+      expect((await dao.byId('deb'))!.linkedAccountId, isNull);
+      // A later purchase on the merged card no longer touches the account.
+      await spend('deb2', 1000, 11);
+      expect(await amountOf('acc'), 950000);
+    });
+
+    test('(a) control: a linked card merged into its own account keeps the '
+        'figure without a new anchor', () async {
+      await report('acc', 1000000, 1);
+      await repo.linkCard(cardId: 'deb', accountId: 'acc');
+      await spend('deb', 50000, 2);
+      await repo.merge(sourceId: 'deb', targetId: 'acc');
+      expect(await amountOf('acc'), 950000);
+      expect((await opening()).of('acc', 'EGP'), isNull);
+    });
+
+    test('(b) an account with a linked card merged into a card: the target '
+        'shows the account figure, the card counts on its own', () async {
+      await dao.insert(account('deb2', last4: '5678'));
+      await report('acc', 1000000, 1);
+      await repo.linkCard(cardId: 'deb', accountId: 'acc');
+      await spend('deb', 50000, 2);
+      await spend('acc', 10000, 3);
+      expect(await amountOf('acc'), 940000);
+
+      clock = DateTime.fromMillisecondsSinceEpoch(t0 + 10 * hour, isUtc: true);
+      await repo.merge(sourceId: 'acc', targetId: 'deb2');
+      expect(await amountOf('deb2'), 940000);
+      expect((await dao.byId('deb'))!.linkedAccountId, isNull);
+      expect(await egpAssets(), 940000);
+      await spend('deb', 1000, 11);
+      expect(await amountOf('deb2'), 940000);
+    });
+
+    test('(c) merging into a linked card is refused: ACC_LINKED, nothing '
+        'moves', () async {
+      await report('other', 300000, 1);
+      await report('acc', 1000000, 1);
+      await repo.linkCard(cardId: 'deb', accountId: 'acc');
+      await spend('other', 5000, 2);
+      expect(
+        await codeOf(repo.merge(sourceId: 'other', targetId: 'deb')),
+        AccountsException.linked,
+      );
+      expect((await dao.byId('other'))!.mergedIntoId, isNull);
+      expect(await amountOf('other'), 295000);
+      expect(await amountOf('acc'), 1000000);
+      expect(await linesOf('deb'), isEmpty);
+    });
+  });
+
   test('cardsLinkedTo and linkTargets', () async {
     await dao.insert(account('acc2', kind: 'account', last4: null));
     await report('acc2', 300000, 1);

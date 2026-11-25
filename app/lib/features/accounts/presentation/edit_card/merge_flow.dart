@@ -30,7 +30,8 @@ Future<Account?> runMergeFlow(
   if (!context.mounted) return null;
   final candidates = [
     for (final a in all)
-      if (a.id != source.id && !a.isMerged) a,
+      // T-266: a linked card's figures are its account's; never a target.
+      if (a.id != source.id && !a.isMerged && !a.isLinked) a,
   ];
   final target = await Navigator.of(context).push<Account>(
     MaterialPageRoute(
@@ -48,8 +49,10 @@ Future<Account?> runMergeFlow(
     messenger.showSnackBar(
       SnackBar(
         content: Text(
-          '${l10n.commonErrorSaveFailed} '
-          '${l10n.commonSupportCodeValue(e.code)}',
+          e.code == AccountsException.linked
+              ? l10n.accountsLinkBlocked
+              : '${l10n.commonErrorSaveFailed} '
+                    '${l10n.commonSupportCodeValue(e.code)}',
         ),
       ),
     );

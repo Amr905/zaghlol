@@ -283,25 +283,35 @@ class DriftAccountsRepository implements AccountsRepository {
     final now = _nowMs();
     return _dao.inTransaction(() async {
       final source = await _live(sourceId);
-      await _live(targetId);
+      final target = await _live(targetId);
       if (source.isDefaultCash != 0) {
         throw AccountsException(AccountsException.defaultCash);
       }
+      // T-266: a linked card's figures are its account's, so nothing may be
+      // merged into it (its moved balances would hide behind the link).
+      if (target.linkedAccountId != null) {
+        throw AccountsException(AccountsException.linked);
+      }
+      final targetHolds = AccountKind.fromCode(target.kind).canHoldCards;
+      // A merge that ends a link re-anchors the account first, exactly as an
+      // unlink does, while the ledger still counts the card on it; so the
+      // account's figure does not move when the card's transactions leave.
+      if (!targetHolds) {
+        for (final card in await _dao.cardsLinkedTo(sourceId)) {
+          await _unlinkIn(card);
+        }
+      }
+      final linkedTo = source.linkedAccountId;
+      if (linkedTo != null && linkedTo != targetId) await _unlinkIn(source);
       await _dao.relinkTransactions(sourceId, targetId, at: now);
       await _dao.relinkRecurring(sourceId, targetId);
       await _dao.repointMerged(sourceId, targetId, at: now);
-      // T-266: cards linked to the source follow it when the target can hold
-      // cards; else they are unlinked (they count on their own again).
-      final target = await _live(targetId);
-      final targetHolds = AccountKind.fromCode(target.kind).canHoldCards;
-      await _dao.repointLinked(
-        sourceId,
-        targetHolds ? targetId : null,
-        at: now,
-      );
-      // A linked card merged into another card stops being linked, so the
+      // Cards linked to the source follow it when the target can hold cards
+      // (else they were unlinked above and count on their own again).
+      if (targetHolds) await _dao.repointLinked(sourceId, targetId, at: now);
+      // A linked card merged into its own account stops being linked, so the
       // target never inherits a stale link through the source row.
-      if (source.linkedAccountId != null) {
+      if (linkedTo != null && linkedTo == targetId) {
         await _dao.setLinked(sourceId, null, at: now);
       }
       for (final b in await _dao.balancesOf(sourceId)) {
@@ -316,14 +326,13 @@ class DriftAccountsRepository implements AccountsRepository {
           await _dao.deleteBalance(sourceId, b.currency);
         }
       }
-      final settings = _settings;
-      if (settings != null) {
-        final key = keys.Settings.openingBalances;
-        final before = key.parse(await settings.read(key.name));
-        final after = before.moveAccount(sourceId, targetId);
-        if (!identical(before, after)) {
-          await settings.write(key.name, key.format(after), at: now);
-        }
+      // The typed balances move too (including an anchor written above).
+      final settings = _settingsDao;
+      final key = keys.Settings.openingBalances;
+      final before = key.parse(await settings.read(key.name));
+      final after = before.moveAccount(sourceId, targetId);
+      if (!identical(before, after)) {
+        await settings.write(key.name, key.format(after), at: now);
       }
       final changed = await _dao.updateById(
         sourceId,

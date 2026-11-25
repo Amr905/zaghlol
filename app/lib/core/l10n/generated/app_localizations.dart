@@ -3928,6 +3928,12 @@ abstract class AppLocalizations {
   /// **'معرفناش نحفظ الربط، جرّب تاني.'**
   String get accountsLinkFailed;
 
+  /// S · T-266 · ACC_LINKED: a merge or retype would break a card link
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده مربوط بحساب، والتغيير ده هيفك الربط. فك ربط الكارت الأول وبعدين جرّب تاني.'**
+  String get accountsLinkBlocked;
+
   /// T · T-266
   ///
   /// In ar, this message translates to:

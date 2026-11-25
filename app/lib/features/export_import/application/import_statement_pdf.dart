@@ -419,6 +419,7 @@ class ImportStatementPdfUseCase {
       start.toUtc().millisecondsSinceEpoch,
       end.toUtc().millisecondsSinceEpoch,
       settledOnly: true,
+      withLinkedCards: true,
     )) {
       counts.update(
         _key(e.direction, e.amount),
@@ -430,9 +431,22 @@ class ImportStatementPdfUseCase {
   }
 
   /// Built from storage terms (minor + currency), never from source text.
+  /// Keyed by the cash side, not the exact direction: a statement row is only
+  /// an expense or income, while SMS store the same money as a transfer, fee
+  /// or refund.
   static String _key(TxnDirection d, Money amount) {
     final s = amount.toStorage();
+    final side = _isOutflow(d) ? 'out' : 'in';
     // ignore: no_unmasked_amount - duplicate-detection key, never shown
-    return '${d.code}|${s.minor}|${s.currency}';
+    return '$side|${s.minor}|${s.currency}';
   }
+
+  static bool _isOutflow(TxnDirection d) => switch (d) {
+    TxnDirection.expense ||
+    TxnDirection.fee ||
+    TxnDirection.transferOut => true,
+    TxnDirection.income ||
+    TxnDirection.refund ||
+    TxnDirection.transferIn => false,
+  };
 }
