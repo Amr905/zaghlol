@@ -2596,6 +2596,26 @@
   "@ingestionReviewDismissed": {
     "description": "N + common_action_undo"
   },
+  "ingestionReviewOldDueQuestion": "ده كان تذكير بميعاد سداد، مش مصروف — نشيله؟",
+  "@ingestionReviewOldDueQuestion": {
+    "description": "T-250: review card on an old due reminder that was saved as spending"
+  },
+  "ingestionReviewOldDueRemove": "شيله",
+  "@ingestionReviewOldDueRemove": {
+    "description": "T-250: removes the transaction (undo in the snackbar)"
+  },
+  "ingestionReviewOldDueKeep": "خليه",
+  "@ingestionReviewOldDueKeep": {
+    "description": "T-250: keeps the transaction as spending; never asked again"
+  },
+  "ingestionReviewOldDueRemoved": "شلناه من مصاريفك",
+  "@ingestionReviewOldDueRemoved": {
+    "description": "T-250: snackbar after Remove, with common_action_undo"
+  },
+  "ingestionReviewOldDueKept": "تمام، هيفضل زي ما هو",
+  "@ingestionReviewOldDueKept": {
+    "description": "T-250: snackbar after Keep"
+  },
   "ingestionReviewEmptyTitle": "كله تمام! مفيش حاجة مستنية رأيك ✨",
   "@ingestionReviewEmptyTitle": {
     "description": "T · C-28, Rive proud"

@@ -211,3 +211,23 @@ final class SuggestionCardModel extends ReviewCardModel {
   @override
   ReviewFilter get filter => ReviewFilter.all;
 }
+
+/// T-250: a transaction saved from a message that now reads as a card due
+/// reminder: "remove it?" with Remove and Keep. Nothing is removed without
+/// the tap on Remove.
+final class OldDueCardModel extends ReviewCardModel {
+  const OldDueCardModel({
+    required String itemId,
+    required this.txnId,
+    required this.amount,
+    required this.occurredAt,
+    this.merchant,
+  }) : super(itemId);
+  final String txnId;
+  final Money amount;
+  final DateTime occurredAt;
+  final String? merchant;
+
+  @override
+  ReviewFilter get filter => ReviewFilter.messages;
+}

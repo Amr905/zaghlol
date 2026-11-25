@@ -9,7 +9,8 @@
 // - one write transaction per message; a message the user or another engine
 //   changed meanwhile is skipped (conditional status update), so the job can
 //   run next to live capture, the inbox scan and the review screen;
-// - nothing is deleted; a user-verified or deleted transaction is never
+// - nothing is deleted (T-250: an old auto-saved due reminder only gets a
+//   Remove/Keep review item); a user-verified or deleted transaction is never
 //   written; amounts, directions, statuses and categories of existing
 //   transactions never change;
 // - a registry-stamp on every examined row means each start only looks at
@@ -30,6 +31,7 @@ import 'ingest_store_port.dart';
 abstract final class ReparseDiag {
   static const String converted = 'REPARSE_CONVERTED';
   static const String updated = 'REPARSE_UPDATED';
+  static const String offered = 'REPARSE_OFFERED';
   static const String skipped = 'REPARSE_SKIPPED';
   static const String failed = 'REPARSE_FAILED';
   static const String hookFailed = 'REPARSE_HOOK_FAILED';
@@ -41,6 +43,7 @@ final class ReparseSummary {
     this.examined = 0,
     this.converted = 0,
     this.updated = 0,
+    this.offered = 0,
     this.unchanged = 0,
     this.skipped = 0,
     this.failed = 0,
@@ -51,6 +54,10 @@ final class ReparseSummary {
   final int examined;
   final int converted;
   final int updated;
+
+  /// T-250: messages whose old auto-saved transaction is now offered for
+  /// removal (a review item; nothing removed).
+  final int offered;
   final int unchanged;
   final int skipped;
 
@@ -69,7 +76,7 @@ final class ReparseSummary {
   @override
   String toString() =>
       'ReparseSummary(examined: $examined, converted: $converted, '
-      'updated: $updated, unchanged: $unchanged, skipped: $skipped, '
+      'updated: $updated, offered: $offered, unchanged: $unchanged, skipped: $skipped, '
       'failed: $failed, hookFailures: $hookFailures, stopped: $stopped)';
 }
 
@@ -113,6 +120,7 @@ final class ReparseJob {
     var examined = 0;
     var converted = 0;
     var updated = 0;
+    var offered = 0;
     var unchanged = 0;
     var skipped = 0;
     var failed = 0;
@@ -163,6 +171,9 @@ final class ReparseJob {
           case ReparseOutcome.updated:
             updated++;
             _diag.count(ReparseDiag.updated, 1);
+          case ReparseOutcome.offered:
+            offered++;
+            _diag.count(ReparseDiag.offered, 1);
           case ReparseOutcome.unchanged:
             unchanged++;
           case ReparseOutcome.skipped:
@@ -189,6 +200,7 @@ final class ReparseJob {
       examined: examined,
       converted: converted,
       updated: updated,
+      offered: offered,
       unchanged: unchanged,
       skipped: skipped,
       failed: failed,

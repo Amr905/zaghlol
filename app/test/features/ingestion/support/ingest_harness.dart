@@ -200,6 +200,9 @@ final class FaultyStore implements IngestStorePort {
   Future<ReparseTarget?> txnOfRaw(String rawId) =>
       _step(() => _inner.txnOfRaw(rawId));
   @override
+  Future<List<String>> oldDueOfferTxns(String rawId) =>
+      _step(() => _inner.oldDueOfferTxns(rawId));
+  @override
   Future<void> insertReview({
     required String id,
     required String kind,

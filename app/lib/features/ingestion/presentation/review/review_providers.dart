@@ -24,6 +24,9 @@ import '../../../accounts/domain/account.dart';
 import '../../../capture/application/template_builder.dart' show TemplateSample;
 import '../../../categorization/data/categorizer_providers.dart';
 import '../../../categorization/domain/categorize_input.dart';
+import '../../../transactions/presentation/list/txn_list_providers.dart'
+    show txnBulkActionsProvider, txnListProvider;
+import '../../application/old_due_review.dart';
 import '../../data/review_repository.dart';
 import '../../domain/generic_suggestion.dart';
 import 'review_models.dart';
@@ -62,6 +65,17 @@ abstract interface class ReviewActions {
   /// The message behind [rawMessageId] as a template-builder sample, read
   /// only when the user asks to make a template from it. Never logged.
   Future<TemplateSample?> templateSample(String rawMessageId);
+
+  /// T-250 Remove: deletes the old due reminder saved as spending through
+  /// the normal delete path. Returns the undo batch id, or null when the
+  /// offer no longer applies (nothing changed).
+  Future<String?> removeOldDue(OldDueCardModel card);
+
+  /// Undo of [removeOldDue].
+  Future<void> undoRemoveOldDue(String batchId);
+
+  /// T-250 Keep: the transaction stays and is never offered again.
+  Future<bool> keepOldDue(OldDueCardModel card);
 }
 
 final class _LiveActions implements ReviewActions {
@@ -246,6 +260,33 @@ final class _LiveActions implements ReviewActions {
     return TemplateSample(sender: sender, channel: row.channel, body: row.body);
   }
 
+  Future<OldDueReview> get _oldDue async => OldDueReview(
+    reviews: await _reviews,
+    txns: await _ref.read(txnBulkActionsProvider.future),
+  );
+
+  @override
+  Future<String?> removeOldDue(OldDueCardModel card) async {
+    final batchId = await (await _oldDue).remove(card.itemId);
+    _ref.invalidate(txnListProvider);
+    _refresh();
+    return batchId;
+  }
+
+  @override
+  Future<void> undoRemoveOldDue(String batchId) async {
+    await (await _oldDue).undoRemove(batchId);
+    _ref.invalidate(txnListProvider);
+    _refresh();
+  }
+
+  @override
+  Future<bool> keepOldDue(OldDueCardModel card) async {
+    final kept = await (await _oldDue).keep(card.itemId);
+    _refresh();
+    return kept;
+  }
+
   @override
   Future<void> requestBank(
     String itemId, {
@@ -357,6 +398,17 @@ Future<ReviewCardModel?> _toCard(
                 txn.direction == TxnDirection.transferIn
             ? txn.merchantRaw
             : null,
+      );
+    case ReviewKind.lowConfidence
+        when payload['reason'] == ReviewReason.oldDueNotice:
+      // T-250: shown only while the offer still applies.
+      if (txn == null || txn.isUserVerified) return null;
+      return OldDueCardModel(
+        itemId: item.id,
+        txnId: txn.id,
+        amount: txn.amount,
+        occurredAt: txn.occurredAt,
+        merchant: txn.merchantRaw,
       );
     case ReviewKind.lowConfidence:
     case ReviewKind.newSender:

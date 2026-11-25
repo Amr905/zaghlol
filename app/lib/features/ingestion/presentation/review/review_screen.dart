@@ -364,6 +364,57 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     );
   }
 
+  /// T-250: Remove deletes at once through the normal delete path; Undo
+  /// puts the transaction back (same as deleting from its detail screen).
+  Future<void> _removeOldDue(OldDueCardModel card) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    final batchId = await _actions.removeOldDue(card);
+    messenger.hideCurrentSnackBar();
+    if (batchId == null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.reviewErrorSaveFailed)),
+      );
+      return;
+    }
+    final actions = _actions;
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.ingestionReviewOldDueRemoved),
+        persist: false,
+        action: SnackBarAction(
+          label: l10n.commonActionUndo,
+          onPressed: () {
+            ZHaptics.light();
+            // Outlives the screen: no `ref` or `context` here.
+            unawaited(
+              actions.undoRemoveOldDue(batchId).catchError((Object _) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.reviewErrorSaveFailed)),
+                );
+              }),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _keepOldDue(OldDueCardModel card) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    final kept = await _actions.keepOldDue(card);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            kept ? l10n.ingestionReviewOldDueKept : l10n.reviewErrorSaveFailed,
+          ),
+        ),
+      );
+  }
+
   void _dismissCard(ReviewCardModel card) {
     if (card is SubscriptionCardModel) {
       _deferred(
@@ -410,6 +461,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       ),
       onConfirm: () => _now(() => _actions.confirmSubscription(card)),
       onDismiss: () => _dismissCard(card),
+    ),
+    OldDueCardModel() => _OldDueCard(
+      card: card,
+      onRemove: () => _now(() => _removeOldDue(card)),
+      onKeep: () => _now(() => _keepOldDue(card)),
     ),
     SuggestionCardModel(isPair: true) => _PairCard(
       card: card,
@@ -1114,6 +1170,66 @@ class _SuggestionShell extends StatelessWidget {
                 label: l10n.commonActionDismiss,
                 variant: ZButtonVariant.text,
                 onPressed: onDismiss,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// T-250: "This was a payment-due reminder, not spending — remove it?"
+class _OldDueCard extends StatelessWidget {
+  const _OldDueCard({
+    required this.card,
+    required this.onRemove,
+    required this.onKeep,
+  });
+  final OldDueCardModel card;
+  final VoidCallback onRemove;
+  final VoidCallback onKeep;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final digits = ProviderScope.containerOf(context)
+        .read(digitsModeProvider(lang));
+    final colors = ZColors.of(context);
+    return ZCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.ingestionReviewOldDueQuestion,
+            style: ZType.body.copyWith(color: colors.text),
+          ),
+          const SizedBox(height: ZSpacing.sm),
+          _amountLine(
+            context,
+            card.amount,
+            isIncome: false,
+            merchant: card.merchant,
+          ),
+          Text(
+            ZDateFormat.date(card.occurredAt.toLocal(), lang, digits),
+            style: ZType.bodySmall.copyWith(color: colors.textMuted),
+          ),
+          const SizedBox(height: ZSpacing.md),
+          Wrap(
+            spacing: ZSpacing.sm,
+            runSpacing: ZSpacing.sm,
+            children: [
+              ZButton(
+                label: l10n.ingestionReviewOldDueRemove,
+                haptic: ZHaptic.medium,
+                onPressed: onRemove,
+              ),
+              ZButton(
+                label: l10n.ingestionReviewOldDueKeep,
+                variant: ZButtonVariant.text,
+                onPressed: onKeep,
               ),
             ],
           ),

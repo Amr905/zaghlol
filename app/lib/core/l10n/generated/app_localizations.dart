@@ -3058,6 +3058,36 @@ abstract class AppLocalizations {
   /// **'اتشالت من المراجعة'**
   String get ingestionReviewDismissed;
 
+  /// T-250: review card on an old due reminder that was saved as spending
+  ///
+  /// In ar, this message translates to:
+  /// **'ده كان تذكير بميعاد سداد، مش مصروف — نشيله؟'**
+  String get ingestionReviewOldDueQuestion;
+
+  /// T-250: removes the transaction (undo in the snackbar)
+  ///
+  /// In ar, this message translates to:
+  /// **'شيله'**
+  String get ingestionReviewOldDueRemove;
+
+  /// T-250: keeps the transaction as spending; never asked again
+  ///
+  /// In ar, this message translates to:
+  /// **'خليه'**
+  String get ingestionReviewOldDueKeep;
+
+  /// T-250: snackbar after Remove, with common_action_undo
+  ///
+  /// In ar, this message translates to:
+  /// **'شلناه من مصاريفك'**
+  String get ingestionReviewOldDueRemoved;
+
+  /// T-250: snackbar after Keep
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام، هيفضل زي ما هو'**
+  String get ingestionReviewOldDueKept;
+
   /// T · C-28, Rive proud
   ///
   /// In ar, this message translates to:
