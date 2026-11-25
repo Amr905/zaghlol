@@ -100,3 +100,22 @@ Registry: T-248 (`arab_bank.account_purchase.ar` → v10) and T-250 (`cib.cc_due
 | FU-315 | T-249 m-3, n-1 (zero amounts on notices dropped by the parser) | parsing |
 | FU-316 | T-250 m-4 (Remove atomic) | app core |
 | FU-317 | T-250 n-2, n-3 (Remove copy, `recurring_occurrences` clause, purge note) | app core |
+
+## Delta re-review (Sonnet)
+
+Delta `15b7b7fc..34feb1c6` (fix/fix70). Analyze clean; registry lint 1425/1425, 0 findings; `po_suite` + `notices` pass; app ingestion, features/ingestion and features/recurring pass (455, goldens excluded).
+
+Targeted fail-before proof, run in a clean worktree on the merged tree, then restored (tree clean):
+- M-1: restoring the old mask inference (`_isMaskedAccount(c.name!) ? 'own_account' : 'person'`) makes 3 tests in `fix70_counterparty_test.dart` fail (masked Arab Bank InstaPay out, masked-employer salary, "Exxon 24"). The HSBC case-10 test, the FU-315 test and the M-2 tests still pass.
+- M-2: replacing the `_dueIsPast` guard with `if (true)` makes exactly 1 test fail ("a notice with a past due date changes no due and no reminder"). The future-due test still passes.
+
+| Item | Verdict | Notes |
+|---|---|---|
+| M-1 | RESOLVED | `own_account` now only when the template sets `counterpartyOwnAccount` (only `hsbc.cc_payment_transfer.en`, version bumped, registry and guard versions bumped). The pipeline sets it only when a name was extracted. The mask regex is gone, so no other path marks a masked third-party account internal. Everything else is `person` as before T-248. |
+| M-2 | RESOLVED | The guard is only in the re-parse path (`_dueIsPast`, UTC-midnight date against today's local date). Live capture and the inbox scan don't call it. A null due date still applies. |
+| FU-316 | RESOLVED | Check, conditional resolve and delete run in one `_db.transaction`. The resolve comes first, so a Keep that landed earlier makes it return null with nothing deleted. A throwing delete rolls the resolve back, and Undo restores the delete batch. Minor note, no action needed: any non-DB side effects inside `TxnBulkActions.delete` (undo image, change event) happen before commit, but the delete is the last step. |
+| FU-315 | RESOLVED | A zero amount or minimum is kept only for `ccDue` and `ccStatement`. Other events still reject zero, and the notice path never produces a transaction. `mergeNotice` now sets min due to 0 when the incoming total is an explicit 0 with no minimum. Test covers a real 0.00 statement and a zero purchase staying a non-transaction. |
+
+New blocker/major: none.
+
+Verdict: APPROVED.
