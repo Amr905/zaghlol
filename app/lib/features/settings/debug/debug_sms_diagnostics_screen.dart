@@ -18,6 +18,12 @@ const String kDiagNote =
     'review. inbox_* is the historical scan. Counts only, never message text.';
 
 /// The status line (a plain function: not UI scope for the string lint).
+/// One unread-reason row (T-244): reason code and count, no message text.
+String unreadLine(String reason, int count) => 'unread:$reason: $count';
+
+/// One shape-signature row (T-244): text-free signature and count.
+String shapeLine(String signature, int count) => 'shape x$count: $signature';
+
 String guardLine(SmsDiagSnapshot s) =>
     'Guard: ${s.guardMode} / user part: ${s.userState} / '
     'spooled waiting: ${s.pending}';
@@ -117,18 +123,19 @@ class _Body extends StatelessWidget {
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Text(
-                  'unread:${e.key}: ${e.value}',
+                  unreadLine(e.key, e.value),
                   key: Key('sms-diag-$name-unread-${e.key}'),
                 ),
               ),
             ),
-          for (final e in (snapshot.signatures[name] ?? const []))
+          for (final e
+              in (snapshot.signatures[name] ?? const <MapEntry<String, int>>[]))
             Padding(
               padding: const EdgeInsetsDirectional.only(start: 12),
               child: Directionality(
                 textDirection: TextDirection.ltr,
                 child: Text(
-                  'shape x${e.value}: ${e.key}',
+                  shapeLine(e.key, e.value),
                   key: Key('sms-diag-$name-shape-${e.key}'),
                 ),
               ),
