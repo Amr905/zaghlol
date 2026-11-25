@@ -55,6 +55,16 @@ allKeys = [
     byDefault: SalaryState.empty,
     other: SalaryState.empty.withSkipped(CivilDate(2026, 11, 25)),
   ),
+  (
+    key: Settings.paydayAuto,
+    byDefault: PaydayAutoState.empty,
+    other: const PaydayAutoState(
+      autoDay: 23,
+      previous: 1,
+      bannerPending: true,
+      suppressed: [5],
+    ),
+  ),
   (key: Settings.primaryCurrency, byDefault: egp, other: kwd),
   (key: Settings.approxViewEnabled, byDefault: false, other: true),
   (key: Settings.approxViewTarget, byDefault: egp, other: Currency.of('USD')),

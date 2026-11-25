@@ -20,6 +20,7 @@ export 'money/src/allocation.dart' show maxAllocationParts;
 export 'mascot_rules/mascot_rules.dart';
 export 'recurring/recurring_rules.dart';
 export 'roi/roi_assumptions.dart';
+export 'salary/payday_detection.dart';
 export 'salary/salary_rules.dart';
 export 'roi/roi_rules.dart';
 export 'transfers/offsets.dart';

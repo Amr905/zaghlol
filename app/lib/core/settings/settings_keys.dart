@@ -73,6 +73,15 @@ abstract final class Settings {
     encode: (v) => v.toJson(),
   );
 
+  /// T-246 (D-81): what the automatic payday last did (previous value, banner
+  /// pending, undone patterns). Unreadable text reads as empty.
+  static final paydayAuto = SettingKey.custom<PaydayAutoState>(
+    'payday_auto',
+    byDefault: PaydayAutoState.empty,
+    decode: PaydayAutoState.fromJson,
+    encode: (v) => v.toJson(),
+  );
+
   /// T-199 (D-75): balances the user typed per account and currency, each
   /// with the instant it is true for. Read as empty when unreadable.
   static final openingBalances = SettingKey.custom<OpeningBalances>(
