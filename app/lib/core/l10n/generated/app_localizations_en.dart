@@ -1956,6 +1956,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ingestionReviewDismissed => 'Removed from review';
 
   @override
+  String get ingestionReviewOldDueQuestion =>
+      'This was a payment-due reminder, not spending — remove it?';
+
+  @override
+  String get ingestionReviewOldDueRemove => 'Remove';
+
+  @override
+  String get ingestionReviewOldDueKeep => 'Keep';
+
+  @override
+  String get ingestionReviewOldDueRemoved => 'Removed from your spending';
+
+  @override
+  String get ingestionReviewOldDueKept => 'OK, it stays as it is';
+
+  @override
   String get ingestionReviewEmptyTitle => 'All clear! Nothing to review ✨';
 
   @override

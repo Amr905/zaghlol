@@ -14,6 +14,7 @@ import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/outbox_dao.dart';
 import '../../../core/db/daos/review_items_dao.dart';
 import '../../../core/db/daos/write_errors.dart';
+import '../../../core/db/db_errors.dart' show DbCorruptException;
 import '../../transactions/data/drift_transaction_repository.dart'
     show Clock, IdGenerator;
 import '../../transactions/data/transactions_providers.dart'
@@ -25,6 +26,12 @@ abstract final class ReviewResolution {
   static const String manual = 'manual';
   static const String accepted = 'accepted';
   static const String bankRequested = 'bank_requested';
+
+  /// T-250: the user removed an old due reminder saved as spending.
+  static const String removed = 'removed';
+
+  /// T-250: the user kept it (the transaction is now user-verified).
+  static const String kept = 'kept';
 }
 
 /// Typed failure; the code never carries message text.
@@ -224,6 +231,69 @@ class ReviewRepository {
         }
         return ReviewOutcome(applied: true, txnId: txnId);
       });
+
+  // ---- T-250: old due reminders saved as spending.
+
+  /// The transaction behind the open old-due item [itemId] when it may
+  /// still be removed: the item is open and of reason `oldDueNotice`, and
+  /// its transaction is live and not user-verified (an edit since the offer
+  /// locks it). Null otherwise; never writes.
+  Future<String?> oldDueTxnToRemove(String itemId) => guardRead(() async {
+    final item = await _reviews.byId(itemId);
+    if (item == null || item.resolvedAt != null || !_isOldDue(item)) {
+      return null;
+    }
+    final txnId = item.txnId!;
+    final t = await (_db.select(
+      _db.transactions,
+    )..where((x) => x.id.equals(txnId))).getSingleOrNull();
+    if (t == null || t.deletedAt != null || t.isUserVerified != 0) return null;
+    return txnId;
+  });
+
+  /// Resolves the old-due item [itemId] as `removed` after the user's Remove
+  /// deleted its transaction. False when it was resolved already.
+  Future<bool> markOldDueRemoved(String itemId) => _act(itemId, (item) async {
+    if (!_isOldDue(item)) {
+      throw ReviewException(ReviewException.notApplicable);
+    }
+    return ReviewOutcome(
+      applied: await _resolve(item, ReviewResolution.removed),
+      txnId: item.txnId,
+    );
+  }).then((o) => o.applied);
+
+  /// Keep: resolves the old-due item [itemId] as `kept` and marks its
+  /// transaction user-verified, so it is never offered again. False when
+  /// another actor resolved it first (nothing changed).
+  Future<bool> keepOldDue(String itemId) => _act(itemId, (item) async {
+    if (!_isOldDue(item)) {
+      throw ReviewException(ReviewException.notApplicable);
+    }
+    if (!await _resolve(item, ReviewResolution.kept)) {
+      return const ReviewOutcome(applied: false);
+    }
+    await (_db.update(
+      _db.transactions,
+    )..where((t) => t.id.equals(item.txnId!))).write(
+      TransactionsCompanion(
+        isUserVerified: const Value(1),
+        updatedAt: Value(_now),
+      ),
+    );
+    return ReviewOutcome(applied: true, txnId: item.txnId);
+  }).then((o) => o.applied);
+
+  static bool _isOldDue(ReviewItemRow item) {
+    if (item.kind != ReviewKind.lowConfidence || item.txnId == null) {
+      return false;
+    }
+    try {
+      return reviewPayloadOf(item)?['reason'] == ReviewReason.oldDueNotice;
+    } on DbCorruptException {
+      return false;
+    }
+  }
 
   /// "Request my bank": queues a `bank_request` in the outbox (name,
   /// country and channel only, BR-SYNC-03) and resolves the item.

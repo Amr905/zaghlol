@@ -25,6 +25,14 @@ abstract final class ReviewKind {
   static const String paydaySuggestion = 'payday_suggestion';
 }
 
+/// `payload.reason` values that give an existing [ReviewKind] its own card.
+abstract final class ReviewReason {
+  /// T-250: a `low_confidence` item on a transaction that was saved from a
+  /// message re-parse now reads as a card due notice (D-83). The user picks
+  /// Remove or Keep; nothing is removed without that tap.
+  static const String oldDueNotice = 'oldDueNotice';
+}
+
 class ReviewItemsDao {
   ReviewItemsDao(this._db);
 

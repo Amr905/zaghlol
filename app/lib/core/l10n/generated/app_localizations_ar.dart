@@ -2009,6 +2009,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ingestionReviewDismissed => 'اتشالت من المراجعة';
 
   @override
+  String get ingestionReviewOldDueQuestion =>
+      'ده كان تذكير بميعاد سداد، مش مصروف — نشيله؟';
+
+  @override
+  String get ingestionReviewOldDueRemove => 'شيله';
+
+  @override
+  String get ingestionReviewOldDueKeep => 'خليه';
+
+  @override
+  String get ingestionReviewOldDueRemoved => 'شلناه من مصاريفك';
+
+  @override
+  String get ingestionReviewOldDueKept => 'تمام، هيفضل زي ما هو';
+
+  @override
   String get ingestionReviewEmptyTitle => 'كله تمام! مفيش حاجة مستنية رأيك ✨';
 
   @override

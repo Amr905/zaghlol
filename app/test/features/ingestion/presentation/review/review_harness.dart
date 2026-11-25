@@ -74,6 +74,24 @@ class FakeActions implements ReviewActions {
     calls.add('sample:$rawMessageId');
     return null;
   }
+
+  /// removeOldDue answers null (the offer no longer applies).
+  bool refuseOldDue = false;
+
+  @override
+  Future<String?> removeOldDue(OldDueCardModel card) async {
+    await _rec('oldDueRemove:${card.itemId}');
+    return refuseOldDue ? null : 'batch-${card.itemId}';
+  }
+
+  @override
+  Future<void> undoRemoveOldDue(String batchId) => _rec('oldDueUndo:$batchId');
+
+  @override
+  Future<bool> keepOldDue(OldDueCardModel card) async {
+    await _rec('oldDueKeep:${card.itemId}');
+    return true;
+  }
 }
 
 final sampleCards = <ReviewCardModel>[

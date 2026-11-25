@@ -81,4 +81,11 @@ abstract interface class IngestStorePort {
 
   /// T-076: the transaction whose `raw_message_id` is [rawId], if any.
   Future<ReparseTarget?> txnOfRaw(String rawId);
+
+  /// T-250: ids of the transactions stored from [rawId] that may be offered
+  /// for removal now that the message reads as a card due notice: live,
+  /// machine-made spending the user never touched (not verified, no user
+  /// category, note, split, transfer pair or offset link) and never offered
+  /// before (no `oldDueNotice` review item in any state). Ordered by id.
+  Future<List<String>> oldDueOfferTxns(String rawId);
 }

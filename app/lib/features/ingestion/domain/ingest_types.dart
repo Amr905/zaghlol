@@ -246,6 +246,11 @@ enum ReparseOutcome {
   /// A parsed message's unverified transaction had NULL fields filled.
   updated,
 
+  /// T-250: a parsed message now reads as a card due notice; its untouched
+  /// auto-saved transaction(s) got a Remove/Keep review item. Nothing was
+  /// removed.
+  offered,
+
   /// Nothing to apply (still unrecognized, no handler, locked by the user's
   /// own edit, or the same template).
   unchanged,
