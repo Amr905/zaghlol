@@ -331,9 +331,15 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-245](tasks/T-245.md) | Card dues from notices into the dues reminders | D-83 | High | Sonnet | flutter-core-engineer | T-241 | A | 68 | DONE (batch 68) |
 | [T-246](tasks/T-246.md) | Payday follows the salary (first of month, 3-month pattern, auto-set + Undo) | D-81 | High | Sonnet | flutter-core-engineer | — | A | 67 | DONE (batch 67) |
 | [T-247](tasks/T-247.md) | Cycle after day 20 named as the next month | D-82 | Medium | Sonnet | flutter-core-engineer | T-246 | A | 69 | DONE (batch 69) |
-| [T-248](tasks/T-248.md) | Parsing follow-ups (FU-298/299/300/305/306) | follow-ups | Medium | Sonnet | parsing-engine-engineer | — | P | 70 | TODO |
-| [T-249](tasks/T-249.md) | Card dues follow-ups (FU-301…FU-304) | follow-ups | Medium | Sonnet | flutter-core-engineer | — | A | 70 | TODO |
-| [T-250](tasks/T-250.md) | Old due reminders saved as spending: offer to remove (FU-295) | D-83 | High (C4) | Sonnet | flutter-core-engineer | — | A | 70 | TODO |
+| [T-248](tasks/T-248.md) | Parsing follow-ups (FU-298/299/300/305/306) | follow-ups | Medium | Sonnet | parsing-engine-engineer | — | P | 70 | DONE (batch 70) |
+| [T-249](tasks/T-249.md) | Card dues follow-ups (FU-301…FU-304) | follow-ups | Medium | Sonnet | flutter-core-engineer | — | A | 70 | DONE (batch 70) |
+| [T-250](tasks/T-250.md) | Old due reminders saved as spending: offer to remove (FU-295) | D-83 | High (C4) | Sonnet | flutter-core-engineer | — | A | 70 | DONE (batch 70) |
+| [T-251](tasks/T-251.md) | Backend follow-ups (FU-004/010/052/059/063/064/116) | follow-ups | Medium | Sonnet | backend-engineer | — | B | 71 | DONE (batch 71) |
+| [T-252](tasks/T-252.md) | Lint and core follow-ups (FU-029/031/032/033/038/076) | follow-ups | Medium | Sonnet | flutter-core-engineer | — | C | 71 | DONE (batch 71) |
+| [T-253](tasks/T-253.md) | Copy follow-ups (FU-027/039/040) | follow-ups | Low | Sonnet | flutter-ui-engineer | — | U | 71 | DONE (batch 71) |
+| [T-254](tasks/T-254.md) | Native capture hardening follow-ups | follow-ups | High (C4) | Opus | native-platform-engineer | — | N | 72 | DONE (batch 72) |
+| [T-255](tasks/T-255.md) | Core follow-ups (FU-110/113/114/126/138/144) | follow-ups | Medium | Sonnet | flutter-core-engineer | — | A | 72 | DONE (batch 72) |
+| [T-256](tasks/T-256.md) | Parsing follow-ups (FU-051/078/084/118) | follow-ups | Medium | Sonnet | parsing-engine-engineer | — | P | 72 | DONE (batch 72) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

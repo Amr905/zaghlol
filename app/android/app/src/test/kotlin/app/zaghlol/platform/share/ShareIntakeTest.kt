@@ -187,6 +187,102 @@ class ShareIntakeTest {
         assertEquals(ShareKind.CSV, accepted(intake.accept(source)).kind)
     }
 
+    /** FU-070 C2: a provider MIME that maps to no kind is refused; the intent type can't rescue it. */
+    @Test
+    fun anUnknownProviderTypeIsRefusedEvenWithAnAcceptedIntentType() {
+        var opened = false
+        val source = FakeShareSource(
+            intentType = "image/png",
+            streamScheme = "content",
+            streamHost = "com.example.provider",
+            resolverMime = "application/octet-stream",
+            opener = { opened = true; (PNG_HEAD + ByteArray(20)).inputStream() },
+        )
+        assertEquals(ShareRejectReason.UNSUPPORTED_TYPE, rejected(intake.accept(source)))
+        assertFalse("nothing read from the sender", opened)
+        assertNoLeftovers(dir)
+    }
+
+    /** FU-070 C2: with no provider MIME the intent type still decides. */
+    @Test
+    fun theIntentTypeDecidesWhenTheProviderReportsNone() {
+        val source = FakeShareSource(
+            intentType = "text/csv",
+            streamScheme = "content",
+            streamHost = "com.example.provider",
+            resolverMime = null,
+            opener = { "a,b\n1,2\n".byteInputStream() },
+        )
+        assertEquals(ShareKind.CSV, accepted(intake.accept(source)).kind)
+    }
+
+    /** FU-330: a Telephony provider is refused by package even under an unknown authority. */
+    @Test
+    fun telephonyProviderPackageIsRefusedWhateverTheAuthority() {
+        val source = FakeShareSource(
+            intentType = "text/plain",
+            streamScheme = "content",
+            streamHost = "sms-changes",
+            streamProviderPackage = "com.android.providers.telephony",
+            resolverMime = "text/plain",
+            opener = { "SYNTHETIC".byteInputStream() },
+        )
+        assertEquals(ShareRejectReason.UNSUPPORTED_TYPE, rejected(intake.accept(source)))
+    }
+
+    /** FU-331: CSV MIME aliases, and octet-stream only for a .csv name. */
+    @Test
+    fun csvAliasesAndNamedOctetStreamAreAccepted() {
+        for (mime in listOf("text/comma-separated-values", "text/x-csv", "application/csv")) {
+            val s = FakeShareSource(intentType = "text/csv", streamScheme = "content", streamHost = "com.example.provider",
+                resolverMime = mime, opener = { "a,b\n1,2\n".byteInputStream() })
+            assertEquals(mime, ShareKind.CSV, accepted(intake.accept(s)).kind)
+        }
+        val named = FakeShareSource(intentType = "text/csv", streamScheme = "content", streamHost = "com.example.provider",
+            streamFileName = "Stmt.CSV", resolverMime = "application/octet-stream", opener = { "a,b\n".byteInputStream() })
+        assertEquals(ShareKind.CSV, accepted(intake.accept(named)).kind)
+        val unnamed = FakeShareSource(intentType = "text/csv", streamScheme = "content", streamHost = "com.example.provider",
+            streamFileName = "stmt.bin", resolverMime = "application/octet-stream", opener = { "a,b\n".byteInputStream() })
+        assertEquals(ShareRejectReason.UNSUPPORTED_TYPE, rejected(intake.accept(unnamed)))
+    }
+
+    /** FU-070 S2: providers our SMS/contacts/call-log permissions unlock are never read. */
+    @Test
+    fun systemProvidersOurPermissionsUnlockAreRefused() {
+        for (host in listOf("sms", "mms", "mms-sms", "call_log", "com.android.contacts", "contacts", "SMS")) {
+            var opened = false
+            val source = FakeShareSource(
+                intentType = "text/plain",
+                streamScheme = "content",
+                streamHost = host.lowercase(),
+                resolverMime = "text/plain",
+                opener = { opened = true; "SYNTHETIC".byteInputStream() },
+            )
+            assertEquals(host, ShareRejectReason.UNSUPPORTED_TYPE, rejected(intake.accept(source)))
+            assertFalse(host, opened)
+        }
+        // The media store stays allowed (gallery shares).
+        val media = FakeShareSource(
+            intentType = "text/plain",
+            streamScheme = "content",
+            streamHost = "media",
+            resolverMime = "text/plain",
+            opener = { "SYNTHETIC text".byteInputStream() },
+        )
+        assertEquals(ShareKind.TEXT, accepted(intake.accept(media)).kind)
+    }
+
+    /** FU-070 C3: when the share already has an outcome, nothing is committed (text and stream paths). */
+    @Test
+    fun noCommitOnceTheShareHasAnOutcome() {
+        val text = intake.accept(FakeShareSource(intentType = "text/plain", text = "SYNTHETIC"), mayCommit = { false })
+        assertEquals(ShareRejectReason.UNREADABLE, rejected(text))
+        val image = intake.accept(FakeShareSource.stream("image/png", PNG_HEAD + ByteArray(20)), mayCommit = { false })
+        assertEquals(ShareRejectReason.UNREADABLE, rejected(image))
+        assertTrue(store.list().isEmpty())
+        assertNoLeftovers(dir)
+    }
+
     // ---- URI and provider safety ----
 
     @Test

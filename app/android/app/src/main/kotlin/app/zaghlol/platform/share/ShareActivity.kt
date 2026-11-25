@@ -22,6 +22,9 @@ import java.util.concurrent.TimeUnit
  * the share arrived (counted from arrival, so a share queued behind a slow one
  * cannot extend it), and after a further [ShareLimits.INTAKE_GRACE_MS] the
  * share is refused as `unreadable` even if the worker has not returned.
+ * A provider that ignores the cancellation can hold a worker for good, so
+ * there are two ([ShareWorkers], FU-070 S1); a commit already in progress
+ * is not overridden by the give-up (FU-070 C3).
  * Recreation (F3): the job id is kept in the saved state; a recreated
  * instance re-attaches to the running job and never ingests twice.
  *
@@ -58,27 +61,36 @@ class ShareActivity : Activity() {
         val deadline = SystemClock.elapsedRealtime() + ShareLimits.INTAKE_TIMEOUT_MS
         val cancelRead = WATCHDOG.schedule(Runnable { source.cancel() }, ShareLimits.INTAKE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         val giveUp = WATCHDOG.schedule(
-            Runnable { ShareJobs.finish(newJob, ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)) },
+            Runnable { ShareJobs.giveUp(newJob, ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)) },
             ShareLimits.INTAKE_TIMEOUT_MS + ShareLimits.INTAKE_GRACE_MS,
             TimeUnit.MILLISECONDS,
         )
-        EXECUTOR.execute {
-            val outcome = try {
-                ShareIntake(
-                    store = ShareStores.create(context),
-                    ownPackage = context.packageName,
-                    imageProbe = BitmapBoundsProbe,
-                    clock = SystemClock::elapsedRealtime,
-                ).accept(source, deadline)
-            } catch (_: Exception) {
-                ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)
-            } catch (_: OutOfMemoryError) {
-                ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)
-            }
-            cancelRead.cancel(false)
-            giveUp.cancel(false)
-            ShareJobs.finish(newJob, outcome)
-        }
+        WORKERS.submit(
+            task = {
+                val outcome = try {
+                    ShareIntake(
+                        store = ShareStores.create(context),
+                        ownPackage = context.packageName,
+                        imageProbe = BitmapBoundsProbe,
+                        clock = SystemClock::elapsedRealtime,
+                    ).accept(source, deadline, mayCommit = newJob::beginCommit)
+                } catch (_: Exception) {
+                    ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)
+                } catch (_: OutOfMemoryError) {
+                    ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)
+                }
+                cancelRead.cancel(false)
+                giveUp.cancel(false)
+                ShareJobs.finish(newJob, outcome)
+            },
+            onRejected = {
+                // FU-070 S1: every worker is held and the queue is full: refuse now.
+                cancelRead.cancel(false)
+                giveUp.cancel(false)
+                source.cancel()
+                ShareJobs.finish(newJob, ShareOutcome.Rejected(ShareRejectReason.UNREADABLE))
+            },
+        )
         attach(newJob)
     }
 
@@ -122,8 +134,8 @@ class ShareActivity : Activity() {
         const val KEY_JOB = "app.zaghlol.share.job"
         val MAIN = Handler(Looper.getMainLooper())
 
-        /** One worker: shares are ingested in order, each bounded by its own deadline. */
-        val EXECUTOR = Executors.newSingleThreadExecutor { r -> Thread(r, "zaghlol-share").apply { isDaemon = true } }
+        /** FU-070 S1: two workers and a short queue, so one provider that never returns can't block later shares. */
+        val WORKERS = ShareWorkers()
         val WATCHDOG: ScheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "zaghlol-share-timeout").apply { isDaemon = true } }
     }

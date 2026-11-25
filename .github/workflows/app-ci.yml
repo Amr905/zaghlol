@@ -701,8 +701,9 @@ jobs:
             exit 1
           fi
           for abi in $ABIS; do
-            if ! grep -qE "^lib/$abi/lib[^/]*sqlite3[^/]*[.]so$" libs.txt; then
-              echo "::error::no sqlite3 code asset for $abi in $APK"
+            # T-007 review #3 (FU-050): exactly SQLite3MultipleCiphers, never upstream libsqlite3.so.
+            if ! grep -qE "^lib/$abi/libsqlite3mc[.]so$" libs.txt; then
+              echo "::error::no libsqlite3mc.so code asset for $abi in $APK"
               exit 1
             fi
           done

@@ -14,13 +14,20 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Past the budget the work is abandoned, not interrupted: the spool write is
  * atomic (a whole entry or none), and a message lost to a process kill after
  * `finish()` is recovered by the inbox catch-up (FU-088). Nothing is logged.
+ *
+ * FU-086 I-5: when the budget (or an executor rejection) finishes the
+ * broadcast **before** the work did, [run]'s `onAbandoned` is called once,
+ * after `finish`, so the caller can record the message as possibly missed.
+ * It is not called when the work finished first. It runs on the timer thread
+ * (or the caller's, on rejection): a caller whose callback can block must
+ * hand it to its own thread, so later broadcasts' `finish` is never delayed.
  */
 class BoundedDispatch(
     private val executor: ExecutorService,
     private val timer: ScheduledExecutorService,
     private val budgetMs: Long = BUDGET_MS,
 ) {
-    fun run(work: () -> Unit, finish: () -> Unit) {
+    fun run(work: () -> Unit, onAbandoned: (() -> Unit)? = null, finish: () -> Unit) {
         val done = AtomicBoolean(false)
         val finishOnce = {
             if (done.compareAndSet(false, true)) {
@@ -29,10 +36,22 @@ class BoundedDispatch(
                 } catch (_: Throwable) {
                     // finish() of an already-finished PendingResult; nothing to do.
                 }
+                true
+            } else {
+                false
+            }
+        }
+        val abandon = {
+            if (finishOnce() && onAbandoned != null) {
+                try {
+                    onAbandoned()
+                } catch (_: Throwable) {
+                    // A record of a miss must never break the receiver.
+                }
             }
         }
         val timeout = try {
-            timer.schedule({ finishOnce() }, budgetMs, TimeUnit.MILLISECONDS)
+            timer.schedule({ abandon() }, budgetMs, TimeUnit.MILLISECONDS)
         } catch (_: Throwable) {
             null
         }
@@ -49,7 +68,7 @@ class BoundedDispatch(
             }
         } catch (_: Throwable) {
             timeout?.cancel(false)
-            finishOnce()
+            abandon()
         }
     }
 
