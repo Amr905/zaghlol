@@ -48,6 +48,10 @@ ParseResult parseGeneric({
   if (notice != null) {
     return notice;
   }
+  // T-243: a text that is only a fee or terms footer is not a transaction.
+  if (_onlyFeeFooter(t)) {
+    return const ParseUnrecognized(UnrecognizedReason.genericPromotion);
+  }
   if (_hits(t, promoKeywords, null).isNotEmpty &&
       _hits(t, completedTransactionCues, null).isEmpty) {
     return const ParseUnrecognized(UnrecognizedReason.genericPromotion);
@@ -152,8 +156,13 @@ ParseResult parseGeneric({
       : _event(t, best, direction);
 
   final last4 = _last4(t, globalLast4);
-  final merchant = _merchant(folded, body, cleaning);
-  if (last4 == null && merchant == null) {
+  // T-243: a transfer names the other party, not a merchant.
+  final cp = direction == null
+      ? null
+      : _counterparty(folded, body, best.end, direction);
+  final merchant = cp != null ? null : _merchant(folded, body, cleaning);
+  final bal = _balances(t, best.money.currency);
+  if (last4 == null && merchant == null && cp == null) {
     reasons.add(GenericReason.sparseFields);
   }
   final date = _withClock(t, _messageDate(t, receivedAt));
@@ -188,6 +197,8 @@ ParseResult parseGeneric({
     if (merchant != null) GenericField.merchant: merchant.$2 ? 850 : 700,
     if (date != null) GenericField.date: date.$2 ? 900 : 800,
     if (reference != null) GenericField.reference: 850,
+    if (cp != null) GenericField.counterparty: 800,
+    if (bal.$1 != null) GenericField.balance: 850,
   };
   GenericSpan span(int s, int e) =>
       GenericSpan(folded.origin[s], folded.origin[e - 1] + 1);
@@ -198,6 +209,7 @@ ParseResult parseGeneric({
     if (merchant != null) GenericField.merchant: span(merchant.$3, merchant.$4),
     if (date != null) GenericField.date: span(date.$3, date.$4),
     if (reference != null) GenericField.reference: reference.$2,
+    if (cp != null) GenericField.counterparty: span(cp.$2, cp.$3),
   };
 
   return ParseGeneric(
@@ -211,6 +223,9 @@ ParseResult parseGeneric({
     dateRead: date != null,
     event: event,
     reference: reference?.$1,
+    counterparty: cp?.$1,
+    balance: bal.$1,
+    available: bal.$2,
     institutionCode: institutionCode,
     confidencePermille: confidence.clamp(0, kGenericMaxConfidencePermille),
     reasons: ordered,
@@ -1033,14 +1048,70 @@ final RegExp _last4Marked = RegExp(
       }
     }
   }
-  final m = _last4Marked.firstMatch(t);
-  if (m == null) {
+  // The earliest of: a marked last-4, a masked prefix (`419*5015`), and a
+  // 4-digit number after `رقم` near a card or account word (T-243).
+  RegExpMatch? best;
+  var bestMasked = false;
+  final hasMask = t.contains('*') || t.contains('x');
+  final hasNumber = t.contains(_numberWord) || t.contains('no');
+  for (final (re, masked) in [
+    (_last4Marked, null),
+    if (hasMask) (_last4Prefixed, true),
+    if (hasNumber) (_last4AfterNumber, false),
+  ]) {
+    for (final m in re.allMatches(t)) {
+      if (re == _last4AfterNumber && !_cardWordBefore(t, m.start)) {
+        continue;
+      }
+      if (_refNumberFollows(t, m)) {
+        continue;
+      }
+      if (best == null || m.start < best.start) {
+        best = m;
+        bestMasked =
+            masked ??
+            (t.codeUnitAt(m.start) == 0x2A || t.codeUnitAt(m.start) == 0x78);
+      }
+      break;
+    }
+  }
+  if (best == null) {
     return null;
   }
-  final d = m.group(1)!;
-  final first = t.codeUnitAt(m.start);
-  final masked = first == 0x2A || first == 0x78;
-  return (d, !masked, m.end - 4);
+  return (best.group(1)!, !bestMasked, best.end - 4);
+}
+
+final RegExp _numberLead = RegExp(r'(?:رقم|no|number)[ :.#x*-]{0,4}[0-9]{4}$');
+final RegExp _refWord = RegExp(r'^ ?(?:مرجعي|ref|reference)');
+
+/// `رقم 1234 مرجعي ...`: a 4-digit reference number, not a last-4.
+bool _refNumberFollows(String t, RegExpMatch m) =>
+    _numberLead.hasMatch(m.group(0)!) && _refWord.hasMatch(t.substring(m.end));
+
+final String _numberWord = foldKey('رقم');
+
+final RegExp _last4Prefixed = RegExp(
+  r'(?<![0-9])[0-9]{2,6}[*x]{1,8}([0-9]{4})(?![0-9])(?![.,][0-9])',
+);
+
+final RegExp _last4AfterNumber = RegExp(
+  r'(?<![a-z0-9])(?:رقم|no|number)[ :.#x*-]{0,4}([0-9]{4})(?![0-9])(?![.,][0-9])(?! ?(?:مرجعي|ref|reference))',
+);
+
+final List<String> _cardWords = [
+  'بطاقه',
+  'حساب',
+  'كارت',
+  'card',
+  'account',
+  'acct',
+].map(foldKey).toList();
+
+/// A card or account word within 40 characters before [at].
+bool _cardWordBefore(String t, int at) {
+  final from = at < 40 ? 0 : at - 40;
+  final w = t.substring(from, at);
+  return _cardWords.any(w.contains);
 }
 
 bool _allDigits(String s) => s.codeUnits.every((u) => u >= 0x30 && u <= 0x39);
@@ -1132,6 +1203,15 @@ bool _nameAli(String c, FoldedText folded, String original, int start) {
     if (endsClause(raws[i]) && !raws[i].endsWith(':')) {
       continue;
     }
+    // T-243: `في حالة`, `من خلال`, `to your account`, a link: not a merchant.
+    if (i + 1 < raws.length) {
+      final first = core(raws[i + 1]);
+      if (merchantNonStarters.contains(first) ||
+          first.startsWith('http') ||
+          first.contains('://')) {
+        continue;
+      }
+    }
     int? spanStart;
     var spanEnd = 0;
     var count = 0;
@@ -1181,4 +1261,200 @@ bool _nameAli(String c, FoldedText folded, String original, int start) {
     }
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// T-243: fee footer, counterparty, balance.
+
+/// True when every sentence that holds a fee or terms wording is the only
+/// place a charge is named: no other sentence has a completed-transaction cue.
+bool _onlyFeeFooter(String t) {
+  if (_hits(t, feeFooterKeywords, null).isEmpty) {
+    return false;
+  }
+  final rest = StringBuffer();
+  var from = 0;
+  for (var i = 0; i <= t.length; i++) {
+    final end = i == t.length;
+    if (end ||
+        (t.codeUnitAt(i) == 0x2E &&
+            (i + 1 == t.length || t.codeUnitAt(i + 1) == 0x20))) {
+      final sentence = t.substring(from, end ? i : i + 1);
+      if (_hits(sentence, feeFooterKeywords, null).isEmpty) {
+        rest.write('$sentence ');
+      }
+      from = i + 1;
+    }
+  }
+  // `charged` and `paid` inside the footer sentences never count.
+  return _hits(rest.toString(), completedTransactionCues, null).isEmpty;
+}
+
+/// The other party of a transfer after the amount: the name as written (masks
+/// kept) up to an end anchor, a sentence end or a long digit run. Null when
+/// the message is no transfer or names nobody.
+(Counterparty, int, int)? _counterparty(
+  FoldedText folded,
+  String original,
+  int afterAmount,
+  TemplateDirection direction,
+) {
+  final t = folded.text;
+  var transfer = false;
+  for (final (event, words) in eventKeywords) {
+    if (event == GenericEvent.transfer && _hits(t, words, null).isNotEmpty) {
+      transfer = true;
+    }
+  }
+  if (!transfer) {
+    return null;
+  }
+  final markers = direction == TemplateDirection.expense
+      ? counterpartyOutMarkers
+      : counterpartyInMarkers;
+  final starts = <int>[];
+  final raws = <String>[];
+  var s = 0;
+  for (var i = 0; i <= t.length; i++) {
+    if (i == t.length || t.codeUnitAt(i) == 0x20) {
+      if (i > s) {
+        starts.add(s);
+        raws.add(t.substring(s, i));
+      }
+      s = i + 1;
+    }
+  }
+  bool ends(String r) => _clauseEnd.hasMatch(r);
+  String core(String r) {
+    var b = r.length;
+    while (b > 0 && '.,;:!?)\'"'.contains(r[b - 1])) {
+      b--;
+    }
+    return r.substring(0, b);
+  }
+
+  for (var i = 0; i < raws.length; i++) {
+    if (starts[i] < afterAmount || !markers.contains(core(raws[i]))) {
+      continue;
+    }
+    if (ends(raws[i])) {
+      continue;
+    }
+    int? first;
+    var last = 0;
+    for (var j = i + 1; j < raws.length; j++) {
+      final c = core(raws[j]);
+      if (c.isEmpty ||
+          counterpartyEndAnchors.contains(c) ||
+          counterpartyOutMarkers.contains(c) ||
+          counterpartyInMarkers.contains(c)) {
+        break;
+      }
+      if (c == foldKey('رقم') &&
+          j + 1 < raws.length &&
+          const [
+            'مرجعي',
+            'مرجع',
+            'المرجع',
+            'ref',
+          ].map(foldKey).contains(core(raws[j + 1]))) {
+        break;
+      }
+      if (first == null &&
+          (merchantNonStarters.contains(c) || c.startsWith('http'))) {
+        break;
+      }
+      if (!c.contains('*') && _mostlyDigits(c)) {
+        break;
+      }
+      first ??= starts[j];
+      last = starts[j] + c.length;
+      if (ends(raws[j])) {
+        break;
+      }
+    }
+    if (first == null) {
+      continue;
+    }
+    final name = original
+        .substring(folded.origin[first], folded.origin[last - 1] + 1)
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (name.isEmpty) {
+      continue;
+    }
+    return (Counterparty(kind: CounterpartyKind.name, name: name), first, last);
+  }
+  return null;
+}
+
+/// Balance and available limit after their anchors: `(balance, limit)`.
+/// Glued currency (`4667.24EGP`) is read; no currency inherits [fallback].
+(Money?, Money?) _balances(String t, Currency fallback) {
+  Money? balance;
+  Money? limit;
+  Money? read(String anchor, int from) {
+    final end = from + anchor.length;
+    final m = _numberRun.firstMatch(
+      t.substring(end, end + 24 > t.length ? t.length : end + 24),
+    );
+    if (m == null) {
+      return null;
+    }
+    final gap = t.substring(end, end + m.start);
+    // Only a currency word, `is`, or punctuation may sit between.
+    if (gap.length > 16) {
+      return null;
+    }
+    final numStart = end + m.start;
+    var numEnd = end + m.end;
+    var text = m.group(0)!;
+    if (_trailingSeparator.hasMatch(text)) {
+      text = text.substring(0, text.length - 1);
+      numEnd -= 1;
+    }
+    // TODO(T-242): use the amount parser's trailing-minus helper.
+    final negative =
+        numEnd < t.length &&
+        t.codeUnitAt(numEnd) == 0x2D &&
+        (numEnd + 1 == t.length || t.codeUnitAt(numEnd + 1) == 0x20);
+    final cur =
+        (_markerBefore(t, numStart) ?? _markerAfter(t, numEnd))?.currency ??
+        fallback;
+    final parsed = parseAmount(text, currency: cur);
+    final money = parsed is Ok<Money, ParseFailure> ? parsed.value : null;
+    if (money == null || negative) {
+      return null;
+    }
+    return money;
+  }
+
+  for (final anchor in limitAnchors) {
+    final i = t.indexOf(anchor);
+    if (i >= 0) {
+      limit = read(anchor, i);
+      if (limit != null) {
+        break;
+      }
+    }
+  }
+  for (final anchor in balanceAnchors) {
+    var from = 0;
+    while (balance == null) {
+      final i = t.indexOf(anchor, from);
+      if (i < 0) {
+        break;
+      }
+      from = i + 1;
+      // `available limit` belongs to the limit.
+      if (limitAnchors.any((l) => t.startsWith(l, i))) {
+        continue;
+      }
+      balance = read(anchor, i);
+    }
+    if (balance != null) {
+      break;
+    }
+  }
+  return (balance, limit);
 }

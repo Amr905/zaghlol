@@ -360,6 +360,8 @@ enum GenericField {
   merchant,
   date,
   reference,
+  counterparty,
+  balance,
 }
 
 /// A span of the original message text, in code units: where a generic field
@@ -400,6 +402,9 @@ final class ParseGeneric extends ParseResult {
     this.originalAmount,
     this.event,
     this.reference,
+    this.counterparty,
+    this.balance,
+    this.available,
     this.dateRead = false,
     this.fieldConfidence = const {},
     this.spans = const {},
@@ -438,6 +443,17 @@ final class ParseGeneric extends ParseResult {
   /// A reference or transaction id after a `Ref`/`المرجع` cue, as written.
   final String? reference;
 
+  /// T-243: the other party of a transfer (name as written, masks kept),
+  /// stored like a templated InstaPay counterparty; never a merchant.
+  final Counterparty? counterparty;
+
+  /// Account balance after the transaction (`الرصيد المتوفر`, `avail bal`);
+  /// never the amount. Null when not read.
+  final Money? balance;
+
+  /// Available limit (`available limit is`); null when not read.
+  final Money? available;
+
   /// 0..[kGenericMaxConfidencePermille].
   final int confidencePermille;
   final List<GenericReason> reasons;
@@ -458,7 +474,7 @@ final class ParseGeneric extends ParseResult {
   /// goes to review (FR-PAR-13, A-66), it is never saved by this flag.
   bool get prefillComplete =>
       direction != null &&
-      (last4 != null || merchant != null) &&
+      (last4 != null || merchant != null || counterparty != null) &&
       !reasons.contains(GenericReason.amountAmbiguous) &&
       !reasons.contains(GenericReason.currencyAmbiguous) &&
       !reasons.contains(GenericReason.directionConflict);

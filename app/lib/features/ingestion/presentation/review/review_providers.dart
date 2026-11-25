@@ -201,6 +201,8 @@ final class _LiveActions implements ReviewActions {
       categorizeInputFor(
         merchantRaw: g.merchant,
         merchantNorm: g.merchantKey,
+        counterpartyKind: g.counterpartyKind,
+        counterpartyValue: g.counterpartyValue,
         eventCategoryId: g.eventCategoryId,
       ),
     );
@@ -218,6 +220,8 @@ final class _LiveActions implements ReviewActions {
         tzOffsetMin: g.tzOffsetMin,
         merchant: g.merchant,
         merchantNorm: g.merchantKey,
+        counterpartyKind: g.counterpartyKind,
+        counterpartyValue: g.counterpartyValue,
         catalogMerchantId: decision.catalogMerchantId,
         categoryId: decision.categoryId,
         categorySource: decision.categoryId == null

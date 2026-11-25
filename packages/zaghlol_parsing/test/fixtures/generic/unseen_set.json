@@ -94,7 +94,7 @@
    "amount": "1200.00",
    "currency": "AED",
    "direction": "expense",
-   "merchant": "Sara Ahmed"
+   "counterparty": "Sara Ahmed"
   }
  },
  {

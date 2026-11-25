@@ -124,6 +124,21 @@ void main() {
     },
   );
 
+  // T-243: the other party of a generic transfer is stored as the
+  // counterparty (like a templated InstaPay one), not as the merchant.
+  test('generic transfer: counterparty stored, no merchant', () async {
+    final o = (await ingest(
+      'NBE',
+      'EGP 100.00 transferred to Sara Ahmed from your account *4567 on '
+          '09/11/2026',
+    )).single;
+    expect(o['o'], isA<IngestInserted>());
+    final t = (o['t']! as List).single as Map<String, Object?>;
+    expect(t['counterparty_kind'], 'person');
+    expect(t['counterparty_value'], 'Sara Ahmed');
+    expect(t['merchant_raw'], isNull);
+  });
+
   test('credit-card settlement (generic cue, EN) is a transfer into the card '
       'account, not income', () async {
     final o = (await ingest(
