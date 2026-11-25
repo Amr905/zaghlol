@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=6b4230257c7f943df0e3409ba888ff9005f8cd31
+SKIP sha=6b4230257c7f943df0e3409ba888ff9005f8cd31 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-250-old-dues 6b4230257c7f943df0e3409ba888ff9005f8cd31 2026-11-25T18:29:09.3062784+02:00
+
+
+
