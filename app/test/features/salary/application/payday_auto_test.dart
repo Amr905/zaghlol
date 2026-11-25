@@ -119,6 +119,7 @@ void main() {
         zone: const FixedLocalZone(120),
       ).setPayday(5);
       await settings.set(Settings.paydayAuto, PaydayAutoState.empty);
+      final erasBefore = await settings.get(Settings.paydayEras);
       // A hand-typed 5 is only changed when all 3 months disagree.
       await credit(CivilDate(2026, 9, 24));
       await credit(CivilDate(2026, 10, 23));
@@ -127,11 +128,38 @@ void main() {
       expect(await payday(), 23);
       await service.undo();
       expect(await payday(), 5);
+      expect(
+        (await settings.get(Settings.paydayEras))?.toJson(),
+        erasBefore?.toJson(),
+      );
       final s = await settings.get(Settings.paydayAuto);
       expect(s.suppressed, [23]);
       expect(s.bannerPending, isFalse);
       expect(await service.run(), isNull);
       expect(await payday(), 5);
+    },
+  );
+
+  test(
+    'Undo of a first-ever auto-set restores unset eras and history',
+    () async {
+      final old = CivilDate(2026, 8, 15);
+      expect(await settings.get(Settings.paydayEras), isNull);
+      final before = await settings.get(Settings.paydayDay);
+      await credit(CivilDate(2026, 9, 23));
+      await credit(CivilDate(2026, 10, 23));
+      expect(await service.run(), 23);
+      final during = (await settings.get(Settings.paydayEras))!;
+      expect(during.cycleOn(old).start, CivilDate(2026, 7, 23));
+      await service.undo();
+      expect(await settings.get(Settings.paydayEras), isNull);
+      expect(await payday(), before);
+      final after = await PaydayScheduleStore(
+        settings,
+        nowUtcMs: () => nowMs,
+        zone: const FixedLocalZone(120),
+      ).load();
+      expect(after.cycleOn(old).start, CivilDate(2026, 8, 1));
     },
   );
 
