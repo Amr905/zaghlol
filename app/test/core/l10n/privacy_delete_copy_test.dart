@@ -11,12 +11,24 @@ void main() {
 
   test('FU-040: backups, purchase and account stay (ar + en)', () {
     final en = AppLocalizationsEn();
-    expect(en.privacyDeleteBackupsKept, contains('stay'));
-    expect(en.privacyDeleteStoreAccountKept, contains("aren't touched"));
-    expect(AppLocalizationsAr().privacyDeleteBackupsKept, contains('هتفضل'));
+    final ar = AppLocalizationsAr();
     expect(
-      AppLocalizationsAr().privacyDeleteStoreAccountKept,
-      contains('مش هيتأثروا'),
+      en.privacyDeleteBackupsKept,
+      'Your backups on Google Drive or iCloud stay there. '
+      'Delete them from there if you want.',
+    );
+    expect(
+      en.privacyDeleteStoreAccountKept,
+      "Your store purchase and your account aren't touched.",
+    );
+    expect(
+      ar.privacyDeleteBackupsKept,
+      'النسخ الاحتياطية اللي على Google Drive أو iCloud هتفضل زي ما هي. '
+      'لو عايز تمسحها، امسحها من هناك.',
+    );
+    expect(
+      ar.privacyDeleteStoreAccountKept,
+      'شراءك من المتجر وحسابك مش هيتأثروا.',
     );
   });
 }

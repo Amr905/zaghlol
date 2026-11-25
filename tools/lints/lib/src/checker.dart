@@ -165,8 +165,12 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
         'integer minor units instead.',
       );
     }
-    if (node.target == null) {
+    final target = node.target;
+    if (target == null) {
       _checkSafeCode(node.methodName.name, node.argumentList, node.offset);
+    } else if (target is SimpleIdentifier && target.name == 'SafeException') {
+      // FU-310: SafeException.named(...) parsed as a method call.
+      _checkSafeCode('SafeException', node.argumentList, node.offset);
     }
     _checkPrint(node);
     _checkUnmaskedAmount(node);
@@ -580,7 +584,12 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
           if (m.isStatic &&
               m.fields.isConst &&
               m.fields.variables.any((v) => v.name.lexeme == e.name)) {
-            return true;
+            final init = m.fields.variables
+                .firstWhere((v) => v.name.lexeme == e.name)
+                .initializer;
+            // FU-309: the value itself must be an UPPER_SNAKE literal.
+            return init is SimpleStringLiteral &&
+                _codeShape.hasMatch(init.value);
           }
         }
         return false;
@@ -595,11 +604,45 @@ class _RuleVisitor extends RecursiveAstVisitor<void> {
     final cls = parent is ConstructorDeclaration ? parent.parent : null;
     // Only direct subclasses of SafeException pass a code up.
     if (cls is ClassDeclaration &&
-        ClassGraph.directSupertypes(cls).contains('SafeException') &&
-        node.constructorName == null) {
+        ClassGraph.directSupertypes(cls).contains('SafeException')) {
       _checkSafeCode('SafeException', node.argumentList, node.offset);
     }
     super.visitSuperConstructorInvocation(node);
+  }
+
+  // FU-310: `super.code` forwards a variable into SafeException's code.
+  @override
+  void visitSuperFormalParameter(SuperFormalParameter node) {
+    final ctor = node.thisOrAncestorOfType<ConstructorDeclaration>();
+    final cls = ctor?.parent;
+    if (scope.inParsingOrDbLayer &&
+        node.name.lexeme == 'code' &&
+        cls is ClassDeclaration &&
+        ClassGraph.directSupertypes(cls).contains('SafeException') &&
+        !_hasCodeConstants(cls)) {
+      _report(
+        ruleSafeExceptionRequired,
+        node.offset,
+        'SafeException code must be an UPPER_SNAKE_CASE string literal, '
+        'not forwarded through super.code.',
+      );
+    }
+    super.visitSuperFormalParameter(node);
+  }
+
+  // A class that forwards `super.code` is accepted only when it publishes its
+  // codes as UPPER_SNAKE `static const` string literals for callers to use.
+  static bool _hasCodeConstants(ClassDeclaration cls) {
+    for (final m in cls.members.whereType<FieldDeclaration>()) {
+      if (!m.isStatic || !m.fields.isConst) continue;
+      for (final v in m.fields.variables) {
+        final i = v.initializer;
+        if (i is SimpleStringLiteral && _codeShape.hasMatch(i.value)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @override
