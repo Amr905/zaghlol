@@ -97,4 +97,61 @@ class BoundedDispatchTest {
         assertEquals(true, daemon.get())
         assertEquals(5_000L, BoundedDispatch.BUDGET_MS)
     }
+
+    /** FU-086 I-5: the budget ended the broadcast before the work: the miss is reported once, after finish. */
+    @Test
+    fun anAbandonedWorkIsReportedOnceAfterFinish() {
+        val order = java.util.Collections.synchronizedList(mutableListOf<String>())
+        val release = CountDownLatch(1)
+        val reported = CountDownLatch(1)
+        BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 50).run(
+            work = { release.await(30, TimeUnit.SECONDS) },
+            onAbandoned = { order.add("abandoned"); reported.countDown() },
+            finish = { order.add("finish") },
+        )
+        assertEquals(true, reported.await(2, TimeUnit.SECONDS))
+        release.countDown()
+        Thread.sleep(150)
+        assertEquals(listOf("finish", "abandoned"), order.toList())
+    }
+
+    /** FU-086 I-5: a work that finished within the budget is never reported as missed. */
+    @Test
+    fun aWorkThatFinishesInTimeIsNotReported() {
+        val abandoned = AtomicInteger()
+        val finished = CountDownLatch(1)
+        BoundedDispatch(Executors.newSingleThreadExecutor(), timer, 200).run(
+            work = { },
+            onAbandoned = { abandoned.incrementAndGet() },
+            finish = { finished.countDown() },
+        )
+        finished.await(2, TimeUnit.SECONDS)
+        Thread.sleep(400) // past the budget
+        assertEquals(0, abandoned.get())
+    }
+
+    @Test
+    fun aRejectedWorkIsReported() {
+        val ex = Executors.newSingleThreadExecutor().apply { shutdown() }
+        val abandoned = AtomicInteger()
+        val finished = AtomicInteger()
+        BoundedDispatch(ex, timer, 1_000).run(work = { }, onAbandoned = { abandoned.incrementAndGet() }, finish = { finished.incrementAndGet() })
+        assertEquals(1, finished.get())
+        assertEquals(1, abandoned.get())
+    }
+
+    @Test
+    fun theMissedRecorderRecordsTheReceiveTimeOnItsOwnThreadAndSwallowsFailures() {
+        val thread = Executors.newSingleThreadExecutor { r -> Thread(r, "missed-test") }
+        val seen = java.util.concurrent.LinkedBlockingQueue<Pair<Long, String>>()
+        val record = SmsCapture.missedRecorder(thread, 1_234L) { at -> seen.add(at to Thread.currentThread().name) }
+        record()
+        assertEquals(1_234L to "missed-test", seen.poll(2, TimeUnit.SECONDS))
+        // A throwing store and a dead executor are both swallowed.
+        val throwing = SmsCapture.missedRecorder(thread, 1L) { error("keystore busy") }
+        throwing()
+        thread.shutdown()
+        val dead = SmsCapture.missedRecorder(thread, 1L) { }
+        dead()
+    }
 }

@@ -139,17 +139,25 @@ final class InboxScanner {
     } on Object {
       return _fail('INGEST_SETUP_FAILED');
     }
+    // FU-121 048-3: provider ids this scan stored, so a restarted pass does
+    // not count its own earlier imports again as skipped duplicates.
+    final importedIds = <String>{};
     try {
       var restarts = 0;
       while (true) {
         try {
-          await _pass(req, found);
+          await _pass(req, found, importedIds);
           break;
         } on CaptureHostException catch (e) {
           if (e.platformCode == 'INVALID_ARGUMENT' &&
               restarts < kMaxScanRestarts) {
             restarts++;
-            _set(_progress.copyWith(restarts: restarts));
+            // FU-121 048-3: the new pass reads the inbox from the start, so
+            // the rows read and skipped restart from zero (and the first page
+            // is small again); imports stay, they are in the database.
+            _set(
+              _progress.copyWith(restarts: restarts, scanned: 0, skipped: 0),
+            );
             continue;
           }
           return _fail(e.platformCode);
@@ -183,7 +191,11 @@ final class InboxScanner {
 
   /// One pass over the current sender list. Throws [CaptureHostException]
   /// (INVALID_ARGUMENT restarts the pass), [IngestBatchFailed] or [_Stop].
-  Future<void> _pass(ScanRequest req, Set<String> found) async {
+  Future<void> _pass(
+    ScanRequest req,
+    Set<String> found,
+    Set<String> importedIds,
+  ) async {
     final all = await senders.read();
     final only = req.onlyInstitutions;
     final candidates = only == null
@@ -238,6 +250,7 @@ final class InboxScanner {
             institutionOf,
             personalAddresses,
             found,
+            importedIds,
           );
           cursor = page.nextCursor;
           if (cursor == null) break;
@@ -268,6 +281,7 @@ final class InboxScanner {
     Map<String, String> institutionOf,
     Set<String> personalAddresses,
     Set<String> found,
+    Set<String> importedIds,
   ) async {
     for (var i = 0; i < items.length; i += kIngestBatchSize) {
       if (_cancel) throw const _Stop.cancelled();
@@ -295,10 +309,14 @@ final class InboxScanner {
       for (final m in slice) {
         final o = result.outcomes[m.providerId];
         if (o == null) continue; // kept: not stored, still in the inbox
+        if (o is IngestDuplicate && importedIds.contains(m.providerId)) {
+          continue; // stored by this scan's earlier pass (048-3)
+        }
         if (o is IngestDuplicate || o is IngestDropped) {
           skipped++;
         } else {
           imported++;
+          importedIds.add(m.providerId);
           final inst = institutionOf[m.address.toLowerCase()];
           if (inst != null) found.add(inst);
         }

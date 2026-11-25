@@ -92,4 +92,26 @@ class ShareJobTest {
         assertNull("an id from a previous process never matches", ShareJobs.get("000000000000-1"))
         ShareJobs.remove(b.id)
     }
+
+    /** FU-070 C3: once the give-up timer set an outcome, the worker may not commit. */
+    @Test
+    fun aGiveUpBeforeTheCommitStopsTheCommit() {
+        val job = ShareJob("j", queue::addLast)
+        assertTrue(job.giveUp(timedOut))
+        assertFalse(job.beginCommit())
+    }
+
+    /** FU-070 C3: a commit in progress is not overridden by the give-up; the worker's outcome is the one delivered. */
+    @Test
+    fun aCommitInProgressWinsOverTheGiveUp() {
+        val job = ShareJob("j", queue::addLast)
+        val got = mutableListOf<ShareOutcome>()
+        job.attach { got += it }
+        assertTrue(job.beginCommit())
+        assertFalse(ShareJobs.giveUp(job, timedOut))
+        assertNull("no refusal recorded for Dart", ShareIntakeState.takeRejection())
+        assertTrue(job.complete(accepted))
+        drain()
+        assertEquals(listOf<ShareOutcome>(accepted), got)
+    }
 }

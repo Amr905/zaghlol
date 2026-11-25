@@ -51,8 +51,14 @@ object ShareUriPolicy {
         if (host.isNullOrEmpty()) return false
         val own = ownPackage.lowercase()
         if (host == own || host.startsWith("$own.")) return false
+        // FU-070 S2: providers our own permissions unlock (READ_SMS, contacts, call log):
+        // a sender could make us copy the user's messages into a share.
+        if (host in SYSTEM_AUTHORITIES) return false
         // Belt and braces: whatever the authority looks like, never read from a provider of our own.
         if (source.streamProviderPackage == ownPackage) return false
         return true
     }
+
+    /** FU-070 S2: authorities of system providers our permissions can read. `media` is allowed (gallery shares). */
+    val SYSTEM_AUTHORITIES: Set<String> = setOf("sms", "mms", "mms-sms", "call_log", "com.android.contacts", "contacts")
 }

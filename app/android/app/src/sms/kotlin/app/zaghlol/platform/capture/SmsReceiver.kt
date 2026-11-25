@@ -18,7 +18,9 @@ import android.provider.Telephony
  * `goAsync()`. Then, on the SMS intake thread with a 5 s budget
  * ([SmsCapture.dispatch], `finish()` exactly once): multipart assembly,
  * Guard → spool → enqueue ([SmsIntake], [CaptureIntake]). A personal SMS is
- * decided in memory and leaves no file. Nothing is logged.
+ * decided in memory and leaves no file, unless the budget ends the broadcast
+ * first: then only its receive time is recorded as a possible miss
+ * (`firstMissedSmsAtMs`, FU-086 I-5). Nothing is logged.
  *
  * Accessors: `displayOriginatingAddress` / `displayMessageBody`, which
  * reproduce the system inbox row (they differ from `originatingAddress` /
@@ -45,6 +47,7 @@ class SmsReceiver : BroadcastReceiver() {
         SmsCapture.dispatch.run(
             work = { SmsCapture.intake(app).process(parts, wallMs, rxElapsedNs, simSlot) },
             finish = { pending.finish() },
+            onAbandoned = SmsCapture.missedRecorder(app, wallMs),
         )
     }
 }
