@@ -146,7 +146,6 @@ const List<_Case> _cases = [
       'minDueMinor': null,
       'dueDate': '2026-11-25',
     },
-    pendingUntil: 'T-241',
   ),
   _Case(
     8,
@@ -162,7 +161,6 @@ const List<_Case> _cases = [
       'minDueMinor': 5177,
       'dueDate': '2026-11-25',
     },
-    pendingUntil: 'T-241',
   ),
   _Case(
     9,
@@ -229,7 +227,6 @@ const List<_Case> _cases = [
       'statementDate': '2026-10-03',
       'dueDate': '2026-10-28',
     },
-    pendingUntil: 'T-241',
   ),
 ];
 
@@ -299,6 +296,17 @@ Map<String, Object?> _view(ParseResult r) {
       'last4': r.last4,
       'merchantKey': r.merchant?.key,
       'date': r.dateRead ? _d(r.occurredAt) : _d(_at),
+    };
+  }
+  if (r is ParseNotice) {
+    return {
+      'kind': 'notice',
+      'last4': r.last4,
+      'dueMinor': r.amountDue?.minor,
+      'currency': r.amountDue?.currency.code,
+      'minDueMinor': r.minDue?.minor,
+      'dueDate': r.dueDate == null ? null : _d(r.dueDate!),
+      'statementDate': r.statementDate == null ? null : _d(r.statementDate!),
     };
   }
   return {'kind': r.runtimeType.toString()};
