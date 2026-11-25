@@ -12562,6 +12562,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'دوس على زغلول'**
   String get devMoodTap;
+
+  /// Home banner after the payday followed the salary (T-246, D-81)
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّيت يوم القبض {day} لأن مرتبك بينزل يوم {day}'**
+  String paydayAutoBanner(String day);
+
+  /// Undo button on the payday-auto banner
+  ///
+  /// In ar, this message translates to:
+  /// **'تراجع'**
+  String get paydayAutoUndo;
+
+  /// Screen-reader label of the banner close button
+  ///
+  /// In ar, this message translates to:
+  /// **'اقفل الرسالة'**
+  String get paydayAutoDismissA11y;
 }
 
 class _AppLocalizationsDelegate

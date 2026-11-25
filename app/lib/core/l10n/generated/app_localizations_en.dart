@@ -8593,4 +8593,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get devMoodTap => 'Tap the bird';
+
+  @override
+  String paydayAutoBanner(String day) {
+    return 'I set your payday to day $day because your salary lands on day $day';
+  }
+
+  @override
+  String get paydayAutoUndo => 'Undo';
+
+  @override
+  String get paydayAutoDismissA11y => 'Close message';
 }

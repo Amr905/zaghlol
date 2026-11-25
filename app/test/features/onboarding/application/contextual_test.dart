@@ -25,28 +25,9 @@ SetupContext ctx({
 );
 
 void main() {
-  test('AC: salary on day 25 suggests payday 25 (once)', () {
-    final s = nextSetupSuggestion(ctx(salary: CivilDate(2026, 10, 25)));
-    expect(s, const SetupSuggestion(SetupSuggestionKind.payday, paydayDay: 25));
-    expect(s!.kind.messageKey, 'suggestPayday');
-    expect(
-      nextSetupSuggestion(
-        ctx(salary: CivilDate(2026, 10, 25)),
-        handled: {'payday'},
-      ),
-      isNull,
-    );
-  });
-
-  test('salary on 29-31 proposes 28; none when payday already set', () {
-    expect(
-      nextSetupSuggestion(ctx(salary: CivilDate(2026, 10, 31)))!.paydayDay,
-      28,
-    );
-    expect(
-      nextSetupSuggestion(ctx(payday: true, salary: CivilDate(2026, 10, 25))),
-      isNull,
-    );
+  test('T-246: a salary never raises a payday suggestion any more', () {
+    expect(nextSetupSuggestion(ctx(salary: CivilDate(2026, 10, 25))), isNull);
+    expect(nextSetupSuggestion(ctx(salary: CivilDate(2026, 10, 31))), isNull);
     expect(nextSetupSuggestion(ctx()), isNull);
   });
 
@@ -87,17 +68,13 @@ void main() {
     );
   });
 
-  test('payday takes priority over backup; one at a time', () {
+  test('backup is offered when only a salary exists', () {
     final c = ctx(
       installed: CivilDate(2026, 10, 1),
       today: CivilDate(2026, 11, 1),
       salary: CivilDate(2026, 10, 25),
     );
-    expect(nextSetupSuggestion(c)?.kind, SetupSuggestionKind.payday);
-    expect(
-      nextSetupSuggestion(c, handled: {'payday'})?.kind,
-      SetupSuggestionKind.backup,
-    );
+    expect(nextSetupSuggestion(c)?.kind, SetupSuggestionKind.backup);
   });
 
   group('store', () {
@@ -108,9 +85,12 @@ void main() {
     test('handled persists and hides the suggestion forever', () async {
       final repo = SettingsRepository(SettingsDao(edb.db));
       final store = SetupSuggestionStore(repo);
-      final c = ctx(salary: CivilDate(2026, 10, 25));
-      expect((await store.next(c))?.kind, SetupSuggestionKind.payday);
-      await store.markHandled(SetupSuggestionKind.payday);
+      final c = ctx(
+        installed: CivilDate(2026, 10, 1),
+        today: CivilDate(2026, 11, 1),
+      );
+      expect((await store.next(c))?.kind, SetupSuggestionKind.backup);
+      await store.markHandled(SetupSuggestionKind.backup);
       expect(await store.next(c), isNull);
       final again = SetupSuggestionStore(
         SettingsRepository(SettingsDao(edb.db)),

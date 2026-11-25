@@ -216,6 +216,14 @@ final housekeepingProvider = Provider<Housekeeping>((ref) {
         },
       ),
       (
+        name: 'payday_auto',
+        run: () async {
+          // T-246 (D-81): the payday follows the salary.
+          if (restoreWaiting()) return;
+          await (await ref.read(paydayAutoServiceProvider.future)).run();
+        },
+      ),
+      (
         name: 'card_dues',
         run: () async {
           await (await recurring()).syncCardDues();

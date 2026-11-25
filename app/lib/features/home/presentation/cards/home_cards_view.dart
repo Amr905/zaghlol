@@ -13,6 +13,9 @@ import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_card.dart';
 import '../../../mascot/presentation/zaghlol_avatar.dart';
+import '../../../salary/application/salary_providers.dart'
+    show paydayAutoProvider;
+import '../../../salary/presentation/payday_auto_banner.dart';
 import '../../../onboarding/application/contextual.dart';
 import '../../../security/domain/app_lock_controller.dart';
 import '../../application/home_cards.dart';
@@ -39,12 +42,20 @@ class HomeContextualCards extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cards = ref.watch(homeCardsProvider(hasTransactions)).value;
-    if (cards == null || cards.isEmpty) return const SizedBox.shrink();
+    final autoPayday =
+        ref.watch(paydayAutoProvider).value?.bannerPending ?? false;
+    if (cards == null || (cards.isEmpty && !autoPayday)) {
+      return const SizedBox.shrink();
+    }
     final s = cards.suggestion;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: ZSpacing.md),
+        if (autoPayday) ...[
+          const PaydayAutoBanner(),
+          if (!cards.isEmpty) const SizedBox(height: ZSpacing.md),
+        ],
         if (s != null)
           SuggestionCard(
             key: const ValueKey('home-card-suggestion'),

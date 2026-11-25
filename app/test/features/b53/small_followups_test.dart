@@ -167,33 +167,36 @@ void main() {
       );
     });
 
-    test('plan and a tied entry: credit exists, payday card shows', () async {
-      final (c, repo) = await _make();
-      await repo.set(
-        Settings.salaryPlan,
-        SalaryPlan.tryCreate(amount: Money(egp, 1500000), day: 25),
-      );
-      await repo.set(
-        Settings.salaryState,
-        SalaryState.empty.withEntry(
-          SalaryEntry(
-            txnId: 't1',
-            captured: true,
-            anchor: CivilDate(2026, 10, 25),
+    test(
+      'plan and a tied entry: credit exists, no payday card (T-246)',
+      () async {
+        final (c, repo) = await _make();
+        await repo.set(
+          Settings.salaryPlan,
+          SalaryPlan.tryCreate(amount: Money(egp, 1500000), day: 25),
+        );
+        await repo.set(
+          Settings.salaryState,
+          SalaryState.empty.withEntry(
+            SalaryEntry(
+              txnId: 't1',
+              captured: true,
+              anchor: CivilDate(2026, 10, 25),
+            ),
           ),
-        ),
-      );
-      c.listen(setupSalaryCreditProvider, (_, _) {});
-      await c.read(salaryPlanProvider.future);
-      await c.read(salaryStateProvider.future);
-      final credit = c.read(setupSalaryCreditProvider).value;
-      expect(credit?.date, CivilDate(2026, 10, 25));
-      expect(credit?.amount, Money(egp, 1500000));
-      expect(
-        nextSetupSuggestion(ctx(salary: credit?.date))?.kind,
-        SetupSuggestionKind.payday,
-      );
-    });
+        );
+        c.listen(setupSalaryCreditProvider, (_, _) {});
+        await c.read(salaryPlanProvider.future);
+        await c.read(salaryStateProvider.future);
+        final credit = c.read(setupSalaryCreditProvider).value;
+        expect(credit?.date, CivilDate(2026, 10, 25));
+        expect(credit?.amount, Money(egp, 1500000));
+        expect(
+          nextSetupSuggestion(ctx(salary: credit?.date, backup: true)),
+          isNull,
+        );
+      },
+    );
 
     test('backup exists comes from the backup module', () async {
       var exists = false;
