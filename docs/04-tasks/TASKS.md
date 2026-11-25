@@ -343,7 +343,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-257](tasks/T-257.md) | Ingest/diagnostics minors (FU-313/314/317) | follow-ups | Low | Sonnet | parsing-engine-engineer | — | P | 73 | DONE (batch 73) |
 | [T-258](tasks/T-258.md) | Lint minors (FU-309…FU-312) | follow-ups | Low | Sonnet | flutter-core-engineer | — | C | 73 | DONE (batch 73) |
 | [T-259](tasks/T-259.md) | Native follow-ups (FU-332, FU-113 native) | follow-ups | Medium | Sonnet | native-platform-engineer | — | N | 73 | DONE (batch 73) |
-| [T-260](tasks/T-260.md) | Till receipts (pharmacy) read: amount around the total label, wider labels, clear empty states | PO report 2026-11-25 | High | Sonnet | parsing-engine-engineer | — | P | 74 | TODO |
+| [T-260](tasks/T-260.md) | Till receipts (pharmacy) read: amount around the total label, wider labels, clear empty states | PO report 2026-11-25 | High | Sonnet | parsing-engine-engineer | — | P | 74 | DONE (batch 74) |
 
 ## Blocked or external items
 | ID | Task | Waiting for |

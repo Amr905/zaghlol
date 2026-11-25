@@ -31,3 +31,10 @@ Required change: add `received|returned|refund(ed)?|savings?|saved|balance|tende
 
 ## Lead delta check
 (pending fix of M-1)
+
+## Lead delta check (`fix/fix74`)
+
+- **M-1 RESOLVED:** tender/after-total words (received, returned, refund, savings, balance, card/visa/mastercard, change due; المستلم، المرتجع، توفير، الرصيد، فيزا، بطاقه) are skip lines; four new fixtures fail on the old code (the Arabic one not proven separately). Two regex lines changed.
+- **FU-338 RESOLVED** by the same skip list (the fallback already ignored skip lines).
+- **FU-340** comment wrapped.
+- Lead note → **FU-341** (OPEN): a total line that also names the tender (`Total (Card) 150.00`, `الاجمالي بطاقه`) is now skipped as a total and falls to the next label or the fallback; add a fixture and let a total label on the same line win over a tender word if real receipts show it.
