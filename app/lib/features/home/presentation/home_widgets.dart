@@ -18,6 +18,7 @@ import '../../accounts/data/accounts_providers.dart';
 import '../../accounts/domain/account.dart';
 import '../../accounts/presentation/account_type.dart';
 import '../../transactions/domain/transaction.dart';
+import '../../transactions/presentation/instapay_title.dart';
 import '../application/card_filter.dart';
 import '../application/home_read_model.dart';
 import 'home_format.dart';
@@ -412,7 +413,9 @@ class HomeFeedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final r = item.record;
-    final title = r.merchantNorm ?? r.merchantRaw ?? _typeLabel(l, item);
+    final ip = instapayLines(l, r);
+    final title =
+        ip?.title ?? r.merchantNorm ?? r.merchantRaw ?? _typeLabel(l, item);
     final local = r.occurredAt.toLocal();
     final sameDay =
         local.year == today.year &&
@@ -423,9 +426,13 @@ class HomeFeedRow extends StatelessWidget {
     final when = sameDay
         ? format.time(r.occurredAt)
         : format.dayMonthOf(r.occurredAt);
-    String tail(String name) => item.excludedFromTotals
-        ? '$name · ${l.homeFeedExcludedFromSpending}'
-        : '$name · $when';
+    String tail(String name) {
+      final rest = item.excludedFromTotals
+          ? '$name · ${l.homeFeedExcludedFromSpending}'
+          : '$name · $when';
+      return ip?.nameLine == null ? rest : '${ip!.nameLine} · $rest';
+    }
+
     final subtitle = tail(
       acc == null ? where : formatAccountWithCard(acc.label, acc.last4),
     );

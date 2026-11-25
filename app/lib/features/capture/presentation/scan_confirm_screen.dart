@@ -80,6 +80,7 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
   bool _fromShare = false;
   ScanOrigin _origin = ScanOrigin.image;
   ScanNoTotal? _noTotal;
+  bool _cameraDenied = false;
 
   @override
   void initState() {
@@ -109,7 +110,9 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
     if (mounted) setState(() => _phase = p);
   }
 
-  Future<void> _choose() async {
+  Future<void> _choose([
+    ScanImageSource source = ScanImageSource.gallery,
+  ]) async {
     final picker = ref.read(scanImagePickerProvider);
     if (picker == null) {
       _set(_Phase.unavailable);
@@ -117,7 +120,16 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
     }
     final String? path;
     try {
-      path = await picker();
+      path = await picker(source);
+    } on ScanCameraDeniedException {
+      // Permission denied: say so and keep the gallery one tap away.
+      if (mounted) {
+        setState(() {
+          _cameraDenied = true;
+          _phase = _Phase.choose;
+        });
+      }
+      return;
     } on OcrException catch (e) {
       _set(
         e.code == OcrFailureCode.notAvailable
@@ -130,6 +142,7 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
       return;
     }
     if (path == null || !mounted) return;
+    _cameraDenied = false;
     _set(_Phase.reading);
     await _apply(await ref.read(scanServiceProvider).scanImage(path));
   }
@@ -187,6 +200,30 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
     );
   }
 
+  /// Dev flavours only: the OCR text of this scan (in memory, never logged
+  /// or stored). Null hides the "what I read" button, which release builds
+  /// never show.
+  String? get _devReadText {
+    if (!ref.read(scanReadTextEnabledProvider)) return null;
+    if (_phase != _Phase.found &&
+        _phase != _Phase.noText &&
+        _phase != _Phase.noTotal) {
+      return null;
+    }
+    return ref.read(scanServiceProvider).lastReadText ?? '';
+  }
+
+  Widget _whatIRead(AppLocalizations l) => TextButton(
+    key: const Key('scan-what-i-read'),
+    onPressed: () => unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => _ReadTextDialog(text: _devReadText ?? ''),
+      ),
+    ),
+    child: Text(l.captureScanWhatIRead),
+  );
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -194,6 +231,7 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
       return TransactionEditScreen(
         prefill: _prefill,
         title: l.captureScanTitle,
+        extraActions: [if (_devReadText != null) _whatIRead(l)],
         bannerText: _fromShare
             ? (_origin == ScanOrigin.image
                   ? l.captureScanFromShare
@@ -209,6 +247,7 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(l.captureScanTitle),
+        actions: [if (_devReadText != null) _whatIRead(l)],
       ),
       body: Center(
         child: Padding(
@@ -269,9 +308,24 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
               l.captureScanOnDevice,
             ),
             const SizedBox(height: ZSpacing.lg),
+            if (_cameraDenied) ...[
+              ZBanner(message: l.captureScanCameraDenied),
+              const SizedBox(height: ZSpacing.md),
+            ],
+            if (!_cameraDenied) ...[
+              ZButton(
+                key: const Key('scan-camera'),
+                label: l.captureScanCamera,
+                onPressed: () => _choose(ScanImageSource.camera),
+              ),
+              const SizedBox(height: ZSpacing.sm),
+            ],
             ZButton(
               key: const Key('scan-choose'),
-              label: l.captureScanChoose,
+              label: l.captureScanGallery,
+              variant: _cameraDenied
+                  ? ZButtonVariant.primary
+                  : ZButtonVariant.secondary,
               onPressed: _choose,
             ),
           ],
@@ -378,6 +432,33 @@ class _ScanState extends ConsumerState<ScanConfirmScreen> {
           builder: (_) => const TransactionEditScreen(),
         ),
       ),
+    );
+  }
+}
+
+/// Dev builds only: the text the OCR read, selectable, shown on screen.
+class _ReadTextDialog extends StatelessWidget {
+  const _ReadTextDialog({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l.captureScanWhatIReadTitle),
+      content: SingleChildScrollView(
+        child: SelectableText(
+          text.isEmpty ? l.captureScanWhatIReadEmpty : text,
+          style: ZType.body.copyWith(color: ZColors.of(context).text),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.commonActionClose),
+        ),
+      ],
     );
   }
 }

@@ -15,6 +15,7 @@ import '../../../../core/l10n/money_format.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
 import '../../domain/transaction.dart';
+import '../instapay_title.dart';
 import 'txn_list_providers.dart';
 import '../../../../core/ui/amount_semantics.dart';
 
@@ -110,11 +111,23 @@ class TxnRow extends StatelessWidget {
     final acc = lookups.account(txn.accountId);
     final cardName = acc == null ? '' : accountName(acc, fmt);
     final merchant = txn.merchantNorm ?? txn.merchantRaw ?? txn.note ?? '';
-    final title = txn.isInternal ? l.transactionsRowInternalTitle : merchant;
+    final ip = instapayLines(l, txn);
+    final title = txn.isInternal
+        ? l.transactionsRowInternalTitle
+        : (ip?.title ?? merchant);
+    // US-P04: the counterparty leads the second line of an InstaPay row.
+    String withName(String rest) =>
+        ip?.nameLine == null ? rest : '${ip!.nameLine} · $rest';
     final time = ZDateFormat.time(txn.occurredAt, fmt.lang, fmt.digits);
     final subtitle = txn.status == TxnStatus.declined
         ? l.transactionsRowDeclined
-        : l.transactionsRowSubtitle(cardName, sourceLabel(l, txn.source), time);
+        : withName(
+            l.transactionsRowSubtitle(
+              cardName,
+              sourceLabel(l, txn.source),
+              time,
+            ),
+          );
     final amountText = fmt.money(signedAmount(txn));
     final catName = cat == null ? '' : categoryName(cat, fmt.lang);
     final Widget leading = selecting
@@ -165,10 +178,12 @@ class TxnRow extends StatelessWidget {
                       institutionCode: acc.institutionCode,
                       last4: acc.last4,
                       maxLines: 2,
-                      compose: (n) => l.transactionsRowSubtitle(
-                        n,
-                        sourceLabel(l, txn.source),
-                        time,
+                      compose: (n) => withName(
+                        l.transactionsRowSubtitle(
+                          n,
+                          sourceLabel(l, txn.source),
+                          time,
+                        ),
                       ),
                       style: ZType.bodySmall.copyWith(color: c.textMuted),
                     ),

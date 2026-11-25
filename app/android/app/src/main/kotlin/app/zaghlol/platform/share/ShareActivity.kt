@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.widget.Toast
+import app.zaghlol.R
 import app.zaghlol.MainActivity
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -14,7 +16,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Exported share target (ACTION_SEND for text/plain, image, PDF, CSV). It has
+ * Exported share target (ACTION_SEND for text/plain, image, PDF, CSV; ACTION_SEND_MULTIPLE for images, first one only, T-263). It has
  * no UI: it encrypts the payload on a worker thread, then opens
  * [MainActivity] with an intent that carries no content, only the per-process
  * hand-off token (F7). It stays alive until the copy is done because the
@@ -49,7 +51,7 @@ class ShareActivity : Activity() {
             return
         }
         val incoming = intent
-        if (incoming?.action != Intent.ACTION_SEND) {
+        if (incoming?.action != Intent.ACTION_SEND && incoming?.action != Intent.ACTION_SEND_MULTIPLE) {
             finish()
             return
         }
@@ -59,6 +61,10 @@ class ShareActivity : Activity() {
     private fun start(incoming: Intent) {
         val context = applicationContext
         val source = IntentShareSource(context, incoming)
+        // T-263: several photos shared at once: the first is read and the user is told.
+        if (source.hasIgnoredItems) {
+            Toast.makeText(context, R.string.native_android_shareMultipleFirstOnly, Toast.LENGTH_LONG).show()
+        }
         val newJob = ShareJobs.create { MAIN.post(it) }
         val deadline = SystemClock.elapsedRealtime() + ShareLimits.INTAKE_TIMEOUT_MS
         val cancelRead = WATCHDOG.schedule(Runnable { source.cancel() }, ShareLimits.INTAKE_TIMEOUT_MS, TimeUnit.MILLISECONDS)

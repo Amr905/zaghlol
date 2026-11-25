@@ -23,16 +23,33 @@ class IntentShareSource(
         null
     }
 
-    private val uri: Uri? = try {
-        if (Build.VERSION.SDK_INT >= 33) {
-            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    /** T-263: ACTION_SEND_MULTIPLE (several photos from Gallery) carries a list; only the first is read. */
+    private val uris: List<Uri> = try {
+        if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
+            val list = if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+            }
+            list?.filterNotNull().orEmpty()
         } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+            val single = if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+            }
+            listOfNotNull(single)
         }
     } catch (_: RuntimeException) {
-        null
+        emptyList()
     }
+
+    private val uri: Uri? = MultiShare.first(uris)
+
+    /** True when the sender shared more than one item and only the first is used. */
+    val hasIgnoredItems: Boolean = MultiShare.hasIgnored(uris)
 
     override val streamScheme: String? = uri?.scheme?.lowercase()
     override val streamHost: String? = uri?.host?.lowercase()

@@ -1,0 +1,12 @@
+{
+  "body": "Sample Cafe\nLatte\nCroissant\n90.00\n60.00\nDelivery 10.00\nBag 1.00\nTotal 161.00\nCard No 5123 45XX XXXX 4321",
+  "receivedAt": "2026-11-14T20:00:00",
+  "expect": {
+    "amount": "161.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "Sample Cafe",
+    "date": null,
+    "confidence": 600
+  }
+}

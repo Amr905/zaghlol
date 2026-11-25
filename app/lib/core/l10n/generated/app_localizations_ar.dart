@@ -424,10 +424,10 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get commonPeriodThisCycle => 'الدورة دي';
+  String get commonPeriodThisCycle => 'شهر المرتب ده';
 
   @override
-  String get commonPeriodLastCycle => 'الدورة اللي فاتت';
+  String get commonPeriodLastCycle => 'شهر المرتب اللي فات';
 
   @override
   String get commonPeriodThisMonth => 'الشهر ده';
@@ -1212,7 +1212,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeroSpentThisMonth => 'صرفت الشهر ده';
 
   @override
-  String get homeHeroSpentThisCycle => 'صرفت الدورة دي';
+  String get homeHeroSpentThisCycle => 'صرفت الشهر ده';
 
   @override
   String homeHeroSpentInCycleMonth(String month) {
@@ -1226,7 +1226,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeroSetBudget => 'حط ميزانية';
 
   @override
-  String get homeHeroBudgetUsedUp => 'ميزانية الدورة دي خلصت، حاسب على الباقي';
+  String get homeHeroBudgetUsedUp => 'ميزانية الشهر ده خلصت، حاسب على الباقي';
 
   @override
   String get homeHeroKpiIncome => 'دخلك';
@@ -1255,7 +1255,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeMascotShockedCategory(String category, String percent) {
-    return 'حاسب يا كبير! $category وصل $percent من ميزانيته ولسه بدري في الدورة.';
+    return 'حاسب يا كبير! $category وصل $percent من ميزانيته ولسه بدري في الشهر.';
   }
 
   @override
@@ -1302,11 +1302,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeMascotProudSavedMore(String amount) {
-    return 'عاش يا وحش! وفرت $amount زيادة عن الدورة اللي فاتت 👏';
+    return 'عاش يا وحش! وفرت $amount زيادة عن الشهر اللي فات 👏';
   }
 
   @override
-  String get homeMascotProudGoal => 'هدف الدورة اتحقق! 🎯 إنت قدها';
+  String get homeMascotProudGoal => 'هدف الشهر اتحقق! 🎯 إنت قدها';
 
   @override
   String homeMascotPayday(String amount) {
@@ -1328,7 +1328,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homePromptPaydayMonthStart(String amount) {
-    return 'لقيت مرتب $amount بينزل آخر الشهر. نحسب الدورة من أول الشهر لآخره؟';
+    return 'لقيت مرتب $amount بينزل آخر الشهر. نحسب شهرك من أول الشهر لآخره؟';
   }
 
   @override
@@ -1336,7 +1336,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homePromptBudget =>
-      'خلصت أول دورة معايا! تحب نحط ميزانية للدورة الجاية؟';
+      'خلصت أول شهر معايا! تحب نحط ميزانية للشهر الجاي؟';
 
   @override
   String get homePromptBudgetYes => 'يلا';
@@ -1470,7 +1470,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeEmptyFilter(String cards) {
-    return 'مفيش حركات لـ $cards في الدورة دي';
+    return 'مفيش حركات لـ $cards في الشهر ده';
   }
 
   @override
@@ -1480,6 +1480,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsRowInternalTitle => 'تحويلة لنفسك';
+
+  @override
+  String get transactionsInstapayTitle => 'إنستاباي';
+
+  @override
+  String transactionsInstapayTo(String name) {
+    return 'إلى $name';
+  }
+
+  @override
+  String transactionsInstapayFrom(String name) {
+    return 'من $name';
+  }
 
   @override
   String transactionsRowInternalSubtitle(String fromCard, String toCard) {
@@ -3413,8 +3426,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String insightsDeepProjection(String state, String projected) {
     String _temp0 = intl.Intl.selectLogic(state, {
-      'over': 'بالسرعة دي هتقفل الدورة على $projected، يعني فوق ميزانيتك',
-      'other': 'بالسرعة دي هتقفل الدورة على $projected، يعني في حدود ميزانيتك',
+      'over': 'بالسرعة دي هتقفل الشهر على $projected، يعني فوق ميزانيتك',
+      'other': 'بالسرعة دي هتقفل الشهر على $projected، يعني في حدود ميزانيتك',
     });
     return '$_temp0';
   }
@@ -3985,17 +3998,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get budgetOverviewEdit => 'عدّل الميزانية';
 
   @override
-  String get budgetOverviewPrevA11y => 'الدورة اللي قبلها';
+  String get budgetOverviewPrevA11y => 'الشهر اللي قبله';
 
   @override
-  String get budgetOverviewNextA11y => 'الدورة اللي بعدها';
+  String get budgetOverviewNextA11y => 'الشهر اللي بعده';
 
   @override
   String get budgetOverviewEmptyTitle => 'حط حدود وشوف مسموحلك تصرف كام';
 
   @override
   String get budgetOverviewEmptyBody =>
-      'صرف الدورة دي ظاهر تحت لحد ما تحط ميزانية.';
+      'صرف الشهر ده ظاهر تحت لحد ما تحط ميزانية.';
 
   @override
   String get budgetOverviewEmptyAction => 'حط ميزانية';
@@ -4034,11 +4047,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get budgetEditAlertSecond => 'التنبيه التاني';
 
   @override
-  String get budgetEditRollover => 'رحّل اللي فاضل للدورة الجاية';
+  String get budgetEditRollover => 'رحّل اللي فاضل للشهر الجاي';
 
   @override
   String get budgetEditRolloverHint =>
-      'اللي ما اتصرفش بيتضاف لميزانية الدورة الجاية.';
+      'اللي ما اتصرفش بيتضاف لميزانية الشهر الجاي.';
 
   @override
   String get budgetEditAnnual => 'ميزانيات سنوية';
@@ -4453,6 +4466,25 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get captureScanChoose => 'اختار صورة';
+
+  @override
+  String get captureScanCamera => 'صوّر بالكاميرا';
+
+  @override
+  String get captureScanGallery => 'اختار من المعرض';
+
+  @override
+  String get captureScanCameraDenied =>
+      'زغلول مش قادر يفتح الكاميرا. افتحهاله من الإعدادات، أو اختار صورة من المعرض.';
+
+  @override
+  String get captureScanWhatIRead => 'اللي اتقرأ';
+
+  @override
+  String get captureScanWhatIReadTitle => 'الموبايل قرا إيه';
+
+  @override
+  String get captureScanWhatIReadEmpty => 'مفيش حاجة اتقرأت.';
 
   @override
   String get captureScanChooseAnother => 'اختار صورة تانية';
@@ -5067,10 +5099,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chatPeriodLastWeek => 'الأسبوع اللي فات';
 
   @override
-  String get chatPeriodThisCycle => 'الدورة دي';
+  String get chatPeriodThisCycle => 'شهر المرتب ده';
 
   @override
-  String get chatPeriodLastCycle => 'الدورة اللي فاتت';
+  String get chatPeriodLastCycle => 'شهر المرتب اللي فات';
 
   @override
   String get chatPeriodThisMonth => 'الشهر ده';
@@ -6201,7 +6233,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goldPaywallBenefitCharts =>
-      'تحليل أعمق للشارتات: قارن بالدورة اللي فاتت واعرف هتخلص فين';
+      'تحليل أعمق للشارتات: قارن بالشهر اللي فات واعرف هتخلص فين';
 
   @override
   String get goldPaywallBenefitVoice => 'تسجيل بالصوت من غير حدود';
@@ -7051,11 +7083,11 @@ class AppLocalizationsAr extends AppLocalizations {
       'اختار يوم من أول الشهر لحد تمانية وعشرين';
 
   @override
-  String get settingsPrefsPaydayChangeTitle => 'تغيّر يوم القبض في نص الدورة؟';
+  String get settingsPrefsPaydayChangeTitle => 'تغيّر يوم القبض في نص الشهر؟';
 
   @override
   String get settingsPrefsPaydayChangeBody =>
-      'الدورة الحالية هتخلص بدري، وهتبدأ دورة جديدة من يوم القبض الجديد.';
+      'الشهر الحالي هيخلص بدري، وهيبدأ شهر جديد من يوم القبض الجديد.';
 
   @override
   String get settingsPrefsIncome => 'هدف الدخل الشهري';
@@ -7144,12 +7176,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String shareStudioCardBudget(String percent) {
-    return 'خلصت الدورة تحت الميزانية بـ $percent!';
+    return 'خلصت الشهر تحت الميزانية بـ $percent!';
   }
 
   @override
   String shareStudioCardBudgetAmount(String amount) {
-    return 'خلصت الدورة تحت الميزانية بـ $amount!';
+    return 'خلصت الشهر تحت الميزانية بـ $amount!';
   }
 
   @override
@@ -7927,7 +7959,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String commonPeriodLastCycles(String n) {
-    return 'آخر $n دورات';
+    return 'آخر $n شهور مرتب';
   }
 
   @override

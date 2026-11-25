@@ -46,9 +46,10 @@ class PaydayAutoService {
         _primaryCurrency ??
         (await _settings.get(Settings.primaryCurrency)).code;
     final credits = await _credits();
-    final detection = detectPayday(
+    // D-85: the salary currency (primary only on a tie), not primary alone.
+    final detection = detectPaydayForSalary(
       credits: credits,
-      currency: currency,
+      primaryCurrency: currency,
       currentPayday: current,
       typedByUser: state.typedBy(current),
     );

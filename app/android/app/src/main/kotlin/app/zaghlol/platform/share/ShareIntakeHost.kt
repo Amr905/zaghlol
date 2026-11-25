@@ -14,16 +14,21 @@ object ShareIntakeState {
     fun takeRejection(): ShareRejectReason? = rejection.getAndSet(null)
 }
 
+/**
+ * T-263: an image share is sealed in the store at intake, so its `ocrPath` is
+ * the share id, which is what `OcrHostApi.recognize` resolves (iOS: the sealed
+ * body path). EVERY descriptor handed to Dart goes through this: the Pigeon
+ * host and the warm-start announcements of `MainActivity.onResume`. A
+ * descriptor announced without it reached Dart as an image with no OCR path,
+ * and Dart showed "reading images isn't ready on this phone yet".
+ */
+fun ShareDescriptor.withOcrPath(): ShareDescriptor =
+    if (kind == ShareKind.IMAGE) copy(ocrPath = id) else this
+
 /** Pigeon host implementation. Errors carry codes from platform-channels.md and never any content. */
 class ShareIntakeHost(private val store: ShareStore) : ShareIntakeHostApi {
-    /**
-     * An image share is already sealed in the store at intake (copied from the
-     * content stream, size-capped, never a plain file), so its `ocrPath` is the
-     * share id, which is what `OcrHostApi.recognize` resolves (iOS: the sealed
-     * body path). Dart never sees a plain path.
-     */
-    private fun withOcr(d: ShareDescriptor): ShareDescriptor =
-        if (d.kind == ShareKind.IMAGE) d.copy(ocrPath = d.id) else d
+    /** Dart never sees a plain path (see [withOcrPath]). */
+    private fun withOcr(d: ShareDescriptor): ShareDescriptor = d.withOcrPath()
 
     override fun listPendingShares(): List<ShareDescriptor> = try {
         store.list().map(::withOcr)

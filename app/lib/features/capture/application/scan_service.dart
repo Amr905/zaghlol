@@ -51,10 +51,19 @@ final class ScanService {
     required this.pipeline,
     required this.wallClock,
     this.diagnostics,
+    this.keepReadText = false,
   });
 
   /// Outcome counters for dev builds; null records nothing.
   final ScanDiagnostics? diagnostics;
+
+  /// Dev builds only: keep the OCR text of the latest scan in memory in
+  /// [lastReadText] so the "what I read" view can show it. Never logged,
+  /// never stored, never part of an outcome.
+  final bool keepReadText;
+
+  /// The OCR text of the latest image scan; null unless [keepReadText].
+  String? lastReadText;
 
   /// Fewer letters and digits than this is "no text" (the OCR read noise).
   static const int minReadableChars = 10;
@@ -77,6 +86,7 @@ final class ScanService {
   /// Reads the image at [encryptedPath] (a spool path the host owns) and
   /// parses its text. Never throws.
   Future<ScanOutcome> scanImage(String encryptedPath) async {
+    lastReadText = null;
     final OcrOutcome ocr;
     try {
       ocr = await engine.recognize(encryptedPath);
@@ -91,6 +101,7 @@ final class ScanService {
       return const ScanFailed(OcrFailureCode.ocrFailed);
     }
     final text = ocr.fullText;
+    if (keepReadText) lastReadText = text;
     if (!_readable(text)) {
       diagnostics?.record(ScanCounter.noText);
       return const ScanNoText();
@@ -136,6 +147,7 @@ final class ScanService {
   /// Parses shared text like a pasted message: the share channel first (the
   /// generic reader), then the screen templates for text copied from an app.
   ScanOutcome scanText(String text) {
+    lastReadText = keepReadText ? text : null;
     final now = wallClock();
     var result = pipeline.parse(
       ParseRequest(

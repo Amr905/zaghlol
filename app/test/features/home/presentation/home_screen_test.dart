@@ -248,7 +248,7 @@ void main() {
     );
     await tester.pump();
     expect(
-      find.textContaining('${formatAccountWithCard('CIB', '1234')} this cycle'),
+      find.textContaining('${formatAccountWithCard('CIB', '1234')} this month'),
       findsOneWidget,
     );
     expect(find.text('Clear filter'), findsWidgets);

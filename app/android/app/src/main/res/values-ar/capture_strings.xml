@@ -5,4 +5,6 @@
     <string name="native_android_captureNotifTitle">زغلول بيسجّل عملية</string>
     <!-- T-118: home-screen widget picker description (copy deck: key requested from T-087). -->
     <string name="native_android_widgetSafeToSpendDescription">تصرف كام النهارده وفاضل كام يوم على المرتب</string>
+    <!-- T-263: share of several images. -->
+    <string name="native_android_shareMultipleFirstOnly">بعتّ أكتر من صورة. فتحتلك أول واحدة.</string>
 </resources>

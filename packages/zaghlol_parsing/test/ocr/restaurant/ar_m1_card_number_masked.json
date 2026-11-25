@@ -1,0 +1,12 @@
+{
+  "body": "كافيه تجريبي\nلاتيه\nكرواسون\n90.00\n60.00\nتوصيل 10.00\nكيس 1.00\nالاجمالي 161.00\nرقم البطاقة 5123 45XX XXXX 4321",
+  "receivedAt": "2026-11-14T20:00:00",
+  "expect": {
+    "amount": "161.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "كافيه تجريبي",
+    "date": null,
+    "confidence": 600
+  }
+}

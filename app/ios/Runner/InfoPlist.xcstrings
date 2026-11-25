@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "NSCameraUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "زغلول بيستخدم الكاميرا عشان تصوّر الفاتورة ويقراها على موبايلك. الصورة بتتمسح بعد ما تتقرأ ومبتتحفظش في صورك."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaghlol uses the camera to photograph a receipt and read it on your phone. The photo is deleted after reading and is not saved to your photos."
+          }
+        }
+      }
+    },
     "NSMicrophoneUsageDescription": {
       "extractionState": "manual",
       "localizations": {

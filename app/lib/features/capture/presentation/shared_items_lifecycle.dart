@@ -2,7 +2,7 @@
 // share target, T-065 iOS Share Extension) and routes them, when the app is
 // open and unlocked:
 //   text          -> parsed like a pasted message -> S-32 (confirm, never auto-save)
-//   image         -> OCR -> S-32
+//   image         -> OCR -> S-32 (no OCR on the phone: S-32 "not available")
 //   pdf / csv     -> S-32 "not available" (PDF OCR and import belong to T-158)
 // Events come from `ShareIntakeService` (started by the capture coordinator at
 // start and on every resume). Content is read only after the app lock is open
@@ -115,7 +115,10 @@ class _SharedItemsState extends ConsumerState<SharedItemsLifecycle> {
       case ShareKind.text:
         request = await _textRequest(service, d);
       case ShareKind.image:
-        request = ScanImagePath(d.ocrPath);
+        // T-263: on Android the share id is the OCR handle, so an image
+        // announced without an ocrPath is still read (it used to land on the
+        // "not ready on this phone" screen).
+        request = ScanImagePath(d.ocrPath ?? d.id);
       case ShareKind.pdf || ShareKind.csv:
         request = const ScanImagePath(null);
     }

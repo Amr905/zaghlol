@@ -69,3 +69,10 @@ object ShareUriPolicy {
     /** FU-070 S2: authorities of system providers our permissions can read. `media` is allowed (gallery shares). */
     val SYSTEM_AUTHORITIES: Set<String> = setOf("sms", "mms", "mms-sms", "call_log", "com.android.contacts", "contacts")
 }
+
+/** T-263: several items in one share (`ACTION_SEND_MULTIPLE`): the first is read, the rest are ignored and the user is told. */
+object MultiShare {
+    fun <T> first(items: List<T>): T? = items.firstOrNull()
+
+    fun hasIgnored(items: List<*>): Boolean = items.size > 1
+}

@@ -1,0 +1,12 @@
+{
+  "body": "Sample Grill House\nHotline 16000\nWhatsApp 01000000000\nOrder No 4821\n14-11-2026 03:30 PM\nItem Qty U P Total\nGrilled Chicken Plate 2 100.44 200.88\nGarden Salad 1 95.58 95.58\nSoft Drink 2 43.00 86.00\n382.46 Net Sales\n53.54 VAT\n436.00 Amount Due\n0 Paid\n436.00 Visa\n0 Change",
+  "receivedAt": "2026-11-14T20:00:00",
+  "expect": {
+    "amount": "436.00",
+    "currency": "EGP",
+    "template": "ocr.receipt.generic",
+    "merchant": "Sample Grill House",
+    "date": "2026-11-14",
+    "occurredAt": "2026-11-14T15:30:00.000Z"
+  }
+}
