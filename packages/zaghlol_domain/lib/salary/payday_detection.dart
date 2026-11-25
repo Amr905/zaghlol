@@ -1,6 +1,7 @@
 // T-246 (D-81, plan section 6): the payday follows the salary. Pure rules, no
-// Flutter, no database. Money is never involved: only the dates of salary
-// credits in the primary currency (A10) are read.
+// Flutter, no database. Money is never involved: only the dates and currency
+// codes of salary credits are read. T-271 (D-85): the credits of the user's
+// salary currency count, which is the primary currency only on a tie.
 
 import 'dart:convert';
 
@@ -63,15 +64,52 @@ const int _ring = paydayMaxDay;
 /// The first salary date of each month, newest month first, at most
 /// [paydayPatternMonths] months. A credit from day 21 on counts to the next
 /// month, so 25 Oct and 5 Nov are the same month and the 25th wins.
+int _monthKey(CivilDate d) =>
+    d.year * 12 + d.month - 1 + (d.day >= paydayNextMonthFromDay ? 1 : 0);
+
+/// T-271 (D-85): the user's salary currency. Among the salary months of the
+/// latest [paydayPatternMonths] months (any currency), the currency with the
+/// most months wins. A tie goes to [primary] when it is among the tied; else
+/// to the currency with the newest credit (then the smaller code), so the
+/// answer never depends on input order. Null when there are no credits.
+String? salaryCurrencyOf(Iterable<PaydayCredit> credits, String primary) {
+  final months = <String, Set<int>>{};
+  final newest = <String, int>{};
+  final all = <int>{};
+  for (final c in credits) {
+    final k = _monthKey(c.date);
+    all.add(k);
+    (months[c.currency] ??= {}).add(k);
+    final e = c.date.epochDay;
+    if (e > (newest[c.currency] ?? -1000000000)) newest[c.currency] = e;
+  }
+  if (months.isEmpty) return null;
+  final latest = (all.toList()..sort((a, b) => b.compareTo(a)))
+      .take(paydayPatternMonths)
+      .toSet();
+  final count = {
+    for (final e in months.entries)
+      e.key: e.value.where(latest.contains).length,
+  };
+  final top = count.values.reduce((a, b) => a > b ? a : b);
+  final tied = [
+    for (final e in count.entries)
+      if (e.value == top) e.key,
+  ];
+  if (tied.length == 1) return tied.single;
+  if (tied.contains(primary)) return primary;
+  tied.sort((a, b) {
+    final byNew = newest[b]!.compareTo(newest[a]!);
+    return byNew != 0 ? byNew : a.compareTo(b);
+  });
+  return tied.first;
+}
+
 List<int> _latestFirstDays(Iterable<PaydayCredit> credits, String currency) {
   final first = <int, CivilDate>{}; // year * 12 + month - 1 -> earliest date
   for (final c in credits) {
     if (c.currency != currency) continue;
-    final key =
-        c.date.year * 12 +
-        c.date.month -
-        1 +
-        (c.date.day >= paydayNextMonthFromDay ? 1 : 0);
+    final key = _monthKey(c.date);
     final cur = first[key];
     if (cur == null || c.date.epochDay < cur.epochDay) first[key] = c.date;
   }
@@ -107,7 +145,8 @@ int _ringDistance(int a, int b) {
 /// Detects the payday from [credits] (the caller passes the last 12 months).
 ///
 /// [currentPayday] is null when the user never set one. [typedByUser] says
-/// the current value was typed by hand. Only [currency] credits count (A10).
+/// the current value was typed by hand. Only [currency] credits count; use
+/// [detectPaydayForSalary] to pick the user's salary currency first.
 PaydayDetection detectPayday({
   required Iterable<PaydayCredit> credits,
   required String currency,
@@ -276,4 +315,23 @@ final class PaydayAutoState {
       suppressed: List<int>.unmodifiable(s.cast<int>()),
     );
   }
+}
+
+/// T-271 (D-85): [detectPayday] on the credits of the user's salary currency
+/// ([salaryCurrencyOf]; [primaryCurrency] breaks ties).
+PaydayDetection detectPaydayForSalary({
+  required Iterable<PaydayCredit> credits,
+  required String primaryCurrency,
+  required int? currentPayday,
+  required bool typedByUser,
+}) {
+  final list = credits.toList();
+  final currency = salaryCurrencyOf(list, primaryCurrency);
+  if (currency == null) return const PaydayDetection();
+  return detectPayday(
+    credits: list,
+    currency: currency,
+    currentPayday: currentPayday,
+    typedByUser: typedByUser,
+  );
 }

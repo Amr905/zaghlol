@@ -190,17 +190,34 @@ void main() {
     },
   );
 
-  test(
-    'not salary: other currency, expense, internal, other category',
-    () async {
-      await credit(CivilDate(2026, 11, 10), currency: 'USD');
-      await credit(CivilDate(2026, 11, 11), direction: 'expense');
-      await credit(CivilDate(2026, 11, 12), internal: 1);
-      await credit(CivilDate(2026, 11, 13), category: null);
-      expect(await service.run(), isNull);
-      expect(await settings.get(Settings.paydayEras), isNull);
-    },
-  );
+  test('not salary: expense, internal, other category', () async {
+    await credit(CivilDate(2026, 11, 11), direction: 'expense');
+    await credit(CivilDate(2026, 11, 12), internal: 1);
+    await credit(CivilDate(2026, 11, 13), category: null);
+    expect(await service.run(), isNull);
+    expect(await settings.get(Settings.paydayEras), isNull);
+  });
+
+  test('T-271: USD salaries 24/23/24 with EGP primary set payday 23', () async {
+    await credit(CivilDate(2026, 9, 24), currency: 'USD');
+    await credit(CivilDate(2026, 10, 23), currency: 'USD');
+    await credit(CivilDate(2026, 11, 24), currency: 'USD');
+    expect(await service.run(), 23);
+    expect(await payday(), 23);
+  });
+
+  test('T-271: one EGP and two USD months: USD decides', () async {
+    await credit(CivilDate(2026, 10, 5));
+    await credit(CivilDate(2026, 10, 23), currency: 'USD');
+    await credit(CivilDate(2026, 11, 24), currency: 'USD');
+    expect(await service.run(), 23);
+  });
+
+  test('T-271: a tie between EGP and USD months goes to EGP', () async {
+    await credit(CivilDate(2026, 10, 5));
+    await credit(CivilDate(2026, 11, 20), currency: 'USD');
+    expect(await service.run(), 5);
+  });
 
   test('a merge (not inserted) never runs the rule', () async {
     await credit(CivilDate(2026, 11, 10));

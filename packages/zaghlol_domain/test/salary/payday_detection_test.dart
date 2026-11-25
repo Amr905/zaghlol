@@ -230,4 +230,79 @@ void main() {
       expect(x.suppressed.last, 12);
     });
   });
+
+  group('detectPaydayForSalary (D-85)', () {
+    PaydayDetection salary(
+      List<PaydayCredit> credits, {
+      String primary = 'EGP',
+      int? current,
+      bool typed = false,
+    }) => detectPaydayForSalary(
+      credits: credits,
+      primaryCurrency: primary,
+      currentPayday: current,
+      typedByUser: typed,
+    );
+
+    test('USD salaries 24/23/24 with EGP primary -> payday 23', () {
+      final r = salary([
+        c(2026, 9, 24, 'USD'),
+        c(2026, 10, 23, 'USD'),
+        c(2026, 11, 24, 'USD'),
+      ]);
+      expect(r, const PaydayDetection(day: 23, apply: true, salaryDay: 23));
+    });
+
+    test('mixed months: the currency with most months decides', () {
+      final r = salary([
+        c(2026, 9, 24, 'USD'),
+        c(2026, 10, 23, 'USD'),
+        c(2026, 11, 24, 'USD'),
+        c(2026, 10, 5),
+      ]);
+      expect(r.day, 23);
+    });
+
+    test('a tie goes to the primary currency', () {
+      final credits = [c(2026, 10, 5), c(2026, 11, 24, 'USD')];
+      expect(salaryCurrencyOf(credits, 'EGP'), 'EGP');
+      expect(salaryCurrencyOf(credits, 'USD'), 'USD');
+      expect(salary(credits).day, 5);
+    });
+
+    test('a tie without the primary: newest credit, then code; stable', () {
+      final a = [c(2026, 10, 5, 'GBP'), c(2026, 11, 7, 'USD')];
+      expect(salaryCurrencyOf(a, 'EGP'), 'USD');
+      expect(salaryCurrencyOf(a.reversed, 'EGP'), 'USD');
+    });
+
+    test('two salaries in one month: the first of the chosen currency', () {
+      final r = salary([
+        c(2026, 9, 10, 'USD'),
+        c(2026, 9, 3),
+        c(2026, 10, 10, 'USD'),
+        c(2026, 10, 2),
+        c(2026, 11, 10, 'USD'),
+      ]);
+      expect(salaryCurrencyOf([c(2026, 9, 10, 'USD')], 'EGP'), 'USD');
+      expect(r.day, 10);
+    });
+
+    test('only months in the latest three count', () {
+      final credits = [
+        c(2026, 1, 3),
+        c(2026, 2, 3),
+        c(2026, 3, 3),
+        c(2026, 9, 24, 'USD'),
+        c(2026, 10, 23, 'USD'),
+        c(2026, 11, 24, 'USD'),
+      ];
+      expect(salaryCurrencyOf(credits, 'EGP'), 'USD');
+    });
+
+    test('no credits -> nothing', () {
+      expect(salary([]), const PaydayDetection());
+      expect(salaryCurrencyOf([], 'EGP'), isNull);
+    });
+  });
 }
