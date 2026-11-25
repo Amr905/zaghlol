@@ -42,6 +42,12 @@ ParseResult parseGeneric({
   if (_hits(t, declineKeywords, null).isNotEmpty) {
     return const ParseUnrecognized(UnrecognizedReason.genericDeclined);
   }
+  // T-241: a due reminder or statement is a notice, never a transaction.
+  // Decided before any amount is ranked.
+  final notice = _noticeGate(t, language, globalLast4, institutionCode);
+  if (notice != null) {
+    return notice;
+  }
   if (_hits(t, promoKeywords, null).isNotEmpty &&
       _hits(t, completedTransactionCues, null).isEmpty) {
     return const ParseUnrecognized(UnrecognizedReason.genericPromotion);
@@ -210,6 +216,48 @@ ParseResult parseGeneric({
     reasons: ordered,
     fieldConfidence: Map.unmodifiable(scores),
     spans: Map.unmodifiable(spans),
+  );
+}
+
+final RegExp _payBy = RegExp(r'\bpay(?:ment)? by [0-9]');
+final RegExp _statementIs = RegExp(r'كشف حساب[^.\n]{0,80}? هو ');
+
+/// The notice gate (T-241). Reads the text before any boilerplate tail.
+/// Returns null when the message has no notice cue.
+ParseResult? _noticeGate(
+  String t,
+  String language,
+  List<CompiledPattern> globalLast4,
+  String? institutionCode,
+) {
+  var end = t.length;
+  for (final marker in noticeBoilerplateMarkers) {
+    final i = t.indexOf(marker);
+    if (i >= 0 && i < end) {
+      end = i;
+    }
+  }
+  final head = end == t.length ? t : t.substring(0, end);
+  final statement =
+      _hits(head, noticeStatementKeywords, null).isNotEmpty ||
+      _statementIs.hasMatch(head);
+  final future =
+      _hits(head, noticeFutureKeywords, null).isNotEmpty ||
+      _payBy.hasMatch(head);
+  if (!statement && !future) {
+    return null;
+  }
+  if (_hits(head, noticePurchaseConflictCues, null).isNotEmpty) {
+    return const ParseUnrecognized(UnrecognizedReason.genericNoticeConflict);
+  }
+  final amounts = {for (final c in _candidates(head, const [])) c.money};
+  return ParseNotice(
+    kind: statement ? NoticeKind.ccStatement : NoticeKind.ccDue,
+    language: language,
+    institutionCode: institutionCode,
+    last4: _last4(head, globalLast4)?.$1,
+    amountDue: amounts.length == 1 ? amounts.first : null,
+    confidencePermille: kGenericMaxConfidencePermille,
   );
 }
 

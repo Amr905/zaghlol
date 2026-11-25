@@ -547,6 +547,12 @@ Template? _template(ObjReader r, List<RegistryIssue> out) {
       );
     }
   }
+  // T-241: a due reminder or statement is never money moving.
+  if ((event == TemplateEvent.ccDue || event == TemplateEvent.ccStatement) &&
+      direction != null &&
+      direction != TemplateDirection.neutral) {
+    out.add(RegistryIssue('${r.path}.direction', RegistryIssueCode.badValue));
+  }
   final currencyMap = _currencyMap(r, out);
   final date = _date(r, out, groups);
   final localeText = r.string('locale');
@@ -630,16 +636,24 @@ DatePolicy? _date(ObjReader r, List<RegistryIssue> out, Set<String> groups) {
   if (format != null && !_dateFormatShape.hasMatch(format)) {
     out.add(RegistryIssue('${reader.path}.format', RegistryIssueCode.badValue));
   }
-  if (policy != null && policy != 'nearest_past') {
+  if (policy != null &&
+      policy != 'nearest_past' &&
+      policy != 'nearest_future') {
     out.add(
       RegistryIssue('${reader.path}.yearPolicy', RegistryIssueCode.badValue),
     );
   }
-  if (!groups.contains('date')) {
+  if (!groups.contains('date') &&
+      !groups.contains('duedate') &&
+      !groups.contains('stmtdate')) {
     out.add(RegistryIssue(reader.path, RegistryIssueCode.missingGroup, 'date'));
   }
   if (format == null) {
     return null;
   }
-  return DatePolicy(format, policy == 'nearest_past' || policy == null);
+  return DatePolicy(
+    format,
+    policy == 'nearest_past' || policy == 'nearest_future' || policy == null,
+    nearestFuture: policy == 'nearest_future',
+  );
 }

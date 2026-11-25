@@ -30,6 +30,9 @@ final class ExtractedFields {
     this.ref,
     this.date,
     this.time,
+    this.minDue,
+    this.dueDate,
+    this.statementDate,
     this.problems = const [],
   });
 
@@ -52,6 +55,12 @@ final class ExtractedFields {
   /// Calendar date (UTC midnight is used only to carry y/m/d).
   final DateTime? date;
   final String? time;
+
+  /// T-241 (`cc_due`, `cc_statement`): minimum due, due date and statement
+  /// date. [amount] is the total due.
+  final Money? minDue;
+  final DateTime? dueDate;
+  final DateTime? statementDate;
   final List<String> problems;
 }
 
@@ -195,7 +204,8 @@ ExtractedFields extractFields(
       locale: template.locale,
     );
     final value = result.valueOrNull;
-    if (value == null || (key == 'amount' && !value.isPositive)) {
+    if (value == null ||
+        ((key == 'amount' || key == 'mindue') && !value.isPositive)) {
       problems.add(field);
       return null;
     }
@@ -249,6 +259,8 @@ ExtractedFields extractFields(
     last4 = _declaredLast4([...institution.last4, ...globalLast4], foldedBody);
   }
 
+  final minDue = money('mindue', currency, 'minDue');
+
   final merchantRaw = groups['merchant'];
   final merchant = merchantRaw == null
       ? null
@@ -263,6 +275,26 @@ ExtractedFields extractFields(
     date = parseTemplateDate(dateRaw, template.date!, receivedAt);
     if (date == null) {
       problems.add('date');
+    }
+  }
+
+  DateTime? dueDate;
+  DateTime? statementDate;
+  final policy = template.date;
+  if (policy != null) {
+    final dueRaw = groups['duedate'];
+    if (dueRaw != null) {
+      dueDate = parseTemplateDate(dueRaw, policy, receivedAt, due: true);
+      if (dueDate == null) {
+        problems.add('dueDate');
+      }
+    }
+    final stmtRaw = groups['stmtdate'];
+    if (stmtRaw != null) {
+      statementDate = parseTemplateDate(stmtRaw, policy, receivedAt);
+      if (statementDate == null) {
+        problems.add('statementDate');
+      }
     }
   }
 
@@ -282,6 +314,9 @@ ExtractedFields extractFields(
     ref: groups['ref'],
     date: date,
     time: groups['time'],
+    minDue: minDue,
+    dueDate: dueDate,
+    statementDate: statementDate,
     problems: problems,
   );
 }
@@ -312,8 +347,12 @@ String _dropTrailingPunctuation(String raw) {
 DateTime? parseTemplateDate(
   String raw,
   DatePolicy policy,
-  DateTime receivedAt,
-) {
+  DateTime receivedAt, {
+
+  /// T-241: a due date; with `nearest_future` and no year it resolves to the
+  /// nearest date on or after the day of receipt.
+  bool due = false,
+}) {
   final tokens = RegExp(r'd{1,2}|M{1,2}|y{4}|y{2}|[/.-]')
       .allMatches(policy.format)
       .map((m) => m.group(0)!)
@@ -362,6 +401,15 @@ DateTime? parseTemplateDate(
     return build(receivedAt.year);
   }
   final today = DateTime.utc(receivedAt.year, receivedAt.month, receivedAt.day);
+  if (due && policy.nearestFuture) {
+    for (var ahead = 0; ahead <= 4; ahead++) {
+      final d = build(receivedAt.year + ahead);
+      if (d != null && !d.isBefore(today)) {
+        return d;
+      }
+    }
+    return null;
+  }
   final thisYear = build(receivedAt.year);
   if (thisYear != null && !thisYear.isAfter(today)) {
     return thisYear;

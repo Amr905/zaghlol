@@ -197,6 +197,61 @@ final class ParseParsed extends ParseResult {
   bool get needsReview => confidencePermille < kAutoAcceptThresholdPermille;
 }
 
+/// Which card notice a [ParseNotice] is.
+enum NoticeKind {
+  /// A reminder that the card payment is due or will be debited.
+  ccDue,
+
+  /// A statement (total due, minimum due, due date).
+  ccStatement,
+}
+
+/// T-241 (D-83): a card due reminder or statement. **Never a transaction**:
+/// it is not [ParseParsed] or [ParseGeneric], so no code path that saves a
+/// parse can save it. The ingest layer stores the raw message and hands the
+/// typed fields to the dues hook. Every field a message does not carry is
+/// null. Carries typed fields only, never message text.
+final class ParseNotice extends ParseResult {
+  const ParseNotice({
+    required this.kind,
+    required this.language,
+    required this.confidencePermille,
+    this.institutionCode,
+    this.templateId,
+    this.templateVersion,
+    this.last4,
+    this.amountDue,
+    this.minDue,
+    this.dueDate,
+    this.statementDate,
+  });
+
+  final NoticeKind kind;
+  final String language;
+
+  /// Null for an unknown sender (generic gate).
+  final String? institutionCode;
+
+  /// Set when a registry template read it; null for the generic gate.
+  final String? templateId;
+  final int? templateVersion;
+  final String? last4;
+
+  /// Total amount due (the amount that will be debited for a reminder).
+  final Money? amountDue;
+  final Money? minDue;
+
+  /// Calendar dates (UTC midnight carries y/m/d). An undated due date is the
+  /// nearest future one.
+  final DateTime? dueDate;
+  final DateTime? statementDate;
+  final int confidencePermille;
+
+  /// True when a template read it (fields are reliable) rather than the
+  /// generic gate (best effort).
+  bool get fromTemplate => templateId != null;
+}
+
 enum DropReason { globalPattern, institutionPattern }
 
 /// A drop pattern fired (OTP, promotion): nothing is stored.
@@ -240,6 +295,11 @@ enum UnrecognizedReason {
   /// Generic parser: promotion wording (offer, win, `عرض خاص`) and no word
   /// saying money moved. Not a transaction; still a review item.
   genericPromotion,
+
+  /// Generic parser (T-241): the message reads like a due reminder or
+  /// statement and also like a completed purchase. Neither is trusted: it
+  /// goes to review, never to a transaction.
+  genericNoticeConflict,
 }
 
 /// Nothing could be parsed. The caller keeps the raw message as an

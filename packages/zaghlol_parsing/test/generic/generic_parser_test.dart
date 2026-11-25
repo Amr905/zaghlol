@@ -432,6 +432,7 @@ void main() {
           ],
           ParseUnrecognized() => [r.reason.name, ?r.institutionCode],
           ParseDropped() => [r.reason.name],
+          ParseNotice() => [r.language, ?r.last4],
           ParseParsed() => <String>[],
         };
         for (final s in strings) {

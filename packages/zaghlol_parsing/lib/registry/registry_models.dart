@@ -68,7 +68,12 @@ enum TemplateEvent {
   settled('settled'),
   walletTopup('wallet_topup'),
   bnplInstallment('bnpl_installment'),
-  balanceOnly('balance_only');
+  balanceOnly('balance_only'),
+
+  /// T-241: a card payment-due reminder or statement. Never a transaction:
+  /// the pipeline returns a `ParseNotice` for these events.
+  ccDue('cc_due'),
+  ccStatement('cc_statement');
 
   const TemplateEvent(this.wire);
   final String wire;
@@ -100,6 +105,10 @@ const Set<String> templateGroupNames = {
   'ref',
   'date',
   'time',
+  // T-241 notices: `amount` is the total due.
+  'mindue',
+  'duedate',
+  'stmtdate',
 };
 
 /// A pattern compiled once at load. [source] is the text as written in the
@@ -135,7 +144,7 @@ final class SenderRule {
 
 /// Date field format and year policy of a template.
 final class DatePolicy {
-  const DatePolicy(this.format, this.nearestPast);
+  const DatePolicy(this.format, this.nearestPast, {this.nearestFuture = false});
 
   /// Tokens `d`, `dd`, `M`, `MM`, `yy`, `yyyy` and separators `/ - .`.
   final String format;
@@ -143,6 +152,11 @@ final class DatePolicy {
   /// With no year in the message, take the year that puts the date nearest
   /// in the past to `receivedAt` (parsing-engine §4).
   final bool nearestPast;
+
+  /// T-241: a `duedate` with no year takes the nearest date on or after
+  /// `receivedAt` (a due date is ahead of the message). `date` and `stmtdate`
+  /// keep the past policy.
+  final bool nearestFuture;
 }
 
 final class Template {

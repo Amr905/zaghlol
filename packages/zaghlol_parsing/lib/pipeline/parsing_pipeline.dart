@@ -224,12 +224,22 @@ final class ParsingPipeline {
       cleaning: registry.shared.merchantCleaning,
       institutionCode: institution.code,
     );
-    return generic is ParseGeneric
-        ? generic
-        : ParseUnrecognized(
-            UnrecognizedReason.noTemplateMatched,
-            institutionCode: institution.code,
-          );
+    if (generic is ParseGeneric || generic is ParseNotice) {
+      return generic;
+    }
+    // T-241: keep the notice-conflict reason; the other reasons stay hidden
+    // behind `noTemplateMatched` (T-244 surfaces them).
+    if (generic is ParseUnrecognized &&
+        generic.reason == UnrecognizedReason.genericNoticeConflict) {
+      return ParseUnrecognized(
+        UnrecognizedReason.genericNoticeConflict,
+        institutionCode: institution.code,
+      );
+    }
+    return ParseUnrecognized(
+      UnrecognizedReason.noTemplateMatched,
+      institutionCode: institution.code,
+    );
   }
 
   Iterable<Template> _candidates(
@@ -272,13 +282,32 @@ final class ParsingPipeline {
           );
   }
 
-  ParseParsed _finish(
+  ParseResult _finish(
     Institution institution,
     Template template,
     ExtractedFields extracted,
     DateTime receivedAt,
     MessageLanguage language,
   ) {
+    // T-241: a due reminder or statement is never a transaction.
+    if (template.event == TemplateEvent.ccDue ||
+        template.event == TemplateEvent.ccStatement) {
+      return ParseNotice(
+        kind: template.event == TemplateEvent.ccDue
+            ? NoticeKind.ccDue
+            : NoticeKind.ccStatement,
+        language: language.name,
+        institutionCode: institution.code,
+        templateId: template.id,
+        templateVersion: template.version,
+        last4: extracted.last4,
+        amountDue: extracted.amount,
+        minDue: extracted.minDue,
+        dueDate: extracted.dueDate,
+        statementDate: extracted.statementDate,
+        confidencePermille: template.baseConfidencePermille,
+      );
+    }
     final reasons = <ParseReason>{};
     for (final problem in extracted.problems) {
       final reason = switch (problem) {

@@ -1,0 +1,17 @@
+{
+  "sender": "CIB",
+  "body": "كشف حساب شهر أكتوبر 2026  لبطاقتك الائتمانية المنتهية بـ 6603 هو 25,400.75 جم ، الحد الأدنى للسداد قبل  25/11 هو 1,270.04 جم .يمكنك الاطلاع على تفاصيل كشف الحساب من خلال الرابط التالي: https://example.invalid/x1",
+  "receivedAt": "2026-11-25T10:00:00+02:00",
+  "expect": {
+    "template": "cib.cc_statement.ar",
+    "event": "cc_statement",
+    "direction": "neutral",
+    "currency": "EGP",
+    "balance": null,
+    "available": null,
+    "amount": "25400.75",
+    "minDue": "1270.04",
+    "last4": "6603",
+    "dueDate": "2026-11-25"
+  }
+}
