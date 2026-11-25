@@ -82,4 +82,27 @@ void main() {
     pipeline.parseOcr('الاجمالي ' * 800, now);
     expect(w.elapsedMilliseconds, lessThan(2000));
   });
+
+  group('tender and after-total lines are never the total', () {
+    final cases = <String, String>{
+      'Total 150.00\nAmount received 200.00': '15000',
+      'Total 150.00\nAmount returned 50.00': '15000',
+      'Total 150.00\nTotal Savings 15.00': '15000',
+      'الاجمالي 150.00\nالمستلم 200.00': '15000',
+    };
+    cases.forEach((text, minor) {
+      test(text.replaceAll('\n', ' | '), () {
+        final r = pipeline.parseOcr(text, now);
+        expect((r as ParseParsed).fields.amount!.minor.toString(), minor);
+      });
+    });
+    test('fallback never reads a card line', () {
+      final r = pipeline.parseOcr(
+        'Pharmacy\nPanadol 25.00\nVitamin C 90.00\nCard 200.00',
+        now,
+      );
+      final a = r is ParseParsed ? r.fields.amount?.minor : null;
+      expect(a, isNot(20000));
+    });
+  });
 }

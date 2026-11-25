@@ -36,8 +36,8 @@ final RegExp _totalLabel = RegExp(
 /// Lines that are never the total: subtotal, tax, discount, tender, change,
 /// item counts. `incl. VAT` after a total is removed first.
 final RegExp _skipLine = RegExp(
-  r'(?<![a-z])(?:sub ?total|vat|tax|discount|disc|paid|cash|change|tendered|items?|qty|quantity)(?![a-z])'
-  r'|المجموع الفرعي|قبل الخصم|ضريبه|خصم|المدفوع|مدفوع|الباقي|نقدي|نقدا|عدد|الكميه',
+  r'(?<![a-z])(?:sub ?total|vat|tax|discount|disc|paid|cash|change|tendered|tender|received|returned|refund|savings?|saved|balance|card|visa|mastercard|change due|items?|qty|quantity)(?![a-z])'
+  r'|المجموع الفرعي|قبل الخصم|ضريبه|خصم|المدفوع|مدفوع|الباقي|نقدي|نقدا|عدد|الكميه|المستلم|المرتجع|مرتجع|توفير|وفرت|الرصيد|فيزا|بطاقه',
 );
 final RegExp _inclTax = RegExp(
   r'(?:incl\w*\.?|inc\.?|with|including|شامل(?: ال)?)\s*(?:vat|tax|ضريبه)',
