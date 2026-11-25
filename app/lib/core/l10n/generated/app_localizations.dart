@@ -8509,6 +8509,24 @@ abstract class AppLocalizations {
   /// **'النسخة الاحتياطية ماتعملتش. جرّب تاني.'**
   String get backupSettingsErrorGeneric;
 
+  /// S · T-270 · dev/staging builds only, DRIVE_NOT_CONFIGURED; the define names stay in Latin
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة الاحتياطية على Google Drive مش هتشتغل في نسخة التجربة دي: اتعملت من غير الـ client ID بتاع تسجيل الدخول بجوجل (ZAGHLOL_GOOGLE_SERVER_CLIENT_ID على أندرويد، ZAGHLOL_GOOGLE_IOS_CLIENT_ID على الآيفون). بياناتك في أمان على موبايلك. اعمل build للتطبيق تاني بالـ client ID من مشروع Google Cloud.'**
+  String get backupSettingsErrorNotConfiguredDev;
+
+  /// S · T-270 · store builds, DRIVE_NOT_CONFIGURED
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة الاحتياطية على Google Drive مش متاحة في النسخة دي من زغلول. بياناتك في أمان على موبايلك. حدّث التطبيق وجرّب تاني.'**
+  String get backupSettingsErrorNotConfigured;
+
+  /// S · T-270 · iCloud took the file but hasn't confirmed the upload
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة اتحفظت في iCloud على الموبايل، بس لسه بتترفع. هتتحسب نسختك الاحتياطية أول ما الرفع يخلص، فخلّي الموبايل على النت.'**
+  String get backupSettingsPendingUpload;
+
   /// T · first backup
   ///
   /// In ar, this message translates to:

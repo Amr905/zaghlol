@@ -7,6 +7,11 @@
 // last good backup stays), stale reminder (Free, over 30 days; A-67), Free
 // (locked Automatic and Versions rows open the paywall) and Gold.
 //
+// T-270: a build without the Google client ID says so up front for Drive
+// (dev builds name the missing setting) and does not start the passphrase
+// step; an iCloud backup that is still uploading is shown as pending, not
+// done.
+//
 // A running backup has no cancel: the services expose no cancellation, so the
 // "you can cancel" note is not shown. The Account row is left out: no
 // account name is exposed by the Drive or iCloud services.
@@ -22,9 +27,11 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../gold/application/gating.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
+import '../application/drive_backup_providers.dart';
 import '../application/schedule.dart' show backupStaleAfter;
 import '../application/schedule_providers.dart';
 import '../crypto/backup_crypto_exception.dart';
+import '../data/drive_auth.dart' show DriveBackupSetup;
 import 'backup_labels.dart';
 import 'backup_ports.dart';
 import 'passphrase_sheet.dart';
@@ -49,7 +56,7 @@ final backupLastSizeProvider = Provider.autoDispose
       return list == null || list.isEmpty ? null : list.first.sizeBytes;
     }, name: 'backupLastSizeProvider');
 
-enum _Run { idle, running, done, failed }
+enum _Run { idle, running, done, pending, failed }
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({
@@ -85,6 +92,11 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         : BackupProviderKind.drive;
   }
 
+  /// T-270: Drive is the target but this build has no Google client ID.
+  bool get _driveMissing =>
+      _where == BackupProviderKind.drive &&
+      ref.watch(driveBackupSetupProvider) != DriveBackupSetup.ready;
+
   Future<void> _backUp() async {
     final actions = ref.read(backupActionsProvider);
     final where = _where;
@@ -92,6 +104,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       _run = _Run.idle;
       _error = null;
     });
+    // Checked before the passphrase step: a backup that can't reach Drive
+    // must not ask for a passphrase first (T-270).
+    if (where == BackupProviderKind.drive &&
+        ref.read(driveBackupSetupProvider) != DriveBackupSetup.ready) {
+      return;
+    }
     try {
       var haveKey = false;
       try {
@@ -112,12 +130,12 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       }
       if (!mounted) return;
       setState(() => _run = _Run.running);
-      await actions.backupNow(
+      final confirmed = await actions.backupNow(
         where == BackupProviderKind.icloud
             ? BackupDestinationPref.icloud
             : BackupDestinationPref.drive,
       );
-      if (mounted) setState(() => _run = _Run.done);
+      if (mounted) setState(() => _run = confirmed ? _Run.done : _Run.pending);
     } on Object catch (e) {
       if (!mounted) return;
       setState(() {
@@ -213,9 +231,15 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       BackupErrorKind.storage => l10n.backupSettingsErrorStorage(provider),
       BackupErrorKind.auth => l10n.backupSettingsErrorAuth(provider),
       BackupErrorKind.icloud => l10n.backupSettingsErrorIcloud,
+      BackupErrorKind.notConfigured => _notConfiguredText(l10n),
       _ => l10n.backupSettingsErrorGeneric,
     };
   }
+
+  String _notConfiguredText(AppLocalizations l10n) =>
+      ref.read(driveBackupSetupProvider) == DriveBackupSetup.missingInDevBuild
+      ? l10n.backupSettingsErrorNotConfiguredDev
+      : l10n.backupSettingsErrorNotConfigured;
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +250,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     final mode =
         ref.watch(backupScheduleModeProvider).value ?? BackupScheduleMode.off;
     final running = _run == _Run.running;
+    final driveMissing = _driveMissing;
     final now = (widget.now ?? DateTime.now)();
     final staleDays = last == null ? 0 : now.difference(last).inDays;
     final stale =
@@ -285,12 +310,27 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
                 tone: ZBannerTone.success,
                 message: l10n.backupSettingsDone,
               ),
-            if (_run == _Run.failed && _error != null)
+            if (_run == _Run.pending)
+              ZBanner(
+                tone: ZBannerTone.info,
+                message: l10n.backupSettingsPendingUpload,
+              ),
+            if (driveMissing)
+              ZBanner(
+                tone: ZBannerTone.error,
+                message: _notConfiguredText(l10n),
+              )
+            else if (_run == _Run.failed && _error != null)
               ZBanner(
                 tone: ZBannerTone.error,
                 message: _errorText(l10n, _error!),
-                actionLabel: l10n.commonActionTryAgain,
-                onAction: _backUp,
+                // Trying again can't help a build without the client ID.
+                actionLabel: _error == BackupErrorKind.notConfigured
+                    ? null
+                    : l10n.commonActionTryAgain,
+                onAction: _error == BackupErrorKind.notConfigured
+                    ? null
+                    : _backUp,
               ),
             const SizedBox(height: ZSpacing.lg),
             _auto(l10n, gold, mode),
@@ -381,7 +421,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         ZButton(
           label: l10n.backupSettingsNow,
           expand: true,
-          onPressed: _backUp,
+          onPressed: _driveMissing ? null : _backUp,
         ),
         if (!gold && last != null) ...[
           const SizedBox(height: ZSpacing.sm),
