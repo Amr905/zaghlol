@@ -107,3 +107,13 @@ Commands run:
 - T-246 M-1 (major, data): Undo after a first-ever auto-set leaves all past cycles on the auto day.
 
 Follow-ups: the minors and nits above, from FU-295 on (Lead to number and assign).
+
+## Delta re-review (Sonnet)
+
+Scope: `git diff 5d8d1ed d1a8a12 -- packages app`. Run: parsing `dart test` (notices, po_suite, generic) 216 pass; app `card_notice_ingest_test` + `features/salary` 74 pass; `dart analyze --fatal-infos` clean.
+
+- **T-241 M-1 (past-tense debit swallowed as notice): RESOLVED.** `_movedHits` runs in the notice gate and returns `genericNoticeConflict` (a review path, never a notice). The `ي`-prefix skip only fires when `ي` is directly adjacent to the cue start (`يتم`/`سيتم`); every cue starts with `تم`/`خصم`, so a real `تم خصم` after a space (e.g. "... في تم خصم") is still a hit and cannot slip through as a notice. Generic-gate notices now also get a `low_confidence` review item (`reason: genericNotice`), so a gate mistake stays visible. Side effects, both on the safe side: `received`/`credited`/`خصم من` turn some real due reminders (e.g. "سيتم خصم من حسابك") into review items instead of notices; no path found that turns a real transaction into a notice.
+- **T-241 M-2 (unused import): RESOLVED.**
+- **T-246 M-1 (Undo restores exact eras): RESOLVED.** `previousEras` is saved before `setPayday`, round-trips through JSON (length-capped), and `PaydayScheduleStore.restore` resets both keys on null eras and invalidates cycle caches before and after. Legacy state (no `e`, `previous` set) falls back to `setPayday(previous)`; null/null restores to unset. Test added. Nit (not blocking): `copyWith` uses `previousEras ?? this.previousEras`, so a second auto change from legacy-eras-null with a non-null previous could keep a stale `previousEras`; unreachable in practice since eras and day are written together.
+
+New blocker/major: none.
