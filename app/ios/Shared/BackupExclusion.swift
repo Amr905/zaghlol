@@ -113,10 +113,28 @@ enum ZaghlolDirectories {
 /// T-021: native side of the diagnostic log. Native code reports a fixed code
 /// (an allow-listed `DiagCodes` value, never a path or error text). Nothing is
 /// printed to the system log. The handler is `nil` until the platform-channel
-/// bridge that writes into `diag_log` is installed (follow-up native task);
+/// bridge that writes into `diag_log` is installed (FU-113 bridge, still open);
 /// until then reports are dropped.
+///
+/// FU-113: the handler is guarded by a lock, so `report` (any thread, e.g. an
+/// extension queue) and `install` (main thread) never race on it. The handler
+/// is called outside the lock.
 enum NativeDiagHook {
-  static var handler: ((String) -> Void)?
+  private static let lock = NSLock()
+  private static var current: ((String) -> Void)?
+
+  static var handler: ((String) -> Void)? {
+    get {
+      lock.lock()
+      defer { lock.unlock() }
+      return current
+    }
+    set {
+      lock.lock()
+      current = newValue
+      lock.unlock()
+    }
+  }
 
   static func report(_ code: String) {
     handler?(code)

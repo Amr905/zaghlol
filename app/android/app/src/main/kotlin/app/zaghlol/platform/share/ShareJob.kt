@@ -19,6 +19,7 @@ class ShareJob(val id: String, private val post: (Runnable) -> Unit) {
     private var listener: ((ShareOutcome) -> Unit)? = null
     private var delivered = false
     private var committing = false
+    private var abandoned = false
 
     /** Sets the outcome from any thread; false when one was already set. */
     fun complete(result: ShareOutcome): Boolean {
@@ -55,6 +56,27 @@ class ShareJob(val id: String, private val post: (Runnable) -> Unit) {
         post(Runnable { deliverIfReady() })
         return true
     }
+
+    /**
+     * FU-332: the commit watchdog. Unlike [giveUp] it applies while a commit is
+     * in progress (a stalled Keystore call), and only then. Sets [result] and
+     * marks the commit abandoned: if the worker's commit lands later, its
+     * outcome is ignored by [complete] and the stored share is discarded by
+     * [ShareJobs.finish], so the user sees exactly one outcome.
+     */
+    fun abandonCommit(result: ShareOutcome): Boolean {
+        synchronized(this) {
+            if (!committing || outcome != null) return false
+            outcome = result
+            abandoned = true
+        }
+        post(Runnable { deliverIfReady() })
+        return true
+    }
+
+    /** True once [abandonCommit] set the outcome. */
+    val commitAbandoned: Boolean
+        get() = synchronized(this) { abandoned }
 
     /** Attaches the only listener (on the [post] thread); called at once when the outcome is already known. */
     fun attach(l: (ShareOutcome) -> Unit) {
@@ -103,9 +125,24 @@ object ShareJobs {
      * [ShareIntakeState], so Dart learns it even when no activity is left to
      * hand it over. Returns false when the job already had an outcome.
      */
-    fun finish(job: ShareJob, outcome: ShareOutcome): Boolean {
+    fun finish(job: ShareJob, outcome: ShareOutcome, discardLate: (String) -> Unit = {}): Boolean {
         val first = job.complete(outcome)
         if (first && outcome is ShareOutcome.Rejected) ShareIntakeState.setRejected(outcome.reason)
+        // FU-332: a commit that landed after the watchdog gave up is not shown; its stored share is removed.
+        if (!first && outcome is ShareOutcome.Accepted && job.commitAbandoned) {
+            try {
+                discardLate(outcome.descriptor.id)
+            } catch (_: Exception) {
+                // Best effort: the stale sweep removes it after STALE_AFTER_MS.
+            }
+        }
+        return first
+    }
+
+    /** The commit watchdog's [finish] (FU-332): ends a commit that has stalled. */
+    fun abandonCommit(job: ShareJob, outcome: ShareOutcome.Rejected): Boolean {
+        val first = job.abandonCommit(outcome)
+        if (first) ShareIntakeState.setRejected(outcome.reason)
         return first
     }
 

@@ -9,7 +9,9 @@ import android.os.SystemClock
 import app.zaghlol.MainActivity
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Exported share target (ACTION_SEND for text/plain, image, PDF, CSV). It has
@@ -65,15 +67,29 @@ class ShareActivity : Activity() {
             ShareLimits.INTAKE_TIMEOUT_MS + ShareLimits.INTAKE_GRACE_MS,
             TimeUnit.MILLISECONDS,
         )
+        val store by lazy { ShareStores.create(context) } // built on the worker, as before
+        // FU-332: a commit that has started is bounded too; the watchdog starts when the commit does.
+        val commitGiveUp = AtomicReference<ScheduledFuture<*>?>(null)
+        val mayCommit: () -> Boolean = {
+            newJob.beginCommit().also { started ->
+                if (started) {
+                    commitGiveUp.set(WATCHDOG.schedule(
+                        Runnable { ShareJobs.abandonCommit(newJob, ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)) },
+                        ShareLimits.COMMIT_TIMEOUT_MS,
+                        TimeUnit.MILLISECONDS,
+                    ))
+                }
+            }
+        }
         WORKERS.submit(
             task = {
                 val outcome = try {
                     ShareIntake(
-                        store = ShareStores.create(context),
+                        store = store,
                         ownPackage = context.packageName,
                         imageProbe = BitmapBoundsProbe,
                         clock = SystemClock::elapsedRealtime,
-                    ).accept(source, deadline, mayCommit = newJob::beginCommit)
+                    ).accept(source, deadline, mayCommit = mayCommit)
                 } catch (_: Exception) {
                     ShareOutcome.Rejected(ShareRejectReason.UNREADABLE)
                 } catch (_: OutOfMemoryError) {
@@ -81,7 +97,8 @@ class ShareActivity : Activity() {
                 }
                 cancelRead.cancel(false)
                 giveUp.cancel(false)
-                ShareJobs.finish(newJob, outcome)
+                commitGiveUp.get()?.cancel(false)
+                ShareJobs.finish(newJob, outcome, discardLate = store::discard)
             },
             onRejected = {
                 // FU-070 S1: every worker is held and the queue is full: refuse now.
