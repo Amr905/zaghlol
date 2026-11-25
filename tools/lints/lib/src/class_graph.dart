@@ -61,4 +61,15 @@ class _Collector extends RecursiveAstVisitor<void> {
     graph._add(node.name.lexeme, ClassGraph.directSupertypes(node));
     super.visitClassDeclaration(node);
   }
+
+  @override
+  void visitMixinDeclaration(MixinDeclaration node) {
+    graph._add(node.name.lexeme, {
+      for (final t in node.implementsClause?.interfaces ?? <NamedType>[])
+        stripGenerics(t.toSource()),
+      for (final t in node.onClause?.superclassConstraints ?? <NamedType>[])
+        stripGenerics(t.toSource()),
+    });
+    super.visitMixinDeclaration(node);
+  }
 }

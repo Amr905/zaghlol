@@ -55,6 +55,7 @@ enum PdfExtractFailureKind {
 
 final class PdfExtractException extends SafeException {
   PdfExtractException(this.kind)
+    // ignore: safe_exception_required - suffix is a PdfExtractFailureKind enum name, a closed set
     : super('PDF_EXTRACT_${kind.name.toUpperCase()}');
   final PdfExtractFailureKind kind;
 }

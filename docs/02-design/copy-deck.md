@@ -2671,7 +2671,7 @@ Serious and exact. No jokes, no emoji. The dialog is a type-to-confirm (C-18).
 |---|---|---|---|
 | `privacy_delete_row` | امسح كل حاجة | Delete everything | L · destructive |
 | `privacy_delete_title` | تمسح كل حاجة من على الموبايل ده؟ | Delete everything from this phone? | T |
-| `privacy_delete_body` | هنمسح كل حركاتك وإعداداتك ومفاتيح الحماية من على الموبايل ده. مفيش رجوع. | We'll delete all your transactions, settings and security keys from this phone. There's no undo. | S |
+| `privacy_delete_body` | هنمسح كل حركاتك وإعداداتك من على الموبايل ده. مفيش رجوع. | We'll delete all your transactions and settings from this phone. There's no undo. | S · FU-039: no "security keys" claim; iPhone seat keys stay, said by `privacy_delete_iosKeys` |
 | `privacy_delete_storeAccountKept` | شراءك من المتجر وحسابك مش هيتأثروا. | Your store purchase and your account aren't touched. | S · no promise about Gold on this phone (Android delete is a new install and spends the seat move; see the seat warning) |
 | `privacy_delete_lastBackup` | آخر نسخة احتياطية: {date} | Last backup: {date} | S |
 | `privacy_delete_noBackup` | مفيش نسخة احتياطية. اللي هتمسحه مش هيرجع. | You have no backup. What you delete can't come back. | S |
