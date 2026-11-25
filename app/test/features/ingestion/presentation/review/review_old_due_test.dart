@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/ui/z_button.dart';
 import 'package:zaghlol/features/ingestion/presentation/review/review_models.dart';
 
@@ -71,6 +72,27 @@ void main() {
         await t.pump();
         await t.pump();
         expect(a.calls, ['oldDueRemove:d1', 'oldDueUndo:batch-d1']);
+      });
+
+      testWidgets('T-257: Remove on a stale offer shows a neutral message', (
+        t,
+      ) async {
+        final a = FakeActions()..refuseOldDue = true;
+        await pumpReview(
+          t,
+          reviewApp(actions: a, queue: [_card], locale: Locale(lang)),
+        );
+        await t.tap(find.widgetWithText(ZButton, s.remove));
+        await t.pump();
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 750));
+        final l = lookupAppLocalizations(Locale(lang));
+        expect(
+          find.text(l.ingestionReviewOldDueAlreadyHandled),
+          findsOneWidget,
+        );
+        expect(find.text(l.reviewErrorSaveFailed), findsNothing);
+        expect(find.byType(SnackBarAction), findsNothing);
       });
 
       testWidgets('Keep calls keep only', (t) async {

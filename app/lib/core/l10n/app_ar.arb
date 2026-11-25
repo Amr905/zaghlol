@@ -2612,6 +2612,10 @@
   "@ingestionReviewOldDueRemoved": {
     "description": "T-250: snackbar after Remove, with common_action_undo"
   },
+  "ingestionReviewOldDueAlreadyHandled": "اتعامل معاها قبل كده، مفيش حاجة تتعمل هنا",
+  "@ingestionReviewOldDueAlreadyHandled": {
+    "description": "T-257: snackbar when Remove finds the offer no longer applies"
+  },
   "ingestionReviewOldDueKept": "تمام، هيفضل زي ما هو",
   "@ingestionReviewOldDueKept": {
     "description": "T-250: snackbar after Keep"

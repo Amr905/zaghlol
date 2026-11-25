@@ -1969,6 +1969,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ingestionReviewOldDueRemoved => 'Removed from your spending';
 
   @override
+  String get ingestionReviewOldDueAlreadyHandled =>
+      'Already handled, nothing to do here';
+
+  @override
   String get ingestionReviewOldDueKept => 'OK, it stays as it is';
 
   @override

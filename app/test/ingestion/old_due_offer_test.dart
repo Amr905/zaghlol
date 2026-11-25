@@ -303,6 +303,23 @@ void main() {
     expect((await w.txns()).single['deleted_at'], isNull);
     expect((await offers()).single['resolved_at'], isNull);
   });
+
+  test('T-257 FU-317: a transaction a reminder was marked paid with is not '
+      'offered', () async {
+    await oldAutoSaved();
+    await w.db.customStatement(
+      'INSERT INTO recurring_items (id, kind, status, name, amount_minor, '
+      "currency, cadence, created_at) VALUES ('ri1', 'card_due', 'active', "
+      "'Card', 5177, 'EGP', 'monthly', 1)",
+    );
+    await w.db.customStatement(
+      'INSERT INTO recurring_occurrences (item_id, due_date, txn_id, '
+      "paid_at) VALUES ('ri1', '2026-11-25', 'old1', 1)",
+    );
+    final s = await reparse();
+    expect(s.offered, 0);
+    expect(await offers(), isEmpty);
+  });
 }
 
 /// Runs a Keep right after Remove's check, like a second screen would.
