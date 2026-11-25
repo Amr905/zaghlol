@@ -63,7 +63,6 @@ const List<_Case> _cases = [
       'date': '2026-10-26',
       'balanceMinor': null,
     },
-    pendingUntil: 'T-243',
   ),
   _Case(
     3,
@@ -97,7 +96,6 @@ const List<_Case> _cases = [
       'date': '2026-10-28',
       'balanceMinor': null,
     },
-    pendingUntil: 'T-243',
   ),
   _Case(
     5,
@@ -231,8 +229,7 @@ const List<_Case> _cases = [
 ];
 
 class _Neg {
-  const _Neg(this.name, this.source, this.body, {this.pendingUntil});
-  final String? pendingUntil;
+  const _Neg(this.name, this.source, this.body);
   final String name;
   final String source;
   final String body;
@@ -261,7 +258,6 @@ const List<_Neg> _negatives = [
     'HSBC',
     'Terms and conditions apply. A late payment fee of EGP 150.00 may be '
         'charged on overdue balances.',
-    pendingUntil: 'T-243', // generic reader reads the fee as a payment today
   ),
   _Neg('hotline-only number', 'CIB', 'للمزيد اتصل ب 19888'),
 ];
@@ -295,7 +291,10 @@ Map<String, Object?> _view(ParseResult r) {
       'currency': r.amount.currency.code,
       'last4': r.last4,
       'merchantKey': r.merchant?.key,
+      'counterparty': r.counterparty?.name,
       'date': r.dateRead ? _d(r.occurredAt) : _d(_at),
+      'balanceMinor': r.balance?.minor,
+      'availableMinor': r.available?.minor,
     };
   }
   if (r is ParseNotice) {
@@ -396,7 +395,6 @@ void main() {
       test(n.name, () {
         final r = parse(n.body, n.source);
         final tx = r is ParseParsed || r is ParseGeneric;
-        if (n.pendingUntil != null) return; // known gap, reported in task
         expect(tx, isFalse);
       });
     }

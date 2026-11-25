@@ -50,6 +50,8 @@ final class ManualTxnInput {
     this.source = 'manual',
     this.categorySource,
     this.merchantNorm,
+    this.counterpartyKind,
+    this.counterpartyValue,
     this.catalogMerchantId,
     this.allowForeignCurrency = false,
   });
@@ -77,6 +79,10 @@ final class ManualTxnInput {
   /// Stored category source; null means `user` with a category, else `none`.
   final String? categorySource;
   final String? merchantNorm;
+
+  /// The other party of a transfer read from the message (T-243).
+  final String? counterpartyKind;
+  final String? counterpartyValue;
   final int? catalogMerchantId;
 
   /// A message read in a currency other than the card's (a USD purchase on
@@ -179,6 +185,8 @@ class ReviewRepository {
               occurredTzOffsetMin: input.tzOffsetMin,
               merchantRaw: Value(input.merchant),
               merchantNorm: Value(input.merchantNorm),
+              counterpartyKind: Value(input.counterpartyKind),
+              counterpartyValue: Value(input.counterpartyValue),
               catalogMerchantId: Value(input.catalogMerchantId),
               categoryId: Value(input.categoryId),
               categorySource:

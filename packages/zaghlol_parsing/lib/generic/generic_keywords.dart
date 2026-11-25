@@ -26,6 +26,9 @@ final List<String> expenseKeywords = _fold(const [
   'sent to',
   'pos',
   'used for',
+  'has been used for',
+  'trx using',
+  'a trx',
   'has been used',
   'was used',
   'withdrew',
@@ -650,3 +653,118 @@ final List<String> noticePurchaseConflictCues = _fold(const [
   'تم سحب نقدي',
   'cash withdrawal',
 ]);
+
+// ---------------------------------------------------------------------------
+// T-243.
+
+/// Anchors of the account balance (a number after one is never the amount).
+final List<String> balanceAnchors = _fold(const [
+  'الرصيد المتوفر',
+  'الرصيد المتاح',
+  'رصيدك المتاح',
+  'رصيدك الحالي',
+  'المتاح',
+  'available balance is',
+  'available balance',
+  'avail bal',
+  'avl bal',
+  'balance is',
+  'balance:',
+]);
+
+/// Anchors of an available credit limit (kept apart from the balance).
+final List<String> limitAnchors = _fold(const [
+  'available limit is',
+  'available limit',
+  'avail limit',
+  'الحد المتاح',
+]);
+
+/// Wording of a fee or terms footer: a hypothetical charge, not a payment.
+/// A message whose other sentences hold no completed-transaction cue is not
+/// a transaction (T&C footer, T-243).
+final List<String> feeFooterKeywords = _fold(const [
+  'terms and conditions',
+  'terms apply',
+  'late fee',
+  'late payment fee',
+  'fee of',
+  'fees apply',
+  'applies if',
+  'apply if',
+  'may be charged',
+  'will be charged',
+  'غرامه تاخير',
+  'رسوم تاخير',
+  'الشروط والاحكام',
+  'تطبق الشروط',
+]);
+
+/// First words after a merchant marker that never start a merchant
+/// (`في حالة`, `من خلال`, `to your account`, a link).
+final Set<String> merchantNonStarters = Set.unmodifiable(
+  _fold(const [
+    'حاله',
+    'حال',
+    'خلال',
+    'الرابط',
+    'رابط',
+    'اي',
+    'كل',
+    'هذا',
+    'هذه',
+    'ذلك',
+    'تاريخ',
+    'اليوم',
+    'يوم',
+    'حسابك',
+    'حسابكم',
+    'حساب',
+    'بطاقتك',
+    'بطاقه',
+    'your',
+    'you',
+    'the',
+    'a',
+    'an',
+    'this',
+    'account',
+    'card',
+    'http',
+    'https',
+    'www',
+  ]),
+);
+
+/// Words that end a counterparty name (T-243): reference, date and hotline
+/// anchors. `رقم` ends it only before `مرجعي`; see the reader.
+final Set<String> counterpartyEndAnchors = Set.unmodifiable(
+  _fold(const [
+    'مرجعي',
+    'المرجع',
+    'ref',
+    'reference',
+    'يوم',
+    'بتاريخ',
+    'on',
+    'الساعه',
+    'للمزيد',
+    'at',
+    'via',
+    'using',
+    'عبر',
+    'باستخدام',
+    'بتاريخ',
+    'date',
+    'time',
+    'for',
+  ]),
+);
+
+/// Markers of the other party by direction.
+final Set<String> counterpartyOutMarkers = Set.unmodifiable(
+  _fold(const ['الى', 'to']),
+);
+final Set<String> counterpartyInMarkers = Set.unmodifiable(
+  _fold(const ['من', 'from']),
+);

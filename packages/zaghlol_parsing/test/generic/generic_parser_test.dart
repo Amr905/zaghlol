@@ -118,6 +118,10 @@ void main() {
         if (ex.containsKey('merchant')) {
           expect(g.merchant?.display, ex['merchant']);
         }
+        if (ex.containsKey('counterparty')) {
+          expect(g.counterparty?.name, ex['counterparty']);
+          expect(g.merchant, isNull);
+        }
       });
     }
 

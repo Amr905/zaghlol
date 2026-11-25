@@ -15,6 +15,8 @@ final class GenericSuggestion {
     this.direction,
     this.merchant,
     this.merchantKey,
+    this.counterpartyKind,
+    this.counterpartyValue,
     this.last4,
     this.institutionCode,
     this.institutionLabel,
@@ -31,6 +33,10 @@ final class GenericSuggestion {
   final TxnDirection? direction;
   final String? merchant;
   final String? merchantKey;
+
+  /// T-243: the other party of a transfer (`person`, `ipa`, `phone`).
+  final String? counterpartyKind;
+  final String? counterpartyValue;
   final String? last4;
 
   /// The known bank the sender resolved to (FU-243); null for an unknown
@@ -109,6 +115,8 @@ final class GenericSuggestion {
         direction: dir is String ? TxnDirection.fromCode(dir) : null,
         merchant: _text(payload['merchant']),
         merchantKey: _text(payload['merchantKey']),
+        counterpartyKind: _text(payload['counterpartyKind']),
+        counterpartyValue: _text(payload['counterpartyValue']),
         last4: _last4(payload['last4']),
         institutionCode: _text(payload['institutionCode']),
         institutionLabel: _text(payload['institutionLabel']),
