@@ -23,6 +23,7 @@ import '../../data/transaction_detail_reader.dart';
 import '../../data/transactions_providers.dart';
 import '../../../accounts/presentation/account_type.dart';
 import '../../domain/transaction.dart';
+import '../instapay_title.dart';
 import '../edit/transaction_edit_screen.dart';
 import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
@@ -560,7 +561,8 @@ class _Body extends StatelessWidget {
     final t = detail.record;
     final cat = lookups.category(t.categoryId);
     final acc = lookups.account(t.accountId);
-    final merchant = t.merchantNorm ?? t.merchantRaw ?? '';
+    final ip = instapayLines(l, t);
+    final merchant = ip?.title ?? t.merchantNorm ?? t.merchantRaw ?? '';
     final isExpense =
         t.direction == TxnDirection.expense || t.direction == TxnDirection.fee;
     final isIncoming =
@@ -663,6 +665,12 @@ class _Body extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: ZType.title.copyWith(color: c.text),
                 ),
+              ),
+            if (ip?.nameLine != null)
+              Text(
+                ip!.nameLine!,
+                textAlign: TextAlign.center,
+                style: ZType.body.copyWith(color: c.textMuted),
               ),
             const SizedBox(height: ZSpacing.md),
             ZChip(

@@ -305,6 +305,8 @@ class DriftTransactionRepository implements TransactionRepository {
     isUserVerified: r.isUserVerified == 1,
     isInternal: r.isInternal == 1,
     note: r.note,
+    counterpartyKind: r.counterpartyKind,
+    counterpartyValue: r.counterpartyValue,
     deletedAt: r.deletedAt == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(r.deletedAt!, isUtc: true),

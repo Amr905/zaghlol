@@ -2284,6 +2284,24 @@ abstract class AppLocalizations {
   /// **'تحويلة لنفسك'**
   String get transactionsRowInternalTitle;
 
+  /// L · title of an InstaPay row (US-P04)
+  ///
+  /// In ar, this message translates to:
+  /// **'إنستاباي'**
+  String get transactionsInstapayTitle;
+
+  /// L · second line of an outgoing InstaPay row; name as stored
+  ///
+  /// In ar, this message translates to:
+  /// **'إلى {name}'**
+  String transactionsInstapayTo(String name);
+
+  /// L · second line of an incoming InstaPay row; name as stored
+  ///
+  /// In ar, this message translates to:
+  /// **'من {name}'**
+  String transactionsInstapayFrom(String name);
+
   /// L · FR-HOME-03; colour is never the only cue
   ///
   /// In ar, this message translates to:

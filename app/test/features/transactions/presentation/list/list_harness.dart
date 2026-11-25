@@ -44,6 +44,8 @@ TransactionRecord txnRec(
   bool internal = false,
   TxnStatus status = TxnStatus.posted,
   String account = 'acc1',
+  String? counterpartyKind,
+  String? counterpartyValue,
 }) => TransactionRecord(
   id: id,
   accountId: account,
@@ -53,7 +55,9 @@ TransactionRecord txnRec(
   amount: Money(currency ?? egp, minor),
   occurredAt: now.subtract(Duration(days: daysAgo)),
   occurredTzOffsetMin: offset,
-  merchantNorm: merchant,
+  merchantNorm: merchant.isEmpty ? null : merchant,
+  counterpartyKind: counterpartyKind,
+  counterpartyValue: counterpartyValue,
   categoryId: categoryId,
   categorySource: CategorySource.catalog,
   isUserVerified: false,
@@ -82,7 +86,9 @@ class FakeRepo implements TransactionRepository {
     if (failWith != null) throw failWith!;
     final hits = rows.where((t) {
       if (text != null &&
-          !(t.merchantNorm ?? '').toLowerCase().contains(text.toLowerCase())) {
+          !'${t.merchantNorm ?? ''} ${t.counterpartyValue ?? ''}'
+              .toLowerCase()
+              .contains(text.toLowerCase())) {
         return false;
       }
       if ((filter.categoryIds.isNotEmpty || filter.includeUncategorized) &&

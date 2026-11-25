@@ -1435,6 +1435,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsRowInternalTitle => 'To yourself';
 
   @override
+  String get transactionsInstapayTitle => 'InstaPay';
+
+  @override
+  String transactionsInstapayTo(String name) {
+    return 'To $name';
+  }
+
+  @override
+  String transactionsInstapayFrom(String name) {
+    return 'From $name';
+  }
+
+  @override
   String transactionsRowInternalSubtitle(String fromCard, String toCard) {
     return '$fromCard → $toCard · Excluded from spending';
   }
