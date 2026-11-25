@@ -1482,6 +1482,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsRowInternalTitle => 'تحويلة لنفسك';
 
   @override
+  String get transactionsInstapayTitle => 'إنستاباي';
+
+  @override
+  String transactionsInstapayTo(String name) {
+    return 'إلى $name';
+  }
+
+  @override
+  String transactionsInstapayFrom(String name) {
+    return 'من $name';
+  }
+
+  @override
   String transactionsRowInternalSubtitle(String fromCard, String toCard) {
     return '$fromCard لـ $toCard · مش محسوبة في المصاريف';
   }

@@ -1812,6 +1812,28 @@
   "@transactionsRowInternalTitle": {
     "description": "L · ⇄ icon, muted"
   },
+  "transactionsInstapayTitle": "إنستاباي",
+  "@transactionsInstapayTitle": {
+    "description": "L · title of an InstaPay row (US-P04)"
+  },
+  "transactionsInstapayTo": "إلى {name}",
+  "@transactionsInstapayTo": {
+    "description": "L · second line of an outgoing InstaPay row; name as stored",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsInstapayFrom": "من {name}",
+  "@transactionsInstapayFrom": {
+    "description": "L · second line of an incoming InstaPay row; name as stored",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "transactionsRowInternalSubtitle": "{fromCard} لـ {toCard} · مش محسوبة في المصاريف",
   "@transactionsRowInternalSubtitle": {
     "description": "L · FR-HOME-03; colour is never the only cue",

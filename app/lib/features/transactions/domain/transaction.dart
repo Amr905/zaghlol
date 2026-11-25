@@ -98,6 +98,8 @@ final class TransactionRecord {
     this.merchantNorm,
     this.categoryId,
     this.note,
+    this.counterpartyKind,
+    this.counterpartyValue,
     this.deletedAt,
   });
 
@@ -126,6 +128,11 @@ final class TransactionRecord {
   final bool isUserVerified;
   final bool isInternal;
   final String? note;
+
+  /// US-P04: the other party as stored (`ipa`, `phone`, `person`, ...), masks
+  /// kept.
+  final String? counterpartyKind;
+  final String? counterpartyValue;
 
   /// Set while the row is in the Undo window (UTC).
   final DateTime? deletedAt;
