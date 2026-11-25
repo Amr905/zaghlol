@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-26 (Cairo) by the Lead session: PO phone feedback 2 (stories `docs/01-requirements/user-stories-2026-11-25.md`, T-262…T-271). Batch 76 merging; batch 77 = T-266 card↔account link (building), T-269 statement import UI, T-270 backup setup message (built). T-268 mascot inset held on `task/T-268-po2` until the PO shows where the hand is cut. PO owes: Google OAuth client IDs (Drive backup + Google sign-in), multi-currency design choice (`docs/02-design/multi-currency-options.md`), local backup file decision. Update it whenever the state below changes._
+_Last updated: 2026-11-26 (Cairo) by the Lead session: PO phone feedback 2 done except the mascot — batches 76 (#125) and 77 merged/merging. Next: multi-currency hybrid (D-86) screen plan for the PO before any code; mascot placement (D-87, PO to pick places) with T-268 (inset fix, held on `task/T-268-po2`). PO owes: Google OAuth client IDs, local backup file decision, where the cut hand shows, "what I read" text if the restaurant receipt still reads 1,558. Update it whenever the state below changes._
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
@@ -170,7 +170,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-355**
+Next free follow-up number: **FU-364**
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
