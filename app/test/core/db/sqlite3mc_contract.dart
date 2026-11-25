@@ -739,6 +739,15 @@ void registerSqlite3mcContract({required String env}) {
         isA<DbContractException>(),
         reason: 'open sequence refuses plaintext',
       );
+      // FU-050 (T-007 #5): refused because the file is not encrypted, not
+      // by any other error (a PRAGMA typo would also throw).
+      final refusal = failure! as DbContractException;
+      expect(
+        refusal.sqliteCode == sqliteNotADb ||
+            refusal.stage == 'DB_NOT_ENCRYPTED',
+        isTrue,
+        reason: 'plaintext refused as not-a-database or not encrypted',
+      );
     });
 
     test(

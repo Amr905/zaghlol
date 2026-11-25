@@ -358,7 +358,13 @@ Future<Map<String, Object?>> runDbBenchmark({
       'pbkdf2_open_ms': pbkdf2,
     };
   } finally {
-    await dir.delete(recursive: true);
+    // FU-050 (T-007 #6): after a failed step a database may still be open;
+    // on Windows the delete then fails and would hide the real error.
+    try {
+      await dir.delete(recursive: true);
+    } on FileSystemException {
+      // Left in the temp directory; the original error propagates.
+    }
   }
 }
 

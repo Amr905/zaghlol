@@ -148,7 +148,11 @@ jobs:
             echo "== $f ($(sha256sum "$f" | cut -c1-64))"
             # Non-zero exit (step fails) unless a valid attestation exists.
             # Without a TTY gh prints nothing, so show what was verified.
-            gh attestation verify "$f" --repo simolus3/sqlite3.dart --format json > att.json
+            # FU-050 (T-007 review #1, security L-2): only the upstream release
+            # workflow, on a GitHub-hosted runner; gh by absolute path (I-4).
+            /usr/bin/gh attestation verify "$f" --repo simolus3/sqlite3.dart \
+              --signer-workflow simolus3/sqlite3.dart/.github/workflows/compile_sqlite.yml \
+              --deny-self-hosted-runners --format json > att.json
             n=$(jq 'length' att.json)
             signer=$(jq -r '[.[].verificationResult.signature.certificate.buildSignerURI] | unique | join(", ")' att.json)
             ref=$(jq -r '[.[].verificationResult.signature.certificate.sourceRepositoryRef] | unique | join(", ")' att.json)
