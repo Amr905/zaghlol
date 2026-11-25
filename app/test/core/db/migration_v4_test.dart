@@ -231,6 +231,15 @@ void main() {
             for (final r in rows) {...r}..remove('auto_added_at'),
           ];
         }
+        if (t == 'accounts') {
+          // v6 (T-266) added `linked_account_id`: NULL for every old row.
+          expect([
+            for (final r in rows) r['linked_account_id'],
+          ], everyElement(isNull));
+          rows = [
+            for (final r in rows) {...r}..remove('linked_account_id'),
+          ];
+        }
         expect(rows, before[t], reason: t);
       }
       // The REAL 5.0 that v3 stored as INTEGER 5 is still an integer.

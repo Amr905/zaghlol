@@ -44,6 +44,7 @@ import '../edit_card/merge_flow.dart';
 import '../../../recurring/data/card_dues_providers.dart';
 import '../../domain/card_due.dart';
 import 'card_detail_providers.dart';
+import 'card_link_section.dart';
 import '../../../../core/settings/settings_providers.dart';
 import '../../../../core/ui/z_hide_amounts_button.dart';
 
@@ -239,19 +240,36 @@ class _State extends ConsumerState<CardDetailScreen> {
           const SizedBox(height: ZSpacing.md),
         ],
         _IgnoredBanner(account: account),
-        _Header(
-          waiting: widget.justAdded,
+        if (account.linkedAccountId != null)
+          // T-266: a linked card has no balance of its own.
+          LinkedCardHeader(account: account, cur: cur, fmt: fmt)
+        else
+          _Header(
+            waiting: widget.justAdded,
+            account: account,
+            balance: a.balances
+                .where((b) => b.currency == cur)
+                .cast<AccountBalance?>()
+                .firstWhere((_) => true, orElse: () => null),
+            cur: cur,
+            fmt: fmt,
+            line: _lineOf(
+              ref.watch(netWorthBreakdownProvider).value,
+              account.id,
+              cur,
+            ),
+          ),
+        CardLinkSection(
           account: account,
-          balance: a.balances
-              .where((b) => b.currency == cur)
-              .cast<AccountBalance?>()
-              .firstWhere((_) => true, orElse: () => null),
           cur: cur,
-          fmt: fmt,
-          line: _lineOf(
-            ref.watch(netWorthBreakdownProvider).value,
-            account.id,
-            cur,
+          onOpenCard: (card) => Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (_) => CardDetailScreen(
+                accountId: card.id,
+                onSeeAll: widget.onSeeAll,
+                onOpenTransaction: widget.onOpenTransaction,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: ZSpacing.lg),

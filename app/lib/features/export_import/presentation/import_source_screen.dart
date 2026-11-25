@@ -20,6 +20,7 @@ import 'import_done_screen.dart';
 import 'import_labels.dart';
 import 'import_ports.dart';
 import 'import_summary_sheet.dart';
+import 'statement_import_screen.dart';
 import 'statement_mapping_step.dart';
 
 class ImportSourceScreen extends ConsumerStatefulWidget {
@@ -55,6 +56,21 @@ class _State extends ConsumerState<ImportSourceScreen> {
       return;
     }
     setState(() => _error = null);
+    if (source.kind == ImportFileKind.pdf) {
+      // T-269: bank statements have their own screen (PDF or photos, rows to
+      // confirm, account).
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => StatementImportScreen(
+            bankKey: source.id.name,
+            bankName: importSourceName(AppLocalizations.of(context), source.id),
+            onReview: widget.onReview,
+            onOpenCard: widget.onOpenCard,
+          ),
+        ),
+      );
+      return;
+    }
     final picked = await ref.read(importFilePickerProvider).pick(source.kind);
     if (picked == null || !mounted) return;
     setState(() => _busy = true);

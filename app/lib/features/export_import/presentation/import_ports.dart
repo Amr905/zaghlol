@@ -30,9 +30,9 @@ enum ImportSourceGroup { egyptBanks, onlineBanks, zaghlol }
 enum ImportSourceId { cib, nbe, misr, qnb, wise, revolut, payoneer, zaghlolCsv }
 
 /// One row of the source list. A source with [available] false is shown
-/// disabled as "coming soon" (T-156 / T-157 wait on statement samples).
-/// Plugging a parser in later means flipping [available] and handling the
-/// id in an [ImportRunner].
+/// disabled as "coming soon". Bank PDF sources are available since T-269:
+/// they open the statement screen (PDF or photos, review, confirm); the
+/// online-bank CSVs (T-157) still wait on samples.
 final class ImportSourceDef {
   const ImportSourceDef({
     required this.id,
@@ -64,6 +64,7 @@ const List<ImportSourceDef> importSources = [
     group: ImportSourceGroup.egyptBanks,
     kind: ImportFileKind.pdf,
     capability: GoldCapability.pdfStatementImport,
+    available: true,
     showsSource: true,
   ),
   ImportSourceDef(
@@ -71,18 +72,21 @@ const List<ImportSourceDef> importSources = [
     group: ImportSourceGroup.egyptBanks,
     kind: ImportFileKind.pdf,
     capability: GoldCapability.pdfStatementImport,
+    available: true,
   ),
   ImportSourceDef(
     id: ImportSourceId.misr,
     group: ImportSourceGroup.egyptBanks,
     kind: ImportFileKind.pdf,
     capability: GoldCapability.pdfStatementImport,
+    available: true,
   ),
   ImportSourceDef(
     id: ImportSourceId.qnb,
     group: ImportSourceGroup.egyptBanks,
     kind: ImportFileKind.pdf,
     capability: GoldCapability.pdfStatementImport,
+    available: true,
   ),
   ImportSourceDef(
     id: ImportSourceId.wise,

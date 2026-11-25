@@ -4,6 +4,7 @@
 
 import 'dart:io' show Platform;
 
+import 'package:flutter/services.dart' show appFlavor;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
@@ -21,6 +22,12 @@ final driveAuthorizerProvider = Provider<DriveAuthorizer>(
     gate: ref.watch(googleSignInGateProvider),
   ),
   name: 'driveAuthorizerProvider',
+);
+
+/// T-270: whether this build has the Google client ID Drive backup needs.
+final driveBackupSetupProvider = Provider<DriveBackupSetup>(
+  (ref) => driveBackupSetupOf(isIos: Platform.isIOS, flavor: appFlavor),
+  name: 'driveBackupSetupProvider',
 );
 
 final driveConnectorProvider = Provider<DriveConnector>(

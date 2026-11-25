@@ -61,6 +61,9 @@ final class BackupEntryView {
 enum RestoreFailureKind {
   network,
   signIn,
+
+  /// T-270: this build has no Google client ID, so Drive can't be reached.
+  notConfigured,
   newer,
   corrupted,
   wrongPassphrase,
@@ -104,8 +107,8 @@ RestoreFailureKind restoreFailureKindOf(Object e) {
       DriveBackupErrorCode.serverError => RestoreFailureKind.network,
       DriveBackupErrorCode.signInRequired ||
       DriveBackupErrorCode.signInCancelled ||
-      DriveBackupErrorCode.authorizationDenied ||
-      DriveBackupErrorCode.notConfigured => RestoreFailureKind.signIn,
+      DriveBackupErrorCode.authorizationDenied => RestoreFailureKind.signIn,
+      DriveBackupErrorCode.notConfigured => RestoreFailureKind.notConfigured,
       DriveBackupErrorCode.corruptDownload => RestoreFailureKind.corrupted,
       _ => RestoreFailureKind.other,
     };
@@ -385,7 +388,9 @@ abstract interface class BackupActions {
   Future<void> recoverKey(String passphrase);
 
   /// Backs up now. Throws a code-only exception (see [backupErrorKindOf]).
-  Future<void> backupNow(BackupDestinationPref where);
+  /// Returns false when the destination took the file but has not confirmed
+  /// it yet (iCloud still uploading): it is not counted as a backup.
+  Future<bool> backupNow(BackupDestinationPref where);
 
   /// Sets the schedule (Gold). Returns the mode in force.
   Future<BackupScheduleMode> setSchedule(BackupScheduleMode mode);
@@ -419,9 +424,10 @@ final class ServiceBackupActions implements BackupActions {
       (await _cipher.recoverWithPassphrase(passphrase)).zeroize();
 
   @override
-  Future<void> backupNow(BackupDestinationPref where) async {
+  Future<bool> backupNow(BackupDestinationPref where) async {
     final s = await _ref.read(backupScheduleServiceProvider.future);
-    await s.backupNow(where);
+    final r = await s.backupNow(where);
+    return r.status == BackupRunStatus.backedUp;
   }
 
   @override
@@ -436,7 +442,17 @@ final backupActionsProvider = Provider<BackupActions>(
   name: 'backupActionsProvider',
 );
 
-enum BackupErrorKind { network, storage, auth, icloud, needsPassphrase, other }
+enum BackupErrorKind {
+  network,
+  storage,
+  auth,
+  icloud,
+  needsPassphrase,
+
+  /// T-270: this build has no Google client ID (DRIVE_NOT_CONFIGURED).
+  notConfigured,
+  other,
+}
 
 /// Maps a thrown backup failure (a [BackupRunFailure] carries a code only).
 BackupErrorKind backupErrorKindOf(Object e) {
@@ -467,6 +483,9 @@ BackupErrorKind backupErrorKindOf(Object e) {
   }
   if (code == ICloudBackupErrorCode.unavailable.safeCode) {
     return BackupErrorKind.icloud;
+  }
+  if (code == DriveBackupErrorCode.notConfigured.safeCode) {
+    return BackupErrorKind.notConfigured;
   }
   return BackupErrorKind.other;
 }

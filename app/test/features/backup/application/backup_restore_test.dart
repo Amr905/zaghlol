@@ -24,6 +24,7 @@ import 'package:zaghlol/features/backup/crypto/backup_keys.dart';
 import '../../../core/db/db_open_harness.dart';
 import '../../../core/db/schema_v3_database.dart';
 import '../../../core/db/schema_v4_database.dart';
+import '../../../core/db/schema_v5_database.dart';
 import 'snapshot_test_support.dart';
 
 Matcher snapCode(BackupSnapshotErrorCode c) => throwsA(
@@ -95,6 +96,13 @@ void main() {
 
     // Every FR-BAK-06 item (D-19), row for row.
     expect(await dump(b.db, backedUpTables), source);
+    // T-266: the card link travels with the accounts table.
+    final link = await b.db
+        .customSelect(
+          "SELECT linked_account_id AS l FROM accounts WHERE id = 'accCard'",
+        )
+        .getSingle();
+    expect(link.read<String?>('l'), 'accBank');
     // Search works on the restored data (FTS pages travelled with it).
     final hits = await b.db
         .customSelect(
@@ -320,6 +328,48 @@ void main() {
         .customSelect('SELECT count(*) AS n FROM recurring_dismissals')
         .getSingle();
     expect(d.read<int>('n'), 0);
+  });
+
+  test('older snapshot (schema v5) is migrated on restore: no card is '
+      'linked (T-266)', () async {
+    final file = await craftBackup(
+      a,
+      keysA,
+      headerSchema: 5,
+      prepareSnapshot: (snap, kSnap) async {
+        final v5 = File('${snap.parent.path}/v5.db');
+        await makeV5File(v5, seed: 99);
+        final src = openRaw(v5, keyOf(99));
+        final dst = openRaw(snap, kSnap);
+        dst.execute('PRAGMA journal_mode = DELETE');
+        await src.backup(dst, nPage: -1).drain<void>();
+        src.close();
+        for (final t in deviceTables.reversed) {
+          final exists = dst.select(
+            'SELECT 1 FROM sqlite_schema WHERE name = ?',
+            [t],
+          );
+          if (exists.isNotEmpty) dst.execute('DELETE FROM "$t"');
+        }
+        dst.close();
+      },
+    );
+    final v5Accounts = await _countIn(
+      keyOf(99),
+      (dir) => makeV5File(File('${dir.path}/x.db'), seed: 99),
+      'accounts',
+    );
+    final outcome = await b.service().restore(bytesStream(file), passphrase);
+    expect(outcome.schemaVersion, 5);
+    expect(await userVersionOf(b.db), appSchemaVersion);
+    final r = await b.db
+        .customSelect(
+          'SELECT count(*) AS n, count(linked_account_id) AS l FROM accounts',
+        )
+        .getSingle();
+    expect(r.read<int>('n'), v5Accounts);
+    expect(v5Accounts, greaterThan(0));
+    expect(r.read<int>('l'), 0);
   });
 
   group('refusals leave the live database untouched', () {

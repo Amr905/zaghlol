@@ -34,6 +34,36 @@ const String googleServerClientId = String.fromEnvironment(
   'ZAGHLOL_GOOGLE_SERVER_CLIENT_ID',
 );
 
+/// T-270: whether this build can sign in to Google for Drive at all.
+enum DriveBackupSetup {
+  ready,
+
+  /// The client ID is missing in a dev or staging build: the screen names
+  /// the missing build setting.
+  missingInDevBuild,
+
+  /// The client ID is missing in a store build: the screen says Drive
+  /// backup is not available in this version.
+  missingInRelease,
+}
+
+/// The same check [GoogleSignInDriveAuthorizer] makes before it calls Google
+/// (it then throws notConfigured), so the screen can say so before the
+/// passphrase step. [flavor] is the Flutter build flavour (`devSms`, …).
+DriveBackupSetup driveBackupSetupOf({
+  required bool isIos,
+  required String? flavor,
+  String iosClientId = googleIosClientId,
+  String serverClientId = googleServerClientId,
+}) {
+  final configured = isIos ? iosClientId.isNotEmpty : serverClientId.isNotEmpty;
+  if (configured) return DriveBackupSetup.ready;
+  final f = flavor ?? '';
+  return f.startsWith('dev') || f.startsWith('staging')
+      ? DriveBackupSetup.missingInDevBuild
+      : DriveBackupSetup.missingInRelease;
+}
+
 final class GoogleSignInDriveAuthorizer implements DriveAuthorizer {
   GoogleSignInDriveAuthorizer({
     GoogleSignIn? signIn,

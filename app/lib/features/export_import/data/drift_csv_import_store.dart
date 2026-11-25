@@ -54,7 +54,13 @@ class DriftCsvImportStore implements CsvImportStore {
     int fromMs,
     int toMs, {
     bool settledOnly = false,
+    bool withLinkedCards = false,
   }) async {
+    final ids = {accountId};
+    if (withLinkedCards) {
+      final live = await _accounts.listLive(includeHidden: true);
+      ids.addAll(linkedCardsOf(live)[accountId] ?? const []);
+    }
     // Page through every row at this instant (the DAO caps one page).
     final rows = <TransactionRow>[];
     int? afterAt;
@@ -64,7 +70,7 @@ class DriftCsvImportStore implements CsvImportStore {
         TxnQuery(
           from: fromMs,
           to: toMs,
-          accountIds: {accountId},
+          accountIds: ids,
           statuses: settledOnly
               ? {TxnStatus.posted.code, TxnStatus.pending.code}
               : const {},

@@ -1,12 +1,18 @@
 // T-156: statement import against a real (in-memory encrypted) database:
 // day-range duplicate check, `pdf` source, template persistence.
+// M2 (batch 77): the check also searches the account's live linked cards and
+// compares by cash side (out/in), so SMS transfers, fees and refunds match.
 
 import 'dart:typed_data';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
+import 'package:zaghlol/features/export_import/application/import_csv.dart'
+    show ImportSummary;
 import 'package:zaghlol/features/export_import/application/import_statement_pdf.dart';
 import 'package:zaghlol/features/export_import/data/drift_csv_import_store.dart';
 import 'package:zaghlol/features/export_import/data/drift_statement_template_store.dart';
@@ -40,11 +46,12 @@ void main() {
   late DriftTransactionRepository repo;
   late ImportStatementPdfUseCase uc;
   late DriftStatementTemplateStore templates;
+  late AccountsDao accounts;
 
   setUp(() async {
     edb = await EncryptedDb.open();
     final dao = TransactionsDao(edb.db);
-    final accounts = AccountsDao(edb.db);
+    accounts = AccountsDao(edb.db);
     await accounts.insert(account('acc1'));
     repo = DriftTransactionRepository(dao);
     templates = DriftStatementTemplateStore(SettingsDao(edb.db));
@@ -121,6 +128,123 @@ void main() {
     final s = await uc.run(reading, mapping, accountId: 'acc1');
     expect(s.imported, 2);
     expect(s.duplicates, 0);
+  });
+
+  final egp = Currency.of('EGP');
+  final mapping = StatementMapping(
+    currency: Currency.of('EGP'),
+    roles: const [
+      StatementColumnRole.date,
+      StatementColumnRole.description,
+      StatementColumnRole.amount,
+    ],
+  );
+
+  // A captured 45.00 on 5 Jan (statement: COFFEE -45) or 6 Jan (REFUND +45).
+  Future<void> captured(
+    String accountId,
+    TxnDirection direction, {
+    int day = 5,
+  }) => repo.add(
+    NewTransaction(
+      accountId: accountId,
+      direction: direction,
+      amount: Money.parse('45.00', egp),
+      occurredAt: DateTime(2026, 1, day, 18, 42).toUtc(),
+      occurredTzOffsetMin: DateTime(2026, 1, day).timeZoneOffset.inMinutes,
+    ),
+  );
+
+  Future<ImportSummary> importInto(String accountId) async {
+    final reading = await uc.open(Uint8List.fromList([1]), bankKey: 'cib');
+    return uc.run(reading, mapping, accountId: accountId);
+  }
+
+  group('M2: duplicates across linked cards and directions', () {
+    setUp(() async {
+      await accounts.insert(account('bank', kind: 'account', last4: null));
+      await accounts.insert(account('card', last4: '4321'));
+    });
+
+    test('a linked card purchase already captured by SMS is not imported '
+        'again into its account', () async {
+      await accounts.setLinked('card', 'bank', at: t0 + 1);
+      await captured('card', TxnDirection.expense);
+      final s = await importInto('bank');
+      expect(s.duplicates, 1);
+      expect(s.duplicateRows, hasLength(1));
+      expect(s.imported, 1);
+      expect(await repo.count(), 2);
+    });
+
+    test('control: the same purchase on an unlinked card does not block the '
+        'statement row', () async {
+      await captured('card', TxnDirection.expense);
+      final s = await importInto('bank');
+      expect(s.duplicates, 0);
+      expect(s.imported, 2);
+    });
+
+    test('a merged-away card no longer counts as linked', () async {
+      await accounts.setLinked('card', 'bank', at: t0 + 1);
+      await accounts.insert(account('other', last4: '9999'));
+      await accounts.updateById(
+        'card',
+        AccountsCompanion(mergedIntoId: const Value('other')),
+      );
+      await captured('card', TxnDirection.expense);
+      final s = await importInto('bank');
+      expect(s.duplicates, 0);
+    });
+
+    for (final d in [TxnDirection.transferOut, TxnDirection.fee]) {
+      test('an SMS ${d.code} matches the statement expense row', () async {
+        await captured('bank', d);
+        final s = await importInto('bank');
+        expect(s.duplicates, 1);
+        expect(s.imported, 1);
+        final pdf = (await repo.query()).where(
+          (r) => r.source == TxnSource.pdf,
+        );
+        expect(pdf.single.direction, TxnDirection.income);
+      });
+    }
+
+    for (final d in [TxnDirection.transferIn, TxnDirection.refund]) {
+      test('an SMS ${d.code} matches the statement income row', () async {
+        await captured('bank', d, day: 6);
+        final s = await importInto('bank');
+        expect(s.duplicates, 1);
+        expect(s.imported, 1);
+      });
+    }
+
+    test('money in never matches a money-out row (control)', () async {
+      await captured('bank', TxnDirection.transferIn);
+      final s = await importInto('bank');
+      expect(s.duplicates, 0);
+      expect(s.imported, 2);
+    });
+
+    test('Add anyway keeps a flagged duplicate', () async {
+      await captured('bank', TxnDirection.transferOut);
+      final reading = await uc.open(Uint8List.fromList([1]), bankKey: 'cib');
+      final dry = await uc.run(
+        reading,
+        mapping,
+        accountId: 'bank',
+        dryRun: true,
+      );
+      final s = await uc.run(
+        reading,
+        mapping,
+        accountId: 'bank',
+        keepDuplicates: {dry.duplicateRows.single},
+      );
+      expect(s.duplicates, 0);
+      expect(s.imported, 2);
+      expect(await repo.count(), 3);
+    });
   });
 
   test('a corrupt stored template is ignored', () async {

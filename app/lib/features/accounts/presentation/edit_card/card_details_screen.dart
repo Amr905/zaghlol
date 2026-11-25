@@ -92,6 +92,7 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
   var _touched = false;
   var _saving = false;
   var _saveFailed = false;
+  var _saveLinked = false;
   late bool _hidden;
   Account? _duplicate;
   final Set<String> _off = {};
@@ -160,6 +161,7 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
     setState(() {
       _saving = true;
       _saveFailed = false;
+      _saveLinked = false;
       _duplicate = null;
     });
     try {
@@ -202,8 +204,14 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
       }
       if (!mounted) return;
       widget.onSaved?.call(saved);
-    } on Object {
-      if (mounted) setState(() => _saveFailed = true);
+    } on Object catch (e) {
+      if (mounted) {
+        setState(() {
+          _saveFailed = true;
+          _saveLinked =
+              e is AccountsException && e.code == AccountsException.linked;
+        });
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -293,7 +301,9 @@ class _CardDetailsState extends ConsumerState<CardDetailsScreen> {
                 padding: const EdgeInsetsDirectional.only(bottom: ZSpacing.md),
                 child: ZBanner(
                   key: const Key('card-save-error'),
-                  message: l10n.commonErrorSaveFailed,
+                  message: _saveLinked
+                      ? l10n.accountsLinkBlocked
+                      : l10n.commonErrorSaveFailed,
                   tone: ZBannerTone.error,
                 ),
               ),

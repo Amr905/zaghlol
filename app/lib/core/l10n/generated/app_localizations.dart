@@ -3844,6 +3844,114 @@ abstract class AppLocalizations {
   /// **'هيظهر مع أول رسالة فيها رصيد'**
   String get accountsDetailBalanceUnknown;
 
+  /// L · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الحساب المربوط'**
+  String get accountsLinkTitle;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده مش مربوط بحساب'**
+  String get accountsLinkNone;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'اربطه بحساب'**
+  String get accountsLinkPick;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر'**
+  String get accountsLinkChange;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'فك الربط'**
+  String get accountsLinkUnlink;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده على حسابك في {account}؟'**
+  String accountsLinkSuggest(String account);
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه، اربطه'**
+  String get accountsLinkSuggestYes;
+
+  /// T · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده بيصرف من أنهي حساب؟'**
+  String get accountsLinkSheetTitle;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'صرف الكارت والرصيد اللي في رسايله هيتحسبوا على الحساب ده. مش هنربط حاجة من غير ما تختار.'**
+  String get accountsLinkSheetHint;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيف حساب البنك الأول، وبعدين اربط الكارت بيه.'**
+  String get accountsLinkNoTargets;
+
+  /// C · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد على حساب {account}'**
+  String accountsLinkBalanceOn(String account);
+
+  /// T · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'تفك ربط الكارت؟'**
+  String get accountsLinkUnlinkTitle;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي فات هيفضل زي ما هو. من دلوقتي صرف الكارت هيتحسب على الكارت لوحده، ورصيد الحساب مش هيتغير.'**
+  String get accountsLinkUnlinkBody;
+
+  /// S · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفناش نحفظ الربط، جرّب تاني.'**
+  String get accountsLinkFailed;
+
+  /// S · T-266 · ACC_LINKED: a merge or retype would break a card link
+  ///
+  /// In ar, this message translates to:
+  /// **'الكارت ده مربوط بحساب، والتغيير ده هيفك الربط. فك ربط الكارت الأول وبعدين جرّب تاني.'**
+  String get accountsLinkBlocked;
+
+  /// T · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'الكروت على الحساب ده'**
+  String get accountsCardsOnAccount;
+
+  /// B · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'حط المبلغ اللي في الحساب دلوقتي'**
+  String get accountsSetCurrentAmount;
+
+  /// C · T-266
+  ///
+  /// In ar, this message translates to:
+  /// **'كارت على {account}'**
+  String accountsOverviewLinkedTo(String account);
+
   /// L
   ///
   /// In ar, this message translates to:
@@ -8563,6 +8671,24 @@ abstract class AppLocalizations {
   /// **'النسخة الاحتياطية ماتعملتش. جرّب تاني.'**
   String get backupSettingsErrorGeneric;
 
+  /// S · T-270 · dev/staging builds only, DRIVE_NOT_CONFIGURED; the define names stay in Latin
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة الاحتياطية على Google Drive مش هتشتغل في نسخة التجربة دي: اتعملت من غير الـ client ID بتاع تسجيل الدخول بجوجل (ZAGHLOL_GOOGLE_SERVER_CLIENT_ID على أندرويد، ZAGHLOL_GOOGLE_IOS_CLIENT_ID على الآيفون). بياناتك في أمان على موبايلك. اعمل build للتطبيق تاني بالـ client ID من مشروع Google Cloud.'**
+  String get backupSettingsErrorNotConfiguredDev;
+
+  /// S · T-270 · store builds, DRIVE_NOT_CONFIGURED
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة الاحتياطية على Google Drive مش متاحة في النسخة دي من زغلول. بياناتك في أمان على موبايلك. حدّث التطبيق وجرّب تاني.'**
+  String get backupSettingsErrorNotConfigured;
+
+  /// S · T-270 · iCloud took the file but hasn't confirmed the upload
+  ///
+  /// In ar, this message translates to:
+  /// **'النسخة اتحفظت في iCloud على الموبايل، بس لسه بتترفع. هتتحسب نسختك الاحتياطية أول ما الرفع يخلص، فخلّي الموبايل على النت.'**
+  String get backupSettingsPendingUpload;
+
   /// T · first backup
   ///
   /// In ar, this message translates to:
@@ -11137,6 +11263,323 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المصدر ده لسه مش جاهز'**
   String get importFlowUnavailable;
+
+  /// T-269 screen title
+  ///
+  /// In ar, this message translates to:
+  /// **'كشف {bank}'**
+  String stmtImportTitle(String bank);
+
+  /// T-269 intro
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار الكشف PDF أو صور صفحاته. بيتقرا على موبايلك بس، ومفيش حاجة بتتحفظ غير لما تأكّد.'**
+  String get stmtImportSub;
+
+  /// T-269 button
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار ملف PDF'**
+  String get stmtImportPickPdf;
+
+  /// T-269 button
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار صور الصفحات'**
+  String get stmtImportPickImages;
+
+  /// T-269 failure: no table
+  ///
+  /// In ar, this message translates to:
+  /// **'ملقيتش جدول حركات في الملف ده. جرّب PDF من تطبيق البنك، أو صور أوضح.'**
+  String get stmtImportErrNoRows;
+
+  /// T-269 failure: no text
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش كلام أقدر أقراه في الملف ده. لو ده سكان، جرّب صور أوضح.'**
+  String get stmtImportErrNoText;
+
+  /// T-269 failure: OCR not available on this phone
+  ///
+  /// In ar, this message translates to:
+  /// **'الموبايل ده مش بيقرا الكلام من الصور، فالكشوف المصوّرة مش هتشتغل هنا. جرّب PDF نازل من تطبيق البنك.'**
+  String get stmtImportErrNoOcr;
+
+  /// T-269 failure: password not given
+  ///
+  /// In ar, this message translates to:
+  /// **'الـ PDF ده عليه كلمة سر ومعرفتش أفتحه. اختار الملف تاني واكتب كلمة السر.'**
+  String get stmtImportErrPassword;
+
+  /// T-269 failure: save failed
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفتش أحفظ، فمفيش حاجة اتضافت. جرّب تاني.'**
+  String get stmtImportErrSave;
+
+  /// T-269 failure: year missing
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار السنة الأول.'**
+  String get stmtImportErrYear;
+
+  /// T-269 mapping step title
+  ///
+  /// In ar, this message translates to:
+  /// **'أنهي عمود إيه؟'**
+  String get stmtMapTitle;
+
+  /// T-269 mapping step hint
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفتش أميّز الأعمدة من عناوينها. قولّي مرة واحدة وهفتكرها للبنك ده.'**
+  String get stmtMapHint;
+
+  /// T-269 mapping column fallback title
+  ///
+  /// In ar, this message translates to:
+  /// **'عمود {n}'**
+  String stmtMapColumn(String n);
+
+  /// T-269 column role
+  ///
+  /// In ar, this message translates to:
+  /// **'التاريخ'**
+  String get stmtMapRoleDate;
+
+  /// T-269 column role
+  ///
+  /// In ar, this message translates to:
+  /// **'الوصف'**
+  String get stmtMapRoleDescription;
+
+  /// T-269 column role
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوس خارجة'**
+  String get stmtMapRoleDebit;
+
+  /// T-269 column role
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوس داخلة'**
+  String get stmtMapRoleCredit;
+
+  /// T-269 column role
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ (بعلامته)'**
+  String get stmtMapRoleAmount;
+
+  /// T-269 column role
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد'**
+  String get stmtMapRoleBalance;
+
+  /// T-269 column role
+  ///
+  /// In ar, this message translates to:
+  /// **'تجاهل'**
+  String get stmtMapRoleIgnore;
+
+  /// T-269 date order switch
+  ///
+  /// In ar, this message translates to:
+  /// **'اليوم قبل الشهر'**
+  String get stmtMapDayFirst;
+
+  /// T-269 currency picker label
+  ///
+  /// In ar, this message translates to:
+  /// **'العملة'**
+  String get stmtMapCurrency;
+
+  /// T-269 mapping invalid hint
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار عمود تاريخ، وعمود وصف، وأعمدة الفلوس.'**
+  String get stmtMapInvalid;
+
+  /// T-269 review title
+  ///
+  /// In ar, this message translates to:
+  /// **'راجع الصفوف'**
+  String get stmtImportReviewTitle;
+
+  /// T-269 review reassurance
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة بتتحفظ غير لما تدوس الزرار اللي تحت.'**
+  String get stmtImportNothingSaved;
+
+  /// T-269 account section
+  ///
+  /// In ar, this message translates to:
+  /// **'الكشف ده لأنهي حساب؟'**
+  String get stmtImportAccountTitle;
+
+  /// T-269 currency label
+  ///
+  /// In ar, this message translates to:
+  /// **'عملة الكشف'**
+  String get stmtImportCurrencyLabel;
+
+  /// T-269 account choice
+  ///
+  /// In ar, this message translates to:
+  /// **'حساب جديد'**
+  String get stmtImportAccountNew;
+
+  /// T-269 new account field
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم الحساب'**
+  String get stmtImportAccountName;
+
+  /// T-269 new account field
+  ///
+  /// In ar, this message translates to:
+  /// **'آخر ٤ أرقام (اختياري)'**
+  String get stmtImportAccountLast4;
+
+  /// T-269 no matching account
+  ///
+  /// In ar, this message translates to:
+  /// **'معندكش حساب بـ{currency} لسه. اعمل واحد للكشف ده.'**
+  String stmtImportAccountNoneYet(String currency);
+
+  /// T-269 year prompt
+  ///
+  /// In ar, this message translates to:
+  /// **'الكشف ده من سنة كام؟'**
+  String get stmtImportYearTitle;
+
+  /// T-269 year prompt body
+  ///
+  /// In ar, this message translates to:
+  /// **'التواريخ اللي فيه من غير سنة. اختار سنة آخر تاريخ.'**
+  String get stmtImportYearBody;
+
+  /// T-269 review section
+  ///
+  /// In ar, this message translates to:
+  /// **'محتاجين رأيك ({n})'**
+  String stmtImportSectionAnswer(String n);
+
+  /// T-269 review section
+  ///
+  /// In ar, this message translates to:
+  /// **'صفوف هتتضاف ({n})'**
+  String stmtImportSectionRows(String n);
+
+  /// T-269 review section
+  ///
+  /// In ar, this message translates to:
+  /// **'موجودة عندك أصلًا ({n})'**
+  String stmtImportSectionDup(String n);
+
+  /// T-269 flagged row reason
+  ///
+  /// In ar, this message translates to:
+  /// **'مش عارف دي فلوس داخلة ولا خارجة.'**
+  String get stmtImportReasonDirection;
+
+  /// T-269 flagged row reason
+  ///
+  /// In ar, this message translates to:
+  /// **'الرصيد المكتوب بعد الصف ده مش مظبوط مع اللي قبله.'**
+  String get stmtImportReasonBalance;
+
+  /// T-269 row choice
+  ///
+  /// In ar, this message translates to:
+  /// **'سيبه زي ما اتقرأ'**
+  String get stmtImportChoiceKeep;
+
+  /// T-269 row choice
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوس خارجة'**
+  String get stmtImportChoiceOut;
+
+  /// T-269 row choice
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوس داخلة'**
+  String get stmtImportChoiceIn;
+
+  /// T-269 row choice
+  ///
+  /// In ar, this message translates to:
+  /// **'تخطّى'**
+  String get stmtImportChoiceSkip;
+
+  /// T-269 row state
+  ///
+  /// In ar, this message translates to:
+  /// **'اتخطّى'**
+  String get stmtImportRowSkipped;
+
+  /// T-269 row action
+  ///
+  /// In ar, this message translates to:
+  /// **'رجّعه'**
+  String get stmtImportRowUndo;
+
+  /// T-269 row menu a11y label
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّر الصف ده'**
+  String get stmtImportRowEdit;
+
+  /// T-269 duplicate row note
+  ///
+  /// In ar, this message translates to:
+  /// **'شبه حركة عندك فعلًا، فهيتخطّى.'**
+  String get stmtImportDupNote;
+
+  /// T-269 duplicate row action
+  ///
+  /// In ar, this message translates to:
+  /// **'ضيفه برضو'**
+  String get stmtImportDupAddAnyway;
+
+  /// T-269 confirm hint
+  ///
+  /// In ar, this message translates to:
+  /// **'جاوب على الصفوف اللي فوق الأول.'**
+  String get stmtImportBlockedAnswers;
+
+  /// T-269 confirm hint
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار السنة الأول.'**
+  String get stmtImportBlockedYear;
+
+  /// T-269 confirm hint
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار الحساب أو اعمل واحد جديد الأول.'**
+  String get stmtImportBlockedAccount;
+
+  /// T-269 confirm hint when every row is skipped or a duplicate
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة تتضاف.'**
+  String get stmtImportNothingToAdd;
+
+  /// T-269 row a11y label
+  ///
+  /// In ar, this message translates to:
+  /// **'{date}، {description}، {amount}، {direction}'**
+  String stmtImportRowSemantics(
+    String date,
+    String description,
+    String amount,
+    String direction,
+  );
 
   /// D-67 eye button label and tooltip: hide every amount in the app
   ///
