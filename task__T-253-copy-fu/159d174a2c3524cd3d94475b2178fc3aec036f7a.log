@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=159d174a2c3524cd3d94475b2178fc3aec036f7a
+SKIP sha=159d174a2c3524cd3d94475b2178fc3aec036f7a no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-253-copy-fu 159d174a2c3524cd3d94475b2178fc3aec036f7a 2026-11-25T18:28:05.1936005+02:00
+
+
+
