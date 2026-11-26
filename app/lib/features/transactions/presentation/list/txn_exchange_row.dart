@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/db/app_database_providers.dart';
 import '../../../../core/l10n/date_format.dart';
+import '../../../../core/l10n/digits_mode.dart';
 import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/amount_semantics.dart';
@@ -20,6 +21,20 @@ import '../../domain/exchange.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
 
+/// Finds the exchanges touching some transaction ids, keyed by both leg ids
+/// (faked in widget tests).
+typedef ExchangeLookup = Future<Map<String, TxnExchange>> Function(
+  Iterable<String> txnIds,
+);
+
+final txnExchangeLookupProvider = FutureProvider.autoDispose<ExchangeLookup>((
+  ref,
+) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final repo = await ref.watch(transactionRepositoryProvider.future);
+  return ExchangeReader(db, repo).forTransactions;
+}, name: 'txnExchangeLookupProvider');
+
 /// The exchanges among the loaded list rows, keyed by both leg ids. Under a
 /// currency filter only one leg is loaded; the pair is still found, so the
 /// exchange keeps its one row.
@@ -31,9 +46,8 @@ final txnExchangesProvider =
           if (t.isInternal) t.id,
       ];
       if (ids.isEmpty) return const {};
-      final db = await ref.watch(appDatabaseProvider.future);
-      final repo = await ref.watch(transactionRepositoryProvider.future);
-      return ExchangeReader(db, repo).forTransactions(ids);
+      final lookup = await ref.watch(txnExchangeLookupProvider.future);
+      return lookup(ids);
     }, name: 'txnExchangesProvider');
 
 /// The second line: the bank rate and "not spending". With amounts hidden
@@ -41,9 +55,15 @@ final txnExchangesProvider =
 String exchangeRateLine(AppLocalizations l, TxnExchange x, TxnFmt fmt) {
   final rate = x.rate;
   if (rate == null || fmt.hidden) return l.transactionsExchangeNotSpending;
-  return l.transactionsExchangeRate(
-    fmt.digits.render(formatRateE9(rate.rateE9)),
-  );
+  return l.transactionsExchangeRate(exchangeRateText(rate.rateE9, fmt));
+}
+
+/// The rate number in the user's digits; Arabic-Indic digits use the Arabic
+/// decimal separator (٤٩٫٥٠), as money does.
+String exchangeRateText(int rateE9, TxnFmt fmt) {
+  final ascii = formatRateE9(rateE9);
+  if (fmt.digits == DigitsMode.western) return ascii;
+  return fmt.digits.render(ascii).replaceAll('.', '\u066B');
 }
 
 /// The exchange title «غيّرت {from} ← {to}».

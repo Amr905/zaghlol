@@ -94,7 +94,9 @@ final String _zbank =
         r'(?<oamount>[\\d,.]+)'
         '$_acct\$')},
     ${_t('move.sms', 'transfer_out', 'neutral', '^zbank: move egp $_amt$_acct\$')},
-    ${_t('purchase.notif', 'card_purchase', 'expense', '^purchase egp $_amt$_merchant\$', channel: '"notification"')}
+    ${_t('purchase.notif', 'card_purchase', 'expense', '^purchase egp $_amt$_merchant\$', channel: '"notification"')},
+    ${_t('convert.notif', 'fx_conversion', 'neutral', r'^converted (?<cur>usd) (?<amount>[\\d,.]+) to (?<ocur>egp) (?<oamount>[\\d,.]+)'
+        '\$', channel: '"notification"')}
   ]
 }
 ''';
