@@ -172,6 +172,8 @@ Isolate = the presentation layer wraps the value in FSI U+2068 … PDI U+2069 (�
 | `email` | String | Data: the masked address from the ID token, e.g. `amr…@gmail.com` | yes | LTR. Part 3 |
 | `build` | String | Data: the build number, Western digits always | yes | Part 3 |
 | `banks` | String | Data: institution names (registry, per locale) joined with the locale list format | yes | may contain Latin names. Part 3 |
+| `aiProvider` | String | Data: the AI provider's display name, from remote config | yes | Latin, never translated. Part 4 (ASK-LLM) |
+| `months` | String | Copy (`chat_unit_months`) | yes | a length in months, contains a number. Part 4 (ASK-LLM) |
 
 ARB type for every Select placeholder is String (gen-l10n requirement).
 
@@ -215,6 +217,8 @@ ARB type for every Select placeholder is String (gen-l10n requirement).
 | `exports_import_found`, `exports_import_duplicates`, `exports_import_untracked`, `exports_import_importButton`, `exports_import_done` | an empty file has its own state; the duplicate and untracked rows are hidden at 0; the button and the done line need at least one new row |
 | `settings_prefs_lockAfterMinutes` | menu choices are 1, 5 and 15 minutes; "immediately" is its own key |
 | `notifications_alert_overdue`, `notifications_alert_overdueHidden` | sent only on day 1 and day 3 after the due date (PO OVERDUE-REMINDERS), so the count is never 0 |
+| `chat_quota_goldHint`, `chat_consent_quota` | count = the tier's monthly quota (remote config); the line is hidden when it is 0 (Part 4) |
+| `chat_unit_months`, `chat_whatIf_basis` | months are 1–60; the basis is 1–3 full periods, and 0 shows `chat_whatIf_notEnough` instead (Part 4) |
 
 - Every plural row's note states `count:int, n` plus its other placeholders.
 - Egyptian noun forms used throughout:
@@ -2971,3 +2975,169 @@ Nothing here blocks T-058 or T-087. Drafts are used where a question is open.
 
 ## T-058 pass 1 (2026-11-18)
 - First expert pass before the native-speaker review. Clear fixes were applied to `app_ar.arb` and to the matching AR cells here (keys unchanged). Judgement calls, and the drift between this deck and the ARB files, are listed in `copy-review-pass1.md` for the human reviewer. Reviewer sign-off is still pending.
+
+---
+
+# PART 4 — ASK-LLM: the online helper in the Zaghlol tab
+
+Source: `docs/01-requirements/ask-llm.md` v0.2 (D-88…D-93), UX in `ask-llm-ux.md`. Everything here is hidden while the `ask_llm` flag is off; `chat_invest_*` also needs `ask_llm_invest`. Reused, not redefined: `chat_main_*` (input, too long), `chat_fallback_text`, `chat_answer_*` (spend, compare, top merchants, balance, budget, dues, biggest, savings, no data), `chat_period_*`, `common_action_tryAgain`, `common_action_notNow`, `common_badge_stale`, `common_currency_approxCaption`, `common_money_maskedA11y`, `budget_overview_emptyAction`. No emoji on errors, quota limits, consent or investment lines (tone gate 1). The investment disclaimer is the only simple-standard-Arabic row (voice guide §1).
+
+## 4.1 Input and quota — `chat_llmInput_*`, `chat_quota_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_llmInput_hint` | اسألني بكلامك عن فلوسك… | Ask in your own words… | L · replaces `chat_main_inputHint` while `ask_llm` is on |
+| `chat_llmInput_counter` | {n} من {max} | {n}/{max} | C · shown from 250 typed characters; max = 300 (FR-LLM-17) |
+| `chat_llmInput_stop` | وقّف | Stop | B · replaces Send while a question is out (FR-LLM-52) |
+| `chat_llmInput_stopA11y` | وقّف السؤال | Stop the question | A |
+| `chat_quota_remaining` | `{count, plural, =0{خلصت أسئلة الشهر} =1{فاضل سؤال واحد} =2{فاضل سؤالين} few{فاضل {n} أسئلة} many{فاضل {n} سؤال} other{فاضل {n} سؤال}}` | `{count, plural, =0{No questions left} =1{1 question left} other{{n} questions left}}` | L · count:int, n · beside the input, value from the last backend reply (FR-LLM-12); hidden when paused |
+| `chat_quota_remainingA11y` | `{count, plural, =0{خلصت الأسئلة الأونلاين الشهر ده} =1{فاضل سؤال أونلاين واحد الشهر ده} =2{فاضل سؤالين أونلاين الشهر ده} few{فاضل {n} أسئلة أونلاين الشهر ده} many{فاضل {n} سؤال أونلاين الشهر ده} other{فاضل {n} سؤال أونلاين الشهر ده}}` | `{count, plural, =0{No online questions left this month} =1{1 online question left this month} other{{n} online questions left this month}}` | A · count:int, n |
+| `chat_quota_unknown` | — | — | C · before the first backend reply (FR-LLM-12) |
+| `chat_quota_unknownA11y` | عدد الأسئلة هيظهر بعد أول سؤال أونلاين | The count shows after your first online question | A |
+| `chat_quota_infoTitle` | الأسئلة الأونلاين | Online questions | T · sheet opened by tapping the counter |
+| `chat_quota_infoBody` | الأسئلة اللي بجاوبها من موبايلك ببلاش ومن غير حد. الأسئلة اللي محتاجة المساعد الأونلاين ليها عدد في الشهر، وبيرجع أول كل شهر. | Questions I answer on your phone are free and unlimited. Questions that need the online helper have a monthly count that resets on the 1st. | E |
+| `chat_quota_lastOne` | ده آخر سؤال أونلاين الشهر ده | This is your last online question this month | N · under the input when 1 is left |
+| `chat_quota_freeOut` | خلّصت أسئلتك الأونلاين ببلاش الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك، والعداد بيرجع يوم {date}. | You've used this month's free online questions. I can still answer the usual ones from your phone, and the count resets on {date}. | E · Free at the limit (FR-LLM-13), Rive `tourGuide` still; followed by `chat_quota_goldHint` and `chat_llmStatus_notQueued` |
+| `chat_quota_goldHint` | `{count, plural, =1{مع جولد بيبقى عندك سؤال واحد في الشهر.} =2{مع جولد بيبقى عندك سؤالين في الشهر.} few{مع جولد بيبقى عندك {n} أسئلة في الشهر.} many{مع جولد بيبقى عندك {n} سؤال في الشهر.} other{مع جولد بيبقى عندك {n} سؤال في الشهر.}}` | `{count, plural, =1{Gold gives you 1 question a month.} other{Gold gives you {n} questions a month.}}` | S · count:int = `ask.quota_gold`, n · Free only, plus `chat_quota_seeGold` |
+| `chat_quota_seeGold` | شوف جولد | See Gold | L · text button, opens S-68 (counts toward FR-GOLD-05 only when the paywall opens) |
+| `chat_quota_goldOut` | خلّصت أسئلتك الأونلاين الشهر ده، وبترجع يوم {date}. لحد ساعتها بجاوبك على الأسئلة العادية من موبايلك. | You've used this month's online questions. They reset on {date}. Until then I'll answer the usual ones from your phone. | E · Gold at the limit; date = 1st of next month, locale format |
+
+## 4.2 First-use notice and consent — `chat_consent_*`
+Bottom sheet (C-17) shown when the first LLM-bound question is sent (FR-LLM-30). Not Now stores nothing.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_consent_title` | السؤال ده محتاج المساعد الأونلاين | This one needs the online helper | T |
+| `chat_consent_intro` | مقدرش أجاوبه من موبايلك لوحدي. لو وافقت، هبعت نص سؤالك لسيرفر زغلول ولـ {aiProvider} علشان يفهموه، والحساب كله بيحصل على موبايلك. | I can't answer it on your phone alone. If you allow it, I'll send the question text to Zaghlol's server and {aiProvider} so they can understand it. All the maths happens on your phone. | E · never says "no server" (tone gate 4) |
+| `chat_consent_previewTitle` | ده اللي هيتبعت بالظبط | Exactly what will be sent | L · above the masked preview (same rendering as §4.4) |
+| `chat_consent_sendsTitle` | بيتبعت | What's sent | L |
+| `chat_consent_sends` | سؤالك بيتبعت من غير أسماء حساباتك وكروتك وبنوكك، ومن غير أسماء الأماكن اللي بتشتري منها واللي زغلول عارفها. أي حاجة تانية تكتبها، زي مبلغ، بتتبعت زي ما هي. | Your question goes without your account, card and bank names, and without the names of places you shop that Zaghlol recognises. Anything else you type, like an amount, goes as typed. | E · FR-LLM-09 wording |
+| `chat_consent_neverTitle` | عمره ما بيتبعت | Never sent | L |
+| `chat_consent_never` | حركاتك وأرصدتك وميزانياتك ورسايل البنوك. ولا حاجة فيهم بتسيب موبايلك. | Your transactions, balances, budgets and bank messages. None of it leaves your phone. | S |
+| `chat_consent_storage` | سيرفر زغلول مبيحفظش سؤالك، و{aiProvider} مبيتعلمش منه. التفاصيل في سياسة الخصوصية. | Zaghlol's server doesn't keep your question, and {aiProvider} doesn't learn from it. Details are in the privacy policy. | S · FR-LLM-32/33; wording to legal with the policy section |
+| `chat_consent_quota` | `{count, plural, =1{عندك سؤال أونلاين واحد في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} =2{عندك سؤالين أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} few{عندك {n} أسئلة أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} many{عندك {n} سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} other{عندك {n} سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.}}` | `{count, plural, =1{You get 1 online question a month. Questions I answer on your phone don't count.} other{You get {n} online questions a month. Questions I answer on your phone don't count.}}` | S · count:int = the tier quota (5 Free, 50 Gold), n |
+| `chat_consent_allow` | تمام، ابعت | Allow and send | B · stores `ask.llm_consent`, then sends |
+| `chat_consent_settingsHint` | تقدر تقفلها في أي وقت من «خصوصيتك». | You can turn it off any time in Privacy & data. | S |
+| `chat_consent_declined` | ولا يهمك، سؤالك ماتبعتش. جرّب واحد من دول: | No problem, your question wasn't sent. Try one of these: | M · Rive `tourGuide`; three chips follow (FR-CHAT-05) |
+
+## 4.3 Sending, status and errors — `chat_llmStatus_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_llmStatus_sending` | ببعت سؤالك من غير بياناتك… | Sending just your question… | L · Rive `thinking` (D-35), from 300 ms |
+| `chat_llmStatus_computing` | بحسبها على موبايلك… | Working it out on your phone… | L · after the plan arrives, while the phone computes |
+| `chat_llmStatus_thinkingA11y` | زغلول بيفكر. سؤالك بس اللي اتبعت | Zaghlol is thinking. Only your question was sent | A · live region |
+| `chat_llmStatus_stopped` | وقّفت السؤال. | Question stopped. | N |
+| `chat_llmStatus_notQueued` | سؤالك ماتبعتش، ومش هيتبعت بعدين. | Your question wasn't sent and won't be sent later. | S · caption under offline and at-limit bubbles (FR-LLM-13/50) |
+| `chat_llmStatus_offline` | السؤال ده محتاج نت. ابعته تاني لما النت يرجع، ولحد ساعتها جرّب دول: | This one needs the internet. Ask again once you're online. Meanwhile, try these: | M · Rive `oops` still; three chips (FR-LLM-50) |
+| `chat_llmStatus_timeout` | المساعد الأونلاين اتأخر في الرد، ومتحسبش من أسئلتك. | The online helper took too long. It didn't count toward your questions. | S · 12 s or 5xx, plus `common_action_tryAgain` once (FR-LLM-51) |
+| `chat_llmStatus_error` | حصلت مشكلة وأنا بفهم سؤالك، ومتحسبش من أسئلتك. | Something went wrong understanding your question. It didn't count. | S · plus `common_action_tryAgain` |
+| `chat_llmStatus_slowDown` | أسئلة كتير ورا بعض. استنى دقيقة وجرّب تاني. | That's a lot of questions in a row. Wait a minute and try again. | S · HTTP 429, not counted (FR-LLM-15) |
+| `chat_llmStatus_integrity` | مقدرتش أتأكد إن نسخة زغلول دي سليمة. حدّثها من المتجر أو جرّب تاني. | I couldn't verify this copy of Zaghlol. Update it from the store or try again. | S · attestation failed, not counted (FR-LLM-14) |
+| `chat_llmStatus_paused` | المساعد الأونلاين واخد راحة الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك. | The online helper is resting this month. I can still answer the usual questions from your phone. | M · Rive `sleep`; `service_paused`, counter hidden (FR-LLM-16/61) |
+
+## 4.4 What I sent — `chat_sent_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_sent_badge` | أونلاين | Online helper | C · small label on every answer that used the LLM |
+| `chat_sent_badgeA11y` | الإجابة دي اتفهمت بالمساعد الأونلاين | This answer used the online helper | A |
+| `chat_sent_toggle` | اللي بعته | What I sent | L · disclosure row, collapsed by default (D-92) |
+| `chat_sent_title` | ده سؤالك زي ما خرج من موبايلك: | Your question exactly as it left your phone: | S |
+| `chat_sent_chip` | `{state, select, account{حساب {n}} card{كارت {n}} bank{بنك {n}} merchant{مكان {n}} other{اسم {n}}}` | `{state, select, account{Account {n}} card{Card {n}} bank{Bank {n}} merchant{Place {n}} other{Name {n}}}` | C · `state:select(account/card/bank/merchant/other)`; n = placeholder number, digits per locale |
+| `chat_sent_chipA11y` | `{state, select, account{حساب رقم {n}، اسمه فضل على موبايلك} card{كارت رقم {n}، رقمه فضل على موبايلك} bank{بنك رقم {n}، اسمه فضل على موبايلك} merchant{مكان رقم {n}، اسمه فضل على موبايلك} other{اسم رقم {n}، فضل على موبايلك}}` | `{state, select, account{Account {n}, its name stayed on your phone} card{Card {n}, its number stayed on your phone} bank{Bank {n}, its name stayed on your phone} merchant{Place {n}, its name stayed on your phone} other{Name {n}, it stayed on your phone}}` | A |
+| `chat_sent_hidden` | `{state, select, phone{رقم موبايل} email{إيميل} instapay{عنوان إنستاباي} number{رقم طويل} other{متشال}}` | `{state, select, phone{Phone number} email{Email} instapay{InstaPay address} number{Long number} other{Removed}}` | C · FR-LLM-03 scrub chips · `state:select(phone/email/instapay/number/other)` |
+| `chat_sent_chipsNote` | المربعات دي مكان الأسامي. معناها فضل على موبايلك ومتبعتش. | The boxes stand in for names. What they mean stayed on your phone. | S |
+| `chat_sent_alsoSent` | ومعاه بس: لغة التطبيق وإصداره، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. {aiProvider} بيوصله السؤال واللغة بس. | Also sent: the app language and version, a random app ID and a proof the phone is genuine. {aiProvider} gets only the question and the language. | E · FR-LLM-02/34 |
+| `chat_sent_textA11y` | اللي اتبعت: {text} | Sent: {text} | A · text = the sent question with chips read via `chat_sent_chipA11y` |
+| `chat_sent_local` | اتجاوب على موبايلك | Answered on your phone | L · optional caption on local answers (open question UX-ASK-03) |
+
+## 4.5 Clarification, nothing sent — `chat_clarify_*`
+Local answers (FR-LLM-20): chips of the user's matching cards or accounts follow; no request, no quota.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_clarify_noCard` | مش لاقي كارت آخره {last4}. تقصد أنهي كارت؟ | I can't find a card ending {last4}. Which card do you mean? | M · Rive `detective` still |
+| `chat_clarify_sameLast4` | عندك أكتر من كارت آخره {last4}. تقصد أنهي واحد؟ | You have more than one card ending {last4}. Which one? | M |
+| `chat_clarify_noBankAccount` | مش لاقي حساب ليك في {bank}. تقصد أنهي حساب؟ | I can't find an account of yours at {bank}. Which account do you mean? | M · registry bank, no account |
+| `chat_clarify_unknownBank` | مش عارف بنك اسمه {bank}. تقصد أنهي حساب؟ | I don't know a bank called {bank}. Which account do you mean? | M · bank = the user's typed word |
+| `chat_clarify_noAccount` | مش لاقي الحساب ده. تقصد أنهي واحد؟ | I can't find that account. Which one do you mean? | M |
+| `chat_clarify_notSent` | سؤالك ماتبعتش ومتحسبش من أسئلتك. | Your question wasn't sent and didn't count. | S · caption under every clarification |
+| `chat_clarify_notFound` | ملقتش «{query}» في حركاتك. تقصد واحد من دول؟ | I couldn't find "{query}" in your transactions. Did you mean one of these? | M · FR-LLM-07 mention with no match (after a reply, so counted) |
+
+## 4.6 Data answers not covered by `chat_answer_*` — `chat_llmAnswer_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_llmAnswer_average` | `متوسط صرفك على {subject} {span}: {average} {state, select, day{في اليوم} week{في الأسبوع} other{في الشهر}}.` | `Your average spend on {subject} {span}: {average} {state, select, day{a day} week{a week} other{a month}}.` | E · PL-AVERAGE · `state:select(day/week/other)` |
+| `chat_llmAnswer_fullUnits` | `{state, select, day{حسبت الأيام الكاملة بس، من غير النهارده.} week{حسبت الأسابيع الكاملة بس، من غير الأسبوع ده.} other{حسبت الشهور الكاملة بس، من غير الشهر ده.}}` | `{state, select, day{I counted full days only, leaving out today.} week{I counted full weeks only, leaving out this week.} other{I counted full months only, leaving out this month.}}` | S · `state:select(day/week/other)` |
+| `chat_llmAnswer_income` | دخلك {span}: {income}. | Your income {span}: {income}. | E · PL-INCOME |
+| `chat_llmAnswer_breakdown` | فلوسك راحت فين {span}: {list}. | Where your money went {span}: {list}. | E · PL-BREAKDOWN; list = top N plus `chat_llmAnswer_otherBucket` |
+| `chat_llmAnswer_topCategories` | أكتر التصنيفات صرفًا {span}: {list}. | Your top categories {span}: {list}. | E · PL-TOPN of category |
+| `chat_llmAnswer_otherBucket` | حاجات تانية | Other | C |
+| `chat_llmAnswer_changePct` | يعني فرق {percent}. | That's a {percent} change. | S · after `chat_answer_compare` (PL-COMPARE) |
+| `chat_llmAnswer_safeSpend` | تقدر تصرف {perDay} في اليوم لحد القبض. | You can spend {perDay} a day until payday. | E · PL-SAFE-SPEND |
+| `chat_llmAnswer_safeSpendNone` | لسه مفيش ميزانية، فمقدرش أحسب تصرف كام في اليوم. حط ميزانية وأنا أحسبهالك. | There's no budget yet, so I can't work out a daily amount. Set one and I'll do the maths. | E · EC-24, plus `budget_overview_emptyAction` |
+
+## 4.7 What-if — `chat_whatIf_*`, `chat_unit_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_unit_months` | `{count, plural, =1{شهر} =2{شهرين} few{{n} شهور} many{{n} شهر} other{{n} شهر}}` | `{count, plural, =1{1 month} other{{n} months}}` | C · count:int, n · 1–60, inserted as `{months}` |
+| `chat_whatIf_cutPercent` | لو قللت {subject} {percent}، هتوفر حوالي {monthly} في الشهر، يعني {amount} في {months}. | Cut {subject} by {percent} and you'd save about {monthly} a month, {amount} over {months}. | E · PL-WHATIF-CUT percent |
+| `chat_whatIf_cutAmount` | لو قللت {subject} بـ {monthly} في الشهر، هتوفر {amount} في {months}. | Cut {subject} by {monthly} a month and you'd save {amount} over {months}. | E · PL-WHATIF-CUT amount |
+| `chat_whatIf_capped` | متوسط صرفك على {subject} {average} بس، فده أقصى توفير في الشهر. | You average only {average} a month on {subject}, so that's the most you can save monthly. | S · amount > B |
+| `chat_whatIf_save` | لو حوشت {monthly} كل شهر، هيبقى معاك {amount} بعد {months}، من غير أي عائد. | Put aside {monthly} every month and you'll have {amount} after {months}, before any returns. | E · PL-WHATIF-SAVE |
+| `chat_whatIf_basis` | `{count, plural, =1{على أساس آخر شهر كامل} =2{على أساس متوسط آخر شهرين كاملين} few{على أساس متوسط آخر {n} شهور كاملة} many{على أساس متوسط آخر {n} شهر كامل} other{على أساس متوسط آخر {n} شهر كامل}}` | `{count, plural, =1{Based on your last full month} other{Based on the average of your last {n} full months}}` | S · count:int, n · 1–3 full periods; caption under what-if and suggestions |
+| `chat_whatIf_notEnough` | لسه مفيش شهر كامل أحسب عليه. استناني لآخر الشهر وأنا أحسبهالك. | There isn't a full month to work from yet. Check back at the end of the month. | M · Rive `sleep`, EC-23, no figure |
+
+## 4.8 Saving suggestions — `chat_suggest_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_suggest_intro` | دي أكتر حاجات ممكن توفر منها الشهر الجاي: | Here's where you could save most next month: | M · Rive `tourGuide`; top 3 rows follow, then `chat_whatIf_basis` |
+| `chat_suggest_aboveAverage` | {category} الشهر اللي فات {amount}، يعني {gap} فوق متوسطك. لو رجعته للمتوسط هتوفر {gap}. | {category} came to {amount} last month, {gap} above your average. Bring it back and save {gap}. | E · S1 |
+| `chat_suggest_subscription` | اشتراك {item} بـ {monthly} في الشهر. لو مش بتستخدمه، وقفه ووفر {monthly}. | {item} costs {monthly} a month. If you don't use it, cancel it and save {monthly}. | E · S2; the user cancels, Zaghlol never does |
+| `chat_suggest_creep` | {category} بيزيد كل شهر، من {startAmount} لـ {endAmount}. لو رجعته لأوله هتوفر {gap}. | {category} has gone up every month, from {startAmount} to {endAmount}. Bring it back down and save {gap}. | E · S3 |
+| `chat_suggest_cash` | {amount} كاش سحبته ومش متسجل راح فين. لو سجلته، ممكن توفر حوالي {target}. | {amount} of withdrawn cash isn't logged anywhere. Log it and you could save about {target}. | E · S4, plus `chat_suggest_cashTip` |
+| `chat_suggest_cashTip` | سجّل الكاش وإنت بتصرفه، حتى بصوتك. | Log cash as you spend it, even by voice. | S |
+| `chat_suggest_saveLabel` | توفير متوقع: {monthly} في الشهر | Possible saving: {monthly} a month | L · trailing line of each row |
+| `chat_suggest_none` | مش لاقي حاجة واضحة توفر منها. صرفك ماشي على متوسطه، كمّل كده! | Nothing obvious to trim. Your spending is on its usual track. Keep it up! | M · Rive `proud` |
+| `chat_suggest_footer` | دي اقتراحات بس، ومفيش حاجة اتغيرت. | Just suggestions. Nothing has been changed. | S · OOS-04 |
+
+## 4.9 Investment illustrations — `chat_invest_*` (flag `ask_llm_invest`)
+App-owned only (BR-LLM-04). Conditional or past tense, never "buy/should" (BR-LLM-01). The disclaimer pair is always visible under every PL-INVEST answer, never collapsed.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_invest_lead` | `{state, select, saved{الشهر اللي فات فضل معاك {amount}.} whatIf{لو كنت وفرت {amount}:} other{لو معاك {amount}:}}` | `{state, select, saved{Last month you had {amount} left over.} whatIf{If you had saved {amount}:} other{If you had {amount}:}}` | E · `state:select(saved/whatIf/other)` = source |
+| `chat_invest_gold` | كان ممكن يجيب حوالي {grams} دهب عيار {karat}، بسعر {price} للجرام يوم {date}. | It could have bought about {grams} of {karat}K gold, at {price} per gram on {date}. | E · S ≥ G; stale adds `common_badge_stale` |
+| `chat_invest_usd` | كان ممكن يساوي ≈ {amount2}، بسعر {rate} للدولار يوم {date}. | It could have been worth ≈ {amount2}, at {rate} per dollar on {date}. | E · EGP source only, plus `common_currency_approxCaption` |
+| `chat_invest_certificate` | في شهادة بعائد مثال {exampleRate} لمدة {months}، كان ممكن يطلع عائد حوالي {payout}، قبل الضرايب والمصاريف. ده معدل للتوضيح، مش عرض. | In a savings certificate at an example rate of {exampleRate} for {months}, it could have earned about {payout} before tax and fees. The rate is an illustration, not an offer. | E · EGP only; rate from `ask.cd_example_rate_bp` |
+| `chat_invest_stocks` | مبلغ زي ده ممكن يبقى بداية صغيرة في الأسهم عمومًا. اتعلم الأول، واتعامل مع جهة مرخصة. | An amount like this could be a small start in stocks in general. Learn first, and use a licensed provider. | E · D-93 band 100 < S < G; nothing named |
+| `chat_invest_small` | كل جنيه بيفرق، كمّل كده والشهر الجاي هيبقى أحسن. | Every pound counts. Keep going and next month will be better. | M · Rive `proud`; band 0 < S ≤ 100, plus `chat_invest_suggestChip`; no disclaimer needed (no instrument) |
+| `chat_invest_nothingSaved` | الشهر اللي فات مفضلش حاجة. تعالى نشوف نوفر منين الشهر الجاي. | Nothing was left over last month. Let's see where you can save next month. | M · S ≤ 0, plus `chat_invest_suggestChip`; no emoji |
+| `chat_invest_noPrice` | {currency} مش داخل هنا، علشان مفيش سعر ليه. | {currency} isn't included because there's no price for it. | S · never converted |
+| `chat_invest_gramsHiddenA11y` | الوزن مخفي | Weight hidden | A · hide-amounts on (FR-LLM-54) |
+| `chat_invest_suggestChip` | أوفر منين؟ | Help me save | C · runs PL-SUGGEST on the phone directly: no request, no quota |
+| `chat_invest_chip` | لو كنت حوشت؟ | If I had saved? | C · after `chat_refuse_specificPick`; runs PL-INVEST{savedLastPeriod} on the phone directly: no request, no quota |
+| `chat_invest_disclaimerSummary` | ده توضيح بس، مش نصيحة استثمار. | This is an illustration, not investment advice. | S · Egyptian summary, above the disclaimer |
+| `chat_invest_disclaimer` | هذه الأرقام للتوضيح فقط وليست نصيحة استثمارية. الأسعار والعوائد تتغير، والقيم السابقة لا تدل على القيم المستقبلية. القرار النهائي لك. | These figures are an illustration only, not investment advice. Prices and returns change, and past values don't predict future ones. The final decision is yours. | E · **simple standard Arabic** (BR-LLM-03). Legal sign-off: OQ-ASK-01 |
+
+## 4.10 Refusals — `chat_refuse_*`
+Unsupported, invalid and Zakah questions use `chat_fallback_text` (PL-FALLBACK).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `chat_refuse_offTopic` | أنا شاطر في الفلوس بس 😄 اسألني عن صرفك أو تحويشك: | Money is my thing 😄 Ask me about your spending or saving: | M · Rive `tourGuide`; three chips |
+| `chat_refuse_unsafe` | ده مش حاجة أقدر أساعد فيها. لو عندك سؤال عن فلوسك، أنا موجود. | That's not something I can help with. If you have a question about your money, I'm here. | M · calm, still pose, no emoji |
+| `chat_refuse_support` | لو الدنيا تقيلة عليك، كلم حد بتثق فيه. إنت مش لوحدك. | If things feel heavy, talk to someone you trust. You're not alone. | S · self-harm cues only; no number until legal supplies one (OQ-ASK-08) |
+| `chat_refuse_specificPick` | مقدرش أرشحلك سهم أو صندوق بعينه. أقدر أوريك فلوسك كانت ممكن تساوي كام، كتوضيح بس. | I can't pick a stock or fund for you. I can show what your money could have been worth, as an illustration only. | M · plus `chat_invest_chip` (hidden when `ask_llm_invest` is off) |
+
+## 4.11 S-71 Privacy — `privacy_askLlm_*`
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `privacy_askLlm_label` | اسأل المساعد الأونلاين | Ask the online helper | L · switch (FR-LLM-31); on = consent stored |
+| `privacy_askLlm_sentence` | بيبعت نص سؤالك بس، من غير أسماء حساباتك وكروتك وبنوكك. حركاتك وأرصدتك عمرها ما بتسيب موبايلك. | Sends only your question text, without your account, card and bank names. Your transactions and balances never leave your phone. | S |
+| `privacy_askLlm_quota` | `{count, plural, =0{خلصت أسئلة الشهر، وبترجع يوم {date}.} =1{فاضل سؤال واحد الشهر ده، والعداد بيرجع يوم {date}.} =2{فاضل سؤالين الشهر ده، والعداد بيرجع يوم {date}.} few{فاضل {n} أسئلة الشهر ده، والعداد بيرجع يوم {date}.} many{فاضل {n} سؤال الشهر ده، والعداد بيرجع يوم {date}.} other{فاضل {n} سؤال الشهر ده، والعداد بيرجع يوم {date}.}}` | `{count, plural, =0{No questions left this month. They reset on {date}.} =1{1 question left this month. Resets on {date}.} other{{n} questions left this month. Resets on {date}.}}` | S · count:int, n, date · under the switch while on |
+| `privacy_askLlm_quotaUnknown` | عدد الأسئلة هيظهر بعد أول سؤال أونلاين. | The count shows after your first online question. | S |
+| `privacy_askLlm_details` | إيه اللي بيتبعت؟ | What's sent? | L · text button, opens the consent sheet read-only |
+| `privacy_askLlm_turnedOff` | اتقفل. مش هبعت أي سؤال غير لما توافق تاني. | Turned off. No question is sent until you allow it again. | N |
+| `privacy_server_itemAskLlm` | نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر | Your question text for the online helper, only if you allow it and never stored, plus your monthly question count | S · BR-SYNC-03 amendment (D-90); added to the §3.10 list while `ask_llm` is on |
+
+## 4.K Key count and changelog (Part 4)
+- 2026-11-26 — first draft (ASK-LLM UX): **105 ARB keys** in §4.1–§4.11 (input and quota 15, consent 12, status 11, what I sent 11, clarify 7, data answers 9, what-if 7, suggestions 9, investment 13, refusals 4, privacy 7 — §4.11 counts `privacy_server_itemAskLlm`). Registry: `aiProvider`, `months`. No-zero rows: `chat_quota_goldHint`, `chat_consent_quota`, `chat_unit_months`, `chat_whatIf_basis`. Parts 1–3 rows unchanged. Native-speaker review (T-058 process) and legal sign-off of `chat_invest_disclaimer`, `chat_consent_storage` and `privacy_server_itemAskLlm` pending.
