@@ -29,6 +29,7 @@ class LlmCatQueueHeader extends ConsumerWidget {
       return Semantics(
         button: true,
         label: t.categorizationAiQueuePassiveRow,
+        onTap: () => LlmCatConsentFlow.prompt(context, ref),
         excludeSemantics: true,
         child: InkWell(
           key: const ValueKey('cat-queue-passive'),

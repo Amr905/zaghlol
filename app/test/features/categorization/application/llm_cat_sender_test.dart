@@ -8,7 +8,10 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/app_database_providers.dart';
+import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:zaghlol/core/backend/backend_client.dart';
 import 'package:zaghlol/core/backend/response_signature.dart';
 import 'package:zaghlol/core/backend/transport.dart';
@@ -131,6 +134,7 @@ void main() {
   late _Server server;
   late _Prover prover;
   late _Diag diag;
+  late ProviderContainer container;
   late LlmConsentStore consent;
   late LlmQuotaStore quota;
   late LlmCatSender sender;
@@ -199,7 +203,14 @@ void main() {
       );
     }
     final repo = SettingsRepository(SettingsDao(db), nowMs: () => 1);
-    consent = LlmConsentStore(repo, nowMs: () => 2);
+    // The REAL production wiring (llmConsentStoreProvider's onCleared).
+    container = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWith((ref) async => db),
+        settingsRepositoryProvider.overrideWith((ref) async => repo),
+      ],
+    );
+    consent = await container.read(llmConsentStoreProvider.future);
     quota = LlmQuotaStore(repo);
     await consent.grant(LlmFeature.categorise, 'openai-luna', 1);
     final backend = BackendClient(
@@ -267,7 +278,10 @@ void main() {
       allowedCategoryIds: () async => {'sys:food', 'sys:bills'},
     );
   });
-  tearDown(() => edb.close());
+  tearDown(() async {
+    container.dispose();
+    await edb.close();
+  });
 
   Future<LlmCatSendReport> run([DateTime? at]) =>
       sender.run(now: at ?? _now, lang: LlmLang.en);

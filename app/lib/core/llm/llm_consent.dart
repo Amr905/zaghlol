@@ -136,9 +136,12 @@ final class LlmConsentStore {
   }
 
   /// The Settings switch off, or a `409 LLM_CONSENT_REQUIRED`.
-  Future<void> clear(LlmFeature feature) async {
+  ///
+  /// [withdraw] is true for a user's choice (switch off, decline): that
+  /// empties the categorise queue (T-358). A 409 passes false: the provider
+  /// changed server-side, the user is re-prompted and the queue is kept.
+  Future<void> clear(LlmFeature feature, {bool withdraw = true}) async {
     await _settings.reset(LlmConsentSettings.of(feature));
-    // T-358 wiring: withdrawing categorise consent empties the queue.
-    await _onCleared?.call(feature);
+    if (withdraw) await _onCleared?.call(feature);
   }
 }

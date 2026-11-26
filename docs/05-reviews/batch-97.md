@@ -138,3 +138,10 @@
 
 ## Follow-ups (minors)
 B97-m1 (keeps FU-439 open), m3 (FU-443 test names above), m4, m5, m6, m8, m9, m10. Nits: m2, m7.
+
+## Fix round — app
+- m5: `LlmConsentStore.clear(feature, {withdraw = true})`; the 409 path passes `withdraw: false`, so only a user clear empties the queue. The sender test now uses the real `llmConsentStoreProvider` (real `onCleared`).
+- m6: failed confirm/correct/undo shows `errorsGenericActionFailed` (existing key).
+- m8: new `cat.card_last_counted`; the card counts one showing per UTC day while displayed (`LlmCatCardActions.countShowing`); "Not now" no longer double counts. Test added.
+- m9: passive row `Semantics` now carries `onTap`.
+- m10: AC to test maps added to T-361 and T-362.

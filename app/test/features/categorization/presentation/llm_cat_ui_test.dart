@@ -148,6 +148,23 @@ void main() {
         expect(kicks, 0);
       });
 
+      testWidgets('an ignored card counts once per day, then runs out', (
+        tester,
+      ) async {
+        await pumpCard(tester, lang: lang);
+        await tester.pumpAndSettle();
+        expect(
+          await tester.runAsync(() => h.repo.get(CatCardSettings.shown)),
+          1,
+        );
+        // Same day again: no second count.
+        await pumpCard(tester, lang: lang);
+        expect(
+          await tester.runAsync(() => h.repo.get(CatCardSettings.shown)),
+          1,
+        );
+      });
+
       testWidgets("Don't ask again hides it for good", (tester) async {
         await pumpCard(tester, lang: lang);
         await tester.tap(find.byKey(const ValueKey('cat-card-never')));

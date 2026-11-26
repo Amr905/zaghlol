@@ -27,7 +27,7 @@ const int catCardMinMerchants = 3;
 
 /// Settings keys of the card (llm-categorise §7).
 abstract final class CatCardSettings {
-  /// How many times the user dismissed the card ("Not now").
+  /// How many days the card was shown (or dismissed with "Not now").
   static final shown = SettingKey.integer(
     'cat.card_shown',
     byDefault: 0,
@@ -40,6 +40,13 @@ abstract final class CatCardSettings {
     'cat.card_last_shown',
     min: 0,
     max: 1 << 52,
+  );
+
+  /// The day (UTC days since epoch) a showing was last counted.
+  static final lastCounted = SettingKey.optionalInteger(
+    'cat.card_last_counted',
+    min: 0,
+    max: 1 << 40,
   );
 
   /// "Don't ask again".
@@ -127,12 +134,25 @@ final catCardVisibleProvider = FutureProvider.autoDispose<bool>((ref) async {
   );
 }, name: 'catCardVisibleProvider');
 
-/// The card's "Not now" and "Don't ask again".
+/// The card's showings, "Not now" and "Don't ask again".
 abstract final class LlmCatCardActions {
-  static Future<void> notNow(WidgetRef ref, {DateTime? now}) async {
+  /// Counts a showing, at most once per (UTC) day, when the card is on
+  /// screen; an ignored card then runs out after [catCardMaxShown] days.
+  /// Does not invalidate the visibility provider (the card stays up today).
+  static Future<void> countShowing(WidgetRef ref, {DateTime? now}) async {
     final repo = await ref.read(settingsRepositoryProvider.future);
+    final t = (now ?? DateTime.now()).toUtc();
+    final last = await repo.get(CatCardSettings.lastCounted);
+    final day = t.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay;
+    if (last == day) return;
+    await repo.set(CatCardSettings.lastCounted, day);
     final shown = await repo.get(CatCardSettings.shown);
     await repo.set(CatCardSettings.shown, shown + 1);
+  }
+
+  static Future<void> notNow(WidgetRef ref, {DateTime? now}) async {
+    final repo = await ref.read(settingsRepositoryProvider.future);
+    await countShowing(ref, now: now); // no double count on the same day
     await repo.set(
       CatCardSettings.lastShown,
       (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch,

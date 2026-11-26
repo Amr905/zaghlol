@@ -23,6 +23,9 @@ class LlmCatDiscoveryCard extends ConsumerWidget {
     if (!(ref.watch(catCardVisibleProvider).value ?? false)) {
       return const SizedBox.shrink();
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) LlmCatCardActions.countShowing(ref);
+    });
     final t = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final n = ref.watch(catEligibleCountProvider).value ?? 0;
