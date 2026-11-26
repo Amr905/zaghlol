@@ -75,6 +75,12 @@ substring of the sent text after normalisation. 4. Amount rule (§2.2). 5. Cross
 their `k`). 6. Template grammar (failure drops `t` only). Failures 1–5 → **PL-FALLBACK, `counted:false`**. The phone pins its
 schema copy per release and applies the same steps after the backend (defence in depth, FR-LLM-06).
 
+### 2.4a Contract details fixed by T-272 (vectors are authoritative)
+- **Step 5 also ties `plan` to `p`:** `p` must validate against `$defs/P_<plan>` of the schema (the `anyOf` alone can't), reason `PLAN_MISMATCH`. Other cross-field rules: `n` only with `lastDays` and required there, `m` only with and required for `monthOfYear`, `y` only with `monthOfYear`; `mode.percent` set exactly when `kind = percent`, `mode.amount` exactly when `kind = amount`; `source.whatIf` exactly for `whatIf`, `source.amount` exactly for `amount`; `instruments` unique; `PL-WHATIF-CUT` `target.currency` null; `PL-INCOME` `filter.slug` null.
+- **Normalisation** for steps 3 and 4 is `foldKey` (`packages/zaghlol_parsing/lib/normalize/text_normalizer.dart`). A number in the text is `[0-9]+(,[0-9]{3})*(.[0-9]+)?` after folding, compared as a decimal; number words are whole words after folding. The fraction rule applies when `currency` is non-null (the phone re-checks `null` against its primary currency).
+- **Template blanks per plan** and the ordered step 6 rules with reason codes are in `vectors/ask-plan-v1.json` (`templateBlanks`, `templateRules`). `t.lang` and `t.text` carry no schema constraint, so a bad template drops only `t`.
+- Reason codes are fixed strings (`SCHEMA_INVALID`, `REF_NOT_IN_TEXT`, `PLAIN_NAME`, `MENTION_NOT_IN_TEXT`, `AMOUNT_NOT_IN_TEXT`, `AMOUNT_FRACTION_TOO_LONG`, `PLAN_MISMATCH`, `FILTER_MULTIPLE_KEYS`, `PERIOD_FIELD_MISMATCH`, `MODE_FIELD_MISMATCH`, `SOURCE_FIELD_MISMATCH`, `INSTRUMENTS_DUPLICATE`, `TARGET_CURRENCY_SET`, `INCOME_SLUG_SET`, `TEMPLATE_*`); they are what a validator logs (never the text).
+
 ### 2.5 Prompt, tokens, cost
 - System prompt `ask-plan-v1` (file in `Zaghlol.Application/Llm/Prompts/`, hash in metrics): role, rules (plans only, placeholders opaque, never answer numbers), the catalogue in one line per plan, 14 short ar/en/mixed examples. Static and **first** in the request, the question last, so automatic prefix caching applies (OpenAI caches prefixes ≥ 1 024 tokens; Gemini implicit caching). No conversation history, no user data, no install data (FR-LLM-34).
 - Budget per call: system ≈ 1 300 + schema ≈ 900 (≈ 2 200 cacheable) + question ≤ 150 input tokens; output capped at `max_output_tokens = 300` (typical 120–200); reasoning `none` (OpenAI) / minimal thinking (Gemini).
@@ -98,7 +104,7 @@ public sealed record LlmResult(LlmOutcome Outcome /* Ok|Invalid|Timeout|Upstream
 
 ### 4.1 `POST /v1/ask/plan` (install token; `Zaghlol-Account` optional)
 ```json
-// request (closed, ≤ 4 KB)
+// request (closed, ≤ 4 KB; 16 KB when attestation carries an attestationObject, backend-api §4.9)
 { "planVersion": 1, "requestId": "01JD…(ULID)", "q": "صرفت كام بكارت ⟦CARD_1⟧ في ⟦MERCHANT_1⟧؟", "lang": "ar",
   "consent": { "provider": "openai-luna", "v": 1 },
   "attestation": { "type": "play_integrity", "token": "…" } }      // or {"type":"app_attest","keyId","assertion","attestationObject"?}

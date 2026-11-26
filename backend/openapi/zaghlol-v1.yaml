@@ -56,6 +56,8 @@ tags:
     description: Signed Gold entitlement.
   - name: Accounts
     description: Optional Google or Apple sign-in used only to carry Gold across devices.
+  - name: Llm
+    description: Optional online helpers on the shared LLM gateway (Ask Zaghlol plans, automatic merchant categories). Text only, no financial data.
   - name: Notifications
     description: Store server-to-server notifications (Google RTDN, App Store Server Notifications V2).
   - name: Admin
@@ -693,6 +695,176 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+
+  /v1/ask/plan:
+    post:
+      tags: [Llm]
+      operationId: askPlan
+      summary: Turn a scrubbed, placeholdered question into a plan the phone executes
+      description: |
+        Ask Zaghlol online helper (D-88, `docs/03-technical/ask-llm.md` section 4.1). The phone sends the question
+        text after its own scrub and reference masking (`q` carries `⟦CARD_1⟧`-style placeholders, never account,
+        card, bank or known merchant names, FR-LLM-18); the server asks the active provider for one plan in the
+        closed schema `backend/contracts/ask-plan-v1.schema.json` (`ask-plan/1`), validates it (section 2.4) and
+        answers it. **No financial data is accepted:** the body is closed, so any other member is
+        `400 UNKNOWN_FIELD`; `q`, the plan and the template are never logged or stored.
+
+        `consent.provider` and `consent.v` must equal the active provider and consent version, else
+        `409 LLM_CONSENT_REQUIRED` (with `providerId`). `attestation` is bound to this body:
+        `bodyHash = SHA-256("zaghlol-ask-v1" || 0x00 || installId || 0x00 || JCS(body without attestation))`
+        (installId from the install token); Play Integrity uses `requestHash = b64u(bodyHash)`, App Attest signs
+        `clientDataHash = SHA-256("zaghlol-ask-attest-v1" || 0x00 || bodyHash)`. Vectors:
+        `backend/tests/Zaghlol.Contract.Tests/vectors/ask-binding-v1.json`. `requestId` is a ULID per question and
+        makes a retry free (a retry with the same id is never counted twice).
+
+        The 200 is **not signed** (not an anchoring operation): the phone validates the plan itself with its pinned
+        copy of the schema and the same section 2.4 rules. `counted` says whether this call used one question of
+        the month; a plan the validator rejected, or `PL-INVEST` while `ask_llm_invest` is off, is answered as
+        `PL-FALLBACK` with `counted: false`. The plan is a closed object; its exact shape is the JSON Schema file,
+        which is the source of truth (the `p` member is declared open here only because OpenAPI cannot express the
+        provider-safe `anyOf`). Request body limit 4 KB without `attestation.attestationObject`, 16 KB with it (App
+        Attest's first-use object alone is about 5 KB).
+        Vectors and replies: `vectors/ask-plan-v1.json`, `backend/contracts/fixtures/ask-plan-responses-v1.json`.
+      security:
+        - installToken: []
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AskPlanRequest'
+            example:
+              planVersion: 1
+              requestId: 01JD8Z3Q4F6R7T9V0W1X2Y3Z4A
+              q: صرفت كام بكارت ⟦CARD_1⟧ في ⟦MERCHANT_1⟧؟
+              lang: ar
+              consent:
+                provider: openai-luna
+                v: 1
+              attestation:
+                type: play_integrity
+                token: synthetic-play-integrity-token-0001
+      responses:
+        '200':
+          description: The plan (not signed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskPlanResponse'
+              example:
+                serverTime: '2026-11-26T10:00:00Z'
+                plan:
+                  v: 1
+                  plan: PL-SPEND
+                  p:
+                    period: {k: cycle, o: 0, n: null, m: null, y: null}
+                    filter: {slug: null, ref: '⟦CARD_1⟧', mention: null, currency: null}
+                  t: null
+                counted: true
+                quota: {limit: 5, used: 3, remaining: 2, resetsAt: '2026-11-30T22:00:00Z'}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '403':
+          $ref: '#/components/responses/LlmQuotaExhausted'
+        '409':
+          $ref: '#/components/responses/LlmConsentRequired'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/DeviceAttestationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/UpstreamUnavailable'
+        '503':
+          $ref: '#/components/responses/LlmServicePaused'
+
+  /v1/categorise:
+    post:
+      tags: [Llm]
+      operationId: categorise
+      summary: Suggest a system category for unknown business merchant names
+      description: |
+        Automatic categories for unknown merchants (D-94, `docs/03-technical/llm-categorise.md` section 3). Only
+        normalised business merchant names (never transfers, person-like names, phones, IBANs, handles, which the
+        phone filters and the server re-checks) and the app language are sent. Per merchant, in request order:
+        privacy re-check, published catalog (free), answer cache (free), quota trim, one provider call for the
+        rest. Quota is reported per merchant (`status: quota`), never as 403, so catalog and cache hits still
+        arrive at 0 left. The structured output is `backend/contracts/cat-result-v1.schema.json`.
+
+        The body is closed (`400 UNKNOWN_FIELD`). `merchants` has 1 to 20 unique names of 2 to 64 characters.
+        `attestation` is bound as for `askPlan` with the prefixes `zaghlol-cat-v1` and `zaghlol-cat-attest-v1`
+        (`vectors/cat-binding-v1.json`); `requestId` makes a retried batch free. The 200 is not signed.
+        Replies: `backend/contracts/fixtures/categorise-responses-v1.json`.
+      security:
+        - installToken: []
+        - installToken: []
+          accountToken: []
+      parameters:
+        - $ref: '#/components/parameters/ZaghlolApp'
+        - $ref: '#/components/parameters/ZaghlolInstall'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoriseRequest'
+            example:
+              v: 1
+              requestId: 01JD8Z3Q4F6R7T9V0W1X2Y3Z4A
+              lang: ar
+              merchants: [zawya coffee, مكتبة النور]
+              consent:
+                provider: openai-luna
+                v: 1
+              attestation:
+                type: play_integrity
+                token: synthetic-play-integrity-token-0001
+      responses:
+        '200':
+          description: One result per requested merchant, in request order (not signed).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriseResponse'
+              example:
+                serverTime: '2026-11-26T10:00:00Z'
+                counted: 1
+                results:
+                  - {merchant: zawya coffee, status: ok, category: dining, confidence: 88, source: llm}
+                  - {merchant: مكتبة النور, status: ok, category: education, confidence: 90, source: cache}
+                quota: {limit: 15, used: 4, remaining: 11, resetsAt: '2026-11-30T22:00:00Z'}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/InstallTokenInvalidOrAccountExpired'
+        '409':
+          $ref: '#/components/responses/LlmConsentRequired'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '422':
+          $ref: '#/components/responses/DeviceAttestationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/UpstreamUnavailable'
+        '503':
+          $ref: '#/components/responses/LlmServicePaused'
 
   /v1/apple/android-callback:
     post:
@@ -2019,7 +2191,32 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
     UpstreamUnavailable:
-      description: '`UPSTREAM_UNAVAILABLE`. Retry with back-off.'
+      description: '`UPSTREAM_UNAVAILABLE` (503, or 502 for an LLM provider failure). Retry with back-off.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    LlmQuotaExhausted:
+      description: |
+        `LLM_QUOTA_EXHAUSTED`. The install or account counter is at its monthly limit; nothing was sent to the
+        provider and nothing was counted. The problem carries `quota` (`resetsAt` is the first instant of the next
+        Africa/Cairo month, in UTC).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    LlmConsentRequired:
+      description: |
+        `LLM_CONSENT_REQUIRED`. `consent.provider` or `consent.v` differs from the active provider or consent
+        version. The problem carries `providerId`. The app clears its stored consent and shows the consent sheet.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    LlmServicePaused:
+      description: |
+        `LLM_SERVICE_PAUSED`. The feature flag is off for this install, the monthly spend cap is reached or the
+        LLM module is disabled. Not counted. The app hides the counter and does not retry until the next sync.
       content:
         application/problem+json:
           schema:
@@ -2113,6 +2310,13 @@ components:
           type: string
           maxLength: 64
           description: Opaque id to quote when contacting support. Contains no request data.
+        quota:
+          description: '`LLM_QUOTA_EXHAUSTED` only: the counter that is at its limit.'
+          $ref: '#/components/schemas/LlmQuota'
+        providerId:
+          type: string
+          pattern: '^[a-z0-9][a-z0-9-]{1,31}$'
+          description: '`LLM_CONSENT_REQUIRED` only: the id of the provider the consent must name.'
     ProblemCode:
       type: string
       description: |
@@ -2135,6 +2339,9 @@ components:
         - IDEMPOTENCY_KEY_REUSED
         - ADMIN_CONFLICT
         - DEVICE_ATTESTATION_FAILED
+        - LLM_QUOTA_EXHAUSTED
+        - LLM_CONSENT_REQUIRED
+        - LLM_SERVICE_PAUSED
         - OWNERSHIP_CHECK_FAILED
         - PAYLOAD_TOO_LARGE
         - UNSUPPORTED_MEDIA_TYPE
@@ -2249,6 +2456,42 @@ components:
           maxItems: 10
           items:
             $ref: '#/components/schemas/BankRequestInput'
+        configVersion:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Version of the remote config the app holds; the `config` block is returned only when it differs (like `flagsVersion`).
+        llmCatFeedback:
+          type: array
+          maxItems: 50
+          description: |
+            Right / Wrong verdicts on automatic categories (D-96, `llm-categorise.md` section 5). Accepted only while
+            the install's `llm_categorise` flag is on; each item is re-checked (`ContributionPrivacy`, category
+            codes), duplicates per merchant keep the first. Covered by the `llm_categorise` consent, not by D-16.
+          items:
+            $ref: '#/components/schemas/LlmCatFeedbackItem'
+    LlmCatFeedbackItem:
+      type: object
+      description: |
+        One verdict. `right`: `userCategory` equals `aiCategory`. `wrong`: the category the user chose, or `custom`
+        for a custom category. No amount, date, account or transaction data.
+      additionalProperties: false
+      required: [merchantNorm, verdict, aiCategory, userCategory, source]
+      properties:
+        merchantNorm:
+          type: string
+          minLength: 2
+          maxLength: 64
+        verdict:
+          type: string
+          enum: [right, wrong]
+        aiCategory:
+          $ref: '#/components/schemas/CategoryCode'
+        userCategory:
+          $ref: '#/components/schemas/CategoryCode'
+        source:
+          type: string
+          enum: [llm, cache, catalog]
     OpKind:
       type: string
       enum: [upsert, delete]
@@ -2468,6 +2711,45 @@ components:
           type: integer
           format: int32
           minimum: 0
+        llmCatFeedback:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Feedback rows actually stored (present only when the request carried `llmCatFeedback`).
+    ConfigBlock:
+      type: object
+      description: |
+        Remote config for the app (`remote_config` closed key set, ask-llm.md sections 4.5 and 4.6). `values` maps a
+        config key (`ask.quota_free`, `ask.quota_gold`, `ask.s1_pct`, `ask.s4_share_pct`, `ask.s4_saving_pct`,
+        `ask.cd_example_rate_bp`, `ask.invest_min_egp`, `ask.invest_gold_min_cg`, `ask.invest_gold_karat`,
+        `cat.quota_free`, `cat.quota_gold`, `cat.batch_max`, `cat.min_confidence`, `llm.provider`, ...) to its
+        canonical string: integers as `-?[0-9]+`, decimals as `DecimalString`, never a JSON number. The app parses
+        each value with its own typed key table and ignores keys it does not know. Stale (more than 14 days) or
+        missing config means bundled defaults; the LLM UI stays governed by the flags (fail closed).
+      required: [version, values]
+      properties:
+        version:
+          type: integer
+          format: int32
+          minimum: 0
+        values:
+          type: object
+          additionalProperties:
+            type: string
+            maxLength: 64
+        providerName:
+          description: Display name of the active provider per language, for the consent sheet.
+          $ref: '#/components/schemas/ProviderName'
+    ProviderName:
+      type: object
+      required: [ar, en]
+      properties:
+        ar:
+          type: string
+          maxLength: 64
+        en:
+          type: string
+          maxLength: 64
     TimeNonce:
       type: string
       description: 16 random bytes (128 bits), base64url without padding (R4-2).
@@ -2524,6 +2806,11 @@ components:
           oneOf:
             - $ref: '#/components/schemas/AcceptedCounts'
             - type: 'null'
+        config:
+          description: Signed remote config (ask-llm.md section 4.6); sent when `configVersion` differs.
+          oneOf:
+            - $ref: '#/components/schemas/ConfigBlock'
+            - type: 'null'
         accountToken:
           oneOf:
             - $ref: '#/components/schemas/Jws'
@@ -2537,6 +2824,248 @@ components:
           $ref: '#/components/schemas/SupportNotice'
         timeNonce:
           $ref: '#/components/schemas/TimeNonceEcho'
+
+    # ---- LLM gateway (Ask Zaghlol plans, automatic categories) -------------
+    LlmQuota:
+      type: object
+      description: |
+        Quota snapshot for the calling subject (the lower of install and account counters). The month is the
+        calendar month in Africa/Cairo; `resetsAt` is the first instant of the next one, in UTC.
+      required: [limit, used, remaining, resetsAt]
+      properties:
+        limit:
+          type: integer
+          format: int32
+          minimum: 0
+        used:
+          type: integer
+          format: int32
+          minimum: 0
+        remaining:
+          type: integer
+          format: int32
+          minimum: 0
+        resetsAt:
+          $ref: '#/components/schemas/UtcTimestamp'
+    LlmConsent:
+      type: object
+      description: The consent the user gave on this phone (provider id and consent version).
+      additionalProperties: false
+      required: [provider, v]
+      properties:
+        provider:
+          type: string
+          pattern: '^[a-z0-9][a-z0-9-]{1,31}$'
+        v:
+          type: integer
+          format: int32
+          minimum: 1
+    LlmPlayIntegrityProof:
+      type: object
+      description: |
+        Play Integrity standard-request token requested with `requestHash = b64u(bodyHash)` (the body-bound hash of
+        the operation; see `askPlan`). Same verifier as restore.
+      additionalProperties: false
+      required: [type, token]
+      properties:
+        type:
+          type: string
+          const: play_integrity
+        token:
+          type: string
+          pattern: '^[A-Za-z0-9_.-]{16,16384}$'
+    LlmAppAttestProof:
+      type: object
+      description: |
+        App Attest assertion over `clientDataHash = SHA-256(clientDataPrefix || 0x00 || bodyHash)` (no seat keys).
+        `attestationObject` is sent once, on a new key's first use.
+      additionalProperties: false
+      required: [type, keyId, assertion]
+      properties:
+        type:
+          type: string
+          const: app_attest
+        keyId:
+          type: string
+          pattern: '^[A-Za-z0-9+/]{43}=$'
+        assertion:
+          type: string
+          pattern: '^[A-Za-z0-9+/]{16,8192}={0,2}$'
+        attestationObject:
+          type: string
+          pattern: '^[A-Za-z0-9+/]{16,16384}={0,2}$'
+    LlmDevProof:
+      type: object
+      description: |
+        Development and Testing only (`Llm:Attestation:Mode = Fake`): an HMAC of `bodyHash` with a test key, from
+        debug builds. Any other environment refuses it with `422 DEVICE_ATTESTATION_FAILED`.
+      additionalProperties: false
+      required: [type, proof]
+      properties:
+        type:
+          type: string
+          const: dev
+        proof:
+          type: string
+          pattern: '^[A-Za-z0-9_.-]{8,256}$'
+    LlmAttestation:
+      oneOf:
+        - $ref: '#/components/schemas/LlmPlayIntegrityProof'
+        - $ref: '#/components/schemas/LlmAppAttestProof'
+        - $ref: '#/components/schemas/LlmDevProof'
+      discriminator:
+        propertyName: type
+        mapping:
+          play_integrity: '#/components/schemas/LlmPlayIntegrityProof'
+          app_attest: '#/components/schemas/LlmAppAttestProof'
+          dev: '#/components/schemas/LlmDevProof'
+    Ulid:
+      type: string
+      description: A ULID (Crockford base32), one per question or batch; makes a retry free.
+      pattern: '^[0-7][0-9A-HJKMNP-TV-Z]{25}$'
+    AskPlanRequest:
+      type: object
+      additionalProperties: false
+      required: [planVersion, requestId, q, lang, consent, attestation]
+      properties:
+        planVersion:
+          type: integer
+          format: int32
+          enum: [1]
+          description: The plan schema version the phone has pinned (`ask-plan/1`); the answer is in that version.
+        requestId:
+          $ref: '#/components/schemas/Ulid'
+        q:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: The scrubbed, placeholdered question (trimmed, NFC; 1 to 300 characters). Never logged or stored.
+        lang:
+          type: string
+          enum: [ar, en]
+        consent:
+          $ref: '#/components/schemas/LlmConsent'
+        attestation:
+          $ref: '#/components/schemas/LlmAttestation'
+    AskPlan:
+      type: object
+      description: |
+        The envelope of `ask-plan/1` (`backend/contracts/ask-plan-v1.schema.json` is authoritative). `p` is the
+        closed per-plan object, `t` an optional template (`ask-llm.md` section 2.3) or `null`. The phone pins the
+        schema and validates every member again (section 2.4).
+      required: [v, plan, p, t]
+      properties:
+        v:
+          type: integer
+          format: int32
+          enum: [1]
+        plan:
+          type: string
+          enum: [PL-SPEND, PL-COMPARE, PL-BREAKDOWN, PL-TOPN, PL-AVERAGE, PL-INCOME, PL-SAVED, PL-BILLS-DUE, PL-BUDGET-LEFT, PL-SAFE-SPEND, PL-BALANCE, PL-WHATIF-CUT, PL-WHATIF-SAVE, PL-SUGGEST, PL-INVEST, PL-FALLBACK, PL-REFUSE]
+        p:
+          type: object
+          description: The per-plan parameters, shaped by `$defs/P_<plan>` of the JSON Schema file.
+          additionalProperties: true
+        t:
+          oneOf:
+            - $ref: '#/components/schemas/AskPlanTemplate'
+            - type: 'null'
+    AskPlanTemplate:
+      type: object
+      required: [lang, text]
+      properties:
+        lang:
+          type: string
+        text:
+          type: string
+    AskPlanResponse:
+      type: object
+      required: [serverTime, plan, counted, quota]
+      properties:
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+        plan:
+          $ref: '#/components/schemas/AskPlan'
+        counted:
+          type: boolean
+          description: Whether this call used one question of the month.
+        quota:
+          $ref: '#/components/schemas/LlmQuota'
+    CategoriseRequest:
+      type: object
+      additionalProperties: false
+      required: [v, requestId, lang, merchants, consent, attestation]
+      properties:
+        v:
+          type: integer
+          format: int32
+          enum: [1]
+        requestId:
+          $ref: '#/components/schemas/Ulid'
+        lang:
+          type: string
+          enum: [ar, en]
+        merchants:
+          type: array
+          minItems: 1
+          maxItems: 20
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 2
+            maxLength: 64
+        consent:
+          $ref: '#/components/schemas/LlmConsent'
+        attestation:
+          $ref: '#/components/schemas/LlmAttestation'
+    CategoriseResult:
+      type: object
+      description: |
+        `status ok`: `category` is a live system category code, `confidence` 0 to 100, `source` says where the answer
+        came from. `unknown` and `low_confidence` (confidence below `cat.min_confidence`) mean no answer, never
+        re-sent. `rejected`: the name failed the privacy re-check. `quota`: no quota left, stays queued on the phone.
+        `category`, `confidence` and `source` are `null` where they do not apply (`confidence` may be set for
+        `low_confidence`).
+      required: [merchant, status, category, confidence, source]
+      properties:
+        merchant:
+          type: string
+        status:
+          type: string
+          enum: [ok, unknown, low_confidence, rejected, quota]
+        category:
+          oneOf:
+            - $ref: '#/components/schemas/CategoryCode'
+            - type: 'null'
+        confidence:
+          oneOf:
+            - type: integer
+              format: int32
+              minimum: 0
+              maximum: 100
+            - type: 'null'
+        source:
+          oneOf:
+            - type: string
+              enum: [llm, cache, catalog]
+            - type: 'null'
+    CategoriseResponse:
+      type: object
+      required: [serverTime, counted, results, quota]
+      properties:
+        serverTime:
+          $ref: '#/components/schemas/UtcTimestamp'
+        counted:
+          type: integer
+          format: int32
+          minimum: 0
+          description: 'Number of `ok` results whose `source` is `llm` (the only ones that use quota).'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoriseResult'
+        quota:
+          $ref: '#/components/schemas/LlmQuota'
 
     # ---- purchases ---------------------------------------------------------
     PurchaseVerifyAndroidRequest:

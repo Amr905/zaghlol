@@ -2627,7 +2627,8 @@
         "lang": "en",
         "text": "Café {amount}"
       },
-      "expect": "TEMPLATE_NOT_NFC"
+      "expect": "TEMPLATE_NOT_NFC",
+      "note": "e + U+0301 composes to U+00E9 in NFC. .NET hosts with invariant globalization (this repo) cannot normalise: use a real NFC implementation"
     },
     {
       "id": "reject-lang-differs-from-request",
@@ -2993,8 +2994,8 @@
       "NOT_NFC",
       "LANG",
       "PLAN_NOT_ALLOWED",
-      "DIGIT",
       "PLACEHOLDER",
+      "DIGIT",
       "BAD_BLANK",
       "DUPLICATE_BLANK",
       "AT",
@@ -3010,7 +3011,7 @@
       "LANG": "t.lang is 'ar' or 'en' and equals the request lang",
       "PLAN_NOT_ALLOWED": "plan has an entry in templateBlanks (PL-INVEST, PL-SUGGEST, PL-REFUSE, PL-FALLBACK never do)",
       "DIGIT": "no character of category Nd (any script), so no digit of any script",
-      "PLACEHOLDER": "no U+27E6 or U+27E7",
+      "PLACEHOLDER": "no U+27E6 or U+27E7 (checked before DIGIT, because a placeholder contains a digit)",
       "BAD_BLANK": "after removing every {name} with name in the plan's blanks, no '{' or '}' remains, and every {name} in the text is one of the plan's blanks",
       "DUPLICATE_BLANK": "each allowed blank occurs at most once",
       "AT": "no '@' (U+0040, U+FF20, U+FE6B)",
