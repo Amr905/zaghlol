@@ -4080,6 +4080,14 @@
   "@accountsEditSaved": {
     "description": "N"
   },
+  "savedToastTitle": "اتسجلت!",
+  "@savedToastTitle": {
+    "description": "T · toast after saving a transaction (T-295)"
+  },
+  "savedToastBudgetLeft": "فاضلك في {category} {amount}",
+  "@savedToastBudgetLeft": {
+    "description": "T · category:String, amount:String (own currency)"
+  },
   "accountsMergePickTitle": "تدمجه مع أنهي كارت؟",
   "@accountsMergePickTitle": {
     "description": "T"

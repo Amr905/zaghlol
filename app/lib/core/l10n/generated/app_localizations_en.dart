@@ -2983,6 +2983,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountsEditSaved => 'Saved ✓';
 
   @override
+  String get savedToastTitle => 'Saved!';
+
+  @override
+  String savedToastBudgetLeft(Object amount, Object category) {
+    return '$amount left in $category';
+  }
+
+  @override
   String get accountsMergePickTitle => 'Merge into which card?';
 
   @override
