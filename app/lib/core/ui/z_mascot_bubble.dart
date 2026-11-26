@@ -13,6 +13,7 @@ class ZMascotBubble extends StatefulWidget {
     required this.message,
     this.moment = ZaghlolMoment.proud,
     this.avatarSize = 64,
+    this.trimHeadroom = false,
     this.onTap,
     this.avatarKey,
   });
@@ -20,6 +21,9 @@ class ZMascotBubble extends StatefulWidget {
   final String message;
   final ZaghlolMoment moment;
   final double avatarSize;
+
+  /// T-274: see [ZaghlolAvatar.trimHeadroom].
+  final bool trimHeadroom;
   final VoidCallback? onTap;
 
   /// Changing it replays a one-off moment (T-099 tap easter egg).
@@ -71,6 +75,7 @@ class _ZMascotBubbleState extends State<ZMascotBubble> {
     final moment = widget.moment;
     final avatarKey = widget.avatarKey;
     final avatarSize = widget.avatarSize;
+    final trimHeadroom = widget.trimHeadroom;
     final onTap = widget.onTap;
     final c = ZColors.of(context);
     final radius = BorderRadius.circular(ZRadius.card);
@@ -105,6 +110,7 @@ class _ZMascotBubbleState extends State<ZMascotBubble> {
                     moment: moment,
                     talk: _talk,
                     size: avatarSize,
+                    trimHeadroom: trimHeadroom,
                   ),
                   const SizedBox(width: ZSpacing.md),
                   Expanded(

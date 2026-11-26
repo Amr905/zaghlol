@@ -64,6 +64,7 @@ class ZaghlolAvatar extends ConsumerWidget {
     this.talk = false,
     this.size = 96,
     this.semanticLabel,
+    this.trimHeadroom = false,
   });
 
   final ZaghlolMoment moment;
@@ -73,6 +74,16 @@ class ZaghlolAvatar extends ConsumerWidget {
   /// Localised description from the caller (AppLocalizations). Null makes the
   /// bird decorative, e.g. when the bubble beside it already says everything.
   final String? semanticLabel;
+
+  /// T-274: the Rive artboard keeps the top quarter free for props (hat,
+  /// magnifier, falling coins); the bird itself spans 26% to 99% of the height
+  /// (measured on the rendered file). With [trimHeadroom] the avatar box is only
+  /// [riveBirdHeightFactor] as tall and the empty top is clipped, so a card can
+  /// show a bigger bird without empty space above its head. Only applies to the
+  /// Rive artboard; the still and the interim art have no such margin.
+  final bool trimHeadroom;
+
+  static const riveBirdHeightFactor = 0.76;
 
   static const stillAsset = 'assets/mascot/zaghlol_still.png';
 
@@ -101,15 +112,29 @@ class ZaghlolAvatar extends ConsumerWidget {
         ? RiveMascot(moment: moment, talk: talk, size: size)
         : InterimMascot(moment: moment, talk: talk, size: size);
 
+    final trim = trimHeadroom && !reduce && artboard == null && hasRive;
+    final height = trim ? size * riveBirdHeightFactor : size;
     return IgnorePointer(
       child: Semantics(
         image: true,
         label: semanticLabel,
         excludeSemantics: true,
-        child: SizedBox.square(
+        child: SizedBox(
           key: const ValueKey('zaghlol-avatar'),
-          dimension: size,
-          child: ExcludeSemantics(child: body),
+          width: size,
+          height: height,
+          child: ExcludeSemantics(
+            child: trim
+                ? ClipRect(
+                    child: OverflowBox(
+                      alignment: AlignmentDirectional.bottomCenter,
+                      minHeight: size,
+                      maxHeight: size,
+                      child: body,
+                    ),
+                  )
+                : body,
+          ),
         ),
       ),
     );

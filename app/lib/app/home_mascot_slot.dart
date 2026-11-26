@@ -15,6 +15,10 @@ import '../features/mascot/application/payday_celebration.dart';
 import '../features/mascot/presentation/mascot_moments.dart';
 import '../features/mascot/presentation/zaghlol_avatar.dart';
 
+/// T-274: bigger than the 64 dp default; with the artboard's empty top
+/// trimmed the bubble stays about as tall as before.
+const _homeAvatarSize = 92.0;
+
 class HomeMascotSlot extends ConsumerStatefulWidget {
   const HomeMascotSlot({super.key, required this.actions});
 
@@ -65,6 +69,8 @@ class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
             key: const ValueKey('home-mascot'),
             message: text,
             moment: ZaghlolMoment.proud,
+            avatarSize: _homeAvatarSize,
+            trimHeadroom: true,
           ),
         HomeContextualCards(
           hasTransactions: hasTransactions,
