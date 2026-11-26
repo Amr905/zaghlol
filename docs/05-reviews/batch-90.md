@@ -218,3 +218,56 @@ Branch `task/b90-fix-masker`. Parsing package only, plus one backend schema patt
 - **Safety net:** after masking, `sentText` is folded again and checked for any account label/nickname/extra name, non-ordinary bank alias, merchant name, or a known last-4 next to a card word; a hit returns `MaskUnresolved(failed)`. Proven through the seam `ReferenceMasker.leaksForTest` (no shipped rule leaves a leak for the net to catch in an end-to-end case).
 - **Tests:** new `reference_masker_variants_test.dart` (variant probes, 20 card words x 14 spellings x 4 frames, property tests with Persian, decomposed hamza, fullwidth, zero-width, accent and split-digit generators, minors, safety net, known gaps). With the lib changes stashed the new tests fail (13 failing groups).
 - **Still not caught** (T-328 task file, known gaps): digits as words, last-4 beyond 3 words (FU-364), possessive suffixes, comma-split digits, look-alike letters from other scripts, scrub failure path text. m6 (input cap) and m7 (registry short forms) not done.
+
+---
+
+## Delta re-review — T-328
+
+Scope: `git diff a1a4e4e6..6afbfac7 -- packages/zaghlol_parsing backend/contracts` (one commit). Reviewer: `code-reviewer` (Opus), delta only.
+
+Verdict: **CHANGES_REQUESTED** (M3). M1 and M2 as written are fixed; one new last-4 leak class remains.
+
+**Checks run.** `dart test test/chat/llm`: 104 passed. About 130 throwaway adversarial probes through `ClientScrub` + `ReferenceMasker` (not committed). Performance: a 300-character question with 100 accounts (label, nickname, extra name, last-4) and 100 merchants (two names each) takes about 4.7 ms on average for scrub + mask, about 2.3 ms for a single run. That is well under 50 ms.
+
+**M1 / M2 confirmed fixed.** These are now masked: Persian ک/ی/ڪ/ۆ, alef + combining U+0654, presentation forms (`ﻛﺎﺭﻓﻮﺭ`), fullwidth (`Ｃarrefour ｃｉｂ`), Latin accents, tatweel inside names, ى/ي and ة/ه swaps (`القاهره`, `حلوانى مصطفي`, `مومن`), every و/ب/ل/ف/ك/لل prefix, any letter case, `كريديت 4321`, `كارت ٤٣ ٢١`, `كارت 4 3 2 1`, `43/21`, `43_21`, a newline between groups, `كارتي ٤٣٢١`, `بكارتي 4321`, and `card ending in 4321`. A nickname that is a common word («الشنطة») is masked everywhere, which is the safe direction.
+
+**Safety net.** There is one `MaskResult` return (`reference_masker.dart:648`), and it comes after `_leaks`. A hit returns `MaskUnresolved(failed)` inside the `try`, so the net can't be bypassed. It re-folds `sentText` with the same `looseFold`, `_nameHits` and `_digitHits` as the masker. As a result, it only catches span-resolution bugs, not matching gaps: every leak below gets past both the masker and the net. See m14.
+
+**Schema.** `_[1-9][0-9]?` matches what the masker emits (`_$n`, no cap). More than 99 entities of one kind can't fit in a 300-character question. See m13 for the missing cap and vectors.
+
+### Findings
+
+**M3 (major, privacy): a known last-4 still reaches `sentText` when glued to the card word, after a possessive card word, or split by a dash or comma.**
+`reference_masker.dart:11` (`_wordRun` makes `كارت4321` one token), `:30` / `:321` (`_cardWords` / `_hasWord` handle prefixes only, not suffixes), `:243` (`_digitGroups` joins on a space only; `loose_text.dart:44` turns only `-` `_` `/` U+2212 into a space).
+
+| Input (4321 is Ahmed's card) | Sent |
+|---|---|
+| `كارت4321`, `كارت٤٣٢١`, `visa4321` | unchanged |
+| `كارتك 4321`, `كارتها 4321` | unchanged |
+| `كارت 43–21` (en dash), `43—21` (em dash; iOS smart punctuation) | unchanged |
+| `كارت 43,21`, `4,3,2,1`, `٤٣،٢١` (Arabic comma) | unchanged |
+
+Dropping the space between a word and a number is common in Arabic typing. «كارتها» (her card) is the usual way to ask about a spouse's card. These are the same leak class as M2.
+
+Required change:
+- Treat a letter↔digit boundary as a token boundary for card-word and digit-group detection.
+- Accept the pronoun suffixes ك/ه/ها/نا/كم/هم/و on card/account words (stem match).
+- In the digit-group join, treat U+2010–2015, `,`, `،` and `:` as separators, like space, `-`, `.` and `/`.
+- Add these vectors to the M2 property generator.
+- Optional, closing all digit cases at once: also make the net fail closed on any known last-4 that appears after digit groups are joined across non-letter separators. This changes the «صرفت 4321 جنيه» rule (test at `reference_masker_variants_test.dart:268`), so it goes with the FU-364 OQ.
+
+**Accepted known gaps** (not majors; none comes from ordinary typing of the user's own reference):
+- **Look-alike letters from other scripts.** Cyrillic/Greek/Cherokee (`Сarrefour`, `Τalabat`, `Ꮯarrefour`), math alphanumerics (`𝐂arrefour`), Roman numeral `Ⅽ`, and Arabic Extended-A `ࢪ`. No Egyptian keyboard produces these inside a Latin or Arabic name. The threat is accidental disclosure by the user, not an adversary hiding their own data. Already listed in the task file.
+- **Possessive or plural suffixes on names.** `كارفوري`, `كارفورها`, `طلباتي`, `Talabatey`, `Carrefours`, and a nickname with a possessive (`شنطتي`). Already listed (m4); low frequency; tracked with FU-364.
+- **Names split by a space, emoji, comma or hyphen.** `كار فور`, `Carre four`, `C a r r e f o u r`, `كار🛒فور`, `حلواني🍰مصطفى`, `حلواني، مصطفى`, `كار-فور`, `N B E`. These are not real spellings of the name.
+- **Spelling variants that are different letters, not folds.** `سبينز`, `الكاهرة` (ق→ك), `كوستى` / `كوسته` (final ا→ى/ه). The registry should supply these aliases (T-343, with m7).
+- **Last-4 more than 3 words from the card word.** `…بيخلص بـ 4321`, `…آخر أربع أرقام فيه 4321`. Tracked in FU-364 (OQ).
+- **Bank name glued to the card word.** `CIBcard`, `CIB<ZWSP>card`. This is the `بنكالأهلي` class.
+
+**Minors (follow-ups):**
+- **m13.** `docs/03-technical/ask-llm.md:46` still says `_[1-9]`. The contract vectors (`backend/tests/Zaghlol.Contract.Tests/vectors/ask-plan-v1.json`) have no `_10` accept case or `_100` reject case. The masker has no cap at 99: add one, or rely on the m6 input cap. The .NET contract tests were not run in the fix round; the batch GitHub run must cover them.
+- **m14.** The safety net shares its matching with the masker, so it adds no coverage for matching gaps. Make it strictly wider:
+  - For names of 4 or more folded letters, match a substring in text with spaces, punctuation and symbols removed.
+  - Match a known last-4 joined across any non-letter separators, as in M3's optional item.
+- **m15.** ZWSP/ZWNJ are dropped, not read as a space, so `CIB<ZWSP>card` glues. A dot inside a name is dropped but a hyphen becomes a space, so `كار.فور` is masked and `كار-فور` is not. Pick one rule. Nit-level.
+- **Batch 91 note.** `task/T-331` embeds the old pattern in `packages/zaghlol_parsing/lib/chat/llm/plan_schema.g.dart:41`. `task/T-330` and `task/T-331` both carry `backend/contracts/ask-plan-v1.schema.json` with `_[1-9]`. After batch 90 merges, rebase both and regenerate `plan_schema.g.dart` from the widened schema. Otherwise the app rejects `_10`+ plans that the masker can now produce.
