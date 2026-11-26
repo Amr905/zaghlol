@@ -23,8 +23,9 @@ void main() {
       return nativeHandler!(c);
     });
     messenger.setMockMethodCallHandler(SystemChannels.platform, (c) async {
-      if (c.method == 'HapticFeedback.vibrate')
+      if (c.method == 'HapticFeedback.vibrate') {
         system.add(c.arguments as String);
+      }
       return null;
     });
   });
