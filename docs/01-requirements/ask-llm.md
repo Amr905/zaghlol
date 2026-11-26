@@ -9,6 +9,8 @@
 | Decisions | **D-88** architecture & privacy · **D-89** quotas · **D-90** BR-SYNC-03 amendment · **D-91** Lead defaults (investment wording, provider choice, flag), confirmed · **D-92** account/card/bank/merchant references replaced by placeholders on the phone (§2a) · **D-93** investment suggestion bands (§3.4a) |
 | Amends | D-06 and OOS-05 (no LLM) for this feature only; BR-SYNC-03 (D-90); NFR-PRIV-01 metrics wording (§9) |
 
+**Sibling feature:** automatic category for unknown merchants (LLM-CATEGORISE, D-94…D-96) is specified in `llm-categorise.md`; it reuses this document's provider terms, attestation, rate limits, spend cap and flag rules, with its own quota counter.
+
 IDs: **FR-LLM-##** requirements, **BR-LLM-##** rules, **PL-##** plans. Priorities MoSCoW. "Period" = the budget month («شهر», payday-based, named per D-82/D-84) unless the question names a calendar period.
 
 ## 1. Goal, scope, non-goals
