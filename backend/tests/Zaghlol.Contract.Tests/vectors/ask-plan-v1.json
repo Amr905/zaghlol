@@ -1960,6 +1960,74 @@
       "note": "a registry alias in plain text is rejected before the substring check"
     },
     {
+      "id": "invalid-plain-name-in-template-text",
+      "group": "references",
+      "lang": "en",
+      "sent": "how much did I spend last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": {
+          "lang": "en",
+          "text": "You spent {amount} at CIB in {period}."
+        }
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-19",
+      "note": "a registry alias in t.text drops the template only (TEMPLATE_PLAIN_NAME); the plan is kept"
+    },
+    {
+      "id": "invalid-plain-name-in-currency",
+      "group": "references",
+      "lang": "en",
+      "sent": "how much did I spend last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": null,
+            "currency": "CIB"
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 2,
+        "reason": "PLAIN_NAME"
+      },
+      "srs": "FR-LLM-19",
+      "note": "every string of p is checked, not only mention"
+    },
+    {
       "id": "invalid-plain-bank-name-arabic",
       "group": "references",
       "lang": "ar",

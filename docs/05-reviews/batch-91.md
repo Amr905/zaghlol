@@ -184,3 +184,9 @@
 ## Notes for the Lead
 - Fix round: M1 (T-330) and M2 (T-332) are both small (a few lines plus one test each); the Lead delta check should suffice. M1's fix should come with m7 in the same pass if the fix agent touches the adapter.
 - C1 is a spec decision, not a builder error; file it in `docs/01-requirements/open-questions.md` against FR-LLM-35 and block the LLM answer path (T-342/T-349) on it, not this batch.
+
+## Fix round — phone
+
+- m5 fixed: `PlanValidator` now runs the plain-name check on every string of `p` (mention, currency, any other), step 2 `PLAIN_NAME`. Test: `currency:"CIB"` in `plan_validator_test.dart` (fails without the fix).
+- Vectors added to `ask-plan-v1.json`: `invalid-plain-name-in-template-text` (accept, template dropped; phone already did this, backend m3) and `invalid-plain-name-in-currency` (fallback, step 2, PLAIN_NAME).
+- Table rows with no phone change: duplicate key, trailing `\n`, `target.currency` in whatIf, PL-BALANCE ref (backend-side or phone already stricter); `❤️`/NFC mark order and mention length in UTF-16 units vs code points (m6) left open (more than 10 lines, follow-up B91-m6); supplementary-letter link (backend n2).
