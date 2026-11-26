@@ -84,6 +84,8 @@ import UserNotifications
     SpeechSupportRegistration.register(with: engineBridge.pluginRegistry)
     // FU-168e: schedule / cancel the periodic backup wake-up.
     BackupWorkRegistration.register(with: engineBridge.pluginRegistry)
+    // T-293: animation-synced haptic patterns (CoreHaptics; no entitlement).
+    HapticsHost.register(with: engineBridge.pluginRegistry)
     // NOTIF-GW: local notifications and the permission prompt.
     NotificationsRegistration.register(with: engineBridge.pluginRegistry)
     // T-224: the theme choice (light/dark/system only) for the next cold start.
