@@ -2,6 +2,8 @@
 // title; Android a Material 3 collapsing app bar. Contextual cards (T-104)
 // are in the banner slot (T-104); one hero page (the primary currency) plus small currency cards (T-278).
 
+import '../../categorization/presentation/llm_cat_discovery_card.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -259,6 +261,7 @@ class _HomeBody extends ConsumerWidget {
               openFinishSetup: a.openFinishSetup,
             ),
           const ExpectedSalaryRow(),
+          const LlmCatDiscoveryCard(),
           if (m.reviewCount > 0) ...[
             const SizedBox(height: ZSpacing.md),
             HomeReviewPill(

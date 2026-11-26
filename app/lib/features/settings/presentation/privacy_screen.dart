@@ -20,6 +20,8 @@ import '../../categorization/application/contributions.dart';
 import '../../gold/application/restore.dart' show DeleteEverythingWarning;
 import 'preferences_screen.dart';
 import 'privacy_ask_llm_section.dart';
+import '../../categorization/presentation/llm_cat_ui_providers.dart';
+import 'privacy_llm_cat_section.dart';
 import 'server_allow_list.dart';
 import 'settings_ports.dart';
 import 'settings_widgets.dart';
@@ -59,6 +61,7 @@ class PrivacyScreen extends ConsumerWidget {
         ),
         ServerKnowsSection(platform: plat),
         const PrivacyAskLlmSection(),
+        const PrivacyLlmCatSection(),
         SettingsSection(
           children: [
             SettingsSwitchRow(
@@ -263,6 +266,7 @@ class ServerKnowsSection extends ConsumerWidget {
     final t = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final askOn = ref.watch(featureFlagProvider(FeatureFlag.askLlm));
+    final catOn = ref.watch(catFeatureOfferedProvider);
     return SettingsSection(
       title: t.privacyServerTitle,
       children: [
@@ -275,6 +279,7 @@ class ServerKnowsSection extends ConsumerWidget {
         ),
         for (final k in serverAllowList(platform)) _entry(context, t, k),
         if (askOn) _bullet(c, t.privacyServerItemAskLlm),
+        if (catOn) _bullet(c, t.privacyServerItemLlmCat),
       ],
     );
   }

@@ -5,6 +5,8 @@
 // Reads state through the providers in txn_list_providers.dart only. Nothing
 // here logs; failures show a generic message (no row data).
 
+import '../../../categorization/presentation/llm_cat_queue_header.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -171,6 +173,8 @@ class _State extends ConsumerState<TransactionsListScreen> {
             ),
             _FilterBar(fmt: fmt),
             if (widget.header != null) widget.header!(context),
+            if (ref.watch(txnListFilterProvider).includeUncategorized)
+              const LlmCatQueueHeader(),
             Expanded(child: _body(context, list, fmt, sel)),
           ],
         ),
