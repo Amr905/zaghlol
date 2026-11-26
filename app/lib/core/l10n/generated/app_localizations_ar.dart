@@ -3248,6 +3248,12 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get workingBirdA11y => 'زغلول شغال على الموضوع';
+
+  @override
+  String get workingBirdFailedA11y => 'زغلول بيقولك حصلت مشكلة';
+
+  @override
   String captureRescanDone(int count, String n) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

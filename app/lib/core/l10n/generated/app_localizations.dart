@@ -4878,6 +4878,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{بدوّر…} =1{بدوّر… لقيت حركة جديدة} =2{بدوّر… لقيت حركتين جداد} few{بدوّر… لقيت {n} حركات جديدة} many{بدوّر… لقيت {n} حركة جديدة} other{بدوّر… لقيت {n} حركة جديدة}}'**
   String captureRescanRunning(int count, String n);
 
+  /// No description provided for @workingBirdA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول شغال على الموضوع'**
+  String get workingBirdA11y;
+
+  /// No description provided for @workingBirdFailedA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول بيقولك حصلت مشكلة'**
+  String get workingBirdFailedA11y;
+
   /// N · count:int, n
   ///
   /// In ar, this message translates to:
