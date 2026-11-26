@@ -13,7 +13,7 @@
 # All keys are made here at run time and go to a dart-define file outside the
 # published output; nothing is committed and nothing is printed. The fixtures
 # (ask-plan responses, sync config blocks) go in the same file because the
-# device cannot read the repo.
+# device cannot read the repo (compact JSON, base64: raw text broke the define parser).
 # Synthetic data only. The script also fails when the test log or logcat holds
 # a fixture merchant name or a question fragment (AC4: no question text in
 # logs). Inputs: DEVICE (emulator-5554), RUNNER_TEMP.
@@ -53,7 +53,7 @@ d = bytes.fromhex(priv)[-32:]
 raw = bytes.fromhex(pub)
 assert len(d) == 32 and len(raw) == 65 and raw[0] == 4
 b64u = lambda b: base64.urlsafe_b64encode(b).decode().rstrip("=")
-read = lambda p: open(os.path.join(root, p), encoding="utf-8").read()
+read = lambda p: base64.b64encode(json.dumps(json.load(open(os.path.join(root, p), encoding="utf-8")), separators=(",", ":"), ensure_ascii=True).encode()).decode()
 json.dump({
     "ZAGHLOL_API_BASE": "http://127.0.0.1:" + port,
     "ZAGHLOL_DEV_KEYS": "s0000a:%s:%s" % (b64u(raw[1:33]), b64u(raw[33:65])),

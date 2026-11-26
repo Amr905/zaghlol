@@ -33,6 +33,7 @@
 //      --flavor devSms -d <device> --no-uninstall
 //      --dart-define-from-file=<file from e2e-ask-llm-device.sh>
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -123,8 +124,8 @@ void main() {
         port: port,
         signKeyD: _signD,
         devProofKey: _devProofKey,
-        askPlanFixture: _planFixture,
-        syncConfigFixture: _configFixture,
+        askPlanFixture: utf8.decode(base64.decode(_planFixture)),
+        syncConfigFixture: utf8.decode(base64.decode(_configFixture)),
       );
       final f = fake!;
       await e.seedReturningUser(
