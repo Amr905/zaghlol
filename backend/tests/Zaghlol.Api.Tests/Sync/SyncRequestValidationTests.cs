@@ -5,6 +5,7 @@ using Zaghlol.Api.Json;
 namespace Zaghlol.Api.Tests.Sync;
 
 /// <summary>T-334: the two new BR-SYNC-03 members of <c>SyncRequest</c> (<c>configVersion</c>, <c>llmCatFeedback</c>) and the config block's wire form.</summary>
+[Collection(ApiHostGroup.Name)]
 public class SyncRequestValidationTests
 {
     private const string Item = """{"merchantNorm":"zawya coffee","verdict":"wrong","aiCategory":"dining","userCategory":"custom","source":"llm"}""";

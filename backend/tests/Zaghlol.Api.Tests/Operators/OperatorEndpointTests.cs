@@ -35,6 +35,7 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
     private const string DeleteDraft = "DELETE /admin/v1/catalog/draft/{entity}/{id}";
     private const string Publish = "POST /admin/v1/catalog/publish";
     private const string PutFlag = "PUT /admin/v1/flags/{key}";
+    private const string PutConfig = "PUT /admin/v1/config/{key}";
     private const string PutPriceOverride = "PUT /admin/v1/prices/override";
     private const string PromoteContribution = "POST /admin/v1/contributions:promote";
     private const string RejectContribution = "POST /admin/v1/contributions:reject";
@@ -43,7 +44,7 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
         [OperatorRoles.CatalogEditor, OperatorRoles.FlagsAdmin, OperatorRoles.PricesAdmin, OperatorRoles.SupportViewer, OperatorRoles.SupportAgent, OperatorRoles.SupportLead];
 
     /// <summary>Every admin operation that changes state or is audited, with a valid call. A new one fails the test below.</summary>
-    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutPriceOverride, PromoteContribution, RejectContribution, LookupKey, MoveKey, DetachKey, UnfreezeKey];
+    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutConfig, PutPriceOverride, PromoteContribution, RejectContribution, LookupKey, MoveKey, DetachKey, UnfreezeKey];
 
     [Fact]
     public async Task AValidMfaTokenWithTheRoleIsServed()
@@ -461,6 +462,8 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/catalog/publish", Token(), "{}"));
             case PutFlag:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/flags/zakah", Token(), "{\"value\":true}"));
+            case PutConfig:
+                return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/config/ask.quota_free", Token(), "{\"value\":\"5\"}"));
             case PutPriceOverride:
                 return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Put, "/admin/v1/prices/override", Token(), "{\"symbol\":\"XAU21_G\",\"currency\":\"EGP\",\"price\":\"4217.50\",\"reason\":\"Audit coverage test\"}"));
             case PromoteContribution:
