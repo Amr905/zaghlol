@@ -5,12 +5,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../core/l10n/generated/app_localizations.dart';
+import '../core/routing/app_routes.dart';
+import 'app_navigation.dart' show openImportFlow;
 import '../features/home/application/home_mascot.dart';
 import '../features/home/application/home_read_model.dart';
 import '../features/home/presentation/cards/home_cards_view.dart';
 import '../features/home/presentation/home_format.dart';
 import '../features/home/presentation/home_screen.dart' show HomeActions;
+import '../features/mascot/application/mascot_tips.dart';
 import '../features/mascot/application/payday_celebration.dart';
 import '../features/mascot/presentation/mascot_moments.dart';
 import '../features/mascot/presentation/zaghlol_avatar.dart';
@@ -34,6 +39,30 @@ class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
   // a rebuild never celebrates the same payday twice).
   bool _payday = false;
 
+  void _open(MascotTipTarget target) {
+    final a = widget.actions;
+    switch (target) {
+      case MascotTipTarget.none:
+        break;
+      case MascotTipTarget.add:
+        context.push(AppRoutes.add);
+      case MascotTipTarget.review:
+        context.push(AppRoutes.review);
+      case MascotTipTarget.transactions:
+        context.push(AppRoutes.transactions);
+      case MascotTipTarget.insights:
+        context.go(AppRoutes.insights);
+      case MascotTipTarget.ask:
+        context.go(AppRoutes.zaghlol);
+      case MascotTipTarget.budget:
+        a.openBudget?.call();
+      case MascotTipTarget.settings:
+        a.openSettings?.call();
+      case MascotTipTarget.importStatement:
+        openImportFlow(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final actions = widget.actions;
@@ -55,10 +84,34 @@ class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
       MascotOnTrack() => l.homeMascotProudOnTrack,
       null => null,
     };
+    // T-277: a tip only fills an empty slot; payday and the proud/alert
+    // lines always win.
+    final tip = (_payday || text != null)
+        ? null
+        : ref.watch(homeTipProvider).value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (_payday)
+        if (tip != null) ...[
+          ZaghlolTapBubble(
+            key: const ValueKey('home-mascot-tip'),
+            message: tip.text(l),
+            moment: switch (tip.group) {
+              MascotTipGroup.usage => ZaghlolMoment.tourGuide,
+              MascotTipGroup.smart => ZaghlolMoment.professor,
+              MascotTipGroup.habit => ZaghlolMoment.proud,
+            },
+          ),
+          if (tip.target != MascotTipTarget.none)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                key: const ValueKey('home-mascot-tip-open'),
+                onPressed: () => _open(tip.target),
+                child: Text(l.mascotTipShowMe),
+              ),
+            ),
+        ] else if (_payday)
           ZaghlolTapBubble(
             key: const ValueKey('home-mascot-payday'),
             message: l.mascotPaydayLine,

@@ -155,6 +155,16 @@ abstract final class Settings {
     max: 999999999999999,
   );
 
+  /// T-277: where Captain Zaghlol's tip rotation stands (counters only, no
+  /// personal data), as `usage.smart.habit.shown`. Unreadable text reads as
+  /// the start.
+  static final mascotTipState = SettingKey.custom<String>(
+    'mascot.tip_state',
+    byDefault: '',
+    decode: (s) => RegExp(r'^\d{1,6}(\.\d{1,6}){3}$').hasMatch(s) ? s : null,
+    encode: (v) => v,
+  );
+
   /// T-215: epoch day of the last payday Captain Zaghlol celebrated; null:
   /// never. Stops a second celebration and old salaries from celebrating.
   static final mascotPaydayCelebrated = SettingKey.optionalInteger(
