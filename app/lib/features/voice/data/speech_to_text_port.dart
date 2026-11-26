@@ -105,6 +105,9 @@ class SpeechToTextPort implements SpeechPort {
   void _onError(SpeechRecognitionError e) {
     // A "nothing heard" / timeout error before this session started listening
     // belongs to the cancelled one.
+    // Covers only the window between start() and the plugin's first
+    // 'listening' status (on Android that arrives at once, so the window is
+    // short); a stale error after that is left to the quick retry.
     if (!_heard &&
         (e.errorMsg == 'error_no_match' ||
             e.errorMsg == 'error_speech_timeout' ||
