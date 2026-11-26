@@ -18,6 +18,7 @@ import '../../../core/llm/llm_feature.dart';
 import '../../../core/llm/llm_gateway_client.dart';
 import '../../../ingestion/bundled_registry.dart';
 import '../application/llm_cat_business_templates.dart';
+import '../application/llm_cat_feedback.dart';
 import '../application/llm_cat_queue.dart';
 import 'categorizer_ports.dart';
 import 'rules_providers.dart';
@@ -85,3 +86,10 @@ final aiSuggestionApplierProvider = FutureProvider<AiSuggestionApplier>((
     newCategorizer: () => Categorizer(driftCategorizerPorts(db, rules)),
   );
 }, name: 'aiSuggestionApplierProvider');
+
+/// T-359: the Right / Wrong / Undo actions on an AI category.
+final llmCatFeedbackProvider = FutureProvider<LlmCatFeedback>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final rules = await ref.watch(rulesRepositoryProvider.future);
+  return LlmCatFeedback(db, rules);
+}, name: 'llmCatFeedbackProvider');

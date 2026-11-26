@@ -35,6 +35,7 @@ import '../../../core/db/daos/catalog_dao.dart';
 import '../../../core/db/daos/misc_daos.dart' show DiagLevel;
 import '../../../core/db/daos/outbox_dao.dart';
 import '../../../core/config/remote_config_service.dart';
+import '../../../core/flags/feature_flags.dart';
 import '../../../core/flags/flags_service.dart';
 import '../../../core/logging/diag_code.dart';
 import '../../../core/logging/diag_event.dart';
@@ -54,6 +55,13 @@ const Duration syncLeaseTtl = Duration(minutes: 5);
 
 const int maxSyncContributions = 50;
 const int maxSyncBankRequests = 10;
+const int maxSyncLlmCatFeedback = 50;
+
+/// T-359 / FU-412: whether auto-category feedback (`llmCatFeedback`,
+/// D-96) may leave the phone. Compile-time false until the PO approves the
+/// BR-SYNC-03 wording; flipping it (and adding the member to the privacy
+/// allow-list, `test/privacy/support/br_sync_03.dart`) is the whole change.
+const bool kSendLlmCatFeedback = false;
 
 /// The backend calls the sync needs (BackendClient implements them).
 abstract interface class SyncBackend {
@@ -130,6 +138,8 @@ class SyncOrchestrator {
     this._registryVersion,
     this._pauseGate,
     this._config,
+    this._llmCatFeedbackConsent,
+    this._sendLlmCatFeedback = kSendLlmCatFeedback,
   }) : _now = now ?? (() => DateTime.now().toUtc().millisecondsSinceEpoch),
        _applier = CatalogApplier(_db);
 
@@ -149,6 +159,11 @@ class SyncOrchestrator {
   /// Closed by the restore flow: no run starts and a running one is awaited.
   final IngestionPauseGate? _pauseGate;
   final CatalogApplier _applier;
+
+  /// T-359: true while the auto-category consent is on (the same consent as
+  /// the names, OQ-LCAT-04). Null means "no consent": nothing is sent.
+  final Future<bool> Function()? _llmCatFeedbackConsent;
+  final bool _sendLlmCatFeedback;
 
   Future<SyncOutcome>? _inFlight;
 
@@ -455,6 +470,8 @@ class SyncOrchestrator {
       sent.add(_Sent(r.id));
     }
 
+    final feedback = await _llmCatFeedback(dao, now, sent);
+
     final request = SyncRequest(
       catalogVersion: meta?.version ?? 0,
       flagsVersion: _flags.current.version,
@@ -464,6 +481,7 @@ class SyncOrchestrator {
       registryVersion: _registryVersion,
       contributions: contributions.isEmpty ? null : contributions,
       bankRequests: banks.isEmpty ? null : banks,
+      llmCatFeedback: feedback.isEmpty ? null : feedback,
     );
     try {
       request.toJson(); // fail before anything is sent
@@ -474,6 +492,71 @@ class SyncOrchestrator {
       throw SyncException(SyncException.badRequest);
     }
     return request;
+  }
+
+  /// T-359: up to [maxSyncLlmCatFeedback] queued Right/Wrong items, only
+  /// while the send switch, the `llm_categorise` flag and the consent are
+  /// all on; otherwise they stay in the outbox untouched.
+  Future<List<LlmCatFeedbackItem>> _llmCatFeedback(
+    OutboxDao dao,
+    int now,
+    List<_Sent> sent,
+  ) async {
+    if (!_sendLlmCatFeedback ||
+        !_flags.isOn(FeatureFlag.llmCategorise) ||
+        !await (_llmCatFeedbackConsent?.call() ?? Future.value(false))) {
+      return const [];
+    }
+    const keys = {
+      'merchantNorm',
+      'verdict',
+      'aiCategory',
+      'userCategory',
+      'source',
+    };
+    final out = <LlmCatFeedbackItem>[];
+    final rows =
+        [
+          ...await dao.due(now: now, kind: OutboxKind.llmCatConfirmation),
+          ...await dao.due(now: now, kind: OutboxKind.llmCatCorrection),
+        ]..sort(
+          (a, b) => a.createdAt != b.createdAt
+              ? a.createdAt.compareTo(b.createdAt)
+              : a.id.compareTo(b.id),
+        );
+    for (final r in rows) {
+      if (out.length >= maxSyncLlmCatFeedback) break;
+      final m = _payload(r.payload, keys);
+      final verdict = switch (m?['verdict']) {
+        'right' => LlmCatFeedbackItemVerdict.right,
+        'wrong' => LlmCatFeedbackItemVerdict.wrong,
+        _ => null,
+      };
+      final source = switch (m?['source']) {
+        'llm' => LlmCatFeedbackItemSource.llm,
+        'cache' => LlmCatFeedbackItemSource.cache,
+        'catalog' => LlmCatFeedbackItemSource.catalog,
+        _ => null,
+      };
+      if (m == null || verdict == null || source == null) {
+        await dao.deleteIds([r.id]); // never sendable
+        continue;
+      }
+      final item = LlmCatFeedbackItem(
+        merchantNorm: m['merchantNorm']!,
+        verdict: verdict,
+        aiCategory: m['aiCategory']!,
+        userCategory: m['userCategory']!,
+        source: source,
+      );
+      if (!_valid(item.toJson)) {
+        await dao.deleteIds([r.id]); // only this row is bad
+        continue;
+      }
+      out.add(item);
+      sent.add(_Sent(r.id));
+    }
+    return out;
   }
 
   static bool _valid(void Function() check) {
