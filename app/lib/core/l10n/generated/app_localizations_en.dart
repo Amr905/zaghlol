@@ -8286,6 +8286,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPrefsHideAmounts => 'Hide amounts in the app';
 
   @override
+  String get settingsPrefsHaptics => 'Vibration';
+
+  @override
   String get settingsPrefsHideAmountsHint =>
       'Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.';
 

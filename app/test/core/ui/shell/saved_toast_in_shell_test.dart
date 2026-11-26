@@ -9,10 +9,10 @@ import 'shell_harness.dart';
 void main() {
   // Batch 83 major: the toast must sit above the bar and the raised Add circle.
   for (final locale in const [Locale('ar', 'EG'), Locale('en')]) {
-    testWidgets(
-      'Saved toast clears the bar and Add button (${locale.languageCode})',
-      (tester) async {
-        await pumpShell(tester, locale: locale);
+    for (final scale in const [1.0, 1.3]) {
+      testWidgets('Saved toast clears the bar and Add button '
+          '(${locale.languageCode}, ${scale}x)', (tester) async {
+        await pumpShell(tester, locale: locale, textScale: scale);
         final ctx = tester.element(find.byType(ZBottomBar));
         showSavedToast(ScaffoldMessenger.of(ctx), AppLocalizations.of(ctx));
         await tester.pump();
@@ -30,7 +30,7 @@ void main() {
         expect(toast.overlaps(add), isFalse);
         expect(toast.overlaps(bar), isFalse);
         expect(toast.bottom, lessThanOrEqualTo(add.top));
-      },
-    );
+      });
+    }
   }
 }

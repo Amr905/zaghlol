@@ -51,6 +51,7 @@ final setupProgressProvider = settingProvider(Settings.setupProgress);
 final moneyGroupByTypeProvider = settingProvider(Settings.moneyGroupByType);
 
 /// The raw `hide_amounts.app` setting (D-67).
+final hapticsEnabledProvider = settingProvider(Settings.hapticsEnabled);
 final hideAmountsAppProvider = settingProvider(Settings.hideAmountsApp);
 
 /// Whether amounts are hidden now. Fails closed: while the setting loads or
