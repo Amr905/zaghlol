@@ -23,6 +23,12 @@ final speechPortProvider = Provider<SpeechPort>(
   name: 'speechPortProvider',
 );
 
+/// Monotonic time source for the quick-end check (T-275); faked in tests.
+final voiceMonotonicProvider = Provider<Duration Function()>((ref) {
+  final sw = Stopwatch()..start();
+  return () => sw.elapsed;
+}, name: 'voiceMonotonicProvider');
+
 /// Turns a transcript into editable drafts (parser T-109/T-119 plus the
 /// shared categorizer). Faked in widget tests.
 abstract interface class VoiceInterpreter {
