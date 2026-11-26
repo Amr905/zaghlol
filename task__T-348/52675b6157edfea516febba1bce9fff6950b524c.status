@@ -1,1 +1,1 @@
-﻿RUNNING sha=52675b6157edfea516febba1bce9fff6950b524c
+﻿FAIL sha=52675b6157edfea516febba1bce9fff6950b524c pipeline=quick docker-not-running=1
