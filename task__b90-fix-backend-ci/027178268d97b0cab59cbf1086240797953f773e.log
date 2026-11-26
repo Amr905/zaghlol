@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=027178268d97b0cab59cbf1086240797953f773e
+SKIP sha=027178268d97b0cab59cbf1086240797953f773e no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/b90-fix-backend-ci 027178268d97b0cab59cbf1086240797953f773e 2026-11-26T21:55:11.7935269+02:00
+
+
+
