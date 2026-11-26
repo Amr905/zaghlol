@@ -48,7 +48,7 @@ internal static class LlmFixtures
 
     public static LlmProviderOptions OpenAi(string baseUrl, int attemptMs = 8000) => new(
         "openai-test", LlmProviderKind.OpenAiResponses, "model-from-config", new Uri(baseUrl), null,
-        TimeSpan.FromMilliseconds(attemptMs), 0.10m, 0.01m, 0.50m, null);
+        TimeSpan.FromMilliseconds(attemptMs), 0.10m, 0.01m, 0.50m);
 
     public static LlmCallGuard Guard(TimeProvider? clock = null, LlmGuardOptions? options = null, ILogger? logger = null) =>
         new("openai-test", options ?? LlmGuardOptions.Default, clock ?? TimeProvider.System, logger ?? NullLogger.Instance);

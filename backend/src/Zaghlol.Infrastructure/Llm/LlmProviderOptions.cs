@@ -8,7 +8,6 @@ namespace Zaghlol.Infrastructure.Llm;
 public enum LlmProviderKind
 {
     OpenAiResponses,
-    Fake,
 }
 
 /// <summary>
@@ -24,8 +23,7 @@ public sealed record LlmProviderOptions(
     TimeSpan AttemptTimeout,
     decimal PriceInPerMTok,
     decimal PriceCachedPerMTok,
-    decimal PriceOutPerMTok,
-    string? FixturePath)
+    decimal PriceOutPerMTok)
 {
     public const string SectionName = "Llm";
     public const string ActiveKey = "Llm:ActiveProvider";
@@ -50,18 +48,14 @@ public sealed record LlmProviderOptions(
             throw new LlmConfigurationException($"Llm:Providers:{id}:Model is required.");
         }
 
-        Uri? endpoint = null;
-        if (kind != LlmProviderKind.Fake)
+        if (!Uri.TryCreate(section["Endpoint"], UriKind.Absolute, out var endpoint) || endpoint.Scheme is not ("https" or "http"))
         {
-            if (!Uri.TryCreate(section["Endpoint"], UriKind.Absolute, out endpoint) || endpoint.Scheme is not ("https" or "http"))
-            {
-                throw new LlmConfigurationException($"Llm:Providers:{id}:Endpoint must be an absolute http(s) URL.");
-            }
+            throw new LlmConfigurationException($"Llm:Providers:{id}:Endpoint must be an absolute http(s) URL.");
+        }
 
-            if (!string.IsNullOrEmpty(endpoint.UserInfo) || !string.IsNullOrEmpty(endpoint.Query))
-            {
-                throw new LlmConfigurationException($"Llm:Providers:{id}:Endpoint must not carry credentials or a query.");
-            }
+        if (!string.IsNullOrEmpty(endpoint.UserInfo) || !string.IsNullOrEmpty(endpoint.Query))
+        {
+            throw new LlmConfigurationException($"Llm:Providers:{id}:Endpoint must not carry credentials or a query.");
         }
 
         var timeoutMs = section["TimeoutMs"] is { Length: > 0 } t
@@ -81,8 +75,7 @@ public sealed record LlmProviderOptions(
             TimeSpan.FromMilliseconds(timeoutMs),
             Price(section, id, "PriceInPerMTok"),
             Price(section, id, "PriceCachedPerMTok"),
-            Price(section, id, "PriceOutPerMTok"),
-            section["FixturePath"]);
+            Price(section, id, "PriceOutPerMTok"));
     }
 
     private static int ParseInt(string value, string id, string name) =>

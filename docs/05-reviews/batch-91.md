@@ -210,3 +210,7 @@ Note: `origin/batch/2026-11-26-91` currently points at 33ad5383, which does not 
 **Phone plain-name scope: OK.** Backend checks `t.text`; phone checks every string of `p` and `t.text`; both pass the two new vectors. `expect.templateReason` is ignored by the Dart vector runner (it only checks `rejected` for `accept`), harmless; the phone's own unit test asserts `TEMPLATE_PLAIN_NAME` (plan_validator_test.dart:262).
 
 Verdicts: T-330 APPROVED, T-332 APPROVED.
+
+## CI fix — fake provider
+
+`TestSupportExclusionTests` rightly flagged `FakeLlmProvider` and `FakeReply` in `Zaghlol.Infrastructure`. Both moved to `backend/tests/Shared/FakeLlmProvider.cs` (namespace `Zaghlol.Testing`, linked into `Zaghlol.Infrastructure.Tests`, like `FakeKms`). The `Fake` provider kind and `FixturePath` option are gone from production, so config can't select a fake and the startup guard for it is no longer needed. AC5's test is now `AFakeProviderKindCannotBeSelectedInAnyEnvironment`. The guard is unchanged. T-332.md and ask-llm.md note that the T-350/T-351 harness links the shared file. Local: build `-warnaserror` and `format` clean, TestSupportExclusion 6/6, Llm tests green except Docker-only ones.

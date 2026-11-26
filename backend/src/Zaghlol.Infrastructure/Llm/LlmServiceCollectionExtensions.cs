@@ -34,11 +34,6 @@ public static class LlmServiceCollectionExtensions
                 case LlmProviderKind.OpenAiResponses:
                     AddOpenAi(services, options);
                     break;
-                case LlmProviderKind.Fake:
-                    services.AddSingleton<ILlmProvider>(_ => options.FixturePath is { Length: > 0 } path
-                        ? FakeLlmProvider.FromFixture(options.Id, path)
-                        : new FakeLlmProvider(options.Id, []));
-                    break;
             }
         }
 
@@ -77,7 +72,7 @@ public static class LlmServiceCollectionExtensions
 internal sealed record LlmRegisteredProviders(IReadOnlyList<LlmProviderOptions> Providers);
 
 /// <summary>
-/// Fails the start when the fake provider is configured outside Development and Testing, when the active provider is not one of the
+/// Fails the start when the active provider is not one of the
 /// configured ones, or (outside Development and Testing) when an endpoint isn't https. The fake can never serve users.
 /// </summary>
 internal sealed class LlmStartupCheck(LlmRegisteredProviders registered, IActiveLlmProviderId active, IHostEnvironment environment) : IHostedService
@@ -87,11 +82,6 @@ internal sealed class LlmStartupCheck(LlmRegisteredProviders registered, IActive
         var relaxed = environment.IsDevelopment() || environment.IsEnvironment("Testing");
         foreach (var p in registered.Providers)
         {
-            if (!relaxed && p.Kind == LlmProviderKind.Fake)
-            {
-                throw new LlmConfigurationException("The fake LLM provider may only be configured in Development and Testing.");
-            }
-
             if (!relaxed && p.Endpoint is { } endpoint && endpoint.Scheme != "https")
             {
                 throw new LlmConfigurationException("LLM provider endpoints must be https outside Development and Testing.");
