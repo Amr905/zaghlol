@@ -1,5 +1,1639 @@
 ﻿== SUMMARY ==
-RUNNING sha=8cffdd6d4c818f3624bb8face47ef4c6bfa5abb1
+FAIL sha=8cffdd6d4c818f3624bb8face47ef4c6bfa5abb1 pipeline=quick-app pub-get=0 format=0 analyze=1 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=1 apk-devNoSms=1
+pub-get                      PASS  exit=0  8s
+format                       PASS  exit=0  59s
+analyze                      FAIL  exit=1  426s
+lints                        PASS  exit=0  66s
+app-test                     FAIL  exit=1  5s
+dart-test-zaghlol_catalog    PASS  exit=0  5s
+dart-test-zaghlol_domain     PASS  exit=0  7s
+dart-test-zaghlol_parsing    FAIL  exit=1  22s
+apk-devNoSms                 FAIL  exit=1  135s
+
+== ERRORS: analyze ==
+  error • 'SubscriptionCost' isn't a function. Try correcting the name to match an existing function, or define a method or function named 'SubscriptionCost' • app/lib/features/insights/data/chart_repository.dart:995:15 • invocation_of_non_function
+  error • The name 'SubscriptionCost' is defined in the libraries 'package:zaghlol/features/insights/domain/chart_models.dart' and 'package:zaghlol_domain/ask/savings_suggest.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/lib/features/insights/data/chart_repository.dart:995:15 • ambiguous_import
+  error • The property 'annual' can't be unconditionally accessed because the receiver can be 'null'. Try making the access conditional (using '?.') or adding a null check to the target ('!') • app/lib/features/insights/data/chart_repository.dart:1006:25 • unchecked_use_of_nullable_value
+  error • The property 'annual' can't be unconditionally accessed because the receiver can be 'null'. Try making the access conditional (using '?.') or adding a null check to the target ('!') • app/lib/features/insights/data/chart_repository.dart:1006:50 • unchecked_use_of_nullable_value
+  error • The property 'itemId' can't be unconditionally accessed because the receiver can be 'null'. Try making the access conditional (using '?.') or adding a null check to the target ('!') • app/lib/features/insights/data/chart_repository.dart:1007:35 • unchecked_use_of_nullable_value
+  error • The property 'itemId' can't be unconditionally accessed because the receiver can be 'null'. Try making the access conditional (using '?.') or adding a null check to the target ('!') • app/lib/features/insights/data/chart_repository.dart:1007:54 • unchecked_use_of_nullable_value
+  error • The returned type 'double' isn't returnable from a 'int' function, as required by the closure's context • app/lib/features/insights/data/chart_repository.dart:1012:56 • return_of_invalid_type_from_closure
+  error • The property 'annual' can't be unconditionally accessed because the receiver can be 'null'. Try making the access conditional (using '?.') or adding a null check to the target ('!') • app/lib/features/insights/data/chart_repository.dart:1012:62 • unchecked_use_of_nullable_value
+  error • 'FxQuote' isn't a function. Try correcting the name to match an existing function, or define a method or function named 'FxQuote' • app/lib/features/wealth/data/prices_repository.dart:190:7 • invocation_of_non_function
+  error • The name 'FxQuote' is defined in the libraries 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/lib/features/wealth/data/prices_repository.dart:190:7 • ambiguous_import
+  error • The name 'SubscriptionCost' is defined in the libraries 'package:zaghlol/features/insights/domain/chart_models.dart' and 'package:zaghlol_domain/ask/savings_suggest.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/insights/domain/explanations_test.dart:578:5 • ambiguous_import
+  error • 'SubscriptionCost' isn't a function. Try correcting the name to match an existing function, or define a method or function named 'SubscriptionCost' • app/test/features/insights/domain/explanations_test.dart:578:51 • invocation_of_non_function
+  error • The name 'SubscriptionCost' is defined in the libraries 'package:zaghlol/features/insights/domain/chart_models.dart' and 'package:zaghlol_domain/ask/savings_suggest.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/insights/domain/explanations_test.dart:578:51 • ambiguous_import
+  error • 'SubscriptionCost' isn't a function. Try correcting the name to match an existing function, or define a method or function named 'SubscriptionCost' • app/test/features/insights/domain/explanations_test.dart:879:17 • invocation_of_non_function
+  error • The name 'SubscriptionCost' is defined in the libraries 'package:zaghlol/features/insights/domain/chart_models.dart' and 'package:zaghlol_domain/ask/savings_suggest.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/insights/domain/explanations_test.dart:879:17 • ambiguous_import
+  error • 'SubscriptionCost' isn't a function. Try correcting the name to match an existing function, or define a method or function named 'SubscriptionCost' • app/test/features/insights/presentation/charts/charts_test_support.dart:239:5 • invocation_of_non_function
+  error • The name 'SubscriptionCost' is defined in the libraries 'package:zaghlol/features/insights/domain/chart_models.dart' and 'package:zaghlol_domain/ask/savings_suggest.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/insights/presentation/charts/charts_test_support.dart:239:5 • ambiguous_import
+  error • The name 'FxQuote' is defined in the libraries 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/wealth/domain/approx_view_test.dart:22:1 • ambiguous_import
+  error • 'FxQuote' isn't a function. Try correcting the name to match an existing function, or define a method or function named 'FxQuote' • app/test/features/wealth/domain/approx_view_test.dart:23:5 • invocation_of_non_function
+  error • The name 'FxQuote' is defined in the libraries 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/wealth/domain/approx_view_test.dart:23:5 • ambiguous_import
+  error • The name 'FxQuote' is defined in the libraries 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/wealth/domain/approx_view_test.dart:31:8 • ambiguous_import
+  error • The name 'FxQuote' is defined in the libraries 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/wealth/domain/price_feed_test.dart:50:1 • ambiguous_import
+  error • 'FxQuote' isn't a function. Try correcting the name to match an existing function, or define a method or function named 'FxQuote' • app/test/features/wealth/domain/price_feed_test.dart:51:5 • invocation_of_non_function
+  error • The name 'FxQuote' is defined in the libraries 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart (via package:zaghlol_domain/zaghlol_domain.dart)'. Try using 'as prefix' for one of the import directives, or hiding the name from all but one of the imports • app/test/features/wealth/domain/price_feed_test.dart:51:5 • ambiguous_import
+24 issues found. (ran in 421.6s)
+
+== ERRORS: app-test ==
+Unhandled exception:
+System not configured correctly: No compiler configured on host 'linux_x64' with target 'linux_x64'.
+#0      CompilerResolver.resolveCompiler (package:native_toolchain_c/src/cbuilder/compiler_resolver.dart:70:5)
+<asynchronous suspension>
+#1      RunCBuilder.compiler (package:native_toolchain_c/src/cbuilder/run_cbuilder.dart:106:44)
+<asynchronous suspension>
+#2      RunCBuilder.run (package:native_toolchain_c/src/cbuilder/run_cbuilder.dart:139:27)
+<asynchronous suspension>
+#3      CBuilder.run (package:native_toolchain_c/src/cbuilder/cbuilder.dart:237:5)
+<asynchronous suspension>
+#4      main.<anonymous closure> (file:///pubcache/hosted/pub.dev/pdfium_dart-0.4.3/hook/build.dart:20:5)
+<asynchronous suspension>
+#5      build (package:hooks/src/api/build_and_link.dart:250:5)
+<asynchronous suspension>
+#6      main (file:///pubcache/hosted/pub.dev/pdfium_dart-0.4.3/hook/build.dart:14:3)
+<asynchronous suspension>
+
+  stdout:
+  Running `which clang`.
+Running `which vswhere.exe`.
+You can install the missing package via
+
+
+Building native assets failed. See the logs for more details.
+
+
+== ERRORS: dart-test-zaghlol_parsing ==
+00:03 +1107 -1: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed) [E]
+  Expected: a value less than <140>
+    Actual: <485.98775>
+     Which: is not a value less than <140>
+  budget is 140 us
+  
+  package:matcher                              expect
+  test/generic/generic_parser_test.dart 521:7  main.<fn>.<fn>
+  
+Retry: safety benchmark: mean generic parse time (printed)
+00:04 +1108 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+
+00:05 +1177 -1: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed) [E]
+  Expected: a value less than <140>
+    Actual: <351.61825>
+     Which: is not a value less than <140>
+  budget is 140 us
+  
+  package:matcher                              expect
+  test/generic/generic_parser_test.dart 521:7  main.<fn>.<fn>
+  
+00:05 +1178 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1179 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+
+00:11 +1800 -2: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3) [E]
+  Expected: a value less than <170>
+    Actual: <256.4105>
+     Which: is not a value less than <170>
+  mean 256 us
+  
+  package:matcher                                 expect
+  test/pipeline/parsing_pipeline_test.dart 946:5  main.<fn>
+  
+Retry: benchmark: mean parse time is under 2 ms (AC 3)
+00:12 +1801 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+
+00:12 +1813 -2: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3) [E]
+  Expected: a value less than <170>
+    Actual: <174.60125>
+     Which: is not a value less than <170>
+  mean 175 us
+  
+  package:matcher                                 expect
+  test/pipeline/parsing_pipeline_test.dart 946:5  main.<fn>
+  
+00:12 +1814 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1815 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+
+
+== ERRORS: apk-devNoSms ==
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDevNoSmsDebug'.
+> Process 'command '/opt/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2m 10s
+[=========                              ] 25%                                   
+Running Gradle task 'assembleDevNoSmsDebug'...                    131.5s
+Gradle task assembleDevNoSmsDebug failed with exit code 1
+
+
+lib/features/wealth/data/prices_repository.dart:190:7: Error: 'FxQuote' is imported from both 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart'.
+lib/features/insights/data/chart_repository.dart:995:15: Error: 'SubscriptionCost' is imported from both 'package:zaghlol/features/insights/domain/chart_models.dart' and 'package:zaghlol_domain/ask/savings_suggest.dart'.
+lib/features/insights/data/chart_repository.dart:1012:58: Error: A value of type 'num' can't be returned from a function with return type 'int'.
+lib/features/insights/data/chart_repository.dart:1011:18: Error: The argument type 'List<dynamic>' can't be assigned to the parameter type 'List<SubscriptionCost>'.
 
 == FULL LOG (last 1500 lines) ==
-auto task/T-327 8cffdd6d4c818f3624bb8face47ef4c6bfa5abb1 2026-11-26T17:28:20.6368425+02:00
+00:02 +501: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +502: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +503: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +504: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +505: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +506: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +507: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +508: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +509: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +510: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +511: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +512: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +513: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +514: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +515: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +516: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +517: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +518: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +519: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +520: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +521: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +522: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +523: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +524: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +525: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +526: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +527: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +528: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +529: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +530: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +531: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +532: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +533: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +534: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +535: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +536: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +537: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +538: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +539: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +540: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +541: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +542: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +543: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +544: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +545: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +546: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +547: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +548: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +549: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +550: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +551: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +552: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +553: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +554: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +555: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +556: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +557: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +558: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +559: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +560: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +561: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +562: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +563: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +564: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +565: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +566: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +567: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +568: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +569: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +570: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +571: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +572: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +573: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +574: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +575: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +576: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +577: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +578: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +579: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +580: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +581: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +582: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +583: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +584: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +585: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +586: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +587: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +588: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +589: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +590: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +591: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +592: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +593: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +594: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +595: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +596: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +597: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +598: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +599: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +600: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +601: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +602: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +603: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +604: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +605: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +606: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +607: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +608: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +609: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +610: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +611: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +612: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +613: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +614: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +615: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +616: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +617: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +618: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +619: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +620: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +621: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +622: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +623: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +624: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +625: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +626: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +627: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +628: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +629: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +630: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +631: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +632: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +633: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +634: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +635: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +636: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +637: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +638: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +639: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +640: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +641: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +642: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +643: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +644: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +645: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +646: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +647: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +648: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +649: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +650: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +651: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +652: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +653: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +654: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +655: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +656: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +657: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +658: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +659: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +660: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +661: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +662: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +663: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +664: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +665: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +666: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +667: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +668: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +669: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +670: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +671: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +672: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +673: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +674: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +675: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +676: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +677: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +678: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +679: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +680: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +681: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +682: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +683: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +684: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +685: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +686: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +687: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +688: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +689: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +690: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +691: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +692: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +693: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +694: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +695: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +696: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +697: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +698: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +699: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +700: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +701: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +702: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +703: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +704: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +705: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +706: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +707: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +708: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +709: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +710: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +711: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +712: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +713: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +714: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +715: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +716: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +717: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +718: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +719: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +720: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +721: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +722: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +723: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +724: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +725: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +726: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +727: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +728: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +729: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +730: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +731: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +732: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +733: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +734: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +735: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +736: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +737: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +738: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +739: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +740: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +741: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +742: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +743: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +744: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +745: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +746: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +747: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +748: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +749: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +750: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +751: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +752: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +753: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +754: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +755: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +756: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +757: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +758: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +759: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +760: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +761: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +762: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +763: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +764: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +765: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +766: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +767: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +768: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +769: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +770: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +771: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +772: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +773: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +774: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +775: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +776: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +777: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +778: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +779: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +780: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +781: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +782: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +783: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +784: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +785: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +786: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +787: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +788: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +789: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +790: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +791: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +792: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +793: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +794: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +795: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +796: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +797: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +798: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +799: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +800: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +801: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +802: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +803: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +804: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +805: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +806: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +807: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +808: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +809: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +810: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +811: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +812: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +813: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +814: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +815: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +816: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +817: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +818: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +819: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +820: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +821: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +822: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +823: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +824: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +825: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +826: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +827: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +828: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +829: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +830: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +831: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +832: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +833: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +834: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +835: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +836: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +837: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +838: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +839: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +840: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +841: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +842: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +843: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +844: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +845: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +846: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +847: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +848: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +849: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +850: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +851: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +852: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +853: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +854: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +855: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +856: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +857: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +858: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +859: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +860: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +861: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +862: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +863: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +864: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +865: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +866: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +867: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +868: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +869: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +870: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +871: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +872: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +873: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +874: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +875: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +876: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +877: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +878: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +879: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +880: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +881: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +882: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +883: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +884: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +885: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +886: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +887: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +888: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +889: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +890: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +891: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +892: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:02 +893: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +894: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +895: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +896: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +897: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +898: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +899: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +900: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +901: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +902: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +903: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +904: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +905: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +906: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +907: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +908: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +909: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +910: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +911: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +912: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +913: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +914: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +915: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +916: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +917: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +918: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +919: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +920: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +921: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +922: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +923: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +924: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +925: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +926: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +927: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +928: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +929: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +930: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +931: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +932: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +933: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +934: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +935: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +936: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +937: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +938: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +939: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +940: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +941: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +942: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +943: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +944: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +945: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +946: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +947: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +948: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +949: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +950: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +951: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +952: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +953: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +954: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +955: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +956: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +957: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +958: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +959: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +960: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +961: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +962: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +963: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +964: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +965: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +966: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +967: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +968: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +969: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +970: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +971: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +972: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +973: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +974: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +975: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +976: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +977: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +978: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +979: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +980: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +981: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +982: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +983: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +984: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +985: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +986: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +987: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +988: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +989: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +990: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +991: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +992: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +993: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +994: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +995: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +996: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +997: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +998: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +999: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1000: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1001: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1002: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1003: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1004: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1005: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1006: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1007: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1008: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1009: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1010: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1011: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1012: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1013: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1014: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1015: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1016: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1017: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1018: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1019: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1020: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1021: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1022: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1023: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1024: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1025: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1026: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1027: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1028: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1029: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1030: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1031: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1032: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1033: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1034: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1035: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1036: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1037: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1038: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1039: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1040: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1041: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1042: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1043: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1044: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1045: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1046: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1047: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1048: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1049: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1050: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1051: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1052: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1053: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1054: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1055: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1056: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1057: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1058: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1059: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1060: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1061: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1062: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1063: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1064: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1065: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1066: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1067: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1068: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1069: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1070: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1071: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1072: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1073: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1074: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1075: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1076: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1077: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1078: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1079: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1080: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1081: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1082: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1083: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1084: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1085: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1086: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1087: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1088: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1089: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1090: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1091: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1092: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1093: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1094: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1095: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1096: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1097: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1098: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1099: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1100: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1101: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1102: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1103: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1104: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+generic parse mean: 486 us over 4000 runs
+00:03 +1105: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1106: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+00:03 +1106 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:03 +1107 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:03 +1107 -1: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed) [E]
+  Expected: a value less than <140>
+    Actual: <485.98775>
+     Which: is not a value less than <140>
+  budget is 140 us
+  
+  package:matcher                              expect
+  test/generic/generic_parser_test.dart 521:7  main.<fn>.<fn>
+  
+Retry: safety benchmark: mean generic parse time (printed)
+00:04 +1108 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1109 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1110 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1111 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1112 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1113 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1114 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1115 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1116 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1117 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1118 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1119 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1119 -1: test/generic/generic_fuzzy_corpus_test.dart: per-field precision and recall, tuning set (printed)
+generic fuzzy corpus, tuning set (78 messages)
+field      precision  recall   tp  fp  fn
+amount        100.0%  100.0%   78   0   0
+currency      100.0%  100.0%   78   0   0
+direction     100.0%  100.0%   77   0   0
+event         100.0%   98.3%   58   0   1  misses: alex_en
+last4         100.0%  100.0%   69   0   0
+merchant      100.0%   91.2%   52   0   5  misses: hsbc_ref, ipa_in_en, ar_ipa_in, imp_ipa_in_ar, imp_ipa_in_en
+date          100.0%  100.0%   32   0   0
+ref           100.0%  100.0%   11   0   0
+
+00:04 +1120 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1121 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1122 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1123 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1124 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1124 -1: test/generic/generic_fuzzy_corpus_test.dart: per-field precision and recall, hold-out set (printed)
+generic fuzzy corpus, hold-out set (20 messages)
+field      precision  recall   tp  fp  fn
+amount        100.0%  100.0%   20   0   0
+currency      100.0%  100.0%   20   0   0
+direction     100.0%  100.0%   20   0   0
+event          92.3%  100.0%   12   1   0  misses: ho_dear_customer
+last4         100.0%  100.0%   17   0   0
+merchant      100.0%   84.6%   11   0   2  misses: ho_credit_acct, ho_ar_transfer_in
+date          100.0%  100.0%   11   0   0
+ref           100.0%  100.0%    1   0   0
+
+00:04 +1125 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1126 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1127 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1128 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1129 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1130 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1131 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1132 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1133 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1134 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1135 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1136 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1137 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1138 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1139 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1140 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1141 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1142 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1143 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1144 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1145 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1146 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1147 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1148 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1149 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1150 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:04 +1151 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1152 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1153 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1154 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1155 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1156 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1157 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1158 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1159 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1160 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1161 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1162 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1163 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1164 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1165 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1166 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1167 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1168 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1169 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1170 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1171 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1172 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1173 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1174 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1175 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1176 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1177 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1177 -1: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+generic parse mean: 352 us over 4000 runs
+00:05 +1177 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1177 -1: test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed) [E]
+  Expected: a value less than <140>
+    Actual: <351.61825>
+     Which: is not a value less than <140>
+  budget is 140 us
+  
+  package:matcher                              expect
+  test/generic/generic_parser_test.dart 521:7  main.<fn>.<fn>
+  
+00:05 +1178 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1179 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1180 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1181 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1182 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1183 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1184 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1185 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1186 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1187 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1188 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1189 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1190 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1191 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1192 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1193 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1194 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1195 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1196 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1197 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1198 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1199 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1200 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1201 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1202 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1203 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1204 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:05 +1205 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1206 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1207 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1208 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1209 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1210 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1211 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1212 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1213 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1214 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1215 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1216 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1217 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1218 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1219 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1220 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1221 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1222 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1223 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1224 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1225 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1226 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1227 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1228 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1229 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1230 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1231 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1232 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1233 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1234 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1235 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1236 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1237 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1238 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1239 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1240 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1241 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1242 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1243 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1244 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1245 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1246 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1247 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1248 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1249 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1250 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1251 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1252 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1253 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1254 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1255 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1256 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1257 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1258 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1259 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1260 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1261 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1262 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1263 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1264 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:06 +1265 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1266 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1267 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1268 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1269 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1270 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1271 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1272 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1273 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1274 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1275 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1276 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1277 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1278 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1279 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1280 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1281 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1282 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1283 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1284 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1285 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1286 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1287 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1288 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1289 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1290 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1291 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1292 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1293 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1294 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1295 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1296 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1297 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1298 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1299 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1300 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1301 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1302 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1303 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1304 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1305 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1306 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1307 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1308 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1309 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1310 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1311 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1312 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1313 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1314 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1315 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1316 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1317 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1318 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1319 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1320 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1321 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1322 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1323 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1324 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1325 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1326 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1327 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1328 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1329 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1330 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1331 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1332 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1333 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1334 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1335 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1336 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1337 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1338 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1339 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1340 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1341 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1342 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1343 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1344 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1345 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1346 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1347 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1348 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1349 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1350 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1351 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1352 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1353 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1354 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1355 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1356 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1357 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1358 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1359 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1360 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1361 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1362 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1363 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1364 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1365 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1366 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1367 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1368 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1369 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1370 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1371 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1372 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1373 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1374 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1375 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1376 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1377 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1378 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1379 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1380 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1381 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1382 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1383 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1384 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1385 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1386 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1387 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1388 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1389 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1390 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1391 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1392 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1393 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1394 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1395 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1396 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1397 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1398 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1399 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1400 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1401 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1402 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1403 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1404 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1405 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1406 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1407 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1408 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1409 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1410 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1411 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1412 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1413 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1414 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1415 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1416 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1417 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1418 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1419 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1420 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1421 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1422 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1423 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1424 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1425 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1426 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:07 +1427 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1428 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1429 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1430 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1431 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1432 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1433 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1434 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1435 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1436 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1437 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1438 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1439 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1440 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1441 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1442 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1443 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1444 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1445 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1446 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1447 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1448 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1449 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1450 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1451 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1452 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1453 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1454 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1455 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1456 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1456 -1: test/po_suite/po_suite_test.dart: (tearDownAll)
+po_suite: 12/12 pass, 0 pending
+00:08 +1456 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1457 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1458 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1459 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1460 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1461 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1462 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1463 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1464 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1465 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1466 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1467 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1468 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1469 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1470 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1471 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1472 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1473 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1474 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1475 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1476 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1477 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1478 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1479 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1480 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1481 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1482 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1483 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1484 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1485 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1486 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1487 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1488 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1489 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1490 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1491 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1492 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1493 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1494 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1495 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1496 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1497 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1498 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1499 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1500 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1501 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1502 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1503 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1504 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1505 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1506 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1507 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1508 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1509 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1510 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1511 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1512 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1513 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1514 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1515 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1516 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1517 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1518 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1519 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1520 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1521 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1522 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1523 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1524 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1525 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1526 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1527 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1528 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1529 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1530 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1531 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1532 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:08 +1533 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1534 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1535 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1536 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1537 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1538 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1539 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1540 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1541 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1542 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1543 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1544 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1545 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1546 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1547 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1548 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1549 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1550 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1551 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1552 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1553 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1554 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1555 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1556 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1557 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1558 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1559 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1560 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1561 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1562 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1563 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1564 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1565 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1566 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1567 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1568 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1569 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1570 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1571 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1572 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1573 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1574 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1575 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1576 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1577 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1578 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1579 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1580 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1581 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1582 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1583 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1584 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1585 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1586 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1587 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1588 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1589 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1590 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1591 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1592 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1593 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1594 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1595 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1596 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1597 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1598 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1599 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1600 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1601 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1602 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1603 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1604 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1605 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1606 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1607 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1608 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1609 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1610 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1611 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1612 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1613 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1614 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1615 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1616 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1617 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1618 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1619 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1620 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1621 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1622 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1623 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1624 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1625 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1626 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1627 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1628 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1629 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1630 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1631 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1632 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1633 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1634 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1635 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1636 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1637 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1638 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1639 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1640 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1641 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1642 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1643 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1644 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1645 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1646 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1647 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1648 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1649 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1650 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1651 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1652 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1653 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1654 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1655 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1656 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1657 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1658 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1659 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1660 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1661 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1662 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1663 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1664 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1665 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1666 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1667 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1668 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1669 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1670 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1671 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1672 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1673 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1674 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1675 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1676 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1677 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1678 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1679 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1680 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1681 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1682 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1683 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1684 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1685 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1686 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1687 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1688 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1689 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1690 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1691 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1692 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1693 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1694 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1695 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1696 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1697 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1698 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:09 +1699 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1700 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1701 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1702 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1703 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1704 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1705 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1706 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1707 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1708 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1709 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1710 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1711 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1712 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1713 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1714 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1715 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1716 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1717 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1718 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1719 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1720 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1721 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1722 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1723 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1724 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1725 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1726 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1727 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1728 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1729 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1730 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1731 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1732 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1733 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1734 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1735 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1736 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1737 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1738 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1739 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1740 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1741 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1742 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1743 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1744 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1745 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1746 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1747 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1748 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1749 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1750 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1751 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1752 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1753 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1754 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1755 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1756 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1757 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1758 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1759 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1760 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1761 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1762 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1763 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1764 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1765 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1766 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1767 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1768 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1769 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1770 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1771 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1772 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1773 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:10 +1774 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1774 -1: test/voice/voice_parser_test.dart: phrase fixtures (FR-VOI-02/05, EC-30, EC-31) item accuracy is at least 95% and every phrase is reported
+voice fixtures: 424/424 items (100.0%), 254 phrases; failures: []
+00:11 +1775 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1776 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1777 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1778 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1779 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1780 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1781 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1782 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1783 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1784 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1785 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1786 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1787 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1788 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1789 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1790 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1791 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1792 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1793 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1794 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1795 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1796 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1797 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1798 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1799 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1800 -1: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1800 -1: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3)
+pipeline parse mean: 256 us over 4000 runs
+00:11 +1800 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:11 +1800 -2: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3) [E]
+  Expected: a value less than <170>
+    Actual: <256.4105>
+     Which: is not a value less than <170>
+  mean 256 us
+  
+  package:matcher                                 expect
+  test/pipeline/parsing_pipeline_test.dart 946:5  main.<fn>
+  
+Retry: benchmark: mean parse time is under 2 ms (AC 3)
+00:12 +1801 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1802 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1803 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1804 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1805 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1806 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1807 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1808 -2: test/chat/llm/reference_masker_test.dart: NEGATIVE PROOF 1 (property over generated references) no throw on odd input
+00:12 +1809 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1810 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1811 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1812 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1813 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1813 -2: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3)
+pipeline parse mean: 175 us over 4000 runs
+00:12 +1813 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1813 -2: test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3) [E]
+  Expected: a value less than <170>
+    Actual: <174.60125>
+     Which: is not a value less than <170>
+  mean 175 us
+  
+  package:matcher                                 expect
+  test/pipeline/parsing_pipeline_test.dart 946:5  main.<fn>
+  
+00:12 +1814 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1815 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:12 +1816 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a stalled regex is quarantined after repeated overruns
+00:15 +1817 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a single over-budget run does not quarantine
+00:15 +1818 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a drop pattern always runs as a plain match, even if quarantined
+00:15 +1819 -2: test/registry/regex_safety_test.dart: match budget (FU-074) a fast regex is never quarantined and still matches
+00:15 +1820 -2: Some tests failed.
+
+Failing tests:
+  test/generic/generic_parser_test.dart: safety benchmark: mean generic parse time (printed)
+  test/pipeline/parsing_pipeline_test.dart: benchmark: mean parse time is under 2 ms (AC 3)
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
+
+[17:38:24] === RESULT dart-test-zaghlol_parsing exit=1 (22s)
+[17:38:24] === STEP apk-devNoSms (docker zaghlol-flutter-android:3.47.9, /work/app)
+Resolving dependencies in `/work`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  android_file_picker 2.1.6 (2.2.1 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.2 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_ui 1.1.6 (1.1.7 available)
+  dart_style 3.1.3 (3.1.14 available)
+  dbus 0.8.0 (0.8.1 available)
+  drift 2.35.3 (2.35.4 available)
+  file_picker 13.3.3 (13.4.1 available)
+  file_picker_darwin 2.5.1 (2.5.2 available)
+  file_picker_linux 2.0.4 (2.0.5 available)
+  file_picker_platform_interface 4.2.0 (4.3.0 available)
+  file_picker_web 4.2.1 (4.2.2 available)
+  hashlib 2.4.2 (2.4.4 available)
+  image_picker_ios 0.8.13+15 (0.8.13+16 available)
+  jni 1.1.2 (1.2.1 available)
+  jni_flutter 1.0.4+1 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.11.0 (1.11.1 available)
+  objective_c 9.6.3 (9.6.4 available)
+  package_config 2.2.0 (3.0.0 available)
+  pdfium_dart 0.4.3 (0.4.4 available)
+  pdfium_flutter 0.4.3 (0.4.4 available)
+  pdfrx 3.0.0 (3.1.0 available)
+  pdfrx_engine 0.9.3 (0.9.6 available)
+  pigeon 26.3.2 (30.0.4 available)
+  sqlite3 3.9.1 (3.9.2 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+Got dependencies in `/work`!
+33 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Gradle task 'assembleDevNoSmsDebug'...                  
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter, rive_native
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+Checking the license for package Android SDK Platform 35 in /opt/android-sdk/licenses
+License for package Android SDK Platform 35 accepted.
+Preparing "Install Android SDK Platform 35 (revision 2)".
+"Install Android SDK Platform 35 (revision 2)" ready.
+Installing Android SDK Platform 35 in /opt/android-sdk/platforms/android-35
+"Install Android SDK Platform 35 (revision 2)" complete.
+"Install Android SDK Platform 35 (revision 2)" finished.
+lib/features/wealth/data/prices_repository.dart:190:7: Error: 'FxQuote' is imported from both 'package:zaghlol/features/wealth/domain/price_feed.dart' and 'package:zaghlol_domain/ask/invest_illustrations.dart'.
+      FxQuote(
+      ^^^^^^^
+lib/features/insights/data/chart_repository.dart:995:15: Error: 'SubscriptionCost' is imported from both 'package:zaghlol/features/insights/domain/chart_models.dart' and 'package:zaghlol_domain/ask/savings_suggest.dart'.
+              SubscriptionCost(
+              ^^^^^^^^^^^^^^^^
+lib/features/insights/data/chart_repository.dart:1012:58: Error: A value of type 'num' can't be returned from a function with return type 'int'.
+          annualTotal: _m(items.fold<int>(0, (a, i) => a + i.annual.minor), f),
+                                                         ^
+lib/features/insights/data/chart_repository.dart:1011:18: Error: The argument type 'List<dynamic>' can't be assigned to the parameter type 'List<SubscriptionCost>'.
+ - 'List' is from 'dart:core'.
+ - 'SubscriptionCost' is from 'package:zaghlol/features/insights/domain/chart_models.dart' ('lib/features/insights/domain/chart_models.dart').
+          items: items,
+                 ^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDevNoSmsDebug'.
+> Process 'command '/opt/flutter/bin/flutter'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2m 10s
+[=========                              ] 25%                                   
+Running Gradle task 'assembleDevNoSmsDebug'...                    131.5s
+Gradle task assembleDevNoSmsDebug failed with exit code 1
+
+[17:40:39] === RESULT apk-devNoSms exit=1 (135s)
+[17:40:39] skipping apk-perms, android-unit and android-lint: apk-devNoSms failed (fix the build first)
+[17:40:39] SUMMARY FAIL sha=8cffdd6d4c818f3624bb8face47ef4c6bfa5abb1 pipeline=quick-app pub-get=0 format=0 analyze=1 lints=0 app-test=1 dart-test-zaghlol_catalog=0 dart-test-zaghlol_domain=0 dart-test-zaghlol_parsing=1 apk-devNoSms=1
