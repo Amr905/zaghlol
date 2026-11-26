@@ -2456,20 +2456,6 @@ components:
           maxItems: 10
           items:
             $ref: '#/components/schemas/BankRequestInput'
-        configVersion:
-          type: integer
-          format: int32
-          minimum: 0
-          description: Version of the remote config the app holds; the `config` block is returned only when it differs (like `flagsVersion`).
-        llmCatFeedback:
-          type: array
-          maxItems: 50
-          description: |
-            Right / Wrong verdicts on automatic categories (D-96, `llm-categorise.md` section 5). Accepted only while
-            the install's `llm_categorise` flag is on; each item is re-checked (`ContributionPrivacy`, category
-            codes), duplicates per merchant keep the first. Covered by the `llm_categorise` consent, not by D-16.
-          items:
-            $ref: '#/components/schemas/LlmCatFeedbackItem'
     LlmCatFeedbackItem:
       type: object
       description: |

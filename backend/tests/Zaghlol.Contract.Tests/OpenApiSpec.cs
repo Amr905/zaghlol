@@ -41,6 +41,17 @@ internal sealed class OpenApiSpec
 
     public JsonObject Schemas { get; }
 
+    /// <summary>
+    /// Operations the spec declares ahead of the task that maps their route (spec first, no stub endpoints). Each entry names the
+    /// task that removes it; <c>EverySpecOperationHasAMappedRoute</c> fails when a planned operation is in fact mapped, so the list
+    /// cannot go stale.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string> PlannedUnmapped = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["askPlan"] = "T-349",
+        ["categorise"] = "T-352",
+    };
+
     public static OpenApiSpec Load()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "openapi", "zaghlol-v1.yaml");

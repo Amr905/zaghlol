@@ -112,8 +112,12 @@ public partial class ModelTests
         var objects = Model.GetEntityTypes().Select(e => e.GetTableName() ?? e.GetViewName()!).ToHashSet(StringComparer.Ordinal);
         var readable = GrantMatrix.Current.Where(g => g.Role == GrantMatrix.OpsRo).Select(g => g.Table).ToHashSet(StringComparer.Ordinal);
 
-        Assert.Empty(objects.Except(readable));
+        // ops_ro reads every table except the quota counters, whose subject_id is a per-install / per-account identifier (T-323).
+        var deliberatelyUnreadable = new HashSet<string>(StringComparer.Ordinal) { "llm_quota_counters" };
+
+        Assert.Empty(objects.Except(readable).Except(deliberatelyUnreadable));
         Assert.Empty(readable.Except(objects));
+        Assert.Empty(readable.Intersect(deliberatelyUnreadable));
     }
 
     [Fact]

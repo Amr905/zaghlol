@@ -153,6 +153,8 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_admin", "UPDATE zaghlol.remote_config SET value = 'z', version = version + 1 WHERE false" },
         { "zaghlol_ops_ro", "SELECT key, value FROM zaghlol.remote_config" },
         { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_cat_corrections" },
+        { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_spend_daily" },
+        { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_cat_answer_cache" },
         { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_cat_confirmations" },
         { "zaghlol_api", "SELECT id FROM zaghlol.llm_cat_confirmations WHERE false" },
         { "zaghlol_api", "SELECT id FROM zaghlol.llm_cat_corrections WHERE false" },

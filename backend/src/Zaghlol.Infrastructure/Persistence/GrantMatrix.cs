@@ -286,8 +286,8 @@ public static class GrantMatrix
     /// ships. <c>app_rw</c> reads and writes the quota counters (also DELETE: install/account erasure) and answer cache (also DELETE:
     /// FR-LCAT-12 intake), the spend ledger, only reads <c>remote_config</c>, and inserts and reads the confirmation and correction
     /// rows; <c>worker_rw</c> is the retention purger (DELETE); <c>ops_rw</c> reads the two review tables, moves only the review
-    /// columns and upserts <c>remote_config</c> (admin endpoint, ops CLI). <c>ops_ro</c> reads <c>remote_config</c> and the two review
-    /// tables (operator review view) but not the quota counters (subject_id).
+    /// columns and upserts <c>remote_config</c> (admin endpoint, ops CLI). <c>ops_ro</c> reads <c>remote_config</c>, the spend ledger, the answer cache and the two
+    /// review tables (operator views; no personal data) but not the quota counters (subject_id).
     /// </summary>
     public static IReadOnlyList<TableGrant> LlmTables { get; } =
     [
@@ -306,6 +306,8 @@ public static class GrantMatrix
         new(OpsRw, "llm_cat_corrections", S, UpdateColumns: ["status", "operator_id", "resolved_at"]),
         new(OpsRw, "remote_config", SIU),
         new(OpsRo, "remote_config", S),
+        new(OpsRo, "llm_spend_daily", S),
+        new(OpsRo, "llm_cat_answer_cache", S),
         new(OpsRo, "llm_cat_confirmations", S),
         new(OpsRo, "llm_cat_corrections", S),
     ];

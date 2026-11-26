@@ -332,3 +332,10 @@ All are under 50 ms.
 - m10 fixed in place (migration not shipped): `app_rw` now has DELETE on `llm_quota_counters` and `llm_cat_answer_cache`.
 - Open points decided: `ops_rw` gets SELECT/INSERT/UPDATE on `remote_config` (the admin endpoint and ops CLI must write it; mirrors `feature_flags`); `ops_ro` gets SELECT on `remote_config` and the two review tables (operator review view; rows hold only the peppered install_hash), still nothing on quota counters.
 - `GrantMatrix.LlmTables`, `GrantTests`, backend-schema.md and T-323 updated.
+
+## CI fix — backend
+
+Run 45819498879 failed four Docker-side tests:
+1. `TheRequestTypesCarryExactlyTheBrSync03Members`: T-322 put `configVersion` and `llmCatFeedback` in the live OpenAPI `SyncRequest` ahead of T-334 (neither is in the C# type or BR-SYNC-03). Both request fields were removed from the spec; T-334.md notes that it adds them with the BR-SYNC-03 row and the test. Response-side `config` stays (a response carries no user data).
+2. `EveryOperationThatRequiresTheAppHeader...(askPlan|categorise)` and 3. `EverySpecOperationHasAMappedRoute`: spec-first operations with no route yet. New `OpenApiSpec.PlannedUnmapped` (askPlan -> T-349, categorise -> T-352) is skipped by both tests; `EverySpecOperationHasAMappedRoute` fails if a listed operation is mapped or is not in the spec. No stub endpoints.
+4. `EveryModelTableAndTheViewAppearInTheGrantMatrix`: `ops_ro` had no grant on `llm_spend_daily`, `llm_cat_answer_cache` (no personal data) or `llm_quota_counters` (per-subject id). Added `ops_ro` SELECT on the first two (GrantMatrix.LlmTables, GrantTests allow rows); the quota counters are a named exclusion in the test, which also asserts `ops_ro` still cannot read them (existing deny row).
