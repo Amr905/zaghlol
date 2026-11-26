@@ -1,0 +1,92 @@
+==== scenario device
+"Install CMake 3.22.1 v.3.22.1" finished.
+Running Gradle task 'assembleDevSmsDebug'...                      443.9s
+✓ Built build/app/outputs/flutter-apk/app-devsms-debug.apk
+apk: build/app/outputs/flutter-apk/app-devsms-debug.apk
+Performing Streamed Install
+Success
+past messages sent: 42 refused: 0; device date now: Thu Nov 26 16:19:29 UTC 2026
+in the telephony database: 0
+---- live
+  live ok: lv-01 (CIB)
+  live ok: lv-02 (NBE)
+  live ok: lv-03 (Telda)
+  live ok: lv-04 (CIB)
+SCENARIO_LIVE_SENT
+scenario device test exit: 0
+SCENARIO_DEVICE SCENARIO entries=47 pastSms=40 liveSms=3 ignored=3
+SCENARIO_DEVICE CAPS smsFlavor=true smsGranted=true
+SCENARIO_DEVICE SCAN phase=done scanned=42 imported=40 skipped=0 code=null
+SCENARIO_DEVICE GUARD mode=full user=OK
+SCENARIO_DEVICE SENDER CIB inbox_drop:otp_or_promo_global=1 inbox_drop:otp_or_promo_inst=1 inbox_kept=20 stored:parsed=20 saved=20
+SCENARIO_DEVICE SENDER HSBC inbox_kept=2 stored:parsed=2 saved=2
+SCENARIO_DEVICE SENDER InstaPay inbox_kept=4 stored:parsed=4 saved=4
+SCENARIO_DEVICE SENDER NBE inbox_kept=5 stored:parsed=5 saved=5
+SCENARIO_DEVICE SENDER OrangeCash inbox_kept=1 stored:parsed=1 saved=1
+SCENARIO_DEVICE SENDER QNB inbox_kept=1 stored:parsed=1 saved=1
+SCENARIO_DEVICE SENDER Telda inbox_kept=5 stored:parsed=5 saved=5
+SCENARIO_DEVICE SENDER WEPay inbox_kept=1 stored:parsed=1 saved=1
+SCENARIO_DEVICE SENDER myfawry inbox_kept=1 stored:parsed=1 saved=1
+SCENARIO_DEVICE PAST saved=40 of 40 (ok=true)
+SCENARIO_DEVICE READY_FOR_LIVE
+SCENARIO_DEVICE LIVE saved=43 of 43 (ok=true)
+SCENARIO_DEVICE ENTRY_OK m1-01
+SCENARIO_DEVICE ENTRY_OK m1-02
+SCENARIO_DEVICE ENTRY_OK m1-03
+SCENARIO_DEVICE ENTRY_OK m1-04
+SCENARIO_DEVICE ENTRY_OK m1-05
+SCENARIO_DEVICE ENTRY_OK m1-06
+SCENARIO_DEVICE ENTRY_OK m1-07
+SCENARIO_DEVICE ENTRY_OK m1-08
+SCENARIO_DEVICE ENTRY_OK m1-09
+SCENARIO_DEVICE ENTRY_OK m1-10
+SCENARIO_DEVICE ENTRY_OK m1-11
+SCENARIO_DEVICE ENTRY_OK m1-12
+SCENARIO_DEVICE ENTRY_OK m1-13
+SCENARIO_DEVICE ENTRY_OK m1-14
+SCENARIO_DEVICE ENTRY_OK m1-15
+SCENARIO_DEVICE ENTRY_OK m1-16
+SCENARIO_DEVICE ENTRY_OK m1-17
+SCENARIO_DEVICE ENTRY_OK m1-18
+SCENARIO_DEVICE ENTRY_OK m1-19
+SCENARIO_DEVICE ENTRY_OK m1-22
+SCENARIO_DEVICE ENTRY_OK m1-23
+SCENARIO_DEVICE ENTRY_OK m1-24
+SCENARIO_DEVICE ENTRY_OK m1-25
+SCENARIO_DEVICE ENTRY_OK m1-26
+SCENARIO_DEVICE ENTRY_OK m1-27
+SCENARIO_DEVICE ENTRY_OK m1-28
+SCENARIO_DEVICE ENTRY_OK m1-29
+SCENARIO_DEVICE ENTRY_OK m2-01
+SCENARIO_DEVICE ENTRY_OK m2-02
+SCENARIO_DEVICE ENTRY_OK m2-03
+SCENARIO_DEVICE ENTRY_OK m2-04
+SCENARIO_DEVICE ENTRY_OK m2-05
+SCENARIO_DEVICE ENTRY_OK m2-06
+SCENARIO_DEVICE ENTRY_OK m2-07
+SCENARIO_DEVICE ENTRY_OK m2-08
+SCENARIO_DEVICE ENTRY_OK m3-01
+SCENARIO_DEVICE ENTRY_OK m3-02
+SCENARIO_DEVICE ENTRY_OK m3-03
+SCENARIO_DEVICE ENTRY_OK m3-04
+SCENARIO_DEVICE ENTRY_OK m3-05
+SCENARIO_DEVICE ENTRY_OK m3-06
+SCENARIO_DEVICE ENTRY_OK lv-01
+SCENARIO_DEVICE ENTRY_OK lv-02
+SCENARIO_DEVICE ENTRY_OK lv-03
+SCENARIO_DEVICE ENTRIES matched=44 of 44 transactions=44 extra=0
+SCENARIO_DEVICE EGP month-3 merchants other(expected)=0 income=1400000 spend=209000
+SCENARIO_DEVICE EGP month-2 merchants other(expected)=9500 income=1500000 spend=279500
+SCENARIO_DEVICE EGP month-1 merchants other(expected)=283000 income=1930000 spend=915950
+SCENARIO_DEVICE EGP month-0 merchants other(expected)=0 income=0 spend=53125
+SCENARIO_DEVICE USD month-3 merchants other(expected)=0 income=0 spend=2000
+SCENARIO_DEVICE USD month-1 merchants other(expected)=0 income=0 spend=2000
+SCENARIO_DEVICE SHOT scn-en-1-overview
+SCENARIO_DEVICE SHOT scn-en-2-categories
+SCENARIO_DEVICE SHOT scn-en-3-trends
+SCENARIO_DEVICE SHOT scn-ar-1-overview
+SCENARIO_DEVICE SHOT scn-ar-2-categories
+SCENARIO_DEVICE SHOT scn-ar-3-trends
+SCENARIO_DEVICE SHOT scn-en-4-home
+SCENARIO_DEVICE RESULT problems=0
+01:05 +1: All tests passed!
