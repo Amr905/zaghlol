@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    T-350: the LLM evaluation harness (set, scorer, report, live runner). An executable under tests/ so that nothing in src/ ships it.
+    It holds no fakes: the recorded run lives in Zaghlol.LlmEval.Tests, which links the shared FakeLlmProvider.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>false</IsTestProject>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <RootNamespace>Zaghlol.LlmEval</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Zaghlol.Application\Zaghlol.Application.csproj" />
+    <ProjectReference Include="..\..\src\Zaghlol.Infrastructure\Zaghlol.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+    <PackageReference Include="JsonSchema.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="providers.live.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="data\*" CopyToOutputDirectory="PreserveNewest" LinkBase="data" />
+    <Content Include="recordings\*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="recordings" />
+  </ItemGroup>
+
+</Project>
