@@ -67,8 +67,28 @@ object OcrMerger {
     /** A strong ML Kit line with an amount-like token (not any digit) on the same box: its digits win over the Arabic line's (FU-376). */
     private fun strongAmountOverlaps(arabicLine: RawLine, latin: List<RawLine>): Boolean =
         latin.any {
-            strongLatin(it.text) && digitTokens(it.text).any { t -> amountLike(t) } &&
+            strongLatin(it.text) && digitTokens(it.text).any { t -> amountLike(t) || smallAmount(t, it, latin) } &&
                 overlap(it, arabicLine) >= OVERLAP
+        }
+
+    /** FU-395: a 1-2 digit whole number is an amount when its line, or a line on its row, holds an amount word. */
+    private fun smallAmount(token: String, line: RawLine, latin: List<RawLine>): Boolean {
+        val t = token.trim(':', ')', '(', ',', '.', '/')
+        if (t.isEmpty() || t.length > 2 || !t.all { it in '0'..'9' }) return false
+        return hasAmountWord(line.text) || latin.any { it !== line && hasAmountWord(it.text) && sameRow(it, line) }
+    }
+
+    /** Vertical overlap only: a total word and its number sit side by side. */
+    private fun sameRow(a: RawLine, b: RawLine): Boolean {
+        val h = minOf(a.bottom, b.bottom) - maxOf(a.top, b.top)
+        val smallerHeight = minOf(a.bottom - a.top, b.bottom - b.top)
+        return h > 0 && smallerHeight > 0 && h.toDouble() / smallerHeight >= 0.5
+    }
+
+    private fun hasAmountWord(s: String): Boolean =
+        s.split(WHITESPACE).any { w ->
+            val x = w.trim(':', ')', '(', ',', '.', '/').lowercase()
+            x in AMOUNT_WORDS
         }
 
     private fun mergeBoth(latin: List<RawLine>, arabic: List<RawLine>): List<RawLine> {
@@ -245,6 +265,9 @@ object OcrMerger {
         return (w.toLong() * h).toDouble() / smaller
     }
 
+    private val AMOUNT_WORDS = setOf(
+        "total", "amount", "net", "due", "balance", "subtotal", "الإجمالي", "الاجمالي", "إجمالي", "اجمالي", "المبلغ", "مبلغ",
+    )
     private val WHITESPACE = Regex("\\s+")
     private val AMOUNT = Regex("\\d+([.,]\\d+)*")
 }
