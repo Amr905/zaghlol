@@ -222,7 +222,7 @@
             "string",
             "null"
           ],
-          "pattern": "^⟦(ACCOUNT|CARD|BANK|MERCHANT)_[1-9]⟧$"
+          "pattern": "^⟦(ACCOUNT|CARD|BANK|MERCHANT)_[1-9][0-9]?⟧$"
         },
         "mention": {
           "type": [
@@ -527,7 +527,7 @@
             "string",
             "null"
           ],
-          "pattern": "^⟦(ACCOUNT|CARD|BANK)_[1-9]⟧$"
+          "pattern": "^⟦(ACCOUNT|CARD|BANK)_[1-9][0-9]?⟧$"
         }
       }
     },

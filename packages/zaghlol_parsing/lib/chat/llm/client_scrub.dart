@@ -3,13 +3,22 @@
 /// Pure, total, never throws, never logs.
 library;
 
-import '../../normalize/text_normalizer.dart';
 import 'loose_text.dart';
 import 'mask_models.dart';
 
 final RegExp _address = RegExp(
   r'[\p{L}\p{N}._%+\-]+@[\p{L}\p{N}\-]+(?:\.[\p{L}\p{N}\-]+)*',
   unicode: true,
+);
+// "ahmed @ instapay": spaces around the @ before an InstaPay domain.
+final RegExp _spacedIpa = RegExp(
+  r'[\p{L}\p{N}._%+\-]+ ?@ ?instapay\b',
+  unicode: true,
+);
+// Egyptian mobile with a prefix and any of space, dot, dash between digits:
+// "0100.000.0000", "010 00 00 00 00", "+20 100 000 0000".
+final RegExp _sepPhone = RegExp(
+  r'(?<![0-9])(?:\+?20|0020|0)[ .\-]?1[0125](?:[ .\-]?[0-9]){8}(?![0-9])',
 );
 
 // A first group of any length, then groups of 3+ digits joined by one space
@@ -45,12 +54,14 @@ abstract final class ClientScrub {
   }
 
   static ScrubResult _apply(String text) {
-    final folded = foldKeyIndexed(text);
+    final folded = scrubFold(text);
     final f = folded.text;
     final spans = <_Span>[];
 
     for (final m in _address.allMatches(f)) {
-      final domain = f.substring(m.group(0)!.indexOf('@') + 1 + m.start, m.end);
+      final domain = f
+          .substring(m.group(0)!.indexOf('@') + 1 + m.start, m.end)
+          .trim();
       spans.add(
         _Span(
           m.start,
@@ -58,6 +69,12 @@ abstract final class ClientScrub {
           domain.contains('.') ? ScrubKind.email : ScrubKind.ipa,
         ),
       );
+    }
+    for (final m in _spacedIpa.allMatches(f)) {
+      spans.add(_Span(m.start, m.end, ScrubKind.ipa));
+    }
+    for (final m in _sepPhone.allMatches(f)) {
+      spans.add(_Span(m.start, m.end, ScrubKind.phone));
     }
     for (final m in _digitRun.allMatches(f)) {
       final raw = m.group(0)!;

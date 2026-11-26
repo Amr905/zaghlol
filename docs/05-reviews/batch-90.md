@@ -205,3 +205,16 @@ Next free number from `LEAD_HANDOFF.md`: FU-364.
 | FU-369 | m8: categorise attest prefix in the spec docs; m9: NFC as an AC of T-330 | T-330 / T-336 |
 | FU-370 | m10: `app_rw` DELETE on `llm_quota_counters` and `llm_cat_answer_cache` (or fix now) | T-334 / T-339 |
 | FU-371 | m11: OQ on the S1 average basis; m12: negative base; nit: dedupe by id | T-342 |
+
+---
+
+## Fix round — T-328
+
+Branch `task/b90-fix-masker`. Parsing package only, plus one backend schema pattern.
+
+- **M1 fixed.** `looseFold` (loose_text.dart) is now its own pass, not `foldKeyIndexed` plus extras. It folds Persian/Urdu letters (ک ی ە ھ ہ ۃ گ پ چ ڤ ...), alef/waw/yeh with hamza or madda (precomposed or combining U+0653-0655; ؤ ئ read as و ي on both sides), Arabic presentation forms (FB50-FDFF, FE70-FEFE, lam-alef as two letters), fullwidth ASCII, Latin accents (U+00C0-017F, NFD marks, ligatures), Eastern Arabic and Persian digits, and drops zero-width, bidi, variation selectors, tatweel and marks. The parser's `foldKey` is unchanged (test). A second mapping, `scrubFold`, keeps dots and hyphens for the scrub regexes.
+- **M2 fixed.** Card words extended (كريديت، الكريديت، كردت، ديبت، بريبيد، ائتمان، ميزة، ماستر، credit, debit, prepaid, meeza, ending, آخره ...). A last-4 can now be 1 to 4 adjacent digit groups that make exactly 4 digits (`43 21`, `43-21`, `43.21`, `4 3 2 1`, any digit script) within 3 words of a card word; the amount exception is unchanged.
+- **Minors done:** `bank of X`, `bank al X` and `X bank` go through the unknown-bank check (an English prefix stop list keeps `my bank`, `which bank`); phones with dots, 2-digit groups and `+20`; `ahmed @ instapay` and fullwidth `@`; placeholder numbers above 9 render and map (schema pattern widened to `_[1-9][0-9]?` in `backend/contracts/ask-plan-v1.schema.json`; the .NET contract tests were not run here).
+- **Safety net:** after masking, `sentText` is folded again and checked for any account label/nickname/extra name, non-ordinary bank alias, merchant name, or a known last-4 next to a card word; a hit returns `MaskUnresolved(failed)`. Proven through the seam `ReferenceMasker.leaksForTest` (no shipped rule leaves a leak for the net to catch in an end-to-end case).
+- **Tests:** new `reference_masker_variants_test.dart` (variant probes, 20 card words x 14 spellings x 4 frames, property tests with Persian, decomposed hamza, fullwidth, zero-width, accent and split-digit generators, minors, safety net, known gaps). With the lib changes stashed the new tests fail (13 failing groups).
+- **Still not caught** (T-328 task file, known gaps): digits as words, last-4 beyond 3 words (FU-364), possessive suffixes, comma-split digits, look-alike letters from other scripts, scrub failure path text. m6 (input cap) and m7 (registry short forms) not done.
