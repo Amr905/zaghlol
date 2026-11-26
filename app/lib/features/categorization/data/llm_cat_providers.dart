@@ -16,6 +16,7 @@ import '../../../core/flags/feature_flags.dart';
 import '../../../core/flags/flags_providers.dart';
 import '../../../core/llm/llm_feature.dart';
 import '../../../core/llm/llm_gateway_client.dart';
+import '../../../ingestion/bundled_registry.dart';
 import '../application/llm_cat_queue.dart';
 import 'categorizer_ports.dart';
 import 'rules_providers.dart';
@@ -50,8 +51,14 @@ final llmCatQueueFillerProvider = FutureProvider<LlmCatQueueFiller>((
   final flags = await ref.watch(flagsServiceProvider.future);
   final consent = await ref.watch(llmConsentStoreProvider.future);
   final quota = await ref.watch(llmQuotaStoreProvider.future);
+  final registry = await preloadBundledRegistry();
+  final events = {
+    for (final i in registry.institutions)
+      for (final t in i.templates) t.id: t.event,
+  };
   return LlmCatQueueFiller(
     db,
+    templateEvents: () => events,
     gate: LlmCatGate(
       isFlagOn: () => flags.isOn(FeatureFlag.llmCategorise),
       hasConsent: () async {

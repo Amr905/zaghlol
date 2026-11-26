@@ -77,6 +77,17 @@ final class LlmCatFillReport {
   );
 }
 
+/// A card purchase on an expense row, or a card refund on a refund row.
+bool _businessEvidence(TemplateEvent e, String direction) =>
+    (direction == 'expense' && _cardEvents.contains(e)) ||
+    (direction == 'refund' && e == TemplateEvent.refund);
+
+/// Template events that are a card / POS / online purchase at a business.
+const Set<TemplateEvent> _cardEvents = {
+  TemplateEvent.cardPurchase,
+  TemplateEvent.cardPurchaseFx,
+};
+
 final RegExp _tableKey = RegExp(r'^[a-z0-9]+( [a-z0-9]+)*$');
 
 /// True when [key] fits the queue's CHECK (2–64, `[a-z0-9]` words).
@@ -84,7 +95,21 @@ bool isQueueableKey(String key) =>
     key.length >= 2 && key.length <= 64 && _tableKey.hasMatch(key);
 
 class LlmCatQueueFiller {
-  LlmCatQueueFiller(this._db, {required this.gate, required this.lexicon});
+  LlmCatQueueFiller(
+    this._db, {
+    required this.gate,
+    required this.lexicon,
+    this.templateEvents = _noEvents,
+  });
+
+  /// Template id -> the event the registry declares for it. The only typed
+  /// evidence that a row without a counterparty is a card / POS purchase
+  /// (the parser leaves the counterparty kind null on those rows). Empty
+  /// (the default) means no row is treated as a business payment by
+  /// evidence: fail closed.
+  final Map<String, TemplateEvent> Function() templateEvents;
+
+  static Map<String, TemplateEvent> _noEvents() => const {};
 
   final AppDatabase _db;
   final LlmCatGate gate;
@@ -105,7 +130,7 @@ class LlmCatQueueFiller {
         final rows = await _db
             .customSelect(
               'SELECT merchant_norm, merchant_raw, direction, source, '
-              'counterparty_kind, counterparty_value, is_internal, '
+              'counterparty_kind, counterparty_value, is_internal, template_id, '
               'transfer_pair_id IS NOT NULL AS paired, created_at '
               'FROM transactions WHERE merchant_norm IS NOT NULL '
               'AND created_at >= ?1 AND $needsClassificationSql',
@@ -130,12 +155,13 @@ class LlmCatQueueFiller {
           (byKey[r.read<String>('merchant_norm')] ??= []).add(r);
         }
         final tried = await suggestions.statesOf(byKey.keys);
+        final events = templateEvents();
 
         final eligible = <({String key, int count, int lastSeen})>[];
         for (final e in byKey.entries) {
           final key = e.key;
           if (!isQueueableKey(key) || ruled.contains(key)) continue;
-          if (e.value.every((r) => _rowEligible(r, key, lx, tried))) {
+          if (e.value.every((r) => _rowEligible(r, key, lx, tried, events))) {
             eligible.add((
               key: key,
               count: e.value.length,
@@ -184,19 +210,41 @@ class LlmCatQueueFiller {
     String key,
     NameLexicon lx,
     Map<String, String> tried,
+    Map<String, TemplateEvent> events,
   ) {
-    final kind = llmPaymentKindOf(
-      direction: r.read<String>('direction'),
-      source: r.read<String>('source'),
-      counterpartyKind: r.read<String?>('counterparty_kind'),
-      isInternal: r.read<int>('is_internal') != 0,
-      hasTransferPair: r.read<int>('paired') != 0,
-    );
+    final direction = r.read<String>('direction');
+    final storedKind = r.read<String?>('counterparty_kind');
+    final tid = r.read<String?>('template_id');
+    final event = tid == null ? null : events[tid];
+    // Typed evidence only: a card / POS / online purchase template on an
+    // expense row with no counterparty is a business payment. Nothing is
+    // inferred from text; transfers, ATM, income, fees and unknown events
+    // stay null (the rule then refuses).
+    final counterpartyKind =
+        storedKind ??
+        (event != null && _businessEvidence(event, direction)
+            ? 'merchant'
+            : null);
+    final paymentKind =
+        event != null &&
+            !_cardEvents.contains(event) &&
+            event != TemplateEvent.refund
+        ? LlmPaymentKind.unknown
+        : null;
+    final kind =
+        paymentKind ??
+        llmPaymentKindOf(
+          direction: direction,
+          source: r.read<String>('source'),
+          counterpartyKind: counterpartyKind,
+          isInternal: r.read<int>('is_internal') != 0,
+          hasTransferPair: r.read<int>('paired') != 0,
+        );
     final raw = r.read<String?>('merchant_raw');
     final input = categorizeInputFor(
       merchantRaw: raw,
       merchantNorm: key,
-      counterpartyKind: r.read<String?>('counterparty_kind'),
+      counterpartyKind: counterpartyKind,
       counterpartyValue: r.read<String?>('counterparty_value'),
     );
     final onKey = LlmEligibility.check(

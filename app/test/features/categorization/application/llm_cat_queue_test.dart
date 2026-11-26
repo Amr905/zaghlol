@@ -41,6 +41,14 @@ void main() {
   late TransactionsDao txns;
   late LlmQuotaStore quota;
   late LlmCatQueueDao queue;
+  // Template id -> registry event (the typed evidence of the row kind).
+  const events = {
+    'card': TemplateEvent.cardPurchase,
+    'ipa': TemplateEvent.instapayOut,
+    'wallet': TemplateEvent.transferOut,
+    'atm': TemplateEvent.atmWithdrawal,
+    'refund': TemplateEvent.refund,
+  };
   var flagOn = true;
   var consent = true;
 
@@ -52,6 +60,7 @@ void main() {
       quota: quota,
     ),
     lexicon: () async => lexicon,
+    templateEvents: () => events,
   );
 
   Future<void> put(
@@ -65,6 +74,7 @@ void main() {
     String categorySource = 'none',
     int createdAt = t0,
     bool internal = false,
+    String? template = 'card',
   }) => txns.insert(
     txn(id, merchantNorm: norm, direction: direction).copyWith(
       source: Value(source),
@@ -75,6 +85,7 @@ void main() {
       categorySource: Value(categorySource),
       createdAt: Value(createdAt),
       isInternal: Value(internal ? 1 : 0),
+      templateId: Value(template),
     ),
   );
 
@@ -142,7 +153,7 @@ void main() {
 
   test('queues eligible merchants with their counts; idempotent', () async {
     await put('a1', 'zawya cinema');
-    await put('a2', 'zawya cinema', direction: 'refund');
+    await put('a2', 'zawya cinema', direction: 'refund', template: 'refund');
     await put('b1', 'kosharyx', source: 'notification');
     final r = await filler().fill(now: now);
     expect(r.ran, isTrue);
@@ -155,6 +166,38 @@ void main() {
       [for (final q in await queue.all()) q.firstQueuedAt],
       [for (final q in first) q.firstQueuedAt],
     );
+  });
+
+  test(
+    'card purchase evidence: a brand without a business word is queued; '
+    'the same name on a transfer row, mixed rows or a person name is not',
+    () async {
+      await put('c1', 'kosharyx');
+      await put('p1', 'kosharyx', template: 'ipa');
+      await put('p2', 'zawya cinema');
+      await put('p3', 'zawya cinema', template: 'wallet');
+      await put('a1', 'atm shop', template: 'atm');
+      await put('n1', 'plainx', template: null);
+      await put('u1', 'mona'); // person-like name on a card row
+      await put('ok', 'kosharyz');
+      await filler().fill(now: now);
+      expect(await queued(), {'kosharyz': 1});
+    },
+  );
+
+  test('without template evidence nothing is a business payment', () async {
+    await put('c1', 'kosharyx');
+    final f = LlmCatQueueFiller(
+      db,
+      gate: LlmCatGate(
+        isFlagOn: () => true,
+        hasConsent: () async => true,
+        quota: quota,
+      ),
+      lexicon: () async => lexicon,
+    );
+    await f.fill(now: now);
+    expect(await queue.count(), 0);
   });
 
   test('NEGATIVE PROOF 3a: nothing ineligible is ever queued', () async {
