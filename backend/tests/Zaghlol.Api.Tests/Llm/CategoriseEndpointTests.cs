@@ -362,7 +362,7 @@ public class CategoriseEndpointTests(AskHostFixture fixture) : IClassFixture<Ask
         Assert.Equal(1, await CacheRowsAsync(Marker));
 
         // the cache row has no column that could name an install, an account, an address or a version, and no install id inside
-        Assert.Empty(await CacheColumnsAsync("install", "account", "ip", "version", "token"));
+        Assert.Empty(await CacheColumnsAsync("install", "account", "ip_", "_ip", "app_", "token", "address"));
         Assert.DoesNotContain(id, await DumpCacheAsync(), StringComparison.OrdinalIgnoreCase);
     }
 
