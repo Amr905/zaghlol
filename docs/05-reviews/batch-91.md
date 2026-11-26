@@ -196,3 +196,17 @@
 - m5 fixed: `PlanValidator` now runs the plain-name check on every string of `p` (mention, currency, any other), step 2 `PLAIN_NAME`. Test: `currency:"CIB"` in `plan_validator_test.dart` (fails without the fix).
 - Vectors added to `ask-plan-v1.json`: `invalid-plain-name-in-template-text` (accept, template dropped; phone already did this, backend m3) and `invalid-plain-name-in-currency` (fallback, step 2, PLAIN_NAME).
 - Table rows with no phone change: duplicate key, trailing `\n`, `target.currency` in whatIf, PL-BALANCE ref (backend-side or phone already stricter); `❤️`/NFC mark order and mention length in UTF-16 units vs code points (m6) left open (more than 10 lines, follow-up B91-m6); supplementary-letter link (backend n2).
+
+## Delta re-review (head 7061f999, diff 5d2152d2..HEAD, backend + packages)
+
+Note: `origin/batch/2026-11-26-91` currently points at 33ad5383, which does not contain this head; 7061f999 was reviewed directly.
+
+**Checks run.** Application.Tests Llm/Plan 191 pass; Infrastructure.Tests Llm (non-Docker) 54 pass; Contract.Tests AskPlan 10 pass; `dart test test/chat` 309 pass. Docker-backed tests not run (no Docker). On the old `backend/src` (5d2152d2) the new tests fail: `M1_*` (3 duplicate-key cases) and the `invalid-plain-name-in-template-text` vector. M2 tests exercise the new type, so they have no old-code counterpart.
+
+**T-330 (M1, m3): APPROVED.** `Validate` wraps `CheckPlan` in a catch-all that maps to `SCHEMA_INVALID` and drops the exception unlogged. The only parse in the path is `JsonNode.Parse(planJson.GetRawText())` (line 97); duplicates, depth over 64 and default `JsonElement` all land in the catch. `CheckTemplate` works on the `JsonElement` and does not parse. Malformed/huge input cannot reach `Validate` (the adapter's `JsonDocument.Parse` rejects it earlier). Tests cover duplicates at root, in `mention` and in `t`, the default element, and an empty log sink; no explicit deep-nesting test (covered by the same catch, nit). `t.text` plain-name check drops the template only with `TEMPLATE_PLAIN_NAME`; both new vectors pass.
+
+**T-332 (M2, m7): APPROVED.** `LlmSensitive<T>` has no public property, `ToString` is `***`, the type-level converter writes `"***"` and still reads the bare value. It is covered for direct, nested, array, dictionary, anonymous, `{@}` logger, interpolation and exception message. `LlmCall.UserText`, `LlmResult.Json`, the fake and the OpenAI adapter all use it; the remaining `Sensitive<>` uses in `backend/src` are token/account/order carriers (install, purchase, auth, sync), none holds question text. The LLM types are not in a source-gen context, and the attribute converter applies there anyway; no custom-options test, none needed. Nit: the factory uses `Activator.CreateInstance` (not trim/AOT-safe); fine unless the app publishes trimmed. m7: reply parsing uses `AllowDuplicateProperties = false`, test passes.
+
+**Phone plain-name scope: OK.** Backend checks `t.text`; phone checks every string of `p` and `t.text`; both pass the two new vectors. `expect.templateReason` is ignored by the Dart vector runner (it only checks `rejected` for `accept`), harmless; the phone's own unit test asserts `TEMPLATE_PLAIN_NAME` (plan_validator_test.dart:262).
+
+Verdicts: T-330 APPROVED, T-332 APPROVED.
