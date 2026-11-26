@@ -45,3 +45,7 @@ Blockers: none. Majors: none.
 
 ## Unverified
 Golden tests (excluded by `-x golden`, not run), Kotlin compile and unit tests (CI/PC runner only), Ask/backup/restore bird claims, real-device haptic cancel.
+
+### Lead delta check (CI)
+
+- app-ci Kotlin tests: T-299's FU-395 rule made `Ref 12` amount-like through the row neighbour `Total Amount`, failing T-292's `anUnrelatedShortDigitLineOnTheSameBoxDoesNotBlockTheArabicAmount`. Fix (4 lines, `OcrMerger.smallAmount`): a row neighbour's amount word counts only for a bare number box (no letters); a token whose own line has an amount word still counts. Hand-traced: the three T-299 tests (bare `85` beside `Total Amount`; `Amount 85`; `Order Reference` + `12`) and the T-292 `Ref 12` test all pass. Re-run in CI.

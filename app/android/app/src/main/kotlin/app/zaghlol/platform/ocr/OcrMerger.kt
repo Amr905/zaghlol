@@ -75,7 +75,10 @@ object OcrMerger {
     private fun smallAmount(token: String, line: RawLine, latin: List<RawLine>): Boolean {
         val t = token.trim(':', ')', '(', ',', '.', '/')
         if (t.isEmpty() || t.length > 2 || !t.all { it in '0'..'9' }) return false
-        return hasAmountWord(line.text) || latin.any { it !== line && hasAmountWord(it.text) && sameRow(it, line) }
+        if (hasAmountWord(line.text)) return true
+        // A row neighbour's amount word only counts for a bare number box: "Ref 12" has its own label.
+        if (line.text.any { it.isLetter() }) return false
+        return latin.any { it !== line && hasAmountWord(it.text) && sameRow(it, line) }
     }
 
     /** Vertical overlap only: a total word and its number sit side by side. */
