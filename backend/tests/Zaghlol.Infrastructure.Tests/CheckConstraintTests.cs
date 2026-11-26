@@ -165,6 +165,23 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["pending_apple_revocations: negative attempts"] = ("pending_apple_revocations", Set("attempts", -1), "ck_pending_apple_revocations_attempts"),
             ["pending_apple_revocations: expires before it was created"] = ("pending_apple_revocations", Set("expires_at", Rows.Now().AddDays(-1)), "ck_pending_apple_revocations_window"),
 
+            // LLM helper tables (T-273)
+            ["llm_quota_counters: unknown feature"] = ("llm_quota_counters", Set("feature", "chat"), "ck_llm_quota_counters_feature"),
+            ["llm_quota_counters: unknown subject_kind"] = ("llm_quota_counters", Set("subject_kind", "device"), "ck_llm_quota_counters_subject_kind"),
+            ["llm_quota_counters: month_key below 202601"] = ("llm_quota_counters", Set("month_key", 202512), "ck_llm_quota_counters_month_key"),
+            ["llm_quota_counters: month_key above 209912"] = ("llm_quota_counters", Set("month_key", 210001), "ck_llm_quota_counters_month_key"),
+            ["llm_quota_counters: negative used"] = ("llm_quota_counters", Set("used", -1), "ck_llm_quota_counters_used"),
+            ["llm_spend_daily: unknown feature"] = ("llm_spend_daily", Set("feature", "chat"), "ck_llm_spend_daily_feature"),
+            ["llm_cat_answer_cache: confidence above 100"] = ("llm_cat_answer_cache", Set("confidence", (short)101), "ck_llm_cat_answer_cache_confidence"),
+            ["llm_cat_answer_cache: confidence below 0"] = ("llm_cat_answer_cache", Set("confidence", (short)-1), "ck_llm_cat_answer_cache_confidence"),
+            ["llm_cat_answer_cache: merchant_norm with a 6-digit run"] = ("llm_cat_answer_cache", Set("merchant_norm", "shop 123456"), "ck_llm_cat_answer_cache_merchant_norm"),
+            ["llm_cat_confirmations: unknown source"] = ("llm_cat_confirmations", Set("source", "user"), "ck_llm_cat_confirmations_source"),
+            ["llm_cat_confirmations: unknown status"] = ("llm_cat_confirmations", Set("status", "open"), "ck_llm_cat_confirmations_status"),
+            ["llm_cat_confirmations: merchant_norm with an at sign"] = ("llm_cat_confirmations", Set("merchant_norm", "a@b"), "ck_llm_cat_confirmations_merchant_norm"),
+            ["llm_cat_corrections: unknown source"] = ("llm_cat_corrections", Set("source", "user"), "ck_llm_cat_corrections_source"),
+            ["llm_cat_corrections: unknown status"] = ("llm_cat_corrections", Set("status", "collecting"), "ck_llm_cat_corrections_status"),
+            ["llm_cat_corrections: merchant_norm too short"] = ("llm_cat_corrections", Set("merchant_norm", "a"), "ck_llm_cat_corrections_merchant_norm"),
+
             // audit_log (SEC F3): any depth, any letter case, values with "@", and the target
             ["audit_log: details with email"] = ("audit_log", Set("details", new Jsonb("{\"email\": \"x\"}")), "ck_audit_log_details_no_identifiers"),
             ["audit_log: details with order_id"] = ("audit_log", Set("details", new Jsonb("{\"order_id\": \"GPA.0000-0000-0000-00000\"}")), "ck_audit_log_details_no_identifiers"),
@@ -227,8 +244,9 @@ public class CheckConstraintTests(SchemaFixture fixture)
 
         // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
         // + 2 idempotency_records claim checks (T-130) + ck_store_notifications_google_shape (T-133)
-        // + 2 pending_apple_revocations (T-135) + ck_installs_catalog_version (BUG-009).
-        Assert.Equal(58, inSchema.Count);
+        // + 2 pending_apple_revocations (T-135) + ck_installs_catalog_version (BUG-009)
+        // + 13 LLM helper tables (T-273).
+        Assert.Equal(71, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));
     }

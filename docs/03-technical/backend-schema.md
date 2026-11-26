@@ -395,6 +395,32 @@ CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, 
 CREATE TABLE pending_apple_revocations (id uuid PRIMARY KEY, sealed_blob bytea NOT NULL, attempts integer NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL, next_attempt_at timestamptz NOT NULL, expires_at timestamptz NOT NULL,
   CHECK (attempts >= 0), CHECK (expires_at > created_at));
+-- T-273: LLM helper tables (ask-llm.md §4.5, llm-categorise.md §4). No column holds a question text; subject_id is the only
+-- install/account id (llm_quota_counters); the review tables carry only the peppered install_hash. merchant_norm has the same
+-- backstop CHECK as merchant_contributions, plus length 2..64. Grants (GrantMatrix.LlmTables): app_rw R/W on counters, ledger and
+-- cache, R on remote_config, INSERT+SELECT on confirmations/corrections; worker_rw SELECT+DELETE on all but remote_config;
+-- ops_rw SELECT and UPDATE(status) on confirmations, UPDATE(status, operator_id, resolved_at) on corrections; ops_ro none.
+CREATE TABLE llm_quota_counters (feature text NOT NULL, subject_kind text NOT NULL, subject_id uuid NOT NULL, month_key integer NOT NULL,
+  used integer NOT NULL, last_request_hash bytea, updated_at timestamptz NOT NULL,
+  PRIMARY KEY (feature, subject_kind, subject_id, month_key),
+  CHECK (feature IN ('ask','cat')), CHECK (subject_kind IN ('install','account')), CHECK (month_key BETWEEN 202601 AND 209912), CHECK (used >= 0));
+CREATE TABLE llm_spend_daily (day date NOT NULL, feature text NOT NULL, provider_id text NOT NULL, model text NOT NULL,
+  calls integer NOT NULL, input_tokens bigint NOT NULL, cached_tokens bigint NOT NULL, output_tokens bigint NOT NULL,
+  cost_usd numeric(14,6) NOT NULL, PRIMARY KEY (day, feature, provider_id, model), CHECK (feature IN ('ask','cat')));
+CREATE TABLE remote_config (key text PRIMARY KEY, value text NOT NULL, version bigint NOT NULL, updated_by uuid, updated_at timestamptz NOT NULL);
+CREATE TABLE llm_cat_answer_cache (merchant_norm text PRIMARY KEY, category_code text NOT NULL, confidence smallint NOT NULL,
+  provider_id text NOT NULL, prompt_version text NOT NULL, created_at timestamptz NOT NULL, expires_at timestamptz NOT NULL,
+  hits integer NOT NULL DEFAULT 0, CHECK (confidence BETWEEN 0 AND 100),
+  CHECK (char_length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}' AND position('@' in merchant_norm) = 0));
+CREATE TABLE llm_cat_confirmations (id uuid PRIMARY KEY, merchant_norm text NOT NULL, category_code text NOT NULL, source text NOT NULL,
+  install_hash bytea NOT NULL, created_at timestamptz NOT NULL, status text NOT NULL DEFAULT 'collecting',
+  UNIQUE (merchant_norm, install_hash), CHECK (source IN ('llm','cache','catalog')), CHECK (status IN ('collecting','promoted','rejected')),
+  CHECK (char_length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}' AND position('@' in merchant_norm) = 0));
+CREATE TABLE llm_cat_corrections (id uuid PRIMARY KEY, merchant_norm text NOT NULL, ai_category text NOT NULL, user_category text NOT NULL,
+  source text NOT NULL, install_hash bytea NOT NULL, created_at timestamptz NOT NULL, status text NOT NULL DEFAULT 'open',
+  operator_id uuid, resolved_at timestamptz,
+  UNIQUE (merchant_norm, install_hash), CHECK (source IN ('llm','cache','catalog')), CHECK (status IN ('open','promoted','rejected','prompt_issue')),
+  CHECK (char_length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm !~ '([0-9٠-٩۰-۹０-９][[:space:].,/_،-]{0,3}){6,}' AND position('@' in merchant_norm) = 0));
 CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   operator_id uuid NOT NULL REFERENCES operators(id),   -- operators are disabled, never deleted
   action text NOT NULL, target text NOT NULL, details jsonb NOT NULL, at timestamptz NOT NULL DEFAULT now(),
