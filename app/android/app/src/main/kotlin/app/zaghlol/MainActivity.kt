@@ -198,7 +198,7 @@ class MainActivity : FlutterFragmentActivity() {
         ShareImageRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         ShareImageRegistration.sweepAll(this)
         SpeechSupportRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
-        HapticsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        HapticsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger, this)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/app_settings").setMethodCallHandler(null)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/launch_theme").setMethodCallHandler(null)
         launchThemeChannel = null
@@ -268,6 +268,16 @@ class MainActivity : FlutterFragmentActivity() {
      * store, so a spoofed intent cannot consume anything; Dart dedupes by id.
      * On a cold start Dart is not listening yet and polls by itself.
      */
+    override fun onPause() {
+        HapticsRegistration.cancel(this)
+        super.onPause()
+    }
+
+    override fun onStop() {
+        HapticsRegistration.cancel(this)
+        super.onStop()
+    }
+
     override fun onResume() {
         super.onResume()
         // T-044 (EC-13): a permission or notification access changed while away.
