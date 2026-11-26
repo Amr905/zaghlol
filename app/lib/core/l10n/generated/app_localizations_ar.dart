@@ -3290,7 +3290,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotTipUseLinkCard =>
-      'كارتك مربوط بحسابه؟ ربطه بيخليني أفهم الدفع من الحساب وماعدّهوش مرتين';
+      'اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة';
 
   @override
   String get mascotTipUsePayday =>

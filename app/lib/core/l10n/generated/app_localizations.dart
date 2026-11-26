@@ -4932,7 +4932,7 @@ abstract class AppLocalizations {
   /// No description provided for @mascotTipUseLinkCard.
   ///
   /// In ar, this message translates to:
-  /// **'كارتك مربوط بحسابه؟ ربطه بيخليني أفهم الدفع من الحساب وماعدّهوش مرتين'**
+  /// **'اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة'**
   String get mascotTipUseLinkCard;
 
   /// No description provided for @mascotTipUsePayday.

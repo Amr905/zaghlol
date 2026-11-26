@@ -505,7 +505,7 @@ Shown in the Home bubble (C-14) only when no payday, proud or alert line is up. 
 | `mascotTipUseScan` | usage | add | عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸 | Got a paper receipt? Snap it from the Add button and I'll read the amount and the shop 📸 |
 | `mascotTipUseShare` | usage | text only | شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل | Spotted a receipt or screenshot? Share it to Zaghlol from the share menu and I'll take it from there |
 | `mascotTipUseSay` | usage | add | زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤 | Tired of typing? Tap Add, pick Say, and just tell me what you spent 🎤 |
-| `mascotTipUseLinkCard` | usage | text only | كارتك مربوط بحسابه؟ ربطه بيخليني أفهم الدفع من الحساب وماعدّهوش مرتين | Link a card to its account and I'll stop counting the repayment as spending twice |
+| `mascotTipUseLinkCard` | usage | text only | اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة | Link your debit card to its account and card purchases come out of that balance, counted once |
 | `mascotTipUsePayday` | usage | settings | قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب | Not paid on the 1st? Set your payday and I'll line the month up with your salary |
 | `mascotTipUseStatement` | usage | import flow | عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB) | Have a bank statement? Add it and I'll read it and bring back past months (CIB, NBE, Banque Misr, QNB) |
 | `mascotTipUseReview` | usage | review | فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀 | Some items waiting on you? In Review you can Keep, Edit or Ignore each one 👀 |

@@ -998,7 +998,7 @@
   "mascotTipUseScan": "Got a paper receipt? Snap it from the Add button and I'll read the amount and the shop 📸",
   "mascotTipUseShare": "Spotted a receipt or screenshot? Share it to Zaghlol from the share menu and I'll take it from there",
   "mascotTipUseSay": "Tired of typing? Tap Add, pick Say, and just tell me what you spent 🎤",
-  "mascotTipUseLinkCard": "Link a card to its account and I'll stop counting the repayment as spending twice",
+  "mascotTipUseLinkCard": "Link your debit card to its account and card purchases come out of that balance, counted once",
   "mascotTipUsePayday": "Not paid on the 1st? Set your payday and I'll line the month up with your salary",
   "mascotTipUseStatement": "Have a bank statement? Add it and I'll read it and bring back past months (CIB, NBE, Banque Misr, QNB)",
   "mascotTipUseReview": "Some items waiting on you? In Review you can Keep, Edit or Ignore each one 👀",

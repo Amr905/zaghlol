@@ -3192,7 +3192,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mascotTipUseLinkCard =>
-      'Link a card to its account and I\'ll stop counting the repayment as spending twice';
+      'Link your debit card to its account and card purchases come out of that balance, counted once';
 
   @override
   String get mascotTipUsePayday =>
