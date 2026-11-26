@@ -1,0 +1,8 @@
+{
+  "id": "msg_synthetic_005",
+  "type": "message",
+  "role": "assistant",
+  "content": [ { "type": "tool_use", "id": "toolu_synthetic_005", "name": "reply_json", "input": { "v": 1, "plan": "PL-SPEND", "plan": "PL-REFUSE" } } ],
+  "stop_reason": "tool_use",
+  "usage": { "input_tokens": 2200, "output_tokens": 12 }
+}

@@ -1,0 +1,12 @@
+{
+  "candidates": [
+    {
+      "content": { "role": "model", "parts": [ { "text": "{\"v\":1,\"plan\":\"PL-SUGGEST\",\"p\":{\"currency\":null},\"t\":null}" } ] },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": { "promptTokenCount": 2200, "cachedContentTokenCount": 2048, "candidatesTokenCount": 30, "thoughtsTokenCount": 4, "totalTokenCount": 2234 },
+  "modelVersion": "synthetic-model",
+  "responseId": "synthetic-001"
+}

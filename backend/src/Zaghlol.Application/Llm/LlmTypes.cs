@@ -136,3 +136,9 @@ public sealed class RedactedJsonConverter<T> : JsonConverter<T>
 
 /// <summary>A configuration problem of the LLM gateway; the message is constant and never carries a value.</summary>
 public sealed class LlmConfigurationException(string message) : Exception(message);
+
+/// <summary>Whether an id names a provider this host has configured (FU-411: <c>PUT llm.provider</c> refuses an id with no adapter).</summary>
+public interface IKnownLlmProviderIds
+{
+    bool IsKnown(string providerId);
+}

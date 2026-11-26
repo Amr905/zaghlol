@@ -20,6 +20,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\ZaghlolTestDatabase.cs" Link="Shared\ZaghlolTestDatabase.cs" />
     <Compile Include="..\Shared\FakeLlmProvider.cs" Link="Shared\FakeLlmProvider.cs" />
+    <Compile Include="..\Shared\FakeVertexTokenSource.cs" Link="Shared\FakeVertexTokenSource.cs" />
     <Compile Include="..\Shared\FakeKms.cs" Link="Shared\FakeKms.cs" />
     <Compile Include="..\Shared\FileKmsKeySet.cs" Link="Shared\FileKmsKeySet.cs" />
     <Compile Include="..\Shared\HostSecretsKeySet.cs" Link="Shared\HostSecretsKeySet.cs" />

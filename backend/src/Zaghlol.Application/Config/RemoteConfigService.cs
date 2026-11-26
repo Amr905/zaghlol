@@ -1,5 +1,7 @@
 using System.Globalization;
 
+using Zaghlol.Application.Llm;
+
 namespace Zaghlol.Application.Config;
 
 /// <summary>One stored <c>remote_config</c> row. <see cref="Version"/> counts the changes of this key.</summary>
@@ -124,7 +126,7 @@ public enum ConfigSetStatus
 public sealed record ConfigSetResult(ConfigSetStatus Status, RemoteConfigState? State = null);
 
 /// <summary>The admin use cases for <c>/admin/v1/config</c>.</summary>
-public sealed class RemoteConfigAdminService(IRemoteConfigAdminStore store, TimeProvider clock)
+public sealed class RemoteConfigAdminService(IRemoteConfigAdminStore store, TimeProvider clock, IKnownLlmProviderIds? knownProviders = null)
 {
     public async Task<IReadOnlyList<RemoteConfigState>> ListAsync(CancellationToken cancellationToken)
     {
@@ -152,6 +154,12 @@ public sealed class RemoteConfigAdminService(IRemoteConfigAdminStore store, Time
         }
 
         if (!RemoteConfigKeys.TryCanonicalize(definition, value, out var canonical))
+        {
+            return new ConfigSetResult(ConfigSetStatus.InvalidValue);
+        }
+
+        // FU-411: a provider id the host has no adapter for would make every LLM call fail closed with no hint.
+        if (key == RemoteConfigKeys.LlmProvider && canonical.Length > 0 && knownProviders is { } known && !known.IsKnown(canonical))
         {
             return new ConfigSetResult(ConfigSetStatus.InvalidValue);
         }
