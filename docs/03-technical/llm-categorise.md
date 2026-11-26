@@ -140,7 +140,7 @@ consent covers it (OQ-LCAT-04); the D-16 contributions toggle is not consulted.
   for custom categories); picker cancelled → unchanged; 5 s Undo removes rule and outbox row. Counter in Settings → Privacy and
   the queue header (`cat.llm_quota` snapshot). Discovery card when ≥ 3 distinct eligible uncategorised merchants, settings
   `cat.card_shown` (count ≤ 3), `cat.card_last_shown` (≥ 30 days), `cat.card_never`; passive row in the queue header while off.
-- **Consent:** `cat.llm_consent` `{provider, v, at}` (encrypted), sheet text per FR-LCAT-44; Settings switch; cleared by "Delete everything".
+- **Consent:** `cat.llm_consent` `{provider, v, at}` (encrypted), sheet text per FR-LCAT-44; Settings switch; cleared by "Delete everything". Terms (provider id and names) come from the sync `config` block exactly as for Ask (`ask-llm.md` §4.6, FU-425); on a 409 the sender clears this consent, keeps the queue, resets the config cursor, sends nothing and shows the passive re-consent row.
 - **Flag:** `llm_categorise` (fail closed, 14-day staleness); off → no card, no request, existing chips and controls stay.
 
 ## 8. Tests and tasks
