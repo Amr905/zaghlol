@@ -33,6 +33,10 @@ enum AskIntent {
 
   /// Humorous critique of spending (FR-CHAT-04).
   roast,
+
+  /// T-282 (D-86): how much the user exchanged between currencies in a
+  /// period ("غيّرت كام دولار الشهر ده؟").
+  exchange,
 }
 
 enum AskPeriodKind {

@@ -5671,6 +5671,17 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
+  ) {
+    return '$span غيّرت $given وخدت $received. سعر البنك: $unit الواحد بـ $rate.';
+  }
+
+  @override
   String chatAnswerSpendCard(String amount, String card, String span) {
     return 'صرفت $amount بكارت $card $span.';
   }

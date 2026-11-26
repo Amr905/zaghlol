@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Decision | D-86 (PO, 2026-11-26): option C "Hybrid" from `multi-currency-options.md` |
-| Status | **DRAFT for the PO** — design only, no code |
+| Status | **IN BUILD (slice 2)** — slice 1 merged (batch 78); slice 2 built on the Lead assumptions Q1–Q4 pending the PO |
 | Fixed rules | CLAUDE.md §2.4, D-28, D-29, D-81, D-82, D-84, D-85; FR-CUR-*, FR-TXN-04, FR-PAR-12 |
 
 **In one line:** EGP stays the main view. Each other currency you actually use gets a small card that opens its own view. One optional "≈ total in EGP" line gives the whole picture and always says it is approximate. Stored amounts never change.
@@ -21,10 +21,10 @@
 | **Per-currency view (new screen, reuses the Home page)** | That currency's full page on Home. | It opens from the card. It has the same layout as Home in that currency: hero, income/spent/left, its own feed and its own budget if one exists. It never shows another currency's numbers. |
 | **"≈ total in EGP" line** | Exists only on the Money tab (net worth), off by default (A-54). | Home shows **one line**: `≈ ٤٩٬٥٤٠ ج.م دخلك كله تقريباً`, with the rate date under it. It is **always** marked "≈" and "تقريبي". **Hidden** if any currency on screen has no rate. Hidden when the setting is off. Tapping it opens a sheet that shows each currency, the rate used and where the rate came from. |
 | **Month / Budget (S-22)** | Budgets are per currency (FR-BUD-02). Each budget counts only its own currency. | Same, plus: the **EGP month grows by the EGP you actually received** when you exchange (see §2). A currency with real activity this month gets a small offer: «تعمل ميزانية بالدولار؟». No currency gets a budget unless the user says yes. |
-| **Transactions (S-11)** | Mixed currencies in one list, each row in its own currency. Day headers show one total per currency. | Same list. An exchange shows as **one row with both legs**: `حولت ٦٠٠ USD ← ٢٩٬٧٠٠ ج.م` with the bank's rate under it. It is labelled "not spending". A currency card filters the list to that currency. |
+| **Transactions (S-11)** | Mixed currencies in one list, each row in its own currency. Day headers show one total per currency. | Same list. An exchange shows as **one row with both legs**: `غيّرت ٦٠٠ USD ← ٢٩٬٧٠٠ ج.م` with the bank's rate under it. It is labelled "not spending". A currency card filters the list to that currency. |
 | **Money / accounts (S-40)** | Net worth is shown per currency, never summed. The ≈ net-worth line appears when the setting is on (T-115). Accounts show their own currency. | No change in layout. The ≈ line uses the same rate rule as Home (§3). A multi-currency account (Wise, Revolut) keeps one balance per currency. |
 | **Insights charts (S-20)** | Currency chips. Each chart uses one currency at a time. I found no ≈ option in the chart providers. | Same chips, **EGP first**. Exchanges are never counted as spending or income in any chart. The cash-flow chart shows "exchanged in" as its own colour in the EGP view. The ≈ chip stays off unless the setting is on, and it is labelled "تقريبي". |
-| **Ask Zaghlol (S-50)** | Answers give one figure per currency (FR-CHAT-01). | Same, plus one new question: «حولت كام دولار الشهر ده؟», which answers in both currencies and gives the rate. An answer never adds currencies unless the user asks for "≈", and then it says it is approximate. |
+| **Ask Zaghlol (S-50)** | Answers give one figure per currency (FR-CHAT-01). | Same, plus one new question: «غيّرت كام دولار الشهر ده؟», which answers in both currencies and gives the rate. An answer never adds currencies unless the user asks for "≈", and then it says it is approximate. |
 | **Widgets (W-01)** | Safe to spend and days to payday. | Shows EGP figures plus a small `+USD` hint when other currency cards exist. Never shows a mixed sum. Hide-amounts rules still apply. |
 | **Export (S-67)** | Currency code on every row. Amounts never converted (FR-EXP-07). | Same, plus a "pair" column so both legs of an exchange can be matched in Excel. No converted column. |
 
@@ -39,7 +39,7 @@ Ahmed's payday is the 24th. His three latest salaries came in USD on the 24th, s
 | Step | What happens | What Ahmed sees |
 |---|---|---|
 | 1. **24 Nov: salary USD 1,000 arrives** | It is stored as **income, category Salary, in USD**. Nothing is converted. It starts the December month. | A **USD card** appears on Home: `USD ١٬٠٠٠٫٠٠ دخل`. The EGP page does not change. The ≈ line (if on) reads `≈ ٤٩٬٦٠٠ ج.م دخلك كله تقريباً · سعر النهارده`, using the daily rate of 49.60. |
-| 2. **26 Nov: he exchanges USD 600 → EGP at the bank** | The bank SMS gives both amounts: −USD 600, +EGP 29,700. They are saved as **one exchange (a transfer pair)**. The bank's rate is 29,700 ÷ 600 = **49.50**. | The transactions list shows one row: `حولت ٦٠٠ USD ← ٢٩٬٧٠٠ ج.م · سعر البنك ٤٩٫٥٠`, labelled "not spending". |
+| 2. **26 Nov: he exchanges USD 600 → EGP at the bank** | The bank SMS gives both amounts: −USD 600, +EGP 29,700. They are saved as **one exchange (a transfer pair)**. The bank's rate is 29,700 ÷ 600 = **49.50**. | The transactions list shows one row: `غيّرت ٦٠٠ USD ← ٢٩٬٧٠٠ ج.م · سعر البنك ٤٩٫٥٠`, labelled "not spending". |
 | 3. **The EGP month grows** (PO decision) | The **EGP 29,700 received** counts as EGP money for December. It is shown as "from your dollars", **not** as a second salary. | EGP page: income `٢٩٬٧٠٠ ج.م`, with «منهم ٢٩٬٧٠٠ ج.م من الدولار» under it. "Left" and "safe to spend" grow to match. |
 | 4. **USD 400 stays on its card** | The USD side shows salary +1,000, exchanged −600, left **400**. The exchange is not USD spending. | The USD card reads `USD ٤٠٠٫٠٠ فاضل`. Tapping it opens the USD view with the salary and the exchange. |
 | 5. **Nothing is counted twice** | In the ≈ line, the exchanged part counts **once, at the bank's real rate**, and only the USD still held uses the daily rate: 29,700 + (400 × 49.60 = 19,840) = **≈ 49,540**. The salary is income once, in USD. The exchange is never income, never spending. | `≈ ٤٩٬٥٤٠ ج.م دخلك كله تقريباً · سعر البنك + سعر ٢٦ نوفمبر`. Turn the ≈ line off and every combined number disappears. |
@@ -97,16 +97,16 @@ Packages 1–4 and 7 ship as **slice 1 without the server rate feed**: cards, th
 | `home.approx.rateNote` | سعر البنك + سعر {date} | Bank rate + rate of {date} | 32 |
 | `home.approx.stale` | سعر قديم | Old rate | 10 |
 | `home.approx.sheet.title` | الحسبة دي تقريبية | This total is approximate | 28 |
-| `home.approx.sheet.body` | بنحسبها بسعر البنك للي حولته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي. | We use your bank's rate for what you exchanged and today's rate for the rest. Your money stays saved in its own currency. | 120 |
+| `home.approx.sheet.body` | بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي. | We use your bank's rate for what you exchanged and today's rate for the rest. Your money stays saved in its own currency. | 120 |
 | `home.kpi.income.fromExchange` | منهم {amount} من الدولار | incl. {amount} from your USD | 30 |
 | `currencyView.title` | الشهر ده بالـ{currency} | This month in {currency} | 24 |
 | `budget.offer.foreign` | تعمل ميزانية بالـ{currency}؟ | Want a {currency} budget? | 28 |
 | `budget.offer.raise` | زوّد ميزانية الشهر بـ {amount}؟ | Add {amount} to this month's budget? | 40 |
-| `txn.exchange.title` | حولت {from} ← {to} | Exchanged {from} → {to} | 32 |
+| `txn.exchange.title` | غيّرت {from} ← {to} | Exchanged {from} → {to} | 32 |
 | `txn.exchange.rate` | سعر البنك {rate} · مش مصروف | Bank rate {rate} · not spending | 32 |
 | `add.exchange.entry` | غيّرت عملة | I exchanged currency | 16 |
 | `add.exchange.sent` / `.received` | دفعت / وصلني | You gave / You got | 12 |
-| `pair.exchange.prompt` | دول الدولارات اللي حولتها؟ | Is this your exchanged USD? | 32 |
+| `pair.exchange.prompt` | دول الدولارات اللي غيّرتها؟ | Is this your exchanged USD? | 32 |
 | `pair.exchange.yes` / `.no` | أيوه / لأ | Yes / No | 6 |
 | `mascot.fx.firstForeign` (Captain, Proud coach) | قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط. | Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got. | 110 |
 

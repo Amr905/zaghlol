@@ -152,11 +152,25 @@ final class CashFlowPoint {
     required this.income,
     required this.spend,
     required this.isPartial,
+    this.exchangedIn,
+    this.exchangedOut,
   });
 
   final ChartPeriod period;
   final Money income;
   final Money spend;
+
+  /// T-282 (D-86): money received / given away by exchanging currencies. Own
+  /// series: never income or spending. Null reads as zero.
+  final Money? exchangedIn;
+  final Money? exchangedOut;
+
+  Money get exchangedInOrZero => exchangedIn ?? Money.zero(income.currency);
+  Money get exchangedOutOrZero => exchangedOut ?? Money.zero(income.currency);
+
+  /// Same rule as Home "left" (`CycleTotals.left`): income + exchanged in -
+  /// spending - exchanged out.
+  Money get left => income + exchangedInOrZero - spend - exchangedOutOrZero;
 
   /// The user's data starts inside this bucket (EC-23): shown as partial.
   final bool isPartial;
@@ -170,6 +184,14 @@ final class CashFlowPoint {
     income: points.skip(1).fold(points.first.income, (a, p) => a + p.income),
     spend: points.skip(1).fold(points.first.spend, (a, p) => a + p.spend),
     isPartial: points.first.isPartial,
+    exchangedIn: points.fold<Money>(
+      Money.zero(points.first.income.currency),
+      (a, p) => a + p.exchangedInOrZero,
+    ),
+    exchangedOut: points.fold<Money>(
+      Money.zero(points.first.income.currency),
+      (a, p) => a + p.exchangedOutOrZero,
+    ),
   );
 }
 

@@ -8107,6 +8107,18 @@ abstract class AppLocalizations {
     String percent,
   );
 
+  /// E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).
+  ///
+  /// In ar, this message translates to:
+  /// **'{span} غيّرت {given} وخدت {received}. سعر البنك: {unit} الواحد بـ {rate}.'**
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
+  );
+
   /// E · spend_on_card
   ///
   /// In ar, this message translates to:

@@ -48,13 +48,16 @@ SavedMonths savedMonths(List<CashFlowPoint> points, CivilDate today) {
     final from = p.period.from;
     final to = p.period.to;
     final open = to >= today && from <= today;
-    var net = p.income.minor - p.spend.minor;
+    var net = p.left.minor;
     var projected = false;
     if (open) {
       final elapsed = today.difference(from) + 1;
       final length = to.difference(from) + 1;
       if (elapsed >= ChartThresholds.projectionMinDays && elapsed < length) {
-        net = p.income.minor - mulDivRound(p.spend.minor, length, elapsed);
+        net =
+            p.left.minor +
+            p.spend.minor -
+            mulDivRound(p.spend.minor, length, elapsed);
         projected = true;
       }
     }
