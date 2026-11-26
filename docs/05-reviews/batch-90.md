@@ -275,3 +275,55 @@ Required change:
 ## Fix round 2 — T-328
 
 M3: card-word detection splits letters from digits (`كارت4321`, `visa4321`), accepts pronoun suffixes and clitics (`كارتك`, `كارتها`, `بكارته`, `والفيزا`), and digit groups join across space, `,`, `،`, en/em dash and hyphen (thousands such as `1,000` excepted). m14: the net `_looseLeak` is independent of the masker: per piece between placeholders, names of 4+ letters match with every non-letter removed; any letter-free run whose digits (after normalisation) hold a known last-4 is a leak, except a single group longer than 4 digits, a lone group equal to the last-4 before a currency word, and a valid date. It prefers blocking (`12,4321` blocks; a far last-4 and `كارفوري` are now blocked instead of sent). m13: placeholders capped at 99 per kind; `ask-llm.md` says `_[1-9][0-9]?`; vectors `valid-ref-two-digits` (`_10`) and `invalid-ref-three-digits` (`_100`) added. Tests: new group in `reference_masker_variants_test.dart`; `dart test` 1865 passed; the .NET contract tests were run.
+
+## Delta re-review 2 — T-328
+
+Scope: `git diff 689deb8a..f414d890` (fix round 2). Reviewer: `code-reviewer` (Opus), delta only.
+
+Verdict: **APPROVED**. M3 is closed, m13 is closed and m14 is closed. The remaining gaps are accepted (listed below). The new minors are follow-ups.
+
+**Checks run.** `dart test test/chat/llm`: 125 passed. `dart format` and `dart analyze` on `lib/chat/llm` and `test/chat/llm` are clean. About 120 throwaway probes went through `ClientScrub` + `ReferenceMasker` (not committed). The sources used were `withCosta`, plus a set with last-4s 2026 and 1500, nicknames «ماما» and «سارة», QNB, and Costa/Uber/Metro.
+
+**M3 closed.** Each of these is masked to `⟦CARD_1⟧`, or blocked by the net (unresolved, nothing sent):
+- every M3 vector;
+- mixed ASCII and Arabic-Indic digits (`4٣ 2١`, `٤3٢1`);
+- ZWSP, ZWNJ, ZWJ, WJ, RLM and LRM between digits;
+- NBSP, NNBSP and tab;
+- `٫`, `٬`, `:`, `;`, `+`, `*`, `#`, `(43)(21)` and `43 -/21`;
+- fullwidth and Persian digits;
+- `xx4321`, `****4321` and `...4321`;
+- `كارتي اللي بـ4321`, `الكارت أبو 4321`, `الفيزا بتاعة 4321` and `4321 كارت`;
+- `كارفور4321`, `ماما4321`, `CIB 4321` and `آخر 4 ارقام 4321`.
+
+`صرفت 4321 جنيه من كارت 4321` is sent as `صرفت ⟦CARD_1⟧ جنيه من كارت ⟦CARD_1⟧`. The amount is masked too, which over-masks but is safe.
+
+**Net (`_looseLeak`).** It is independent of the masker's matching: it uses its own letter-strip and non-letter runs, not `_wordRun`, `_digitHits` or `_cardWords`. It shares only `looseFold`, so fold gaps are common-mode (math digits below). It runs first in `_leaks`, and the single `MaskResult` return still sits behind it. I checked its three exceptions:
+- **Lone group longer than 4 digits** (`14321`). The number is longer than a last-4, so the user means an amount. `كارت 4321.00` and `4321٫00` are sent because the loose fold drops the dot and gives `432100`. That is a decimal amount, the same class as the amount rule. Accepted.
+- **Lone group before a currency word** (`صرفت 4321 جنيه`, `صرفت ٤٣٢١ ج`). This is the documented rule, still tied to the FU-364 OQ. A card reference followed directly by a currency word (`ج`, `le`, `egp`) is not how anyone refers to a card. Wherever a card word is near, the primary path masks it anyway (`كارت 4321 جنيه` gives `⟦CARD_1⟧ جنيه`). Accepted.
+- **Valid date** (3 groups, a 4-digit year, day ≤ 31, month ≤ 12). A last-4 sent through this exception needs a card reference typed as a date. Not exploitable in practice. Accepted.
+
+**Surviving leaks (all accepted, none MAJOR):**
+- `كارت 43ab21`, `كارت 43 ab 21`. Letters inside the number are not ordinary typing of the user's own reference.
+- `card 𝟒𝟑𝟐𝟏` (math bold digits). This is the look-alike-script class already accepted for names; no keyboard produces it.
+- The amount, decimal and longer-number cases above.
+- `CIBcard` (glued bank name, an accepted gap from round 1). CIB, NBE and QNB are still masked by the primary path: `in my CIB card` → `⟦BANK_1⟧`, `بالCIB` → `بال⟦BANK_1⟧`. QNB with no QNB account gives `bankWithoutAccount`, a local clarification.
+
+**Over-blocking.** None of these is a privacy issue. On a block, `MaskUnresolved(failed)` keeps the question on the phone and the user gets the local answer path.
+- **m16 (minor). The name net produces substring false positives across word boundaries.** With the merchant Costa (common in Egypt), `what did coffee cost at work` and `how much does food cost a month` are blocked. With the nickname «ماما», `تمام اما صرفت` is blocked. A 4-letter nickname or merchant name will hit now and then in ordinary text. Follow-up: require the match to start at a word start in the unstripped text, or set a minimum of 5 letters for English names. Not common enough to be major.
+- **m17 (minor). A last-4 that looks like a year or a round amount blocks benign questions.** If a card ends in 2026, `صرفت كام في 2026؟`, `how much did I spend in 2026` and `قارن 2025 و 2026` are always unresolved. Dates such as `1/1/2026` still go through. If a card ends in 1500, `صرفت اكتر من 1500` and `عايز ميزانية 1500 في الشهر` are blocked, and so is `1,500 جنيه`: the currency exception covers only a lone group, not a thousands-grouped one. These users can still ask, but never through the LLM for these phrasings. About 1 in 10⁴ cards per value, so not major. Follow-up with FU-364: exempt a 4-digit year (2000–2100) when no card word is within 3 tokens, and apply the currency exception to `_thousands` groups.
+
+**Names net.** Only names of 4 or more letters are checked. 3-letter bank tokens stay with the primary path, which masks them (above). The net also checks a name with `ال` removed when the remainder still has 4 or more letters.
+
+**m13 closed.** The cap of 99 per kind returns unresolved (`reference_masker.dart:678`, tested). `ask-llm.md:46` reads `_[1-9][0-9]?`. The vectors `valid-ref-two-digits` (`_10`, accept) and `invalid-ref-three-digits` (`_100`, SCHEMA_INVALID) are added. The batch-91 rebase note for `plan_schema.g.dart` still applies.
+
+**Performance** (scrub + mask; 100 accounts with label, nickname, extra name and last-4; 100 merchants with two names each; 300-character questions; JIT on the cloud VM):
+
+| Question | Average | Before (689deb8a) |
+|---|---|---|
+| Realistic mixed text | 2.9–3.5 ms | 2.7 ms |
+| Digit-heavy text | 1.9 ms | 1.6 ms |
+| `٤٣٢١ جنيه` × 30 | 6–7 ms | 2.7 ms |
+| Pathological single 300-letter token | 36–38 ms | 31 ms |
+
+All are under 50 ms.
+- **m18 (minor).** The worst case was already there before this round and has little margin on a slow phone. Follow-up: cap the token length, or cut the name scan short on long tokens.
