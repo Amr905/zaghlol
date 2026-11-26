@@ -10,7 +10,10 @@
 enum FeatureFlag {
   zakah('zakah'),
   smartRoi('smart_roi'),
-  roiNamedProducts('roi_named_products');
+  roiNamedProducts('roi_named_products'),
+  askLlm('ask_llm'),
+  askLlmInvest('ask_llm_invest'),
+  llmCategorise('llm_categorise');
 
   const FeatureFlag(this.key);
 
