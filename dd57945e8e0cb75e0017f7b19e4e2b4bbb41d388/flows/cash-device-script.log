@@ -1,0 +1,15 @@
+==== cash device
+Success
+  emu[CIB]: OK 
+  emu[CIB]: OK 
+CASH_DEVICE CATEGORY atm=sys:cash instapay=sys:instapay
+CASH_DEVICE DONUT before total=695280 slices={sys:subscriptions: 391980, sys:instapay: 153000, sys:cash: 100000, sys:groceries: 50300}
+CASH_DEVICE DONUT after total=695280 slices={sys:subscriptions: 391980, sys:instapay: 153000, sys:groceries: 80300, sys:cash: 70000}
+CASH_DEVICE SHOT cash-01-insights
+CASH_DEVICE RECT add=Rect.fromLTRB(129.0, 547.0, 191.0, 609.0) send=Rect.fromLTRB(252.0, 474.0, 300.0, 522.0) screen=Size(320.0, 640.0)
+CASH_DEVICE SHOT cash-02-zaghlol-add-vs-send
+CASH_DEVICE HOME content under Add: 0
+CASH_DEVICE SHOT cash-03-home-add
+CASH_DEVICE RESULT problems=0
+00:16 +1: All tests passed!
+CASH_DEVICE NOTIFICATIONS after launch=0 after two resumes=0
