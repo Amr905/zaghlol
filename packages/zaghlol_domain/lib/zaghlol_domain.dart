@@ -1,6 +1,8 @@
 /// Public API of the `zaghlol_domain` package.
 library;
 
+export 'ask/invest_bands.dart';
+export 'ask/invest_illustrations.dart';
 export 'ask/savings_suggest.dart';
 export 'ask/what_if.dart';
 export 'budget/cash_pool.dart';
