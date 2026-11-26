@@ -34,7 +34,30 @@ object HapticsRegistration {
         }
     }
 
-    fun unregister(messenger: BinaryMessenger) {
+    /** Seam so the cancel call is unit-testable without the framework. */
+    internal fun interface Cancellable {
+        fun cancel()
+    }
+
+    /** FU-397: stop any in-flight vibration; never throws. Returns true when cancel was called. */
+    internal fun cancelWith(target: Cancellable?): Boolean {
+        if (target == null) return false
+        return try {
+            target.cancel()
+            true
+        } catch (_: RuntimeException) {
+            false
+        }
+    }
+
+    /** Call from the activity's onPause/onStop so a long pattern does not buzz in the background. */
+    fun cancel(context: Context) {
+        val v = vibrator(context.applicationContext)
+        cancelWith(v?.let { Cancellable { it.cancel() } })
+    }
+
+    fun unregister(messenger: BinaryMessenger, context: Context? = null) {
+        context?.let { cancel(it) }
         MethodChannel(messenger, CHANNEL).setMethodCallHandler(null)
     }
 

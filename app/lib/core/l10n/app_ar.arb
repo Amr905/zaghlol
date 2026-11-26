@@ -3047,6 +3047,22 @@
   "@ingestionReviewEmptyTitle": {
     "description": "T · C-28, Rive proud"
   },
+  "ingestionReviewHeaderTitle": "{count, plural, =1{رسالة واحدة محتاجة نظرة} =2{رسالتين محتاجين نظرة} few{{n} رسايل محتاجين نظرة} many{{n} رسالة محتاجين نظرة} other{{n} رسالة محتاجين نظرة}}",
+  "@ingestionReviewHeaderTitle": {
+    "description": "C · T-296 review header, count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewHeaderHelper": "اسحب عشان تقبل أو تشيل، أو دوس على الكارت وظبّطه.",
+  "@ingestionReviewHeaderHelper": {
+    "description": "T · T-296 review header helper line"
+  },
   "ingestionAlwaysSenderTitle": "أقرا رسايل {sender} على طول؟",
   "@ingestionAlwaysSenderTitle": {
     "description": "T · A-66 sheet, after confirming a generic parse",
@@ -4291,6 +4307,8 @@
       }
     }
   },
+  "workingBirdA11y": "زغلول شغال على الموضوع",
+  "workingBirdFailedA11y": "زغلول بيقولك حصلت مشكلة",
   "captureRescanDone": "{count, plural, =0{ملقيتش حركات جديدة ✓} =1{ضفت حركة جديدة ✓} =2{ضفت حركتين جداد ✓} few{ضفت {n} حركات جديدة ✓} many{ضفت {n} حركة جديدة ✓} other{ضفت {n} حركة جديدة ✓}}",
   "@captureRescanDone": {
     "description": "N · count:int, n",
@@ -11317,6 +11335,10 @@
   "settingsPrefsHideAmounts": "اخفي المبالغ في التطبيق",
   "@settingsPrefsHideAmounts": {
     "description": "D-67 Preferences switch: hide every amount in the app"
+  },
+  "settingsPrefsHaptics": "الاهتزاز",
+  "@settingsPrefsHaptics": {
+    "description": "T-298 Preferences switch: haptic ticks on or off"
   },
   "settingsPrefsHideAmountsHint": "كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.",
   "@settingsPrefsHideAmountsHint": {

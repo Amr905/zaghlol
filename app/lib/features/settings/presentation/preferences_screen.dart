@@ -202,6 +202,16 @@ class PreferencesScreen extends ConsumerWidget {
         ),
         SettingsSection(
           children: [
+            SettingsSwitchRow(
+              key: const ValueKey('prefs-haptics'),
+              title: t.settingsPrefsHaptics,
+              value: ref.watch(hapticsEnabledProvider).value ?? true,
+              onChanged: (v) => _write(ref, Settings.hapticsEnabled, v),
+            ),
+          ],
+        ),
+        SettingsSection(
+          children: [
             const _PaydayRow(),
             const SalarySettingsRow(),
             _IncomeRow(

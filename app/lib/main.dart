@@ -25,6 +25,7 @@ import 'core/l10n/locale_providers.dart';
 import 'core/platform/launch_theme.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/theme_mode_provider.dart';
+import 'core/ui/haptics_sync.dart';
 import 'core/theme/app_theme.dart';
 import 'features/accounts/presentation/edit_card/edit_card_providers.dart'
     show cardCapturePortProvider;
@@ -245,6 +246,7 @@ class _LocalizedAppState extends ConsumerState<_LocalizedApp>
     ref.listen(catalogSeedProvider, (_, next) {
       if (next.hasValue) ref.invalidate(txnLookupsProvider);
     });
+    ref.watch(hapticsSyncProvider);
     ref.watch(cycleAppWiringProvider);
     ref.watch(pendingAlertsWatcherProvider); // FU-267
     // T-118: the home-screen widget follows the cycle overview.

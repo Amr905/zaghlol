@@ -5,6 +5,8 @@
 // variant. Skip hands the step slug to the caller (FR-ONB-11).
 // Counts only: nothing here shows or logs a message body, sender or amount.
 
+import '../../mascot/presentation/working_bird.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -336,13 +338,9 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
               children: [
                 ExcludeSemantics(
                   child: SizedBox.square(
-                    dimension: 28,
+                    dimension: 40,
                     child: running
-                        ? CircularProgressIndicator(
-                            strokeWidth: 3,
-                            color: c.primary,
-                            backgroundColor: c.primaryContainer,
-                          )
+                        ? const WorkingBird(busy: true, size: 40)
                         : Icon(Icons.check_circle, color: c.primary, size: 28),
                   ),
                 ),
@@ -422,9 +420,8 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
         const SizedBox(height: ZSpacing.lg),
         OnbMascot(
           size: 130,
-          moment: _progress.phase == ScanPhase.running
-              ? ZaghlolMoment.scanning
-              : ZaghlolMoment.tourGuide,
+          // One bird per screen: the scan card holds the working bird.
+          moment: ZaghlolMoment.tourGuide,
         ),
         const SizedBox(height: ZSpacing.lg),
         Text(

@@ -26,6 +26,7 @@ import '../../../../core/ui/z_banner.dart';
 import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_card.dart';
 import '../../../../core/ui/z_chip.dart';
+import '../../../../core/ui/z_empty_state.dart';
 import '../../../../core/ui/z_sheet.dart';
 import '../../../budget/application/budget_providers.dart'
     show localZoneProvider;
@@ -33,6 +34,7 @@ import '../../../capture/presentation/template_builder_screen.dart';
 import '../../../transactions/domain/transaction.dart' show TxnDirection;
 import '../../../transfers/presentation/exchange_entry_screen.dart';
 import '../../data/review_repository.dart' show ReviewException;
+import 'review_header.dart';
 import 'review_models.dart';
 import 'review_providers.dart';
 import '../../../../core/ui/z_haptics.dart';
@@ -264,15 +266,25 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsetsDirectional.all(ZSpacing.screen),
-                itemCount: shown.length,
+                itemCount: shown.length + 1,
                 separatorBuilder: (_, _) => const SizedBox(height: ZSpacing.md),
-                itemBuilder: (context, i) => _swipeable(shown[i]),
+                itemBuilder: (context, i) => i == 0
+                    ? ReviewHeader(
+                        count: visible.length,
+                        countText: _digits(visible.length),
+                      )
+                    : _swipeable(shown[i - 1]),
               ),
             ),
           ],
         );
       },
     );
+  }
+
+  String _digits(int n) {
+    final lang = Localizations.localeOf(context).languageCode;
+    return ref.read(digitsModeProvider(lang)).render('$n');
   }
 
   Widget _swipeable(ReviewCardModel card) {
@@ -1315,26 +1327,9 @@ class _Empty extends StatelessWidget {
   const _Empty();
 
   @override
-  Widget build(BuildContext context) {
-    final c = ZColors.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(ZSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle_outline, size: 64, color: c.primary),
-            const SizedBox(height: ZSpacing.md),
-            Text(
-              AppLocalizations.of(context).ingestionReviewEmptyTitle,
-              textAlign: TextAlign.center,
-              style: ZType.title.copyWith(color: c.text),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ZEmptyState(
+    title: AppLocalizations.of(context).ingestionReviewEmptyTitle,
+  );
 }
 
 class _Skeleton extends StatelessWidget {

@@ -2241,6 +2241,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ingestionReviewEmptyTitle => 'All clear! Nothing to review ✨';
 
   @override
+  String ingestionReviewHeaderTitle(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n messages need a look',
+      one: '1 message needs a look',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingestionReviewHeaderHelper =>
+      'Swipe to accept or dismiss, or tap a card to fix it.';
+
+  @override
   String ingestionAlwaysSenderTitle(String sender) {
     return 'Always capture messages from $sender?';
   }
@@ -3144,6 +3159,12 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get workingBirdA11y => 'Zaghlol is working on it';
+
+  @override
+  String get workingBirdFailedA11y => 'Zaghlol says something went wrong';
 
   @override
   String captureRescanDone(int count, String n) {
@@ -8284,6 +8305,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPrefsHideAmounts => 'Hide amounts in the app';
+
+  @override
+  String get settingsPrefsHaptics => 'Vibration';
 
   @override
   String get settingsPrefsHideAmountsHint =>

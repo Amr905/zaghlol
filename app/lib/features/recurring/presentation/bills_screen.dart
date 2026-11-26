@@ -125,7 +125,10 @@ class _Body extends ConsumerWidget {
           ZSpacing.fabClearance,
         ),
         children: [
-          const SizedBox(height: ZSpacing.xl),
+          const Center(
+            child: ZaghlolAvatar(moment: ZaghlolMoment.sleep, size: 120),
+          ),
+          const SizedBox(height: ZSpacing.md),
           Text(
             l.recurringBillsEmptyTitle,
             textAlign: TextAlign.center,

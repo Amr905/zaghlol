@@ -16,6 +16,7 @@ import '../../../../core/l10n/generated/app_localizations.dart';
 import '../../../../core/l10n/locale_providers.dart';
 import '../../../../core/theme/z_tokens.dart';
 import '../../../../core/ui/z_components.dart';
+import '../../../../core/ui/z_empty_state.dart';
 import '../../../budget/application/budget_providers.dart';
 import '../../../home/application/card_filter.dart';
 import '../../application/bulk_actions.dart';
@@ -899,36 +900,12 @@ class _Message extends StatelessWidget {
   final VoidCallback? onAction;
 
   @override
-  Widget build(BuildContext context) {
-    final c = ZColors.of(context);
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(ZSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: ZType.title.copyWith(color: c.text),
-            ),
-            if (body != null) ...[
-              const SizedBox(height: ZSpacing.sm),
-              Text(
-                body!,
-                textAlign: TextAlign.center,
-                style: ZType.body.copyWith(color: c.textMuted),
-              ),
-            ],
-            if (actionLabel != null) ...[
-              const SizedBox(height: ZSpacing.lg),
-              ZButton(label: actionLabel!, onPressed: onAction),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ZEmptyState(
+    title: title,
+    body: body,
+    actionLabel: actionLabel,
+    onAction: onAction,
+  );
 }
 
 class _Skeleton extends StatelessWidget {

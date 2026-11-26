@@ -2293,6 +2293,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ingestionReviewEmptyTitle => 'كله تمام! مفيش حاجة مستنية رأيك ✨';
 
   @override
+  String ingestionReviewHeaderTitle(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n رسالة محتاجين نظرة',
+      many: '$n رسالة محتاجين نظرة',
+      few: '$n رسايل محتاجين نظرة',
+      two: 'رسالتين محتاجين نظرة',
+      one: 'رسالة واحدة محتاجة نظرة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ingestionReviewHeaderHelper =>
+      'اسحب عشان تقبل أو تشيل، أو دوس على الكارت وظبّطه.';
+
+  @override
   String ingestionAlwaysSenderTitle(String sender) {
     return 'أقرا رسايل $sender على طول؟';
   }
@@ -3228,6 +3246,12 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get workingBirdA11y => 'زغلول شغال على الموضوع';
+
+  @override
+  String get workingBirdFailedA11y => 'زغلول بيقولك حصلت مشكلة';
 
   @override
   String captureRescanDone(int count, String n) {
@@ -8423,6 +8447,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsPrefsHideAmounts => 'اخفي المبالغ في التطبيق';
+
+  @override
+  String get settingsPrefsHaptics => 'الاهتزاز';
 
   @override
   String get settingsPrefsHideAmountsHint =>
