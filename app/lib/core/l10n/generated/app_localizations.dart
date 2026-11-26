@@ -14201,7 +14201,7 @@ abstract class AppLocalizations {
   String chatWhatIfCutPercent(
     String amount,
     String monthly,
-    int months,
+    String months,
     String percent,
     String subject,
   );
@@ -14213,7 +14213,7 @@ abstract class AppLocalizations {
   String chatWhatIfCutAmount(
     String amount,
     String monthly,
-    int months,
+    String months,
     String subject,
   );
 
@@ -14227,7 +14227,7 @@ abstract class AppLocalizations {
   ///
   /// In ar, this message translates to:
   /// **'لو حوشت {monthly} كل شهر، هيبقى معاك {amount} بعد {months}، من غير أي عائد.'**
-  String chatWhatIfSave(String amount, String monthly, int months);
+  String chatWhatIfSave(String amount, String monthly, String months);
 
   /// S · count:int, n · 1–3 full periods; caption under what-if and suggestions
   ///
@@ -14322,7 +14322,11 @@ abstract class AppLocalizations {
   ///
   /// In ar, this message translates to:
   /// **'في شهادة بعائد مثال {exampleRate} لمدة {months}، كان ممكن يطلع عائد حوالي {payout}، قبل الضرايب والمصاريف. ده معدل للتوضيح، مش عرض.'**
-  String chatInvestCertificate(String exampleRate, int months, String payout);
+  String chatInvestCertificate(
+    String exampleRate,
+    String months,
+    String payout,
+  );
 
   /// E · D-93 band 100 < S < G; nothing named
   ///

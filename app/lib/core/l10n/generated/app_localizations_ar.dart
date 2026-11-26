@@ -9896,7 +9896,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String chatWhatIfCutPercent(
     String amount,
     String monthly,
-    int months,
+    String months,
     String percent,
     String subject,
   ) {
@@ -9907,7 +9907,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String chatWhatIfCutAmount(
     String amount,
     String monthly,
-    int months,
+    String months,
     String subject,
   ) {
     return 'لو قللت $subject بـ $monthly في الشهر، هتوفر $amount في $months.';
@@ -9919,7 +9919,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String chatWhatIfSave(String amount, String monthly, int months) {
+  String chatWhatIfSave(String amount, String monthly, String months) {
     return 'لو حوشت $monthly كل شهر، هيبقى معاك $amount بعد $months، من غير أي عائد.';
   }
 
@@ -10005,7 +10005,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String chatInvestCertificate(String exampleRate, int months, String payout) {
+  String chatInvestCertificate(
+    String exampleRate,
+    String months,
+    String payout,
+  ) {
     return 'في شهادة بعائد مثال $exampleRate لمدة $months، كان ممكن يطلع عائد حوالي $payout، قبل الضرايب والمصاريف. ده معدل للتوضيح، مش عرض.';
   }
 

@@ -13486,7 +13486,7 @@
         "type": "String"
       },
       "months": {
-        "type": "int"
+        "type": "String"
       },
       "percent": {
         "type": "String"
@@ -13507,7 +13507,7 @@
         "type": "String"
       },
       "months": {
-        "type": "int"
+        "type": "String"
       },
       "subject": {
         "type": "String"
@@ -13537,7 +13537,7 @@
         "type": "String"
       },
       "months": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -13692,7 +13692,7 @@
         "type": "String"
       },
       "months": {
-        "type": "int"
+        "type": "String"
       },
       "payout": {
         "type": "String"
