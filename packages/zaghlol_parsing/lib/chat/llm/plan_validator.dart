@@ -328,9 +328,13 @@ class PlanValidator {
     final m = o! as Map<String, Object?>;
     return PlanPeriod(
       kind: PeriodKind.values.byName(m['k']! as String),
+      // ignore: no_double_money (a JSON number in the plan, not money)
       offset: (m['o']! as num).toInt(),
+      // ignore: no_double_money (a JSON number in the plan, not money)
       lastDays: (m['n'] as num?)?.toInt(),
+      // ignore: no_double_money (a JSON number in the plan, not money)
       month: (m['m'] as num?)?.toInt(),
+      // ignore: no_double_money (a JSON number in the plan, not money)
       year: (m['y'] as num?)?.toInt(),
     );
   }
@@ -357,15 +361,18 @@ class PlanValidator {
       _filter(m['target']),
       PlanMode(
         kind: WhatIfKind.values.byName(mode['kind']! as String),
+        // ignore: no_double_money (a JSON number in the plan, not money)
         percent: (mode['percent'] as num?)?.toInt(),
         amount: mode['amount'] as String?,
         currency: mode['currency'] as String?,
       ),
+      // ignore: no_double_money (a JSON number in the plan, not money)
       (m['months']! as num).toInt(),
     );
   }
 
   static Plan _parsePlan(String name, Map<String, Object?> p) {
+    // ignore: no_double_money (a JSON number in the plan, not money)
     int i(String k) => (p[k]! as num).toInt();
     switch (name) {
       case 'PL-SPEND':
@@ -478,10 +485,13 @@ bool _valid(Object? v, Map<String, Object?> s, Map<String, Object?> root) {
       return false;
     }
   }
+  // ignore: no_double_money (a JSON number in the plan, not money)
   if (v is num) {
     final min = s['minimum'];
     final max = s['maximum'];
+    // ignore: no_double_money (a JSON number in the plan, not money)
     if (min is num && v < min) return false;
+    // ignore: no_double_money (a JSON number in the plan, not money)
     if (max is num && v > max) return false;
   }
   if (v is List) {
@@ -522,7 +532,9 @@ bool _isType(Object? v, String t) => switch (t) {
   'object' => v is Map,
   'array' => v is List,
   'integer' =>
+    // ignore: no_double_money (a JSON number in the plan, not money)
     v is int || (v is double && v.isFinite && v == v.truncateToDouble()),
+  // ignore: no_double_money (a JSON number in the plan, not money)
   'number' => v is num,
   _ => false,
 };
