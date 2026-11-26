@@ -24,14 +24,14 @@ InvestBand band(String s, GoldQuote? q, [InvestThresholds? t]) =>
 InvestIllustration ill(
   Money s, {
   List<GoldQuote>? gold,
-  FxQuote? fx,
+  InvestFxQuote? fx,
   int months = 12,
   InvestThresholds? t,
 }) => illustrate(
   saved: s,
   prices: InvestPrices(
     gold: gold ?? [g('4000.00')],
-    usdEgp: fx ?? FxQuote(egpPerUsd: e('50.00'), asOf: fresh),
+    usdEgp: fx ?? InvestFxQuote(egpPerUsd: e('50.00'), asOf: fresh),
     certificateRateBp: 2000,
   ),
   instruments: InvestInstrument.values.toSet(),
@@ -176,7 +176,7 @@ void main() {
       final r = ill(
         e('4500.00'),
         gold: [g('4000.00', at: old)],
-        fx: FxQuote(egpPerUsd: e('50.00'), asOf: old),
+        fx: InvestFxQuote(egpPerUsd: e('50.00'), asOf: old),
       );
       expect(r.rows.whereType<GoldRow>().single.stale, isTrue);
       expect(r.rows.whereType<GoldRow>().single.centigrams, 112);

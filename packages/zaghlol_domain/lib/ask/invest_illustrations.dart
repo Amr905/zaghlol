@@ -18,8 +18,8 @@ enum InvestInstrument { gold, usd, certificate }
 const Duration investStaleAfter = Duration(hours: 24);
 
 /// USD/EGP: [egpPerUsd] is the price of one US dollar in EGP.
-final class FxQuote {
-  const FxQuote({required this.egpPerUsd, required this.asOf});
+final class InvestFxQuote {
+  const InvestFxQuote({required this.egpPerUsd, required this.asOf});
   final Money egpPerUsd;
   final DateTime asOf;
 }
@@ -34,7 +34,7 @@ final class InvestPrices {
 
   /// Gold per gram, any karat and currency; the matching one is picked.
   final List<GoldQuote> gold;
-  final FxQuote? usdEgp;
+  final InvestFxQuote? usdEgp;
 
   /// `ask.cd_example_rate_bp`, annual rate in basis points.
   final int certificateRateBp;
