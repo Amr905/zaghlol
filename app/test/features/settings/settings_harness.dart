@@ -52,6 +52,7 @@ class SettingsHarness {
       (ref) => Stream.value(Currency.of('EGP')),
     ),
     hideAmountsAppProvider.overrideWith((ref) => Stream.value(false)),
+    hapticsEnabledProvider.overrideWith((ref) => Stream.value(true)),
     appLockEnabledProvider.overrideWith((ref) => Stream.value(appLock)),
     appLockTimeoutSProvider.overrideWith((ref) => Stream.value(60)),
     contributionOptInProvider.overrideWith((ref) => Stream.value(contributing)),

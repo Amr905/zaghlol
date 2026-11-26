@@ -7838,6 +7838,10 @@
   "@settingsPrefsHideAmounts": {
     "description": "D-67 Preferences switch: hide every amount in the app"
   },
+  "settingsPrefsHaptics": "Vibration",
+  "@settingsPrefsHaptics": {
+    "description": "T-298 Preferences switch: haptic ticks on or off"
+  },
   "settingsPrefsHideAmountsHint": "Every amount shows as ****. Notifications, the widget and shared cards hide amounts too.",
   "@settingsPrefsHideAmountsHint": {
     "description": "D-67 hint under the hide-amounts switch"

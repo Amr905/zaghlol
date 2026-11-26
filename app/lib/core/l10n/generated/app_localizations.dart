@@ -12268,6 +12268,12 @@ abstract class AppLocalizations {
   /// **'اخفي المبالغ في التطبيق'**
   String get settingsPrefsHideAmounts;
 
+  /// T-298 Preferences switch: haptic ticks on or off
+  ///
+  /// In ar, this message translates to:
+  /// **'الاهتزاز'**
+  String get settingsPrefsHaptics;
+
   /// D-67 hint under the hide-amounts switch
   ///
   /// In ar, this message translates to:

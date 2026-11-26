@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/mascot/presentation/zaghlol_avatar.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../theme/z_tokens.dart';
+import 'shell/shell_bar_height.dart';
 import 'z_haptics.dart';
 
 /// T-295 / D-87 place 1: the "Saved!" toast with Captain Zaghlol. It is the
@@ -133,9 +134,26 @@ class _SavedToastBodyState extends ConsumerState<_SavedToastBody> {
 /// Scaffold's own FAB/bar slots, so the snackbar cannot avoid them itself).
 EdgeInsetsGeometry savedToastMargin(BuildContext context) {
   final inset = MediaQuery.paddingOf(context).bottom;
+  // The messenger sits above the shell, so the bar publishes its laid-out
+  // height (bottom inset included) through a provider.
+  final measured = _measuredBarHeight(context);
   return EdgeInsetsDirectional.only(
     start: ZSpacing.md,
     end: ZSpacing.md,
-    bottom: inset + ZSpacing.barHeight + ZSpacing.addRaise + ZSpacing.sm,
+    bottom:
+        (measured ?? inset + ZSpacing.barHeight) +
+        ZSpacing.addRaise +
+        ZSpacing.sm,
   );
+}
+
+double? _measuredBarHeight(BuildContext context) {
+  try {
+    return ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(shellBarHeightProvider);
+  } on Object {
+    return null; // no ProviderScope above: use the token fallback
+  }
 }

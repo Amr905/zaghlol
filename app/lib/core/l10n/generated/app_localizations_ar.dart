@@ -8449,6 +8449,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsPrefsHideAmounts => 'اخفي المبالغ في التطبيق';
 
   @override
+  String get settingsPrefsHaptics => 'الاهتزاز';
+
+  @override
   String get settingsPrefsHideAmountsHint =>
       'كل مبلغ بيظهر ****. والإشعارات والويدجت والكروت اللي بتشاركها بتخفي المبالغ كمان.';
 
