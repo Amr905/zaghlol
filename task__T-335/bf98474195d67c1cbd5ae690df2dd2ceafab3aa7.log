@@ -1,5 +1,135 @@
 ﻿== SUMMARY ==
-RUNNING sha=bf98474195d67c1cbd5ae690df2dd2ceafab3aa7
+FAIL sha=bf98474195d67c1cbd5ae690df2dd2ceafab3aa7 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
+dotnet-build                 PASS  exit=0  75s
+dotnet-format                PASS  exit=0  87s
+dotnet-test                  FAIL  exit=1  281s
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Infrastructure.Tests.Llm.OpenAiResponsesProviderTests.MalformedOrCutOffReplyIsInvalid(fixture: "openai-malformed.json") [12 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Invalid
+Actual:   Timeout
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Llm.OpenAiResponsesProviderTests.MalformedOrCutOffReplyIsInvalid(String fixture) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Llm/OpenAiResponsesProviderTests.cs:line 97
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:23.13]     Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [1 ms]
+
+Passed!  - Failed:     0, Passed:    39, Skipped:     0, Total:    39, Duration: 58 s - Zaghlol.Workers.Tests.dll (net10.0)
+[xUnit.net 00:01:24.33]     Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.ASandboxTransactionReadsFromTheRealAppStoreServerApiWhenConfigured [SKIP]
+
+  Failed Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(name: "Zaghlol.Infrastructure") [6 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["Zaghlol.Infrastructure.Llm.FakeLlmProvider", "Zaghlol.Infrastructure.Llm.FakeReply"]
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(String name) in /_/backend/tests/Zaghlol.Api.Tests/Installs/TestSupportExclusionTests.cs:line 31
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+
+Failed!  - Failed:     1, Passed:  1577, Skipped:     8, Total:  1586, Duration: 3 m 21 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-335 bf98474195d67c1cbd5ae690df2dd2ceafab3aa7 2026-11-26T21:12:59.9718388+02:00
+
+
+
+[21:13:07] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:01:14.47
+
+[21:14:22] === RESULT dotnet-build exit=0 (75s)
+[21:14:22] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 85453ms.
+
+[21:15:49] === RESULT dotnet-format exit=0 (87s)
+[21:15:49] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  1248, Skipped:     0, Total:  1248, Duration: 5 s - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:13.90]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase1_EveryPortWorksAgainstARealOpenBao [SKIP]
+[xUnit.net 00:00:13.95]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseSealed_EveryCallIsUnavailable [SKIP]
+[xUnit.net 00:00:13.97]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase2_AfterARestartTheHashesAndEnvelopesAreUnchanged [SKIP]
+[xUnit.net 00:00:13.98]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseStopped_EveryCallIsUnavailable [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase1_EveryPortWorksAgainstARealOpenBao [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseSealed_EveryCallIsUnavailable [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase2_AfterARestartTheHashesAndEnvelopesAreUnchanged [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseStopped_EveryCallIsUnavailable [1 ms]
+[xUnit.net 00:00:14.02]     Zaghlol.Infrastructure.Tests.Kms.FileKmsPlatformTests.G2_TheFileProviderRefusesToStartOffLinux [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.FileKmsPlatformTests.G2_TheFileProviderRefusesToStartOffLinux [1 ms]
+[xUnit.net 00:00:20.01]     Zaghlol.Infrastructure.Tests.Llm.OpenAiResponsesProviderTests.MalformedOrCutOffReplyIsInvalid(fixture: "openai-malformed.json") [FAIL]
+  Failed Zaghlol.Infrastructure.Tests.Llm.OpenAiResponsesProviderTests.MalformedOrCutOffReplyIsInvalid(fixture: "openai-malformed.json") [12 s]
+  Error Message:
+   Assert.Equal() Failure: Values differ
+Expected: Invalid
+Actual:   Timeout
+  Stack Trace:
+     at Zaghlol.Infrastructure.Tests.Llm.OpenAiResponsesProviderTests.MalformedOrCutOffReplyIsInvalid(String fixture) in /_/backend/tests/Zaghlol.Infrastructure.Tests/Llm/OpenAiResponsesProviderTests.cs:line 97
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:23.13]     Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [1 ms]
+
+Passed!  - Failed:     0, Passed:    39, Skipped:     0, Total:    39, Duration: 58 s - Zaghlol.Workers.Tests.dll (net10.0)
+[xUnit.net 00:01:24.33]     Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.ASandboxTransactionReadsFromTheRealAppStoreServerApiWhenConfigured [SKIP]
+[xUnit.net 00:01:24.34]     Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.TheRecordedSandboxTransactionVerifiesAgainstThePinnedAppleRoot [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.ASandboxTransactionReadsFromTheRealAppStoreServerApiWhenConfigured [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.TheRecordedSandboxTransactionVerifiesAgainstThePinnedAppleRoot [1 ms]
+
+Passed!  - Failed:     0, Passed:   124, Skipped:     0, Total:   124, Duration: 1 m 21 s - Zaghlol.Ops.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   203, Skipped:     0, Total:   203, Duration: 1 m 47 s - Zaghlol.Contract.Tests.dll (net10.0)
+[xUnit.net 00:02:32.43]     Zaghlol.Api.Tests.GooglePlay.RtdnRecordedVectorTests.TheRecordedTestNotificationAuthenticatesAndIsIngestedAsTest [SKIP]
+[xUnit.net 00:02:33.23]     Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(name: "Zaghlol.Infrastructure") [FAIL]
+  Skipped Zaghlol.Api.Tests.GooglePlay.RtdnRecordedVectorTests.TheRecordedTestNotificationAuthenticatesAndIsIngestedAsTest [1 ms]
+  Failed Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(name: "Zaghlol.Infrastructure") [6 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["Zaghlol.Infrastructure.Llm.FakeLlmProvider", "Zaghlol.Infrastructure.Llm.FakeReply"]
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(String name) in /_/backend/tests/Zaghlol.Api.Tests/Installs/TestSupportExclusionTests.cs:line 31
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+
+Failed!  - Failed:     1, Passed:  1577, Skipped:     8, Total:  1586, Duration: 3 m 21 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Failed!  - Failed:     1, Passed:   701, Skipped:     1, Total:   703, Duration: 4 m 24 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[21:20:29] === RESULT dotnet-test exit=1 (281s)
+[21:20:29] SUMMARY FAIL sha=bf98474195d67c1cbd5ae690df2dd2ceafab3aa7 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
