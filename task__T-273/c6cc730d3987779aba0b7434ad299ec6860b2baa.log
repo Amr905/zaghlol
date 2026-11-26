@@ -1,5 +1,85 @@
 ﻿== SUMMARY ==
-RUNNING sha=c6cc730d3987779aba0b7434ad299ec6860b2baa
+PASS sha=c6cc730d3987779aba0b7434ad299ec6860b2baa pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=0
+dotnet-build                 PASS  exit=0  101s
+dotnet-format                PASS  exit=0  92s
+dotnet-test                  PASS  exit=0  301s
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-273 c6cc730d3987779aba0b7434ad299ec6860b2baa 2026-11-26T14:42:33.5205273+02:00
+
+
+
+[14:42:40] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:01:40.07
+
+[14:44:22] === RESULT dotnet-build exit=0 (101s)
+[14:44:22] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 90465ms.
+
+[14:45:54] === RESULT dotnet-format exit=0 (92s)
+[14:45:54] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:  1058, Skipped:     0, Total:  1058, Duration: 5 s - Zaghlol.Application.Tests.dll (net10.0)
+[xUnit.net 00:00:09.49]     Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.ASandboxTransactionReadsFromTheRealAppStoreServerApiWhenConfigured [SKIP]
+[xUnit.net 00:00:09.73]     Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.TheRecordedSandboxTransactionVerifiesAgainstThePinnedAppleRoot [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.ASandboxTransactionReadsFromTheRealAppStoreServerApiWhenConfigured [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.TheRecordedSandboxTransactionVerifiesAgainstThePinnedAppleRoot [1 ms]
+[xUnit.net 00:00:11.42]     Zaghlol.Infrastructure.Tests.Kms.FileKmsPlatformTests.G2_TheFileProviderRefusesToStartOffLinux [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.FileKmsPlatformTests.G2_TheFileProviderRefusesToStartOffLinux [1 ms]
+[xUnit.net 00:00:46.51]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase1_EveryPortWorksAgainstARealOpenBao [SKIP]
+[xUnit.net 00:00:46.51]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseSealed_EveryCallIsUnavailable [SKIP]
+[xUnit.net 00:00:46.51]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase2_AfterARestartTheHashesAndEnvelopesAreUnchanged [SKIP]
+[xUnit.net 00:00:46.51]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseStopped_EveryCallIsUnavailable [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase1_EveryPortWorksAgainstARealOpenBao [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseSealed_EveryCallIsUnavailable [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase2_AfterARestartTheHashesAndEnvelopesAreUnchanged [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseStopped_EveryCallIsUnavailable [1 ms]
+
+Passed!  - Failed:     0, Passed:    39, Skipped:     0, Total:    39, Duration: 1 m 9 s - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   124, Skipped:     0, Total:   124, Duration: 1 m 35 s - Zaghlol.Ops.Tests.dll (net10.0)
+[xUnit.net 00:02:01.77]     Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [1 ms]
+
+Passed!  - Failed:     0, Passed:   179, Skipped:     0, Total:   179, Duration: 2 m 3 s - Zaghlol.Contract.Tests.dll (net10.0)
+[xUnit.net 00:02:53.93]     Zaghlol.Api.Tests.GooglePlay.RtdnRecordedVectorTests.TheRecordedTestNotificationAuthenticatesAndIsIngestedAsTest [SKIP]
+  Skipped Zaghlol.Api.Tests.GooglePlay.RtdnRecordedVectorTests.TheRecordedTestNotificationAuthenticatesAndIsIngestedAsTest [1 ms]
+
+Passed!  - Failed:     0, Passed:  1515, Skipped:     8, Total:  1523, Duration: 3 m 32 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   702, Skipped:     1, Total:   703, Duration: 4 m 41 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[14:50:55] === RESULT dotnet-test exit=0 (301s)
+[14:50:55] SUMMARY PASS sha=c6cc730d3987779aba0b7434ad299ec6860b2baa pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=0
