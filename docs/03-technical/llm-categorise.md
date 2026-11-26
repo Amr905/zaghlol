@@ -47,7 +47,7 @@ name («محمود» ineligible: accepted false negative), and a property test t
 ```json
 // request (closed, ≤ 4 KB)
 { "v": 1, "requestId": "01JD…", "lang": "ar", "merchants": ["zawya coffee", "مكتبة النور"],
-  "consent": { "provider": "openai-luna", "v": 1 }, "attestation": { … } }          // binding prefix "zaghlol-cat-v1" (ask-llm §5)
+  "consent": { "provider": "openai-luna", "v": 1 }, "attestation": { … } }          // binding prefix "zaghlol-cat-v1", App Attest clientData prefix "zaghlol-cat-attest-v1" (ask-llm §5)
 // 200
 { "serverTime": "…", "counted": 1,
   "results": [ { "merchant": "zawya coffee", "status": "ok", "category": "dining", "confidence": 88, "source": "llm" },
