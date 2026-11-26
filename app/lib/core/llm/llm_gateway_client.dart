@@ -209,15 +209,18 @@ final class LlmGatewayClient {
     required LlmTerms terms,
     AbortSignal? stop,
     bool forceNewKey = false,
+    String? requestId,
   }) async {
     const f = LlmFeature.categorise;
     final grant = await _gate(f, terms);
     final names = List<String>.unmodifiable(merchants);
     if (names.toSet().length != names.length) throw LlmRequestRejected();
-    final requestId = _backend.newIdempotencyKey().value;
+    // T-358: a retry of the same batch inside the server's 2-minute window
+    // passes the earlier [requestId] so the backend counts it once.
+    final rid = requestId ?? _backend.newIdempotencyKey().value;
     CategoriseRequest build(LlmAttestation a) => CategoriseRequest(
       v: 1,
-      requestId: requestId,
+      requestId: rid,
       lang: switch (lang) {
         LlmLang.ar => CategoriseRequestLang.ar,
         LlmLang.en => CategoriseRequestLang.en,
