@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../../../core/flags/feature_flags.dart';
+import '../../../core/flags/flags_providers.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
@@ -17,6 +19,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../categorization/application/contributions.dart';
 import '../../gold/application/restore.dart' show DeleteEverythingWarning;
 import 'preferences_screen.dart';
+import 'privacy_ask_llm_section.dart';
 import 'server_allow_list.dart';
 import 'settings_ports.dart';
 import 'settings_widgets.dart';
@@ -55,6 +58,7 @@ class PrivacyScreen extends ConsumerWidget {
           ],
         ),
         ServerKnowsSection(platform: plat),
+        const PrivacyAskLlmSection(),
         SettingsSection(
           children: [
             SettingsSwitchRow(
@@ -249,15 +253,16 @@ class PrivacyScreen extends ConsumerWidget {
 }
 
 /// The server-knowledge list, generated from [serverAllowList].
-class ServerKnowsSection extends StatelessWidget {
+class ServerKnowsSection extends ConsumerWidget {
   const ServerKnowsSection({super.key, required this.platform});
 
   final String platform;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final t = AppLocalizations.of(context);
     final c = ZColors.of(context);
+    final askOn = ref.watch(featureFlagProvider(FeatureFlag.askLlm));
     return SettingsSection(
       title: t.privacyServerTitle,
       children: [
@@ -269,9 +274,30 @@ class ServerKnowsSection extends StatelessWidget {
           ),
         ),
         for (final k in serverAllowList(platform)) _entry(context, t, k),
+        if (askOn) _bullet(c, t.privacyServerItemAskLlm),
       ],
     );
   }
+
+  Widget _bullet(ZColors c, String summary) => Padding(
+    padding: const EdgeInsetsDirectional.symmetric(
+      horizontal: ZSpacing.lg,
+      vertical: ZSpacing.sm,
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+          child: Icon(Icons.circle, size: ZSpacing.sm, color: c.primary),
+        ),
+        const SizedBox(width: ZSpacing.md),
+        Expanded(
+          child: Text(summary, style: ZType.body.copyWith(color: c.text)),
+        ),
+      ],
+    ),
+  );
 
   Widget _entry(BuildContext context, AppLocalizations t, ServerKnows k) {
     final c = ZColors.of(context);
@@ -304,27 +330,7 @@ class ServerKnowsSection extends StatelessWidget {
         t.privacyServerSupportRows,
       ),
     };
-    if (detail == null) {
-      return Padding(
-        padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: ZSpacing.lg,
-          vertical: ZSpacing.sm,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
-              child: Icon(Icons.circle, size: ZSpacing.sm, color: c.primary),
-            ),
-            const SizedBox(width: ZSpacing.md),
-            Expanded(
-              child: Text(summary, style: ZType.body.copyWith(color: c.text)),
-            ),
-          ],
-        ),
-      );
-    }
+    if (detail == null) return _bullet(c, summary);
     return ExpansionTile(
       shape: const Border(),
       collapsedShape: const Border(),
