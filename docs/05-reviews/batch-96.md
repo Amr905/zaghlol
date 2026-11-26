@@ -188,3 +188,23 @@ Before merge, also regenerate and spot-check the 36 T-347 golden PNGs.
 - Tests: `ARetriedRequestIdWithOtherMerchantsIsTrimmedAndCounted`, `AnIdenticalRetryInsideTheWindowIsNotCountedTwice`, `TheRetryKeyBindsTheRequestIdToTheBody` (the quota fake `ScriptedQuota` gained a stateful counter mode). An identical retry after the window counting again is the existing store test `AnOldRequestIdBelowTheLimitCountsAgain`. No Postgres test added (the store/repository API is unchanged).
 - **B96-m2 fixed.** Owner stage now draws a per-/24 pre-attestation bucket (`RateLimits:LlmAttemptNetwork`, default 300/min, both features). Test `TheOwnerStageCapsAttemptsPerNetworkBeforeAttestation`.
 - Local: build -warnaserror, format, Application tests (400) and LlmRateLimiter tests pass. Docs `llm-categorise.md` §3 / T-352 note not updated.
+
+## Delta re-review
+
+Scope: fix commits `3308b10b` (backend) and `7fe5885a` (app) only.
+
+**T-352: APPROVED.**
+- B96-M1 closed. `LlmGateRequest.RetryKey` = `RequestId:hex(BodyHash)`. `BodyHash` comes from `LlmBinding.BodyHash(feature, install, parsedRoot)` in the endpoint (server-computed, install-bound, attestation excluded), not client-supplied. Grep: the only quota-store callers (`LlmGateChain` pre-check, `CategoriseService` commit, `AskPlanService` commit) all pass `RetryKey`; no bare `RequestId` reaches the store. Same id with another body is a new request, trimmed and counted (`ARetriedRequestIdWithOtherMerchantsIsTrimmedAndCounted`: 0 left, all `quota`, provider not called). An identical retry inside the window is not double-counted (`AnIdenticalRetryInsideTheWindowIsNotCountedTwice`). Ask is bound too (FU-413 closed).
+- Negative proof: the new tests do not compile on `a2eb5264` (`RetryKey` missing), so they cannot pass on the old code. The behaviour test uses the bare-id store semantics via the stateful `ScriptedQuota`, so it would fail on the old logic as well.
+- Residual: only the documented one-batch parallel race. A replay with a changed body now costs a unit each, so nothing beyond 15 free answers a month is open. Needs a new attested body per request (rate bucket 2/min still applies).
+- m2: per-/24 pre-attestation bucket, 300/min, shared by both features, before the install bucket. Rating: sane. It is half of the existing 600/min `PerNetwork` and 10x the 30/min post-attestation network bucket, so a carrier NAT is unlikely to hit it from honest traffic; it does cap attestation verifications per /24. Test present. Minor: it is not feature-prefixed (intended).
+- Checks: `dotnet build -warnaserror` 0 errors; Application tests filtered to Llm: 400 passed.
+- Open (minor, not blocking): docs `llm-categorise.md` §3 and the T-352 note still not updated (the fix report says so); do it in the batch PR.
+
+**T-358: APPROVED.**
+- B96-B1 closed: `dart analyze --fatal-infos` prints "No issues found!".
+- m4: `SyncLifecycle._isEnglish()` reads `appLocaleProvider`, falls back to the device locale. OK.
+- m5: `sync_lifecycle_test.dart` covers flag off (zero calls), start+resume burst (one send), swallowed error, locale en/ar; `llm_stores_test` uses the real `onCleared` closure. Matches what they say. The no-consent case is covered at sender level, which is acceptable.
+- m3: `askInvestPricesProvider` is `autoDispose` and invalidated after each sync run (not on a thrown run, acceptable); test added.
+- Tests: `flutter test test/core/llm test/features/catalog_sync test/features/categorization test/features/ask test/privacy --exclude-tags golden`: 618 passed.
+- Golden `ask_llm_answer_invest_gold_ar_light.png` (font-less box glyphs in CI): the long answer is cut at the chips row, but the message area is a `ListView` in an `Expanded` with screen padding and `_Chips` is a separate row below it, so this is viewport cut-off of a scrollable list, not clipping. No issue.
