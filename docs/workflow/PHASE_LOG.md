@@ -36,5 +36,7 @@ The Lead updates this file at every gate. Newest entry at the bottom.
 | 2026-11-19 | 5 — Implementation | Independent QA audit of `main` @ bc5b9d1d (`docs/qa/`): NOT READY for release; 9 bugs (1 high, 2 medium, 6 low), no critical. | BUG-001 waits for T-140 keys; the others fixed in batch 43. |
 
 | 2026-11-19 | 1/4 → 5 — Change | PO requests: hide amounts, chart periods + review, app size. SRS v1.9 (D-67…D-69); M8 added (T-187…T-193, incl. QA/security bugs). Bottom-bar and dark-mode redesign options on a design canvas, awaiting the PO's pick before tasks. | Board 193 tasks. |
+| 2026-11-26 | 1 → 2 — Change (Ask-LLM) | PO request: free-form questions to Zaghlol through an LLM. Requirements addendum `docs/01-requirements/ask-llm.md` v0.2 (D-88…D-93). **Gate approved by the PO 2026-11-26 02:22 Cairo** with two changes (account/card/bank placeholders D-92; investment amount bands D-93). Phase 2 (UX) started for this feature only. | Launch checklist before the flags go on: OQ-ASK-01 (legal/FRA), 03 (provider terms, PDPL), 05 (spend cap). |
+
 ## Current phase
 **Phase 5 — Implementation: RUNNING (CI on GitHub Actions)**
