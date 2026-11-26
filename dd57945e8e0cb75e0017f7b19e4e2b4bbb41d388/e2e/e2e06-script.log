@@ -1,0 +1,42 @@
+==== e2e06
+Success
+---- phase e2e06/x1
+  sent: NBE
+---- phase e2e06/x2
+  sent: CIB
+  sent: NBE
+---- phase e2e06/x3
+  sent: InstaPay
+e2e06 exit: 0
+E2E_DEVICE SEND x1
+E2E_DEVICE E2E06 OK phase x1 saved (rows >= 1)
+E2E_DEVICE E2E06 OK the 1,200 purchase is an expense
+E2E_DEVICE SEND x2
+E2E_DEVICE E2E06 OK phase x2 saved (rows >= 3)
+E2E_DEVICE E2E06 OK two 2,000 legs saved
+E2E_DEVICE E2E06 OK both transfer legs are internal
+E2E_DEVICE E2E06 OK the legs are on two different accounts
+E2E_DEVICE E2E06 OK both legs share one pair
+E2E_DEVICE E2E06 OK exactly one transfer pair row
+E2E_DEVICE E2E06 OK before money back: spend is 1,200 only
+E2E_DEVICE E2E06 OK the paired 2,000 is not income
+E2E_DEVICE SEND x3
+E2E_DEVICE E2E06 OK phase x3 saved (rows >= 4)
+E2E_DEVICE E2E06 OK the 400 incoming transfer saved
+E2E_DEVICE E2E06 OK no reimbursement before the assignment
+E2E_DEVICE E2E06 OK before assigning, 400 counts as income
+E2E_DEVICE E2E06 SHOT e2e06-1-list
+E2E_DEVICE E2E06 SHOT e2e06-2-assign
+E2E_DEVICE E2E06 OK one reimbursement link saved
+E2E_DEVICE E2E06 OK link kind
+E2E_DEVICE E2E06 OK link amount is 400
+E2E_DEVICE E2E06 OK on the expense
+E2E_DEVICE E2E06 OK from the transfer
+E2E_DEVICE E2E06 OK cycle spend is 1,200 - 400 = 800
+E2E_DEVICE E2E06 OK cycle income is 0 (money back, internal)
+E2E_DEVICE E2E06 OK chart spend is 800
+E2E_DEVICE E2E06 OK chart income is 0
+E2E_DEVICE E2E06 OK Insights hero spend shows 800
+E2E_DEVICE E2E06 SHOT e2e06-3-insights
+E2E_DEVICE E2E06 RESULT problems=0
+00:51 +1: All tests passed!
