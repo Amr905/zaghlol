@@ -58,8 +58,8 @@ public class SyncFeedbackEndpointTests(SyncHostFixture fixture) : IClassFixture<
         Assert.Equal(1L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_confirmations WHERE merchant_norm = $1 AND category_code = 'dining' AND source = 'llm'", right));
         Assert.Equal(1L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1 AND ai_category = 'dining' AND user_category = 'groceries' AND status = 'open'", wrong));
         Assert.Equal(1L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1 AND user_category = 'custom'", custom));
-        Assert.Equal(0L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_confirmations WHERE merchant_norm LIKE '%fbphone%'"));
-        Assert.Equal(0L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm LIKE '%fbbadcode%'"));
+        Assert.Equal(0L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_confirmations WHERE merchant_norm LIKE $1", "%fbphone%")); // parameters: the test's own SQL text is a traced span too
+        Assert.Equal(0L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm LIKE $1", "%fbbadcode%"));
 
         // negative proof 1: a dump of both tables holds no install id, app version, IP or token
         var dump = (string)(await fixture.ScalarAsync(
