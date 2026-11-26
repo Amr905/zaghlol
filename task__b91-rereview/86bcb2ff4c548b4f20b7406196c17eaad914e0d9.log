@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=86bcb2ff4c548b4f20b7406196c17eaad914e0d9
+SKIP sha=86bcb2ff4c548b4f20b7406196c17eaad914e0d9 no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/b91-rereview 86bcb2ff4c548b4f20b7406196c17eaad914e0d9 2026-11-26T21:55:58.2361348+02:00
+
+
+
