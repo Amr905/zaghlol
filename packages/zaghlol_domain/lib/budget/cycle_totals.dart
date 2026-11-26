@@ -19,6 +19,7 @@ final class CycleTxn {
     required this.amount,
     required this.date,
     this.isInternal = false,
+    this.isExchange = false,
     this.isDeleted = false,
     this.categoryId,
     this.cashCoveredMinor = 0,
@@ -28,6 +29,11 @@ final class CycleTxn {
   final CycleDirection direction;
   final CycleStatus status;
   final bool isInternal;
+
+  /// T-272 (D-86): a leg of a complete exchange pair (`fx_conversion` or
+  /// `cross_currency`). Counts as exchanged in/out only while it is also
+  /// [isInternal]; never as income or spending.
+  final bool isExchange;
   final bool isDeleted;
   final Money amount;
   final String? categoryId;
@@ -65,11 +71,45 @@ final class CycleTotals {
     required this.spend,
     required this.pendingSpend,
     required this.byCategoryMinor,
+    this._exchangedIn,
+    this._exchangedOut,
   });
 
   final Currency currency;
   final Money income;
   final Money spend;
+
+  final Money? _exchangedIn;
+  final Money? _exchangedOut;
+
+  /// T-272 (D-86): money received in this currency by exchanging another
+  /// currency (the receiving legs of exchange pairs). Not income.
+  Money get exchangedIn => _exchangedIn ?? Money.zero(currency);
+
+  /// Money of this currency given away in exchanges. Not spending.
+  Money get exchangedOut => _exchangedOut ?? Money.zero(currency);
+
+  /// The month's money in: income plus exchanged in.
+  Money get moneyIn => income + exchangedIn;
+
+  /// What is left of the month's money: money in minus spending and minus
+  /// what was exchanged away. Same currency throughout.
+  Money get left => moneyIn - spend - exchangedOut;
+
+  /// A copy with the exchange figures replaced (cached cycles carry no
+  /// exchange figures; the repository overlays them).
+  CycleTotals withExchanges({
+    required Money exchangedIn,
+    required Money exchangedOut,
+  }) => CycleTotals(
+    currency: currency,
+    income: income,
+    spend: spend,
+    pendingSpend: pendingSpend,
+    byCategoryMinor: byCategoryMinor,
+    exchangedIn: exchangedIn,
+    exchangedOut: exchangedOut,
+  );
 
   /// The part of [spend] that is `pending`.
   final Money pendingSpend;
@@ -165,12 +205,16 @@ Map<Currency, CycleTotals> aggregateCycle(
   final pending = <Currency, Money>{};
   final income = <Currency, Money>{};
   final byCat = <Currency, Map<String, int>>{};
+  final xIn = <Currency, Money>{};
+  final xOut = <Currency, Money>{};
 
   void ensure(Currency c) {
     spend.putIfAbsent(c, () => Money.zero(c));
     pending.putIfAbsent(c, () => Money.zero(c));
     income.putIfAbsent(c, () => Money.zero(c));
     byCat.putIfAbsent(c, () => <String, int>{});
+    xIn.putIfAbsent(c, () => Money.zero(c));
+    xOut.putIfAbsent(c, () => Money.zero(c));
   }
 
   for (final s in _netSpend(cycle, txns, offsets)) {
@@ -215,6 +259,19 @@ Map<Currency, CycleTotals> aggregateCycle(
     income[c] = income[c]! + (funded == null ? t.amount : t.amount - funded);
   }
 
+  // T-272 (D-86): exchange legs. Internal, so never income or spending
+  // above; counted here once, in their own currency.
+  for (final t in txns) {
+    if (!cycle.contains(t.date) || !isExchangeLeg(t)) continue;
+    final c = t.amount.currency;
+    ensure(c);
+    if (t.direction == CycleDirection.transferIn) {
+      xIn[c] = xIn[c]! + t.amount;
+    } else {
+      xOut[c] = xOut[c]! + t.amount;
+    }
+  }
+
   return {
     for (final c in spend.keys)
       c: CycleTotals(
@@ -223,9 +280,22 @@ Map<Currency, CycleTotals> aggregateCycle(
         spend: spend[c]!,
         pendingSpend: pending[c]!,
         byCategoryMinor: Map.unmodifiable(byCat[c]!),
+        exchangedIn: xIn[c]!,
+        exchangedOut: xOut[c]!,
       ),
   };
 }
+
+/// T-272: true when [t] counts as exchanged in or out: a live posted or
+/// pending transfer leg that is internal and in a complete exchange pair.
+/// Such a row never counts as income or spending (it is internal).
+bool isExchangeLeg(CycleTxn t) =>
+    t.isExchange &&
+    t.isInternal &&
+    !t.isDeleted &&
+    (t.status == CycleStatus.posted || t.status == CycleStatus.pending) &&
+    (t.direction == CycleDirection.transferIn ||
+        t.direction == CycleDirection.transferOut);
 
 /// Net spend of [currency] per 1-based cycle day (offsets restated on the
 /// expense's own day, BR-XFR-07).
