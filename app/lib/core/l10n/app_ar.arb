@@ -1516,15 +1516,6 @@
       }
     }
   },
-  "homeHeroOtherCurrencyIncome": "+ {amount} دخل",
-  "@homeHeroOtherCurrencyIncome": {
-    "description": "C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "homeCurrencyCardsTitle": "فلوسك بعملات تانية",
   "@homeCurrencyCardsTitle": {
     "description": "C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24."
@@ -1889,11 +1880,7 @@
       }
     }
   },
-  "homeApproxSheetClose": "تمام",
-  "@homeApproxSheetClose": {
-    "description": "C"
-  },
-  "homeMascotFirstForeign": "قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.",
+  "homeMascotFirstForeign": "عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.",
   "@homeMascotFirstForeign": {
     "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
   },

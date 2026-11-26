@@ -2034,12 +2034,6 @@ abstract class AppLocalizations {
   /// **'تعمل ميزانية بالـ{currency}؟'**
   String currencyViewBudgetOffer(String currency);
 
-  /// C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.
-  ///
-  /// In ar, this message translates to:
-  /// **'+ {amount} دخل'**
-  String homeHeroOtherCurrencyIncome(String amount);
-
   /// C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24.
   ///
   /// In ar, this message translates to:
@@ -2331,16 +2325,10 @@ abstract class AppLocalizations {
   /// **'سعر {date}: {from} الواحد بـ {rate}'**
   String homeApproxSheetDailyRate(String date, String from, String rate);
 
-  /// C
-  ///
-  /// In ar, this message translates to:
-  /// **'تمام'**
-  String get homeApproxSheetClose;
-
   /// M · Captain, Proud coach; mascot.fx.firstForeign
   ///
   /// In ar, this message translates to:
-  /// **'قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.'**
+  /// **'عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.'**
   String get homeMascotFirstForeign;
 
   /// C · turns the ≈ line off
