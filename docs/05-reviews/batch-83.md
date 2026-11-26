@@ -55,3 +55,25 @@ AC to test map: with and without the budget line, Undo kept -> `z_saved_toast_te
 - T-295: CHANGES_REQUESTED (1 major)
 
 Unverified: Kotlin and Swift compile, the Android unit test, all goldens, real snackbar placement relative to the Add button, device haptic feel.
+
+## Delta re-review (fix83)
+
+Scope: `fix/fix83a` (T-294) and `fix/fix83b` (T-295) against `review/batch-83`. Tests: `flutter test -x golden test/features/mascot test/app test/core/ui test/features/voice` gives 339 passed, 0 failed.
+
+### T-294: APPROVED
+- Double celebration: no path celebrates twice in a session. `paydayShownThisSessionProvider` is a session-scoped provider, so it survives a slot remount. The id is added to it and the stored mark is written before `showPaydaySheet`, in the same frame. Kill window: if the app dies after `shown.add` but before the fire-and-forget `markPaydayCelebrated` write completes (a few ms), the salary celebrates once more on the next launch. This is acceptable because it is a rare, one-time repeat and the opposite failure (never celebrating) is worse. The provider stream also leaves the picked salary unmarked until the sheet opens, so a salary that is picked but never shown stays eligible.
+- go_router: `StatefulShellRoute.indexedStack` (`app_router.dart:98`) wraps each inactive branch in `Offstage` plus `TickerMode(enabled: isActive)`. `TickerMode.valuesOf` therefore flips to false for an offstage Home branch and back to true on tab return. The call registers an inherited dependency, so `didChangeDependencies` fires on the switch and the pending celebration opens. `ModalRoute.of` likewise notifies when `isCurrent` changes (route popped back to Home).
+- Rebuild loop: none. `_schedule` is guarded by `_scheduled`, and `didChangeDependencies` only schedules a post-frame callback that does not call `setState`. `_pending` is cleared before the sheet opens, so opening the sheet (isCurrent -> false) cannot retrigger it. The AppLockGate `TickerMode` (`app_lock_gate.dart:174`) also defers the sheet while the app is locked.
+- Findings:
+  - minor: `markPaydayCelebrated` swallows all errors via `catchError((_) {})`. A failed write silently re-celebrates after a restart. Acceptable, no action needed.
+  - nit: `_pending` holds only the latest salary. If two paydays arrive while Home is hidden, the earlier one is dropped and was never marked, so it stays eligible on a later pick. Harmless.
+
+### T-295: APPROVED
+- Toast margin: `savedToastMargin` = safe-area inset + `barHeight` + `addRaise` + `sm`, with a start/end margin of `md`. This lifts the toast above the bar and the raised Add circle. Voice multi-draft: the title uses `voiceLoggerSaved(count, TxnFmt.count)`, so digits follow the locale, and a single draft keeps "Saved!" plus the budget line.
+- Ordering: `pop()` now runs before the async budget lookup, so the dropped `mounted` check is safe. Only `messenger`, `container`, `l` and `lang`, all captured before the pop, are used afterwards. This fixes the earlier lost-toast case when the screen was disposed during the lookup.
+- Findings:
+  - minor (FU-402): `barHeight` is a fixed token. At 1.3x text scale, if the bottom bar's labels grow it, the toast can overlap the bar by the growth amount. It is not blocking. Follow-up: derive the lift from the measured bar height, or confirm the bar is height-capped.
+  - nit: `title` is a new `showSavedToast` parameter with no test beyond the voice test. Fine.
+
+### New follow-ups
+- FU-402 (minor): saved-toast lift is a constant, not the measured bar height at larger text scales (owner: T-295 follow-up or shell polish).
