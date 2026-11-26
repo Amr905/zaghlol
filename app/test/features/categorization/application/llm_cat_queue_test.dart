@@ -204,8 +204,9 @@ void main() {
       await put('w3', 'zawya cinema', template: 'wal.pay');
       await put('w4', 'kosharyz', direction: 'refund', template: 'wal.refund');
       await put('b1', 'kosharyx', template: 'bank.card');
-      // Same names on the allowed bank template: no business word is
-      // needed, the person-like names still fail the lexicon.
+      // The same person-like name on the allowed bank template: the
+      // template is business evidence, but the name still fails the
+      // eligibility rule (given-name lexicon), so it is not queued.
       await put('b2', 'rahul sharma', template: 'bank.card');
       await filler().fill(now: now);
       expect(await queued(), {'kosharyx': 1});
@@ -259,6 +260,18 @@ void main() {
       );
       expect(isBusinessRefundTemplate(id, allowed), sibling, reason: id);
     }
+    // FU-437: the institutions whose refunds count, pinned literally. A new
+    // refund template, or a new allowed purchase template, must be decided.
+    final refundInstitutions = {
+      for (final id in refunds)
+        if (isBusinessRefundTemplate(id, allowed)) templateInstitution(id),
+    };
+    expect(refundInstitutions.toList()..sort(), [
+      'liv',
+      'monzo',
+      'n26',
+      'wise',
+    ]);
     expect(isBusinessRefundTemplate('revolut.refund.en', allowed), isFalse);
     expect(isBusinessRefundTemplate('instapay.refund.en', allowed), isFalse);
   });
