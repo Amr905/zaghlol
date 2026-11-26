@@ -154,3 +154,26 @@ B95-m1…m9 and B95-n1…n3, as above. FU-413 stays open (retry not bound to bod
 **B95-M1 (privacy, major): fixed.** Business evidence is now an explicit per-template allowlist (`llm_cat_business_templates.dart`), passed to `LlmCatQueueFiller.businessTemplates` (default empty: fail closed). Of 136 card-purchase templates, 115 are allowed (bank/issuer card POS or online notifications) and 19 are refused (wallets, InstaPay, Revolut, Paytm, Vodafone/Orange/WE/Fawry/Telda/OneBank, OCR purchase text, one account debit without a merchant). Refund evidence requires an allowed purchase sibling in the same institution (also covers B95-m9). Eligibility rule untouched. Per-template decisions are in `docs/04-tasks/tasks/T-357.md`.
 
 Tests (`llm_cat_queue_test.dart`): wallet-template rows for `rahul sharma`, `priya`, and a wallet refund are not queued while `kosharyx` on an allowed bank template is; a registry-wide test requires a decision for every card-purchase template and no stale ids. Local run: format, analyze, `flutter test test/features/categorization test/privacy --exclude-tags golden` green.
+
+## Delta re-review — T-357
+Scope: `c01276ef..a9eba6d0` (`0b9ab357` B95-M1 fix, `a9eba6d0` Lead golden-test change). Opus, code + privacy.
+
+**(1) Allowlist, template by template.** All 136 bundled `card_purchase`/`card_purchase_fx` templates were read from `app/assets/registry/institutions/*.json`. Allowed + refused = 115 + 21 = 136, with no overlap. Each of the 115 allowed ids puts `(?<merchant>)` after issuer-card wording: "at" / "لدى" / "لدي" / "عند" / "spent at" / "paid at" / "purchased at" / "card payment of … at", "a trx using card … from" (arab_bank.card_trx.en), or "بطاقتكم … في" (mashreq.card_purchase_used.ar). Every one is a card POS/online descriptor, so the payee is a merchant by construction. Fintech cards: wise (`you spent … at`), monzo (`you spent … at`), n26 (`card payment of … at`), bunq (`you paid … at`), payoneer (`card purchase of … at`) and liv (`spent at`/`لدي … باستخدام بطاقه`) are card-only wording. Their P2P notifications use "sent … to" and do not match. No allowed template has "paid to", "to", "الى"/"الي"/"ل", "تحويل", "دفع إلى", QR or pay-by-link wording. No allowed template is OCR-sourced (the only OCR card templates, `cib.ocr_purchase.*` and `vodafone_cash.ocr_payment.*`, are refused). The registry has no bank-wallet card_purchase templates (CIB Smart Wallet, PhoneCash, BM Wallet, QNB wallet, Meeza), and the wallets it does have (vodafone_cash, orange_cash, we_pay, myfawry, telda, onebank_yalla) are all refused. So no template is a MAJOR.
+
+**(2) Refund rule.** The bundled `refund` templates are instapay.refund.ar/en (no merchant group, and no allowed sibling), liv.refund.en, monzo.refund.en, n26.refund.en, wise.refund.en (merchant refunds: "refund … from" / "refunded by") and revolut.refund.en (refused). No bank P2P reversal or transfer refund uses the `refund` event today, and `reversal` is still not evidence. So nothing counts wrongly now. The rule is per institution, though, and no test pins it (see m10).
+
+**(3) Staleness test.** Mutation probes: removing `wise.card_purchase.en` from the allowlist fails the test (`Actual: Set:['wise.card_purchase.en']`), and adding a stale `zz.card_purchase.en` also fails it. Both were reverted.
+
+**(4) Probes.** `rahul sharma` and `priya` on a wallet template are not queued, and `kosharyx` on the allowed bank template is. Mutation: allowing `wal.pay` in the test makes rahul/priya/kosharyz queue, so the test detects the regression.
+
+**(5) Golden change.** `await Completer<void>().future` holds the Sending state without leaving a pending timer at teardown. Sane.
+
+Run: `flutter test test/features/categorization test/privacy --exclude-tags golden`: 211 passed.
+
+| # | Sev | File:line | Issue | Required change |
+|---|---|---|---|---|
+| B95-m10 | minor | `llm_cat_business_templates.dart:168-176`; `llm_cat_queue_test.dart` (refund loop) | Refund evidence holds for *any* `refund` template of an institution with one allowed purchase template. The registry test has no per-refund-template decision, and its refund loop re-implements `isBusinessRefundTemplate`, so it pins nothing. A future bank refund template for a failed transfer or P2P reversal would count as business evidence with no test failing. | Follow-up: an explicit refund allowlist (or pin the current 6 refund ids in the test, so a new one needs a decision). |
+| B95-n4 | nit | `docs/04-tasks/tasks/T-357.md` fix-round section; batch-95 "Fix round" | The text says "19 refused", but the map and the listed ids hold 21 (115 + 21 = 136). | Correct the count. |
+| B95-n5 | nit | `llm_cat_queue_test.dart` B95-M1 wallet test, b2 comment | The comment says `rahul sharma` on the bank template "still fail[s] the lexicon". It is refused only because its wallet row w1 fails (all rows must qualify). Alone on an allowed bank template it would be queued, which is correct by design. | Reword the comment. |
+
+**Verdict: APPROVED.** B95-M1 is resolved. B95-m10, n4 and n5 are follow-ups.
