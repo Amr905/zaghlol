@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-26 (Cairo) by the Lead session (PO-phone-feedback lane): batches 76 (#125) and 77 (#126) merged; **batch 78** (`batch/2026-11-26-78`: T-272 exchange slice 1, T-273 Android OCR merge rule, T-274 mascot arm + Home bird 92, T-275 voice first recording, T-276 smooth mascot tap, T-277 tips) reviewed, fix round merged, delta re-review + CI + PR in progress. T-268 is superseded by T-274 (do not merge `task/T-268-po2`). Next: multi-currency slice 2 (`docs/02-design/multi-currency-hybrid-plan.md` WP-2/3/5: Home currency cards, per-currency view, ≈ line; exchange as one row, FU-365) on the plan's recommended defaults until the PO answers its 4 questions; mascot placement (D-87) once the PO picks places. PO owes: answers to the 4 plan questions, mascot places, Google OAuth client IDs, local backup file decision, three phone checks for the missing USD salary (search "راتب", review list, SMS diagnostics), device checks of batch 78 (re-scan of the original receipt photo, first voice recording, mascot tap, bird size), tip wording and whether to say "AI", the real Arab Bank issue. The PO's photos never go into the repo (public). Update it whenever the state below changes._
+_Last updated: 2026-11-26 (Cairo) by the Lead session (PO-phone-feedback lane): batch 78 merged (#130). **Batch 79** (`batch/2026-11-26-79`, multi-currency slice 2: T-278 Home currency cards, T-279 currency view, T-280 ≈ line, T-281 exchange as one unit, T-282 Insights/Ask agree) reviewed; fix round for T-280 in progress, then CI + PR. Built on the plan's recommended answers Q1–Q4 (written into the SRS as pending PO). Next: remaining plan items (WP-6 widget `+USD` hint and export pair column, Insights exchange bars), batch 79 minors, mascot placement (D-87) once the PO picks places. PO owes: the 4 plan answers, mascot places, Google OAuth client IDs, local backup file decision, phone checks for the missing USD salary and batch 78 fixes, wording checks listed under FU-379…FU-385, the real Arab Bank issue. The PO's photos never go into the repo (public). Update it whenever the state below changes._
 
 
 > **Two Lead sessions run in parallel (2026-11-26).** The M9 "LLM helper" lane (Ask Zaghlol + auto-category, `docs/04-tasks/m9-llm-plan.md`) uses task ids **T-322…T-365** and batches **90…98**. The PO-phone-feedback lane keeps T-272… and batch 78…. Each lane merges its own batches; take new task ids and FU numbers from `main` right before use, and expect add/add conflicts in `TASKS.md` / `implementation-status.md` to be unions.
@@ -173,7 +173,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-379** (PO-phone-feedback lane; batch 78 used FU-364…FU-378)
+Next free follow-up number: **FU-386** (PO-phone-feedback lane; batch 79 used FU-379…FU-385)
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
