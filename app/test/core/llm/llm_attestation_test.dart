@@ -180,31 +180,56 @@ void main() {
 
   group('AC2 dev proof is debug-only', () {
     final hash = Uint8List.fromList(List<int>.generate(32, (i) => i));
+    final devKey = base64.encode(List<int>.filled(32, 1));
 
     test('debug: HMAC-SHA256 of bodyHash, unpadded base64url, fits the '
         'OpenAPI pattern', () async {
-      final p = DevLlmProver('synthetic-dev-key', mode: BuildMode.debug);
+      final p = DevLlmProver(devKey, mode: BuildMode.debug);
       final a = await p.prove(LlmFeature.ask, hash) as LlmDevProof;
       final want = b64uNoPad(
-        c.Hmac(c.sha256, utf8.encode('synthetic-dev-key')).convert(hash).bytes,
+        c.Hmac(c.sha256, List<int>.filled(32, 1)).convert(hash).bytes,
       );
       expect(a.proof, want);
       expect(a.toJson(), {'type': 'dev', 'proof': want});
     });
 
+    test(
+      'shared vector with the backend (key 32 x 0x01, bodyHash 32 x 0x02)',
+      () async {
+        final p = DevLlmProver(devKey, mode: BuildMode.debug);
+        final a = await p.prove(
+          LlmFeature.ask,
+          Uint8List.fromList(List<int>.filled(32, 2)),
+        ) as LlmDevProof;
+        expect(a.proof, 'cyFAbgyID9kll4mL6zk68q6-1Rq1zfHVLlmR-a-t0t4');
+      },
+    );
+
+    test('key must be standard base64 of at least 32 bytes (fail closed)', () {
+      for (final bad in [
+        base64.encode(List<int>.filled(31, 1)),
+        'synthetic-dev-key',
+        base64Url.encode(List<int>.filled(33, 251)),
+        'not base64!',
+      ]) {
+        expect(
+          () => DevLlmProver(bad, mode: BuildMode.debug),
+          throwsStateError,
+          reason: bad,
+        );
+      }
+    });
+
     test('negative proof 2: release and profile builds cannot make one, and '
         'the selector never picks it there', () {
       for (final mode in [BuildMode.release, BuildMode.profile]) {
-        expect(
-          () => DevLlmProver('synthetic-dev-key', mode: mode),
-          throwsStateError,
-        );
+        expect(() => DevLlmProver(devKey, mode: mode), throwsStateError);
         expect(
           selectLlmProver(
             attestation: PigeonAttestation(api: FakeAttestHost()),
             platform: ClientPlatform.android,
             mode: mode,
-            devKey: 'synthetic-dev-key',
+            devKey: devKey,
           ),
           isA<PlatformLlmProver>(),
         );
@@ -237,8 +262,8 @@ void main() {
       expect(
         src,
         contains(
-          "const String llmDevKeyDefine = kReleaseMode ? '' : "
-          "String.fromEnvironment('ZAGHLOL_LLM_DEV_KEY');",
+          'const String llmDevKeyDefine = kDebugMode ? '
+          "String.fromEnvironment('ZAGHLOL_LLM_DEV_KEY') : '';",
         ),
       );
       // In this (debug/test) build the define is unset: empty.

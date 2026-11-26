@@ -235,6 +235,13 @@ void main() {
       expect(a.figures, [e('15600')]);
     });
 
+    test('an English merchant mention is resolved', () async {
+      final a = await run<LlmDataAnswer>(
+        const PlanSpend(last, PlanFilter(mention: 'Carrefour')),
+      );
+      expect(a.target.kind, LlmTargetKind.merchant);
+    });
+
     test('a placeholder missing from the map: fallback', () async {
       final a = await run<LlmFallbackAnswer>(
         const PlanSpend(last, PlanFilter(ref: '⟦CARD_2⟧')),

@@ -167,10 +167,11 @@ enum BuildMode {
 
 /// The dev HMAC key from `--dart-define=ZAGHLOL_LLM_DEV_KEY=…`. A constant:
 /// in a release build it is the empty string whatever was defined, so no key
-/// is compiled into a release app.
-const String llmDevKeyDefine = kReleaseMode
-    ? ''
-    : String.fromEnvironment('ZAGHLOL_LLM_DEV_KEY');
+/// is compiled into a release or profile app. The value is standard base64
+/// of at least 32 bytes, the same as the server's `Llm:Attestation:DevProofKey`.
+const String llmDevKeyDefine = kDebugMode
+    ? String.fromEnvironment('ZAGHLOL_LLM_DEV_KEY')
+    : '';
 
 /// The dev proof for the backend's `Fake` attestation mode (Development and
 /// Testing only). Exists only in debug builds.
@@ -178,9 +179,21 @@ final class DevLlmProver implements LlmProver {
   /// Throws [StateError] outside a debug build or without a key.
   DevLlmProver(String key, {BuildMode mode = BuildMode.current})
     : _mode = mode,
-      _key = Uint8List.fromList(utf8.encode(key)) {
+      _key = _decodeKey(mode, key);
+
+  static Uint8List _decodeKey(BuildMode mode, String key) {
     _guard(mode);
-    if (key.isEmpty) throw StateError('dev proof needs a key');
+    final k = key.trim();
+    if (k.isEmpty) throw StateError('dev proof needs a key');
+    // Match the server: standard alphabet, padded, at least 32 bytes.
+    if (!RegExp(r'^[A-Za-z0-9+/]*={0,2}$').hasMatch(k) || k.length % 4 != 0) {
+      throw StateError('dev proof key must be standard base64');
+    }
+    final bytes = base64.decode(k);
+    if (bytes.length < 32) {
+      throw StateError('dev proof key must hold at least 32 bytes');
+    }
+    return Uint8List.fromList(bytes);
   }
 
   final BuildMode _mode;

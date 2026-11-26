@@ -131,3 +131,9 @@ Voice: Egyptian colloquial throughout («يلا يخمّن», «مش دلوقت�
 - Fix round: only **B93-M1** (T-340, about 10 lines of app code + docs + one shared vector). It is a dev-only interop major, not money, security, privacy or data. Under SPRINT rules it may instead become a follow-up owned by T-349 (the first task that exercises Fake mode end to end). If deferred, T-340 can move to APPROVED with the FU recorded.
 - Minors B93-m1…m7 and nits B93-n1…n5 → `FU-###`. B93-m3 and B93-m7 belong with the PO/legal items already open (D-90/D-96 text in BR-SYNC-03, OQ-LCAT-08).
 - `resumeAll()` after sync (T-343) is a release blocker for `ask_llm` ON, not for this batch.
+
+## Fix round — T-340
+
+- **B93-M1 fixed (app side).** `DevLlmProver` now decodes `ZAGHLOL_LLM_DEV_KEY` as standard padded base64 (the server's `Convert.FromBase64String` alphabet) and needs at least 32 bytes. Otherwise it throws `StateError`, so there is no dev proof and no request. `ask-llm.md` §5 states the key format. One shared vector (key 32 x 0x01, bodyHash 32 x 0x02, proof `cyFAbgyID9kll4mL6zk68q6-1Rq1zfHVLlmR-a-t0t4`) is asserted in `llm_attestation_test.dart` and `LlmDevProofVectorTests`. A bad-key test covers 31 bytes, non-base64, url-safe alphabet.
+- **B93-n3 fixed.** The define is now `kDebugMode ? String.fromEnvironment(…) : ''`, so profile builds bundle no key. The release negative proof is unchanged and green.
+- **B93-m5 (T-342), partly.** Added the English-name mention test (`Carrefour`). Not done: (b) merchant name holding a category word (the fix, checking the merchant before the category, needs a parser-level look because the probe came back as a fallback) and (c) a period-word mention. Left as follow-ups with B93-n4, n5 and the other minors.

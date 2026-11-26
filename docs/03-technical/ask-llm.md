@@ -196,7 +196,7 @@ purge and alert checks join the embedded retention/heartbeat jobs, outbound 443 
 
 | Stage | Environment | `Llm:Attestation:Mode` | Behaviour |
 |---|---|---|---|
-| 0 now | Development, Testing | `Fake` | accepts only `{"type":"dev","proof":"<HMAC of bodyHash with a test key>"}` from debug builds; refused at start in any other environment. Format (T-340): unpadded base64url of HMAC-SHA256(key, bodyHash), 43 chars; the app reads the key from `--dart-define=ZAGHLOL_LLM_DEV_KEY` in debug builds only |
+| 0 now | Development, Testing | `Fake` | accepts only `{"type":"dev","proof":"<HMAC of bodyHash with a test key>"}` from debug builds; refused at start in any other environment. Format (T-340): unpadded base64url of HMAC-SHA256(key, bodyHash), 43 chars; the app reads the key from `--dart-define=ZAGHLOL_LLM_DEV_KEY` in debug builds only. Key format on both sides: standard padded base64 of at least 32 bytes, the same value as `Llm:Attestation:DevProofKey`; the app refuses a malformed or short key (no request). Shared vector (key 32 x 0x01, bodyHash 32 x 0x02 -> `cyFAbgyID9kll4mL6zk68q6-1Rq1zfHVLlmR-a-t0t4`) is asserted in Dart and .NET |
 | 1 now | Staging | `ReportOnly` | verifies real proofs when present, counts failures by reason, does not refuse (side-loaded builds) |
 | 2 store accounts live | Production | `Enforce` (forced) | Production ignores the setting and always enforces; with verifiers unconfigured every request is `503 UPSTREAM_UNAVAILABLE`, so `ask_llm` stays off |
 
