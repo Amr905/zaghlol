@@ -76,13 +76,15 @@ internal sealed partial class AskPlanReference
         var foldedSent = Fold(sent);
         foreach (var (key, value) in texts.Where(t => t.Key == "mention"))
         {
-            if (!MentionOccurs(foldedSent, value))
+            if (value.EnumerateRunes().Any(Rune.IsNumber) || !MentionOccurs(foldedSent, value))
             {
                 return (3, "MENTION_NOT_IN_TEXT");
             }
         }
 
         // Step 4: amounts come from the question.
+        // Placeholders carry no numbers (section 2.4a): each token becomes a space before numbers and number words are read.
+        foldedSent = Regex.Replace(foldedSent, @"\u27e6[^\u27e6\u27e7]*\u27e7", " ", RegexOptions.None, TimeSpan.FromMilliseconds(200));
         var knownNumbers = NumbersIn(foldedSent);
         foreach (var amount in Amounts(plan["p"]))
         {

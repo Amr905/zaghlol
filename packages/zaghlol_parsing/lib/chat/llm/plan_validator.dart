@@ -70,6 +70,13 @@ final class _Name {
 
 final RegExp _numberRe = RegExp(r'[0-9]+(?:,[0-9]{3})*(?:\.[0-9]+)?');
 
+/// A `⟦…⟧` placeholder token. Step 4 cuts these out of the sent text before
+/// it reads numbers, so a placeholder index is never an amount (FU-409).
+final RegExp _placeholderRe = RegExp('⟦[^⟦⟧]*⟧');
+
+/// Any number character (Nd, Nl, No: `½`, `①`, `Ⅻ`), for the mention rule.
+final RegExp _anyNumber = RegExp(r'\p{N}', unicode: true);
+
 class PlanValidator {
   /// [sources]: the user's accounts, the registry aliases and the user's
   /// merchants (the masker's sources); their names must not appear in plain
@@ -176,17 +183,19 @@ class PlanValidator {
     final foldedSent = foldKey(sent);
     for (final m in mentions) {
       final f = foldKey(m);
-      if (f.isEmpty || !foldedSent.contains(f)) {
+      if (_anyNumber.hasMatch(m) || f.isEmpty || !foldedSent.contains(f)) {
         return _reject(3, 'MENTION_NOT_IN_TEXT');
       }
     }
 
     // Step 4
     if (amounts.isNotEmpty) {
+      // A space is left for each token, so its neighbours never join.
+      final numbersText = foldedSent.replaceAll(_placeholderRe, ' ');
       final known = {
-        for (final m in _numberRe.allMatches(foldedSent))
+        for (final m in _numberRe.allMatches(numbersText))
           canonicalDecimal(m.group(0)!),
-        ...numberWordValues(foldedSent),
+        ...numberWordValues(numbersText),
       };
       for (final (amount, currency) in amounts) {
         if (!known.contains(canonicalDecimal(amount))) {

@@ -2127,6 +2127,142 @@
       }
     },
     {
+      "id": "invalid-mention-vulgar-fraction",
+      "group": "mention",
+      "lang": "en",
+      "sent": "how much on ½ kilo coffee?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "½ kilo",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 3,
+        "reason": "MENTION_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-07",
+      "note": "FU-409: the no-digit rule of mention is \\p{N} (No here); the schema pattern only lists ASCII and Arabic digits, so this is step 3"
+    },
+    {
+      "id": "invalid-mention-circled-digit",
+      "group": "mention",
+      "lang": "en",
+      "sent": "how much at shop ①?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "shop ①",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 3,
+        "reason": "MENTION_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-07",
+      "note": "\\p{No}"
+    },
+    {
+      "id": "invalid-mention-roman-numeral",
+      "group": "mention",
+      "lang": "en",
+      "sent": "how much at Ⅻ cafe?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "Ⅻ cafe",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 3,
+        "reason": "MENTION_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-07",
+      "note": "\\p{Nl}"
+    },
+    {
+      "id": "invalid-mention-digit-of-another-script",
+      "group": "mention",
+      "lang": "ar",
+      "sent": "صرفت كام في محل ৩؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "محل ৩",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 3,
+        "reason": "MENTION_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-07",
+      "note": "\\p{Nd} outside the scripts the schema pattern lists (Bengali digit)"
+    },
+    {
       "id": "invalid-amount-invented",
       "group": "amount",
       "lang": "en",
@@ -2175,6 +2311,133 @@
         "reason": "AMOUNT_NOT_IN_TEXT"
       },
       "srs": "FR-LLM-04"
+    },
+    {
+      "id": "invalid-amount-from-placeholder-index",
+      "group": "amount",
+      "lang": "ar",
+      "sent": "⟦CARD_1⟧ هحوش",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "1",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-04",
+      "note": "FU-409: a placeholder index is not a number of the question (section 2.4a)"
+    },
+    {
+      "id": "invalid-amount-from-placeholder-arabic-indic-index",
+      "group": "amount",
+      "lang": "ar",
+      "sent": "⟦CARD_٢⟧ هحوش ٥٠٠ كل شهر",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "2",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-04",
+      "note": "the token is removed after folding, so an Arabic-Indic digit inside it does not count either"
+    },
+    {
+      "id": "valid-amount-next-to-placeholder",
+      "group": "amount",
+      "lang": "ar",
+      "sent": "⟦CARD_٢⟧ هحوش ٥٠٠ كل شهر",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "500",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-04",
+      "note": "numbers outside the placeholder still count"
+    },
+    {
+      "id": "invalid-amount-joined-across-placeholder",
+      "group": "amount",
+      "lang": "en",
+      "sent": "save 5⟦CARD_1⟧00 a month",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "500",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-04",
+      "note": "removing a token leaves a gap: its neighbours never join into one number"
+    },
+    {
+      "id": "invalid-amount-from-second-placeholder-index",
+      "group": "amount",
+      "lang": "en",
+      "sent": "⟦MERCHANT_1⟧ and ⟦CARD_12⟧ save a month",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "12",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-04",
+      "note": "every token is removed, not only the first"
     },
     {
       "id": "invalid-amount-cut-mode-invented",
