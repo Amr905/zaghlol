@@ -112,9 +112,10 @@ class CaptureSourceScanTest {
         // The main-manifest permissions are INTERNET (T-141, backend calls) and
         // POST_NOTIFICATIONS (NOTIF-GW, the app's own local alerts) and
         // RECEIVE_BOOT_COMPLETED (T-230, re-arm alerts after restart) and
+        // VIBRATE (T-293, normal permission: haptic patterns, no prompt) and
         // RECORD_AUDIO (T-120, the voice logger; asked at first use).
         val perms = Regex("""<uses-permission[^>]*android:name="([^"]+)"""").findAll(File(src, "main/AndroidManifest.xml").readText()).map { it.groupValues[1] }.toList()
-        assertEquals(listOf("android.permission.INTERNET", "android.permission.POST_NOTIFICATIONS", "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.RECORD_AUDIO"), perms)
+        assertEquals(listOf("android.permission.INTERNET", "android.permission.POST_NOTIFICATIONS", "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.VIBRATE", "android.permission.RECORD_AUDIO"), perms)
     }
 
     @Test

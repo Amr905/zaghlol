@@ -33,6 +33,7 @@ import app.zaghlol.platform.share.ShareIntakeHostApi
 import app.zaghlol.platform.share.ShareIntakeState
 import app.zaghlol.platform.share.ShareStore
 import app.zaghlol.platform.share.ShareStores
+import app.zaghlol.platform.haptics.HapticsRegistration
 import app.zaghlol.platform.sharesheet.ShareImageRegistration
 import app.zaghlol.platform.speech.SpeechSupportRegistration
 import app.zaghlol.platform.text.TextNormalizationHostApi
@@ -94,6 +95,8 @@ class MainActivity : FlutterFragmentActivity() {
         ShareImageRegistration.register(messenger, this)
         // T-120: on-device speech support check (UI engine only).
         SpeechSupportRegistration.register(messenger, this)
+        // T-293: animation-synced haptic patterns (UI engine only).
+        HapticsRegistration.register(messenger, this)
         // T-224: the theme choice (light/dark/system only) for the next cold start.
         val themeChannel = MethodChannel(messenger, "zaghlol/launch_theme")
         launchThemeChannel = themeChannel
@@ -195,6 +198,7 @@ class MainActivity : FlutterFragmentActivity() {
         ShareImageRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         ShareImageRegistration.sweepAll(this)
         SpeechSupportRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
+        HapticsRegistration.unregister(flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/app_settings").setMethodCallHandler(null)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "zaghlol/launch_theme").setMethodCallHandler(null)
         launchThemeChannel = null
