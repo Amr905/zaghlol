@@ -79,11 +79,7 @@ internal sealed class HostSecretsKms : IKmsBackend, IDisposable
 
         var strict = !environment.IsDevelopment() && !environment.IsEnvironment("Testing");
 
-        // H4: the weaker custody of a shared host is an explicit, recorded choice (ADR-026).
-        if (strict && !(bool.TryParse(configuration[CustodyKey], out var accepted) && accepted))
-        {
-            throw new KmsConfigurationException(CustodyMessage);
-        }
+        CheckCustody(configuration, environment);
 
         CheckNoKeysInFiles(configuration, environment);
         FileKms.CheckDevKids(settings, strict, Messages);
@@ -160,6 +156,16 @@ internal sealed class HostSecretsKms : IKmsBackend, IDisposable
 
     public void Dispose() => keys.Dispose();
 
+    /// <summary>H4: the weaker custody of a shared host is an explicit, recorded choice outside Development and Testing (ADR-026).</summary>
+    internal static void CheckCustody(IConfiguration configuration, IHostEnvironment environment)
+    {
+        var strict = !environment.IsDevelopment() && !environment.IsEnvironment("Testing");
+        if (strict && !(bool.TryParse(configuration[CustodyKey], out var accepted) && accepted))
+        {
+            throw new KmsConfigurationException(CustodyMessage);
+        }
+    }
+
     /// <summary>
     /// H3: a <c>ZAGHLOL_KEYS</c> value served by a configuration file, or an <c>appsettings*.json</c> in the content root or the
     /// application directory that holds <c>ZAGHLOL_KEYS</c> or <see cref="ValueMarker"/> (loaded in this environment or not).
@@ -213,7 +219,7 @@ internal sealed class HostSecretsKms : IKmsBackend, IDisposable
     /// The <c>pem</c> or <c>key</c> text of <c>ZAGHLOL_KEYS:&lt;name&gt;</c> (or its <c>_</c> spelling) in a pinned array the caller
     /// zeroes. Intermediate buffers are pinned and zeroed here.
     /// </summary>
-    private static byte[] ReadValue(IConfigurationSection section, string name, KeyKind kind)
+    internal static byte[] ReadValue(IConfigurationSection section, string name, KeyKind kind)
     {
         var dash = section[name];
         var underscore = name.Contains('-', StringComparison.Ordinal) ? section[name.Replace('-', '_')] : null;
@@ -250,7 +256,7 @@ internal sealed class HostSecretsKms : IKmsBackend, IDisposable
         }
     }
 
-    /// <summary>Exactly <c>{"zaghlol":"host-key-v1","name":&lt;name&gt;,"pem"|"key":&lt;text&gt;}</c>, members in this order.</summary>
+    /// <summary>Exactly <c>{"zaghlol":"host-key-v1","name":&lt;name&gt;,"pem"|"key"|"secret":&lt;text&gt;}</c>, members in this order.</summary>
     internal static byte[] ParseJson(ReadOnlySpan<byte> json, string name, KeyKind kind)
     {
         byte[]? text = null;
@@ -269,7 +275,7 @@ internal sealed class HostSecretsKms : IKmsBackend, IDisposable
             ExpectMember(ref reader, "name"u8);
             Expect(ref reader, JsonTokenType.String);
             Require(reader.ValueTextEquals(name));
-            ExpectMember(ref reader, kind == KeyKind.Pem ? "pem"u8 : "key"u8);
+            ExpectMember(ref reader, kind switch { KeyKind.Pem => "pem"u8, KeyKind.Key => "key"u8, _ => "secret"u8 });
             Expect(ref reader, JsonTokenType.String);
             Require(!reader.HasValueSequence);
             text = GC.AllocateArray<byte>(reader.ValueSpan.Length, pinned: true);
@@ -314,10 +320,14 @@ internal sealed class HostSecretsKms : IKmsBackend, IDisposable
     private static readonly System.Buffers.SearchValues<char> Base64UrlChars =
         System.Buffers.SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
 
-    /// <summary>Which member a value must hold: <c>pem</c> for a signing key, <c>key</c> for an HMAC or key-encryption key.</summary>
+    /// <summary>
+    /// Which member a value must hold: <c>pem</c> for a signing key, <c>key</c> for an HMAC or key-encryption key, <c>secret</c> for
+    /// an LLM provider key (T-333, <c>ZAGHLOL_KEYS__llm_&lt;id&gt;</c>).
+    /// </summary>
     internal enum KeyKind
     {
         Pem,
         Key,
+        Secret,
     }
 }

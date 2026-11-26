@@ -30,7 +30,7 @@ public static class KmsMetrics
 
     /// <summary>
     /// <paramref name="operation"/> is one of <c>sign</c>, <c>sign_verify</c> (<see cref="SignVerifyOperation"/>), <c>hmac</c>,
-    /// <c>data_key</c>, <c>public_key</c>.
+    /// <c>data_key</c>, <c>public_key</c>, <c>llm_key</c> (the start-up read of an LLM provider key from OpenBao KV, T-333).
     /// </summary>
     public static void KmsUnavailable(string operation) =>
         Unavailable.Add(1, new TagList { { "operation", operation } });

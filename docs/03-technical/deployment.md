@@ -165,6 +165,26 @@ It writes `/etc/zaghlol/kms-production/keys/` (mode 0500) with 0400 files owned 
 
 *CI:* the `openbao-live` job (`backend/tools/openbao-live.sh`) runs the pinned OpenBao image with this `openbao.hcl` (raft, static seal, TLS, audit), `setup.sh`, both key tools and the live tests before and after a restart, sealed and stopped.
 
+**LLM provider keys (T-333, ask-llm.md §3, ADR-027).** The API keys of the LLM providers (and, for Vertex, the service-account JSON) come from the secret store of the active `Kms:Provider`, never from `appsettings*.json`, environment configuration or the command line: any setting under `Llm` named like `ApiKey`, `Key`, `Secret`, `Token`, `Password`, `Credentials` or `ServiceAccount…` refuses the start. One key per provider id under `Llm:Providers` (ids: `a-z`, `0-9`, `-`, at most 40 characters):
+
+| `Kms:Provider` | Where the key lives | Format |
+|---|---|---|
+| `File` | `<Kms:File:KeyDirectory>/llm_<id>.secret`, owner = app user or root, mode `0400`/`0600`, no symlink (the T-200 key-folder rules) | the key text, one optional trailing newline |
+| `HostSecrets` | host secret setting `ZAGHLOL_KEYS__llm_<id>` (a `-` in the id may be written `_`); custody flag and "no key in a file" as in section 7 | unpadded base64url of `{"zaghlol":"host-key-v1","name":"llm_<id>","secret":"<key text>"}`, members in this order |
+| `OpenBao` | KV v2 mount `zaghlol` (created by `setup.sh apply`), path `llm/<id>`; the `zaghlol-api` policy may read `zaghlol/data/llm/*` and nothing else there | data exactly `{"secret": "<key text>"}` |
+| `Local` | `<Kms:Local:KeyDirectory>/llm_<id>.secret` (Development/Testing only) | as `File` |
+
+OpenAI-style keys must be 1–1024 visible ASCII characters (no spaces or line breaks). A service-account JSON must be an object with `"type":"service_account"`, `client_email` and `private_key`.
+
+*Writing a key without printing it* (the key is in a file only you can read, e.g. on a tmpfs, deleted afterwards):
+- File: `sudo install -m 0400 -o 1654 -g 1654 /dev/shm/key /etc/zaghlol/kms-production/keys/llm_<id>.secret`.
+- HostSecrets: `jq -cnj --arg n llm_<id> --rawfile s /dev/shm/key '{zaghlol:"host-key-v1",name:$n,secret:$s}' | basenc --base64url -w0 | tr -d =` and paste the output into the GitHub environment secret that the deploy writes to `ZAGHLOL_KEYS__llm_<id>` (as for the KMS keys, section 7). Never paste it into chat, an issue or a commit.
+- OpenBao (operator token, inside the OpenBao container): `bao kv put -mount=zaghlol llm/<id> secret=@/dev/shm/key`. After a `setup.sh` update, re-run `setup.sh apply` so the `zaghlol-api` policy includes the read path.
+
+*At start:* the log says `LLM key for provider <id> loaded from <source>` for each key it found. A **missing** key (no file, no setting, KV 404, or KV not readable) logs a warning `No LLM key for provider <id> in <source>: the provider is paused`: the backend starts and the LLM endpoints answer `LLM_SERVICE_PAUSED` while that provider is active. A **present but unusable** key (wrong mode or owner, symlink, empty, too large, malformed wrapper, wrong `name`, extra KV fields, a character a header can't carry) refuses the start with a message that names the source and the provider id, never the value. Logs, traces, metrics, problem bodies and exception messages never carry a key or any part of it; the key travels only in the provider's `Authorization` header (never in a URL).
+
+*Rotation (new key, restart):* 1. create the new key at the provider; 2. write it to the store as above, replacing the old value (File: write `llm_<id>.secret.new` with the same owner and mode, then `mv` it over the old file); 3. restart the API (`./compose.sh up -d --force-recreate api`, or redeploy on the shared host); keys are read only at start; 4. check the start log line `LLM key for provider <id> loaded from <source>` and make one request through the app or the staging smoke test (a `401` from the provider shows up as `UPSTREAM_UNAVAILABLE`, never with the key); 5. revoke the old key at the provider. On a suspected leak, revoke first: the provider is paused until the new key is in and the API restarted. Switching the active provider (`llm.provider` remote config) needs no restart when its key was loaded at the last start.
+
 **Forwarded headers and the client address (T-124).** The per-network rate limits (`RateLimits:*`) group clients by the /24 (IPv4) or /56 (IPv6) of the address that ASP.NET Core `ForwardedHeaders` resolves. `X-Forwarded-For` is trusted only from listed proxies; if none is listed behind a load balancer, every client looks like the load balancer and the whole service shares one bucket, so one client could block registration for everyone.
 - `ForwardedHeaders:KnownProxies:<n>` (IP addresses) and/or `ForwardedHeaders:KnownNetworks:<n>` (CIDR, e.g. `10.0.0.0/16`): the addresses of the hop directly in front of the API.
 - `ForwardedHeaders:NoProxy=true`: set this instead only when clients connect to the API directly (no load balancer, CDN or WAF in front).
