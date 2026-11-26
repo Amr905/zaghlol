@@ -283,15 +283,17 @@ public static class GrantMatrix
 
     /// <summary>
     /// The grants of the LlmQuotaSpendConfigCategorise migration (T-323; ask-llm §4.5, llm-categorise §4). Frozen: never edit after it
-    /// ships. <c>app_rw</c> reads and writes the quota counters, spend ledger and answer cache, only reads <c>remote_config</c>, and
-    /// inserts and reads the confirmation and correction rows; <c>worker_rw</c> is the retention purger (DELETE); <c>ops_rw</c>
-    /// reads the two review tables and moves only the review columns. <c>ops_ro</c> has no grant on any of them.
+    /// ships. <c>app_rw</c> reads and writes the quota counters (also DELETE: install/account erasure) and answer cache (also DELETE:
+    /// FR-LCAT-12 intake), the spend ledger, only reads <c>remote_config</c>, and inserts and reads the confirmation and correction
+    /// rows; <c>worker_rw</c> is the retention purger (DELETE); <c>ops_rw</c> reads the two review tables, moves only the review
+    /// columns and upserts <c>remote_config</c> (admin endpoint, ops CLI). <c>ops_ro</c> reads <c>remote_config</c> and the two review
+    /// tables (operator review view) but not the quota counters (subject_id).
     /// </summary>
     public static IReadOnlyList<TableGrant> LlmTables { get; } =
     [
-        new(AppRw, "llm_quota_counters", SIU),
+        new(AppRw, "llm_quota_counters", SIUD),
         new(AppRw, "llm_spend_daily", SIU),
-        new(AppRw, "llm_cat_answer_cache", SIU),
+        new(AppRw, "llm_cat_answer_cache", SIUD),
         new(AppRw, "remote_config", S),
         new(AppRw, "llm_cat_confirmations", SI),
         new(AppRw, "llm_cat_corrections", SI),
@@ -302,6 +304,10 @@ public static class GrantMatrix
         new(WorkerRw, "llm_cat_corrections", SD),
         new(OpsRw, "llm_cat_confirmations", S, UpdateColumns: ["status"]),
         new(OpsRw, "llm_cat_corrections", S, UpdateColumns: ["status", "operator_id", "resolved_at"]),
+        new(OpsRw, "remote_config", SIU),
+        new(OpsRo, "remote_config", S),
+        new(OpsRo, "llm_cat_confirmations", S),
+        new(OpsRo, "llm_cat_corrections", S),
     ];
 
     /// <summary>What the database must hold after all migrations: one merged row per role and table.</summary>

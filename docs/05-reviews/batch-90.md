@@ -205,3 +205,8 @@ Next free number from `LEAD_HANDOFF.md`: FU-364.
 | FU-369 | m8: categorise attest prefix in the spec docs; m9: NFC as an AC of T-330 | T-330 / T-336 |
 | FU-370 | m10: `app_rw` DELETE on `llm_quota_counters` and `llm_cat_answer_cache` (or fix now) | T-334 / T-339 |
 | FU-371 | m11: OQ on the S1 average basis; m12: negative base; nit: dedupe by id | T-342 |
+
+## Fix round — T-323
+- m10 fixed in place (migration not shipped): `app_rw` now has DELETE on `llm_quota_counters` and `llm_cat_answer_cache`.
+- Open points decided: `ops_rw` gets SELECT/INSERT/UPDATE on `remote_config` (the admin endpoint and ops CLI must write it; mirrors `feature_flags`); `ops_ro` gets SELECT on `remote_config` and the two review tables (operator review view; rows hold only the peppered install_hash), still nothing on quota counters.
+- `GrantMatrix.LlmTables`, `GrantTests`, backend-schema.md and T-323 updated.
