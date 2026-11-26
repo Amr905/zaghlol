@@ -1,0 +1,34 @@
+{
+  "note": "Synthetic sync config blocks for the LLM provider terms (T-367, ask-llm.md 4.6). Mirrors what T-366 emits.",
+  "blocks": {
+    "luna": {
+      "version": 4,
+      "values": {"llm.provider": "openai-luna", "ask.quota_free": "5"},
+      "providerName": {"ar": "لونا", "en": "Luna AI"}
+    },
+    "switched": {
+      "version": 5,
+      "values": {"llm.provider": "other-prov"},
+      "providerName": {"ar": "تانية", "en": "Other AI"}
+    },
+    "noNames": {
+      "version": 6,
+      "values": {"llm.provider": "openai-luna"}
+    },
+    "noId": {
+      "version": 7,
+      "values": {"ask.quota_free": "5"},
+      "providerName": {"ar": "لونا", "en": "Luna AI"}
+    },
+    "emptyArName": {
+      "version": 8,
+      "values": {"llm.provider": "openai-luna"},
+      "providerName": {"ar": "", "en": "Luna AI"}
+    },
+    "badId": {
+      "version": 9,
+      "values": {"llm.provider": "Bad Id!"},
+      "providerName": {"ar": "لونا", "en": "Luna AI"}
+    }
+  }
+}

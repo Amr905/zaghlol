@@ -426,6 +426,35 @@ void main() {
       expect(server.bodies, hasLength(2));
     });
 
+    test('409 clears consent, keeps the queue, resets the config cursor and '
+        'never stores the 409 provider (FU-425)', () async {
+      await put('c1', 'kosharyx');
+      var resets = 0;
+      final s2 = LlmCatSender(
+        db,
+        filler: filler,
+        applier: sender.applier,
+        call: sender.call,
+        newRequestId: sender.newRequestId,
+        terms: sender.terms,
+        batchMax: sender.batchMax,
+        allowedCategoryIds: sender.allowedCategoryIds,
+        onConsentRequired: () async => resets++,
+      );
+      server.reply = (b) => problem(409, 'LLM_CONSENT_REQUIRED');
+      await s2.run(now: _now, lang: LlmLang.en);
+      expect(resets, 1);
+      expect(await consent.read(LlmFeature.categorise), isNull);
+      expect(await queued(), ['kosharyx']);
+      // Nothing more is sent until the user agrees again.
+      final n = server.bodies.length;
+      await s2.run(
+        now: _now.add(const Duration(minutes: 11)),
+        lang: LlmLang.en,
+      );
+      expect(server.bodies, hasLength(n));
+    });
+
     test('409 clears consent; 503 pauses until sync', () async {
       await put('c1', 'kosharyx');
       server.reply = (b) => problem(409, 'LLM_CONSENT_REQUIRED');
@@ -518,10 +547,13 @@ void main() {
       await consent.clear(LlmFeature.categorise);
       await expectSilent();
     });
-    test('terms unknown (no provider id yet, FU-425)', () async {
-      terms = null;
-      await expectSilent();
-    });
+    test(
+      'terms unknown (no provider id or names in the synced config, FU-425)',
+      () async {
+        terms = null;
+        await expectSilent();
+      },
+    );
     test('paused until sync', () async {
       await quota.pause(LlmFeature.categorise);
       await expectSilent();

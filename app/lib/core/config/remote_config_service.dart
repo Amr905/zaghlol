@@ -25,6 +25,7 @@ final class RemoteConfigService {
   final Duration maxAge;
 
   int _version = 0;
+  bool _cursorReset = false;
   int _atMs = 0;
   Map<String, String> _values = const {};
   LlmProviderNames? _names;
@@ -33,8 +34,14 @@ final class RemoteConfigService {
   final _changes = StreamController<RemoteConfig>.broadcast();
 
   /// Version of the stored block (0 when none): what the next sync may send
-  /// as `configVersion`.
-  int get version => _version;
+  /// as `configVersion`. 0 after [resetCursor] until a block is applied, so
+  /// the next sync carries the block again (FU-425).
+  int get version => _cursorReset ? 0 : _version;
+
+  /// FU-425 safety net: a `409 LLM_CONSENT_REQUIRED` means the held block may
+  /// be behind the server. The values stay (evaluated as before); only the
+  /// next request omits `configVersion`, so the server sends its block.
+  void resetCursor() => _cursorReset = true;
 
   /// Typed values now; defaults when missing, stale or the clock is odd.
   RemoteConfig get current {
@@ -81,7 +88,15 @@ final class RemoteConfigService {
   }) {
     final run = _writes.then((_) async {
       final p = _parse(version, values, providerName);
-      if (p == null || (_version > 0 && p.version <= _version)) return false;
+      if (p == null) return false;
+      // A block that answers a reset cursor is taken even at the held
+      // version (the provider names are not versioned); it ends the reset.
+      final wasReset = _cursorReset;
+      if (_version > 0 &&
+          (p.version < _version || (p.version == _version && !wasReset))) {
+        return false;
+      }
+      _cursorReset = false;
       final now = _clock().toUtc().millisecondsSinceEpoch;
       await _dao.write(
         remoteConfigSnapshotKey,
@@ -115,7 +130,7 @@ final class RemoteConfigService {
   /// freshness moves to now. Ignored when none is held or it differs.
   Future<void> confirm(int version) {
     final run = _writes.then((_) async {
-      if (_version == 0 || _version != version) return;
+      if (_version == 0 || _version != version || _cursorReset) return;
       final now = _clock().toUtc().millisecondsSinceEpoch;
       if (now <= _atMs) return;
       await _dao.write(

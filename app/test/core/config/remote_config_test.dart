@@ -114,6 +114,46 @@ void main() {
       expect(s.current.askQuotaFree, 5);
     });
 
+    test('resetCursor: version reads 0 until a block applies; values stay; '
+        'the same version is then taken again (FU-425)', () async {
+      await s.apply(
+        version: 3,
+        values: {'llm.provider': 'prov-a'},
+        providerName: {'ar': 'أ', 'en': 'A'},
+      );
+      s.resetCursor();
+      expect(s.version, 0);
+      expect(s.current.llmProvider, 'prov-a');
+      await s.confirm(3);
+      expect(
+        await s.apply(
+          version: 3,
+          values: {'llm.provider': 'prov-b'},
+          providerName: {'ar': 'ب', 'en': 'B'},
+        ),
+        isTrue,
+      );
+      expect(s.version, 3);
+      expect(s.current.llmProvider, 'prov-b');
+      expect(s.current.providerName.en, 'B');
+      // Back to normal: an equal version is ignored again.
+      expect(
+        await s.apply(version: 3, values: {'llm.provider': 'x1'}),
+        isFalse,
+      );
+    });
+
+    test('provider names go stale with the block (no id, no names)', () async {
+      await s.apply(
+        version: 3,
+        values: {'llm.provider': 'prov-a'},
+        providerName: {'ar': 'أ', 'en': 'A'},
+      );
+      now = now.add(const Duration(days: 15));
+      expect(s.current.llmProvider, '');
+      expect(s.current.providerName.en, '');
+    });
+
     test('confirm() keeps a held version fresh past 14 days', () async {
       await s.apply(version: 3, values: {'ask.quota_free': '9'});
       now = now.add(const Duration(days: 10));

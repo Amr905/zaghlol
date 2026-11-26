@@ -114,7 +114,7 @@ final class RemoteConfig {
   }
 
   static final RegExp _intRe = RegExp(r'^-?[0-9]{1,9}$');
-  static final RegExp _idRe = RegExp(r'^[a-z0-9._-]{1,32}$');
+  static final RegExp _idRe = RegExp(r'^[a-z0-9][a-z0-9-]{1,31}$');
   static final RegExp _decRe = RegExp(r'^([0-9]{1,7})(?:\.([0-9]{1,2}))?$');
 
   /// "100.00" / "100" to piasters, 0.01..1,000,000.00; null when bad.

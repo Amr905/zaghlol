@@ -122,6 +122,8 @@ class _Rig {
     this.sent = 'صرفت كام بكارت $_cardRef الشهر ده؟',
     this.outcome,
     this.activeTerms = _terms,
+    this.afterResync,
+    this.dropTermsOnResync = false,
     this.scrubOverride,
     List<bool> consents = const [true],
   }) : prompter = _Prompter([...consents]) {
@@ -141,7 +143,12 @@ class _Rig {
       quota: quota,
       prompter: prompter,
       isFlagOn: () => flagOn,
-      terms: () => activeTerms,
+      terms: () => _current,
+      resyncConfig: () async {
+        resyncs++;
+        await consent.clear(LlmFeature.ask); // the gateway did it at the 409
+        _current = dropTermsOnResync ? null : (afterResync ?? _current);
+      },
       now: () => _now,
       isOnline: () async => online,
       scrub: scrubOverride ?? ClientScrub.apply,
@@ -157,6 +164,12 @@ class _Rig {
   final String sent;
   final MaskOutcome Function(String, MaskSources)? outcome;
   final LlmTerms? activeTerms;
+
+  /// What the config says after the 409's one sync (null: unchanged).
+  final LlmTerms? afterResync;
+  late LlmTerms? _current = activeTerms;
+  final bool dropTermsOnResync;
+  int resyncs = 0;
   final ScrubResult Function(String)? scrubOverride;
   final dao = _MemDao();
   final client = _Client();
@@ -263,37 +276,75 @@ void main() {
       expect((await r.run('q')).last, isA<AskLlmQuotaOut>());
     });
 
+    test('409 with another provider in the synced config: one sync, the sheet '
+        'names the synced provider, Allow resends once (FU-425)', () async {
+      const next = LlmTerms(provider: 'other-provider', v: 1);
+      final r = _Rig(consents: [true, true], afterResync: next);
+      await _grant(r);
+      r.client.script
+        ..add(LlmConsentRequired())
+        ..add(_reply('PL-SPEND'));
+      final s = await r.run('q');
+      expect(r.resyncs, 1);
+      expect(s.whereType<AskLlmSending>(), hasLength(2));
+      expect(s.last, isA<AskLlmAnswered>());
+      expect(
+        (await r.consent.read(LlmFeature.ask))?.provider,
+        'other-provider',
+      );
+      expect(r.prompter.shown, hasLength(1));
+      expect(r.prompter.shown.single.terms.provider, 'other-provider');
+    });
+
+    test('409 with the same provider after the sync: paused copy, no sheet, '
+        'no resend, nothing stored (never adopts a 409 id)', () async {
+      final r = _Rig(consents: [true, true]);
+      await _grant(r);
+      r.client.script.add(LlmConsentRequired());
+      final s = await r.run('q');
+      expect(r.resyncs, 1);
+      expect(s.last, isA<AskLlmPaused>());
+      expect(r.client.sent, hasLength(1));
+      expect(r.prompter.shown, isEmpty);
+      expect(await r.consent.read(LlmFeature.ask), isNull);
+    });
+
     test(
-      '409: consent was cleared; asks again; allowed resends once',
+      '409 and the sync left no terms (no names): nothing is resent',
       () async {
-        final r = _Rig(consents: [true, true]);
+        final r = _Rig(consents: [true, true], dropTermsOnResync: true);
         await _grant(r);
-        r.client.script
-          ..add(LlmConsentRequired('other-provider'))
-          ..add(_reply('PL-SPEND'));
-        await r.consent.clear(LlmFeature.ask); // what the gateway did
-        final s = await r.run('q');
-        expect(s.whereType<AskLlmSending>(), hasLength(2));
-        expect(s.last, isA<AskLlmAnswered>());
-        expect(
-          (await r.consent.read(LlmFeature.ask))?.provider,
-          'other-provider',
-        );
-        expect(r.prompter.shown.first.terms.provider, 'openai-luna');
-        expect(r.prompter.shown.last.terms.provider, 'other-provider');
+        r.client.script.add(LlmConsentRequired());
+        expect((await r.run('q')).last, isA<AskLlmPaused>());
+        expect(r.client.sent, hasLength(1));
       },
     );
 
-    test('409 then Not now: declined; a second 409 never loops', () async {
-      final r = _Rig(consents: [false]);
+    test('409 and a failing sync: paused copy, no resend', () async {
+      final r = _Rig(consents: [true]);
       await _grant(r);
-      r.client.script.add(LlmConsentRequired(null));
+      r.client.script.add(LlmConsentRequired());
+      // Same terms stay when the sync can't deliver anything.
+      expect((await r.run('q')).last, isA<AskLlmPaused>());
+      expect(r.client.sent, hasLength(1));
+    });
+
+    test('409 then Not now: declined; a second 409 never loops', () async {
+      final r = _Rig(
+        consents: [false],
+        afterResync: const LlmTerms(provider: 'other-provider', v: 1),
+      );
+      await _grant(r);
+      r.client.script.add(LlmConsentRequired());
       expect((await r.run('q')).last, isA<AskLlmConsentDeclined>());
-      final r2 = _Rig(consents: [true, true]);
+      final r2 = _Rig(
+        consents: [true, true],
+        afterResync: const LlmTerms(provider: 'other-provider', v: 1),
+      );
       await _grant(r2);
       r2.client.script
-        ..add(LlmConsentRequired(null))
-        ..add(LlmConsentRequired(null));
+        ..add(LlmConsentRequired())
+        ..add(LlmConsentRequired());
       expect((await r2.run('q')).last, isA<AskLlmConsentDeclined>());
       expect(r2.client.sent, hasLength(2));
     });
