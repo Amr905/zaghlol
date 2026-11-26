@@ -528,6 +528,11 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     if (id != null) {
       setState(() {
         _categoryId = id;
+        // T-294: picking Salary turns "Is this a salary?" on.
+        if (id == SalaryService.incomeCategoryId &&
+            _type == TxnEditType.income) {
+          _salary = true;
+        }
         _touch();
       });
     }

@@ -2,6 +2,8 @@
 // A-26, A-27, A-29, A-43, A-54). Names are the `settings.key` values, so they
 // are part of the backup format: never rename one.
 
+import 'dart:convert';
+
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import 'setting_key.dart';
@@ -185,6 +187,25 @@ abstract final class Settings {
     'mascot.payday_celebrated',
     min: 0,
     max: 9999999,
+  );
+
+  /// T-294: ids of the salary transactions already celebrated (newest last,
+  /// at most 32). Stops repeats, also after a restore of the same data.
+  static final mascotPaydayCelebratedTxns = SettingKey.custom<List<String>>(
+    'mascot.payday_celebrated_txns',
+    byDefault: const <String>[],
+    decode: (s) {
+      try {
+        final v = jsonDecode(s);
+        if (v is! List || v.length > 32) return null;
+        final ok = RegExp(r'^[A-Za-z0-9_-]{1,64}$');
+        if (v.any((e) => e is! String || !ok.hasMatch(e))) return null;
+        return v.cast<String>();
+      } on FormatException {
+        return null;
+      }
+    },
+    encode: jsonEncode,
   );
 
   // FR-NTF-02, A-27: 23:00–08:00, as minutes after local midnight.

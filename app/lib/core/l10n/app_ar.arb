@@ -4574,9 +4574,38 @@
   "@mascotTapLine10": {
     "description": "M · Rive tap"
   },
-  "mascotPaydayLine": "القبض نزل يا كبير! 🎉",
-  "@mascotPaydayLine": {
-    "description": "M · Rive payday · Home bubble when a salary lands (once per payday)"
+  "paydaySheetTitle": "وصل المرتب!",
+  "@paydaySheetTitle": {
+    "description": "Payday sheet title (T-294)"
+  },
+  "paydaySheetAmount": "+{amount}",
+  "@paydaySheetAmount": {
+    "description": "Payday sheet amount, in the salary's own currency",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "paydaySheetPerDay": "زغلول حسبها: تقدر تصرف حوالي {perDay} في اليوم لحد المرتب الجاي.",
+  "@paydaySheetPerDay": {
+    "description": "Payday sheet line, shown only with an EGP cycle and a per-day figure",
+    "placeholders": {
+      "perDay": {"type": "String"}
+    }
+  },
+  "paydaySheetPlan": "خطّط الشهر",
+  "@paydaySheetPlan": {
+    "description": "Payday sheet button, opens the budget"
+  },
+  "paydaySheetDone": "تمام",
+  "@paydaySheetDone": {
+    "description": "Payday sheet button, closes"
+  },
+  "paydaySheetA11y": "وصل المرتب، {amount}",
+  "@paydaySheetA11y": {
+    "description": "Screen-reader label of the payday sheet header",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
   },
   "mascotTipUseScan": "عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸",
   "mascotTipUseShare": "شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل",
@@ -11331,7 +11360,7 @@
   "@salaryFoundNo": {
     "description": "Dialog button"
   },
-  "salaryAddSwitch": "ده مرتب",
+  "salaryAddSwitch": "ده مرتب؟",
   "@salaryAddSwitch": {
     "description": "Add-income switch"
   },

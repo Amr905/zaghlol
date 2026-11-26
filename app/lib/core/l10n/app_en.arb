@@ -1128,9 +1128,38 @@
   "@mascotTapLine10": {
     "description": "M · Rive tap"
   },
-  "mascotPaydayLine": "Payday landed! 🎉",
-  "@mascotPaydayLine": {
-    "description": "M · Rive payday · Home bubble when a salary lands (once per payday)"
+  "paydaySheetTitle": "Payday is here!",
+  "@paydaySheetTitle": {
+    "description": "Payday sheet title (T-294)"
+  },
+  "paydaySheetAmount": "+{amount}",
+  "@paydaySheetAmount": {
+    "description": "Payday sheet amount, in the salary's own currency",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "paydaySheetPerDay": "Zaghlol did the maths: you can spend about {perDay} a day until the next payday.",
+  "@paydaySheetPerDay": {
+    "description": "Payday sheet line, shown only with an EGP cycle and a per-day figure",
+    "placeholders": {
+      "perDay": {"type": "String"}
+    }
+  },
+  "paydaySheetPlan": "Plan the month",
+  "@paydaySheetPlan": {
+    "description": "Payday sheet button, opens the budget"
+  },
+  "paydaySheetDone": "Got it",
+  "@paydaySheetDone": {
+    "description": "Payday sheet button, closes"
+  },
+  "paydaySheetA11y": "Payday is here, {amount}",
+  "@paydaySheetA11y": {
+    "description": "Screen-reader label of the payday sheet header",
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
   },
   "mascotTipUseScan": "Got a paper receipt? Snap it from the Add button and I'll read the amount and the shop 📸",
   "mascotTipUseShare": "Spotted a receipt or screenshot? Share it to Zaghlol from the share menu and I'll take it from there",
@@ -7861,7 +7890,7 @@
   "@salaryFoundNo": {
     "description": "Dialog button"
   },
-  "salaryAddSwitch": "This is a salary",
+  "salaryAddSwitch": "Is this a salary?",
   "@salaryAddSwitch": {
     "description": "Add-income switch"
   },
