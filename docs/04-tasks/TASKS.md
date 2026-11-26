@@ -369,10 +369,10 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-285](tasks/T-285.md) | Export "pair" column for exchange/transfer legs | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-core-engineer | — | E | 80 | DONE (batch 80) |
 | [T-286](tasks/T-286.md) | Safe cross-channel exchange merge + bulk actions on an exchange row (FU-383/384) | US-P11 / D-86 | High (C4) | Opus | flutter-core-engineer | — | T | 80 | DONE (batch 80) |
 | [T-287](tasks/T-287.md) | Batch 79 minors (FU-379…382, FU-385) | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-core-engineer | — | A | 80 | DONE (batch 80) |
-| [T-288](tasks/T-288.md) | UI follow-ups: exchange chart colour, selection count, no Rive preload under reduce motion (FU-386/390/374) | follow-ups | Standard (C2) | Sonnet | flutter-ui-engineer | — | U | 81 | TODO |
-| [T-289](tasks/T-289.md) | Exchange follow-ups: per-currency balance-rise threshold, cold-start overlay, statement vs manual exchange (FU-366/369/370) | D-86 | High (C4) | Sonnet | flutter-core-engineer | — | A | 81 | TODO |
-| [T-290](tasks/T-290.md) | Android OCR merge minors (FU-371/376/377/378) | T-273 | Medium (C3) | Sonnet | native-platform-engineer | — | N | 81 | TODO |
-| [T-291](tasks/T-291.md) | Export pair-kind batching, widget line two fits, voice comment (FU-388/387/373) | follow-ups | Standard (C2) | Sonnet | flutter-core-engineer | — | E | 81 | TODO |
+| [T-288](tasks/T-288.md) | UI follow-ups: exchange chart colour, selection count, no Rive preload under reduce motion (FU-386/390/374) | follow-ups | Standard (C2) | Sonnet | flutter-ui-engineer | — | U | 81 | DONE (batch 81) |
+| [T-289](tasks/T-289.md) | Exchange follow-ups: per-currency balance-rise threshold, cold-start overlay, statement vs manual exchange (FU-366/369/370) | D-86 | High (C4) | Sonnet | flutter-core-engineer | — | A | 81 | DONE (batch 81) |
+| [T-290](tasks/T-290.md) | Android OCR merge minors (FU-371/376/377/378) | T-273 | Medium (C3) | Sonnet | native-platform-engineer | — | N | 81 | DONE (batch 81) |
+| [T-291](tasks/T-291.md) | Export pair-kind batching, widget line two fits, voice comment (FU-388/387/373) | follow-ups | Standard (C2) | Sonnet | flutter-core-engineer | — | E | 81 | DONE (batch 81) |
 | [T-263](tasks/T-263.md) | Sharing an image to Zaghlol opens the scan, never "not implemented" | US-P02 | High | Sonnet | native-platform-engineer | — | — | 77 | DONE (batch 76) |
 | [T-266](tasks/T-266.md) | Link a debit card to its bank account (one balance, set by the user) | US-P05 | High | Sonnet | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 | [T-268](tasks/T-268.md) | Mascot animation matches the approved art; left hand not cut | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | — | 77 | SUPERSEDED by T-274 (not merged) |

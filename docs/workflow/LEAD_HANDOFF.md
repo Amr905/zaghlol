@@ -1,6 +1,6 @@
 # Lead handoff — read this first
 
-_Last updated: 2026-11-26 (Cairo) by the Lead session (PO-phone-feedback lane): batches 78 (#130) and 79 (#131) merged. **Batch 80** (`batch/2026-11-26-80`: T-283 Insights exchange bars, T-284 widget "+ USD" hint, T-285 export pair column, T-286 safe cross-channel merge + exchange bulk actions, T-287 batch 79 minors) reviewed, all APPROVED; FU-389 fix round, then CI + PR. Multi-currency plan WP-1…WP-8 is now built on the recommended Q1–Q4 answers (pending the PO). Next: FU-386 chart colour (needs UX), mascot placement (D-87) once the PO picks places, other open FUs. PO owes: the 4 plan answers, mascot places, Google OAuth client IDs, local backup file decision, phone checks (missing USD salary; batches 78–80), wording checks (card line «دخل … · خرج …», exchange delete text, first-currency note), whether to notify when a rule deletes half an exchange, the real Arab Bank issue. The PO's photos never go into the repo (public). Update it whenever the state below changes._
+_Last updated: 2026-11-26 (Cairo) by the Lead session (PO-phone-feedback lane): batches 78 (#130) and 79 (#131) merged. Batch 80 merged (#132). **Batch 81** (`batch/2026-11-26-81`: follow-ups T-288…T-291) reviewed; T-290 fix round, then CI + PR. Multi-currency plan WP-1…WP-8 is now built on the recommended Q1–Q4 answers (pending the PO). Next: UX sign-off on the exchange chart colours (violet/blue), mascot placement (D-87) once the PO picks places, other open FUs. PO owes: the 4 plan answers, mascot places, Google OAuth client IDs, local backup file decision, phone checks (missing USD salary; batches 78–80), wording checks (card line «دخل … · خرج …», exchange delete text, first-currency note), whether to notify when a rule deletes half an exchange, the real Arab Bank issue. The PO's photos never go into the repo (public). Update it whenever the state below changes._
 
 
 > **Two Lead sessions run in parallel (2026-11-26).** The M9 "LLM helper" lane (Ask Zaghlol + auto-category, `docs/04-tasks/m9-llm-plan.md`) uses task ids **T-322…T-365** and batches **90…98**. The PO-phone-feedback lane keeps T-272… and batch 78…. Each lane merges its own batches; take new task ids and FU numbers from `main` right before use, and expect add/add conflicts in `TASKS.md` / `implementation-status.md` to be unions.
@@ -173,7 +173,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-391** (PO-phone-feedback lane; batch 80 used FU-386…FU-390)
+Next free follow-up number: **FU-395** (PO-phone-feedback lane; batch 81 used FU-391…FU-394)
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
