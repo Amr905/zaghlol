@@ -36,6 +36,6 @@ public class ConfigSpecTests
     {
         var serverOnly = RemoteConfigKeys.All.Where(d => !d.SentToApp).Select(d => d.Key).Order(StringComparer.Ordinal).ToList();
 
-        Assert.Equal(["cat.cache_min_confidence", "cat.confirm_n", "llm.provider", "llm.spend_cap_usd"], serverOnly);
+        Assert.Equal(["cat.cache_min_confidence", "cat.confirm_n", "llm.spend_cap_usd"], serverOnly);
     }
 }

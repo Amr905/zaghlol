@@ -38,6 +38,8 @@ public sealed class LlmApiKeyTests : IDisposable
 
     internal static Dictionary<string, string?> ProviderSettings(Dictionary<string, string?> settings, string endpoint = "https://llm.example.test/")
     {
+        settings[$"Llm:Providers:{Id}:DisplayNameAr"] = "مساعد";
+        settings[$"Llm:Providers:{Id}:DisplayNameEn"] = "Helper";
         settings[$"Llm:Providers:{Id}:Kind"] = "OpenAiResponses";
         settings[$"Llm:Providers:{Id}:Model"] = "some-model";
         settings[$"Llm:Providers:{Id}:Endpoint"] = endpoint;

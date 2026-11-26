@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Zaghlol.Application.Config;
 using Zaghlol.Domain;
 
 namespace Zaghlol.Application.Llm;
@@ -142,8 +143,24 @@ public sealed class RedactedJsonConverter<T> : JsonConverter<T>
 /// <summary>A configuration problem of the LLM gateway; the message is constant and never carries a value.</summary>
 public sealed class LlmConfigurationException(string message) : Exception(message);
 
-/// <summary>Whether an id names a provider this host has configured (FU-411: <c>PUT llm.provider</c> refuses an id with no adapter).</summary>
+/// <summary>
+/// Whether an id names a provider this host can serve (FU-411, FU-425): a <c>Llm:Providers:&lt;id&gt;</c> section with both display
+/// names and an API key. <c>PUT llm.provider</c> refuses any other id.
+/// </summary>
 public interface IKnownLlmProviderIds
 {
     bool IsKnown(string providerId);
+}
+
+/// <summary>
+/// The one place the effective provider id and its display names come from (FU-425): the sync <c>config</c> block and the LLM
+/// gate both resolve the id from the same <see cref="RemoteConfigSnapshot"/>, so they can't disagree.
+/// </summary>
+public interface ILlmProviderIdentity
+{
+    /// <summary>The row <c>llm.provider</c> if set, else <c>Llm:ActiveProvider</c>; empty when neither.</summary>
+    string EffectiveId(RemoteConfigSnapshot snapshot);
+
+    /// <summary>The display names of a provider, or <c>null</c> unless it has both.</summary>
+    ProviderName? Names(string providerId);
 }

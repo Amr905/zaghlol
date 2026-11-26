@@ -15,6 +15,8 @@ public sealed class LlmAdapterConfigurationTests
 
     private static (string, string?)[] Gemini(string? project = "proj-1", string? region = "europe-west4") =>
     [
+        ("Llm:Providers:gemini-flash-lite:DisplayNameAr", "جيمني"),
+        ("Llm:Providers:gemini-flash-lite:DisplayNameEn", "Gemini"),
         ("Llm:Providers:gemini-flash-lite:Kind", "VertexGemini"),
         ("Llm:Providers:gemini-flash-lite:Model", "model-a"),
         ("Llm:Providers:gemini-flash-lite:Endpoint", "https://europe-west4-aiplatform.googleapis.com/"),
@@ -27,6 +29,8 @@ public sealed class LlmAdapterConfigurationTests
 
     private static (string, string?)[] Claude() =>
     [
+        ("Llm:Providers:claude-haiku:DisplayNameAr", "كلود"),
+        ("Llm:Providers:claude-haiku:DisplayNameEn", "Claude"),
         ("Llm:Providers:claude-haiku:Kind", "AnthropicMessages"),
         ("Llm:Providers:claude-haiku:Model", "model-b"),
         ("Llm:Providers:claude-haiku:Endpoint", "https://api.anthropic.com/"),

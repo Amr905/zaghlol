@@ -32,6 +32,50 @@ public class RemoteConfigProviderSwitchTests
     }
 
     [Fact]
+    public async Task TheSyncBlockIdEqualsTheGateIdFromOneSnapshotAndARowSwitchMovesTheVersion()
+    {
+        var reader = new Rows();
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Llm:ActiveProvider"] = "prov-a",
+            ["Llm:Providers:prov-a:DisplayNameAr"] = "أ",
+            ["Llm:Providers:prov-a:DisplayNameEn"] = "A",
+            ["Llm:Providers:prov-b:DisplayNameAr"] = "ب",
+        }).Build();
+        var fallback = new ConfiguredActiveLlmProviderId(config);
+        var options = new[]
+        {
+            Options("prov-a", "أ", "A"),
+            Options("prov-b", "ب", null),
+        };
+        var identity = new ConfiguredLlmProviderIdentity(fallback, options);
+        var gate = new RemoteConfigActiveLlmProviderId(new RemoteConfigService(reader), fallback);
+
+        async Task<(SyncConfigBlock Block, string GateId)> Read()
+        {
+            var snapshot = await new RemoteConfigService(reader).GetAsync(default);
+            var id = identity.EffectiveId(snapshot);
+            return (snapshot.ToAppBlock(id, identity.Names(id)), await gate.CurrentAsync(default));
+        }
+
+        var (first, firstGate) = await Read();
+        Assert.Equal(firstGate, first.Values[RemoteConfigKeys.LlmProvider]);
+        Assert.Equal(new ProviderName("أ", "A"), first.ProviderName);
+
+        reader.Set(RemoteConfigKeys.LlmProvider, "prov-b");
+        var (second, secondGate) = await Read();
+        Assert.True(second.Version > first.Version);
+        Assert.Equal("prov-b", secondGate);
+
+        // prov-b has only one name: no id, no names (never an id without both names).
+        Assert.DoesNotContain(RemoteConfigKeys.LlmProvider, second.Values.Keys);
+        Assert.Null(second.ProviderName);
+    }
+
+    private static LlmProviderOptions Options(string id, string? ar, string? en) =>
+        new(id, LlmProviderKind.OpenAiResponses, "m", null, null, TimeSpan.FromSeconds(1), 1m, 0m, 1m, null, ar, en);
+
+    [Fact]
     public async Task AnUnregisteredProviderIdFailsClosed()
     {
         var reader = new Rows();

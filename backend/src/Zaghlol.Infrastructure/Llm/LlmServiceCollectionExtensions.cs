@@ -47,7 +47,8 @@ public static class LlmServiceCollectionExtensions
             provider.GetRequiredService<IHostEnvironment>(),
             provider.GetRequiredService<ILogger<LlmKeyStartup>>())));
         services.AddSingleton(new LlmRegisteredProviders(providers));
-        services.TryAddSingleton<IKnownLlmProviderIds>(new ConfiguredLlmProviderIds(providers));
+        services.TryAddSingleton<IKnownLlmProviderIds>(sp => new ConfiguredLlmProviderIds(providers, sp));
+        services.TryAddSingleton<ILlmProviderIdentity>(new ConfiguredLlmProviderIdentity(configured, providers));
 
         foreach (var options in providers)
         {
@@ -127,9 +128,12 @@ public static class LlmServiceCollectionExtensions
 }
 
 /// <summary>The provider ids that have an adapter in this host (FU-411: the admin API refuses an unknown <c>llm.provider</c>).</summary>
-internal sealed class ConfiguredLlmProviderIds(IReadOnlyList<LlmProviderOptions> providers) : IKnownLlmProviderIds
+internal sealed class ConfiguredLlmProviderIds(IReadOnlyList<LlmProviderOptions> providers, IServiceProvider services) : IKnownLlmProviderIds
 {
-    public bool IsKnown(string providerId) => providers.Any(p => string.Equals(p.Id, providerId, StringComparison.Ordinal));
+    public bool IsKnown(string providerId) =>
+        providers.Any(p => string.Equals(p.Id, providerId, StringComparison.Ordinal)
+            && p.DisplayNameAr is { Length: > 0 } && p.DisplayNameEn is { Length: > 0 })
+        && (services.GetService<ILlmApiKeyProvider>()?.HasKey(providerId) ?? true);
 }
 
 /// <summary>The provider options read at registration (for the startup check).</summary>
@@ -146,6 +150,11 @@ internal sealed class LlmStartupCheck(LlmRegisteredProviders registered, Configu
         var relaxed = environment.IsDevelopment() || environment.IsEnvironment("Testing");
         foreach (var p in registered.Providers)
         {
+            if (string.IsNullOrEmpty(p.DisplayNameAr) || string.IsNullOrEmpty(p.DisplayNameEn))
+            {
+                throw new LlmConfigurationException($"Llm:Providers:{p.Id}:DisplayNameAr and :DisplayNameEn are required.");
+            }
+
             if (!relaxed && p.Endpoint is { } endpoint && endpoint.Scheme != "https")
             {
                 throw new LlmConfigurationException("LLM provider endpoints must be https outside Development and Testing.");
