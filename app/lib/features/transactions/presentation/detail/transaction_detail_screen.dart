@@ -7,6 +7,8 @@
 // sensitive: shown on screen only, never logged.
 
 import '../../../salary/presentation/salary_merged_banner.dart';
+import '../../../categorization/presentation/ai_category_chip.dart';
+import '../../../categorization/presentation/ai_feedback_controls.dart';
 import '../../../categorization/presentation/category_visuals.dart';
 
 import 'package:flutter/foundation.dart';
@@ -709,6 +711,18 @@ class _Body extends StatelessWidget {
               icon: Icons.arrow_drop_down,
               onTap: onCategory,
             ),
+            if (isAiUnconfirmed(t))
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: ZSpacing.sm),
+                child: AiSuggestionBar(
+                  merchantNorm: t.merchantNorm!,
+                  merchantLabel: merchant,
+                  categoryId: t.categoryId,
+                  lookups: lookups,
+                  lang: fmt.lang,
+                  transactionId: t.id,
+                ),
+              ),
           ],
         ),
         const SizedBox(height: ZSpacing.xl),
