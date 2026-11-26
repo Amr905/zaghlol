@@ -1941,7 +1941,7 @@
       }
     }
   },
-  "insightsExplainMerchantsBasic": "{merchant} is first with {amount} ({visits}), then {merchant2} with {amount2}.",
+  "insightsExplainMerchantsBasic": "{merchant} is first with {amount} (visits: {visits}), then {merchant2} with {amount2}.",
   "@insightsExplainMerchantsBasic": {
     "description": "E · visits = common_unit_visits",
     "placeholders": {
@@ -6940,9 +6940,13 @@
       }
     }
   },
-  "aboutMainNeverSynced": "Not updated yet (works offline)",
-  "@aboutMainNeverSynced": {
-    "description": "S"
+  "aboutMainCatalogNever": "Merchant list: not updated yet (works offline)",
+  "@aboutMainCatalogNever": {
+    "description": "S · FR-SYNC-06 · BUG-017"
+  },
+  "aboutMainPricesNever": "Prices: not updated yet",
+  "@aboutMainPricesNever": {
+    "description": "S · BUG-017"
   },
   "aboutMainTerms": "Terms of use",
   "@aboutMainTerms": {

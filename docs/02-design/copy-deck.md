@@ -1623,7 +1623,7 @@ Twelve charts, four keys each. Free shows `basic` + `tip`. Gold shows `basic` + 
 ### Chart 6 — Top merchants
 | Key | AR | EN | Notes |
 |---|---|---|---|
-| `insights_explainMerchants_basic` | {merchant} في المركز الأول بـ {amount} ({visits})، وبعده {merchant2} بـ {amount2}. | {merchant} is first with {amount} ({visits}), then {merchant2} with {amount2}. | E · visits = `common_unit_visits` |
+| `insights_explainMerchants_basic` | {merchant} في المركز الأول بـ {amount} (عدد المرات: {visits})، وبعده {merchant2} بـ {amount2}. | {merchant} is first with {amount} (visits: {visits}), then {merchant2} with {amount2}. | E · visits = `common_unit_visits` |
 | `insights_explainMerchants_tip` | جمّع مشترياتك من {merchant} في زيارة واحدة كل أسبوع. | Group your {merchant} shopping into one visit a week. | S |
 | `insights_explainMerchants_deep` | أول تلات تجار واخدين {percent} من صرفك. {trend, select, up{و{merchant} زاد عن {prev} بـ {delta}.} down{و{merchant} قل عن {prev} بـ {delta}.} other{و{merchant} زي {prev} تقريباً.}} | Your top three merchants take {percent} of your spending. {trend, select, up{{merchant} is up {delta} on {prev}.} down{{merchant} is down {delta} on {prev}.} other{{merchant} is about the same as {prev}.}} | E · Gold |
 | `insights_explainMerchants_deepTip` | لو قللت {merchant} بالربع هتوفر {target} في الشهر، يعني {yearly} في السنة. | Cut {merchant} by a quarter and you'll save {target} a month, {yearly} a year. | S · Gold |
@@ -2807,7 +2807,8 @@ Version and update status (FR-SYNC-06). The merchant-list status never shows an 
 | `about_main_version` | الإصدار {appVersion} (رقم {build}) | Version {appVersion} (build {build}) | L · Western digits always |
 | `about_main_catalog` | قايمة التجار اتحدّثت {date} | Merchant list updated {date} | L · FR-SYNC-06 |
 | `about_main_prices` | الأسعار اتحدّثت {date} | Prices updated {date} | L |
-| `about_main_neverSynced` | لسه ما اتحدّثتش (شغال من غير نت) | Not updated yet (works offline) | S |
+| `about_main_catalogNever` | قايمة التجار: لسه ما اتحدّثتش (شغال من غير نت) | Merchant list: not updated yet (works offline) | S |
+| `about_main_pricesNever` | الأسعار: لسه ما اتحدّثتش | Prices: not updated yet | S |
 | `about_main_terms` | الشروط | Terms of use | L |
 | `about_main_privacy` | سياسة الخصوصية | Privacy policy | L |
 | `about_main_licenses` | تراخيص المصدر المفتوح | Open-source licences | L |

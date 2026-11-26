@@ -9,7 +9,8 @@ Target: `Amr905/zaghlol`, `main` @ `bc5b9d1d`. Run on 19 Nov 2026 in a Linux x86
 | Existing automated suites (app, packages, tools, backend) | 10,547 | 10,547 | 0 | 39 | see §4 |
 | New black-box API and database cases written for this audit | 151 | 130 | 10 | 0 | 1 blocked, 10 withdrawn |
 | Extra live checks (rate limit, flag toggle, shutdown, production guards) | 5 | 4 | 1 | 0 | |
-| On-device UI and end-to-end journeys | 0 | 0 | 0 | 0 | all (blocked) |
+| Benchmark-tagged tests (run 19 Nov, second session) | 21 | 21 | 0 | 0 | db-platform benchmarks not run |
+| On-device checks on the emulator (19 Nov, evening) | 36 | 32 | 4 | 0 | typing, scrolling, cloud and store steps blocked; see §5 |
 
 "Withdrawn" means my expectation was wrong or my own earlier case caused the result; each one is listed in `bug-report.md` under "Not bugs".
 
@@ -47,6 +48,7 @@ Static checks:
 | `dotnet build Zaghlol.sln -c Release -warnaserror` | PASS (0 warnings) |
 | `dotnet list package --vulnerable --include-transitive` | PASS (none reported) |
 | `dotnet format --verify-no-changes` | PASS for repository files (the only finding was in my test shim) |
+| OpenAPI lint, Spectral with the repository ruleset, `--fail-severity=warn` | PASS (no warnings or errors) |
 
 ### Deviations from the project's own way of running tests
 
@@ -109,20 +111,84 @@ Transactions were not tested separately; the existing Infrastructure tests that 
 | `Production` with the local KMS and no key configuration | host refuses to start, "Kms:HmacKeys:Seat must be set" (PASS) |
 | `SIGTERM` to the running API | **unhandled exception, exit 134 (FAIL, BUG-002)** |
 
+### 3.4 Benchmarks (host timing, 2-CPU Linux VM)
+
+All 21 benchmark-tagged tests passed: 12 in `zaghlol_parsing` (`dart test --tags benchmark -j 1`) and 9 in the app (`flutter test --tags 'benchmark && !db-platform' --concurrency=1`). These are host numbers. They show the code is not grossly slow; they do **not** verify the NFR-PERF targets, which are set for a reference mid-range Android phone.
+
+| Measure | Host result | Target in the SRS (phone) |
+|---|---|---|
+| Parse one message, full pipeline (mean of 4,000) | 0.058 ms | < 10 ms (NFR-PERF-01) |
+| Generic parser (mean of 4,000) | 0.061 ms | — |
+| Categorise one message, p95 (with 3,600 aliases) | 4.17 ms (6.50 ms) | — |
+| Full-text search, 50,000 rows, p95 | 37.5 ms | < 200 ms (FR-TXN-01) |
+| Slowest of the 12 charts on 10,000 transactions (month vs 3-month average), max | 19 ms | < 300 ms (NFR-PERF-04) |
+| Historical scan of 10,000 SMS | 6.2 s, first batch at 0.76 s | < 60 s (NFR-PERF-03) |
+| Ingest 500 messages | 1.7 s | — |
+| Catalog seed verify and apply | 274 ms | — |
+
 ## 4. Not run, and why
 
 | Item | Reason | Status |
 |---|---|---|
-| On-device UI, navigation, responsive behaviour, forms on a real screen | No emulator was running on the PC; Android Studio was closed and I can only click in it, not type or build | BLOCKED |
-| End-to-end journeys (onboarding → SMS capture → categorise → budget; purchase; backup and restore) | Same; also need Play billing, Drive, an iPhone | BLOCKED |
+| On-device steps that need typing, swiping or scrolling (saving a transaction, budgets, SMS injection, Delete everything, long screens) | The emulator runs inside Android Studio, where I may only click | BLOCKED |
+| End-to-end journeys with data (SMS capture → categorise → budget; purchase; backup and restore) | Same; also need Play billing, Drive, an iPhone | BLOCKED |
 | `app/integration_test/*` (7 files: database on device, explorer, device flows, SMS on device) | Need an emulator | BLOCKED |
 | Android Gradle unit tests, Android lint, APK assertions | No Android SDK in the VM | NOT TESTED |
 | iOS `xcodebuild test`, iOS build | No macOS | NOT TESTED |
-| Benchmark-tagged tests (parse time, 50k-row search, chart speed) | Timing on a 2-CPU VM is not the reference device | NOT TESTED |
+| Benchmark-tagged tests tagged `db-platform` (FTS on the device database) | Need the emulator; the other 21 benchmarks ran, see §3.4 | NOT TESTED |
 | Docker image, non-root, Trivy scan, `docker compose up` | No Docker | NOT TESTED |
-| OpenAPI Spectral lint, Prometheus rule check | Not attempted | NOT TESTED |
+| Prometheus alert-rule check (`promtool`) | Not attempted | NOT TESTED |
 | Admin API with a valid operator token | No identity provider configured (T-136 open) | BLOCKED |
 | Real Google Play / App Store verification, RTDN, App Store notifications | No store accounts | BLOCKED |
 | Regression against a previous release | There is no earlier release; the 10,547 existing tests are the regression baseline recorded here | — |
+
+## 5. On-device session (emulator)
+
+Device: Android Studio AVD "Pixel 10 Pro XL", Android 17 (API 37), x86-64, on the product owner's PC. App: `zaghlol-devSms-debug-apk` from app-ci run 44394261225 (commit `a9969346`, same tree as `main`), installed by the product owner. Driven by screen clicks only; I could not type, swipe or scroll inside the emulator. The app's backend address is the production one, which does not exist yet, so nothing that needs the server could work.
+
+| # | Check | Result |
+|---|---|---|
+| 1 | Cold start to welcome screen (debug build, first launch) | Welcome shown after about 14 s (debug build; not a measure of NFR-PERF-02) |
+| 2 | Welcome: Arabic RTL, light theme, privacy lines, one primary button, restore link, privacy details | PASS |
+| 3 | Privacy details list what the server knows | PASS, matches BR-SYNC-03 |
+| 4 | SMS explanation → system permission → granted in 3 taps | PASS |
+| 5 | History scan starts by itself with progress | PASS (7 messages scanned, 0 found: the emulator holds no bank SMS) |
+| 6 | Notification-access step can be skipped | PASS |
+| 7 | Home reached with no account, payday or income asked | PASS |
+| 8 | Notification permission prompt on Home | Shown at once on first Home visit; allowed |
+| 9 | Home empty state, greeting, budget nudge, four tabs | PASS |
+| 10 | Add sheet: voice, manual, screenshot, asset (Gold); voice counter 15/15 | PASS |
+| 11 | Manual form: fields, Cash default account | PASS |
+| 12 | Save with empty amount and no category → two inline errors, nothing saved | PASS |
+| 13 | Currency picker order and search | PASS |
+| 14 | KWD switches the amount to 3 decimals | PASS |
+| 15 | Category picker (Egyptian colloquial names, icons) | PASS |
+| 16 | Close with unsaved input → discard confirmation | PASS |
+| 17 | Insights: charts list with empty states, card filter, period | PASS |
+| 18 | Insights: budget and bills empty states | PASS |
+| 19 | Money tab: total (0 EGP), Cash account, compare link, Gold-locked wealth | PASS |
+| 20 | Chat: intro, suggestion chips | PASS |
+| 21 | Chat with no data: "no data for this period", no invented figure (2 questions) | PASS |
+| 22 | Settings: all sections reachable | PASS |
+| 23 | Preferences: language, digits, theme, currency, ≈ off, payday, income, app lock | PASS |
+| 24 | Switch to English → full LTR mirror | PASS |
+| 25 | Switch to dark theme | PASS |
+| 26 | Gold paywall loads prices or shows "prices failed" | **FAIL: stuck on loading (BUG-015)** |
+| 27 | Restore purchases with no store product | PASS (clear error message) |
+| 28 | Notification settings: 7 types, reminder days, quiet hours, hide amounts | PASS |
+| 29 | Capture settings: sources, not-tracked list, tools | PASS |
+| 30 | Capture "Fix" opens Android notification access | PASS (was reported dead earlier; fixed) |
+| 31 | Supported banks list with search | PASS |
+| 32 | About: version, sync status, diagnostics entry | **FAIL: two identical unlabelled lines (BUG-017)** |
+| 33 | Backup screen (free slot, Gold items, contents note) | PASS |
+| 34 | Export & import screen: statement banks marked "Coming soon" | PASS (matches T-156/T-157 blocked) |
+| 35 | Home card filter sheet | **FAIL: covered by tab bar and Add button (BUG-018)** |
+| 36 | App icon | **FAIL: Flutter default icon (BUG-016)** |
+
+Not reached: saving any transaction, budgets, SMS injection and auto-capture, transfers and reimbursements, ignoring a card, app lock prompt, Delete everything, backup upload, purchase. All need typing, swiping, a Google account or a backend.
+
+The emulator was left running with the app in English and dark theme, SMS and notification permissions granted, and no data entered.
+
+## 6. CI runs
 
 GitHub Actions reported `app-ci`, `backend-ci` and `db-platform` green on the same tree (`a9969346`, 18 Nov). Those runs include the Android, iOS and emulator jobs I could not run. I read the run list only; I did not re-verify their logs, so they are not counted in any figure above.
