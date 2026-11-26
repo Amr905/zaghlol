@@ -2,6 +2,9 @@
 
 _Last updated: 2026-11-26 (Cairo) by the Lead session: PO phone feedback 2 done except the mascot — batches 76 (#125) and 77 merged/merging. Next: multi-currency hybrid (D-86) screen plan for the PO before any code; mascot placement (D-87, PO to pick places) with T-268 (inset fix, held on `task/T-268-po2`). PO owes: Google OAuth client IDs, local backup file decision, where the cut hand shows, "what I read" text if the restaurant receipt still reads 1,558. Update it whenever the state below changes._
 
+
+> **Two Lead sessions run in parallel (2026-11-26).** The M9 "LLM helper" lane (Ask Zaghlol + auto-category, `docs/04-tasks/m9-llm-plan.md`) uses task ids **T-322…T-365** and batches **90…98**. The PO-phone-feedback lane keeps T-272… and batch 78…. Each lane merges its own batches; take new task ids and FU numbers from `main` right before use, and expect add/add conflicts in `TASKS.md` / `implementation-status.md` to be unions.
+
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 
 ## Start of a session (in order)
