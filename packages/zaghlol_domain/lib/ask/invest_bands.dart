@@ -45,11 +45,16 @@ final class GoldQuote {
 /// Remote-config thresholds (`ask.invest_min_egp`, `ask.invest_gold_min_cg`,
 /// `ask.invest_gold_karat`). Parameters, never constants in the logic.
 final class InvestThresholds {
-  const InvestThresholds({
+  InvestThresholds({
     required this.minEgp,
     this.goldMinCentigrams = 25,
     this.goldKarat = 21,
-  });
+  }) {
+    // FU-407: the bands compare against EGP amounts only.
+    if (minEgp.currency.code != 'EGP') {
+      throw ArgumentError('minEgp must be an EGP amount');
+    }
+  }
 
   /// Defaults: EGP 100.00, 0.25 g, 21K.
   factory InvestThresholds.defaults() =>

@@ -71,11 +71,15 @@ final class Suggestion {
     required this.category,
     required this.monthlySaving,
     required this.basisPeriods,
+    this.categoryId,
   });
   final SuggestionKind kind;
 
   /// Category name, subscription name, or `CAT-CASH` for S4.
   final String category;
+
+  /// The category id for S1/S3 (FU-401: de-duplication key); null for S2/S4.
+  final String? categoryId;
   final Money monthlySaving;
   final int basisPeriods;
 }
@@ -138,13 +142,15 @@ List<Suggestion> _forCurrency(
     if (m.currency != cur) throw ArgumentError('currency mismatch');
   }
 
-  // Per category: keep the best of S1 / S3 so a category appears once.
+  // Per category: keep the best of S1 / S3 so a category appears once. Keyed
+  // by id (FU-401): two categories with the same name stay separate.
   final byCategory = <String, Suggestion>{};
   void offer(Suggestion s) {
     if (s.monthlySaving.minor <= 0) return;
-    final prev = byCategory[s.category];
+    final key = s.categoryId ?? s.category;
+    final prev = byCategory[key];
     if (prev == null || s.monthlySaving > prev.monthlySaving) {
-      byCategory[s.category] = s;
+      byCategory[key] = s;
     }
   }
 
@@ -158,6 +164,9 @@ List<Suggestion> _forCurrency(
     final p1 = BigInt.from(last3[1].minor);
     final p2 = BigInt.from(last3[2].minor);
     final sum = p0 + p1 + p2;
+    // S1 basis (FU-401, OQ-ASK-09): the SRS says "its 3-period average" and
+    // the fixture holds with the last period included, so the average is of
+    // the last 3 periods including the latest. Kept until the PO answers.
     // S1: last >= avg * (100 + pct) / 100  <=>  last*300 >= sum*(100+pct)
     if (p2 * BigInt.from(300) >= sum * BigInt.from(100 + t.s1Pct)) {
       // saving = last - sum/3, rounded half-even once.
@@ -170,6 +179,7 @@ List<Suggestion> _forCurrency(
         Suggestion(
           kind: SuggestionKind.s1AboveAverage,
           category: c.name,
+          categoryId: c.id,
           monthlySaving: _money(cur, saving),
           basisPeriods: _basis,
         ),
@@ -181,6 +191,7 @@ List<Suggestion> _forCurrency(
         Suggestion(
           kind: SuggestionKind.s3Creep,
           category: c.name,
+          categoryId: c.id,
           monthlySaving: _money(cur, p2 - p0),
           basisPeriods: _basis,
         ),

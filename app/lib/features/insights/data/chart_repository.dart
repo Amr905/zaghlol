@@ -773,6 +773,86 @@ class ChartRepository {
     );
   }
 
+  // ------------------------------- Ask online-helper reads (T-342)
+
+  /// Net spend per category id in [p] (positive sums only; uncategorized is
+  /// the key `''`). One currency. The same counting as [categoryDonut].
+  Future<Map<String, int>> categoryTotals(ChartPeriod p, ChartFilter f) =>
+      _memoized(_key('catTotals', p, f), () async {
+        final all = await _byCategory(p, f);
+        return {
+          for (final r in all)
+            if (r.minor > 0) r.id ?? '': r.minor,
+        };
+      });
+
+  /// The [limit] expenses with the largest net amount in [p], biggest first
+  /// (ties by id). One currency.
+  Future<List<BiggestExpense>> topExpenses(
+    ChartPeriod p,
+    ChartFilter f, {
+    int limit = 5,
+  }) {
+    final n = limit < 1 ? 1 : (limit > 50 ? 50 : limit);
+    return _memoized(_key('topExp', p, f, '$n'), () async {
+      final s = _spend(p, f);
+      final rows = await _select(
+        'SELECT t.id AS id, ($_netSpend) AS s, '
+        'coalesce(t.merchant_raw, t.merchant_norm) AS m, '
+        't.category_id AS cid, $_localDay AS d '
+        'FROM transactions t WHERE ${s.where} AND ($_netSpend) > 0 '
+        'ORDER BY s DESC, t.id LIMIT ?',
+        [...s.args, Variable.withInt(n)],
+      );
+      return [
+        for (final r in rows)
+          BiggestExpense(
+            id: r.read<String>('id'),
+            amount: _m(r.read<int>('s'), f),
+            merchant: r.readNullable<String>('m'),
+            categoryId: r.readNullable<String>('cid'),
+            date: CivilDate.fromEpochDay(r.read<int>('d')),
+          ),
+      ];
+    });
+  }
+
+  /// Cash withdrawn in [p] (rows in category `sys:cash`) and the part of the
+  /// CAT-CASH pool no category has claimed yet. One currency.
+  Future<({Money withdrawn, Money unattributed})> cashPool(
+    ChartPeriod p,
+    ChartFilter f,
+  ) => _memoized(_key('cashPool', p, f), () async {
+    final s = _spend(p, f);
+    final rows = await _select(
+      'SELECT coalesce(sum(t.amount_minor), 0) AS w FROM transactions t '
+      "WHERE ${s.where} AND t.category_id = 'sys:cash'",
+      s.args,
+    );
+    final withdrawn = rows.single.read<int>('w');
+    final left = (await _byCategory(
+      p,
+      f,
+    )).where((r) => r.id == 'sys:cash').fold<int>(0, (a, r) => a + r.minor);
+    return (
+      withdrawn: _m(withdrawn < 0 ? 0 : withdrawn, f),
+      unattributed: _m(left < 0 ? 0 : (left > withdrawn ? withdrawn : left), f),
+    );
+  });
+
+  /// The cycle budgets set on category [categoryId], per currency.
+  Future<Map<Currency, Money>> categoryBudgets(String categoryId) async {
+    final rows =
+        await (_db.select(_db.budgets)..where(
+              (b) => b.period.equals('cycle') & b.categoryId.equals(categoryId),
+            ))
+            .get();
+    return {
+      for (final b in rows)
+        Currency.of(b.currency): Money.fromStorage(b.limitMinor, b.currency),
+    };
+  }
+
   // ------------------------------------------------------ 6 top merchants
 
   /// The [limit] merchants with the most net spend. Free users get

@@ -79,6 +79,12 @@ void main() {
       expect(band('1000.00', q), InvestBand.gold);
       expect(band('1000.01', q), InvestBand.gold);
     });
+    test('FU-407 minEgp must be EGP', () {
+      expect(
+        () => InvestThresholds(minEgp: Money.parse('100.00', usd)),
+        throwsArgumentError,
+      );
+    });
     test('configurable minimum', () {
       final t = InvestThresholds(minEgp: e('200.00'));
       expect(band('150.00', q, t), InvestBand.small);

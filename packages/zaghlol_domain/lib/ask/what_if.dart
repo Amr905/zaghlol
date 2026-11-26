@@ -91,6 +91,9 @@ WhatIfCutOutcome whatIfCut({
     sum = sum + p; // throws CurrencyMismatch if mixed
   }
   final base = sum.mulDiv(1, used.length, MoneyRounding.halfEven);
+  // FU-401: a net-negative or zero base (refunds above spend) has nothing to
+  // cut: no figure, never a negative saving or a "capped" negative.
+  if (base.minor <= 0) return const NotEnoughData();
   var capped = false;
   final Money monthly;
   switch (mode) {
