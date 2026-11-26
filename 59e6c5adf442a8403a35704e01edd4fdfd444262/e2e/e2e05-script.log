@@ -1,0 +1,49 @@
+==== e2e05
+Success
+---- phase e2e05/p1
+  sent: NBE
+  sent: NBE
+---- phase e2e05/p2
+E2E_DEVICE NOTIF budget channel before 80%: 0
+  sent: NBE
+E2E_DEVICE NOTIF channels now: 
+E2E_DEVICE NOTIF diag: lines=1012 records=4 pkgLines=1 budgetChannel=1
+E2E_DEVICE NOTIF         AppSettings: app.zaghlol.dev (10192) importance=DEFAULT userSet=false
+---- phase e2e05/alertcheck
+E2E_DEVICE NOTIF budget alert posted (count): 1
+---- phase e2e05/probe
+E2E_DEVICE NOTIF after control probe:
+E2E_DEVICE NOTIF diag: lines=1285 records=7 pkgLines=27 budgetChannel=7
+E2E_DEVICE NOTIF       NotificationRecord(0x0601500f: pkg=app.zaghlol.dev user=UserHandle{0} id=2147483647 tag=ranker_group importance=3 key=0|app.zaghlol.dev|2147483647|ranker_group|10192|ranker_group: Notification(cha
+E2E_DEVICE NOTIF         opPkg=app.zaghlol.dev
+E2E_DEVICE NOTIF         icon=Icon(typ=RESOURCE pkg=app.zaghlol.dev id=0x7f0d0000)
+E2E_DEVICE NOTIF         key=0|app.zaghlol.dev|2147483647|ranker_group|10192|ranker_group
+E2E_DEVICE NOTIF         groupKey=0|app.zaghlol.dev|g:ranker_group
+E2E_DEVICE NOTIF               contentIntent=PendingIntent{f8dd89c: PendingIntentRecord{30cd596 app.zaghlol.dev startActivity}}
+E2E_DEVICE NOTIF                   android.appInfo=ApplicationInfo (ApplicationInfo{c0cf2a5 app.zaghlol.dev})
+E2E_DEVICE NOTIF       NotificationRecord(0x040fc67a: pkg=app.zaghlol.dev user=UserHandle{0} id=424242 tag=null importance=3 key=0|app.zaghlol.dev|424242|null|10192: Notification(channel=zaghlol_alert_budget shortcut=nu
+e2e05 exit: 0
+E2E_DEVICE E2E05 OK cycle starts on the 25th
+E2E_DEVICE E2E05 OK cycle ends on the 24th
+E2E_DEVICE E2E05 CYCLE daysLeft=29
+E2E_DEVICE SEND p1
+E2E_DEVICE E2E05 OK two SMS purchases saved
+E2E_DEVICE E2E05 OK cycle spend after p1 is 60 %
+E2E_DEVICE E2E05 OK no alert recorded at 60 %
+E2E_DEVICE E2E05 P1_DONE
+E2E_DEVICE SEND p2
+E2E_DEVICE E2E05 OK third SMS purchase saved
+E2E_DEVICE E2E05 OK an alert was recorded at 80 %
+E2E_DEVICE E2E05 OK only the 80 threshold fired
+E2E_DEVICE E2E05 OK cycle spend after p2 is 80 %
+E2E_DEVICE E2E05 P2_DONE
+E2E_DEVICE SEND alertcheck
+E2E_DEVICE E2E05 NOTIF permission=granted
+E2E_DEVICE E2E05 NOTIF fired_alerts rows later: 1
+E2E_DEVICE SEND probe
+E2E_DEVICE E2E05 OK safe per day provider equals floor(left / days) = 689
+E2E_DEVICE E2E05 OK days remaining incl. today
+E2E_DEVICE E2E05 OK Budget screen shows the safe-per-day figure
+E2E_DEVICE E2E05 SHOT e2e05-budget
+E2E_DEVICE E2E05 RESULT problems=0
+01:34 +1: All tests passed!
