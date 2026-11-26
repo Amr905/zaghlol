@@ -145,3 +145,10 @@ B97-m1 (keeps FU-439 open), m3 (FU-443 test names above), m4, m5, m6, m8, m9, m1
 - **B97-m1 / FU-439 fixed.** The pipeline sends all names of a request in one prompt, so the cache is written only when exactly one name was sent; a row is served only at `cat.cache_min_confidence`; the catalog is checked before the cache. Tests: `AnswersFromAPromptWithSeveralNamesAreNeverWrittenToTheSharedCache`, `OnlyAnAnswerAtTheCacheThresholdIsCached`, `ACachedRowBelowTheCurrentFloorIsNotServedAndGoesToTheModel`.
 - **B97-m4 fixed:** `ConfiguredLlmProviderIds.IsKnown` fails closed without a key provider. **B97-m3 (FU-443):** `LlmProviderNameRefusalTests` (startup refusal per missing name in Production and Testing, pattern refusals, `NamesAreNullUnlessBothAreSet`, known-only-with-names-and-key, no-key-provider). The 400-at-the-endpoint variants were not added; the service-level refusal (`AnLlmProviderIdWithNoAdapterIsRefusedAndNeverWritten`) and `IsKnown` tests cover the logic.
 - Local: build -warnaserror clean, format clean, Application tests 1526 passed. Postgres tests run in CI.
+
+## Fix round — app
+- m5: `LlmConsentStore.clear(feature, {withdraw = true})`; the 409 path passes `withdraw: false`, so only a user clear empties the queue. The sender test now uses the real `llmConsentStoreProvider` (real `onCleared`).
+- m6: failed confirm/correct/undo shows `errorsGenericActionFailed` (existing key).
+- m8: new `cat.card_last_counted`; the card counts one showing per UTC day while displayed (`LlmCatCardActions.countShowing`); "Not now" no longer double counts. Test added.
+- m9: passive row `Semantics` now carries `onTap`.
+- m10: AC to test maps added to T-361 and T-362.

@@ -391,7 +391,7 @@ final class LlmGatewayClient {
           q == null ? null : LlmQuotaSnapshot.fromWire(q),
         );
       case ProblemCode.llmConsentRequired:
-        if (live) await _consent.clear(f);
+        if (live) await _consent.clear(f, withdraw: false);
         return LlmConsentRequired();
       case ProblemCode.llmServicePaused:
         if (live) await _quota.pause(f);

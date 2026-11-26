@@ -135,6 +135,9 @@ class AiSuggestionBar extends ConsumerWidget {
           ? await actions.confirm(merchantNorm)
           : await actions.correct(merchantNorm, picked!);
     } catch (_) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l.errorsGenericActionFailed)));
       return;
     }
     if (txnId != null) container.invalidate(txnDetailProvider(txnId));
@@ -157,6 +160,9 @@ class AiSuggestionBar extends ConsumerWidget {
               try {
                 await actions.undo(r.token);
               } catch (_) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l.errorsGenericActionFailed)),
+                );
                 return;
               }
               if (txnId != null) {
