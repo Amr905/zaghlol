@@ -97,6 +97,8 @@ flutter:
     - assets/brand/
     - assets/brand/logos/
     - assets/fonts/OFL.txt
+    # T-325: person-name / honorific / business-word lists (FR-LCAT-05).
+    - assets/data/
   fonts:
     # FU-044: IBM Plex Sans Arabic (SIL OFL 1.1, assets/fonts/OFL.txt); covers
     # Arabic and Latin. Family name = kZFontFamily.
