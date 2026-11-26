@@ -70,6 +70,15 @@ jobs:
           path: test-results/*.trx
           if-no-files-found: ignore
 
+      # T-350: the recorded LLM evaluation table (synthetic replies, no key, no network), written by Zaghlol.LlmEval.Tests.
+      - name: Upload recorded LLM evaluation report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: llm-eval-recorded
+          path: backend/tests/Zaghlol.LlmEval.Tests/bin/Release/net10.0/llm-eval-recorded/report.*
+          if-no-files-found: ignore
+
   # T-201: the OpenBao Transit KMS adapter against a real OpenBao with the production configuration (raft, static seal,
   # TLS, audit), set up by backend/deploy/openbao/setup.sh and migrated from T-200 File keys; restart, seal and stop phases.
   openbao-live:

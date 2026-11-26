@@ -1,0 +1,108 @@
+name: llm-eval-live
+
+# T-350: the live evaluation of the Ask-Zaghlol planner against the candidate LLM providers (ask-llm.md section 3, "Evaluation harness").
+# MANUAL ONLY. It runs on workflow_dispatch and nothing else: never on push, pull_request or pull_request_target, and a fork
+# can't run it (the job is guarded and the secrets live in the protected environment `llm-eval`, which a fork does not have).
+# Provider keys are read ONLY from the secrets of that environment (set by the PO, T-351), are passed as environment variables to the
+# one step that runs the harness, are masked, and are never printed. The artifact holds report.md and report.json: ids, plan ids,
+# reason codes, token counts and costs for the synthetic question set. No key, no reply body, no request body.
+# The recorded (keyless) run is part of backend-ci (Zaghlol.LlmEval.Tests).
+on:
+  workflow_dispatch:
+    inputs:
+      providers:
+        description: "Provider ids from providers.live.json to evaluate (comma separated), or all"
+        required: true
+        default: all
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: llm-eval-live
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: "1"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+
+jobs:
+  live:
+    name: live run (manual, protected environment)
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: llm-eval
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: 10.0.x
+
+      # Built without any secret in the environment.
+      - name: Build the harness
+        working-directory: backend
+        run: dotnet build tests/Zaghlol.LlmEval/Zaghlol.LlmEval.csproj -c Release -warnaserror
+
+      - name: Run the live evaluation
+        working-directory: backend
+        env:
+          LLM_EVAL_KEY_OPENAI: ${{ secrets.LLM_EVAL_KEY_OPENAI }}
+          LLM_EVAL_KEY_VERTEX: ${{ secrets.LLM_EVAL_KEY_VERTEX }}
+          LLM_EVAL_KEY_ANTHROPIC: ${{ secrets.LLM_EVAL_KEY_ANTHROPIC }}
+          PROVIDERS_INPUT: ${{ inputs.providers }}
+        run: |
+          set +x
+          names="LLM_EVAL_KEY_OPENAI LLM_EVAL_KEY_VERTEX LLM_EVAL_KEY_ANTHROPIC"
+          # Mask every line of every key before anything can print (GitHub masks secrets itself; this covers multi-line values).
+          for name in $names; do
+            value="${!name}"
+            [ -n "$value" ] || continue
+            while IFS= read -r line; do
+              [ "${#line}" -ge 8 ] && printf '::add-mask::%s\n' "$line"
+            done <<< "$value"
+          done
+          if ! [[ "$PROVIDERS_INPUT" =~ ^(all|[a-z0-9-]+(,[a-z0-9-]+)*)$ ]]; then
+            echo "::error::providers must be 'all' or a comma separated list of provider ids"
+            exit 2
+          fi
+          only=()
+          [ "$PROVIDERS_INPUT" = "all" ] || only=(--only "$PROVIDERS_INPUT")
+          status=0
+          dotnet run --no-build -c Release --project tests/Zaghlol.LlmEval/Zaghlol.LlmEval.csproj -- \
+            live --providers tests/Zaghlol.LlmEval/providers.live.json --out "$RUNNER_TEMP/llm-eval-results" "${only[@]}" || status=$?
+          # A key value in the results would be a leak: fail before anything is uploaded.
+          for name in $names; do
+            value="${!name}"
+            [ -n "$value" ] || continue
+            while IFS= read -r line; do
+              if [ "${#line}" -ge 8 ] && grep -rqF -- "$line" "$RUNNER_TEMP/llm-eval-results"; then
+                echo "::error::a provider key appears in the results; nothing is uploaded"
+                rm -rf "$RUNNER_TEMP/llm-eval-results"
+                exit 3
+              fi
+            done <<< "$value"
+          done
+          exit $status
+
+      - name: Job summary (numbers only)
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/llm-eval-results/report.md" ]; then
+            cat "$RUNNER_TEMP/llm-eval-results/report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the results table
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: llm-eval-results
+          path: |
+            ${{ runner.temp }}/llm-eval-results/report.md
+            ${{ runner.temp }}/llm-eval-results/report.json
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,34 @@
+{
+  "$comment": "T-350/T-351: the three candidates of the live run. Model ids and USD-per-million-token prices are NOT filled in: the PO sets them from each provider's current price list in the T-351 PR (the harness refuses Model UNSET and a zero in/out price). Endpoints are the public API hosts; Vertex needs Project and Region. Keys are never here: they come from the environment (LLM_EVAL_KEY_<ID>).",
+  "Providers": {
+    "openai": {
+      "Kind": "OpenAiResponses",
+      "Model": "UNSET",
+      "Endpoint": "https://api.openai.com",
+      "TimeoutMs": 8000,
+      "PriceInPerMTok": "0",
+      "PriceCachedPerMTok": "0",
+      "PriceOutPerMTok": "0"
+    },
+    "vertex": {
+      "Kind": "VertexGemini",
+      "Model": "UNSET",
+      "Endpoint": "https://us-central1-aiplatform.googleapis.com",
+      "Project": "UNSET",
+      "Region": "us-central1",
+      "TimeoutMs": 8000,
+      "PriceInPerMTok": "0",
+      "PriceCachedPerMTok": "0",
+      "PriceOutPerMTok": "0"
+    },
+    "anthropic": {
+      "Kind": "AnthropicMessages",
+      "Model": "UNSET",
+      "Endpoint": "https://api.anthropic.com",
+      "TimeoutMs": 8000,
+      "PriceInPerMTok": "0",
+      "PriceCachedPerMTok": "0",
+      "PriceOutPerMTok": "0"
+    }
+  }
+}
