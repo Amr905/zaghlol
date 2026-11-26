@@ -31,8 +31,8 @@ public partial class SchemaTests(SchemaFixture fixture)
         var documented = SchemaDocument.Tables().Keys.ToHashSet(StringComparer.Ordinal);
         var actual = (await Db.QueryAsync(Superuser, ColumnsSql)).Select(r => (string)r[0]!).ToHashSet(StringComparer.Ordinal);
 
-        // 27 tables (v_entitlements is a view; pending_apple_revocations from T-135); a parser regression that drops tables fails here.
-        Assert.Equal(27, documented.Count);
+        // 33 tables (v_entitlements is a view; pending_apple_revocations from T-135) + 6 LLM tables (T-273); a parser regression that drops tables fails here.
+        Assert.Equal(33, documented.Count);
         Assert.Empty(documented.Except(actual));
         Assert.Empty(actual.Except(documented));
     }

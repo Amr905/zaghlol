@@ -97,6 +97,56 @@ public static class Rows
             ["next_attempt_at"] = Now().AddMinutes(15),
             ["expires_at"] = Now().AddDays(30),
         },
+        "llm_quota_counters" => new(StringComparer.Ordinal)
+        {
+            ["feature"] = "ask",
+            ["subject_kind"] = "install",
+            ["subject_id"] = Guid.CreateVersion7(),
+            ["month_key"] = 202611,
+            ["used"] = 1,
+            ["updated_at"] = Now(),
+        },
+        "llm_spend_daily" => new(StringComparer.Ordinal)
+        {
+            ["day"] = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-RandomNumberGenerator.GetInt32(1, 100_000)),
+            ["feature"] = "ask",
+            ["provider_id"] = "fake",
+            ["model"] = "fake-model",
+            ["calls"] = 1,
+            ["input_tokens"] = 100L,
+            ["cached_tokens"] = 0L,
+            ["output_tokens"] = 20L,
+            ["cost_usd"] = 0.001234m,
+        },
+        "llm_cat_answer_cache" => new(StringComparer.Ordinal)
+        {
+            ["merchant_norm"] = "m" + Guid.NewGuid().ToString("N")[..20],
+            ["category_code"] = "groceries",
+            ["confidence"] = (short)80,
+            ["provider_id"] = "fake",
+            ["prompt_version"] = "v1",
+            ["created_at"] = Now(),
+            ["expires_at"] = Now().AddDays(90),
+        },
+        "llm_cat_confirmations" => new(StringComparer.Ordinal)
+        {
+            ["id"] = Guid.CreateVersion7(),
+            ["merchant_norm"] = "m" + Guid.NewGuid().ToString("N")[..20],
+            ["category_code"] = "groceries",
+            ["source"] = "llm",
+            ["install_hash"] = Bytes(),
+            ["created_at"] = Now(),
+        },
+        "llm_cat_corrections" => new(StringComparer.Ordinal)
+        {
+            ["id"] = Guid.CreateVersion7(),
+            ["merchant_norm"] = "m" + Guid.NewGuid().ToString("N")[..20],
+            ["ai_category"] = "dining",
+            ["user_category"] = "groceries",
+            ["source"] = "llm",
+            ["install_hash"] = Bytes(),
+            ["created_at"] = Now(),
+        },
         "replay_guard" => new(StringComparer.Ordinal)
         {
             ["key_hash"] = Bytes(),

@@ -281,9 +281,32 @@ public static class GrantMatrix
         new(WorkerRw, "pending_apple_revocations", SD, UpdateColumns: ["attempts", "next_attempt_at"]),
     ];
 
+    /// <summary>
+    /// The grants of the LlmQuotaSpendConfigCategorise migration (T-273; ask-llm §4.5, llm-categorise §4). Frozen: never edit after it
+    /// ships. <c>app_rw</c> reads and writes the quota counters, spend ledger and answer cache, only reads <c>remote_config</c>, and
+    /// inserts and reads the confirmation and correction rows; <c>worker_rw</c> is the retention purger (DELETE); <c>ops_rw</c>
+    /// reads the two review tables and moves only the review columns. <c>ops_ro</c> has no grant on any of them.
+    /// </summary>
+    public static IReadOnlyList<TableGrant> LlmTables { get; } =
+    [
+        new(AppRw, "llm_quota_counters", SIU),
+        new(AppRw, "llm_spend_daily", SIU),
+        new(AppRw, "llm_cat_answer_cache", SIU),
+        new(AppRw, "remote_config", S),
+        new(AppRw, "llm_cat_confirmations", SI),
+        new(AppRw, "llm_cat_corrections", SI),
+        new(WorkerRw, "llm_quota_counters", SD),
+        new(WorkerRw, "llm_spend_daily", SD),
+        new(WorkerRw, "llm_cat_answer_cache", SD),
+        new(WorkerRw, "llm_cat_confirmations", SD),
+        new(WorkerRw, "llm_cat_corrections", SD),
+        new(OpsRw, "llm_cat_confirmations", S, UpdateColumns: ["status"]),
+        new(OpsRw, "llm_cat_corrections", S, UpdateColumns: ["status", "operator_id", "resolved_at"]),
+    ];
+
     /// <summary>What the database must hold after all migrations: one merged row per role and table.</summary>
     public static IReadOnlyList<TableGrant> Current { get; } =
-        Merge([.. InitialCreate, .. CatalogDrafts, .. PurchaseAckNextAttempt, .. PurchaseLastPaymentAt, .. AppleNotifications, .. PendingAppleRevocations]);
+        Merge([.. InitialCreate, .. CatalogDrafts, .. PurchaseAckNextAttempt, .. PurchaseLastPaymentAt, .. AppleNotifications, .. PendingAppleRevocations, .. LlmTables]);
 
     /// <summary>
     /// Folds the grants of several migrations into one row per role and table (privileges and column lists united, in order),
