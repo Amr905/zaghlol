@@ -390,12 +390,12 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-324](tasks/T-324.md) | ARB strings: copy-deck Part 4 (105 keys) | ASK-LLM | Low | Haiku | boilerplate-engineer | — | U | 90 | DONE (batch 90) |
 | [T-325](tasks/T-325.md) | Given-name, honorific and business-word lists (assets) | LLM-CAT | Low | Haiku | boilerplate-engineer | — | P | 92 | TODO |
 | [T-326](tasks/T-326.md) | What-if and saving-suggestion calculators (pure) | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | — | Q | 90 | DONE (batch 90) |
-| [T-327](tasks/T-327.md) | Investment illustrations and D-93 bands (pure) | ASK-LLM / D-93 | High (C4) | Sonnet | flutter-core-engineer | — | Q | 91 | TODO |
+| [T-327](tasks/T-327.md) | Investment illustrations and D-93 bands (pure) | ASK-LLM / D-93 | High (C4) | Sonnet | flutter-core-engineer | — | Q | 91 | DONE (batch 91) |
 | [T-328](tasks/T-328.md) | Client scrub and reference masker (pure) | ASK-LLM / D-92 | High (C4) | Sonnet | parsing-engine-engineer | — | P | 90 | DONE (batch 90) |
 | [T-329](tasks/T-329.md) | Copy deck §4.12: automatic-category strings | LLM-CAT | Docs | Sonnet | ux-designer | — | Doc | 93 | TODO |
-| [T-330](tasks/T-330.md) | Backend plan validator and template grammar | ASK-LLM | High | Sonnet | backend-engineer | T-322 | B | 91 | TODO |
-| [T-331](tasks/T-331.md) | Dart plan types, phone validator, template grammar, number words | ASK-LLM | High | Sonnet | parsing-engine-engineer | T-322 | P | 91 | TODO |
-| [T-332](tasks/T-332.md) | LLM gateway core, `Sensitive<T>`, OpenAI adapter, fake provider, resilience | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-322 | B | 91 | TODO |
+| [T-330](tasks/T-330.md) | Backend plan validator and template grammar | ASK-LLM | High | Sonnet | backend-engineer | T-322 | B | 91 | DONE (batch 91) |
+| [T-331](tasks/T-331.md) | Dart plan types, phone validator, template grammar, number words | ASK-LLM | High | Sonnet | parsing-engine-engineer | T-322 | P | 91 | DONE (batch 91) |
+| [T-332](tasks/T-332.md) | LLM gateway core, `Sensitive<T>`, OpenAI adapter, fake provider, resilience | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-322 | B | 91 | DONE (batch 91) |
 | [T-333](tasks/T-333.md) | Provider API keys from KMS secret stores | ASK-LLM | High (C4) | Opus | backend-engineer | T-332 | B | 93 | TODO |
 | [T-334](tasks/T-334.md) | LLM flags, remote config, admin endpoint, ops CLI, sync `config` block (backend) | ASK-LLM / LLM-CAT | Medium | Sonnet | backend-engineer | T-322, T-323 | B | 92 | TODO |
 | [T-335](tasks/T-335.md) | LLM quota store: Cairo month, tiers, account, idempotent commit, purge | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | T-323 | B | 92 | TODO |
@@ -419,7 +419,7 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-353](tasks/T-353.md) | Feedback intake through sync, corrections review table, retention | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-352, T-334 | B | 97 | TODO |
 | [T-354](tasks/T-354.md) | Operator review admin endpoints and `zaghlol-ops llmcat` | LLM-CAT | Medium | Sonnet | backend-engineer | T-353 | B | 98 | TODO |
 | [T-355](tasks/T-355.md) | Categorise eligibility rule (pure) | LLM-CAT | High (C4) | Sonnet | parsing-engine-engineer | T-325 | P | 94 | TODO |
-| [T-356](tasks/T-356.md) | Drift migration: AI suggestions, queue, outbox kinds, `CategorySource.ai`, export | LLM-CAT | High (C4) | Opus | flutter-core-engineer | — | A | 91 | TODO |
+| [T-356](tasks/T-356.md) | Drift migration: AI suggestions, queue, outbox kinds, `CategorySource.ai`, export | LLM-CAT | High (C4) | Opus | flutter-core-engineer | — | A | 91 | DONE (batch 91) |
 | [T-357](tasks/T-357.md) | Categorizer AI tier and recategorizer | LLM-CAT | High (C4) | Opus | flutter-core-engineer | T-356 | A | 95 | TODO |
 | [T-358](tasks/T-358.md) | Categorise queue and sender with outgoing-body proofs | LLM-CAT | High (C4) | Sonnet | flutter-core-engineer | T-355, T-356, T-340 | A | 96 | TODO |
 | [T-359](tasks/T-359.md) | Right/Wrong actions, Undo, `llmCatFeedback` through sync | LLM-CAT | High | Sonnet | flutter-core-engineer | T-356, T-357, T-322 | A | 96 | TODO |

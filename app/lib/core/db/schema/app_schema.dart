@@ -18,10 +18,13 @@ part 'app_schema.g.dart';
 /// in financial_c.drift (T-019) and four batch-B tables rebuilt with stricter
 /// CHECKs. v5: `recurring_items` rebuilt for the quarterly and semi-annual
 /// cadences plus `auto_added_at`, and `recurring_dismissals` (T-196). v6:
-/// `accounts.linked_account_id` and its index (T-266). Must equal
+/// `accounts.linked_account_id` and its index (T-266). v7: `transactions`
+/// and `outbox` rebuilt with the `ai` category source and the auto-category
+/// outbox kinds, plus `ai_merchant_suggestions` and `llm_cat_queue` in
+/// financial_d.drift (T-356). Must equal
 /// [AppSchema.schemaVersion], which drift_dev reads as a literal (a test
 /// checks both).
-const int appSchemaVersion = 6;
+const int appSchemaVersion = 7;
 
 /// Key/value facts about the database itself (T-016), e.g.
 /// `restore_notice_due`. Not user settings (those are `settings`, T-019).
@@ -40,12 +43,17 @@ class DbMeta extends Table {
 /// The generated schema. [AppDatabase] (app_database.dart) adds behaviour.
 @DriftDatabase(
   tables: [DbMeta],
-  include: {'financial.drift', 'financial_b.drift', 'financial_c.drift'},
+  include: {
+    'financial.drift',
+    'financial_b.drift',
+    'financial_c.drift',
+    'financial_d.drift',
+  },
 )
 abstract class AppSchema extends _$AppSchema {
   AppSchema(super.e);
 
   // A literal: drift_dev reads it from the source (make-migrations).
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 }

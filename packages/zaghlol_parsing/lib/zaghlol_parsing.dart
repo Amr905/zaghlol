@@ -41,7 +41,13 @@ export 'chat/ask_parser.dart' show parseAskQuestion, maxAskEntities;
 export 'chat/ask_types.dart';
 export 'chat/llm/client_scrub.dart' show ClientScrub, scrubTokenTexts;
 export 'chat/llm/mask_models.dart';
+export 'chat/llm/number_words.dart' show numberWordValues, planNumberWords;
+export 'chat/llm/plan.dart';
+export 'chat/llm/plan_schema.g.dart';
+export 'chat/llm/plan_validator.dart'
+    show PlanTemplate, PlanValidation, PlanValidator;
 export 'chat/llm/reference_masker.dart' show ReferenceMasker;
+export 'chat/llm/template_grammar.dart' show TemplateGrammar;
 export 'voice/voice_categorizer.dart';
 export 'voice/voice_parser.dart' show parseVoicePhrase;
 export 'voice/voice_types.dart';

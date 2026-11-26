@@ -63,7 +63,7 @@ internal sealed partial class AskPlanReference
             }
         }
 
-        foreach (var (key, value) in texts.Where(t => t.Key == "mention"))
+        foreach (var value in AllStrings(plan["p"]))
         {
             var folded = Fold(value);
             if (aliases.Any(a => ContainsWord(folded, a)))
@@ -313,6 +313,17 @@ internal sealed partial class AskPlanReference
                 }
             }
         }
+    }
+
+    /// <summary>Step 2: no plain registry name in any string of p (ask-llm.md section 2.4).</summary>
+    private static IEnumerable<string> AllStrings(JsonNode? p) =>
+        Objects(p).SelectMany(o => o.Select(kv => kv.Value is JsonValue v && v.TryGetValue<string>(out var text) ? text : null)).OfType<string>();
+
+    /// <summary>True when a template text contains a registry alias (the template is dropped, TEMPLATE_PLAIN_NAME).</summary>
+    public bool TemplateNamesAName(string text)
+    {
+        var folded = Fold(text);
+        return aliases.Any(a => ContainsWord(folded, a));
     }
 
     private static void Collect(JsonNode? node, List<(string Key, string Value)> into)

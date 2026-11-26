@@ -66,7 +66,11 @@ enum CategorySource {
   userRule('user_rule'),
   catalog('catalog'),
   heuristic('heuristic'),
-  none('none');
+  none('none'),
+
+  /// T-356: an AI merchant suggestion (LLM-CATEGORISE, D-94). Whether the
+  /// user confirmed it lives in `ai_merchant_suggestions`.
+  ai('ai');
 
   const CategorySource(this.code);
   final String code;

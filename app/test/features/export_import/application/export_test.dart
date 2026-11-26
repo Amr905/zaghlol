@@ -3,6 +3,11 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drift/native.dart';
+import 'package:zaghlol/core/db/app_database.dart';
+import 'package:zaghlol/core/db/daos/ai_merchant_suggestions_dao.dart';
+import 'package:zaghlol/features/categorization/data/drift_ai_suggestion_states.dart';
+import 'package:zaghlol/features/categorization/domain/ai_suggestion.dart';
 import 'package:zaghlol/features/export_import/application/export.dart';
 import 'package:zaghlol/features/gold/application/gating.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
@@ -79,6 +84,22 @@ class _DeletingRepo extends _Repo {
   }
 }
 
+class _States implements AiSuggestionStates {
+  _States(this.states);
+  final Map<String, AiSuggestionState> states;
+  final List<Set<String>> asked = [];
+  @override
+  Future<Map<String, AiSuggestionState>> statesOf(
+    Iterable<String> merchantNorms,
+  ) async {
+    asked.add(merchantNorms.toSet());
+    return {
+      for (final m in merchantNorms)
+        if (states.containsKey(m)) m: states[m]!,
+    };
+  }
+}
+
 class _Dest implements ExportDestination {
   String? name;
   Uint8List? bytes;
@@ -96,6 +117,8 @@ TransactionRecord _t(
   String cur = 'EGP',
   int minor = 12345,
   DateTime? at,
+  CategorySource categorySource = CategorySource.none,
+  String? merchantNorm,
   String? pairId,
 }) {
   final c = Currency.of(cur);
@@ -111,7 +134,8 @@ TransactionRecord _t(
     merchantRaw: merchant,
     transferPairId: pairId,
     note: note,
-    categorySource: CategorySource.none,
+    merchantNorm: merchantNorm,
+    categorySource: categorySource,
     isUserVerified: true,
     isInternal: false,
     createdAt: DateTime.utc(2026),
@@ -177,7 +201,7 @@ void main() {
           .split('\r\n')
           .map((l) => l.split(','))
           .toList();
-      expect(lines.first.sublist(14), ['pair', 'kind']);
+      expect(lines.first.sublist(14), ['pair', 'kind', 'category_source']);
       final byId = {for (final l in lines.skip(1)) l[0]: l};
       expect(byId['t1']![14], byId['t2']![14]);
       expect(byId['t1']![14], isNotEmpty);
@@ -326,5 +350,129 @@ void exportColumnConstantsTest() {
     expect(exportHeader[exportColAmount], 'amount');
     expect(exportHeader[exportColCurrency], 'currency');
     expect(exportHeader[exportColMerchant], 'merchant');
+  });
+
+  group('T-356 AC4: category_source (FR-LCAT-25)', () {
+    test('the column is appended last; earlier positions unchanged', () {
+      expect(exportHeader.last, 'category_source');
+      expect(exportHeader, hasLength(17));
+      expect(exportHeader.sublist(13), [
+        'note',
+        'pair',
+        'kind',
+        'category_source',
+      ]);
+      expect(exportRow(_t(1)), hasLength(17));
+    });
+
+    test('mapping: ai + unconfirmed (or no row, corrected, no_answer) is '
+        'ai_unconfirmed; ai + confirmed is user_rule; others as stored', () {
+      for (final s in [
+        null,
+        AiSuggestionState.unconfirmed,
+        AiSuggestionState.corrected,
+        AiSuggestionState.noAnswer,
+      ]) {
+        expect(
+          exportCategorySource(CategorySource.ai, s),
+          'ai_unconfirmed',
+          reason: '$s',
+        );
+      }
+      expect(
+        exportCategorySource(CategorySource.ai, AiSuggestionState.confirmed),
+        'user_rule',
+      );
+      for (final c in CategorySource.values) {
+        if (c == CategorySource.ai) continue;
+        for (final s in [null, ...AiSuggestionState.values]) {
+          expect(exportCategorySource(c, s), c.code);
+        }
+      }
+    });
+
+    test('a Gold export: the unconfirmed AI row exports ai_unconfirmed, the '
+        'confirmed one user_rule, a user rule as today; states are read once '
+        'for the ai rows only', () async {
+      final repo = _Repo([
+        _t(1, categorySource: CategorySource.ai, merchantNorm: 'zawya coffee'),
+        _t(2, categorySource: CategorySource.ai, merchantNorm: 'book corner'),
+        _t(3, categorySource: CategorySource.userRule, merchantNorm: 'x shop'),
+        _t(4, categorySource: CategorySource.catalog, merchantNorm: 'y shop'),
+      ]);
+      final states = _States({
+        'zawya coffee': AiSuggestionState.unconfirmed,
+        'book corner': AiSuggestionState.confirmed,
+      });
+      final d = _Dest();
+      await ExportService(repo, aiStates: states).export(
+        entitlement: goldForTest(),
+        filter: const TransactionFilter(),
+        format: ExportFormat.csv,
+        destination: d,
+        warningAcknowledged: true,
+      );
+      final lines = utf8.decode(d.bytes!.sublist(3)).split('\r\n');
+      expect(lines.first, endsWith(',note,pair,kind,category_source'));
+      final bySource = {
+        for (final l in lines.skip(1).where((l) => l.isNotEmpty))
+          l.split(',').first: l.split(',').last,
+      };
+      expect(bySource, {
+        't1': 'ai_unconfirmed',
+        't2': 'user_rule',
+        't3': 'user_rule',
+        't4': 'catalog',
+      });
+      expect(states.asked, [
+        {'zawya coffee', 'book corner'},
+      ]);
+    });
+
+    test('the Free preview carries the same column', () async {
+      final out =
+          await ExportService(
+            _Repo([
+              _t(1, categorySource: CategorySource.ai, merchantNorm: 'm m'),
+            ]),
+            aiStates: _States({}),
+          ).export(
+            entitlement: EntitlementState.free,
+            filter: const TransactionFilter(),
+            format: ExportFormat.csv,
+            destination: _Dest(),
+            warningAcknowledged: false,
+          );
+      expect((out as ExportPreview).rows.single.last, 'ai_unconfirmed');
+    });
+
+    test('DriftAiSuggestionStates reads the stored states', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      await db.customStatement(
+        'INSERT INTO categories (id, system_code, name_ar, name_en, icon, '
+        "color, bucket, sort) VALUES ('sys:dining', 'dining', 'x', 'x', 'i', "
+        "'#000000', 'wants', 1)",
+      );
+      final dao = AiMerchantSuggestionsDao(db);
+      for (final m in ['aa shop', 'bb shop']) {
+        await dao.putAnswer(
+          merchantNorm: m,
+          categoryId: 'sys:dining',
+          confidence: 90,
+          source: AiSuggestionSourceCode.cache,
+          at: 1,
+        );
+      }
+      await dao.decide('bb shop', state: 'confirmed', at: 2);
+      expect(
+        await DriftAiSuggestionStates(db)
+            .statesOf(['aa shop', 'bb shop', 'cc shop']),
+        {
+          'aa shop': AiSuggestionState.unconfirmed,
+          'bb shop': AiSuggestionState.confirmed,
+        },
+      );
+    });
   });
 }

@@ -120,7 +120,7 @@ void main() {
       addTearDown(db.close);
       expect(opened.migratedFrom, 5);
       expect(db.attemptedUpgradeFrom, 5);
-      expect(await userVersionOf(db), 6);
+      expect(await userVersionOf(db), appSchemaVersion);
       expect(world.files.migrateTmp.existsSync(), isFalse);
       expect(world.files.migratePart.existsSync(), isFalse);
 
@@ -139,7 +139,7 @@ void main() {
 
       final live = await schemaShapeOf(db);
       expect(sameSchemaShape(live, await freshShape()), isTrue);
-      expect(sameSchemaShape(live, await dumpShape(6)), isTrue);
+      expect(sameSchemaShape(live, await dumpShape(appSchemaVersion)), isTrue);
       expect(await db.customSelect('PRAGMA foreign_key_check').get(), isEmpty);
 
       // A debit card links to an account.
@@ -221,7 +221,7 @@ void main() {
       expect(failed.code, DbOpenFailureCode.migrationFailed);
       expect(failed.restored, isTrue);
       expect(failed.fromVersion, 5);
-      expect(failed.toVersion, 6);
+      expect(failed.toVersion, appSchemaVersion);
       await settle(world);
       expect(sameSnapshot(before, snapshotFiles(world.dbDir)), isTrue);
       expect(world.wipeLog, isEmpty);

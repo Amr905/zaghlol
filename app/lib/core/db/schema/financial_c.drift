@@ -248,10 +248,12 @@ CREATE TABLE secure_state (
 ) AS SecureStateRow;
 
 -- Queued uploads (backend-api §4.2). Turning contribution opt-in off deletes
--- the queued contributions (EC-48).
+-- the queued contributions (EC-48). v7 (T-356): the auto-category feedback
+-- kinds (D-94, llm-categorise §5).
 CREATE TABLE outbox (
   id TEXT NOT NULL PRIMARY KEY,
-  kind TEXT NOT NULL CHECK (kind IN ('contribution', 'bank_request', 'purchase_verify')),
+  kind TEXT NOT NULL CHECK (kind IN ('contribution', 'bank_request', 'purchase_verify',
+    'llm_cat_confirmation', 'llm_cat_correction')),
   payload TEXT NOT NULL
     CHECK (length(CAST(payload AS BLOB)) <= 65536
       AND instr(CAST(payload AS BLOB), x'00') = 0

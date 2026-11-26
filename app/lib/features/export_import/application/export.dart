@@ -17,6 +17,7 @@ import 'dart:typed_data';
 
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../categorization/domain/ai_suggestion.dart';
 import '../../gold/application/gating.dart';
 import '../../transactions/domain/transaction.dart';
 import '../../transactions/domain/transaction_repository.dart';
@@ -46,11 +47,26 @@ const List<String> exportHeader = [
   'note',
   'pair',
   'kind',
+  // T-356 (FR-LCAT-25): appended last so the columns before keep their
+  // positions. See [exportCategorySource].
+  'category_source',
 ];
 
-/// Header of exports written before T-285 (14 columns); the importer still
-/// reads it.
+/// Every header an export has ever been written with, which the importer
+/// reads: the original 14 columns, T-285's 16 (`pair`, `kind`) and the
+/// current 17 (`category_source` last). Extra columns are ignored on import.
+List<List<String>> get knownExportHeaders => [
+  exportHeader.sublist(0, 14),
+  exportHeader.sublist(0, 16),
+  exportHeader,
+];
+
+/// Header of exports written before T-285 (14 columns).
 List<String> get legacyExportHeader => exportHeader.sublist(0, 14);
+
+/// `category_source` of an export row whose stored category was not yet
+/// confirmed by the user (FR-LCAT-25).
+const String exportAiUnconfirmed = 'ai_unconfirmed';
 
 /// T-285: kind values for rows that are one leg of a pair.
 const String exportKindExchange = 'exchange';
@@ -82,10 +98,31 @@ String neutralizeFormula(String s) {
   return risky.contains(s.codeUnitAt(0)) ? "'$s" : s;
 }
 
-/// One export row as strings, in [exportHeader] order.
+/// The `category_source` column (FR-LCAT-25): the stored source code,
+/// except an AI category. That one exports as `user_rule` once the user
+/// confirmed the merchant's suggestion (Right made it a user rule), and as
+/// [exportAiUnconfirmed] in every other case (unconfirmed, corrected but not
+/// yet re-categorised, no suggestion row, unknown state): an AI category is
+/// never shown as the user's choice without the user's Right.
+String exportCategorySource(CategorySource source, AiSuggestionState? state) =>
+    switch (source) {
+      CategorySource.ai =>
+        state == AiSuggestionState.confirmed
+            ? CategorySource.userRule.code
+            : exportAiUnconfirmed,
+      _ => source.code,
+    };
+
+/// One export row as strings, in [exportHeader] order. [aiState] is the
+/// state of the row's merchant's AI suggestion (read only for `ai` rows).
+///
 /// [pairKind] is the stored `transfer_pairs.kind` of the row's pair, when
 /// known; exchanges are `fx_conversion` / `cross_currency`.
-List<String> exportRow(TransactionRecord t, {String? pairKind}) {
+List<String> exportRow(
+  TransactionRecord t, {
+  AiSuggestionState? aiState,
+  String? pairKind,
+}) {
   final pairId = t.transferPairId;
   final orig = t.originalAmount;
   // FU-131: ids are free-form text in the database (a restored or imported
@@ -113,6 +150,7 @@ List<String> exportRow(TransactionRecord t, {String? pairKind}) {
         : (pairKind != null && _isExchange(pairKind)
               ? exportKindExchange
               : exportKindTransfer),
+    exportCategorySource(t.categorySource, aiState),
   ];
 }
 
@@ -348,20 +386,41 @@ final class ExportTooLarge extends ExportOutcome {
 }
 
 class ExportService {
-  ExportService(this._repo, {this.pairKinds});
-  final TransactionRepository _repo;
-
-  /// Resolves pair ids to `transfer_pairs.kind`. Without it every pair
+  /// [aiStates] reads the AI suggestion states for `category_source`; when
+  /// null every `ai` row exports as [exportAiUnconfirmed]. [pairKinds]
+  /// resolves pair ids to `transfer_pairs.kind`; without it every pair
   /// exports as `transfer`.
+  ExportService(this._repo, {AiSuggestionStates? aiStates, this.pairKinds})
+    : _aiStates = aiStates; // ignore: prefer_initializing_formals - a private named parameter can't be an initializing formal
+  final TransactionRepository _repo;
+  final AiSuggestionStates? _aiStates;
+
   final Future<Map<String, String>> Function(Set<String> pairIds)? pairKinds;
 
+  /// The rows as strings, with the AI suggestion states and pair kinds read
+  /// in one go each.
   Future<List<List<String>>> _rows(List<TransactionRecord> rows) async {
+    final merchants = {
+      for (final r in rows)
+        if (r.categorySource == CategorySource.ai && r.merchantNorm != null)
+          r.merchantNorm!,
+    };
+    final states = merchants.isEmpty || _aiStates == null
+        ? const <String, AiSuggestionState>{}
+        : await _aiStates.statesOf(merchants);
     final ids = {for (final r in rows) ?r.transferPairId};
     final kinds = ids.isEmpty || pairKinds == null
         ? const <String, String>{}
         : await pairKinds!(ids);
     return [
-      for (final r in rows) exportRow(r, pairKind: kinds[r.transferPairId]),
+      for (final r in rows)
+        exportRow(
+          r,
+          aiState: r.categorySource == CategorySource.ai
+              ? states[r.merchantNorm]
+              : null,
+          pairKind: kinds[r.transferPairId],
+        ),
     ];
   }
 

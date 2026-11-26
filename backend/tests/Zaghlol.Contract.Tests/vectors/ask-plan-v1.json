@@ -1960,6 +1960,75 @@
       "note": "a registry alias in plain text is rejected before the substring check"
     },
     {
+      "id": "invalid-plain-name-in-template-text",
+      "group": "references",
+      "lang": "en",
+      "sent": "how much did I spend on dining this month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": {
+          "lang": "en",
+          "text": "You spent {amount} on {target} at CIB."
+        }
+      },
+      "expect": {
+        "outcome": "accept",
+        "templateReason": "TEMPLATE_PLAIN_NAME"
+      },
+      "srs": "FR-LLM-19",
+      "note": "a registry alias in t.text drops the template only (TEMPLATE_PLAIN_NAME); the plan is still accepted"
+    },
+    {
+      "id": "invalid-plain-name-in-currency",
+      "group": "references",
+      "lang": "en",
+      "sent": "how much did I spend on dining this month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": "CIB"
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 2,
+        "reason": "PLAIN_NAME"
+      },
+      "srs": "FR-LLM-19",
+      "note": "currency matches the schema pattern ^[A-Z]{3}$ but is a registry alias: step 2 applies to every string of p, not only mention"
+    },
+    {
       "id": "invalid-plain-bank-name-arabic",
       "group": "references",
       "lang": "ar",

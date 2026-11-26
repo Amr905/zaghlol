@@ -1,0 +1,47 @@
+import 'financial.drift';
+
+-- T-356: schema v7, automatic category for unknown merchants (LLM-CATEGORISE,
+-- D-94; llm-categorise.md §7). Both tables are the user's categorisation
+-- data: in the encrypted database, carried by backups (FR-BAK-06), emptied by
+-- "Delete everything". Never uploaded: only the merchant name and the user's
+-- right/wrong verdict leave the phone, through the outbox (BR-SYNC-03, D-96).
+--
+-- merchant_norm is the canonical merchant key (`[a-z0-9]` words, single
+-- spaces), 2–64 characters as in the eligibility rule (FR-LCAT-05). Times
+-- are epoch milliseconds (UTC).
+
+-- One row per merchant the backend answered for (FR-LCAT-20). `no_answer`
+-- (unknown, low confidence, rejected) has no category and is never re-sent.
+-- `category_id` stays the suggested category after a correction (the
+-- correction sends it as `aiCategory`); `decided_at` is the user's verdict.
+CREATE TABLE ai_merchant_suggestions (
+  merchant_norm TEXT NOT NULL PRIMARY KEY
+    CHECK (length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm NOT GLOB '*[^a-z0-9 ]*'
+      AND merchant_norm NOT GLOB ' *' AND merchant_norm NOT GLOB '* '
+      AND merchant_norm NOT GLOB '*  *' AND instr(CAST(merchant_norm AS BLOB), x'00') = 0),
+  category_id TEXT REFERENCES categories(id),
+  confidence INTEGER
+    CHECK (confidence IS NULL OR (typeof(confidence) = 'integer' AND confidence BETWEEN 0 AND 100)),
+  source TEXT CHECK (source IS NULL OR source IN ('llm', 'cache', 'catalog')),
+  state TEXT NOT NULL CHECK (state IN ('unconfirmed', 'confirmed', 'corrected', 'no_answer')),
+  created_at INTEGER NOT NULL CHECK (typeof(created_at) = 'integer'),
+  decided_at INTEGER CHECK (decided_at IS NULL OR typeof(decided_at) = 'integer'),
+  CHECK ((state = 'no_answer') = (category_id IS NULL)),
+  CHECK (state = 'no_answer' OR (confidence IS NOT NULL AND source IS NOT NULL)),
+  CHECK ((state IN ('confirmed', 'corrected')) = (decided_at IS NOT NULL))
+) AS AiMerchantSuggestionRow;
+
+-- Eligible merchants waiting to be sent (FR-LCAT-04): cap 100 distinct,
+-- 60 days, oldest dropped first (the sender enforces both). Send order: most
+-- transactions, then most recent.
+CREATE TABLE llm_cat_queue (
+  merchant_norm TEXT NOT NULL PRIMARY KEY
+    CHECK (length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm NOT GLOB '*[^a-z0-9 ]*'
+      AND merchant_norm NOT GLOB ' *' AND merchant_norm NOT GLOB '* '
+      AND merchant_norm NOT GLOB '*  *' AND instr(CAST(merchant_norm AS BLOB), x'00') = 0),
+  txn_count INTEGER NOT NULL CHECK (typeof(txn_count) = 'integer' AND txn_count >= 1),
+  first_queued_at INTEGER NOT NULL CHECK (typeof(first_queued_at) = 'integer'),
+  last_seen_at INTEGER NOT NULL CHECK (typeof(last_seen_at) = 'integer'),
+  attempts INTEGER NOT NULL DEFAULT 0 CHECK (typeof(attempts) = 'integer' AND attempts >= 0),
+  next_attempt_at INTEGER CHECK (next_attempt_at IS NULL OR typeof(next_attempt_at) = 'integer')
+) AS LlmCatQueueRow;

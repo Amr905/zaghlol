@@ -18,6 +18,7 @@ RUN dotnet restore src/Zaghlol.Api/Zaghlol.Api.csproj \
  && dotnet restore src/Zaghlol.Workers/Zaghlol.Workers.csproj
 
 COPY src/ src/
+COPY contracts/ contracts/
 RUN dotnet publish src/Zaghlol.Api/Zaghlol.Api.csproj -c Release --no-restore -p:UseAppHost=false -o /app/api \
  && dotnet publish src/Zaghlol.Workers/Zaghlol.Workers.csproj -c Release --no-restore -p:UseAppHost=false -o /app/worker
 

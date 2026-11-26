@@ -3,6 +3,1596 @@
 part of 'app_schema.dart';
 
 // ignore_for_file: type=lint
+class Categories extends Table with TableInfo<Categories, CategoryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  Categories(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY',
+  );
+  static const VerificationMeta _systemCodeMeta = const VerificationMeta(
+    'systemCode',
+  );
+  late final GeneratedColumn<String> systemCode = GeneratedColumn<String>(
+    'system_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'UNIQUE',
+  );
+  static const VerificationMeta _parentIdMeta = const VerificationMeta(
+    'parentId',
+  );
+  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
+    'parent_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'REFERENCES categories(id)',
+  );
+  static const VerificationMeta _nameArMeta = const VerificationMeta('nameAr');
+  late final GeneratedColumn<String> nameAr = GeneratedColumn<String>(
+    'name_ar',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _nameEnMeta = const VerificationMeta('nameEn');
+  late final GeneratedColumn<String> nameEn = GeneratedColumn<String>(
+    'name_en',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+    'icon',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  static const VerificationMeta _bucketMeta = const VerificationMeta('bucket');
+  late final GeneratedColumn<String> bucket = GeneratedColumn<String>(
+    'bucket',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (bucket IN (\'needs\', \'wants\', \'obligations\', \'savings\', \'income\', \'giving\'))',
+  );
+  static const VerificationMeta _isCustomMeta = const VerificationMeta(
+    'isCustom',
+  );
+  late final GeneratedColumn<int> isCustom = GeneratedColumn<int>(
+    'is_custom',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (is_custom IN (0, 1))',
+    defaultValue: const CustomExpression('0'),
+  );
+  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
+    'isArchived',
+  );
+  late final GeneratedColumn<int> isArchived = GeneratedColumn<int>(
+    'is_archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (is_archived IN (0, 1))',
+    defaultValue: const CustomExpression('0'),
+  );
+  static const VerificationMeta _sortMeta = const VerificationMeta('sort');
+  late final GeneratedColumn<int> sort = GeneratedColumn<int>(
+    'sort',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    systemCode,
+    parentId,
+    nameAr,
+    nameEn,
+    icon,
+    color,
+    bucket,
+    isCustom,
+    isArchived,
+    sort,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'categories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CategoryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('system_code')) {
+      context.handle(
+        _systemCodeMeta,
+        systemCode.isAcceptableOrUnknown(data['system_code']!, _systemCodeMeta),
+      );
+    }
+    if (data.containsKey('parent_id')) {
+      context.handle(
+        _parentIdMeta,
+        parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta),
+      );
+    }
+    if (data.containsKey('name_ar')) {
+      context.handle(
+        _nameArMeta,
+        nameAr.isAcceptableOrUnknown(data['name_ar']!, _nameArMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameArMeta);
+    }
+    if (data.containsKey('name_en')) {
+      context.handle(
+        _nameEnMeta,
+        nameEn.isAcceptableOrUnknown(data['name_en']!, _nameEnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameEnMeta);
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_iconMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_colorMeta);
+    }
+    if (data.containsKey('bucket')) {
+      context.handle(
+        _bucketMeta,
+        bucket.isAcceptableOrUnknown(data['bucket']!, _bucketMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bucketMeta);
+    }
+    if (data.containsKey('is_custom')) {
+      context.handle(
+        _isCustomMeta,
+        isCustom.isAcceptableOrUnknown(data['is_custom']!, _isCustomMeta),
+      );
+    }
+    if (data.containsKey('is_archived')) {
+      context.handle(
+        _isArchivedMeta,
+        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
+    }
+    if (data.containsKey('sort')) {
+      context.handle(
+        _sortMeta,
+        sort.isAcceptableOrUnknown(data['sort']!, _sortMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CategoryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CategoryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      systemCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}system_code'],
+      ),
+      parentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_id'],
+      ),
+      nameAr: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_ar'],
+      )!,
+      nameEn: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name_en'],
+      )!,
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      )!,
+      bucket: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bucket'],
+      )!,
+      isCustom: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}is_custom'],
+      )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}is_archived'],
+      )!,
+      sort: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort'],
+      )!,
+    );
+  }
+
+  @override
+  Categories createAlias(String alias) {
+    return Categories(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class CategoryRow extends DataClass implements Insertable<CategoryRow> {
+  final String id;
+  final String? systemCode;
+  final String? parentId;
+  final String nameAr;
+  final String nameEn;
+  final String icon;
+  final String color;
+  final String bucket;
+  final int isCustom;
+  final int isArchived;
+  final int sort;
+  const CategoryRow({
+    required this.id,
+    this.systemCode,
+    this.parentId,
+    required this.nameAr,
+    required this.nameEn,
+    required this.icon,
+    required this.color,
+    required this.bucket,
+    required this.isCustom,
+    required this.isArchived,
+    required this.sort,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || systemCode != null) {
+      map['system_code'] = Variable<String>(systemCode);
+    }
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
+    map['name_ar'] = Variable<String>(nameAr);
+    map['name_en'] = Variable<String>(nameEn);
+    map['icon'] = Variable<String>(icon);
+    map['color'] = Variable<String>(color);
+    map['bucket'] = Variable<String>(bucket);
+    map['is_custom'] = Variable<int>(isCustom);
+    map['is_archived'] = Variable<int>(isArchived);
+    map['sort'] = Variable<int>(sort);
+    return map;
+  }
+
+  CategoriesCompanion toCompanion(bool nullToAbsent) {
+    return CategoriesCompanion(
+      id: Value(id),
+      systemCode: systemCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(systemCode),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
+      nameAr: Value(nameAr),
+      nameEn: Value(nameEn),
+      icon: Value(icon),
+      color: Value(color),
+      bucket: Value(bucket),
+      isCustom: Value(isCustom),
+      isArchived: Value(isArchived),
+      sort: Value(sort),
+    );
+  }
+
+  factory CategoryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CategoryRow(
+      id: serializer.fromJson<String>(json['id']),
+      systemCode: serializer.fromJson<String?>(json['system_code']),
+      parentId: serializer.fromJson<String?>(json['parent_id']),
+      nameAr: serializer.fromJson<String>(json['name_ar']),
+      nameEn: serializer.fromJson<String>(json['name_en']),
+      icon: serializer.fromJson<String>(json['icon']),
+      color: serializer.fromJson<String>(json['color']),
+      bucket: serializer.fromJson<String>(json['bucket']),
+      isCustom: serializer.fromJson<int>(json['is_custom']),
+      isArchived: serializer.fromJson<int>(json['is_archived']),
+      sort: serializer.fromJson<int>(json['sort']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'system_code': serializer.toJson<String?>(systemCode),
+      'parent_id': serializer.toJson<String?>(parentId),
+      'name_ar': serializer.toJson<String>(nameAr),
+      'name_en': serializer.toJson<String>(nameEn),
+      'icon': serializer.toJson<String>(icon),
+      'color': serializer.toJson<String>(color),
+      'bucket': serializer.toJson<String>(bucket),
+      'is_custom': serializer.toJson<int>(isCustom),
+      'is_archived': serializer.toJson<int>(isArchived),
+      'sort': serializer.toJson<int>(sort),
+    };
+  }
+
+  CategoryRow copyWith({
+    String? id,
+    Value<String?> systemCode = const Value.absent(),
+    Value<String?> parentId = const Value.absent(),
+    String? nameAr,
+    String? nameEn,
+    String? icon,
+    String? color,
+    String? bucket,
+    int? isCustom,
+    int? isArchived,
+    int? sort,
+  }) => CategoryRow(
+    id: id ?? this.id,
+    systemCode: systemCode.present ? systemCode.value : this.systemCode,
+    parentId: parentId.present ? parentId.value : this.parentId,
+    nameAr: nameAr ?? this.nameAr,
+    nameEn: nameEn ?? this.nameEn,
+    icon: icon ?? this.icon,
+    color: color ?? this.color,
+    bucket: bucket ?? this.bucket,
+    isCustom: isCustom ?? this.isCustom,
+    isArchived: isArchived ?? this.isArchived,
+    sort: sort ?? this.sort,
+  );
+  CategoryRow copyWithCompanion(CategoriesCompanion data) {
+    return CategoryRow(
+      id: data.id.present ? data.id.value : this.id,
+      systemCode: data.systemCode.present
+          ? data.systemCode.value
+          : this.systemCode,
+      parentId: data.parentId.present ? data.parentId.value : this.parentId,
+      nameAr: data.nameAr.present ? data.nameAr.value : this.nameAr,
+      nameEn: data.nameEn.present ? data.nameEn.value : this.nameEn,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      color: data.color.present ? data.color.value : this.color,
+      bucket: data.bucket.present ? data.bucket.value : this.bucket,
+      isCustom: data.isCustom.present ? data.isCustom.value : this.isCustom,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
+      sort: data.sort.present ? data.sort.value : this.sort,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryRow(')
+          ..write('id: $id, ')
+          ..write('systemCode: $systemCode, ')
+          ..write('parentId: $parentId, ')
+          ..write('nameAr: $nameAr, ')
+          ..write('nameEn: $nameEn, ')
+          ..write('icon: $icon, ')
+          ..write('color: $color, ')
+          ..write('bucket: $bucket, ')
+          ..write('isCustom: $isCustom, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('sort: $sort')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    systemCode,
+    parentId,
+    nameAr,
+    nameEn,
+    icon,
+    color,
+    bucket,
+    isCustom,
+    isArchived,
+    sort,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CategoryRow &&
+          other.id == this.id &&
+          other.systemCode == this.systemCode &&
+          other.parentId == this.parentId &&
+          other.nameAr == this.nameAr &&
+          other.nameEn == this.nameEn &&
+          other.icon == this.icon &&
+          other.color == this.color &&
+          other.bucket == this.bucket &&
+          other.isCustom == this.isCustom &&
+          other.isArchived == this.isArchived &&
+          other.sort == this.sort);
+}
+
+class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
+  final Value<String> id;
+  final Value<String?> systemCode;
+  final Value<String?> parentId;
+  final Value<String> nameAr;
+  final Value<String> nameEn;
+  final Value<String> icon;
+  final Value<String> color;
+  final Value<String> bucket;
+  final Value<int> isCustom;
+  final Value<int> isArchived;
+  final Value<int> sort;
+  final Value<int> rowid;
+  const CategoriesCompanion({
+    this.id = const Value.absent(),
+    this.systemCode = const Value.absent(),
+    this.parentId = const Value.absent(),
+    this.nameAr = const Value.absent(),
+    this.nameEn = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.color = const Value.absent(),
+    this.bucket = const Value.absent(),
+    this.isCustom = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    this.sort = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CategoriesCompanion.insert({
+    required String id,
+    this.systemCode = const Value.absent(),
+    this.parentId = const Value.absent(),
+    required String nameAr,
+    required String nameEn,
+    required String icon,
+    required String color,
+    required String bucket,
+    this.isCustom = const Value.absent(),
+    this.isArchived = const Value.absent(),
+    required int sort,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       nameAr = Value(nameAr),
+       nameEn = Value(nameEn),
+       icon = Value(icon),
+       color = Value(color),
+       bucket = Value(bucket),
+       sort = Value(sort);
+  static Insertable<CategoryRow> custom({
+    Expression<String>? id,
+    Expression<String>? systemCode,
+    Expression<String>? parentId,
+    Expression<String>? nameAr,
+    Expression<String>? nameEn,
+    Expression<String>? icon,
+    Expression<String>? color,
+    Expression<String>? bucket,
+    Expression<int>? isCustom,
+    Expression<int>? isArchived,
+    Expression<int>? sort,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (systemCode != null) 'system_code': systemCode,
+      if (parentId != null) 'parent_id': parentId,
+      if (nameAr != null) 'name_ar': nameAr,
+      if (nameEn != null) 'name_en': nameEn,
+      if (icon != null) 'icon': icon,
+      if (color != null) 'color': color,
+      if (bucket != null) 'bucket': bucket,
+      if (isCustom != null) 'is_custom': isCustom,
+      if (isArchived != null) 'is_archived': isArchived,
+      if (sort != null) 'sort': sort,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CategoriesCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? systemCode,
+    Value<String?>? parentId,
+    Value<String>? nameAr,
+    Value<String>? nameEn,
+    Value<String>? icon,
+    Value<String>? color,
+    Value<String>? bucket,
+    Value<int>? isCustom,
+    Value<int>? isArchived,
+    Value<int>? sort,
+    Value<int>? rowid,
+  }) {
+    return CategoriesCompanion(
+      id: id ?? this.id,
+      systemCode: systemCode ?? this.systemCode,
+      parentId: parentId ?? this.parentId,
+      nameAr: nameAr ?? this.nameAr,
+      nameEn: nameEn ?? this.nameEn,
+      icon: icon ?? this.icon,
+      color: color ?? this.color,
+      bucket: bucket ?? this.bucket,
+      isCustom: isCustom ?? this.isCustom,
+      isArchived: isArchived ?? this.isArchived,
+      sort: sort ?? this.sort,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (systemCode.present) {
+      map['system_code'] = Variable<String>(systemCode.value);
+    }
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (nameAr.present) {
+      map['name_ar'] = Variable<String>(nameAr.value);
+    }
+    if (nameEn.present) {
+      map['name_en'] = Variable<String>(nameEn.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
+    if (bucket.present) {
+      map['bucket'] = Variable<String>(bucket.value);
+    }
+    if (isCustom.present) {
+      map['is_custom'] = Variable<int>(isCustom.value);
+    }
+    if (isArchived.present) {
+      map['is_archived'] = Variable<int>(isArchived.value);
+    }
+    if (sort.present) {
+      map['sort'] = Variable<int>(sort.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('systemCode: $systemCode, ')
+          ..write('parentId: $parentId, ')
+          ..write('nameAr: $nameAr, ')
+          ..write('nameEn: $nameEn, ')
+          ..write('icon: $icon, ')
+          ..write('color: $color, ')
+          ..write('bucket: $bucket, ')
+          ..write('isCustom: $isCustom, ')
+          ..write('isArchived: $isArchived, ')
+          ..write('sort: $sort, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class AiMerchantSuggestions extends Table
+    with TableInfo<AiMerchantSuggestions, AiMerchantSuggestionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  AiMerchantSuggestions(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _merchantNormMeta = const VerificationMeta(
+    'merchantNorm',
+  );
+  late final GeneratedColumn<String> merchantNorm = GeneratedColumn<String>(
+    'merchant_norm',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY CHECK (length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm NOT GLOB \'*[^a-z0-9 ]*\' AND merchant_norm NOT GLOB \' *\' AND merchant_norm NOT GLOB \'* \' AND merchant_norm NOT GLOB \'*  *\' AND instr(CAST(merchant_norm AS BLOB), X\'00\') = 0)',
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'REFERENCES categories(id)',
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  late final GeneratedColumn<int> confidence = GeneratedColumn<int>(
+    'confidence',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'CHECK (confidence IS NULL OR(typeof(confidence) = \'integer\' AND confidence BETWEEN 0 AND 100))',
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'CHECK (source IS NULL OR source IN (\'llm\', \'cache\', \'catalog\'))',
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (state IN (\'unconfirmed\', \'confirmed\', \'corrected\', \'no_answer\'))',
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  late final GeneratedColumn<int> createdAt = GeneratedColumn<int>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (typeof(created_at) = \'integer\')',
+  );
+  static const VerificationMeta _decidedAtMeta = const VerificationMeta(
+    'decidedAt',
+  );
+  late final GeneratedColumn<int> decidedAt = GeneratedColumn<int>(
+    'decided_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'CHECK (decided_at IS NULL OR typeof(decided_at) = \'integer\')',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    merchantNorm,
+    categoryId,
+    confidence,
+    source,
+    state,
+    createdAt,
+    decidedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ai_merchant_suggestions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AiMerchantSuggestionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('merchant_norm')) {
+      context.handle(
+        _merchantNormMeta,
+        merchantNorm.isAcceptableOrUnknown(
+          data['merchant_norm']!,
+          _merchantNormMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_merchantNormMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('decided_at')) {
+      context.handle(
+        _decidedAtMeta,
+        decidedAt.isAcceptableOrUnknown(data['decided_at']!, _decidedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {merchantNorm};
+  @override
+  AiMerchantSuggestionRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AiMerchantSuggestionRow(
+      merchantNorm: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}merchant_norm'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      ),
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}confidence'],
+      ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      ),
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+      decidedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}decided_at'],
+      ),
+    );
+  }
+
+  @override
+  AiMerchantSuggestions createAlias(String alias) {
+    return AiMerchantSuggestions(attachedDatabase, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const [
+    'CHECK((state = \'no_answer\')=(category_id IS NULL))',
+    'CHECK(state = \'no_answer\' OR(confidence IS NOT NULL AND source IS NOT NULL))',
+    'CHECK((state IN (\'confirmed\', \'corrected\'))=(decided_at IS NOT NULL))',
+  ];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class AiMerchantSuggestionRow extends DataClass
+    implements Insertable<AiMerchantSuggestionRow> {
+  final String merchantNorm;
+  final String? categoryId;
+  final int? confidence;
+  final String? source;
+  final String state;
+  final int createdAt;
+  final int? decidedAt;
+  const AiMerchantSuggestionRow({
+    required this.merchantNorm,
+    this.categoryId,
+    this.confidence,
+    this.source,
+    required this.state,
+    required this.createdAt,
+    this.decidedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['merchant_norm'] = Variable<String>(merchantNorm);
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<String>(categoryId);
+    }
+    if (!nullToAbsent || confidence != null) {
+      map['confidence'] = Variable<int>(confidence);
+    }
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
+    }
+    map['state'] = Variable<String>(state);
+    map['created_at'] = Variable<int>(createdAt);
+    if (!nullToAbsent || decidedAt != null) {
+      map['decided_at'] = Variable<int>(decidedAt);
+    }
+    return map;
+  }
+
+  AiMerchantSuggestionsCompanion toCompanion(bool nullToAbsent) {
+    return AiMerchantSuggestionsCompanion(
+      merchantNorm: Value(merchantNorm),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      confidence: confidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confidence),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
+      state: Value(state),
+      createdAt: Value(createdAt),
+      decidedAt: decidedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(decidedAt),
+    );
+  }
+
+  factory AiMerchantSuggestionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AiMerchantSuggestionRow(
+      merchantNorm: serializer.fromJson<String>(json['merchant_norm']),
+      categoryId: serializer.fromJson<String?>(json['category_id']),
+      confidence: serializer.fromJson<int?>(json['confidence']),
+      source: serializer.fromJson<String?>(json['source']),
+      state: serializer.fromJson<String>(json['state']),
+      createdAt: serializer.fromJson<int>(json['created_at']),
+      decidedAt: serializer.fromJson<int?>(json['decided_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'merchant_norm': serializer.toJson<String>(merchantNorm),
+      'category_id': serializer.toJson<String?>(categoryId),
+      'confidence': serializer.toJson<int?>(confidence),
+      'source': serializer.toJson<String?>(source),
+      'state': serializer.toJson<String>(state),
+      'created_at': serializer.toJson<int>(createdAt),
+      'decided_at': serializer.toJson<int?>(decidedAt),
+    };
+  }
+
+  AiMerchantSuggestionRow copyWith({
+    String? merchantNorm,
+    Value<String?> categoryId = const Value.absent(),
+    Value<int?> confidence = const Value.absent(),
+    Value<String?> source = const Value.absent(),
+    String? state,
+    int? createdAt,
+    Value<int?> decidedAt = const Value.absent(),
+  }) => AiMerchantSuggestionRow(
+    merchantNorm: merchantNorm ?? this.merchantNorm,
+    categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    confidence: confidence.present ? confidence.value : this.confidence,
+    source: source.present ? source.value : this.source,
+    state: state ?? this.state,
+    createdAt: createdAt ?? this.createdAt,
+    decidedAt: decidedAt.present ? decidedAt.value : this.decidedAt,
+  );
+  AiMerchantSuggestionRow copyWithCompanion(
+    AiMerchantSuggestionsCompanion data,
+  ) {
+    return AiMerchantSuggestionRow(
+      merchantNorm: data.merchantNorm.present
+          ? data.merchantNorm.value
+          : this.merchantNorm,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+      source: data.source.present ? data.source.value : this.source,
+      state: data.state.present ? data.state.value : this.state,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      decidedAt: data.decidedAt.present ? data.decidedAt.value : this.decidedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AiMerchantSuggestionRow(')
+          ..write('merchantNorm: $merchantNorm, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('confidence: $confidence, ')
+          ..write('source: $source, ')
+          ..write('state: $state, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    merchantNorm,
+    categoryId,
+    confidence,
+    source,
+    state,
+    createdAt,
+    decidedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AiMerchantSuggestionRow &&
+          other.merchantNorm == this.merchantNorm &&
+          other.categoryId == this.categoryId &&
+          other.confidence == this.confidence &&
+          other.source == this.source &&
+          other.state == this.state &&
+          other.createdAt == this.createdAt &&
+          other.decidedAt == this.decidedAt);
+}
+
+class AiMerchantSuggestionsCompanion
+    extends UpdateCompanion<AiMerchantSuggestionRow> {
+  final Value<String> merchantNorm;
+  final Value<String?> categoryId;
+  final Value<int?> confidence;
+  final Value<String?> source;
+  final Value<String> state;
+  final Value<int> createdAt;
+  final Value<int?> decidedAt;
+  final Value<int> rowid;
+  const AiMerchantSuggestionsCompanion({
+    this.merchantNorm = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.source = const Value.absent(),
+    this.state = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.decidedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AiMerchantSuggestionsCompanion.insert({
+    required String merchantNorm,
+    this.categoryId = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.source = const Value.absent(),
+    required String state,
+    required int createdAt,
+    this.decidedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : merchantNorm = Value(merchantNorm),
+       state = Value(state),
+       createdAt = Value(createdAt);
+  static Insertable<AiMerchantSuggestionRow> custom({
+    Expression<String>? merchantNorm,
+    Expression<String>? categoryId,
+    Expression<int>? confidence,
+    Expression<String>? source,
+    Expression<String>? state,
+    Expression<int>? createdAt,
+    Expression<int>? decidedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (merchantNorm != null) 'merchant_norm': merchantNorm,
+      if (categoryId != null) 'category_id': categoryId,
+      if (confidence != null) 'confidence': confidence,
+      if (source != null) 'source': source,
+      if (state != null) 'state': state,
+      if (createdAt != null) 'created_at': createdAt,
+      if (decidedAt != null) 'decided_at': decidedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AiMerchantSuggestionsCompanion copyWith({
+    Value<String>? merchantNorm,
+    Value<String?>? categoryId,
+    Value<int?>? confidence,
+    Value<String?>? source,
+    Value<String>? state,
+    Value<int>? createdAt,
+    Value<int?>? decidedAt,
+    Value<int>? rowid,
+  }) {
+    return AiMerchantSuggestionsCompanion(
+      merchantNorm: merchantNorm ?? this.merchantNorm,
+      categoryId: categoryId ?? this.categoryId,
+      confidence: confidence ?? this.confidence,
+      source: source ?? this.source,
+      state: state ?? this.state,
+      createdAt: createdAt ?? this.createdAt,
+      decidedAt: decidedAt ?? this.decidedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (merchantNorm.present) {
+      map['merchant_norm'] = Variable<String>(merchantNorm.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<int>(confidence.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    if (decidedAt.present) {
+      map['decided_at'] = Variable<int>(decidedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AiMerchantSuggestionsCompanion(')
+          ..write('merchantNorm: $merchantNorm, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('confidence: $confidence, ')
+          ..write('source: $source, ')
+          ..write('state: $state, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('decidedAt: $decidedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class LlmCatQueue extends Table with TableInfo<LlmCatQueue, LlmCatQueueRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  LlmCatQueue(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _merchantNormMeta = const VerificationMeta(
+    'merchantNorm',
+  );
+  late final GeneratedColumn<String> merchantNorm = GeneratedColumn<String>(
+    'merchant_norm',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL PRIMARY KEY CHECK (length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm NOT GLOB \'*[^a-z0-9 ]*\' AND merchant_norm NOT GLOB \' *\' AND merchant_norm NOT GLOB \'* \' AND merchant_norm NOT GLOB \'*  *\' AND instr(CAST(merchant_norm AS BLOB), X\'00\') = 0)',
+  );
+  static const VerificationMeta _txnCountMeta = const VerificationMeta(
+    'txnCount',
+  );
+  late final GeneratedColumn<int> txnCount = GeneratedColumn<int>(
+    'txn_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints:
+        'NOT NULL CHECK (typeof(txn_count) = \'integer\' AND txn_count >= 1)',
+  );
+  static const VerificationMeta _firstQueuedAtMeta = const VerificationMeta(
+    'firstQueuedAt',
+  );
+  late final GeneratedColumn<int> firstQueuedAt = GeneratedColumn<int>(
+    'first_queued_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints:
+        'NOT NULL CHECK (typeof(first_queued_at) = \'integer\')',
+  );
+  static const VerificationMeta _lastSeenAtMeta = const VerificationMeta(
+    'lastSeenAt',
+  );
+  late final GeneratedColumn<int> lastSeenAt = GeneratedColumn<int>(
+    'last_seen_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    $customConstraints: 'NOT NULL CHECK (typeof(last_seen_at) = \'integer\')',
+  );
+  static const VerificationMeta _attemptsMeta = const VerificationMeta(
+    'attempts',
+  );
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+    'attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (typeof(attempts) = \'integer\' AND attempts >= 0)',
+    defaultValue: const CustomExpression('0'),
+  );
+  static const VerificationMeta _nextAttemptAtMeta = const VerificationMeta(
+    'nextAttemptAt',
+  );
+  late final GeneratedColumn<int> nextAttemptAt = GeneratedColumn<int>(
+    'next_attempt_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'CHECK (next_attempt_at IS NULL OR typeof(next_attempt_at) = \'integer\')',
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    merchantNorm,
+    txnCount,
+    firstQueuedAt,
+    lastSeenAt,
+    attempts,
+    nextAttemptAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'llm_cat_queue';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LlmCatQueueRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('merchant_norm')) {
+      context.handle(
+        _merchantNormMeta,
+        merchantNorm.isAcceptableOrUnknown(
+          data['merchant_norm']!,
+          _merchantNormMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_merchantNormMeta);
+    }
+    if (data.containsKey('txn_count')) {
+      context.handle(
+        _txnCountMeta,
+        txnCount.isAcceptableOrUnknown(data['txn_count']!, _txnCountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_txnCountMeta);
+    }
+    if (data.containsKey('first_queued_at')) {
+      context.handle(
+        _firstQueuedAtMeta,
+        firstQueuedAt.isAcceptableOrUnknown(
+          data['first_queued_at']!,
+          _firstQueuedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_firstQueuedAtMeta);
+    }
+    if (data.containsKey('last_seen_at')) {
+      context.handle(
+        _lastSeenAtMeta,
+        lastSeenAt.isAcceptableOrUnknown(
+          data['last_seen_at']!,
+          _lastSeenAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastSeenAtMeta);
+    }
+    if (data.containsKey('attempts')) {
+      context.handle(
+        _attemptsMeta,
+        attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta),
+      );
+    }
+    if (data.containsKey('next_attempt_at')) {
+      context.handle(
+        _nextAttemptAtMeta,
+        nextAttemptAt.isAcceptableOrUnknown(
+          data['next_attempt_at']!,
+          _nextAttemptAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {merchantNorm};
+  @override
+  LlmCatQueueRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LlmCatQueueRow(
+      merchantNorm: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}merchant_norm'],
+      )!,
+      txnCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}txn_count'],
+      )!,
+      firstQueuedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}first_queued_at'],
+      )!,
+      lastSeenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_seen_at'],
+      )!,
+      attempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempts'],
+      )!,
+      nextAttemptAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}next_attempt_at'],
+      ),
+    );
+  }
+
+  @override
+  LlmCatQueue createAlias(String alias) {
+    return LlmCatQueue(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class LlmCatQueueRow extends DataClass implements Insertable<LlmCatQueueRow> {
+  final String merchantNorm;
+  final int txnCount;
+  final int firstQueuedAt;
+  final int lastSeenAt;
+  final int attempts;
+  final int? nextAttemptAt;
+  const LlmCatQueueRow({
+    required this.merchantNorm,
+    required this.txnCount,
+    required this.firstQueuedAt,
+    required this.lastSeenAt,
+    required this.attempts,
+    this.nextAttemptAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['merchant_norm'] = Variable<String>(merchantNorm);
+    map['txn_count'] = Variable<int>(txnCount);
+    map['first_queued_at'] = Variable<int>(firstQueuedAt);
+    map['last_seen_at'] = Variable<int>(lastSeenAt);
+    map['attempts'] = Variable<int>(attempts);
+    if (!nullToAbsent || nextAttemptAt != null) {
+      map['next_attempt_at'] = Variable<int>(nextAttemptAt);
+    }
+    return map;
+  }
+
+  LlmCatQueueCompanion toCompanion(bool nullToAbsent) {
+    return LlmCatQueueCompanion(
+      merchantNorm: Value(merchantNorm),
+      txnCount: Value(txnCount),
+      firstQueuedAt: Value(firstQueuedAt),
+      lastSeenAt: Value(lastSeenAt),
+      attempts: Value(attempts),
+      nextAttemptAt: nextAttemptAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nextAttemptAt),
+    );
+  }
+
+  factory LlmCatQueueRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LlmCatQueueRow(
+      merchantNorm: serializer.fromJson<String>(json['merchant_norm']),
+      txnCount: serializer.fromJson<int>(json['txn_count']),
+      firstQueuedAt: serializer.fromJson<int>(json['first_queued_at']),
+      lastSeenAt: serializer.fromJson<int>(json['last_seen_at']),
+      attempts: serializer.fromJson<int>(json['attempts']),
+      nextAttemptAt: serializer.fromJson<int?>(json['next_attempt_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'merchant_norm': serializer.toJson<String>(merchantNorm),
+      'txn_count': serializer.toJson<int>(txnCount),
+      'first_queued_at': serializer.toJson<int>(firstQueuedAt),
+      'last_seen_at': serializer.toJson<int>(lastSeenAt),
+      'attempts': serializer.toJson<int>(attempts),
+      'next_attempt_at': serializer.toJson<int?>(nextAttemptAt),
+    };
+  }
+
+  LlmCatQueueRow copyWith({
+    String? merchantNorm,
+    int? txnCount,
+    int? firstQueuedAt,
+    int? lastSeenAt,
+    int? attempts,
+    Value<int?> nextAttemptAt = const Value.absent(),
+  }) => LlmCatQueueRow(
+    merchantNorm: merchantNorm ?? this.merchantNorm,
+    txnCount: txnCount ?? this.txnCount,
+    firstQueuedAt: firstQueuedAt ?? this.firstQueuedAt,
+    lastSeenAt: lastSeenAt ?? this.lastSeenAt,
+    attempts: attempts ?? this.attempts,
+    nextAttemptAt: nextAttemptAt.present
+        ? nextAttemptAt.value
+        : this.nextAttemptAt,
+  );
+  LlmCatQueueRow copyWithCompanion(LlmCatQueueCompanion data) {
+    return LlmCatQueueRow(
+      merchantNorm: data.merchantNorm.present
+          ? data.merchantNorm.value
+          : this.merchantNorm,
+      txnCount: data.txnCount.present ? data.txnCount.value : this.txnCount,
+      firstQueuedAt: data.firstQueuedAt.present
+          ? data.firstQueuedAt.value
+          : this.firstQueuedAt,
+      lastSeenAt: data.lastSeenAt.present
+          ? data.lastSeenAt.value
+          : this.lastSeenAt,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      nextAttemptAt: data.nextAttemptAt.present
+          ? data.nextAttemptAt.value
+          : this.nextAttemptAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LlmCatQueueRow(')
+          ..write('merchantNorm: $merchantNorm, ')
+          ..write('txnCount: $txnCount, ')
+          ..write('firstQueuedAt: $firstQueuedAt, ')
+          ..write('lastSeenAt: $lastSeenAt, ')
+          ..write('attempts: $attempts, ')
+          ..write('nextAttemptAt: $nextAttemptAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    merchantNorm,
+    txnCount,
+    firstQueuedAt,
+    lastSeenAt,
+    attempts,
+    nextAttemptAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LlmCatQueueRow &&
+          other.merchantNorm == this.merchantNorm &&
+          other.txnCount == this.txnCount &&
+          other.firstQueuedAt == this.firstQueuedAt &&
+          other.lastSeenAt == this.lastSeenAt &&
+          other.attempts == this.attempts &&
+          other.nextAttemptAt == this.nextAttemptAt);
+}
+
+class LlmCatQueueCompanion extends UpdateCompanion<LlmCatQueueRow> {
+  final Value<String> merchantNorm;
+  final Value<int> txnCount;
+  final Value<int> firstQueuedAt;
+  final Value<int> lastSeenAt;
+  final Value<int> attempts;
+  final Value<int?> nextAttemptAt;
+  final Value<int> rowid;
+  const LlmCatQueueCompanion({
+    this.merchantNorm = const Value.absent(),
+    this.txnCount = const Value.absent(),
+    this.firstQueuedAt = const Value.absent(),
+    this.lastSeenAt = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.nextAttemptAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LlmCatQueueCompanion.insert({
+    required String merchantNorm,
+    required int txnCount,
+    required int firstQueuedAt,
+    required int lastSeenAt,
+    this.attempts = const Value.absent(),
+    this.nextAttemptAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : merchantNorm = Value(merchantNorm),
+       txnCount = Value(txnCount),
+       firstQueuedAt = Value(firstQueuedAt),
+       lastSeenAt = Value(lastSeenAt);
+  static Insertable<LlmCatQueueRow> custom({
+    Expression<String>? merchantNorm,
+    Expression<int>? txnCount,
+    Expression<int>? firstQueuedAt,
+    Expression<int>? lastSeenAt,
+    Expression<int>? attempts,
+    Expression<int>? nextAttemptAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (merchantNorm != null) 'merchant_norm': merchantNorm,
+      if (txnCount != null) 'txn_count': txnCount,
+      if (firstQueuedAt != null) 'first_queued_at': firstQueuedAt,
+      if (lastSeenAt != null) 'last_seen_at': lastSeenAt,
+      if (attempts != null) 'attempts': attempts,
+      if (nextAttemptAt != null) 'next_attempt_at': nextAttemptAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LlmCatQueueCompanion copyWith({
+    Value<String>? merchantNorm,
+    Value<int>? txnCount,
+    Value<int>? firstQueuedAt,
+    Value<int>? lastSeenAt,
+    Value<int>? attempts,
+    Value<int?>? nextAttemptAt,
+    Value<int>? rowid,
+  }) {
+    return LlmCatQueueCompanion(
+      merchantNorm: merchantNorm ?? this.merchantNorm,
+      txnCount: txnCount ?? this.txnCount,
+      firstQueuedAt: firstQueuedAt ?? this.firstQueuedAt,
+      lastSeenAt: lastSeenAt ?? this.lastSeenAt,
+      attempts: attempts ?? this.attempts,
+      nextAttemptAt: nextAttemptAt ?? this.nextAttemptAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (merchantNorm.present) {
+      map['merchant_norm'] = Variable<String>(merchantNorm.value);
+    }
+    if (txnCount.present) {
+      map['txn_count'] = Variable<int>(txnCount.value);
+    }
+    if (firstQueuedAt.present) {
+      map['first_queued_at'] = Variable<int>(firstQueuedAt.value);
+    }
+    if (lastSeenAt.present) {
+      map['last_seen_at'] = Variable<int>(lastSeenAt.value);
+    }
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
+    }
+    if (nextAttemptAt.present) {
+      map['next_attempt_at'] = Variable<int>(nextAttemptAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LlmCatQueueCompanion(')
+          ..write('merchantNorm: $merchantNorm, ')
+          ..write('txnCount: $txnCount, ')
+          ..write('firstQueuedAt: $firstQueuedAt, ')
+          ..write('lastSeenAt: $lastSeenAt, ')
+          ..write('attempts: $attempts, ')
+          ..write('nextAttemptAt: $nextAttemptAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class Assets extends Table with TableInfo<Assets, AssetRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -5397,654 +6987,6 @@ class AccountsCompanion extends UpdateCompanion<AccountRow> {
   }
 }
 
-class Categories extends Table with TableInfo<Categories, CategoryRow> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  Categories(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL PRIMARY KEY',
-  );
-  static const VerificationMeta _systemCodeMeta = const VerificationMeta(
-    'systemCode',
-  );
-  late final GeneratedColumn<String> systemCode = GeneratedColumn<String>(
-    'system_code',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'UNIQUE',
-  );
-  static const VerificationMeta _parentIdMeta = const VerificationMeta(
-    'parentId',
-  );
-  late final GeneratedColumn<String> parentId = GeneratedColumn<String>(
-    'parent_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    $customConstraints: 'REFERENCES categories(id)',
-  );
-  static const VerificationMeta _nameArMeta = const VerificationMeta('nameAr');
-  late final GeneratedColumn<String> nameAr = GeneratedColumn<String>(
-    'name_ar',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _nameEnMeta = const VerificationMeta('nameEn');
-  late final GeneratedColumn<String> nameEn = GeneratedColumn<String>(
-    'name_en',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
-  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
-    'icon',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _colorMeta = const VerificationMeta('color');
-  late final GeneratedColumn<String> color = GeneratedColumn<String>(
-    'color',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  static const VerificationMeta _bucketMeta = const VerificationMeta('bucket');
-  late final GeneratedColumn<String> bucket = GeneratedColumn<String>(
-    'bucket',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL CHECK (bucket IN (\'needs\', \'wants\', \'obligations\', \'savings\', \'income\', \'giving\'))',
-  );
-  static const VerificationMeta _isCustomMeta = const VerificationMeta(
-    'isCustom',
-  );
-  late final GeneratedColumn<int> isCustom = GeneratedColumn<int>(
-    'is_custom',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (is_custom IN (0, 1))',
-    defaultValue: const CustomExpression('0'),
-  );
-  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
-    'isArchived',
-  );
-  late final GeneratedColumn<int> isArchived = GeneratedColumn<int>(
-    'is_archived',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (is_archived IN (0, 1))',
-    defaultValue: const CustomExpression('0'),
-  );
-  static const VerificationMeta _sortMeta = const VerificationMeta('sort');
-  late final GeneratedColumn<int> sort = GeneratedColumn<int>(
-    'sort',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL',
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    systemCode,
-    parentId,
-    nameAr,
-    nameEn,
-    icon,
-    color,
-    bucket,
-    isCustom,
-    isArchived,
-    sort,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'categories';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<CategoryRow> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('system_code')) {
-      context.handle(
-        _systemCodeMeta,
-        systemCode.isAcceptableOrUnknown(data['system_code']!, _systemCodeMeta),
-      );
-    }
-    if (data.containsKey('parent_id')) {
-      context.handle(
-        _parentIdMeta,
-        parentId.isAcceptableOrUnknown(data['parent_id']!, _parentIdMeta),
-      );
-    }
-    if (data.containsKey('name_ar')) {
-      context.handle(
-        _nameArMeta,
-        nameAr.isAcceptableOrUnknown(data['name_ar']!, _nameArMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nameArMeta);
-    }
-    if (data.containsKey('name_en')) {
-      context.handle(
-        _nameEnMeta,
-        nameEn.isAcceptableOrUnknown(data['name_en']!, _nameEnMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nameEnMeta);
-    }
-    if (data.containsKey('icon')) {
-      context.handle(
-        _iconMeta,
-        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_iconMeta);
-    }
-    if (data.containsKey('color')) {
-      context.handle(
-        _colorMeta,
-        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_colorMeta);
-    }
-    if (data.containsKey('bucket')) {
-      context.handle(
-        _bucketMeta,
-        bucket.isAcceptableOrUnknown(data['bucket']!, _bucketMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_bucketMeta);
-    }
-    if (data.containsKey('is_custom')) {
-      context.handle(
-        _isCustomMeta,
-        isCustom.isAcceptableOrUnknown(data['is_custom']!, _isCustomMeta),
-      );
-    }
-    if (data.containsKey('is_archived')) {
-      context.handle(
-        _isArchivedMeta,
-        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
-      );
-    }
-    if (data.containsKey('sort')) {
-      context.handle(
-        _sortMeta,
-        sort.isAcceptableOrUnknown(data['sort']!, _sortMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_sortMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  CategoryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return CategoryRow(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
-      systemCode: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}system_code'],
-      ),
-      parentId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}parent_id'],
-      ),
-      nameAr: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name_ar'],
-      )!,
-      nameEn: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name_en'],
-      )!,
-      icon: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}icon'],
-      )!,
-      color: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}color'],
-      )!,
-      bucket: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}bucket'],
-      )!,
-      isCustom: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}is_custom'],
-      )!,
-      isArchived: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}is_archived'],
-      )!,
-      sort: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}sort'],
-      )!,
-    );
-  }
-
-  @override
-  Categories createAlias(String alias) {
-    return Categories(attachedDatabase, alias);
-  }
-
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class CategoryRow extends DataClass implements Insertable<CategoryRow> {
-  final String id;
-  final String? systemCode;
-  final String? parentId;
-  final String nameAr;
-  final String nameEn;
-  final String icon;
-  final String color;
-  final String bucket;
-  final int isCustom;
-  final int isArchived;
-  final int sort;
-  const CategoryRow({
-    required this.id,
-    this.systemCode,
-    this.parentId,
-    required this.nameAr,
-    required this.nameEn,
-    required this.icon,
-    required this.color,
-    required this.bucket,
-    required this.isCustom,
-    required this.isArchived,
-    required this.sort,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    if (!nullToAbsent || systemCode != null) {
-      map['system_code'] = Variable<String>(systemCode);
-    }
-    if (!nullToAbsent || parentId != null) {
-      map['parent_id'] = Variable<String>(parentId);
-    }
-    map['name_ar'] = Variable<String>(nameAr);
-    map['name_en'] = Variable<String>(nameEn);
-    map['icon'] = Variable<String>(icon);
-    map['color'] = Variable<String>(color);
-    map['bucket'] = Variable<String>(bucket);
-    map['is_custom'] = Variable<int>(isCustom);
-    map['is_archived'] = Variable<int>(isArchived);
-    map['sort'] = Variable<int>(sort);
-    return map;
-  }
-
-  CategoriesCompanion toCompanion(bool nullToAbsent) {
-    return CategoriesCompanion(
-      id: Value(id),
-      systemCode: systemCode == null && nullToAbsent
-          ? const Value.absent()
-          : Value(systemCode),
-      parentId: parentId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(parentId),
-      nameAr: Value(nameAr),
-      nameEn: Value(nameEn),
-      icon: Value(icon),
-      color: Value(color),
-      bucket: Value(bucket),
-      isCustom: Value(isCustom),
-      isArchived: Value(isArchived),
-      sort: Value(sort),
-    );
-  }
-
-  factory CategoryRow.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return CategoryRow(
-      id: serializer.fromJson<String>(json['id']),
-      systemCode: serializer.fromJson<String?>(json['system_code']),
-      parentId: serializer.fromJson<String?>(json['parent_id']),
-      nameAr: serializer.fromJson<String>(json['name_ar']),
-      nameEn: serializer.fromJson<String>(json['name_en']),
-      icon: serializer.fromJson<String>(json['icon']),
-      color: serializer.fromJson<String>(json['color']),
-      bucket: serializer.fromJson<String>(json['bucket']),
-      isCustom: serializer.fromJson<int>(json['is_custom']),
-      isArchived: serializer.fromJson<int>(json['is_archived']),
-      sort: serializer.fromJson<int>(json['sort']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'system_code': serializer.toJson<String?>(systemCode),
-      'parent_id': serializer.toJson<String?>(parentId),
-      'name_ar': serializer.toJson<String>(nameAr),
-      'name_en': serializer.toJson<String>(nameEn),
-      'icon': serializer.toJson<String>(icon),
-      'color': serializer.toJson<String>(color),
-      'bucket': serializer.toJson<String>(bucket),
-      'is_custom': serializer.toJson<int>(isCustom),
-      'is_archived': serializer.toJson<int>(isArchived),
-      'sort': serializer.toJson<int>(sort),
-    };
-  }
-
-  CategoryRow copyWith({
-    String? id,
-    Value<String?> systemCode = const Value.absent(),
-    Value<String?> parentId = const Value.absent(),
-    String? nameAr,
-    String? nameEn,
-    String? icon,
-    String? color,
-    String? bucket,
-    int? isCustom,
-    int? isArchived,
-    int? sort,
-  }) => CategoryRow(
-    id: id ?? this.id,
-    systemCode: systemCode.present ? systemCode.value : this.systemCode,
-    parentId: parentId.present ? parentId.value : this.parentId,
-    nameAr: nameAr ?? this.nameAr,
-    nameEn: nameEn ?? this.nameEn,
-    icon: icon ?? this.icon,
-    color: color ?? this.color,
-    bucket: bucket ?? this.bucket,
-    isCustom: isCustom ?? this.isCustom,
-    isArchived: isArchived ?? this.isArchived,
-    sort: sort ?? this.sort,
-  );
-  CategoryRow copyWithCompanion(CategoriesCompanion data) {
-    return CategoryRow(
-      id: data.id.present ? data.id.value : this.id,
-      systemCode: data.systemCode.present
-          ? data.systemCode.value
-          : this.systemCode,
-      parentId: data.parentId.present ? data.parentId.value : this.parentId,
-      nameAr: data.nameAr.present ? data.nameAr.value : this.nameAr,
-      nameEn: data.nameEn.present ? data.nameEn.value : this.nameEn,
-      icon: data.icon.present ? data.icon.value : this.icon,
-      color: data.color.present ? data.color.value : this.color,
-      bucket: data.bucket.present ? data.bucket.value : this.bucket,
-      isCustom: data.isCustom.present ? data.isCustom.value : this.isCustom,
-      isArchived: data.isArchived.present
-          ? data.isArchived.value
-          : this.isArchived,
-      sort: data.sort.present ? data.sort.value : this.sort,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CategoryRow(')
-          ..write('id: $id, ')
-          ..write('systemCode: $systemCode, ')
-          ..write('parentId: $parentId, ')
-          ..write('nameAr: $nameAr, ')
-          ..write('nameEn: $nameEn, ')
-          ..write('icon: $icon, ')
-          ..write('color: $color, ')
-          ..write('bucket: $bucket, ')
-          ..write('isCustom: $isCustom, ')
-          ..write('isArchived: $isArchived, ')
-          ..write('sort: $sort')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    systemCode,
-    parentId,
-    nameAr,
-    nameEn,
-    icon,
-    color,
-    bucket,
-    isCustom,
-    isArchived,
-    sort,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is CategoryRow &&
-          other.id == this.id &&
-          other.systemCode == this.systemCode &&
-          other.parentId == this.parentId &&
-          other.nameAr == this.nameAr &&
-          other.nameEn == this.nameEn &&
-          other.icon == this.icon &&
-          other.color == this.color &&
-          other.bucket == this.bucket &&
-          other.isCustom == this.isCustom &&
-          other.isArchived == this.isArchived &&
-          other.sort == this.sort);
-}
-
-class CategoriesCompanion extends UpdateCompanion<CategoryRow> {
-  final Value<String> id;
-  final Value<String?> systemCode;
-  final Value<String?> parentId;
-  final Value<String> nameAr;
-  final Value<String> nameEn;
-  final Value<String> icon;
-  final Value<String> color;
-  final Value<String> bucket;
-  final Value<int> isCustom;
-  final Value<int> isArchived;
-  final Value<int> sort;
-  final Value<int> rowid;
-  const CategoriesCompanion({
-    this.id = const Value.absent(),
-    this.systemCode = const Value.absent(),
-    this.parentId = const Value.absent(),
-    this.nameAr = const Value.absent(),
-    this.nameEn = const Value.absent(),
-    this.icon = const Value.absent(),
-    this.color = const Value.absent(),
-    this.bucket = const Value.absent(),
-    this.isCustom = const Value.absent(),
-    this.isArchived = const Value.absent(),
-    this.sort = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  CategoriesCompanion.insert({
-    required String id,
-    this.systemCode = const Value.absent(),
-    this.parentId = const Value.absent(),
-    required String nameAr,
-    required String nameEn,
-    required String icon,
-    required String color,
-    required String bucket,
-    this.isCustom = const Value.absent(),
-    this.isArchived = const Value.absent(),
-    required int sort,
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       nameAr = Value(nameAr),
-       nameEn = Value(nameEn),
-       icon = Value(icon),
-       color = Value(color),
-       bucket = Value(bucket),
-       sort = Value(sort);
-  static Insertable<CategoryRow> custom({
-    Expression<String>? id,
-    Expression<String>? systemCode,
-    Expression<String>? parentId,
-    Expression<String>? nameAr,
-    Expression<String>? nameEn,
-    Expression<String>? icon,
-    Expression<String>? color,
-    Expression<String>? bucket,
-    Expression<int>? isCustom,
-    Expression<int>? isArchived,
-    Expression<int>? sort,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (systemCode != null) 'system_code': systemCode,
-      if (parentId != null) 'parent_id': parentId,
-      if (nameAr != null) 'name_ar': nameAr,
-      if (nameEn != null) 'name_en': nameEn,
-      if (icon != null) 'icon': icon,
-      if (color != null) 'color': color,
-      if (bucket != null) 'bucket': bucket,
-      if (isCustom != null) 'is_custom': isCustom,
-      if (isArchived != null) 'is_archived': isArchived,
-      if (sort != null) 'sort': sort,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  CategoriesCompanion copyWith({
-    Value<String>? id,
-    Value<String?>? systemCode,
-    Value<String?>? parentId,
-    Value<String>? nameAr,
-    Value<String>? nameEn,
-    Value<String>? icon,
-    Value<String>? color,
-    Value<String>? bucket,
-    Value<int>? isCustom,
-    Value<int>? isArchived,
-    Value<int>? sort,
-    Value<int>? rowid,
-  }) {
-    return CategoriesCompanion(
-      id: id ?? this.id,
-      systemCode: systemCode ?? this.systemCode,
-      parentId: parentId ?? this.parentId,
-      nameAr: nameAr ?? this.nameAr,
-      nameEn: nameEn ?? this.nameEn,
-      icon: icon ?? this.icon,
-      color: color ?? this.color,
-      bucket: bucket ?? this.bucket,
-      isCustom: isCustom ?? this.isCustom,
-      isArchived: isArchived ?? this.isArchived,
-      sort: sort ?? this.sort,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (systemCode.present) {
-      map['system_code'] = Variable<String>(systemCode.value);
-    }
-    if (parentId.present) {
-      map['parent_id'] = Variable<String>(parentId.value);
-    }
-    if (nameAr.present) {
-      map['name_ar'] = Variable<String>(nameAr.value);
-    }
-    if (nameEn.present) {
-      map['name_en'] = Variable<String>(nameEn.value);
-    }
-    if (icon.present) {
-      map['icon'] = Variable<String>(icon.value);
-    }
-    if (color.present) {
-      map['color'] = Variable<String>(color.value);
-    }
-    if (bucket.present) {
-      map['bucket'] = Variable<String>(bucket.value);
-    }
-    if (isCustom.present) {
-      map['is_custom'] = Variable<int>(isCustom.value);
-    }
-    if (isArchived.present) {
-      map['is_archived'] = Variable<int>(isArchived.value);
-    }
-    if (sort.present) {
-      map['sort'] = Variable<int>(sort.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('CategoriesCompanion(')
-          ..write('id: $id, ')
-          ..write('systemCode: $systemCode, ')
-          ..write('parentId: $parentId, ')
-          ..write('nameAr: $nameAr, ')
-          ..write('nameEn: $nameEn, ')
-          ..write('icon: $icon, ')
-          ..write('color: $color, ')
-          ..write('bucket: $bucket, ')
-          ..write('isCustom: $isCustom, ')
-          ..write('isArchived: $isArchived, ')
-          ..write('sort: $sort, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class TransferPairs extends Table
     with TableInfo<TransferPairs, TransferPairRow> {
   @override
@@ -6621,7 +7563,7 @@ class Transactions extends Table with TableInfo<Transactions, TransactionRow> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL CHECK (category_source IN (\'user\', \'user_rule\', \'catalog\', \'heuristic\', \'none\'))',
+    $customConstraints: 'NOT NULL CHECK (category_source IN (\'user\', \'user_rule\', \'catalog\', \'heuristic\', \'none\', \'ai\'))',
   );
   static const VerificationMeta _isUserVerifiedMeta = const VerificationMeta(
     'isUserVerified',
@@ -7223,6 +8165,8 @@ class TransactionRow extends DataClass implements Insertable<TransactionRow> {
   final String? counterpartyKind;
   final String? counterpartyValue;
   final String? categoryId;
+
+  /// v7 (T-356): 'ai' = an LLM merchant suggestion (D-94).
   final String categorySource;
   final int isUserVerified;
   final String? transferPairId;
@@ -9231,7 +10175,7 @@ class Outbox extends Table with TableInfo<Outbox, OutboxRow> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    $customConstraints: 'NOT NULL CHECK (kind IN (\'contribution\', \'bank_request\', \'purchase_verify\'))',
+    $customConstraints: 'NOT NULL CHECK (kind IN (\'contribution\', \'bank_request\', \'purchase_verify\', \'llm_cat_confirmation\', \'llm_cat_correction\'))',
   );
   static const VerificationMeta _payloadMeta = const VerificationMeta(
     'payload',
@@ -18137,6 +19081,10 @@ class DbMetaCompanion extends UpdateCompanion<DbMetaRow> {
 abstract class _$AppSchema extends GeneratedDatabase {
   _$AppSchema(QueryExecutor e) : super(e);
   $AppSchemaManager get managers => $AppSchemaManager(this);
+  late final Categories categories = Categories(this);
+  late final AiMerchantSuggestions aiMerchantSuggestions =
+      AiMerchantSuggestions(this);
+  late final LlmCatQueue llmCatQueue = LlmCatQueue(this);
   late final Assets assets = Assets(this);
   late final Index ixAssetsLive = Index(
     'ix_assets_live',
@@ -18167,7 +19115,6 @@ abstract class _$AppSchema extends GeneratedDatabase {
   );
   late final RawMessages rawMessages = RawMessages(this);
   late final Accounts accounts = Accounts(this);
-  late final Categories categories = Categories(this);
   late final TransferPairs transferPairs = TransferPairs(this);
   late final Transactions transactions = Transactions(this);
   late final ReviewItems reviewItems = ReviewItems(this);
@@ -18360,6 +19307,9 @@ abstract class _$AppSchema extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    categories,
+    aiMerchantSuggestions,
+    llmCatQueue,
     assets,
     ixAssetsLive,
     priceQuotes,
@@ -18375,7 +19325,6 @@ abstract class _$AppSchema extends GeneratedDatabase {
     ixTemplatesSender,
     rawMessages,
     accounts,
-    categories,
     transferPairs,
     transactions,
     reviewItems,
@@ -18657,6 +19606,1413 @@ abstract class _$AppSchema extends GeneratedDatabase {
   ]);
 }
 
+typedef $CategoriesCreateCompanionBuilder = CategoriesCompanion Function({
+  required String id,
+  Value<String?> systemCode,
+  Value<String?> parentId,
+  required String nameAr,
+  required String nameEn,
+  required String icon,
+  required String color,
+  required String bucket,
+  Value<int> isCustom,
+  Value<int> isArchived,
+  required int sort,
+  Value<int> rowid,
+});
+typedef $CategoriesUpdateCompanionBuilder = CategoriesCompanion Function({
+  Value<String> id,
+  Value<String?> systemCode,
+  Value<String?> parentId,
+  Value<String> nameAr,
+  Value<String> nameEn,
+  Value<String> icon,
+  Value<String> color,
+  Value<String> bucket,
+  Value<int> isCustom,
+  Value<int> isArchived,
+  Value<int> sort,
+  Value<int> rowid,
+});
+
+final class $CategoriesReferences
+    extends BaseReferences<_$AppSchema, Categories, CategoryRow> {
+  $CategoriesReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static Categories _parentIdTable(_$AppSchema db) =>
+      db.categories.createAlias('categories__parent_id__categories__id');
+
+  $CategoriesProcessedTableManager? get parentId {
+    final $_column = $_itemColumn<String>('parent_id');
+    if ($_column == null) return null;
+    final manager = $CategoriesTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    AiMerchantSuggestions,
+    List<AiMerchantSuggestionRow>
+  >
+  _aiMerchantSuggestionsRefsTable(_$AppSchema db) =>
+      MultiTypedResultKey.fromTable(
+        db.aiMerchantSuggestions,
+        aliasName: 'categories__id__ai_merchant_suggestions__category_id',
+      );
+
+  $AiMerchantSuggestionsProcessedTableManager get aiMerchantSuggestionsRefs {
+    final manager = $AiMerchantSuggestionsTableManager(
+      $_db,
+      $_db.aiMerchantSuggestions,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _aiMerchantSuggestionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<Transactions, List<TransactionRow>>
+  _transactionsRefsTable(_$AppSchema db) => MultiTypedResultKey.fromTable(
+    db.transactions,
+    aliasName: 'categories__id__transactions__category_id',
+  );
+
+  $TransactionsProcessedTableManager get transactionsRefs {
+    final manager = $TransactionsTableManager(
+      $_db,
+      $_db.transactions,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<MerchantRules, List<MerchantRuleRow>>
+  _merchantRulesRefsTable(_$AppSchema db) => MultiTypedResultKey.fromTable(
+    db.merchantRules,
+    aliasName: 'categories__id__merchant_rules__category_id',
+  );
+
+  $MerchantRulesProcessedTableManager get merchantRulesRefs {
+    final manager = $MerchantRulesTableManager(
+      $_db,
+      $_db.merchantRules,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_merchantRulesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<Budgets, List<BudgetRow>> _budgetsRefsTable(
+    _$AppSchema db,
+  ) => MultiTypedResultKey.fromTable(
+    db.budgets,
+    aliasName: 'categories__id__budgets__category_id',
+  );
+
+  $BudgetsProcessedTableManager get budgetsRefs {
+    final manager = $BudgetsTableManager(
+      $_db,
+      $_db.budgets,
+    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_budgetsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $CategoriesFilterComposer extends Composer<_$AppSchema, Categories> {
+  $CategoriesFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get systemCode => $composableBuilder(
+    column: $table.systemCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameAr => $composableBuilder(
+    column: $table.nameAr,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nameEn => $composableBuilder(
+    column: $table.nameEn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bucket => $composableBuilder(
+    column: $table.bucket,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get isCustom => $composableBuilder(
+    column: $table.isCustom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sort => $composableBuilder(
+    column: $table.sort,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $CategoriesFilterComposer get parentId {
+    final $CategoriesFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $CategoriesFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> aiMerchantSuggestionsRefs(
+    Expression<bool> Function($AiMerchantSuggestionsFilterComposer f) f,
+  ) {
+    final $AiMerchantSuggestionsFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.aiMerchantSuggestions,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $AiMerchantSuggestionsFilterComposer(
+            $db: $db,
+            $table: $db.aiMerchantSuggestions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> transactionsRefs(
+    Expression<bool> Function($TransactionsFilterComposer f) f,
+  ) {
+    final $TransactionsFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $TransactionsFilterComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> merchantRulesRefs(
+    Expression<bool> Function($MerchantRulesFilterComposer f) f,
+  ) {
+    final $MerchantRulesFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.merchantRules,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $MerchantRulesFilterComposer(
+            $db: $db,
+            $table: $db.merchantRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> budgetsRefs(
+    Expression<bool> Function($BudgetsFilterComposer f) f,
+  ) {
+    final $BudgetsFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BudgetsFilterComposer(
+            $db: $db,
+            $table: $db.budgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $CategoriesOrderingComposer extends Composer<_$AppSchema, Categories> {
+  $CategoriesOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get systemCode => $composableBuilder(
+    column: $table.systemCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nameAr => $composableBuilder(
+    column: $table.nameAr,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nameEn => $composableBuilder(
+    column: $table.nameEn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bucket => $composableBuilder(
+    column: $table.bucket,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get isCustom => $composableBuilder(
+    column: $table.isCustom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sort => $composableBuilder(
+    column: $table.sort,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $CategoriesOrderingComposer get parentId {
+    final $CategoriesOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $CategoriesOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $CategoriesAnnotationComposer extends Composer<_$AppSchema, Categories> {
+  $CategoriesAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get systemCode => $composableBuilder(
+    column: $table.systemCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get nameAr =>
+      $composableBuilder(column: $table.nameAr, builder: (column) => column);
+
+  GeneratedColumn<String> get nameEn =>
+      $composableBuilder(column: $table.nameEn, builder: (column) => column);
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<String> get bucket =>
+      $composableBuilder(column: $table.bucket, builder: (column) => column);
+
+  GeneratedColumn<int> get isCustom =>
+      $composableBuilder(column: $table.isCustom, builder: (column) => column);
+
+  GeneratedColumn<int> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sort =>
+      $composableBuilder(column: $table.sort, builder: (column) => column);
+
+  $CategoriesAnnotationComposer get parentId {
+    final $CategoriesAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.parentId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $CategoriesAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> aiMerchantSuggestionsRefs<T extends Object>(
+    Expression<T> Function($AiMerchantSuggestionsAnnotationComposer a) f,
+  ) {
+    final $AiMerchantSuggestionsAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.aiMerchantSuggestions,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $AiMerchantSuggestionsAnnotationComposer(
+            $db: $db,
+            $table: $db.aiMerchantSuggestions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> transactionsRefs<T extends Object>(
+    Expression<T> Function($TransactionsAnnotationComposer a) f,
+  ) {
+    final $TransactionsAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $TransactionsAnnotationComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> merchantRulesRefs<T extends Object>(
+    Expression<T> Function($MerchantRulesAnnotationComposer a) f,
+  ) {
+    final $MerchantRulesAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.merchantRules,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $MerchantRulesAnnotationComposer(
+            $db: $db,
+            $table: $db.merchantRules,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> budgetsRefs<T extends Object>(
+    Expression<T> Function($BudgetsAnnotationComposer a) f,
+  ) {
+    final $BudgetsAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.budgets,
+      getReferencedColumn: (t) => t.categoryId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $BudgetsAnnotationComposer(
+            $db: $db,
+            $table: $db.budgets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $CategoriesTableManager
+    extends
+        RootTableManager<
+          _$AppSchema,
+          Categories,
+          CategoryRow,
+          $CategoriesFilterComposer,
+          $CategoriesOrderingComposer,
+          $CategoriesAnnotationComposer,
+          $CategoriesCreateCompanionBuilder,
+          $CategoriesUpdateCompanionBuilder,
+          (CategoryRow, $CategoriesReferences),
+          CategoryRow,
+          PrefetchHooks Function({
+            bool parentId,
+            bool aiMerchantSuggestionsRefs,
+            bool transactionsRefs,
+            bool merchantRulesRefs,
+            bool budgetsRefs,
+          })
+        > {
+  $CategoriesTableManager(_$AppSchema db, Categories table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $CategoriesFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $CategoriesOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $CategoriesAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> systemCode = const Value.absent(),
+                Value<String?> parentId = const Value.absent(),
+                Value<String> nameAr = const Value.absent(),
+                Value<String> nameEn = const Value.absent(),
+                Value<String> icon = const Value.absent(),
+                Value<String> color = const Value.absent(),
+                Value<String> bucket = const Value.absent(),
+                Value<int> isCustom = const Value.absent(),
+                Value<int> isArchived = const Value.absent(),
+                Value<int> sort = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CategoriesCompanion(
+                id: id,
+                systemCode: systemCode,
+                parentId: parentId,
+                nameAr: nameAr,
+                nameEn: nameEn,
+                icon: icon,
+                color: color,
+                bucket: bucket,
+                isCustom: isCustom,
+                isArchived: isArchived,
+                sort: sort,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> systemCode = const Value.absent(),
+                Value<String?> parentId = const Value.absent(),
+                required String nameAr,
+                required String nameEn,
+                required String icon,
+                required String color,
+                required String bucket,
+                Value<int> isCustom = const Value.absent(),
+                Value<int> isArchived = const Value.absent(),
+                required int sort,
+                Value<int> rowid = const Value.absent(),
+              }) => CategoriesCompanion.insert(
+                id: id,
+                systemCode: systemCode,
+                parentId: parentId,
+                nameAr: nameAr,
+                nameEn: nameEn,
+                icon: icon,
+                color: color,
+                bucket: bucket,
+                isCustom: isCustom,
+                isArchived: isArchived,
+                sort: sort,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<Categories, CategoryRow>(table),
+                  $CategoriesReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({
+                parentId = false,
+                aiMerchantSuggestionsRefs = false,
+                transactionsRefs = false,
+                merchantRulesRefs = false,
+                budgetsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (aiMerchantSuggestionsRefs) db.aiMerchantSuggestions,
+                    if (transactionsRefs) db.transactions,
+                    if (merchantRulesRefs) db.merchantRules,
+                    if (budgetsRefs) db.budgets,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (parentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.parentId,
+                            referencedTable: $CategoriesReferences
+                                ._parentIdTable(db),
+                            referencedColumn: $CategoriesReferences
+                                ._parentIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (aiMerchantSuggestionsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          CategoryRow,
+                          Categories,
+                          AiMerchantSuggestionRow,
+                          AiMerchantSuggestions
+                        >(
+                          currentTable: table,
+                          referencedTable: $CategoriesReferences
+                              ._aiMerchantSuggestionsRefsTable(db),
+                          managerFromTypedResult: (p0) => $CategoriesReferences(
+                            db,
+                            table,
+                            p0,
+                          ).aiMerchantSuggestionsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'category_id',
+                          typedResults: items,
+                        ),
+                      if (transactionsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          CategoryRow,
+                          Categories,
+                          TransactionRow,
+                          Transactions
+                        >(
+                          currentTable: table,
+                          referencedTable: $CategoriesReferences
+                              ._transactionsRefsTable(db),
+                          managerFromTypedResult: (p0) => $CategoriesReferences(
+                            db,
+                            table,
+                            p0,
+                          ).transactionsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'category_id',
+                          typedResults: items,
+                        ),
+                      if (merchantRulesRefs)
+                        await $_getPrefetchedDataByColumns<
+                          CategoryRow,
+                          Categories,
+                          MerchantRuleRow,
+                          MerchantRules
+                        >(
+                          currentTable: table,
+                          referencedTable: $CategoriesReferences
+                              ._merchantRulesRefsTable(db),
+                          managerFromTypedResult: (p0) => $CategoriesReferences(
+                            db,
+                            table,
+                            p0,
+                          ).merchantRulesRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'category_id',
+                          typedResults: items,
+                        ),
+                      if (budgetsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          CategoryRow,
+                          Categories,
+                          BudgetRow,
+                          Budgets
+                        >(
+                          currentTable: table,
+                          referencedTable: $CategoriesReferences
+                              ._budgetsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $CategoriesReferences(db, table, p0).budgetsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'category_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $CategoriesProcessedTableManager =
+    ProcessedTableManager<
+      _$AppSchema,
+      Categories,
+      CategoryRow,
+      $CategoriesFilterComposer,
+      $CategoriesOrderingComposer,
+      $CategoriesAnnotationComposer,
+      $CategoriesCreateCompanionBuilder,
+      $CategoriesUpdateCompanionBuilder,
+      (CategoryRow, $CategoriesReferences),
+      CategoryRow,
+      PrefetchHooks Function({
+        bool parentId,
+        bool aiMerchantSuggestionsRefs,
+        bool transactionsRefs,
+        bool merchantRulesRefs,
+        bool budgetsRefs,
+      })
+    >;
+typedef $AiMerchantSuggestionsCreateCompanionBuilder =
+    AiMerchantSuggestionsCompanion Function({
+      required String merchantNorm,
+      Value<String?> categoryId,
+      Value<int?> confidence,
+      Value<String?> source,
+      required String state,
+      required int createdAt,
+      Value<int?> decidedAt,
+      Value<int> rowid,
+    });
+typedef $AiMerchantSuggestionsUpdateCompanionBuilder =
+    AiMerchantSuggestionsCompanion Function({
+      Value<String> merchantNorm,
+      Value<String?> categoryId,
+      Value<int?> confidence,
+      Value<String?> source,
+      Value<String> state,
+      Value<int> createdAt,
+      Value<int?> decidedAt,
+      Value<int> rowid,
+    });
+
+final class $AiMerchantSuggestionsReferences
+    extends
+        BaseReferences<
+          _$AppSchema,
+          AiMerchantSuggestions,
+          AiMerchantSuggestionRow
+        > {
+  $AiMerchantSuggestionsReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static Categories _categoryIdTable(_$AppSchema db) => db.categories
+      .createAlias('ai_merchant_suggestions__category_id__categories__id');
+
+  $CategoriesProcessedTableManager? get categoryId {
+    final $_column = $_itemColumn<String>('category_id');
+    if ($_column == null) return null;
+    final manager = $CategoriesTableManager(
+      $_db,
+      $_db.categories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $AiMerchantSuggestionsFilterComposer
+    extends Composer<_$AppSchema, AiMerchantSuggestions> {
+  $AiMerchantSuggestionsFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get merchantNorm => $composableBuilder(
+    column: $table.merchantNorm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $CategoriesFilterComposer get categoryId {
+    final $CategoriesFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $CategoriesFilterComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $AiMerchantSuggestionsOrderingComposer
+    extends Composer<_$AppSchema, AiMerchantSuggestions> {
+  $AiMerchantSuggestionsOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get merchantNorm => $composableBuilder(
+    column: $table.merchantNorm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get decidedAt => $composableBuilder(
+    column: $table.decidedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $CategoriesOrderingComposer get categoryId {
+    final $CategoriesOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $CategoriesOrderingComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $AiMerchantSuggestionsAnnotationComposer
+    extends Composer<_$AppSchema, AiMerchantSuggestions> {
+  $AiMerchantSuggestionsAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get merchantNorm => $composableBuilder(
+    column: $table.merchantNorm,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get decidedAt =>
+      $composableBuilder(column: $table.decidedAt, builder: (column) => column);
+
+  $CategoriesAnnotationComposer get categoryId {
+    final $CategoriesAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.categoryId,
+      referencedTable: $db.categories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $CategoriesAnnotationComposer(
+            $db: $db,
+            $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $AiMerchantSuggestionsTableManager
+    extends
+        RootTableManager<
+          _$AppSchema,
+          AiMerchantSuggestions,
+          AiMerchantSuggestionRow,
+          $AiMerchantSuggestionsFilterComposer,
+          $AiMerchantSuggestionsOrderingComposer,
+          $AiMerchantSuggestionsAnnotationComposer,
+          $AiMerchantSuggestionsCreateCompanionBuilder,
+          $AiMerchantSuggestionsUpdateCompanionBuilder,
+          (AiMerchantSuggestionRow, $AiMerchantSuggestionsReferences),
+          AiMerchantSuggestionRow,
+          PrefetchHooks Function({bool categoryId})
+        > {
+  $AiMerchantSuggestionsTableManager(
+    _$AppSchema db,
+    AiMerchantSuggestions table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $AiMerchantSuggestionsFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $AiMerchantSuggestionsOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $AiMerchantSuggestionsAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> merchantNorm = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<int?> confidence = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<int> createdAt = const Value.absent(),
+                Value<int?> decidedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AiMerchantSuggestionsCompanion(
+                merchantNorm: merchantNorm,
+                categoryId: categoryId,
+                confidence: confidence,
+                source: source,
+                state: state,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String merchantNorm,
+                Value<String?> categoryId = const Value.absent(),
+                Value<int?> confidence = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                required String state,
+                required int createdAt,
+                Value<int?> decidedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AiMerchantSuggestionsCompanion.insert(
+                merchantNorm: merchantNorm,
+                categoryId: categoryId,
+                confidence: confidence,
+                source: source,
+                state: state,
+                createdAt: createdAt,
+                decidedAt: decidedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<AiMerchantSuggestions, AiMerchantSuggestionRow>(
+                    table,
+                  ),
+                  $AiMerchantSuggestionsReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({categoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (categoryId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.categoryId,
+                        referencedTable: $AiMerchantSuggestionsReferences
+                            ._categoryIdTable(db),
+                        referencedColumn: $AiMerchantSuggestionsReferences
+                            ._categoryIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $AiMerchantSuggestionsProcessedTableManager =
+    ProcessedTableManager<
+      _$AppSchema,
+      AiMerchantSuggestions,
+      AiMerchantSuggestionRow,
+      $AiMerchantSuggestionsFilterComposer,
+      $AiMerchantSuggestionsOrderingComposer,
+      $AiMerchantSuggestionsAnnotationComposer,
+      $AiMerchantSuggestionsCreateCompanionBuilder,
+      $AiMerchantSuggestionsUpdateCompanionBuilder,
+      (AiMerchantSuggestionRow, $AiMerchantSuggestionsReferences),
+      AiMerchantSuggestionRow,
+      PrefetchHooks Function({bool categoryId})
+    >;
+typedef $LlmCatQueueCreateCompanionBuilder = LlmCatQueueCompanion Function({
+  required String merchantNorm,
+  required int txnCount,
+  required int firstQueuedAt,
+  required int lastSeenAt,
+  Value<int> attempts,
+  Value<int?> nextAttemptAt,
+  Value<int> rowid,
+});
+typedef $LlmCatQueueUpdateCompanionBuilder = LlmCatQueueCompanion Function({
+  Value<String> merchantNorm,
+  Value<int> txnCount,
+  Value<int> firstQueuedAt,
+  Value<int> lastSeenAt,
+  Value<int> attempts,
+  Value<int?> nextAttemptAt,
+  Value<int> rowid,
+});
+
+class $LlmCatQueueFilterComposer extends Composer<_$AppSchema, LlmCatQueue> {
+  $LlmCatQueueFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get merchantNorm => $composableBuilder(
+    column: $table.merchantNorm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get txnCount => $composableBuilder(
+    column: $table.txnCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get firstQueuedAt => $composableBuilder(
+    column: $table.firstQueuedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $LlmCatQueueOrderingComposer extends Composer<_$AppSchema, LlmCatQueue> {
+  $LlmCatQueueOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get merchantNorm => $composableBuilder(
+    column: $table.merchantNorm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get txnCount => $composableBuilder(
+    column: $table.txnCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get firstQueuedAt => $composableBuilder(
+    column: $table.firstQueuedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $LlmCatQueueAnnotationComposer
+    extends Composer<_$AppSchema, LlmCatQueue> {
+  $LlmCatQueueAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get merchantNorm => $composableBuilder(
+    column: $table.merchantNorm,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get txnCount =>
+      $composableBuilder(column: $table.txnCount, builder: (column) => column);
+
+  GeneratedColumn<int> get firstQueuedAt => $composableBuilder(
+    column: $table.firstQueuedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastSeenAt => $composableBuilder(
+    column: $table.lastSeenAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<int> get nextAttemptAt => $composableBuilder(
+    column: $table.nextAttemptAt,
+    builder: (column) => column,
+  );
+}
+
+class $LlmCatQueueTableManager
+    extends
+        RootTableManager<
+          _$AppSchema,
+          LlmCatQueue,
+          LlmCatQueueRow,
+          $LlmCatQueueFilterComposer,
+          $LlmCatQueueOrderingComposer,
+          $LlmCatQueueAnnotationComposer,
+          $LlmCatQueueCreateCompanionBuilder,
+          $LlmCatQueueUpdateCompanionBuilder,
+          (
+            LlmCatQueueRow,
+            BaseReferences<_$AppSchema, LlmCatQueue, LlmCatQueueRow>,
+          ),
+          LlmCatQueueRow,
+          PrefetchHooks Function()
+        > {
+  $LlmCatQueueTableManager(_$AppSchema db, LlmCatQueue table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $LlmCatQueueFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $LlmCatQueueOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $LlmCatQueueAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> merchantNorm = const Value.absent(),
+                Value<int> txnCount = const Value.absent(),
+                Value<int> firstQueuedAt = const Value.absent(),
+                Value<int> lastSeenAt = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
+                Value<int?> nextAttemptAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LlmCatQueueCompanion(
+                merchantNorm: merchantNorm,
+                txnCount: txnCount,
+                firstQueuedAt: firstQueuedAt,
+                lastSeenAt: lastSeenAt,
+                attempts: attempts,
+                nextAttemptAt: nextAttemptAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String merchantNorm,
+                required int txnCount,
+                required int firstQueuedAt,
+                required int lastSeenAt,
+                Value<int> attempts = const Value.absent(),
+                Value<int?> nextAttemptAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LlmCatQueueCompanion.insert(
+                merchantNorm: merchantNorm,
+                txnCount: txnCount,
+                firstQueuedAt: firstQueuedAt,
+                lastSeenAt: lastSeenAt,
+                attempts: attempts,
+                nextAttemptAt: nextAttemptAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<LlmCatQueue, LlmCatQueueRow>(table),
+                  BaseReferences<_$AppSchema, LlmCatQueue, LlmCatQueueRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $LlmCatQueueProcessedTableManager =
+    ProcessedTableManager<
+      _$AppSchema,
+      LlmCatQueue,
+      LlmCatQueueRow,
+      $LlmCatQueueFilterComposer,
+      $LlmCatQueueOrderingComposer,
+      $LlmCatQueueAnnotationComposer,
+      $LlmCatQueueCreateCompanionBuilder,
+      $LlmCatQueueUpdateCompanionBuilder,
+      (
+        LlmCatQueueRow,
+        BaseReferences<_$AppSchema, LlmCatQueue, LlmCatQueueRow>,
+      ),
+      LlmCatQueueRow,
+      PrefetchHooks Function()
+    >;
 typedef $AssetsCreateCompanionBuilder = AssetsCompanion Function({
   required String id,
   required String type,
@@ -22225,714 +24581,6 @@ typedef $AccountsProcessedTableManager =
         bool transactionsRefs,
         bool recurringItemsRefs,
         bool accountBalancesRefs,
-      })
-    >;
-typedef $CategoriesCreateCompanionBuilder = CategoriesCompanion Function({
-  required String id,
-  Value<String?> systemCode,
-  Value<String?> parentId,
-  required String nameAr,
-  required String nameEn,
-  required String icon,
-  required String color,
-  required String bucket,
-  Value<int> isCustom,
-  Value<int> isArchived,
-  required int sort,
-  Value<int> rowid,
-});
-typedef $CategoriesUpdateCompanionBuilder = CategoriesCompanion Function({
-  Value<String> id,
-  Value<String?> systemCode,
-  Value<String?> parentId,
-  Value<String> nameAr,
-  Value<String> nameEn,
-  Value<String> icon,
-  Value<String> color,
-  Value<String> bucket,
-  Value<int> isCustom,
-  Value<int> isArchived,
-  Value<int> sort,
-  Value<int> rowid,
-});
-
-final class $CategoriesReferences
-    extends BaseReferences<_$AppSchema, Categories, CategoryRow> {
-  $CategoriesReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static Categories _parentIdTable(_$AppSchema db) =>
-      db.categories.createAlias('categories__parent_id__categories__id');
-
-  $CategoriesProcessedTableManager? get parentId {
-    final $_column = $_itemColumn<String>('parent_id');
-    if ($_column == null) return null;
-    final manager = $CategoriesTableManager(
-      $_db,
-      $_db.categories,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_parentIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-
-  static MultiTypedResultKey<Transactions, List<TransactionRow>>
-  _transactionsRefsTable(_$AppSchema db) => MultiTypedResultKey.fromTable(
-    db.transactions,
-    aliasName: 'categories__id__transactions__category_id',
-  );
-
-  $TransactionsProcessedTableManager get transactionsRefs {
-    final manager = $TransactionsTableManager(
-      $_db,
-      $_db.transactions,
-    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_transactionsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<MerchantRules, List<MerchantRuleRow>>
-  _merchantRulesRefsTable(_$AppSchema db) => MultiTypedResultKey.fromTable(
-    db.merchantRules,
-    aliasName: 'categories__id__merchant_rules__category_id',
-  );
-
-  $MerchantRulesProcessedTableManager get merchantRulesRefs {
-    final manager = $MerchantRulesTableManager(
-      $_db,
-      $_db.merchantRules,
-    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_merchantRulesRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<Budgets, List<BudgetRow>> _budgetsRefsTable(
-    _$AppSchema db,
-  ) => MultiTypedResultKey.fromTable(
-    db.budgets,
-    aliasName: 'categories__id__budgets__category_id',
-  );
-
-  $BudgetsProcessedTableManager get budgetsRefs {
-    final manager = $BudgetsTableManager(
-      $_db,
-      $_db.budgets,
-    ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<String>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_budgetsRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $CategoriesFilterComposer extends Composer<_$AppSchema, Categories> {
-  $CategoriesFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get systemCode => $composableBuilder(
-    column: $table.systemCode,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get nameAr => $composableBuilder(
-    column: $table.nameAr,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get nameEn => $composableBuilder(
-    column: $table.nameEn,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get icon => $composableBuilder(
-    column: $table.icon,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get color => $composableBuilder(
-    column: $table.color,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get bucket => $composableBuilder(
-    column: $table.bucket,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get isCustom => $composableBuilder(
-    column: $table.isCustom,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get isArchived => $composableBuilder(
-    column: $table.isArchived,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get sort => $composableBuilder(
-    column: $table.sort,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  $CategoriesFilterComposer get parentId {
-    final $CategoriesFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.parentId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $CategoriesFilterComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<bool> transactionsRefs(
-    Expression<bool> Function($TransactionsFilterComposer f) f,
-  ) {
-    final $TransactionsFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.transactions,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $TransactionsFilterComposer(
-            $db: $db,
-            $table: $db.transactions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> merchantRulesRefs(
-    Expression<bool> Function($MerchantRulesFilterComposer f) f,
-  ) {
-    final $MerchantRulesFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.merchantRules,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $MerchantRulesFilterComposer(
-            $db: $db,
-            $table: $db.merchantRules,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> budgetsRefs(
-    Expression<bool> Function($BudgetsFilterComposer f) f,
-  ) {
-    final $BudgetsFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.budgets,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $BudgetsFilterComposer(
-            $db: $db,
-            $table: $db.budgets,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $CategoriesOrderingComposer extends Composer<_$AppSchema, Categories> {
-  $CategoriesOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get systemCode => $composableBuilder(
-    column: $table.systemCode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get nameAr => $composableBuilder(
-    column: $table.nameAr,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get nameEn => $composableBuilder(
-    column: $table.nameEn,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get icon => $composableBuilder(
-    column: $table.icon,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get color => $composableBuilder(
-    column: $table.color,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get bucket => $composableBuilder(
-    column: $table.bucket,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get isCustom => $composableBuilder(
-    column: $table.isCustom,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get isArchived => $composableBuilder(
-    column: $table.isArchived,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get sort => $composableBuilder(
-    column: $table.sort,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  $CategoriesOrderingComposer get parentId {
-    final $CategoriesOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.parentId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $CategoriesOrderingComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-}
-
-class $CategoriesAnnotationComposer extends Composer<_$AppSchema, Categories> {
-  $CategoriesAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get systemCode => $composableBuilder(
-    column: $table.systemCode,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get nameAr =>
-      $composableBuilder(column: $table.nameAr, builder: (column) => column);
-
-  GeneratedColumn<String> get nameEn =>
-      $composableBuilder(column: $table.nameEn, builder: (column) => column);
-
-  GeneratedColumn<String> get icon =>
-      $composableBuilder(column: $table.icon, builder: (column) => column);
-
-  GeneratedColumn<String> get color =>
-      $composableBuilder(column: $table.color, builder: (column) => column);
-
-  GeneratedColumn<String> get bucket =>
-      $composableBuilder(column: $table.bucket, builder: (column) => column);
-
-  GeneratedColumn<int> get isCustom =>
-      $composableBuilder(column: $table.isCustom, builder: (column) => column);
-
-  GeneratedColumn<int> get isArchived => $composableBuilder(
-    column: $table.isArchived,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get sort =>
-      $composableBuilder(column: $table.sort, builder: (column) => column);
-
-  $CategoriesAnnotationComposer get parentId {
-    final $CategoriesAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.parentId,
-      referencedTable: $db.categories,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $CategoriesAnnotationComposer(
-            $db: $db,
-            $table: $db.categories,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
-
-  Expression<T> transactionsRefs<T extends Object>(
-    Expression<T> Function($TransactionsAnnotationComposer a) f,
-  ) {
-    final $TransactionsAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.transactions,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $TransactionsAnnotationComposer(
-            $db: $db,
-            $table: $db.transactions,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> merchantRulesRefs<T extends Object>(
-    Expression<T> Function($MerchantRulesAnnotationComposer a) f,
-  ) {
-    final $MerchantRulesAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.merchantRules,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $MerchantRulesAnnotationComposer(
-            $db: $db,
-            $table: $db.merchantRules,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> budgetsRefs<T extends Object>(
-    Expression<T> Function($BudgetsAnnotationComposer a) f,
-  ) {
-    final $BudgetsAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.budgets,
-      getReferencedColumn: (t) => t.categoryId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $BudgetsAnnotationComposer(
-            $db: $db,
-            $table: $db.budgets,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $CategoriesTableManager
-    extends
-        RootTableManager<
-          _$AppSchema,
-          Categories,
-          CategoryRow,
-          $CategoriesFilterComposer,
-          $CategoriesOrderingComposer,
-          $CategoriesAnnotationComposer,
-          $CategoriesCreateCompanionBuilder,
-          $CategoriesUpdateCompanionBuilder,
-          (CategoryRow, $CategoriesReferences),
-          CategoryRow,
-          PrefetchHooks Function({
-            bool parentId,
-            bool transactionsRefs,
-            bool merchantRulesRefs,
-            bool budgetsRefs,
-          })
-        > {
-  $CategoriesTableManager(_$AppSchema db, Categories table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $CategoriesFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $CategoriesOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $CategoriesAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String?> systemCode = const Value.absent(),
-                Value<String?> parentId = const Value.absent(),
-                Value<String> nameAr = const Value.absent(),
-                Value<String> nameEn = const Value.absent(),
-                Value<String> icon = const Value.absent(),
-                Value<String> color = const Value.absent(),
-                Value<String> bucket = const Value.absent(),
-                Value<int> isCustom = const Value.absent(),
-                Value<int> isArchived = const Value.absent(),
-                Value<int> sort = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => CategoriesCompanion(
-                id: id,
-                systemCode: systemCode,
-                parentId: parentId,
-                nameAr: nameAr,
-                nameEn: nameEn,
-                icon: icon,
-                color: color,
-                bucket: bucket,
-                isCustom: isCustom,
-                isArchived: isArchived,
-                sort: sort,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                Value<String?> systemCode = const Value.absent(),
-                Value<String?> parentId = const Value.absent(),
-                required String nameAr,
-                required String nameEn,
-                required String icon,
-                required String color,
-                required String bucket,
-                Value<int> isCustom = const Value.absent(),
-                Value<int> isArchived = const Value.absent(),
-                required int sort,
-                Value<int> rowid = const Value.absent(),
-              }) => CategoriesCompanion.insert(
-                id: id,
-                systemCode: systemCode,
-                parentId: parentId,
-                nameAr: nameAr,
-                nameEn: nameEn,
-                icon: icon,
-                color: color,
-                bucket: bucket,
-                isCustom: isCustom,
-                isArchived: isArchived,
-                sort: sort,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable<Categories, CategoryRow>(table),
-                  $CategoriesReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({
-                parentId = false,
-                transactionsRefs = false,
-                merchantRulesRefs = false,
-                budgetsRefs = false,
-              }) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (transactionsRefs) db.transactions,
-                    if (merchantRulesRefs) db.merchantRules,
-                    if (budgetsRefs) db.budgets,
-                  ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (parentId) {
-                          state = state.withJoin(
-                            currentTable: table,
-                            currentColumn: table.parentId,
-                            referencedTable: $CategoriesReferences
-                                ._parentIdTable(db),
-                            referencedColumn: $CategoriesReferences
-                                ._parentIdTable(db)
-                                .id,
-                          ) as T;
-                        }
-
-                        return state;
-                      },
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (transactionsRefs)
-                        await $_getPrefetchedDataByColumns<
-                          CategoryRow,
-                          Categories,
-                          TransactionRow,
-                          Transactions
-                        >(
-                          currentTable: table,
-                          referencedTable: $CategoriesReferences
-                              ._transactionsRefsTable(db),
-                          managerFromTypedResult: (p0) => $CategoriesReferences(
-                            db,
-                            table,
-                            p0,
-                          ).transactionsRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'category_id',
-                          typedResults: items,
-                        ),
-                      if (merchantRulesRefs)
-                        await $_getPrefetchedDataByColumns<
-                          CategoryRow,
-                          Categories,
-                          MerchantRuleRow,
-                          MerchantRules
-                        >(
-                          currentTable: table,
-                          referencedTable: $CategoriesReferences
-                              ._merchantRulesRefsTable(db),
-                          managerFromTypedResult: (p0) => $CategoriesReferences(
-                            db,
-                            table,
-                            p0,
-                          ).merchantRulesRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'category_id',
-                          typedResults: items,
-                        ),
-                      if (budgetsRefs)
-                        await $_getPrefetchedDataByColumns<
-                          CategoryRow,
-                          Categories,
-                          BudgetRow,
-                          Budgets
-                        >(
-                          currentTable: table,
-                          referencedTable: $CategoriesReferences
-                              ._budgetsRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $CategoriesReferences(db, table, p0).budgetsRefs,
-                          currentColumn: 'id',
-                          referencedColumn: 'category_id',
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $CategoriesProcessedTableManager =
-    ProcessedTableManager<
-      _$AppSchema,
-      Categories,
-      CategoryRow,
-      $CategoriesFilterComposer,
-      $CategoriesOrderingComposer,
-      $CategoriesAnnotationComposer,
-      $CategoriesCreateCompanionBuilder,
-      $CategoriesUpdateCompanionBuilder,
-      (CategoryRow, $CategoriesReferences),
-      CategoryRow,
-      PrefetchHooks Function({
-        bool parentId,
-        bool transactionsRefs,
-        bool merchantRulesRefs,
-        bool budgetsRefs,
       })
     >;
 typedef $TransferPairsCreateCompanionBuilder = TransferPairsCompanion Function({
@@ -32033,6 +33681,12 @@ typedef $$DbMetaTableProcessedTableManager =
 class $AppSchemaManager {
   final _$AppSchema _db;
   $AppSchemaManager(this._db);
+  $CategoriesTableManager get categories =>
+      $CategoriesTableManager(_db, _db.categories);
+  $AiMerchantSuggestionsTableManager get aiMerchantSuggestions =>
+      $AiMerchantSuggestionsTableManager(_db, _db.aiMerchantSuggestions);
+  $LlmCatQueueTableManager get llmCatQueue =>
+      $LlmCatQueueTableManager(_db, _db.llmCatQueue);
   $AssetsTableManager get assets => $AssetsTableManager(_db, _db.assets);
   $PriceQuotesTableManager get priceQuotes =>
       $PriceQuotesTableManager(_db, _db.priceQuotes);
@@ -32051,8 +33705,6 @@ class $AppSchemaManager {
       $RawMessagesTableManager(_db, _db.rawMessages);
   $AccountsTableManager get accounts =>
       $AccountsTableManager(_db, _db.accounts);
-  $CategoriesTableManager get categories =>
-      $CategoriesTableManager(_db, _db.categories);
   $TransferPairsTableManager get transferPairs =>
       $TransferPairsTableManager(_db, _db.transferPairs);
   $TransactionsTableManager get transactions =>

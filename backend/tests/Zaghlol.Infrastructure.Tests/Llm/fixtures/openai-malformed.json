@@ -1,0 +1,9 @@
+{
+  "id": "resp_synthetic_004",
+  "object": "response",
+  "status": "completed",
+  "output": [
+    { "type": "message", "role": "assistant", "content": [ { "type": "output_text", "text": "not json at all" } ] }
+  ],
+  "usage": { "input_tokens": 2200, "input_tokens_details": { "cached_tokens": 0 }, "output_tokens": 4 }
+}

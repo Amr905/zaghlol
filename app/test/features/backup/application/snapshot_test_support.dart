@@ -172,6 +172,26 @@ Future<void> populateSource(AppDatabase db) async {
     "INSERT INTO db_meta (key, value) VALUES ('device', '$deviceASentinel')",
     "INSERT INTO diag_log (at, level, code) VALUES ($t0, 'info', "
         "'${deviceASentinel}_X')",
+    // T-356: an AI-categorised transaction, its unconfirmed suggestion, a
+    // decided one, a queued merchant (all backed up) and an auto-category
+    // feedback row (device-only, like every outbox row).
+    'INSERT INTO transactions (id, account_id, source, direction, '
+        'amount_minor, currency, occurred_at, occurred_tz_offset_min, '
+        'merchant_raw, merchant_norm, category_id, category_source, '
+        "created_at, updated_at) VALUES ('ai1', 'acc1', 'sms', 'expense', "
+        "18500, 'EGP', $t0, 120, 'Zawya Coffee', 'zawya coffee', 'sys:food', "
+        "'ai', $t0, $t0)",
+    'INSERT INTO ai_merchant_suggestions (merchant_norm, category_id, '
+        'confidence, source, state, created_at) VALUES '
+        "('zawya coffee', 'sys:food', 88, 'llm', 'unconfirmed', $t0)",
+    'INSERT INTO ai_merchant_suggestions (merchant_norm, category_id, '
+        'confidence, source, state, created_at, decided_at) VALUES '
+        "('book corner', 'sys:food', 91, 'cache', 'corrected', $t0, $t0)",
+    'INSERT INTO llm_cat_queue (merchant_norm, txn_count, first_queued_at, '
+        "last_seen_at, attempts, next_attempt_at) VALUES ('fresh bakery', 2, "
+        '$t0, $t0, 1, $t0)',
+    'INSERT INTO outbox (id, kind, payload, created_at) VALUES '
+        "('obA', 'llm_cat_confirmation', '{\"m\":\"zawya coffee\"}', $t0)",
   ]);
 }
 

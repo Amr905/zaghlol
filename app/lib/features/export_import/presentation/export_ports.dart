@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/transfers_dao.dart';
+import '../../categorization/data/drift_ai_suggestion_states.dart';
 import '../../transactions/data/transactions_providers.dart';
 import '../application/export.dart';
 
@@ -38,7 +39,11 @@ final exportServiceProvider = FutureProvider<ExportService>((ref) async {
   final repo = await ref.watch(transactionRepositoryProvider.future);
   final db = await ref.watch(appDatabaseProvider.future);
   final pairs = TransferPairsDao(db);
-  return ExportService(repo, pairKinds: pairs.kindsByIds);
+  return ExportService(
+    repo,
+    aiStates: DriftAiSuggestionStates(db),
+    pairKinds: pairs.kindsByIds,
+  );
 }, name: 'exportServiceProvider');
 
 /// Device tests only (T-238): lets an integration test that runs the real app
