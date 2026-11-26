@@ -12,6 +12,7 @@ import '../../../core/flags/flags_providers.dart';
 import '../application/llm_ask_flow.dart';
 import '../data/ask_providers.dart';
 import '../data/llm_ask_providers.dart';
+import '../domain/llm_answer_models.dart';
 import '../domain/ask_models.dart';
 
 /// Longest question the field accepts (S-50 validation).
@@ -136,6 +137,39 @@ class AskChatController extends Notifier<AskChatState> {
   Future<void> sendChip(AskChip chip, String label) async {
     if (state.thinking) return;
     await _run(label, AskRequest.chip(chip));
+  }
+
+  /// T-347: a chip that starts a known plan runs on the phone directly: no
+  /// request, no quota (ask-llm-ux §1). The answer is an online-helper-shaped
+  /// bubble that says nothing was sent ([AskLlmAnswered.sentText] is empty).
+  Future<void> runLocalPlan(String label, Plan plan) async {
+    if (state.thinking) return;
+    state = state.copyWith(
+      messages: [
+        ...state.messages,
+        AskMessage._(id: _nextId++, text: label),
+      ],
+      thinking: true,
+    );
+    LlmAnswer answer;
+    try {
+      final executor = await ref.read(planExecutorProvider.future);
+      answer = await executor.execute(plan, const MaskMap({}));
+    } on Exception {
+      answer = const LlmFallbackAnswer(LlmFallbackReason.failed);
+    }
+    _add(
+      AskMessage._(
+        id: _nextId++,
+        llm: AskLlmAnswered(
+          answer: answer,
+          sentText: '',
+          counted: false,
+          plan: plan,
+        ),
+      ),
+    );
+    state = state.copyWith(thinking: false);
   }
 
   /// Asks again without a new user bubble (the error state's retry).

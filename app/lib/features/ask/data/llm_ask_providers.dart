@@ -20,6 +20,8 @@ import '../../../core/llm/llm_quota_snapshot.dart';
 import '../../../ingestion/bundled_registry.dart';
 import '../../accounts/data/accounts_providers.dart';
 import '../../budget/application/budget_providers.dart';
+import '../../wealth/data/prices_providers.dart';
+import '../../wealth/domain/price_feed.dart' show Approx;
 import '../../insights/data/chart_providers.dart';
 import '../application/llm_ask_flow.dart';
 import '../application/plan_executor.dart';
@@ -56,6 +58,49 @@ final askQuotaSnapshotProvider = FutureProvider<LlmQuotaSnapshot?>((ref) async {
   return store.current(LlmFeature.ask, DateTime.now().toUtc());
 }, name: 'askQuotaSnapshotProvider');
 
+/// FU-426: the gold and USD/EGP quotes of the wealth price feed, for the
+/// investment illustrations. A price the feed doesn't have is simply left out:
+/// the band that needs it is not shown (never guessed). A failed read gives no
+/// quotes at all.
+final askInvestPricesProvider = FutureProvider<InvestPrices>((ref) async {
+  final rate = ref.watch(remoteConfigProvider).value?.cdExampleRateBp ?? 2000;
+  final egp = Currency.of('EGP');
+  try {
+    final repo = await ref.watch(pricesRepositoryProvider.future);
+    final gold = <GoldQuote>[];
+    for (final karat in const [24, 21, 18]) {
+      final symbol = GoldSymbols.forKarat(karat);
+      if (symbol == null) continue;
+      final q = await repo.price(symbol, egp);
+      if (q == null || q.perUnit != 'g' || q.price.currency != egp) continue;
+      gold.add(
+        GoldQuote(
+          karat: karat,
+          pricePerGram: q.price,
+          asOf: DateTime.fromMillisecondsSinceEpoch(q.asOfMs, isUtc: true),
+        ),
+      );
+    }
+    final usd = Currency.of('USD');
+    final fx = await repo.convertApprox(Money(usd, 100), egp);
+    return InvestPrices(
+      gold: gold,
+      usdEgp: fx is Approx && fx.asOfMs != null
+          ? InvestFxQuote(
+              egpPerUsd: fx.amount,
+              asOf: DateTime.fromMillisecondsSinceEpoch(
+                fx.asOfMs!,
+                isUtc: true,
+              ),
+            )
+          : null,
+      certificateRateBp: rate,
+    );
+  } on Object {
+    return InvestPrices(certificateRateBp: rate);
+  }
+}, name: 'askInvestPricesProvider');
+
 final planExecutorProvider = FutureProvider<PlanExecutor>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   final charts = await ref.watch(chartRepositoryProvider.future);
@@ -71,10 +116,7 @@ final planExecutorProvider = FutureProvider<PlanExecutor>((ref) async {
     entities: () =>
         loadAskEntities(db, () => accounts.list(includeHidden: true)),
     today: () => ref.read(todayProvider),
-    // Gold and FX quotes are not wired here yet: the bands treat them as
-    // unknown (the saving lines still show).
-    prices: () async =>
-        InvestPrices(certificateRateBp: cfg?.cdExampleRateBp ?? 2000),
+    prices: () => ref.read(askInvestPricesProvider.future),
     now: DateTime.now,
     suggestThresholds: SuggestThresholds(
       s1Pct: cfg?.s1Pct ?? 15,

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/backend/backend_client.dart' show AbortSignal;
+import 'package:zaghlol/core/flags/feature_flags.dart';
 import 'package:zaghlol/core/flags/flags_providers.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/digits_mode.dart';
@@ -71,6 +72,7 @@ Future<List<Object>> pumpLlm(
   bool dark = false,
   double scale = 1.0,
   bool flag = true,
+  bool investFlag = true,
   bool gold = false,
   LlmQuotaSnapshot? quota,
   bool pausedStored = false,
@@ -95,7 +97,9 @@ Future<List<Object>> pumpLlm(
         ),
         askCategoryNamesProvider.overrideWith((ref) async => {}),
         todayProvider.overrideWith(FixedToday.new),
-        featureFlagProvider.overrideWith((ref, f) => flag),
+        featureFlagProvider.overrideWith(
+          (ref, f) => flag && (f != FeatureFlag.askLlmInvest || investFlag),
+        ),
         llmAskFlowProvider.overrideWith((ref) async => flow),
         askQuotaSnapshotProvider.overrideWith((ref) async => quota),
         askQuotaStateProvider.overrideWith(

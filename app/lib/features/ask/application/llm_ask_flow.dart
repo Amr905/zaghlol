@@ -136,6 +136,7 @@ final class AskLlmAnswered extends AskLlmState {
     required this.sentText,
     required this.counted,
     this.template,
+    this.plan,
   });
   final LlmAnswer answer;
   final String sentText;
@@ -144,6 +145,11 @@ final class AskLlmAnswered extends AskLlmState {
   /// A model template that passed the phone grammar; the filler (T-346) puts
   /// the phone's own numbers into it. Null when none or when dropped.
   final PlanTemplate? template;
+
+  /// T-347: the validated plan the answer came from (the views read the
+  /// what-if mode and the invest source off it). Null for a rejected plan.
+  /// Holds the user's words, so it stays out of `toString`.
+  final Plan? plan;
 
   @override
   String toString() => 'AskLlmAnswered(<redacted>)';
@@ -323,6 +329,7 @@ class LlmAskFlow {
     yield const AskLlmComputing();
     final LlmAnswer answer;
     PlanTemplate? template;
+    Plan? plan;
     final validation = validatorFor(src).validate(
       askPlanEnvelope(res.plan),
       sent: masked.sentText,
@@ -334,6 +341,7 @@ class LlmAskFlow {
       // Never executed: the app's own fallback, not a model answer.
       answer = const LlmFallbackAnswer(LlmFallbackReason.unsupported);
     } else {
+      plan = validation.plan;
       answer = await execute(validation.plan, masked.map);
       if (answer is! LlmFallbackAnswer &&
           answer is! LlmRefuseAnswer &&
@@ -346,6 +354,7 @@ class LlmAskFlow {
       sentText: masked.sentText,
       counted: res.counted,
       template: template,
+      plan: plan,
     );
   }
 
