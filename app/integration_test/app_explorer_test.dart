@@ -224,6 +224,10 @@ void main() {
       ...both((l) => l.shareStudioShare),
       ...both((l) => l.aboutDiagShare),
       ...both((l) => l.commonActionOpenSettings),
+      // T-264: the camera and the gallery are other apps; the run never
+      // comes back from them (device-flows 45739442589).
+      ...both((l) => l.captureScanCamera),
+      ...both((l) => l.captureScanGallery),
       ...both((l) => l.commonActionSignOut),
       ...both((l) => l.privacyDeleteConfirm),
       ...both((l) => l.goldAccountDeleteConfirm),
