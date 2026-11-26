@@ -174,6 +174,15 @@ const Map<AskIntent, List<Cue>> _rawCues = {
     Cue('بحوش', 80),
     Cue('تحويش', 80),
   ],
+  AskIntent.exchange: [
+    Cue('غيرت', 100),
+    Cue('بدلت', 100),
+    Cue('تغيير عمله', 110),
+    Cue('exchanged', 100),
+    Cue('exchange', 100),
+    Cue('converted', 90),
+    Cue('swapped', 90),
+  ],
   AskIntent.roast: [
     Cue('اقصف', 110),
     Cue('اقصفني', 110),

@@ -4197,6 +4197,17 @@
       }
     }
   },
+  "chatAnswerExchange": "{span} you exchanged {given} for {received}. Bank rate: 1 {unit} = {rate}.",
+  "@chatAnswerExchange": {
+    "description": "E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).",
+    "placeholders": {
+      "span": {"type": "String"},
+      "given": {"type": "String"},
+      "received": {"type": "String"},
+      "unit": {"type": "String"},
+      "rate": {"type": "String"}
+    }
+  },
   "chatAnswerSpendCard": "You spent {amount} on {card} {span}.",
   "@chatAnswerSpendCard": {
     "description": "E · spend_on_card",
