@@ -15,7 +15,7 @@ class ZMascotBubble extends StatefulWidget {
     this.avatarSize = 64,
     this.trimHeadroom = false,
     this.onTap,
-    this.avatarKey,
+    this.replay = 0,
   });
 
   final String message;
@@ -26,8 +26,9 @@ class ZMascotBubble extends StatefulWidget {
   final bool trimHeadroom;
   final VoidCallback? onTap;
 
-  /// Changing it replays a one-off moment (T-099 tap easter egg).
-  final Key? avatarKey;
+  /// T-276: bump to replay a one-off moment (T-099 tap easter egg) on the
+  /// same avatar; a changing key would reload the artboard.
+  final int replay;
 
   /// How long the beak moves after a new line appears (T-215, `talk` input).
   static const talkDuration = Duration(milliseconds: 1200);
@@ -73,7 +74,6 @@ class _ZMascotBubbleState extends State<ZMascotBubble> {
   Widget build(BuildContext context) {
     final message = widget.message;
     final moment = widget.moment;
-    final avatarKey = widget.avatarKey;
     final avatarSize = widget.avatarSize;
     final trimHeadroom = widget.trimHeadroom;
     final onTap = widget.onTap;
@@ -106,8 +106,8 @@ class _ZMascotBubbleState extends State<ZMascotBubble> {
               child: Row(
                 children: [
                   ZaghlolAvatar(
-                    key: avatarKey,
                     moment: moment,
+                    replay: widget.replay,
                     talk: _talk,
                     size: avatarSize,
                     trimHeadroom: trimHeadroom,

@@ -62,6 +62,7 @@ class ZaghlolAvatar extends ConsumerWidget {
     super.key,
     this.moment = ZaghlolMoment.tourGuide,
     this.talk = false,
+    this.replay = 0,
     this.size = 96,
     this.semanticLabel,
     this.trimHeadroom = false,
@@ -70,6 +71,10 @@ class ZaghlolAvatar extends ConsumerWidget {
   final ZaghlolMoment moment;
   final bool talk;
   final double size;
+
+  /// T-276: bump to play the same [moment] again on the same widget (never
+  /// change the key for that: it reloads the artboard).
+  final int replay;
 
   /// Localised description from the caller (AppLocalizations). Null makes the
   /// bird decorative, e.g. when the bubble beside it already says everything.
@@ -109,8 +114,14 @@ class ZaghlolAvatar extends ConsumerWidget {
         : artboard != null
         ? artboard(context, moment, talk, size)
         : hasRive
-        ? RiveMascot(moment: moment, talk: talk, size: size)
-        : InterimMascot(moment: moment, talk: talk, size: size);
+        ? RiveMascot(
+            moment: moment,
+            talk: talk,
+            replay: replay,
+            size: size,
+            loader: ref.read(riveMascotLoaderProvider),
+          )
+        : InterimMascot(moment: moment, talk: talk, replay: replay, size: size);
 
     final trim = trimHeadroom && !reduce && artboard == null && hasRive;
     final height = trim ? size * riveBirdHeightFactor : size;

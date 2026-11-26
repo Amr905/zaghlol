@@ -90,7 +90,7 @@ class _ZaghlolTapBubbleState extends State<ZaghlolTapBubble> {
       moment: _back != null ? ZaghlolMoment.tap : widget.moment,
       avatarSize: widget.avatarSize,
       trimHeadroom: widget.trimHeadroom,
-      avatarKey: ValueKey('tap-$_taps'),
+      replay: _taps,
       onTap: _tap,
     );
   }

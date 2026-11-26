@@ -65,7 +65,8 @@ class _MascotMoodsScreenState extends ConsumerState<MascotMoodsScreen> {
         children: [
           Center(
             child: ZaghlolAvatar(
-              key: ValueKey('mood-avatar-$_plays'),
+              key: const ValueKey('mood-avatar'),
+              replay: _plays,
               moment: _moment,
               talk: _talk,
               size: 280,

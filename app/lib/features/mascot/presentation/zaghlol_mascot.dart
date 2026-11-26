@@ -22,11 +22,16 @@ abstract class ZaghlolMascot extends StatefulWidget {
     required this.moment,
     required this.talk,
     required this.size,
+    this.replay = 0,
   });
 
   final ZaghlolMoment moment;
   final bool talk;
   final double size;
+
+  /// T-276: bump to play the same [moment] again without rebuilding the
+  /// widget (a new key would reload the artboard and flash the still).
+  final int replay;
 }
 
 /// Looping moments run only while real work runs (08-mascot-motion rules);
