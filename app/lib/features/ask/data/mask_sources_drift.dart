@@ -5,9 +5,16 @@
 //   which is what PlanExecutor reads back from the mask map);
 // - institutions: registry names ar/en, wallet-card names, the code, and
 //   short forms of the names (FU-399: «فودافون» for «فودافون كاش»);
-// - merchants: every distinct merchant name of the user's own transactions.
-//   The id is `merchant_norm`, the key PlanExecutor resolves a merchant mask
-//   with. No cap: a name left out here would be sent in plain text.
+// - merchants: every distinct merchant text of the user's own transactions:
+//   `merchant_raw` (manual entries, edited merchants, parsed ones) and
+//   `merchant_norm`. The id is `merchant_norm`; rows without one (manual,
+//   edited) get `merchantKey(raw)` at read time, the same normaliser the
+//   categoriser uses, so no migration is needed. The chart reads PlanExecutor
+//   uses match those rows by the same key (ChartRepository._merchantMatch).
+//   Deduped in SQL. No cap: a name left out here would be sent in plain text.
+//   Adding a "counterparty" kind later (open PO decision, not masked now) is
+//   one more query over counterparty_value, merged the same way.
+//   There is no user-alias table; catalog aliases are public.
 //
 // Nothing here logs or stores. Everything is a value that lives for one
 // question.
@@ -130,7 +137,8 @@ final class MaskSourcesDrift implements MaskSources {
     final rows = await db
         .customSelect(
           'SELECT merchant_norm AS m, merchant_raw AS raw FROM transactions '
-          'WHERE deleted_at IS NULL AND merchant_norm IS NOT NULL '
+          'WHERE deleted_at IS NULL AND '
+          '(merchant_norm IS NOT NULL OR merchant_raw IS NOT NULL) '
           'GROUP BY merchant_norm, merchant_raw',
           variables: const <Variable>[],
           readsFrom: {db.transactions},
@@ -138,10 +146,13 @@ final class MaskSourcesDrift implements MaskSources {
         .get();
     final names = <String, Set<String>>{};
     for (final r in rows) {
-      final id = r.read<String>('m');
-      final set = names.putIfAbsent(id, () => {id});
       final raw = r.readNullable<String>('raw');
-      if (raw != null && raw.trim().isNotEmpty) set.add(raw);
+      final hasRaw = raw != null && raw.trim().isNotEmpty;
+      final id =
+          r.readNullable<String>('m') ?? (hasRaw ? merchantKey(raw) : '');
+      if (id.isEmpty) continue;
+      final set = names.putIfAbsent(id, () => {id});
+      if (hasRaw) set.add(raw);
     }
     final all = await accounts();
     return MaskSourcesDrift._(
