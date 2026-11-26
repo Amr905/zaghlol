@@ -4026,7 +4026,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String merchant2,
     String amount2,
   ) {
-    return '$merchant is first with $amount ($visits), then $merchant2 with $amount2.';
+    return '$merchant is first with $amount (visits: $visits), then $merchant2 with $amount2.';
   }
 
   @override
@@ -7577,7 +7577,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get aboutMainNeverSynced => 'Not updated yet (works offline)';
+  String get aboutMainCatalogNever =>
+      'Merchant list: not updated yet (works offline)';
+
+  @override
+  String get aboutMainPricesNever => 'Prices: not updated yet';
 
   @override
   String get aboutMainTerms => 'Terms of use';

@@ -189,6 +189,47 @@ O = {
     'NFR-UX-02': ('PASS', A + 'a11y', None, 'text scale 1.3 overflow sweep and semantics tests; contrast not measured'),
 }
 
+
+# On-device results, emulator session 19 Nov (Pixel 10 Pro XL AVD, Android 17 / API 37, devSms debug APK from app-ci run 44394261225).
+DEVICE = {
+    'FR-ONB-01': ('PASS', 'seen on device: one welcome screen, one primary button, privacy lines, no "no server" claim'),
+    'FR-ONB-02': ('PASS', 'seen on device: no sign-in anywhere in onboarding'),
+    'FR-ONB-03': ('PASS', 'seen on device: reached Home without entering a number; Arabic and light theme by default; payday shows "month start"'),
+    'FR-ONB-05': ('PASS', 'seen on device: 3 taps from welcome to SMS permission granted, one reason line per point'),
+    'FR-ONB-06': ('BLOCKED', 'seen on device: scan starts by itself with live progress; the 10 s target with real bank SMS not measured'),
+    'FR-ONB-07': ('BLOCKED', 'seen on device: language, digits, payday, income target, app lock, capture, categories, notifications, backup, Gold, privacy within 2 taps; "Delete everything" is below the fold and could not be reached by clicks'),
+    'FR-HOME-04': ('PASS', 'seen on device: Add sheet offers voice, manual, screenshot and asset (Gold)'),
+    'FR-HOME-05': ('PASS', 'seen on device: card filter works; its sheet is partly covered by the Add button (BUG-018)'),
+    'FR-CUR-07': ('PASS', 'seen on device: EGP, USD, SAR, EUR, AED, QAR, KWD, BHD, GBP, INR, then all currencies'),
+    'BR-MON-03': ('PASS', 'seen on device: amount hint switches to 3 decimals for KWD'),
+    'FR-L10N-01': ('PASS', 'seen on device: Arabic RTL and English LTR, layout mirrors'),
+    'FR-L10N-03': ('PASS', 'seen on device: Arabic-Indic digits by default in Arabic; digits option in Preferences'),
+    'NFR-UX-01': ('PASS', 'seen on device: RTL first, LTR mirrored'),
+    'NFR-UX-04': ('PASS', 'seen on device: light and dark themes'),
+    'FR-NTF-01': ('PASS', 'seen on device: 7 types, each with its own switch'),
+    'FR-NTF-02': ('PASS', 'seen on device: quiet hours on, 11:00 PM to 8:00 AM'),
+    'FR-NTF-03': ('PASS', 'seen on device: hide amounts on lock screen option'),
+    'FR-SUB-04': ('PASS', 'seen on device: bills reminder "3 days before", configurable'),
+    'FR-CHAT-03': ('PASS', 'seen on device: with no data the answer is "no data for this period", no invented figure'),
+    'FR-CHAT-05': ('PASS', 'seen on device: suggestion chips'),
+    'FR-CHAT-04': ('PASS', 'seen on device: roast chip present; with no data it gives the no-data answer'),
+    'FR-CAP-06': ('PASS', 'seen on device: "Not tracked" list in Settings > Capture'),
+    'FR-ING-A-05': ('PASS', 'seen on device: Capture screen shows each source state (SMS on, notifications off with a working Fix button) and share/paste'),
+    'FR-BAK-04': ('PASS', 'seen on device: "No backup yet"'),
+    'FR-BAK-08': ('BLOCKED', 'seen on device: one free backup offered; upload needs a Google account on the emulator'),
+    'FR-ACC-03': ('PASS', 'seen on device: Cash account exists and is the default on manual entry'),
+    'FR-CARD-05': ('PASS', 'seen on device: manual entry has an account field defaulting to Cash'),
+    'FR-TXN-02': ('BLOCKED', 'seen on device: form validation ("amount greater than zero", "choose the category") and discard confirmation; saving needs typing'),
+    'FR-GOLD-01': ('FAIL', 'seen on device: paywall stays on "Loading prices…" for over 30 s; the code intends an 8 s timeout and a "prices failed" message (BUG-015)'),
+    'FR-VOI-04': ('PASS', 'seen on device: "15 of 15 voice entries left this month"'),
+    'FR-EXP-04': ('BLOCKED', 'seen on device: CIB, NBE, Banque Misr, QNB marked "Coming soon"'),
+    'FR-EXP-06': ('BLOCKED', 'seen on device: Wise, Revolut, Payoneer marked "Coming soon"'),
+    'FR-SHR-01': ('PASS', 'seen on device: share studio opens with an empty state'),
+    'FR-L10N-04': ('BLOCKED', 'seen on device: discard confirmation and store error are plain, no jokes; full copy review still needs T-058'),
+    'FR-PAR-14': ('PASS', 'seen on device: "Request my bank" in Settings > Capture'),
+    'FR-CAP-07': ('PASS', 'seen on device: "Re-scan SMS inbox" in Settings > Capture'),
+}
+
 ORDER = ['PASS', 'FAIL', 'BLOCKED', 'NOT TESTED', 'NOT IMPLEMENTED']
 rows = []
 tally = dict.fromkeys(ORDER, 0)
@@ -208,6 +249,9 @@ for rid, text in req.items():
         status, note = 'NOT TESTED', (note + '; ' if note else '') + 'no executed test matched this requirement'
     if 'Removed by' in text:
         status = 'NOT TESTED'
+    if rid in DEVICE:
+        status, dnote = DEVICE[rid]
+        note = dnote + ('; ' + note if note and 'needs' not in note else '')
     scen = f'{n} executed tests passed in the mapped suites' if n else 'no automated test executed'
     tally[status] += 1
     rows.append((rid, short(text), impl, scen, note, status))
@@ -218,7 +262,7 @@ lines = ['# Requirements coverage', '',
          '## How to read this', '',
          '- **PASS**: tests that exercise the requirement were executed in this audit and passed, at the level the "Test scenario" and '
          '"Actual result" columns state. Most are component level (unit, widget, golden, backend integration on a real PostgreSQL 17). '
-         'It is not a claim that the behaviour was seen on a phone.',
+         'It is not a claim that the behaviour was seen on a phone, unless the note starts with "seen on device" (emulator session, 19 Nov).',
          '- **BLOCKED**: the acceptance criterion needs something this audit did not have (a phone or emulator, an iPhone, store accounts, '
          'real bank samples, a deployed backend, a human reviewer). Component tests that did pass are counted in the row.',
          '- **FAIL**: executed and the result differs from the requirement. **NOT IMPLEMENTED**: no implementation found. '

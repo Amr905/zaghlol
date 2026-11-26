@@ -50,12 +50,12 @@ class AboutScreen extends ConsumerWidget {
             ),
             SettingsRow(
               title: sync.catalogAt == null
-                  ? t.aboutMainNeverSynced
+                  ? t.aboutMainCatalogNever
                   : t.aboutMainCatalog(_date(ref, context, sync.catalogAt!)),
             ),
             SettingsRow(
               title: sync.pricesAt == null
-                  ? t.aboutMainNeverSynced
+                  ? t.aboutMainPricesNever
                   : t.aboutMainPrices(_date(ref, context, sync.pricesAt!)),
             ),
           ],

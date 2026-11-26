@@ -1,0 +1,106 @@
+diff --git a/backend/tests/Shared/ZaghlolTestDatabase.cs b/backend/tests/Shared/ZaghlolTestDatabase.cs
+index 03010b84..f7c6bb44 100644
+--- a/backend/tests/Shared/ZaghlolTestDatabase.cs
++++ b/backend/tests/Shared/ZaghlolTestDatabase.cs
+@@ -1,6 +1,8 @@
+ using System.Security.Cryptography;
+ using Npgsql;
+-using Testcontainers.PostgreSql;
++using System.Diagnostics;
++using System.Net;
++using System.Net.Sockets;
+ using Zaghlol.Infrastructure.Persistence;
+ 
+ namespace Zaghlol.Testing;
+@@ -19,9 +21,9 @@ public sealed class ZaghlolTestDatabase : IAsyncDisposable
+ 
+     private readonly Dictionary<string, string> passwords = new(StringComparer.Ordinal);
+ 
+-    private ZaghlolTestDatabase(PostgreSqlContainer container) => Container = container;
++    private ZaghlolTestDatabase(LocalPg container) => Container = container;
+ 
+-    public PostgreSqlContainer Container { get; }
++    public LocalPg Container { get; }
+ 
+     public string Superuser => Container.GetConnectionString();
+ 
+@@ -43,13 +45,7 @@ public sealed class ZaghlolTestDatabase : IAsyncDisposable
+     /// <param name="migrate">False to stop after the role bootstrap.</param>
+     public static async Task<ZaghlolTestDatabase> StartAsync(int? hostPort = null, bool migrate = true)
+     {
+-        var builder = new PostgreSqlBuilder().WithImage("postgres:17").WithDatabase(DatabaseName);
+-        if (hostPort is int port)
+-        {
+-            builder = builder.WithPortBinding(port, PostgreSqlBuilder.PostgreSqlPort);
+-        }
+-
+-        var database = new ZaghlolTestDatabase(builder.Build());
++        var database = new ZaghlolTestDatabase(new LocalPg(hostPort));
+         try
+         {
+             await database.Container.StartAsync();
+@@ -104,3 +100,64 @@ public sealed class ZaghlolTestDatabase : IAsyncDisposable
+         }
+     }
+ }
++
++/// <summary>QA shim (not part of the repo): a throwaway local PostgreSQL 17 cluster in place of the Testcontainers one.</summary>
++public sealed class LocalPg : IAsyncDisposable
++{
++    private static readonly string Bin = Environment.GetEnvironmentVariable("QA_PG_BIN") ?? throw new InvalidOperationException("QA_PG_BIN");
++    private static readonly SemaphoreSlim Gate = new(2);
++    private readonly string dir = Path.Combine(Path.GetTempPath(), "qapg-" + Guid.NewGuid().ToString("N")[..12]);
++    private readonly int port;
++    private bool initialised;
++
++    public LocalPg(int? hostPort)
++    {
++        if (hostPort is int p) { port = p; return; }
++        using var l = new TcpListener(IPAddress.Loopback, 0);
++        l.Start();
++        port = ((IPEndPoint)l.LocalEndpoint).Port;
++    }
++
++    public string GetConnectionString() => $"Host=127.0.0.1;Port={port};Database=zaghlol;Username=postgres";
++
++    public async Task StartAsync()
++    {
++        await Gate.WaitAsync();
++        try
++        {
++            if (!initialised)
++            {
++                await Run("initdb", $"-D {dir} -U postgres -A trust -E UTF8 --no-sync");
++                await File.AppendAllTextAsync(Path.Combine(dir, "postgresql.conf"), "\nfsync=off\nshared_buffers=16MB\nmax_connections=60\n");
++            }
++
++            await Run("pg_ctl", $"-D {dir} -l {dir}/log.txt -o \"-p {port} -k {dir} -c listen_addresses=127.0.0.1\" -w start");
++            if (!initialised)
++            {
++                initialised = true;
++                await ZaghlolTestDatabase.ExecuteAsync(GetConnectionString().Replace("Database=zaghlol", "Database=postgres"), "CREATE DATABASE zaghlol");
++            }
++        }
++        finally
++        {
++            Gate.Release();
++        }
++    }
++
++    public Task StopAsync() => Run("pg_ctl", $"-D {dir} -m immediate -w stop");
++
++    public async ValueTask DisposeAsync()
++    {
++        try { await StopAsync(); } catch (InvalidOperationException) { }
++        try { Directory.Delete(dir, true); } catch (IOException) { }
++    }
++
++    private static async Task Run(string tool, string args)
++    {
++        using var p = Process.Start(new ProcessStartInfo(Path.Combine(Bin, tool), args) { RedirectStandardOutput = true, RedirectStandardError = true })!;
++        var o = p.StandardOutput.ReadToEndAsync();
++        var e = await p.StandardError.ReadToEndAsync();
++        await p.WaitForExitAsync();
++        if (p.ExitCode != 0) throw new InvalidOperationException($"{tool} {args}: {e} {await o}");
++    }
++}

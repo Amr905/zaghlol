@@ -44,8 +44,8 @@ Show, with executed tests, how far the implementation matches the approved requi
 | API black box | New tests against the running backend: valid, invalid, missing field, unauthorized, boundary, unexpected input | Python `requests` | yes | yes (101 + 30 cases) |
 | Database | New tests: persistence, constraints, relationships, role privileges, duplicate and invalid rows | Python `psycopg` | yes | yes (20 cases) |
 | Security | Authentication and authorization probes, forged tokens, closed schemas, secrets scan, manifest review, production-guard start-up checks | scripts + inspection | yes | partly: no dynamic scan (MobSF, ZAP), no penetration test |
-| UI on a device | Navigation, forms, validation messages, loading / empty / error states, RTL and LTR, text scaling | Android emulator on the PC, driven by screen control | yes | **no: blocked** |
-| End-to-end journeys | the journeys in `docs/02-design/01-user-journeys.md` | emulator, dev backend | yes | **no: blocked** |
+| UI on a device | Navigation, forms, validation messages, loading / empty / error states, RTL and LTR, text scaling | Android emulator on the PC, driven by screen control | yes | partly: 36 click-only checks (second session); typing and scrolling blocked |
+| End-to-end journeys | the journeys in `docs/02-design/01-user-journeys.md` | emulator, dev backend | yes | E2E-01 and E2E-10 done; the rest blocked |
 | Regression | Full existing suite as the baseline | as above | yes | yes for host-level suites |
 | Performance | NFR-PERF targets | reference phone | no | not run |
 
@@ -55,7 +55,9 @@ Show, with executed tests, how far the implementation matches the approved requi
 - **Exit for a PASS on a requirement:** executed evidence at the level stated in `requirements-coverage.md`.
 - **Exit for release recommendation:** no open CRITICAL or HIGH bug, every "Must" requirement PASS, device journeys run. Not met (see `release-readiness.md`).
 
-## 7. Journeys planned for the emulator (not executed)
+## 7. Journeys planned for the emulator
+
+Status after the second session: E2E-01 done (PASS). E2E-10 done (PASS). E2E-04 validation only. All others blocked: they need typing, swiping, a Google account or a dev backend.
 
 | # | Journey | Requirements |
 |---|---|---|

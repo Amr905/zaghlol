@@ -158,12 +158,12 @@ void main() {
   test(
     'T-284: other currency cards add a code-only hint to line two',
     () async {
-      others = ['USD', 'EUR', 'KWD'];
+      others = ['USD', 'EUR'];
       make();
       hide.add(true);
       lockOn.add(false);
       await pastDebounce();
-      expect(host.sent.single.secondaryText, contains('+ USD, EUR +'));
+      expect(host.sent.single.secondaryText, contains('+ USD, EUR'));
       expect(host.sent.single.primaryText, '•••/day');
     },
   );

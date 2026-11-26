@@ -4114,7 +4114,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String merchant2,
     String amount2,
   ) {
-    return '$merchant في المركز الأول بـ $amount ($visits)، وبعده $merchant2 بـ $amount2.';
+    return '$merchant في المركز الأول بـ $amount (عدد المرات: $visits)، وبعده $merchant2 بـ $amount2.';
   }
 
   @override
@@ -7705,7 +7705,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get aboutMainNeverSynced => 'لسه ما اتحدّثتش (شغال من غير نت)';
+  String get aboutMainCatalogNever =>
+      'قايمة التجار: لسه ما اتحدّثتش (شغال من غير نت)';
+
+  @override
+  String get aboutMainPricesNever => 'الأسعار: لسه ما اتحدّثتش';
 
   @override
   String get aboutMainTerms => 'الشروط';
