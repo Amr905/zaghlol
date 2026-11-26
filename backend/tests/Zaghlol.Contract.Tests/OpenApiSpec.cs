@@ -48,7 +48,6 @@ internal sealed class OpenApiSpec
     /// </summary>
     public static readonly IReadOnlyDictionary<string, string> PlannedUnmapped = new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        ["askPlan"] = "T-349",
         ["categorise"] = "T-352",
     };
 

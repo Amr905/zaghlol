@@ -20,6 +20,9 @@
   <ItemGroup>
     <!-- T-330: the ask-plan/1 schema is the single source of truth; the plan validator embeds the contract file. -->
     <EmbeddedResource Include="..\..\contracts\ask-plan-v1.schema.json" LogicalName="Zaghlol.Llm.ask-plan-v1.schema.json" />
+    <!-- T-349: the static system prompts (ask-llm §2.5) and the bundled institution aliases the validator uses to refuse a plain name. -->
+    <EmbeddedResource Include="Llm\Prompts\*.txt" LogicalName="Zaghlol.Llm.Prompts.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\contracts\institution-aliases-v1.json" LogicalName="Zaghlol.Llm.institution-aliases-v1.json" />
   </ItemGroup>
 
 </Project>

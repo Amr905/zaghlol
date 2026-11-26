@@ -225,6 +225,7 @@ public class InstallsLiveContractTests(InstallsContractFixture fixture) : IClass
         ["verifyPurchase"] = """{"platform":"android","productId":"zaghlol_gold_yearly","purchaseToken":"opaque-token-from-play"}""",
         ["restorePurchases"] = """{"platform":"android","purchases":[{"productId":"zaghlol_gold_lifetime","purchaseToken":"opaque-token-from-play"}],"attestation":{"type":"play_integrity","token":"AAAAAAAAAAAAAAAAAAAA"}}""",
         ["signIn"] = """{"provider":"google","idToken":"aaaa.bbbb.cccc","nonce":"AAAAAAAAAAAAAAAAAAAAAA"}""",
+        ["askPlan"] = """{"planVersion":1,"requestId":"01JD8Z3Q4F6R7T9V0W1X2Y3Z4A","q":"how much did I spend this month","lang":"en","consent":{"provider":"openai-luna","v":1},"attestation":{"type":"play_integrity","token":"synthetic-play-integrity-token-0001"}}""",
     };
 
     private static bool RequiresAppHeader(SpecOperation operation) =>

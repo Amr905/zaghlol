@@ -102,6 +102,14 @@ public sealed partial class PlanValidator
 
         // Step 2: every ref occurs verbatim; no plain registry name in any string of p.
         var p = plan["p"];
+
+        // FU-404: .NET's `$` in the schema patterns also matches before a trailing "\n" (ECMA-262 does not). No valid string of p holds a
+        // control character, so one anywhere is a schema failure.
+        if (Objects(p).Any(o => o.Any(member => member.Value is JsonValue v && v.TryGetValue<string>(out var text) && text.Any(char.IsControl))))
+        {
+            return PlanReason.SchemaInvalid;
+        }
+
         var refs = new List<string>();
         var strings = new List<string>();
         var mentions = new List<string>();
@@ -217,7 +225,8 @@ public sealed partial class PlanValidator
             return PlanReason.InstrumentsDuplicate;
         }
 
-        if (p["target"]?["currency"] is not null)
+        // PL-WHATIF-CUT.target, and the what-if nested in PL-INVEST.source (FU-404).
+        if (p["target"]?["currency"] is not null || p["source"]?["whatIf"]?["target"]?["currency"] is not null)
         {
             return PlanReason.TargetCurrencySet;
         }

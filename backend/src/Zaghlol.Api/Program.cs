@@ -7,7 +7,9 @@ using Zaghlol.Api.Endpoints;
 using Zaghlol.Api.Endpoints.Admin;
 using Zaghlol.Api.Endpoints.V1;
 using Zaghlol.Api.Observability;
+using Zaghlol.Api.RateLimiting;
 using Zaghlol.Application;
+using Zaghlol.Application.Llm.Ask;
 using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Accounts;
 using Zaghlol.Infrastructure.Attestation;
@@ -17,6 +19,9 @@ using Zaghlol.Infrastructure.Contributions;
 using Zaghlol.Infrastructure.Entitlements;
 using Zaghlol.Infrastructure.Flags;
 using Zaghlol.Infrastructure.Kms;
+using Zaghlol.Infrastructure.Llm;
+using Zaghlol.Infrastructure.Llm.Quota;
+using Zaghlol.Infrastructure.Llm.Spend;
 using Zaghlol.Infrastructure.Logging;
 using Zaghlol.Infrastructure.Observability;
 using Zaghlol.Infrastructure.Persistence;
@@ -103,6 +108,13 @@ builder.Services.AddZaghlolRestore();
 // LLM attestation (T-336): Llm:Attestation:Mode read once at startup; Fake only in Development/Testing, ReportOnly only in Staging,
 // Production always enforces with the real verifiers (startup check).
 builder.Services.AddZaghlolLlmAttestation();
+// LLM gateway (T-349): the provider adapters, registry and keys (T-333), the quota store (T-335), the spend ledger and cap guard (T-339; the ops alert
+// sink comes from AddZaghlolFlagAdmin, the remote config from AddZaghlolRemoteConfig) and the Ask plan pipeline with its buckets.
+builder.Services.AddZaghlolLlm(builder.Configuration);
+builder.Services.AddZaghlolLlmQuota();
+builder.Services.AddZaghlolLlmSpend();
+builder.Services.AddSingleton<ILlmRateLimiter, LlmRateLimiter>();
+builder.Services.AddZaghlolAskPlan();
 // App Store Server Notifications V2 ingest (T-134): verify and store only, on the App login; the worker processes.
 builder.Services.AddZaghlolAppleNotificationIngest();
 // Google RTDN push (T-133): Pub/Sub OIDC before the body, store only, on the App login; the worker processes. Production refuses to
@@ -131,6 +143,7 @@ app.UseZaghlolPipeline();
 app.MapHealth();
 app.MapInstalls();
 app.MapSync();
+app.MapAsk();
 app.MapPurchases();
 app.MapEntitlement();
 app.MapAccounts();

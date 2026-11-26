@@ -16,7 +16,7 @@ public static class LlmServiceCollectionExtensions
     /// <summary>
     /// Registers the gateway core: one adapter (and one <see cref="HttpClient"/> and one <see cref="LlmCallGuard"/>) per configured
     /// provider under <c>Llm:Providers</c>, the registry, the startup check and the provider keys (<see cref="LlmApiKeyStore"/> from
-    /// the KMS secret store, T-333). The host must also register <see cref="ILlmPromptCatalog"/> (T-339). Not called by the API host yet.
+    /// the KMS secret store, T-333) and the embedded prompt catalogue (T-349). Called by the API host.
     /// </summary>
     public static IServiceCollection AddZaghlolLlm(this IServiceCollection services, IConfiguration configuration)
     {
@@ -32,6 +32,9 @@ public static class LlmServiceCollectionExtensions
             ? new RemoteConfigActiveLlmProviderId(remote, configured)
             : configured);
         services.TryAddSingleton<ILlmProviderRegistry, LlmProviderRegistry>();
+
+        // The static system prompts are embedded in Zaghlol.Application (T-349); a host or a test may register its own catalogue first.
+        services.TryAddSingleton<ILlmPromptCatalog, Zaghlol.Application.Llm.Prompts.EmbeddedLlmPromptCatalog>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, LlmStartupCheck>());
 
         // T-333: provider keys from the KMS secret store, loaded once at start; a host's own ILlmApiKeyProvider (tests) wins.

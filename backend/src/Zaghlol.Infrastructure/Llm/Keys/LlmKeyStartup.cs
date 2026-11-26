@@ -278,6 +278,10 @@ internal static class LlmKeyConfigurationScan
         "credential", "credentials", "password", "privatekey", "authorization",
     };
 
+    // FU-418 (B93-m2): names such as AuthToken, ApiSecret or DbPassword. A plain "key" suffix is not a rule (Llm:Attestation:DevProofKey is T-336's
+    // and is refused outside Development and Testing by its own guard).
+    private static readonly string[] SecretSuffixes = ["secret", "token", "password", "credential", "credentials"];
+
     public static void Check(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
@@ -303,6 +307,7 @@ internal static class LlmKeyConfigurationScan
     internal static bool IsKeyName(string segment)
     {
         var normal = new string([.. segment.Where(char.IsAsciiLetterOrDigit).Select(char.ToLowerInvariant)]);
-        return Forbidden.Contains(normal) || normal.StartsWith("serviceaccount", StringComparison.Ordinal) || normal.EndsWith("apikey", StringComparison.Ordinal);
+        return Forbidden.Contains(normal) || normal.StartsWith("serviceaccount", StringComparison.Ordinal) || normal.EndsWith("apikey", StringComparison.Ordinal)
+            || SecretSuffixes.Any(suffix => normal.EndsWith(suffix, StringComparison.Ordinal));
     }
 }
