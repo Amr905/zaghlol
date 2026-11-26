@@ -112,6 +112,10 @@ void main() {
       );
       final o = leg('o', 'a', out: true);
       expect(decideSameCurrency(o, [o]), isA<NoMatch>());
+      // BUG-019: a pool that holds the leg itself still pairs.
+      final i = leg('i', 'b', out: false);
+      expect(decideSameCurrency(o, [o, i]), isA<PairWith>());
+      expect(decideSameCurrency(i, [i, o]), isA<PairWith>());
     });
 
     test('result does not depend on pool order', () {

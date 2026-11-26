@@ -23,6 +23,13 @@ const widgetMaxRollDays = 62;
 /// Mirror both if either changes (FU-387).
 const widgetMaxLineChars = 120;
 
+/// FU-393: a conservative visual budget (UTF-16 units) for line two on the
+/// smallest (2x1) widget, which ellipsizes a ~35-unit line («٧ أيام على القبض
+/// · + USD, EUR +١»). A line with the hint over this loses the hint and keeps
+/// the payday text. One snapshot serves every size, so the rule is global.
+/// The on-device check of the 2x1 size (ar/en) is still owed.
+const widgetSmallLineBudget = 32;
+
 /// T-284 (D-86): the most ISO codes the hint names before "+N".
 const widgetMaxHintCodes = 2;
 
@@ -74,11 +81,15 @@ class WidgetSnapshotInput {
     required this.copy,
     required this.nowMs,
     this.otherCurrencies = const [],
+    this.lineBudget = widgetSmallLineBudget,
   });
 
   /// T-284: ISO codes of the non-primary currencies that have a Home card
   /// (T-278 rule), in card order. Codes only; left out while locked.
   final List<String> otherCurrencies;
+
+  /// Longest line two kept with the hint (FU-393); tests widen it.
+  final int lineBudget;
 
   /// Null while there is no data (no cycle read yet).
   final CycleOverview? overview;
@@ -140,7 +151,10 @@ WidgetSnapshot buildWidgetSnapshot(WidgetSnapshotInput i) {
     if (hint.isEmpty) return text;
     final withHint = '$text \u00b7 $hint';
     // FU-387: when it would be cut, the hint goes, never the payday text.
-    return withHint.length > widgetMaxLineChars ? text : withHint;
+    final budget = i.lineBudget < widgetMaxLineChars
+        ? i.lineBudget
+        : widgetMaxLineChars;
+    return withHint.length > budget ? text : withHint;
   }
 
   // FU-206b: one finished line per coming day so the widget rolls the count

@@ -373,6 +373,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-289](tasks/T-289.md) | Exchange follow-ups: per-currency balance-rise threshold, cold-start overlay, statement vs manual exchange (FU-366/369/370) | D-86 | High (C4) | Sonnet | flutter-core-engineer | — | A | 81 | DONE (batch 81) |
 | [T-290](tasks/T-290.md) | Android OCR merge minors (FU-371/376/377/378) | T-273 | Medium (C3) | Sonnet | native-platform-engineer | — | N | 81 | DONE (batch 81) |
 | [T-291](tasks/T-291.md) | Export pair-kind batching, widget line two fits, voice comment (FU-388/387/373) | follow-ups | Standard (C2) | Sonnet | flutter-core-engineer | — | E | 81 | DONE (batch 81) |
+| [T-292](tasks/T-292.md) | Batch 81 small follow-ups (FU-391…FU-394) | follow-ups | Standard (C2) | Sonnet | flutter-core-engineer | — | A | 82 | DONE (batch 82) |
 | [T-293](tasks/T-293.md) | Haptic patterns synced with animations (Android + iOS) | D-87 | Medium (C3) | Sonnet | native-platform-engineer | — | N | 83 | TODO |
 | [T-294](tasks/T-294.md) | Payday celebration sheet (option B), once per salary, cash salary switch | D-87 | Medium (C3) | Sonnet | flutter-ui-engineer | T-293 API | U | 83 | TODO |
 | [T-295](tasks/T-295.md) | "Saved!" toast with the bird after saving (place 1) | D-87 | Standard (C2) | Sonnet | flutter-ui-engineer | T-293 API | U2 | 83 | TODO |

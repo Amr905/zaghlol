@@ -37,4 +37,29 @@ void main() {
     expect(state.hasError, isTrue);
     expect(state.error, isA<TimeoutException>());
   });
+
+  testWidgets('BUG-015: with the default container (automatic retry on) the '
+      'failed state stays; it never goes back to loading', (tester) async {
+    var calls = 0;
+    final container = ProviderContainer(
+      overrides: [
+        goldProductQueryProvider.overrideWithValue((_) {
+          calls++;
+          return Completer<ProductDetailsResponse>().future;
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+    final sub = container.listen(goldOffersProvider, (_, _) {});
+    addTearDown(sub.close);
+    await tester.pump(goldStoreTimeout + const Duration(seconds: 1));
+    expect(container.read(goldOffersProvider).hasError, isTrue);
+    for (var i = 0; i < 30; i++) {
+      await tester.pump(const Duration(seconds: 1));
+      final state = container.read(goldOffersProvider);
+      expect(state.isLoading, isFalse, reason: 'second ${i + 1}');
+      expect(state.hasError, isTrue);
+    }
+    expect(calls, 1);
+  });
 }

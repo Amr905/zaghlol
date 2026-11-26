@@ -175,7 +175,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-395** (PO-phone-feedback lane; batch 81 used FU-391…FU-394)
+Next free follow-up number: **FU-397** (PO-phone-feedback lane; batch 82 used FU-395…FU-396)
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
@@ -224,6 +224,17 @@ PO can't use a cloud provider. D-76 / ADR-023: `Kms:Provider = File` (T-200, mer
 - **47:** T-196 recurring 1/3/6/12-month bills (schema v5), T-187 hide amounts (eye + `no_unmasked_amount` lint).
 - **48:** T-195 salary as income (no schema change), T-197 credit vs debit.
 All approved; branches stack: `batch/2026-11-20-48` contains 43–48. **Batch 49** (T-188 chart periods, T-199 net-worth breakdown, T-193 backend/ops/CI part) stacks on it: `batch/2026-11-20-49` contains 43–49. Not pushed (no push access this session); delivered as a git bundle. Before merging: run the CI `app-regen` workflow for goldens (lists in each review), then app-ci / backend-ci / the new `openbao-live` job. Still waiting on the PO: bottom-bar and dark-theme pick (design canvas), T-189 mockups, T-190 (Android build machine), T-191 production keys, bank badge colours/codes.
+
+## QA batch (2026-11-26, `batch/2026-11-26-qa`): QA test-case catalogue and fixes BUG-015…BUG-019
+
+Not batch 78 (another session owns that number). (PO asked the QA session to push its work and fix its findings).
+- **QA docs:** `docs/qa/test-cases.md` + `.csv` (621 cases: every FR/BR/NFR, edge case, SRS decision, PO decision, 25 Nov user story, plus QA cases; status and evidence level from the 26 Nov run on 89583b27), `test-execution-2026-11-26.md`, `device-cases.md` (how to run the 20 device cases; which ones `device-flows` already scripts), second-sitting updates to the other QA reports. `tools/build_test_cases.py` regenerates the catalogue from test output. 41 independent spec-example tests in `packages/zaghlol_parsing/test/qa/`.
+- **QA bug IDs:** the emulator findings are BUG-015…018 (BUG-010…014 were taken by `bug-report-2.md`). Next free: **BUG-023**.
+- **Fixed here:** BUG-015 Gold paywall stuck on "Loading prices…" (root cause: Riverpod 3's automatic retry kept re-running `goldOffersProvider`; now `retry: null`, test with a default container); BUG-016 launcher icons were Flutter's template (generated from `docs/02-design/brand/zaghlol-app-icon-1024.png`; legacy Android PNGs, no adaptive icon yet; test on the template hashes); BUG-017 About "not updated yet" twice (two labelled strings, copy deck updated); BUG-018 Z-sheets opened under the tab bar (`showZSheet` uses the root navigator); BUG-019 `decideSameCurrency` called a pair ambiguous when the pool held the leg.
+- **Chart explanations (PO request):** `app/test/qa/chart_explanations_reflect_data_test.dart` pushes one hand-computed month through the real engine and renderer in en and ar for 8 charts (cash flow, categories, burn rate, 50/30/20, merchants, subscriptions, vs average); all figures match. Found and fixed BUG-021 (visit count shown as a bare "(6)"). BUG-022 is open: the merchants tip "one visit a week" ignores the visit count and merchant type (needs a product rule). Not covered at sentence level: day/hour pattern, installments, cards, net worth, inflation, and every deep (Gold) variant except cash flow.
+- **Open:** BUG-020 (D-67…D-70 each name two decisions in the SRS; about 180 references to disambiguate; needs the PO or analyst to pick the new numbers). BUG-015 and BUG-018 need a look on a device. An Android adaptive icon is a follow-up.
+- **Watch for:** Riverpod 3 retries every failing provider by default. Only `catalog`, the database and now `goldOffersProvider` opt out. Any other provider with an error state and a manual "Try again" may show loading instead of its error; worth a sweep.
+- The sandbox cannot run the File KMS / OpenBao / host-secrets tests (163) or the 3 Docker tests: its `/` is owned by `nobody`, so the key-folder guard fires. CI is the only evidence for them.
 
 ## Ready next
 

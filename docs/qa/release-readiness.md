@@ -4,7 +4,7 @@ Zaghlol, `main` @ `bc5b9d1d`. Audit date: 19 Nov 2026.
 
 ## Recommendation: NOT READY for release
 
-The code that could be tested on a host machine is in good shape: every existing automated test passes and the backend held up under independent API and database testing. It is not releasable because the app was never run on a device in this audit, a release build cannot verify any backend response, and 19 planned tasks, including the security assessment and both store pipelines, are still open.
+The code that could be tested on a host machine is in good shape: every existing automated test passes and the backend held up under independent API and database testing. On the emulator, onboarding, navigation, both languages and both themes work. It is not releasable because the core journeys with data (SMS capture, saving transactions, budgets, purchases, backup) were never run on a device, a release build cannot verify any backend response, and 19 planned tasks, including the security assessment and both store pipelines, are still open.
 
 ## 1. Overall implementation status
 
@@ -23,13 +23,13 @@ The code that could be tested on a host machine is in good shape: every existing
 
 | Status | Count | Share |
 |---|---|---|
-| PASS | 235 | 75.3 % |
-| FAIL | 2 | 0.6 % |
-| BLOCKED | 72 | 23.1 % |
+| PASS | 233 | 74.7 % |
+| FAIL | 3 | 1.0 % |
+| BLOCKED | 73 | 23.4 % |
 | NOT IMPLEMENTED | 2 | 0.6 % |
 | NOT TESTED | 1 | 0.3 % |
 
-Read the 75.3 % with care. A PASS means the tests in the feature's suites were executed and passed, mostly at component level on Linux. The mapping from requirement to suite is by feature folder, so it shows the feature is exercised, not that each sentence of the requirement was individually proven. No requirement was verified on a phone. The 72 BLOCKED ones are those whose acceptance criterion needs a device, a store, real bank samples, a deployed backend or a human reviewer; they include most of capture, purchases, backup to the cloud, app lock and all performance targets.
+Read the 74.7 % with care. A PASS means the tests in the feature's suites were executed and passed, mostly at component level on Linux. The mapping from requirement to suite is by feature folder, so it shows the feature is exercised, not that each sentence of the requirement was individually proven. 37 requirements were also observed on an emulator, click-only; the rest were not seen on a device. The 72 BLOCKED ones are those whose acceptance criterion needs a device, a store, real bank samples, a deployed backend or a human reviewer; they include most of capture, purchases, backup to the cloud, app lock and all performance targets.
 
 ## 3. Test execution statistics
 
@@ -38,10 +38,11 @@ Read the 75.3 % with care. A PASS means the tests in the feature's suites were e
 | Existing suites (app, packages, tools, backend) | 10,547 | 10,547 | 0 | 39 skipped |
 | New API and database cases | 151 | 130 | 10 | 10 withdrawn, 1 blocked |
 | Extra live checks | 5 | 4 | 1 | |
-| Static checks | 6 | 5 | 1 | `flutter analyze` |
-| On-device UI and end-to-end | 0 | — | — | 12 planned journeys blocked |
+| Benchmark-tagged tests (host timing) | 21 | 21 | 0 | `db-platform` benchmarks not run |
+| Static checks | 7 | 6 | 1 | `flutter analyze` |
+| On-device checks on the emulator | 36 | 32 | 4 | click-only; typing, swiping and server steps blocked |
 
-Not run at all: Android Gradle tests and lint, iOS tests, device integration tests, benchmarks, container image checks. GitHub Actions shows these green on the same tree; that was read, not re-verified.
+Not run at all: Android Gradle tests and lint, iOS tests, device integration tests, device benchmarks, container image checks. Host benchmarks are far inside the phone targets (for example 0.06 ms per parsed message against 10 ms), which lowers but does not remove the performance risk. GitHub Actions shows these green on the same tree; that was read, not re-verified.
 
 ## 4. Critical and high-severity bugs
 
@@ -49,7 +50,7 @@ Not run at all: Android Gradle tests and lint, iOS tests, device integration tes
 |---|---|---|
 | BUG-001 | HIGH | A release build embeds no backend public key, so it rejects every sync and never grants Gold. Intentional until production keys exist (T-140), but a release blocker |
 
-No CRITICAL bug found. Medium: BUG-002 (API aborts on shutdown), BUG-003 (two operator endpoints missing). Low: BUG-004…009. See `bug-report.md`.
+No CRITICAL bug found. Medium: BUG-002 (API aborts on shutdown), BUG-003 (two operator endpoints missing), BUG-015 (paywall stuck loading), BUG-016 (Flutter default app icon). Low: BUG-004…009, BUG-017, BUG-018. See `bug-report.md`.
 
 ## 5. Security findings
 
@@ -74,7 +75,7 @@ No CRITICAL bug found. Medium: BUG-002 (API aborts on shutdown), BUG-003 (two op
 
 ## 7. Known risks
 
-1. **Never run on a device in this audit.** UI, navigation, SMS capture with the app killed, permissions and notifications are unverified here.
+1. **Only partly run on a device.** Onboarding, permissions, navigation, settings, languages and themes were seen on an emulator. SMS capture (including with the app killed), saving data, budgets, purchases and backup were not.
 2. **Parsing accuracy is unproven on real messages.** 197 registry entries are marked `synthetic-unverified`; real samples are still awaited (BLK-02). This is the core value of the product.
 3. **Google Play SMS permission.** Approval of the "SMS-based money management" declaration is outside the team's control.
 4. **Purchases untested against real stores.** Only the fake-store path ran.
@@ -85,7 +86,7 @@ No CRITICAL bug found. Medium: BUG-002 (API aborts on shutdown), BUG-003 (two op
 
 ## 8. Conditions to change the recommendation
 
-1. Run the 12 device journeys in `test-plan.md` §7 on an emulator and at least one real Android phone; run the iOS equivalents.
+1. Finish the device journeys in `test-plan.md` §7 that need typing (run the emulator in its own window so it can be granted full control), on at least one real Android phone too; run the iOS equivalents.
 2. Close BUG-001 after T-140; fix BUG-002 and BUG-003.
 3. Validate parsing against real samples for the launch banks.
 4. Complete T-175 (security assessment) and T-172 (device suites).
@@ -105,3 +106,6 @@ Per the audit brief, nothing is fixed until these findings are reviewed and appr
 | BUG-006, BUG-008 | C1 (documents) | Haiku, `boilerplate-engineer`, with PO sign-off on the SRS text | coverage regeneration |
 | BUG-007 | C1 | Haiku | `flutter analyze` on a clean clone |
 | BUG-009 | C4 (data migration) | Opus, `backend-engineer` | D-03 |
+| BUG-015 | C3 (billing UI, failure path unclear) | Sonnet with a short Opus design note, `flutter-ui-engineer` | paywall on an emulator without Play billing |
+| BUG-016 | C1 (assets) | Haiku, `boilerplate-engineer` | launcher on Android and iOS |
+| BUG-017, BUG-018 | C2 | Sonnet, `flutter-ui-engineer` | About on a fresh install; filter sheet golden |

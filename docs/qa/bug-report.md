@@ -1,5 +1,7 @@
 # Bug report
 
+_IDs BUG-015…018 were first published locally as BUG-010…013; renumbered on 25 Nov because QA B57 (`bug-report-2.md` in the repo) used BUG-010…014 for other bugs._
+
 Audit of `Amr905/zaghlol`, branch `main` @ `bc5b9d1d` (merge of PR #76), 19 Nov 2026.
 Every bug below was reproduced or read directly in the code during this audit. Nothing was fixed; no application code was changed.
 
@@ -14,8 +16,16 @@ Every bug below was reproduced or read directly in the code during this audit. N
 | BUG-007 | LOW | `flutter analyze` fails on a clean checkout of `main` | CLAUDE.md §7 (Definition of Done) |
 | BUG-008 | LOW | Status documents contradict each other; README says "zero-backend" | CLAUDE.md §9, docs/workflow |
 | BUG-009 | LOW | `installs.catalog_version` accepts negative values at database level | backend-schema.md |
+| BUG-015 | MEDIUM (FIXED, QA batch 26 Nov) | Gold paywall never leaves "Loading prices…" when the store has no offers | FR-GOLD-01, explorer finding 16 |
+| BUG-016 | MEDIUM (FIXED, QA batch 26 Nov) | App icon is Flutter's default logo on Android and iOS, not Captain Zaghlol | CLAUDE.md §8, docs/02-design/brand |
+| BUG-017 | LOW (FIXED, QA batch 26 Nov) | About screen shows two identical unlabelled "Not updated yet" lines | FR-SYNC-06 |
+| BUG-018 | LOW (FIXED, QA batch 26 Nov) | Card-filter sheet opens under the tab bar; the Add button covers its "Done" button | FR-HOME-05, FR-CARD-01 |
+| BUG-019 | LOW (FIXED, QA batch 26 Nov) | Transfer pairing returns "ambiguous" when the pool contains the leg itself, against its documented contract | BR-XFR-01 |
+| BUG-020 | LOW | Decision IDs D-67…D-70 each name two different decisions in the SRS | requirements.md §2 |
+| BUG-021 | LOW (FIXED, QA batch 26 Nov) | Top-merchants explanation shows the visit count as a bare "(6)" | FR-CHT-03 |
+| BUG-022 | LOW | Top-merchants tip always says "one visit a week", whatever the merchant or the number of visits | FR-CHT-03 |
 
-No CRITICAL bug was found. That statement covers only what was tested: see `release-readiness.md` for what was not.
+BUG-015…018 were found on the emulator in a second session (19 Nov, evening). No CRITICAL bug was found. That statement covers only what was tested: see `release-readiness.md` for what was not.
 
 ---
 
@@ -113,6 +123,74 @@ No CRITICAL bug was found. That statement covers only what was tested: see `rele
 - **Actual:** accepted (D-03).
 - **Recommended fix:** add `CHECK (catalog_version >= 0)` in a migration.
 
+## BUG-015 — Gold paywall stuck on "Loading prices…"
+
+- **Severity:** MEDIUM. The user can close the screen, but cannot buy, retry or learn what is wrong.
+- **Environment:** emulator, Pixel 10 Pro XL AVD, Android 17 (API 37), `zaghlol-devSms-debug-apk` from app-ci run 44394261225 (same tree as `main`). Google Play cannot sell products for this package.
+- **Steps to reproduce:** Settings → Zaghlol Gold banner; wait.
+- **Expected:** after 8 seconds (`goldStoreTimeout`), "prices failed" with a retry button, as the paywall code and `store_timeout_test.dart` describe.
+- **Actual:** three empty plan placeholders and "Loading prices…" for more than 30 seconds; reproduced after closing and reopening (20 s more). "Restore purchases" on the same screen did fail cleanly ("The store reported a problem. Try again in a bit."), so the store connection itself answers.
+- **Evidence:** screenshots taken during the session (described in `test-results.md` §5).
+- **Root cause (found 26 Nov):** Riverpod 3 retries a failing provider automatically. `goldOffersProvider` failed after 8 s, showed the error for a fraction of a second, then went back to loading, again and again. The host test passed because it built its container with `retry: null`. Fixed in the QA batch of 26 Nov by turning the retry off for this provider; not yet re-checked on a device.
+- **Earlier note:** not established; no device logs were available. The 8-second timeout wraps only `queryProductDetails`; something that runs before it, or the provider being rebuilt without settling, may keep it in loading. The host test fakes the store, so it cannot catch this.
+- **Recommended fix:** reproduce with `adb logcat` on an emulator without Play billing; add a device or integration test for the "store unavailable" path.
+
+## BUG-016 — App icon is the Flutter default
+
+- **Severity:** MEDIUM. It would ship to the stores as is.
+- **Steps:** install any flavour; look at the launcher or the system app list.
+- **Expected:** Captain Zaghlol icon (approved in Phase 2; files `docs/02-design/brand/zaghlol-app-icon-*.png`).
+- **Actual:** Flutter logo. `app/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png` has the same MD5 (`afe1b655…`) as Flutter's template icon; iOS `Icon-App-1024x1024@1x.png` has the same MD5 (`c785f893…`) as Flutter's template.
+- **Recommended fix:** generate launcher icons from the brand files (adaptive icon on Android), and add a CI check that the icons differ from Flutter's template.
+
+## BUG-017 — About screen: two identical unlabelled lines
+
+- **Severity:** LOW.
+- **Steps:** fresh install, never synced; Settings → About.
+- **Expected:** "Merchant list updated …" and "Prices updated …", or a labelled "not updated yet" for each (FR-SYNC-06).
+- **Actual:** "Not updated yet (works offline)" twice, with nothing saying which is which.
+- **Root cause:** `about_screen.dart` lines 52 and 57 both fall back to `aboutMainNeverSynced`.
+- **Recommended fix:** a fallback string per row, e.g. "Merchant list: not updated yet".
+
+## BUG-018 — Card-filter sheet covered by the tab bar and Add button
+
+- **Severity:** LOW (a workaround exists).
+- **Steps:** Home → filter icon.
+- **Expected:** a bottom sheet above the tab bar and the floating Add button.
+- **Actual:** the sheet opens under the tab bar; the Add button covers all but the first letter of "Done". Tapping that letter does close the sheet. With many cards, the end of the list would also sit under the tab bar.
+- **Recommended fix:** show the sheet on the root navigator (`useRootNavigator: true`), or hide the Add button while a sheet is open; add a golden test with the sheet open.
+
+## BUG-019 — Transfer pairing breaks its own contract when the pool contains the leg
+
+- **Severity:** LOW (latent). Found 26 Nov on `main` @ `89583b27` by an independent QA test (`packages/zaghlol_parsing/test/qa/qa_independent_spec_test.dart`, TC-XFR-003b).
+- **Steps:** call `decideSameCurrency(a, [a, b])` with `a` = 1,000 EGP out of NBE and `b` = 1,000 EGP into CIB two minutes later.
+- **Expected:** `PairWith(b)`. The function's comment says the pool "may contain [leg]; it is ignored".
+- **Actual:** `AmbiguousMatch`. With `[b]` alone it pairs.
+- **Root cause:** `transfer_matching.dart` runs the reverse check on `[...all, leg]`, so the leg is counted twice when it is already in the pool, and "exactly one reverse candidate" fails.
+- **Impact today:** none seen. The app's only caller (`transfer_pairing.dart`) leaves the leg out of the pool. A future caller that trusts the comment would stop pairing every self-transfer and send them all to "ask the user".
+- **Recommended fix:** drop the leg from `all` before both checks (or fix the comment), and add the two-element case to the existing "leg ignores itself" test, which only checks a pool of one.
+
+## BUG-020 — Duplicate decision IDs in the SRS
+
+- **Severity:** LOW (documentation).
+- **Where:** `docs/01-requirements/requirements.md` §2 on `main` @ `89583b27`.
+- **Actual:** D-67 is both "XAD hidden" and "Hide amounts in the app"; D-68 is both "Late-month salary" and "Chart periods"; D-69 is both "Hidden accounts still count" and "App size budget"; D-70 is both "Dark-mode quip" and "Lost database key".
+- **Impact:** code comments, tests and task files that cite one of these IDs cannot be traced to one decision. The test catalogue cannot attribute tests that cite them.
+- **Recommended fix:** renumber the later four and update the references.
+
+## BUG-021 — Top-merchants explanation: unlabelled visit count
+
+- **Severity:** LOW (readability). Found 26 Nov by `app/test/qa/chart_explanations_reflect_data_test.dart`.
+- **Actual:** "Carrefour is first with EGP 3,200.00 (6), then Talabat with EGP 2,100.00." Nothing says the 6 is the number of visits. Same in Arabic.
+- **Fix (QA batch, 26 Nov):** "(visits: 6)" / "(عدد المرات: 6)", a form that needs no plural rules. Copy deck updated. The wording is QA's; the PO or the copy reviewer may prefer another.
+
+## BUG-022 — Top-merchants tip ignores the data
+
+- **Severity:** LOW. Open.
+- **Actual:** the tip "Group your {merchant} shopping into one visit a week" is shown for the top merchant whenever it is not on the protected list. It does not look at the number of visits or the length of the period, so a merchant visited twice in a month, a ride app or a subscription gets the same advice.
+- **Expected (FR-CHT-03):** a tip computed from the user's data.
+- **Recommended fix:** show it only when visits per week in the period are above one (and for shop-type categories), otherwise fall back to an amount-based tip or none. Needs a product decision, so it is not changed here.
+
 ---
 
 ## Not bugs: expectations I withdrew
@@ -126,3 +204,4 @@ No CRITICAL bug was found. That statement covers only what was tested: see `rele
 | F-12 | A flag key I inserted (`qa_flag_on`) was not delivered | The server delivers only the keys it knows (`zakah`, `smart_roi`, `roi_named_products`). Toggling `zakah` was delivered correctly. |
 | F-07 | A valid merchant contribution was not stored | Category codes are checked against the published catalog, and the test database had none. Recorded as BLOCKED, not failed. |
 | D-04 | Hard `DELETE` of an install as superuser succeeded | The trigger vacates seats; it is not meant to block deletion. |
+| Device | Money tab total looked like "ج.م" with no number | The dot before it is the Arabic-Indic zero "٠"; the card reads 0 EGP. |

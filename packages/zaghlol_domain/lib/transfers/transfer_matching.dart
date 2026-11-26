@@ -104,7 +104,12 @@ SameCurrencyOutcome decideSameCurrency(
   TransferLeg leg,
   Iterable<TransferLeg> pool,
 ) {
-  final all = pool.toList();
+  // BUG-019: the pool may contain [leg]; drop it, or the reverse check below
+  // would count it twice and call a clear pair ambiguous.
+  final all = [
+    for (final c in pool)
+      if (c.id != leg.id) c,
+  ];
   final candidates = sameCurrencyCandidates(leg, all);
   if (candidates.isEmpty) return const NoMatch();
   if (candidates.length > 1) {

@@ -64,10 +64,11 @@ object OcrMerger {
         return h.toDouble() / smallerHeight >= GATE_ROW_OVERLAP
     }
 
-    /** A strong ML Kit amount line on the same box: its digits win over the Arabic line's (FU-376). */
+    /** A strong ML Kit line with an amount-like token (not any digit) on the same box: its digits win over the Arabic line's (FU-376). */
     private fun strongAmountOverlaps(arabicLine: RawLine, latin: List<RawLine>): Boolean =
         latin.any {
-            strongLatin(it.text) && digitTokens(it.text).isNotEmpty() && overlap(it, arabicLine) >= OVERLAP
+            strongLatin(it.text) && digitTokens(it.text).any { t -> amountLike(t) } &&
+                overlap(it, arabicLine) >= OVERLAP
         }
 
     private fun mergeBoth(latin: List<RawLine>, arabic: List<RawLine>): List<RawLine> {
@@ -193,6 +194,13 @@ object OcrMerger {
             }
             .map { normalizeDigits(it) }
             .filter { AMOUNT.matches(it) }
+
+    /** FU-392: a decimal amount ("85.50") or three or more digits ("1436"); "Ref 12" is not one. */
+    private fun amountLike(token: String): Boolean {
+        val t = token.trim(':', ')', '(', ',', '.', '/')
+        if (!AMOUNT.matches(t)) return false
+        return t.any { it == '.' || it == ',' } && t.last().isDigit() || t.count { it in '0'..'9' } >= 3
+    }
 
     private fun digitTokens(s: String): List<String> = s.split(WHITESPACE).filter { t -> t.any { it in '0'..'9' } }
 

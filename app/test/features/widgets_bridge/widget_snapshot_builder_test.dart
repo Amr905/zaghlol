@@ -60,6 +60,7 @@ WidgetSnapshotInput input({
   DigitsMode digits = DigitsMode.western,
   WidgetCopy copy = _en,
   List<String> others = const [],
+  int lineBudget = widgetMaxLineChars,
 }) => WidgetSnapshotInput(
   overview: ov,
   primaryCurrency: egp,
@@ -70,6 +71,7 @@ WidgetSnapshotInput input({
   copy: copy,
   nowMs: 1000,
   otherCurrencies: others,
+  lineBudget: lineBudget,
 );
 
 void main() {
@@ -223,6 +225,29 @@ void main() {
       final s = buildWidgetSnapshot(input(ov: ov, others: ['USD'], copy: long));
       expect(s.secondaryText, '7 ${'x' * 110}');
       expect(s.secondaryTextByDay, everyElement(isNot(contains('USD'))));
+    });
+
+    test('FU-393: a line over the 2x1 budget drops the hint', () {
+      final mid = WidgetCopy(
+        setBudget: 'b',
+        perDay: (a) => '$a/day',
+        daysToPayday: (n, f) => 'x' * (widgetSmallLineBudget - 6),
+        openApp: 'o',
+      );
+      final s = buildWidgetSnapshot(
+        input(
+          ov: ov,
+          others: ['USD'],
+          copy: mid,
+          lineBudget: widgetSmallLineBudget,
+        ),
+      );
+      expect(s.secondaryText, 'x' * (widgetSmallLineBudget - 6));
+      final ok = buildWidgetSnapshot(
+        input(ov: ov, others: ['USD'], lineBudget: widgetSmallLineBudget),
+      );
+      expect(ok.secondaryText.length, lessThanOrEqualTo(widgetSmallLineBudget));
+      expect(ok.secondaryText, contains('+ USD'));
     });
 
     test('every rolled day line carries the hint, no amount in it', () {

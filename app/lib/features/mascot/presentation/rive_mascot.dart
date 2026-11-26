@@ -2,13 +2,16 @@
 // docs/02-design/mascot-rive-handoff.md. If the file fails to load, shows the
 // still so the app never breaks.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rive/rive.dart' as rive;
 
-import 'zaghlol_avatar.dart' show ZaghlolAvatar, ZaghlolMoment;
+import 'zaghlol_avatar.dart'
+    show ZaghlolAvatar, ZaghlolMoment, reduceMotionProvider;
 import 'zaghlol_mascot.dart';
 
 const kRiveArtboard = 'Zaghlol';
@@ -174,6 +177,43 @@ Future<void> preloadRiveMascot({
   } catch (_) {
     // The mascot falls back to the still when it mounts.
   }
+}
+
+/// FU-391: starts [preloadRiveMascot] after the first frame, when the platform
+/// accessibility flags are set and the in-app reduce-motion setting is known.
+/// Either one off means no load. Wraps the app root; shows [child] unchanged.
+class RivePreloadOnFirstFrame extends ConsumerStatefulWidget {
+  const RivePreloadOnFirstFrame({super.key, required this.child, this.load});
+
+  final Widget child;
+
+  /// Test seam: replaces the real load.
+  @visibleForTesting
+  final Future<void> Function()? load;
+
+  @override
+  ConsumerState<RivePreloadOnFirstFrame> createState() =>
+      _RivePreloadOnFirstFrameState();
+}
+
+class _RivePreloadOnFirstFrameState
+    extends ConsumerState<RivePreloadOnFirstFrame> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || ref.read(reduceMotionProvider)) return;
+      unawaited(
+        preloadRiveMascot(
+          animationsDisabled: MediaQuery.maybeDisableAnimationsOf(context),
+          load: widget.load,
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 // Legacy state machine inputs: stable and enough for one number + two flags.
