@@ -44,7 +44,28 @@ const List<String> exportHeader = [
   'category_id',
   'source',
   'note',
+  'pair',
+  'kind',
 ];
+
+/// Header of exports written before T-285 (14 columns); the importer still
+/// reads it.
+List<String> get legacyExportHeader => exportHeader.sublist(0, 14);
+
+/// T-285: kind values for rows that are one leg of a pair.
+const String exportKindExchange = 'exchange';
+const String exportKindTransfer = 'transfer';
+
+/// Short stable id shared by both legs of a pair: FNV-1a (64-bit) of the
+/// pair id, 10 hex digits. Not the stored id, so the file reveals no
+/// internal ids.
+String exportPairLabel(String pairId) {
+  var h = 0xcbf29ce484222325;
+  for (final u in utf8.encode(pairId)) {
+    h = ((h ^ u) * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF;
+  }
+  return (h & 0xFFFFFFFFFF).toRadixString(16).padLeft(10, '0');
+}
 
 /// Positions in [exportHeader] the preview table reads.
 const int exportColDate = 1;
@@ -62,7 +83,10 @@ String neutralizeFormula(String s) {
 }
 
 /// One export row as strings, in [exportHeader] order.
-List<String> exportRow(TransactionRecord t) {
+/// [pairKind] is the stored `transfer_pairs.kind` of the row's pair, when
+/// known; exchanges are `fx_conversion` / `cross_currency`.
+List<String> exportRow(TransactionRecord t, {String? pairKind}) {
+  final pairId = t.transferPairId;
   final orig = t.originalAmount;
   // FU-131: ids are free-form text in the database (a restored or imported
   // row may carry any id), so they are neutralised too.
@@ -83,8 +107,16 @@ List<String> exportRow(TransactionRecord t) {
     neutralizeFormula(t.categoryId ?? ''),
     t.source.code,
     neutralizeFormula(t.note ?? ''),
+    pairId == null ? '' : exportPairLabel(pairId),
+    pairId == null
+        ? ''
+        : (pairKind != null && _isExchange(pairKind)
+              ? exportKindExchange
+              : exportKindTransfer),
   ];
 }
+
+bool _isExchange(String k) => k == 'fx_conversion' || k == 'cross_currency';
 
 /// RFC 4180 CSV, UTF-8 with BOM, CRLF line ends (opens Arabic correctly in
 /// Excel on Windows).
@@ -316,8 +348,22 @@ final class ExportTooLarge extends ExportOutcome {
 }
 
 class ExportService {
-  ExportService(this._repo);
+  ExportService(this._repo, {this.pairKinds});
   final TransactionRepository _repo;
+
+  /// Resolves pair ids to `transfer_pairs.kind`. Without it every pair
+  /// exports as `transfer`.
+  final Future<Map<String, String>> Function(Set<String> pairIds)? pairKinds;
+
+  Future<List<List<String>>> _rows(List<TransactionRecord> rows) async {
+    final ids = {for (final r in rows) ?r.transferPairId};
+    final kinds = ids.isEmpty || pairKinds == null
+        ? const <String, String>{}
+        : await pairKinds!(ids);
+    return [
+      for (final r in rows) exportRow(r, pairKind: kinds[r.transferPairId]),
+    ];
+  }
 
   Future<List<TransactionRecord>> _load(
     TransactionFilter filter,
@@ -357,14 +403,14 @@ class ExportService {
       final total = await _repo.count(filter: filter);
       return ExportPreview(
         exportHeader,
-        rows.take(exportPreviewRows).map(exportRow).toList(),
+        await _rows(rows.take(exportPreviewRows).toList()),
         total,
       );
     }
     if (!warningAcknowledged) return const ExportNeedsWarningAck();
     final rows = await _load(filter, exportMaxRows + 1);
     if (rows.length > exportMaxRows) return const ExportTooLarge();
-    final table = [exportHeader, ...rows.map(exportRow)];
+    final table = [exportHeader, ...await _rows(rows)];
     final bytes = format == ExportFormat.csv
         ? encodeCsv(table)
         : encodeXlsx(table);
