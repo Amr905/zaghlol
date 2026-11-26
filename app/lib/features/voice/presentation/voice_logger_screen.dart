@@ -85,6 +85,19 @@ class _VoiceLoggerState extends ConsumerState<VoiceLoggerScreen> {
     final ids = s.savedIds;
     final d = s.drafts.length == 1 ? s.drafts.first : null;
     final amt = d?.amount;
+    final count = ids.length;
+    final title = count > 1
+        ? l.voiceLoggerSaved(
+            count,
+            TxnFmt(
+              lang,
+              container.read(digitsModeProvider(lang)),
+              hidden: false,
+            ).count(count),
+          )
+        : null;
+    // Pop first; the budget line is looked up while the toast is not yet up.
+    Navigator.of(context).pop();
     final line = d == null || amt == null
         ? null
         : await savedToastBudgetLine(
@@ -94,11 +107,10 @@ class _VoiceLoggerState extends ConsumerState<VoiceLoggerScreen> {
             languageCode: lang,
             l10n: l,
           );
-    if (!mounted) return;
-    Navigator.of(context).pop();
     showSavedToast(
       messenger,
       l,
+      title: title,
       budgetLine: line,
       onUndo: () => unawaited(_undo(container, ids)),
     );

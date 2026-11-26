@@ -78,7 +78,7 @@ void main() {
     expect(legs.every((e) => e.source == TxnSource.voice), isTrue);
     expect(legs.every((e) => e.accountId == 'cash'), isTrue);
     expect(r.usage.counted, 1, reason: 'A-14: one recording = one log');
-    expect(find.text('Saved!'), findsOneWidget);
+    expect(find.text('3 expenses saved ✓'), findsOneWidget);
     expect(find.text('Undo'), findsOneWidget);
     expect(find.text('open'), findsOneWidget, reason: 'screen closed');
   });
@@ -475,7 +475,7 @@ void main() {
     await t.pumpAndSettle();
     expect(r.editor.added.length, 3);
     expect(r.usage.attempts, 1, reason: 'one log is never counted twice');
-    expect(find.text('Saved!'), findsOneWidget);
+    expect(find.text('3 expenses saved ✓'), findsOneWidget);
   });
 
   testWidgets('closing without saving saves and counts nothing', (t) async {

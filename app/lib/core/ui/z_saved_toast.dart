@@ -10,12 +10,14 @@ import 'z_haptics.dart';
 /// normal floating snackbar (one toast system) with the bird in front. Never
 /// shown for bulk actions or background ingestion; callers decide.
 ///
+/// [title] replaces "Saved!" (voice multi-draft count).
 /// [budgetLine] is the already formatted "X left in Category" text, or null.
 /// [onUndo] adds the Undo action when the caller can undo the save.
 /// [extraLabel]/[onExtra] is an optional second action (used instead of Undo).
 void showSavedToast(
   ScaffoldMessengerState messenger,
   AppLocalizations l10n, {
+  String? title,
   String? budgetLine,
   VoidCallback? onUndo,
   String? extraLabel,
@@ -27,11 +29,12 @@ void showSavedToast(
       SnackBar(
         key: const ValueKey('savedToast'),
         behavior: SnackBarBehavior.floating,
+        margin: savedToastMargin(messenger.context),
         duration: const Duration(milliseconds: 2500),
         // A snackbar with an action stays up by default; this one must hide.
         persist: false,
         content: _SavedToastBody(
-          title: l10n.savedToastTitle,
+          title: title ?? l10n.savedToastTitle,
           line: budgetLine,
           // A long label lives in the body (wraps) instead of the action,
           // which overflowed at 1.3x text.
@@ -123,4 +126,16 @@ class _SavedToastBodyState extends ConsumerState<_SavedToastBody> {
       ],
     );
   }
+}
+
+/// Bottom margin that lifts the toast above the shell's bottom bar and the
+/// raised Add circle (both are laid over the Scaffold body, not in the
+/// Scaffold's own FAB/bar slots, so the snackbar cannot avoid them itself).
+EdgeInsetsGeometry savedToastMargin(BuildContext context) {
+  final inset = MediaQuery.paddingOf(context).bottom;
+  return EdgeInsetsDirectional.only(
+    start: ZSpacing.md,
+    end: ZSpacing.md,
+    bottom: inset + ZSpacing.barHeight + ZSpacing.addRaise + ZSpacing.sm,
+  );
 }
