@@ -21,6 +21,7 @@
 | 8 | Logging & monitoring | [`error-handling-and-observability.md`](error-handling-and-observability.md) §3–5 |
 | 9 | Security considerations | [`security-model.md`](security-model.md) |
 | 10 | Deployment considerations | [`deployment.md`](deployment.md) |
+| — | Online helper and automatic categories (LLM) | [`ask-llm.md`](ask-llm.md) · [`llm-categorise.md`](llm-categorise.md) · ADR-027 |
 | — | Testing strategy | [`testing-strategy.md`](testing-strategy.md) |
 | — | Decisions & alternatives | [`adr/`](adr/) (22 ADRs, below) |
 
@@ -52,6 +53,7 @@
 | [022](adr/ADR-022-backend-architecture.md) | .NET 10 modular monolith + PostgreSQL 17; *amended 2026-11-05:* open third-party bodies, no query logging, `backend/Dockerfile` | Microservices, serverless | Proposed |
 | [023](adr/ADR-023-self-hosted-key-custody.md) | No cloud KMS (D-76): hardened key files now (`Kms:Provider = File`, T-200), self-hosted OpenBao Transit before Gold is sold (`Kms:Provider = OpenBao`, T-201) | Cloud KMS, hardware HSM | Accepted |
 | [024](adr/ADR-024-app-size-ocr-pdf-options.md) | App size (T-190): measured 28.8 MiB Play download arm64 / 17.4 MiB IPA; options to drop or defer OCR engines, PDFium, Rive | Drop Tesseract, drop ML Kit, on-demand OCR/PDF, OS PDF APIs, defer Rive | **Proposed** |
+| [027](adr/ADR-027-ask-llm-gateway.md) | LLM gateway for the online helper and automatic categories: backend provider adapters (config-chosen, eval-gated), structured output only, Cairo-month quotas, staged attestation (production always enforces); see [`ask-llm.md`](ask-llm.md), [`llm-categorise.md`](llm-categorise.md) | On-device model, direct provider calls, free-text answers | Proposed |
 
 ## Change requests raised by this phase (need product-owner approval)
 
