@@ -1239,12 +1239,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeHeroKpiIncomeFromExchange(String amount) {
-    return 'منهم $amount من تحويل عملة';
+    return 'منهم $amount من تغيير عملة';
   }
 
   @override
   String homeHeroKpiExchangedOut(String amount) {
-    return 'وحولت $amount';
+    return 'وغيّرت $amount';
   }
 
   @override
@@ -1253,11 +1253,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get exchangeEntryTitle => 'حولت فلوس';
+  String get exchangeEntryTitle => 'تغيير عملة';
 
   @override
   String get exchangeEntryIntro =>
-      'التحويل مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.';
+      'تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.';
 
   @override
   String get exchangeEntrySent => 'دفعت';
@@ -1283,13 +1283,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get exchangeEntrySameCurrency => 'اختار عملتين مختلفتين';
 
   @override
-  String get exchangeEntrySave => 'احفظ التحويل';
+  String get exchangeEntrySave => 'احفظ التغيير';
 
   @override
-  String get exchangeEntrySaved => 'اتسجل التحويل';
+  String get exchangeEntrySaved => 'اتسجل التغيير';
 
   @override
-  String get exchangeEntryFailed => 'معرفناش نحفظ التحويل. جرب تاني.';
+  String get exchangeEntryFailed => 'معرفناش نحفظ التغيير. جرب تاني.';
 
   @override
   String homeHeroApproxTitle(String currency) {
@@ -2097,7 +2097,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String ingestionReviewExchangeJumpQuestion(String currency, String amount) {
-    return 'حولت فلوس؟ رصيدك بالـ$currency زاد حوالي $amount ومشفناش فلوس داخلة.';
+    return 'غيّرت عملة؟ رصيدك بالـ$currency زاد حوالي $amount ومشفناش فلوس داخلة.';
   }
 
   @override
@@ -3338,7 +3338,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotTipSmartVoice =>
-      'بفهم المصري! قول «دفعت ١٥٠ خضار و٤٥ قهوة» وأسجّلهم اتنين 🎤';
+      'بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤';
 
   @override
   String get mascotTipSmartSms =>
@@ -3370,7 +3370,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotTipSmartTransfer =>
-      'لو حولت من كارت لحسابك، ببقى عارف إنه إنت بتدفع لنفسك وماببقاش صرف 👌';
+      'لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌';
 
   @override
   String get mascotTipHabitCoffee =>
@@ -3394,7 +3394,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotTipHabitWait =>
-      'استنى ٢٤ ساعة قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️';
+      'استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️';
 
   @override
   String get mascotTipHabitTreat =>
@@ -4585,13 +4585,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillEditSaved => 'الفاتورة اتحفظت ✓';
 
   @override
-  String get homeQuickAddExchange => 'حولت فلوس';
+  String get homeQuickAddExchange => 'غيّرت عملة';
 
   @override
   String get homeQuickAddExchangeHint => 'من عملة لعملة، زي دولار لجنيه';
 
   @override
-  String get homeQuickAddExchangeA11y => 'سجل تحويل عملة';
+  String get homeQuickAddExchangeA11y => 'سجّل تغيير عملة';
 
   @override
   String homeQuickAddVoiceLeft(String remaining, String max) {

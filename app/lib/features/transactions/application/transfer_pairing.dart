@@ -220,7 +220,7 @@ class TransferPairingUseCase {
     return result;
   }
 
-  /// T-272 (D-86, WP-4): the user exchanged money ("حولت فلوس"). In one
+  /// T-272 (D-86, WP-4): the user exchanged money ("غيّرت عملة"). In one
   /// database transaction stores the `transfer_out` of [sent] on
   /// [fromAccountId] and the `transfer_in` of [received] on [toAccountId]
   /// (source `manual`, user-verified, same instant) and pairs them: kind

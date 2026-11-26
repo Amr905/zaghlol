@@ -18,7 +18,7 @@ final _card = ExchangeJumpCardModel(
 
 const _strings = {
   'en': (q: 'Your EGP balance rose by about', yes: 'Yes, record it', no: 'No'),
-  'ar': (q: 'حولت فلوس؟', yes: 'أيوه، سجلها', no: 'لأ'),
+  'ar': (q: 'غيّرت عملة؟', yes: 'أيوه، سجلها', no: 'لأ'),
 };
 
 void main() {

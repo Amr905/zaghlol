@@ -1472,7 +1472,7 @@
   "@homeHeroKpiLeft": {
     "description": "C"
   },
-  "homeHeroKpiIncomeFromExchange": "منهم {amount} من تحويل عملة",
+  "homeHeroKpiIncomeFromExchange": "منهم {amount} من تغيير عملة",
   "@homeHeroKpiIncomeFromExchange": {
     "description": "C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.",
     "placeholders": {
@@ -1481,7 +1481,7 @@
       }
     }
   },
-  "homeHeroKpiExchangedOut": "وحولت {amount}",
+  "homeHeroKpiExchangedOut": "وغيّرت {amount}",
   "@homeHeroKpiExchangedOut": {
     "description": "C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.",
     "placeholders": {
@@ -1499,11 +1499,11 @@
       }
     }
   },
-  "exchangeEntryTitle": "حولت فلوس",
+  "exchangeEntryTitle": "تغيير عملة",
   "@exchangeEntryTitle": {
     "description": "C · T-272 manual exchange screen title"
   },
-  "exchangeEntryIntro": "التحويل مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.",
+  "exchangeEntryIntro": "تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.",
   "@exchangeEntryIntro": {
     "description": "C · T-272"
   },
@@ -1546,15 +1546,15 @@
   "@exchangeEntrySameCurrency": {
     "description": "C · T-272 validation"
   },
-  "exchangeEntrySave": "احفظ التحويل",
+  "exchangeEntrySave": "احفظ التغيير",
   "@exchangeEntrySave": {
     "description": "C · T-272"
   },
-  "exchangeEntrySaved": "اتسجل التحويل",
+  "exchangeEntrySaved": "اتسجل التغيير",
   "@exchangeEntrySaved": {
     "description": "C · T-272 snackbar"
   },
-  "exchangeEntryFailed": "معرفناش نحفظ التحويل. جرب تاني.",
+  "exchangeEntryFailed": "معرفناش نحفظ التغيير. جرب تاني.",
   "@exchangeEntryFailed": {
     "description": "C · T-272"
   },
@@ -2728,7 +2728,7 @@
   "@ingestionReviewOldDueKept": {
     "description": "T-250: snackbar after Keep"
   },
-  "ingestionReviewExchangeJumpQuestion": "حولت فلوس؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.",
+  "ingestionReviewExchangeJumpQuestion": "غيّرت عملة؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.",
   "@ingestionReviewExchangeJumpQuestion": {
     "description": "C · T-272: unexplained balance rise on an account while another currency had income lately. Opens the exchange entry prefilled.",
     "placeholders": {
@@ -4298,7 +4298,7 @@
   "mascotTipUseDue": "كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم",
   "mascotTipUseInsights": "عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊",
   "mascotTipSmartAsk": "اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك",
-  "mascotTipSmartVoice": "بفهم المصري! قول «دفعت ١٥٠ خضار و٤٥ قهوة» وأسجّلهم اتنين 🎤",
+  "mascotTipSmartVoice": "بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤",
   "mascotTipSmartSms": "لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك",
   "mascotTipSmartCategory": "كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية",
   "mascotTipSmartDue": "لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة",
@@ -4306,13 +4306,13 @@
   "mascotTipSmartDuplicate": "لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين",
   "mascotTipSmartReceipt": "بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌",
   "mascotTipSmartInstapay": "تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة",
-  "mascotTipSmartTransfer": "لو حولت من كارت لحسابك، ببقى عارف إنه إنت بتدفع لنفسك وماببقاش صرف 👌",
+  "mascotTipSmartTransfer": "لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌",
   "mascotTipHabitCoffee": "القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕",
   "mascotTipHabitPigeon": "أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄",
   "mascotTipHabitCheck": "دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر",
   "mascotTipHabitSale": "الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉",
   "mascotTipHabitSmall": "القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶",
-  "mascotTipHabitWait": "استنى ٢٤ ساعة قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️",
+  "mascotTipHabitWait": "استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️",
   "mascotTipHabitTreat": "مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄",
   "mascotTipHabitSubs": "اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀",
   "mascotTipShowMe": "وريني",
@@ -6097,7 +6097,7 @@
   "@homeQuickAddAssetHint": {
     "description": "S · quick add card subtitle"
   },
-  "homeQuickAddExchange": "حولت فلوس",
+  "homeQuickAddExchange": "غيّرت عملة",
   "@homeQuickAddExchange": {
     "description": "C · T-272: Add sheet row for a manual currency exchange (D-86)"
   },
@@ -6105,7 +6105,7 @@
   "@homeQuickAddExchangeHint": {
     "description": "C · T-272"
   },
-  "homeQuickAddExchangeA11y": "سجل تحويل عملة",
+  "homeQuickAddExchangeA11y": "سجّل تغيير عملة",
   "@homeQuickAddExchangeA11y": {
     "description": "A · T-272"
   },
