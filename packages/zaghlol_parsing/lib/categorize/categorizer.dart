@@ -3,8 +3,8 @@
 ///
 /// Order, first hit stops: user rule (counterparty, then `merchant_norm`),
 /// person-to-person stop, catalog exact, prefix/token, fuzzy (a rule on the
-/// found merchant beats its catalog category), keywords, needs
-/// classification. Deterministic: no clock, no randomness, every choice ends
+/// found merchant beats its catalog category), keywords, the merchant's
+/// unconfirmed AI suggestion (T-357), needs classification. Deterministic: no clock, no randomness, every choice ends
 /// in a total order. Failures of a port (database errors) propagate: a
 /// failed lookup is never read as "no match".
 library;
@@ -102,7 +102,23 @@ final class Categorizer {
       final found = await _catalogMerchant(key);
       if (found != null) return _fromMerchant(found.$1, found.$2);
     }
-    return _keywordTier(input.merchantText);
+    final keyword = await _keywordTier(input.merchantText);
+    if (!keyword.needsClassification || key.isEmpty) return keyword;
+    return _aiTier(key);
+  }
+
+  /// T-357: the merchant's unconfirmed AI suggestion, when its category is
+  /// live. Reached only when every earlier tier found nothing.
+  Future<CategoryDecision> _aiTier(String key) async {
+    final port = _ports.ai;
+    if (port == null) return _none;
+    final id = await port.aiSuggestionFor(key);
+    if (id == null || !await _ports.categories.isLive(id)) return _none;
+    return CategoryDecision(
+      categoryId: id,
+      source: CategorySource.ai,
+      tier: CategorizeTier.ai,
+    );
   }
 
   /// Steps 3 to 5: the merchant and the tier that found it.

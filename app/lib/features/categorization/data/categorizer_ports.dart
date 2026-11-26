@@ -6,6 +6,7 @@
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/db/daos/ai_merchant_suggestions_dao.dart';
 import '../../../core/db/daos/catalog_dao.dart';
 import '../../../core/db/daos/categories_dao.dart';
 import '../domain/merchant_rule.dart' show RulesRepository;
@@ -118,11 +119,28 @@ final class RepositoryRulePort implements RulePort {
   }
 }
 
-/// The four ports over one database.
+/// T-357: [AiSuggestionPort] over [AiMerchantSuggestionsDao]. Only an
+/// `unconfirmed` suggestion answers; `confirmed` and `corrected` are user
+/// rules already, `no_answer` has no category.
+final class DriftAiSuggestionPort implements AiSuggestionPort {
+  DriftAiSuggestionPort(this._dao);
+
+  final AiMerchantSuggestionsDao _dao;
+
+  @override
+  Future<String?> aiSuggestionFor(String merchantNorm) async {
+    final r = await _dao.byMerchant(merchantNorm);
+    if (r == null || r.state != AiSuggestionStateCode.unconfirmed) return null;
+    return r.categoryId;
+  }
+}
+
+/// The ports over one database, with the AI tier (T-357).
 CategorizerPorts driftCategorizerPorts(AppDatabase db, RulesRepository rules) =>
     CategorizerPorts(
       rules: RepositoryRulePort(rules),
       catalog: DriftCatalogPort(CatalogDao(db)),
       keywords: DriftKeywordPort(CatalogDao(db)),
       categories: DriftCategoryPort(CategoriesDao(db)),
+      ai: DriftAiSuggestionPort(AiMerchantSuggestionsDao(db)),
     );

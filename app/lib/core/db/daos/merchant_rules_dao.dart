@@ -76,7 +76,9 @@ class MerchantRulesDao {
   ///
   /// Never destroy a user edit on doubt: a row qualifies only when it is
   /// live, not internal, not user-verified, and its category came from the
-  /// pipeline (`none`, `catalog`, `heuristic`). `user` and `user_rule` rows
+  /// pipeline (`none`, `catalog`, `heuristic`, and since T-357 `ai`: a rule,
+  /// incl. the one a Right/Wrong creates, always replaces an AI category,
+  /// FU-408). `user` and `user_rule` rows
   /// (an edit, or another rule's work) are left alone, as is a row already
   /// in the rule's category. The rule row, its category and the archive flag
   /// are read inside the same statement, so a rule deleted or a category
@@ -85,7 +87,7 @@ class MerchantRulesDao {
 transactions.deleted_at IS NULL
 AND transactions.is_internal = 0
 AND transactions.is_user_verified = 0
-AND transactions.category_source IN ('none', 'catalog', 'heuristic')
+AND transactions.category_source IN ('none', 'catalog', 'heuristic', 'ai')
 AND EXISTS (
   SELECT 1 FROM merchant_rules r
   JOIN categories c ON c.id = r.category_id AND c.is_archived = 0

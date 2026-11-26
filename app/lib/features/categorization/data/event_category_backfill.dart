@@ -4,8 +4,9 @@
 // keep: the template id (the registry knows its event) and an InstaPay
 // address counterparty on a transfer.
 //
-// Never touches a user's work: only `none` / `catalog` / `heuristic` rows
-// that are not user-verified (the same set the ingest event hint replaces);
+// Never touches a user's work: only `none` / `catalog` / `heuristic` (and,
+// T-357, `ai`: the event outranks the AI tier) rows that are not
+// user-verified (the same set the ingest event hint replaces);
 // `user` and `user_rule` rows are skipped, and every guard is re-checked in
 // the UPDATE itself. Bounded chunks, one DB transaction each, behind the
 // restore pause gate. Done is marked in `db_meta`; a gate refusal or a
@@ -69,7 +70,7 @@ Future<int?> backfillEventCategories(
             'category_id FROM transactions '
             'WHERE id > ?1 AND deleted_at IS NULL AND is_internal = 0 '
             'AND is_user_verified = 0 '
-            "AND category_source IN ('none','catalog','heuristic') "
+            "AND category_source IN ('none','catalog','heuristic','ai') "
             "AND (template_id IS NOT NULL OR counterparty_kind = 'ipa') "
             'ORDER BY id LIMIT $eventBackfillChunk',
             variables: [Variable.withString(cursor)],
@@ -92,7 +93,7 @@ Future<int?> backfillEventCategories(
             "category_source = 'heuristic', updated_at = ?2 "
             'WHERE id = ?3 AND deleted_at IS NULL AND is_internal = 0 '
             'AND is_user_verified = 0 '
-            "AND category_source IN ('none','catalog','heuristic') "
+            "AND category_source IN ('none','catalog','heuristic','ai') "
             'AND category_id IS NOT ?1 '
             'AND EXISTS (SELECT 1 FROM categories c WHERE c.id = ?1 '
             'AND c.is_archived = 0)',

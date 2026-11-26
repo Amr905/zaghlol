@@ -53,6 +53,7 @@ void main() {
     String? category,
     String? merchant,
     String? merchantRaw,
+    String? categorySource,
   }) => db
       .into(db.transactions)
       .insert(
@@ -71,6 +72,7 @@ void main() {
           isInternal: Value(internal ? 1 : 0),
           deletedAt: Value(deleted ? t0 : null),
           categoryId: Value(category),
+          categorySource: Value(categorySource ?? 'none'),
         ),
       );
 
@@ -244,10 +246,12 @@ void main() {
         await add('zero', amount: 500, category: 'cs');
         await add('zr', amount: 500, direction: 'refund');
         await linkRow('lz', 'zero', 'zr', 500); // net zero: not a slice
+        // T-357 AC5: an unconfirmed AI category counts like any other.
+        await add('ai', amount: 2000, category: 'cw', categorySource: 'ai');
         final d = ready(await repo.categoryDonut(period, fEgp));
-        expect(d.total.minor, 9000);
+        expect(d.total.minor, 11000);
         expect([for (final s in d.slices) s.categoryId], ['cn', 'cw', null]);
-        expect([for (final s in d.slices) s.amount.minor], [5000, 3000, 1000]);
+        expect([for (final s in d.slices) s.amount.minor], [5000, 5000, 1000]);
         expect(d.slices.fold<int>(0, (a, s) => a + s.shareBp), 10000);
       },
     );

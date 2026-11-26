@@ -219,8 +219,15 @@ void main() {
       await db.customStatement(
         "UPDATE transactions SET category_id = 'c1' WHERE id = 'a'",
       );
+      // T-357 AC5: an unconfirmed AI category counts like any other.
+      await add('ai', amount: 40);
+      await db.customStatement(
+        "UPDATE transactions SET category_id = 'c2', category_source = 'ai' "
+        "WHERE id = 'ai'",
+      );
       expect((await repo.computeLive(current()))[egp]!.byCategoryMinor, {
         'c1': 100,
+        'c2': 40,
       });
       final budgets = BudgetsDao(db);
       await budgets.insert(

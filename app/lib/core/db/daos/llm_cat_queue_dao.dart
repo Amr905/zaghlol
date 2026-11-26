@@ -31,6 +31,30 @@ class LlmCatQueueDao {
     ),
   );
 
+  /// T-357: queues [merchantNorm] with its current [txnCount] (set, not
+  /// added, so a recompute can run any number of times) and [lastSeenAt].
+  /// A queued row keeps `first_queued_at` and its retry state.
+  Future<void> put(
+    String merchantNorm, {
+    required int txnCount,
+    required int lastSeenAt,
+    required int at,
+  }) => guardWrite(
+    () => _db.customUpdate(
+      'INSERT INTO llm_cat_queue (merchant_norm, txn_count, first_queued_at, '
+      'last_seen_at) VALUES (?1, ?2, ?3, ?4) '
+      'ON CONFLICT (merchant_norm) DO UPDATE SET txn_count = ?2, '
+      'last_seen_at = ?4',
+      variables: [
+        Variable.withString(merchantNorm),
+        Variable.withInt(txnCount),
+        Variable.withInt(at),
+        Variable.withInt(lastSeenAt),
+      ],
+      updates: {_db.llmCatQueue},
+    ),
+  );
+
   /// Rows whose next attempt is due at [now], in send order: most
   /// transactions first, then most recently seen; at most [limit].
   Future<List<LlmCatQueueRow>> due({required int now, int limit = 20}) =>

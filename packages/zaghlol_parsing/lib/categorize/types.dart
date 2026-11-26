@@ -38,7 +38,11 @@ enum CategorySource {
   none('none'),
   userRule('user_rule'),
   catalog('catalog'),
-  heuristic('heuristic');
+  heuristic('heuristic'),
+
+  /// T-357: the merchant's unconfirmed AI suggestion (LLM-CATEGORISE). Only
+  /// ever produced where every other tier found nothing.
+  ai('ai');
 
   const CategorySource(this.code);
   final String code;
@@ -59,6 +63,9 @@ enum CategorizeTier {
   /// CAT-cash / CAT-INSTAPAY: the event's own category (ATM -> cash,
   /// InstaPay -> instapay), after user rules.
   event,
+
+  /// T-357: the merchant's unconfirmed AI suggestion, after keywords.
+  ai,
   none,
 }
 
@@ -246,12 +253,24 @@ final class CategorizerPorts {
     required this.catalog,
     required this.keywords,
     required this.categories,
+    this.ai,
   });
 
   final RulePort rules;
   final CatalogPort catalog;
   final KeywordPort keywords;
   final CategoryPort categories;
+
+  /// The AI tier (T-357); null skips it.
+  final AiSuggestionPort? ai;
+}
+
+/// The merchants' AI suggestions (T-357, LLM-CATEGORISE).
+abstract interface class AiSuggestionPort {
+  /// The category id of [merchantNorm]'s suggestion while it is
+  /// `unconfirmed`; null otherwise (none, `no_answer`, or a user verdict:
+  /// confirmed and corrected suggestions are user rules already).
+  Future<String?> aiSuggestionFor(String merchantNorm);
 }
 
 /// Tunable decision points (the note's defaults).
