@@ -58,6 +58,8 @@ HomeCurrencyFigures figures(
   );
 }
 
+Money usdMoney(int units) => Money(usd, units * 100);
+
 TransactionRecord usdRow(
   String id, {
   required int minor,

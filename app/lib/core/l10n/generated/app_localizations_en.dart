@@ -1228,11 +1228,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String homeHeroOtherCurrencyIncome(String amount) {
-    return '+ $amount income';
-  }
-
-  @override
   String get homeCurrencyCardsTitle => 'Other currencies';
 
   @override
@@ -1444,11 +1439,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeApproxSheetClose => 'Got it';
-
-  @override
   String get homeMascotFirstForeign =>
-      'Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.';
+      'You\'ve got money in another currency! It stays on its own card. When you exchange it, your EGP month grows by exactly what you got.';
 
   @override
   String get homeApproxNoticeOff => 'Turn it off';

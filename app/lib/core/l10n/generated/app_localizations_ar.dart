@@ -1264,11 +1264,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String homeHeroOtherCurrencyIncome(String amount) {
-    return '+ $amount دخل';
-  }
-
-  @override
   String get homeCurrencyCardsTitle => 'فلوسك بعملات تانية';
 
   @override
@@ -1481,11 +1476,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeApproxSheetClose => 'تمام';
-
-  @override
   String get homeMascotFirstForeign =>
-      'قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.';
+      'عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.';
 
   @override
   String get homeApproxNoticeOff => 'اقفلها';

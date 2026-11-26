@@ -353,7 +353,6 @@
   "currencyViewEmptyTitle": "Nothing in this currency this month",
   "currencyViewEmptyBody": "Once you earn or spend in it, it shows up here.",
   "currencyViewBudgetOffer": "Want a {currency} budget?",
-  "homeHeroOtherCurrencyIncome": "+ {amount} income",
   "homeCurrencyCardsTitle": "Other currencies",
   "homeCurrencyCardLeft": "{amount} left",
   "homeCurrencyCardInOut": "In {income} · Out {out}",
@@ -488,11 +487,7 @@
       }
     }
   },
-  "homeApproxSheetClose": "Got it",
-  "@homeApproxSheetClose": {
-    "description": "C"
-  },
-  "homeMascotFirstForeign": "Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.",
+  "homeMascotFirstForeign": "You've got money in another currency! It stays on its own card. When you exchange it, your EGP month grows by exactly what you got.",
   "@homeMascotFirstForeign": {
     "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
   },
