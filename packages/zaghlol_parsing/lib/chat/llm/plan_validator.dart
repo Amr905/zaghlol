@@ -162,7 +162,10 @@ class PlanValidator {
       if (!sent.contains(r)) return _reject(2, 'REF_NOT_IN_TEXT');
       if (map != null && map[r] == null) return _reject(2, 'REF_NOT_IN_MAP');
     }
-    for (final m in mentions) {
+    // Plain-name check: every string of `p` (mention, currency, ...).
+    final strings = <String>[];
+    _strings(p, strings);
+    for (final m in strings) {
       final f = foldKey(m);
       if (_names.any((n) => containsWholeWord(f, n.folded))) {
         return _reject(2, 'PLAIN_NAME');
@@ -244,6 +247,20 @@ class PlanValidator {
     failedStep: step,
     reason: reason,
   );
+
+  static void _strings(Object? node, List<String> into) {
+    if (node is String) {
+      into.add(node);
+    } else if (node is Map<String, Object?>) {
+      for (final v in node.values) {
+        _strings(v, into);
+      }
+    } else if (node is List) {
+      for (final v in node) {
+        _strings(v, into);
+      }
+    }
+  }
 
   static void _walk(Object? node, List<Map<String, Object?>> into) {
     if (node is Map<String, Object?>) {

@@ -262,6 +262,18 @@ void main() {
       expect(r.templateReason, 'TEMPLATE_PLAIN_NAME');
     });
 
+    test('currency:"CIB" is a plain name (any string of p)', () {
+      final r = validator.validate(
+        jsonDecode(
+          _spend('{"slug":null,"ref":null,"mention":null,"currency":"CIB"}'),
+        ),
+        sent: 'how much did I spend?',
+        lang: 'en',
+      );
+      expect(r.reason, 'PLAIN_NAME');
+      expect(r.failedStep, 2);
+    });
+
     test('currency null uses the primary currency for the fraction rule', () {
       Object? plan() => jsonDecode(
         jsonEncode({

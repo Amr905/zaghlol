@@ -190,3 +190,9 @@
 - **m7 (T-332):** the OpenAI adapter parses the reply with `AllowDuplicateProperties = false`, so duplicates give `Invalid`. Test `AReplyWithDuplicatePropertiesIsInvalid`.
 - **M2 (T-332):** new `Zaghlol.Application.Llm.LlmSensitive<T>` (ToString `***`, JSON writes `"***"`, still reads the bare value). Used for `LlmCall.UserText` and `LlmResult.Json`; T-349 must use it for `q`/`p`/`t`. `Domain.Sensitive<T>` is unchanged (the install token response needs the bare value). Tests `LlmSensitiveWrapperTests` (ToString, interpolation, STJ direct/nested/collection/dictionary/anonymous, `{@}` logger, exception).
 - **Plain-name scope (m3):** validator checks `t.text` (a hit drops the template only, new `TEMPLATE_PLAIN_NAME`, same code as the phone). New vectors `invalid-plain-name-in-template-text` (expect `accept` plus new field `expect.templateReason: "TEMPLATE_PLAIN_NAME"`) and `invalid-plain-name-in-currency` (fallback, step 2, `PLAIN_NAME`). The contract reference now checks every string of `p`.
+
+## Fix round — phone
+
+- m5 fixed: `PlanValidator` now runs the plain-name check on every string of `p` (mention, currency, any other), step 2 `PLAIN_NAME`. Test: `currency:"CIB"` in `plan_validator_test.dart` (fails without the fix).
+- Vectors added to `ask-plan-v1.json`: `invalid-plain-name-in-template-text` (accept, template dropped; phone already did this, backend m3) and `invalid-plain-name-in-currency` (fallback, step 2, PLAIN_NAME).
+- Table rows with no phone change: duplicate key, trailing `\n`, `target.currency` in whatIf, PL-BALANCE ref (backend-side or phone already stricter); `❤️`/NFC mark order and mention length in UTF-16 units vs code points (m6) left open (more than 10 lines, follow-up B91-m6); supplementary-letter link (backend n2).
