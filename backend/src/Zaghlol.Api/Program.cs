@@ -100,6 +100,9 @@ builder.Services.AddZaghlolDevFakeStores(builder.Configuration, builder.Environm
 // real verifiers are registered, and the pinned Apple root and Attestation:* settings are validated at startup.
 builder.Services.AddZaghlolAttestation();
 builder.Services.AddZaghlolRestore();
+// LLM attestation (T-336): Llm:Attestation:Mode read once at startup; Fake only in Development/Testing, ReportOnly only in Staging,
+// Production always enforces with the real verifiers (startup check).
+builder.Services.AddZaghlolLlmAttestation();
 // App Store Server Notifications V2 ingest (T-134): verify and store only, on the App login; the worker processes.
 builder.Services.AddZaghlolAppleNotificationIngest();
 // Google RTDN push (T-133): Pub/Sub OIDC before the body, store only, on the App login; the worker processes. Production refuses to
