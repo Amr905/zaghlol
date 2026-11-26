@@ -5,6 +5,8 @@ import 'package:zaghlol/core/brand/institution_brand.dart';
 import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/core/l10n/card_number.dart';
 import 'package:zaghlol/core/ui/z_banner.dart';
+import 'package:zaghlol/features/budget/application/cycle_overview.dart';
+import 'package:zaghlol/features/home/application/home_read_model.dart';
 import 'package:zaghlol/features/home/presentation/home_screen.dart';
 import 'package:zaghlol/features/home/presentation/home_widgets.dart'
     show HomeHero, HomeKpis;
@@ -114,6 +116,95 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('USD'), findsWidgets);
+  });
+
+  testWidgets('T-272: income KPI shows money in with the exchanged-in line; '
+      'spent stays spending with an exchanged line', (tester) async {
+    HomeCurrencyFigures withX(
+      Currency c, {
+      required int income,
+      required int spend,
+      int xin = 0,
+      int xout = 0,
+    }) {
+      final t = CycleTotals(
+        currency: c,
+        income: Money(c, income),
+        spend: Money(c, spend),
+        pendingSpend: Money(c, 0),
+        byCategoryMinor: const {},
+        exchangedIn: Money(c, xin),
+        exchangedOut: Money(c, xout),
+      );
+      return HomeCurrencyFigures(
+        overview: CurrencyOverview(
+          currency: c,
+          totals: t,
+          budget: null,
+          safeToSpend: null,
+          underIdealLine: null,
+        ),
+        net: t.left,
+      );
+    }
+
+    await pumpHome(
+      tester,
+      locale: _en,
+      platform: TargetPlatform.android,
+      value: model(
+        currencies: [
+          withX(egp, income: 0, spend: 50000, xin: 2970000),
+          withX(usd, income: 100000, spend: 0, xout: 60000),
+        ],
+      ),
+    );
+    expect(find.textContaining('29,700'), findsWidgets);
+    expect(find.textContaining('exchanged in'), findsOneWidget);
+    expect(find.textContaining('29,200'), findsOneWidget); // left
+    await tester.drag(
+      find.byKey(const ValueKey('home-pager')),
+      const Offset(-300, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Text &&
+            (w.data ?? '').contains('600') &&
+            (w.data ?? '').endsWith(' exchanged'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('400'), findsWidgets); // USD left
+  });
+
+  testWidgets('T-272: the main page lists the other currency\'s income, '
+      'unconverted; a tap opens that page; no line without income', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      locale: _en,
+      platform: TargetPlatform.android,
+      value: model(
+        currencies: [
+          figs(egp),
+          figs(usd, income: 189, spend: 0, safe: null),
+          figs(Currency.of('GBP'), income: 0, spend: 10, safe: null),
+        ],
+      ),
+    );
+    final line = find.byKey(const ValueKey('home-other-income-USD'));
+    expect(line, findsOneWidget);
+    expect(
+      find.descendant(of: line, matching: find.textContaining('189')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('home-other-income-GBP')), findsNothing);
+    await tester.tap(line);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('home-other-income-USD')), findsNothing);
   });
 
   for (final locale in const [_en, Locale('ar')]) {

@@ -1472,6 +1472,92 @@
   "@homeHeroKpiLeft": {
     "description": "C"
   },
+  "homeHeroKpiIncomeFromExchange": "منهم {amount} من تغيير عملة",
+  "@homeHeroKpiIncomeFromExchange": {
+    "description": "C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroKpiExchangedOut": "وغيّرت {amount}",
+  "@homeHeroKpiExchangedOut": {
+    "description": "C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroOtherCurrencyIncome": "+ {amount} دخل",
+  "@homeHeroOtherCurrencyIncome": {
+    "description": "C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeEntryTitle": "تغيير عملة",
+  "@exchangeEntryTitle": {
+    "description": "C · T-272 manual exchange screen title"
+  },
+  "exchangeEntryIntro": "تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.",
+  "@exchangeEntryIntro": {
+    "description": "C · T-272"
+  },
+  "exchangeEntrySent": "دفعت",
+  "@exchangeEntrySent": {
+    "description": "C · T-272 the amount given"
+  },
+  "exchangeEntryReceived": "وصلني",
+  "@exchangeEntryReceived": {
+    "description": "C · T-272 the amount received"
+  },
+  "exchangeEntryAccount": "الحساب",
+  "@exchangeEntryAccount": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryCurrency": "العملة",
+  "@exchangeEntryCurrency": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryDate": "التاريخ",
+  "@exchangeEntryDate": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryRate": "السعر: ١ {from} = {rate} {to}",
+  "@exchangeEntryRate": {
+    "description": "C · T-272 the rate from the two amounts",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeEntrySameCurrency": "اختار عملتين مختلفتين",
+  "@exchangeEntrySameCurrency": {
+    "description": "C · T-272 validation"
+  },
+  "exchangeEntrySave": "احفظ التغيير",
+  "@exchangeEntrySave": {
+    "description": "C · T-272"
+  },
+  "exchangeEntrySaved": "اتسجل التغيير",
+  "@exchangeEntrySaved": {
+    "description": "C · T-272 snackbar"
+  },
+  "exchangeEntryFailed": "معرفناش نحفظ التغيير. جرب تاني.",
+  "@exchangeEntryFailed": {
+    "description": "C · T-272"
+  },
   "homeHeroApproxTitle": "كله تقريباً بالـ {currency}",
   "@homeHeroApproxTitle": {
     "description": "L · last pager page, only when the ≈ view is on (FR-CUR-04)",
@@ -2641,6 +2727,26 @@
   "ingestionReviewOldDueKept": "تمام، هيفضل زي ما هو",
   "@ingestionReviewOldDueKept": {
     "description": "T-250: snackbar after Keep"
+  },
+  "ingestionReviewExchangeJumpQuestion": "غيّرت عملة؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.",
+  "@ingestionReviewExchangeJumpQuestion": {
+    "description": "C · T-272: unexplained balance rise on an account while another currency had income lately. Opens the exchange entry prefilled.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewExchangeJumpYes": "أيوه، سجلها",
+  "@ingestionReviewExchangeJumpYes": {
+    "description": "C · T-272"
+  },
+  "ingestionReviewExchangeJumpNo": "لأ",
+  "@ingestionReviewExchangeJumpNo": {
+    "description": "C · T-272"
   },
   "ingestionReviewEmptyTitle": "كله تمام! مفيش حاجة مستنية رأيك ✨",
   "@ingestionReviewEmptyTitle": {
@@ -4177,6 +4283,39 @@
   "@mascotPaydayLine": {
     "description": "M · Rive payday · Home bubble when a salary lands (once per payday)"
   },
+  "mascotTipUseScan": "عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸",
+  "mascotTipUseShare": "شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل",
+  "mascotTipUseSay": "زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤",
+  "mascotTipUseLinkCard": "اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة",
+  "mascotTipUsePayday": "قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب",
+  "mascotTipUseStatement": "عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB)",
+  "mascotTipUseReview": "فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀",
+  "mascotTipUseSearchPerson": "بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه",
+  "mascotTipUseHide": "فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈",
+  "mascotTipUseBudget": "حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام",
+  "mascotTipUseSalary": "سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض",
+  "mascotTipUseAsk": "اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب",
+  "mascotTipUseDue": "كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم",
+  "mascotTipUseInsights": "عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊",
+  "mascotTipSmartAsk": "اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك",
+  "mascotTipSmartVoice": "بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤",
+  "mascotTipSmartSms": "لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك",
+  "mascotTipSmartCategory": "كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية",
+  "mascotTipSmartDue": "لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة",
+  "mascotTipSmartPayday": "لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉",
+  "mascotTipSmartDuplicate": "لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين",
+  "mascotTipSmartReceipt": "بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌",
+  "mascotTipSmartInstapay": "تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة",
+  "mascotTipSmartTransfer": "لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌",
+  "mascotTipHabitCoffee": "القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕",
+  "mascotTipHabitPigeon": "أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄",
+  "mascotTipHabitCheck": "دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر",
+  "mascotTipHabitSale": "الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉",
+  "mascotTipHabitSmall": "القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶",
+  "mascotTipHabitWait": "استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️",
+  "mascotTipHabitTreat": "مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄",
+  "mascotTipHabitSubs": "اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀",
+  "mascotTipShowMe": "وريني",
   "insightsTabsCharts": "الشارتات",
   "@insightsTabsCharts": {
     "description": "C · C-35 segment 1"
@@ -5957,6 +6096,18 @@
   },
   "@homeQuickAddAssetHint": {
     "description": "S · quick add card subtitle"
+  },
+  "homeQuickAddExchange": "غيّرت عملة",
+  "@homeQuickAddExchange": {
+    "description": "C · T-272: Add sheet row for a manual currency exchange (D-86)"
+  },
+  "homeQuickAddExchangeHint": "من عملة لعملة، زي دولار لجنيه",
+  "@homeQuickAddExchangeHint": {
+    "description": "C · T-272"
+  },
+  "homeQuickAddExchangeA11y": "سجّل تغيير عملة",
+  "@homeQuickAddExchangeA11y": {
+    "description": "A · T-272"
   },
   "@homeQuickAddAsset": {
     "description": "L · with common_gold_badge; Free opens S-68"

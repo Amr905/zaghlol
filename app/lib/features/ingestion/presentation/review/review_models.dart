@@ -231,3 +231,27 @@ final class OldDueCardModel extends ReviewCardModel {
   @override
   ReviewFilter get filter => ReviewFilter.messages;
 }
+
+/// T-272 (PO 2026-11-26): "Did you exchange money? Your EGP rose by about
+/// X." Yes opens the exchange entry prefilled with the received side; No
+/// dismisses. Nothing is created without the user's save.
+final class ExchangeJumpCardModel extends ReviewCardModel {
+  const ExchangeJumpCardModel({
+    required String itemId,
+    required this.accountId,
+    required this.amount,
+    required this.asOf,
+  }) : super(itemId);
+
+  /// The account whose balance rose (the received side).
+  final String accountId;
+
+  /// The unexplained rise, in that account's currency.
+  final Money amount;
+
+  /// When the new balance was reported (UTC).
+  final DateTime asOf;
+
+  @override
+  ReviewFilter get filter => ReviewFilter.all;
+}

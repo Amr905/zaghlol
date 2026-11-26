@@ -170,6 +170,10 @@ class VoiceRig {
   final bool gold;
   final TxnLookups lookups;
   int paywall = 0;
+
+  /// The monotonic time the quick-end check sees (T-275); tests advance it
+  /// before ending a session to make it a "real" listening window.
+  Duration elapsed = Duration.zero;
   int settings = 0;
 
   /// In-memory settings, so the remembered consent (T-214) can be checked.
@@ -179,6 +183,7 @@ class VoiceRig {
   List<Override> get overrides => [
     ...hide.overrides,
     speechPortProvider.overrideWithValue(speech),
+    voiceMonotonicProvider.overrideWithValue(() => elapsed),
     voiceInterpreterProvider.overrideWith((ref) async => TestInterpreter()),
     voiceUsageProvider.overrideWith((ref) async => usage),
     transactionEditorProvider.overrideWith((ref) async => editor),

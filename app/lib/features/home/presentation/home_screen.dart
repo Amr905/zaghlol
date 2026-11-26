@@ -322,6 +322,30 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
                 ],
               ),
             ),
+            // T-272 (PO 2026-11-26): income in another currency is never
+            // hidden behind the pager: one line per currency under the main
+            // page, each opening that currency's page. Never converted.
+            if (page == 0)
+              for (var i = 1; i < figures.length; i++)
+                if (figures[i].income.isPositive)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TextButton(
+                      key: ValueKey(
+                        'home-other-income-${figures[i].currency.code}',
+                      ),
+                      onPressed: () => _pager.animateToPage(
+                        i,
+                        duration: ZMotion.standard,
+                        curve: ZMotion.curve,
+                      ),
+                      child: Text(
+                        l.homeHeroOtherCurrencyIncome(
+                          format.money(figures[i].income),
+                        ),
+                      ),
+                    ),
+                  ),
             HomePagerDots(count: figures.length, index: page),
           ],
           if (m.scanInProgress) ...[

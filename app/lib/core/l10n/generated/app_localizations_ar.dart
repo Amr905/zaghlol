@@ -1238,6 +1238,60 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeroKpiLeft => 'فاضلك';
 
   @override
+  String homeHeroKpiIncomeFromExchange(String amount) {
+    return 'منهم $amount من تغيير عملة';
+  }
+
+  @override
+  String homeHeroKpiExchangedOut(String amount) {
+    return 'وغيّرت $amount';
+  }
+
+  @override
+  String homeHeroOtherCurrencyIncome(String amount) {
+    return '+ $amount دخل';
+  }
+
+  @override
+  String get exchangeEntryTitle => 'تغيير عملة';
+
+  @override
+  String get exchangeEntryIntro =>
+      'تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.';
+
+  @override
+  String get exchangeEntrySent => 'دفعت';
+
+  @override
+  String get exchangeEntryReceived => 'وصلني';
+
+  @override
+  String get exchangeEntryAccount => 'الحساب';
+
+  @override
+  String get exchangeEntryCurrency => 'العملة';
+
+  @override
+  String get exchangeEntryDate => 'التاريخ';
+
+  @override
+  String exchangeEntryRate(String from, String rate, String to) {
+    return 'السعر: ١ $from = $rate $to';
+  }
+
+  @override
+  String get exchangeEntrySameCurrency => 'اختار عملتين مختلفتين';
+
+  @override
+  String get exchangeEntrySave => 'احفظ التغيير';
+
+  @override
+  String get exchangeEntrySaved => 'اتسجل التغيير';
+
+  @override
+  String get exchangeEntryFailed => 'معرفناش نحفظ التغيير. جرب تاني.';
+
+  @override
   String homeHeroApproxTitle(String currency) {
     return 'كله تقريباً بالـ $currency';
   }
@@ -2040,6 +2094,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ingestionReviewOldDueKept => 'تمام، هيفضل زي ما هو';
+
+  @override
+  String ingestionReviewExchangeJumpQuestion(String currency, String amount) {
+    return 'غيّرت عملة؟ رصيدك بالـ$currency زاد حوالي $amount ومشفناش فلوس داخلة.';
+  }
+
+  @override
+  String get ingestionReviewExchangeJumpYes => 'أيوه، سجلها';
+
+  @override
+  String get ingestionReviewExchangeJumpNo => 'لأ';
 
   @override
   String get ingestionReviewEmptyTitle => 'كله تمام! مفيش حاجة مستنية رأيك ✨';
@@ -3210,6 +3275,137 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotPaydayLine => 'القبض نزل يا كبير! 🎉';
+
+  @override
+  String get mascotTipUseScan =>
+      'عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸';
+
+  @override
+  String get mascotTipUseShare =>
+      'شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل';
+
+  @override
+  String get mascotTipUseSay =>
+      'زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤';
+
+  @override
+  String get mascotTipUseLinkCard =>
+      'اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة';
+
+  @override
+  String get mascotTipUsePayday =>
+      'قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب';
+
+  @override
+  String get mascotTipUseStatement =>
+      'عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB)';
+
+  @override
+  String get mascotTipUseReview =>
+      'فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀';
+
+  @override
+  String get mascotTipUseSearchPerson =>
+      'بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه';
+
+  @override
+  String get mascotTipUseHide =>
+      'فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈';
+
+  @override
+  String get mascotTipUseBudget =>
+      'حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام';
+
+  @override
+  String get mascotTipUseSalary =>
+      'سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض';
+
+  @override
+  String get mascotTipUseAsk =>
+      'اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب';
+
+  @override
+  String get mascotTipUseDue =>
+      'كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم';
+
+  @override
+  String get mascotTipUseInsights =>
+      'عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊';
+
+  @override
+  String get mascotTipSmartAsk =>
+      'اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك';
+
+  @override
+  String get mascotTipSmartVoice =>
+      'بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤';
+
+  @override
+  String get mascotTipSmartSms =>
+      'لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك';
+
+  @override
+  String get mascotTipSmartCategory =>
+      'كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية';
+
+  @override
+  String get mascotTipSmartDue =>
+      'لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة';
+
+  @override
+  String get mascotTipSmartPayday =>
+      'لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉';
+
+  @override
+  String get mascotTipSmartDuplicate =>
+      'لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين';
+
+  @override
+  String get mascotTipSmartReceipt =>
+      'بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌';
+
+  @override
+  String get mascotTipSmartInstapay =>
+      'تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة';
+
+  @override
+  String get mascotTipSmartTransfer =>
+      'لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌';
+
+  @override
+  String get mascotTipHabitCoffee =>
+      'القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕';
+
+  @override
+  String get mascotTipHabitPigeon =>
+      'أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄';
+
+  @override
+  String get mascotTipHabitCheck =>
+      'دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر';
+
+  @override
+  String get mascotTipHabitSale =>
+      'الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉';
+
+  @override
+  String get mascotTipHabitSmall =>
+      'القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶';
+
+  @override
+  String get mascotTipHabitWait =>
+      'استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️';
+
+  @override
+  String get mascotTipHabitTreat =>
+      'مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄';
+
+  @override
+  String get mascotTipHabitSubs =>
+      'اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀';
+
+  @override
+  String get mascotTipShowMe => 'وريني';
 
   @override
   String get insightsTabsCharts => 'الشارتات';
@@ -4387,6 +4583,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recurringBillEditSaved => 'الفاتورة اتحفظت ✓';
+
+  @override
+  String get homeQuickAddExchange => 'غيّرت عملة';
+
+  @override
+  String get homeQuickAddExchangeHint => 'من عملة لعملة، زي دولار لجنيه';
+
+  @override
+  String get homeQuickAddExchangeA11y => 'سجّل تغيير عملة';
 
   @override
   String homeQuickAddVoiceLeft(String remaining, String max) {

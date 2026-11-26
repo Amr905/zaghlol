@@ -15,6 +15,7 @@ class InterimMascot extends ZaghlolMascot {
     super.key,
     required super.moment,
     super.talk = false,
+    super.replay = 0,
     required super.size,
   });
 
@@ -35,7 +36,7 @@ class _InterimMascotState extends State<InterimMascot>
   @override
   void didUpdateWidget(InterimMascot old) {
     super.didUpdateWidget(old);
-    if (old.moment != widget.moment) _start();
+    if (old.moment != widget.moment || old.replay != widget.replay) _start();
   }
 
   void _start() {
