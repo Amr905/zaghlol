@@ -164,3 +164,57 @@ Truthfulness check: scan, share, voice, link card, payday, statement import (CIB
 | T-275 | APPROVED | none |
 | T-276 | APPROVED | none |
 | T-277 | APPROVED | none |
+
+---
+
+## Delta re-review (fix78)
+
+Scope: `git diff 6bacc0c7 891484cd` (14 files). Kotlin could not be compiled here; read by hand and every `OcrMergerTest` case traced.
+
+### T-273 — **APPROVED** (original major resolved; 1 minor, 2 nits)
+
+| Check | Result |
+|---|---|
+| Real Arabic lines at 0.45-0.60 with no strong ML Kit overlap kept, incl. Arabic-Indic amounts | PASS. `MIN_ARABIC_CONFIDENCE = 0.45`; `arabicLineAtMidConfidenceWithoutOverlapIsKept` and `arabicLineOverWeakGarbageIsKeptWithItsAmount` keep `الإجمالي ٨٥٫٥٠` untouched |
+| 0.60 gate only on overlap with a strong ML Kit line | PASS. `passesOverlapGate` uses the same `overlap >= OVERLAP` as `mergeBoth`'s matcher |
+| `strongLatin` rejects `Jlaa Jlj`, `Jl J`, `lall`, `JI plw` | PASS by hand (no word-like token, or one 4-letter token alone) |
+| `strongLatin` accepts `Total 436.00`, `VAT 53.54`, `Visa 436.00`, `Net after Discount`, long single words, digit-only | PASS |
+| Original bug (noise digits 1,558 vs 436) not reintroduced | PASS for the PO photo: noise 0.47/0.52/0.48 over strong lines is dropped by the gate; the 0.67 line only adds `نقدى`; the mixed-script token `1١5206` is refused by `arabicAmountTokens`. Residual risk in findings 2 and 3 |
+| Kotlin compiles | Expected yes. `a + if (c) x else emptyList()` parses with the `if` as right operand; `String.trim(vararg Char)`, `Regex.matches`, `Char in String` all exist; `val extra`/`words` types infer to `List<String>` (same shape as the previous `if ... emptyList() else ...`). Cannot be confirmed without kotlinc |
+| Operator precedence in `extra` | Correct: `arabicWords(..) + (if (digitTokens(line.text).isEmpty()) arabicAmountTokens(..) else emptyList())` |
+
+Hand trace of `OcrMergerTest` (all 17 cases): all expected to pass, including `latinReceiptKeepsTheMlKitLines` (6 of 7 noise lines gated or non-credible, 7 lines out, first line `Name: عميل نقدى`), `arabicReceiptIsUnchangedAndDigitsComeFromMlKit` (`الإجمالي 85.50`, `12 صيدلية النور`), `arabicAmountIsAppendedWhenStrongMlKitLineHasNoDigits` (`Total Amount الإجمالي 85.50`) and the `strongLatin` assertions.
+
+Is a weak verdict harmless unless a credible Arabic line overlaps? Yes. `strongLatin` only matters (a) in the gate and (b) to decide replace vs append. A weak real Latin line is affected only when an Arabic line with Arabic-majority letters and conf >= 0.45 overlaps it at >= 0.5 (or any Arabic line >= 0.60). Then the line is replaced, but its ASCII digit tokens are kept (`digitsWin`), so amounts survive; the label/currency word is what is lost. Separate amount boxes (`436.00`) are digit-only, hence strong, and still gate the noise out.
+
+#### Findings
+
+| # | Sev | File:line | Issue | Required change |
+|---|---|---|---|---|
+| 1 | minor | `OcrMerger.kt` `wordLike`/`strongLatin` (~l.121-135) | Real short or consonant-only Latin tokens are weak when alone or with only digits: currency codes `KWD 5.000`, `CHF 20.00`, `GBP 20.00`, `BHD 3.000`, `JPY 1000` (no vowel / consonant start), `LE 85.50`, `Rs 50`, `No. 12345` (2 letters), `Qty 2` (`qt` not a cluster), and lone `Cash`, `Tip`, `Tax`, `Net`. Concrete: latin `KWD 5.000` + Arabic `كود 5.000` conf 0.50, same box: gate passes (line is weak), line replaced, output `كود 5.000`, the currency code is lost (amount kept). The parser then has no currency on that line (CLAUDE.md rule 4: never silently wrong currency). Amounts are never lost, so not a major; the OCR result goes through the review screen. Egypt-default EGP/USD/EUR/SAR/AED/QAR are strong, so the common cases are fine | Follow-up: treat an all-caps 3-letter token (any vowels) next to a digit token as strong, or add the ISO code check to `strongLatin`. Add `KWD 5.000`, `Qty 2` to the `strongLatin` test. Owner: T-273 follow-up (FU) |
+| 2 | minor | `OcrMerger.kt:85-95` | Amount-append path trusts Arabic digits when the strong ML Kit line has no ASCII digits and the Arabic line is >= 0.60. Concrete: latin `Net Sales` (0,300,200,340) and separate `382.46` (300,300,500,340), Arabic noise `321146 535 أول١ا` conf 0.62 spanning both: `Net Sales 321146 535` is emitted next to the correct `382.46`. Not reachable with the measured PO noise (max 0.56) and only for pure-ASCII noise tokens, so the 1,558 case stays fixed; the 0.60 margin rests on one photo (already noted in ADR-009, SPK-02) | None now; keep under SPK-02. Optionally append the amount only when the ML Kit line is not label-only next to a digit-only ML Kit line |
+| 3 | minor | `OcrMerger.kt` `overlap`/`mergeBoth` | An Arabic noise line at 0.45-0.60 whose box overlaps a strong ML Kit line by < 0.5 (vertical drift) counts as "no overlap" and is kept whole with its wrong digits. PO-photo boxes align within a few px, so tests do not cover it | Known limit; note for SPK-02 |
+| 4 | nit | `OcrMerger.kt` ~l.79-84 | `val extra = ...; val words = extra` is a redundant alias | Inline |
+| 5 | nit | `OcrMergerTest.kt` | No test for the gate boundary (conf exactly 0.45 / 0.60) or an Arabic-Indic-only amount appended | Optional |
+
+### Copy (T-272 / T-277): PASS, no findings
+
+- Exchange wording is now "تغيير عملة / غيّرت عملة" everywhere in `app_ar.arb` (title, intro, save/saved/failed, KPI lines, jump question, Add row, a11y); en is "I exchanged currency / Currency exchange". No stale "حولت فلوس" left in lib or the design plan table (updated). Egyptian colloquial, no standard-Arabic drift.
+- `mascotTipSmartTransfer` ar/en now say the same thing (move money between own accounts is not spending). `mascotTipSmartVoice` and `mascotTipHabitWait` use word-form numbers in ar (`مية وخمسين`, `استنى يوم`); en keeps digits, acceptable.
+- ar/en key parity and generated files: `test/core/l10n` green.
+
+### MascotTip.androidOnly: PASS
+
+`tipsOf(g, android: false)` drops only `mascotTipSmartSms`; the smart pool keeps >= 10 tips, so no empty pool on iOS and `rotation.of(group) % list.length` stays valid for any saved counters (at worst one tip is skipped or repeated once). The provider passes `defaultTargetPlatform == TargetPlatform.android`; new test covers both platforms over 400 picks. Defaults are `true`, so existing callers and tests are unchanged.
+
+### Tests run
+
+`flutter test -x golden test/features/mascot test/app test/core/l10n test/features/ingestion test/features/transfers test/features/voice` in `app/`: **550 passed, 0 failed**.
+
+### Not verified
+
+Kotlin compile and `OcrMergerTest` execution (no Android SDK/kotlinc; CI is the gate; traced by hand only). Real-device OCR accuracy (one PO photo only). Goldens excluded by the command.
+
+### Verdict (fix78)
+
+T-273: **APPROVED**. No blocker or major remains. Findings 1-3 become follow-ups (FU, owner T-273 / SPK-02), not merge-blocking.
