@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zaghlol/core/settings/settings_providers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/app/home_mascot_slot.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
@@ -45,6 +46,7 @@ Widget _host(
 );
 
 void main() {
+  _routeTests();
   for (final locale in const [Locale('ar'), Locale('en')]) {
     testWidgets('payday opens the sheet, no bubble (${locale.languageCode})', (
       t,
@@ -174,5 +176,72 @@ void main() {
     await t.pumpAndSettle();
     expect(find.byKey(const ValueKey('home-mascot-tip')), findsOneWidget);
     expect(find.byKey(const ValueKey('home-mascot-tip-open')), findsNothing);
+  });
+}
+
+Widget _routed(
+  PaydayCelebration payday, {
+  required GlobalKey<NavigatorState> nav,
+  required ValueNotifier<bool> active,
+}) => ProviderScope(
+  overrides: [
+    paydayCelebrationProvider.overrideWith((ref) => Stream.value(payday)),
+    homeMascotMessageProvider.overrideWith((ref) async => null),
+    homeTipProvider.overrideWith((ref) async => null),
+    homeCardsProvider.overrideWith((ref, hasTx) async => const HomeCards()),
+    settingsRepositoryProvider.overrideWith(
+      (ref) async => throw StateError('no db'),
+    ),
+  ],
+  child: MaterialApp(
+    navigatorKey: nav,
+    theme: ZaghlolTheme.light,
+    locale: const Locale('en'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: ValueListenableBuilder<bool>(
+      valueListenable: active,
+      builder: (_, on, _) => TickerMode(
+        enabled: on,
+        child: const Scaffold(
+          body: SingleChildScrollView(
+            child: HomeMascotSlot(actions: HomeActions()),
+          ),
+        ),
+      ),
+    ),
+  ),
+);
+
+void _routeTests() {
+  final salary = PaydayCelebration('s1', Money(Currency.of('EGP'), 500000));
+
+  testWidgets('salary while Add is on top: sheet opens once after pop', (
+    t,
+  ) async {
+    final nav = GlobalKey<NavigatorState>();
+    final active = ValueNotifier(true);
+    await t.pumpWidget(_routed(salary, nav: nav, active: active));
+    nav.currentState!.push(
+      MaterialPageRoute<void>(builder: (_) => const Scaffold()),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(const ValueKey('payday-amount')), findsNothing);
+    nav.currentState!.pop();
+    await t.pumpAndSettle();
+    expect(find.byKey(const ValueKey('payday-amount')), findsOneWidget);
+  });
+
+  testWidgets('salary on another tab: no sheet until Home is active', (
+    t,
+  ) async {
+    final nav = GlobalKey<NavigatorState>();
+    final active = ValueNotifier(false);
+    await t.pumpWidget(_routed(salary, nav: nav, active: active));
+    await t.pumpAndSettle();
+    expect(find.byKey(const ValueKey('payday-amount')), findsNothing);
+    active.value = true;
+    await t.pumpAndSettle();
+    expect(find.byKey(const ValueKey('payday-amount')), findsOneWidget);
   });
 }

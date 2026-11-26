@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/l10n/generated/app_localizations.dart';
 import '../core/routing/app_routes.dart';
+import '../core/settings/settings_providers.dart';
 import 'app_navigation.dart' show openImportFlow;
 import '../features/home/application/home_mascot.dart';
 import '../features/home/application/home_read_model.dart';
@@ -37,16 +38,47 @@ class HomeMascotSlot extends ConsumerStatefulWidget {
 }
 
 class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
-  // T-294: salaries whose payday sheet was already opened this session (the
-  // mark is stored too, so a restart never celebrates the same salary twice).
-  final Set<String> _shown = {};
+  // T-294: a pending celebration waits until Home is the visible screen on
+  // the Home tab; the mark is stored only once the sheet is opened.
+  PaydayCelebration? _pending;
+  bool _scheduled = false;
 
   void _celebrate(PaydayCelebration? salary) {
-    if (salary == null || !_shown.add(salary.txnId)) return;
+    if (salary == null ||
+        ref.read(paydayShownThisSessionProvider).contains(salary.txnId)) {
+      return;
+    }
+    _pending = salary;
+    _schedule();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Route popped back to Home, or the Home tab became active.
+    if (_pending != null) _schedule();
+  }
+
+  void _schedule() {
+    if (_scheduled) return;
+    _scheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // Only over Home, never over another screen or sheet.
+      _scheduled = false;
+      final salary = _pending;
+      if (!mounted || salary == null) return;
+      // Only over Home on the Home tab, never over another screen or sheet;
+      // otherwise stay pending (didChangeDependencies retries).
       if (ModalRoute.of(context)?.isCurrent != true) return;
+      if (!TickerMode.valuesOf(context).enabled) return;
+      final shown = ref.read(paydayShownThisSessionProvider);
+      _pending = null;
+      if (!shown.add(salary.txnId)) return;
+      unawaited(
+        ref
+            .read(settingsRepositoryProvider.future)
+            .then((r) => markPaydayCelebrated(r, salary.txnId))
+            .catchError((_) {}),
+      );
       unawaited(
         showPaydaySheet(context, salary, openBudget: widget.actions.openBudget),
       );

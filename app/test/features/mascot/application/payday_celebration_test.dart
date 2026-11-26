@@ -102,6 +102,9 @@ void main() {
     final first = await start(state, txns);
     expect(first?.txnId, 's1');
     expect(first?.amount, Money(egp, 2970000));
+    // Not marked until the sheet opens: a restart still shows it.
+    expect((await start(state, txns))?.txnId, 's1');
+    await markPaydayCelebrated(repo, 's1');
     expect(await start(state, txns), isNull);
   });
 
@@ -146,6 +149,7 @@ void main() {
       's2': _txn('s2', Money(egp, 2)),
     };
     expect((await start(first, txns))?.txnId, 's1');
+    await markPaydayCelebrated(repo, 's1');
     final both = SalaryState(entries: [_e('s1', _today), _e('s2', _today)]);
     expect((await start(both, txns))?.txnId, 's2');
   });

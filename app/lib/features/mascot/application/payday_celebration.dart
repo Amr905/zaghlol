@@ -9,6 +9,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/settings/settings_repository.dart';
 import '../../budget/application/budget_providers.dart' show todayProvider;
 import '../../salary/application/salary_providers.dart';
 import '../../transactions/data/transactions_providers.dart';
@@ -97,12 +98,33 @@ final paydayCelebrationProvider = StreamProvider<PaydayCelebration?>((
       }
     }
   }
-  final next = [...done, for (final e in d.all) e.txnId];
-  await repo.set(
-    Settings.mascotPaydayCelebratedTxns,
-    next.length <= kPaydayRememberedIds
-        ? next
-        : next.sublist(next.length - kPaydayRememberedIds),
-  );
+  // The picked salary stays unmarked until its sheet really opens
+  // ([markPaydayCelebrated]); the others are stored silently now.
+  final next = [
+    ...done,
+    for (final e in d.all)
+      if (e.txnId != pick?.txnId) e.txnId,
+  ];
+  await _storeMarks(repo, next);
   yield pick;
 });
+
+Future<void> _storeMarks(SettingsRepository repo, List<String> next) =>
+    repo.set(
+      Settings.mascotPaydayCelebratedTxns,
+      next.length <= kPaydayRememberedIds
+          ? next
+          : next.sublist(next.length - kPaydayRememberedIds),
+    );
+
+/// Persists that [txnId]'s payday sheet was opened (call once it is shown).
+Future<void> markPaydayCelebrated(SettingsRepository repo, String txnId) async {
+  final done = await repo.get(Settings.mascotPaydayCelebratedTxns);
+  if (done.contains(txnId)) return;
+  await _storeMarks(repo, [...done, txnId]);
+}
+
+/// Salaries whose sheet already opened this session; survives a slot remount.
+final paydayShownThisSessionProvider = Provider<Set<String>>(
+  (ref) => <String>{},
+);
