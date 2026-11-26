@@ -117,6 +117,11 @@ sealed class LlmEligibility {
     if (_looksLikePerson(loose, lexicon)) {
       return const Ineligible(LlmIneligibleReason.personLike);
     }
+    // B94-m9: no counterparty kind from the caller: only a business word
+    // makes the text trustworthy (fail closed).
+    if (party == null && !_hasBusinessWord(loose, lexicon)) {
+      return const Ineligible(LlmIneligibleReason.notBusinessPayment);
+    }
     if (triedBefore != null && triedBefore(merchantNorm)) {
       return const Ineligible(LlmIneligibleReason.alreadyTried);
     }
@@ -145,8 +150,9 @@ final class NameLexicon {
     required Iterable<String> givenNames,
     required Iterable<String> honorifics,
     required Iterable<String> businessWords,
-  }) : _names = _foldAll(givenNames),
-       _honorifics = _foldAll(honorifics),
+  }) : _names = {..._foldAll(givenNames), ..._foldAll(_builtinNames)},
+       _assetHonorifics = _foldAll(honorifics),
+       _honorifics = {..._foldAll(honorifics), ..._foldAll(_builtinHonorifics)},
        _business = _foldAll(businessWords);
 
   /// From the raw text of the three asset files (one entry per line).
@@ -161,11 +167,16 @@ final class NameLexicon {
   );
 
   final Set<String> _names;
+  final Set<String> _assetHonorifics;
+
+  /// The asset list plus the built-in fallback set, so an out-of-date asset
+  /// cannot open a gap (B94-M4).
   final Set<String> _honorifics;
   final Set<String> _business;
 
-  /// True when a list that the rule depends on is missing.
-  bool get isEmpty => _names.isEmpty || _honorifics.isEmpty;
+  /// True when a list that the rule depends on is missing (the built-in
+  /// fallbacks do not count: a missing asset must still fail closed).
+  bool get isEmpty => _names.isEmpty || _assetHonorifics.isEmpty;
 
   static Set<String> _foldAll(Iterable<String> src) => {
     for (final s in src)
@@ -228,68 +239,259 @@ bool _hasIdentifier(String raw, String loose) {
   return false;
 }
 
-const Set<String> _connectors = {
+/// Built-in fallback honorifics (folded at use). The asset is the full list.
+const List<String> _builtinHonorifics = [
+  'dr',
+  'doctor',
+  'doc',
+  'eng',
+  'engineer',
+  'mr',
+  'mrs',
+  'ms',
+  'miss',
+  'mister',
+  'madam',
+  'madame',
+  'mdm',
+  'sir',
+  'lady',
+  'captain',
+  'capt',
+  'cpt',
+  'sheikh',
+  'sheik',
+  'shaikh',
+  'shaykh',
+  'hag',
+  'haj',
+  'hajj',
+  'hagg',
+  'haga',
+  'hajja',
+  'hagga',
+  'ostaz',
+  'ostaza',
+  'ustaz',
+  'ustaza',
+  'ostath',
+  'prof',
+  'professor',
+  'bey',
+  'basha',
+  'pasha',
+  'sitt',
+  'دكتور',
+  'دكتوره',
+  'د',
+  'م',
+  'مهندس',
+  'مهندسه',
+  'باشمهندس',
+  'حاج',
+  'حاجه',
+  'شيخ',
+  'شيخه',
+  'كابتن',
+  'مدام',
+  'استاذ',
+  'استاذه',
+  'انسه',
+  'ا',
+  'بيه',
+  'باشا',
+  'ست',
+  'سيده',
+  'استاذ',
+  'بروفيسور',
+];
+
+/// Built-in extra names: compound second halves and common nicknames.
+const List<String> _builtinNames = [
+  'rahman',
+  'rahim',
+  'aziz',
+  'fattah',
+  'allah',
+  'karim',
+  'ghani',
+  'hamid',
+  'mido',
+  'bebo',
+  'zizo',
+  'hamada',
+  'toto',
+  'koko',
+  'fofa',
+  'nono',
+  'رحمن',
+  'رحيم',
+  'الله',
+  'عزيز',
+  'فتاح',
+  'ميدو',
+  'بيبو',
+  'زيزو',
+  'حمادة',
+  'حماده',
+  'توتو',
+  'كوكو',
+];
+
+/// Prefixes that glue to the next token (Abd + X).
+const Set<String> _abdWords = {
+  'abd',
+  'abdel',
+  'abdul',
+  'abdal',
+  'abdol',
+  'abdell',
+  'عبد',
+  'عبدال',
+};
+
+/// Prefixes that make the next token a name (Abou + X).
+const Set<String> _kunya = {
   'abou',
   'abu',
   'abo',
   'ibn',
   'bin',
   'ben',
-  'el',
-  'al',
   'om',
   'um',
-  'ال',
   'ابو',
   'ابن',
   'بن',
   'ام',
 };
 
+const Set<String> _connectors = {'el', 'al', 'ال'};
+
+/// Transfer words: whatever follows must be a business word.
+const Set<String> _transferWords = {
+  'to',
+  'from',
+  'transfer',
+  'transferred',
+  'trf',
+  'tf',
+  'send',
+  'sent',
+  'received',
+  'paid',
+  'ipa',
+  'wallet',
+  'الي',
+  'الى',
+  'من',
+  'تحويل',
+  'حول',
+  'ارسال',
+  'محفظه',
+  'استلام',
+  'لحساب',
+};
+
+/// Wallet brand phrases (folded tokens).
+const List<List<String>> _walletPhrases = [
+  ['vodafone', 'cash'],
+  ['orange', 'cash'],
+  ['etisalat', 'cash'],
+  ['we', 'pay'],
+  ['فودافون', 'كاش'],
+  ['اورانج', 'كاش'],
+  ['اورنج', 'كاش'],
+  ['اتصالات', 'كاش'],
+];
+
+final RegExp _maskedToken = RegExp(r'^[a-z]?x{2,}$|x{3,}|[*•#_]');
+final RegExp _letter = RegExp(r'^\p{L}$', unicode: true);
+
+bool _isBusinessToken(String t, NameLexicon lx) =>
+    lx._business.contains(t) || lx._business.contains(_stripAl(t));
+
+bool _hasBusinessWord(String loose, NameLexicon lx) {
+  for (final t in loose.split(_space)) {
+    if (t.isNotEmpty && _isBusinessToken(t, lx)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool _looksLikePerson(String loose, NameLexicon lx) {
   final tokens = loose.split(_space).where((t) => t.isNotEmpty).toList();
   if (tokens.isEmpty) {
     return true;
   }
-  var business = false;
+  // Masked or initial forms: `A***`, `A.`, single letters, x-masking.
   for (final t in tokens) {
-    if (lx._business.contains(t) || lx._business.contains(_stripAl(t))) {
-      business = true;
-      break;
+    if (_maskedToken.hasMatch(t) || _letter.hasMatch(t)) {
+      return true;
     }
+  }
+  final isBiz = [for (final t in tokens) _isBusinessToken(t, lx)];
+  final business = isBiz.contains(true);
+  // Transfer words and wallet brands: anything after them that is not a
+  // business word is refused.
+  for (var i = 0; i < tokens.length; i++) {
+    var after = -1;
+    if (_transferWords.contains(tokens[i])) {
+      after = i + 1;
+    } else {
+      for (final p in _walletPhrases) {
+        if (i + p.length <= tokens.length &&
+            [for (var k = 0; k < p.length; k++) tokens[i + k]].join(' ') ==
+                p.join(' ')) {
+          after = i + p.length;
+        }
+      }
+    }
+    if (after >= 0) {
+      for (var j = after; j < tokens.length; j++) {
+        if (!isBiz[j]) {
+          return true;
+        }
+      }
+    }
+  }
+  // Honorifics: refuse without a business word; with one, refuse when the
+  // token that follows the honorific is not a business word (`صيدلية د. أحمد`).
+  var honorific = false;
+  for (var i = 0; i < tokens.length; i++) {
+    final t = tokens[i];
+    if (_attachedHonorific(t, lx)) {
+      return true;
+    }
+    if (_isHonorific(t, lx)) {
+      honorific = true;
+      var j = i + 1;
+      while (j < tokens.length &&
+          (_connectors.contains(tokens[j]) || _isHonorific(tokens[j], lx))) {
+        j++;
+      }
+      if (j < tokens.length && !isBiz[j]) {
+        return true;
+      }
+    }
+  }
+  if (honorific && !business) {
+    return true;
   }
   if (business) {
     return false;
   }
-  // Spelled out letter by letter ("m o n a"): refuse.
-  if (tokens.length >= 3 && tokens.where((t) => t.length == 1).length >= 3) {
-    return true;
-  }
-  var honorific = false;
-  var names = 0;
-  var other = 0;
-  for (final t in tokens) {
-    if (_isHonorific(t, lx)) {
-      honorific = true;
-    } else if (_isName(t, lx)) {
-      names++;
-    } else if (_connectors.contains(t)) {
-      // skipped
-    } else if (_attachedHonorific(t, lx)) {
-      honorific = true;
-      names++;
-    } else {
-      other++;
+  for (var i = 0; i < tokens.length; i++) {
+    final t = tokens[i];
+    if (_abdWords.contains(t) || _isName(t, lx)) {
+      return true;
+    }
+    if (_kunya.contains(t) && i + 1 < tokens.length) {
+      return true;
     }
   }
-  if (tokens.length > 4 + (honorific ? 1 : 0)) {
-    return false;
-  }
-  if (honorific) {
-    // "Dr Mona", «حاج سيد»: an honorific and no business word.
-    return true;
-  }
-  return other == 0 && names > 0;
+  return false;
 }
 
 bool _isHonorific(String t, NameLexicon lx) {
@@ -314,6 +516,13 @@ bool _isName(String t, NameLexicon lx) {
   if (lx._names.contains(t)) {
     return true;
   }
+  if ((t.startsWith('عبد') && t.length > 4) ||
+      (t.length > 5 &&
+          (t.startsWith('abdel') ||
+              t.startsWith('abdul') ||
+              t.startsWith('abdal')))) {
+    return true;
+  }
   final s = _stripAl(t);
   if (s != t && lx._names.contains(s)) {
     return true;
@@ -330,11 +539,10 @@ bool _isName(String t, NameLexicon lx) {
 
 /// "Dr.Mona" folds to "drmona": a Latin honorific glued to a name.
 bool _attachedHonorific(String t, NameLexicon lx) {
-  for (final h in lx._honorifics) {
-    if (h.length >= 2 &&
-        t.length > h.length + 1 &&
-        t.startsWith(h) &&
-        _isName(t.substring(h.length), lx)) {
+  final max = t.length - 2 < 12 ? t.length - 2 : 12;
+  for (var n = 2; n <= max; n++) {
+    if (lx._honorifics.contains(t.substring(0, n)) &&
+        _isName(t.substring(n), lx)) {
       return true;
     }
   }

@@ -20,7 +20,9 @@ const biz = LlmPaymentKind.businessPayment;
 LlmEligibility check(
   String s, {
   LlmPaymentKind kind = biz,
-  CategorizeInput input = const CategorizeInput(),
+  CategorizeInput input = const CategorizeInput(
+    counterpartyKind: PartyKind.merchant,
+  ),
   bool Function(String)? tried,
   NameLexicon? lx,
 }) => LlmEligibility.check(
@@ -70,9 +72,7 @@ bool serverAccepts(String text) {
 void main() {
   group('table: eligible', () {
     for (final s in [
-      'Dr Hany Clinic',
       'صيدلية الشفاء',
-      'Koshary Abou Tarek',
       'Carrefour',
       'كارفور',
       'Zawya Coffee',
@@ -90,6 +90,25 @@ void main() {
       'ABC Co',
       'Smart Lab',
       'معمل البرج',
+      'صيدليات العزبي',
+      'مطعم ابو طارق',
+      'Restaurant Abou Tarek',
+      'فودافون كاش',
+      'Vodafone Cash Store',
+      'فودافون كاش ستور',
+      'Orange Cash Shop',
+      'Vodafone',
+      'Noon',
+      'Amazon',
+      'Breadfast',
+      'McDonalds',
+      'Spinneys',
+      'Netflix',
+      'Careem',
+      'Hyper One Market',
+      'بنزينة وطنية',
+      'مطعم الشبراويشي',
+      'صيدلية مصر',
     ]) {
       test(s, () => expect(check(s).isEligible, isTrue));
     }
@@ -163,6 +182,128 @@ void main() {
     });
     test('too long', () {
       expect(why('Cafe ${'x' * 70}'), LlmIneligibleReason.badLength);
+    });
+  });
+
+  group('B94 probes: person strings are refused', () {
+    const probes = [
+      // 5-part full names, split compounds
+      'محمد احمد محمود علي حسن',
+      'MOHAMED AHMED MAHMOUD ALY HASSAN',
+      'Ahmed Mohamed Ali Hassan Ibrahim',
+      'محمد عبد الرحمن',
+      'Mohamed Abdel Rahman',
+      // initials and masked
+      'MOHAMED A***',
+      'MOHAMED AHMED M***',
+      'MOHAMED A. HASSAN',
+      'Mohamed A Hassan',
+      'M. Ahmed',
+      'Rana W.',
+      // transfer words and wallet brands
+      'To Ahmed Mohamed',
+      'تحويل الى احمد محمد',
+      'Transfer Ahmed',
+      'Vodafone Cash Ahmed',
+      'فودافون كاش احمد',
+      'ipa ahmed',
+      // honorifics
+      'Hag Sayed',
+      'Haj Sayed',
+      'Hajj Sayed',
+      'شيخ احمد',
+      'الشيخ احمد',
+      'Captain Mido',
+      'كابتن ميدو',
+      'Madam Mona',
+      'مدام منى',
+      'Ostaz Ahmed',
+      'مهندس كريم',
+      // nicknames from the review (now in the built-in set)
+      'Mido',
+      'Bebo',
+      'Zizo',
+      'Hamada',
+      'حماده',
+    ];
+    for (final s in probes) {
+      test(s, () {
+        expect(check(s).isEligible, isFalse);
+        expect(check(s, input: const CategorizeInput()).isEligible, isFalse);
+      });
+    }
+  });
+
+  group('adversarial person strings', () {
+    const adversarial = [
+      'عبد الله محمد',
+      'عبدالرحمن',
+      'Abd El Aziz Sayed',
+      'Abdul Karim',
+      'Abdelfattah Ali',
+      'Abou Samra',
+      'ابو احمد',
+      'ام كلثوم',
+      'ابن سينا',
+      'El-Sayed Hassan',
+      'Al-Sayed Ahmed',
+      'EL SAYED',
+      'Dr. Smith',
+      'د. سميث',
+      'Eng Smith',
+      'Doctor Ahmed',
+      'الحاجة فاطمة',
+      'Sheikh Mohamed',
+      'كابتن احمد',
+      'Miss Mona',
+      'انسه منى',
+      'Mohamed x',
+      'M A H',
+      'A B',
+      'Ahmed XXXX',
+      'Ahmed M***',
+      'Ahmed ****',
+      'Mona S.',
+      'م. ا. سيد',
+      'Sent to Mona',
+      'Received from Mona',
+      'Trf Ahmed Ali',
+      'Etisalat Cash Mona',
+      'Orange Cash Karim',
+      'WE Pay Karim',
+      'اورانج كاش منى',
+      'من احمد',
+      'محفظة احمد',
+      'مطعم د. احمد',
+      'صيدلية د. أحمد',
+      'Dr Hany Clinic',
+      'Clinic Dr Smith',
+      'Mr Sayed Store',
+      'Hag Sayed Store',
+      'Vodafone Cash Mohamed Store',
+      'To Mona Pharmacy Ahmed',
+    ];
+    for (final s in adversarial) {
+      test(s, () {
+        expect(check(s).isEligible, isFalse);
+      });
+    }
+  });
+
+  group('B94-m9: null counterparty fails closed', () {
+    const none = CategorizeInput();
+    test('no business word -> refused', () {
+      for (final s in ['Carrefour', 'Talabat', 'Uber', 'كارفور']) {
+        final r = check(s, input: none);
+        expect(
+          (r as Ineligible).reason,
+          LlmIneligibleReason.notBusinessPayment,
+        );
+      }
+    });
+    test('business word -> eligible', () {
+      expect(check('Cairo Pharmacy', input: none).isEligible, isTrue);
+      expect(check('مطعم ابو طارق', input: none).isEligible, isTrue);
     });
   });
 
@@ -313,7 +454,7 @@ void main() {
           expect(serverAccepts(s), isTrue, reason: 'case #$i');
         }
       }
-      expect(eligible, greaterThan(500)); // the generator does hit eligible
+      expect(eligible, greaterThan(100)); // the generator does hit eligible
     });
 
     test('>= 4 consecutive digits after normalisation is refused', () {
