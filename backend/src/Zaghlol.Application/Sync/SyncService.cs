@@ -1,4 +1,5 @@
 using Zaghlol.Application.Catalog;
+using Zaghlol.Application.Config;
 using Zaghlol.Application.Flags;
 using Zaghlol.Application.Prices;
 using Zaghlol.Domain;
@@ -21,7 +22,8 @@ public sealed class SyncService(
     IInstallHasher hasher,
     ISyncTelemetry telemetry,
     SyncOptions options,
-    TimeProvider clock)
+    TimeProvider clock,
+    IRemoteConfigService? remoteConfig = null)
 {
     public async Task<SyncResult> SyncAsync(InstallId installId, string appVersion, SyncRequestData request, CancellationToken cancellationToken)
     {
@@ -54,6 +56,7 @@ public sealed class SyncService(
         }
 
         var pricesBlock = await PricesAsync(cancellationToken);
+        var configBlock = await ConfigAsync(request.ConfigVersion, cancellationToken);
         var categoryCodes = request.Contributions.Count == 0
             ? (IReadOnlySet<string>)new HashSet<string>(StringComparer.Ordinal)
             : await RequiredAsync(SyncTags.CatalogBlock, () => catalog.CategoryCodesAsync(cancellationToken));
@@ -116,7 +119,8 @@ public sealed class SyncService(
             SyncComposer.SendFlags(snapshot, request.FlagsVersion, appVersion, install.AppVersion) ? snapshot : null,
             SyncComposer.SendPrices(pricesBlock, request.PricesAsOf) ? pricesBlock : null,
             entitlementResult,
-            new SyncAcceptedCounts(claim.ContributionsInserted, claim.BankRequestsInserted));
+            new SyncAcceptedCounts(claim.ContributionsInserted, claim.BankRequestsInserted),
+            configBlock);
     }
 
     private SyncThrottled Throttle(DateTimeOffset now, DateTimeOffset? lastSyncAt, TimeSpan window)
@@ -159,6 +163,31 @@ public sealed class SyncService(
 #pragma warning restore CA1031
         {
             telemetry.BlockFailed(SyncTags.PricesBlock, ex.GetType().Name);
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// The remote config block when its version differs from the app's. Advisory like prices: a failure degrades to no block, and
+    /// the app keeps its bundled defaults (the LLM UI stays governed by the flags, which fail closed).
+    /// </summary>
+    private async Task<SyncConfigBlock?> ConfigAsync(int clientVersion, CancellationToken cancellationToken)
+    {
+        if (remoteConfig is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var snapshot = await remoteConfig.GetAsync(cancellationToken);
+            return snapshot.AppVersion != clientVersion ? snapshot.ToAppBlock() : null;
+        }
+#pragma warning disable CA1031 // Config is advisory: any failure degrades the block to null.
+        catch (Exception ex) when (ex is not OperationCanceledException)
+#pragma warning restore CA1031
+        {
+            telemetry.BlockFailed(SyncTags.ConfigBlockTag, ex.GetType().Name);
             return null;
         }
     }

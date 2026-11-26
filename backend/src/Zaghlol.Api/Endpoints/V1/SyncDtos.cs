@@ -14,6 +14,7 @@ public sealed class SyncRequest
 {
     public const int MaxContributions = 50;
     public const int MaxBankRequests = 10;
+    public const int MaxLlmCatFeedback = 50;
 
     public required int CatalogVersion { get; init; }
 
@@ -28,6 +29,29 @@ public sealed class SyncRequest
     public IReadOnlyList<SyncContributionInput>? Contributions { get; init; }
 
     public IReadOnlyList<SyncBankRequestInput>? BankRequests { get; init; }
+
+    /// <summary>The remote config version the app holds (a version cursor, BR-SYNC-03); the <c>config</c> block returns only when it differs.</summary>
+    public int? ConfigVersion { get; init; }
+
+    /// <summary>
+    /// Right / Wrong verdicts on automatic categories (D-96, BR-SYNC-03 amendment, at most <see cref="MaxLlmCatFeedback"/>). The
+    /// shape is checked here; storing them is T-353 (<c>accepted.llmCatFeedback</c> follows with it).
+    /// </summary>
+    public IReadOnlyList<SyncLlmCatFeedbackInput>? LlmCatFeedback { get; init; }
+}
+
+/// <summary><c>LlmCatFeedbackItem</c> (D-96): one verdict, no amount, date, account or transaction data.</summary>
+public sealed class SyncLlmCatFeedbackInput
+{
+    public required string MerchantNorm { get; init; }
+
+    public required string Verdict { get; init; }
+
+    public required string AiCategory { get; init; }
+
+    public required string UserCategory { get; init; }
+
+    public required string Source { get; init; }
 }
 
 /// <summary><c>ContributionInput</c>: one opt-in merchant contribution (BR-SYNC-04).</summary>
@@ -67,6 +91,8 @@ internal sealed class SyncResponse : IAnchoredResponse
 
     public required SyncPricesDto? Prices { get; init; }
 
+    public required SyncConfigDto? Config { get; init; }
+
     public required SyncEntitlementDto? Entitlement { get; init; }
 
     public required SyncAcceptedDto Accepted { get; init; }
@@ -99,6 +125,25 @@ internal sealed class SyncFlagsDto
     public required int Version { get; init; }
 
     public required IReadOnlyDictionary<string, bool> Values { get; init; }
+}
+
+/// <summary><c>ConfigBlock</c>: every value is a canonical string, never a JSON number (the app parses with its own key table).</summary>
+internal sealed class SyncConfigDto
+{
+    public required int Version { get; init; }
+
+    public required IReadOnlyDictionary<string, string> Values { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SyncProviderNameDto? ProviderName { get; init; }
+}
+
+/// <summary><c>ProviderName</c>.</summary>
+internal sealed class SyncProviderNameDto
+{
+    public required string Ar { get; init; }
+
+    public required string En { get; init; }
 }
 
 /// <summary><c>PricesBlock</c>: prices and rates are decimal strings, never JSON numbers.</summary>

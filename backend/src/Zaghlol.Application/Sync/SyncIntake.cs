@@ -158,6 +158,10 @@ public static class SyncIntake
     public static bool IsInstitutionCode(string? code) =>
         code is { Length: >= 2 and <= 32 } && code.All(c => c is (>= 'a' and <= 'z') or (>= '0' and <= '9') or '_');
 
+    /// <summary>The OpenAPI <c>CategoryCode</c> shape <c>^[a-z][a-z0-9_]{1,31}$</c> (shape only; membership is checked where the code is used).</summary>
+    public static bool IsCategoryCodeShape(string? code) =>
+        code is { Length: >= 2 and <= 32 } && code[0] is >= 'a' and <= 'z' && code.All(c => c is (>= 'a' and <= 'z') or (>= '0' and <= '9') or '_');
+
     public static bool IsCountry(string? country) =>
         country is { Length: 2 } && country.All(c => c is >= 'A' and <= 'Z');
 

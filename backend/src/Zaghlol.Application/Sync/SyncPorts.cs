@@ -85,6 +85,7 @@ public static class SyncTags
     public const string FlagsBlock = "flags";
     public const string PricesBlock = "prices";
     public const string EntitlementBlock = "entitlement";
+    public const string ConfigBlockTag = "config";
 
     public static IReadOnlyList<string> Outcomes { get; } = [Ok, Throttled, Rejected, Unavailable];
 
@@ -94,7 +95,7 @@ public static class SyncTags
 
     public static IReadOnlyList<string> IntakeResults { get; } = [Accepted, Filtered, InvalidCode, Duplicate, DroppedHasher];
 
-    public static IReadOnlyList<string> Blocks { get; } = [CatalogBlock, FlagsBlock, PricesBlock, EntitlementBlock];
+    public static IReadOnlyList<string> Blocks { get; } = [CatalogBlock, FlagsBlock, PricesBlock, EntitlementBlock, ConfigBlockTag];
 }
 
 /// <summary>

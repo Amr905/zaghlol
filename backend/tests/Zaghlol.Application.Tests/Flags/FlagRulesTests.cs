@@ -65,7 +65,7 @@ public class FlagRulesTests
     [Fact]
     public void FlagKeysAreAClosedSetWithAnAsciiShape()
     {
-        Assert.Equal("zakah,smart_roi,roi_named_products", string.Join(',', FlagKeys.Known));
+        Assert.Equal("zakah,smart_roi,roi_named_products,ask_llm,ask_llm_invest,llm_categorise", string.Join(',', FlagKeys.Known));
         Assert.True(FlagKeys.IsKnown("zakah"));
         Assert.False(FlagKeys.IsKnown("Zakah"));
         Assert.False(FlagKeys.IsKnown("other"));

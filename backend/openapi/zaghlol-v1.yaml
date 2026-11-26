@@ -1492,6 +1492,110 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /admin/v1/config:
+    get:
+      tags: [Admin]
+      operationId: adminListConfig
+      summary: List the remote config
+      description: |
+        Role `flags_admin`. Every key of the closed set (ask-llm.md section 4.5) with its effective value; a key never set shows
+        its default with `isDefault: true` and `version: 0`.
+      x-required-roles: [flags_admin]
+      security:
+        - operatorOidc: []
+      responses:
+        '200':
+          description: The config keys.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/config/{key}:
+    get:
+      tags: [Admin]
+      operationId: adminGetConfig
+      summary: View a remote config key
+      description: Role `flags_admin`.
+      x-required-roles: [flags_admin]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/ConfigKey'
+      responses:
+        '200':
+          description: The key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Admin]
+      operationId: adminPutConfig
+      summary: Change a remote config key
+      description: |
+        Role `flags_admin`. Audited (`config_update`: key, new value, new version). Unknown key `404`; a value of the
+        wrong type or outside the key's range is `400 VALIDATION_FAILED` and is never echoed. Each change increments the
+        key `version` by one; the `config` block of the sync carries the sum of the versions of the app-visible keys.
+        Server-only keys (`llm.provider`, `llm.spend_cap_usd`, `cat.cache_min_confidence`, `cat.confirm_n`) are
+        never sent to the app. Takes effect on the next request (nothing is cached on the server).
+      x-required-roles: [flags_admin]
+      security:
+        - operatorOidc: []
+      parameters:
+        - $ref: '#/components/parameters/ConfigKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigUpdateRequest'
+            example:
+              value: '10.00'
+      responses:
+        '200':
+          description: The updated key.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /admin/v1/prices/override:
     put:
       tags: [Admin]
@@ -2001,6 +2105,13 @@ components:
       description: Feature flag key.
       schema:
         $ref: '#/components/schemas/FlagKey'
+    ConfigKey:
+      name: key
+      in: path
+      required: true
+      description: Remote config key (closed set).
+      schema:
+        $ref: '#/components/schemas/ConfigKey'
 
   responses:
     BadRequest:
@@ -3715,6 +3826,45 @@ components:
           type: boolean
         rules:
           $ref: '#/components/schemas/FlagRules'
+    ConfigKey:
+      type: string
+      pattern: '^[a-z][a-z0-9_.]{1,63}$'
+    ConfigState:
+      type: object
+      required: [key, value, isDefault, version, updatedAt]
+      properties:
+        key:
+          $ref: '#/components/schemas/ConfigKey'
+        value:
+          type: string
+          maxLength: 64
+          description: Canonical string (integers `-?[0-9]+`, decimals with two fraction digits, short text).
+        isDefault:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+        updatedAt:
+          $ref: '#/components/schemas/UtcTimestamp'
+    ConfigList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigState'
+    ConfigUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [value]
+      properties:
+        value:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: The value as its canonical string; a JSON number or any other type is `400`.
     PriceOverrideRequest:
       type: object
       description: |

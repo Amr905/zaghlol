@@ -12,6 +12,7 @@ using Zaghlol.Infrastructure;
 using Zaghlol.Infrastructure.Accounts;
 using Zaghlol.Infrastructure.Attestation;
 using Zaghlol.Infrastructure.Catalog;
+using Zaghlol.Infrastructure.Config;
 using Zaghlol.Infrastructure.Contributions;
 using Zaghlol.Infrastructure.Entitlements;
 using Zaghlol.Infrastructure.Flags;
@@ -79,6 +80,8 @@ builder.Services.AddZaghlolOpsReports();
 // Feature flags (T-126): the admin store on the Admin login, the reader on the App login, the ops-channel notifier.
 builder.Services.AddZaghlolFlagAdmin();
 builder.Services.AddZaghlolFlagReader();
+// Remote config (T-334): admin store and per-request reader; the sync `config` block, `llm.provider` and the LLM feature gate read it.
+builder.Services.AddZaghlolRemoteConfig();
 // Price cache reader (App login) and operator override (Admin login) (T-127).
 builder.Services.AddZaghlolPrices();
 // Entitlement tokens, the seat at verify and the sync's entitlement block (T-132). Before the sync and purchase registrations,
@@ -135,6 +138,7 @@ app.MapCatalogAdmin();
 app.MapContributionAdmin();
 app.MapOpsReports();
 app.MapFlagAdmin();
+app.MapConfigAdmin();
 app.MapSupportAdmin();
 app.MapPriceAdmin();
 app.MapDevFakeStores();

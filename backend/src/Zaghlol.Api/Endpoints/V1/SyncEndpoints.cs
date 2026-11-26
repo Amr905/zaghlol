@@ -106,8 +106,21 @@ internal static partial class SyncEndpoints
         request.CatalogVersion >= 0
         && request.FlagsVersion >= 0
         && request.RegistryVersion is null or >= 0
+        && request.ConfigVersion is null or >= 0
+        && (request.LlmCatFeedback?.Count ?? 0) <= SyncRequest.MaxLlmCatFeedback
+        && (request.LlmCatFeedback ?? []).All(IsValidFeedback)
         && (request.Contributions?.Count ?? 0) <= SyncRequest.MaxContributions
         && (request.BankRequests?.Count ?? 0) <= SyncRequest.MaxBankRequests;
+
+    private static readonly string[] FeedbackSources = ["llm", "cache", "catalog"];
+
+    /// <summary>One feedback item (OpenAPI <c>LlmCatFeedbackItem</c>): name length 2..64, a verdict, two category codes, a source.</summary>
+    private static bool IsValidFeedback(SyncLlmCatFeedbackInput item) =>
+        item.MerchantNorm.Length is >= 2 and <= 64
+        && item.Verdict is "right" or "wrong"
+        && SyncIntake.IsCategoryCodeShape(item.AiCategory)
+        && SyncIntake.IsCategoryCodeShape(item.UserCategory)
+        && FeedbackSources.Contains(item.Source, StringComparer.Ordinal);
 
     /// <summary>
     /// <c>Zaghlol-App: &lt;platform&gt;/&lt;appVersion&gt; (&lt;build&gt;)</c>, exactly one value of printable ASCII, at most 64
@@ -145,7 +158,8 @@ internal static partial class SyncEndpoints
         request.EntitlementIssuedAt,
         (request.Contributions ?? []).Select(c => new SyncContribution(c.MerchantNorm, c.InstitutionCode, c.CategoryCode)).ToList(),
         (request.BankRequests ?? []).Select(b => new SyncBankRequest(b.InstitutionName, b.Country, b.Channel)).ToList(),
-        accountToken);
+        accountToken,
+        request.ConfigVersion ?? 0);
 
     private static SyncResponse ToResponse(SyncCompleted completed, string? nonce) => new()
     {
@@ -163,6 +177,14 @@ internal static partial class SyncEndpoints
             : null,
         Flags = completed.Flags is { } flags ? new SyncFlagsDto { Version = flags.Version, Values = flags.Values } : null,
         Prices = completed.Prices is { } prices ? ToDto(prices) : null,
+        Config = completed.Config is { } config
+            ? new SyncConfigDto
+            {
+                Version = config.Version,
+                Values = config.Values,
+                ProviderName = config.ProviderName is { } name ? new SyncProviderNameDto { Ar = name.Ar, En = name.En } : null,
+            }
+            : null,
         Entitlement = completed.Entitlement.Entitlement is { } token ? new SyncEntitlementDto { Token = token } : null,
         Accepted = new SyncAcceptedDto { Contributions = completed.Accepted.Contributions, BankRequests = completed.Accepted.BankRequests },
         AccountToken = completed.Entitlement.AccountToken,

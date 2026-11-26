@@ -1,4 +1,5 @@
 using Zaghlol.Application.Catalog;
+using Zaghlol.Application.Config;
 using Zaghlol.Application.Flags;
 using Zaghlol.Application.Prices;
 using Zaghlol.Application.Sync;
@@ -22,8 +23,10 @@ public class SyncServiceTests
     private readonly FakeHasher hasher = new();
     private readonly RecordingTelemetry telemetry = new();
 
+    private readonly FakeConfigReader configRows = new();
+
     private SyncService Service => new(
-        store, catalog, flags, new PriceReadService(prices, clock), entitlement, hasher, telemetry, SyncOptions.Default, clock);
+        store, catalog, flags, new PriceReadService(prices, clock), entitlement, hasher, telemetry, SyncOptions.Default, clock, new RemoteConfigService(configRows));
 
     private static SyncRequestData Request(
         int catalogVersion = 0,
@@ -31,8 +34,9 @@ public class SyncServiceTests
         DateTimeOffset? pricesAsOf = null,
         DateTimeOffset? entitlementIssuedAt = null,
         IReadOnlyList<SyncContribution>? contributions = null,
-        IReadOnlyList<SyncBankRequest>? bankRequests = null) =>
-        new(catalogVersion, flagsVersion, pricesAsOf, entitlementIssuedAt, contributions ?? [], bankRequests ?? []);
+        IReadOnlyList<SyncBankRequest>? bankRequests = null,
+        int configVersion = 0) =>
+        new(catalogVersion, flagsVersion, pricesAsOf, entitlementIssuedAt, contributions ?? [], bankRequests ?? [], ConfigVersion: configVersion);
 
     private Task<SyncResult> SyncAsync(SyncRequestData request, string appVersion = "1.0.0") =>
         Service.SyncAsync(Id, appVersion, request, CancellationToken.None);
@@ -199,6 +203,59 @@ public class SyncServiceTests
         await Assert.ThrowsAsync<SyncSourceUnavailableException>(() => SyncAsync(Request()));
         Assert.Empty(store.Claims);
         Assert.Equal(SyncTags.FlagsBlock, Assert.Single(telemetry.Failures));
+    }
+
+    [Fact]
+    public async Task TheConfigBlockIsSentOnlyWhenItsVersionDiffersFromTheApps()
+    {
+        configRows.Rows =
+        [
+            new(RemoteConfigKeys.AskQuotaFree, "7", 2, T0),
+            new(RemoteConfigKeys.LlmProvider, "p1", 4, T0),
+        ];
+
+        var first = Assert.IsType<SyncCompleted>(await SyncAsync(Request(configVersion: 0)));
+        Assert.Equal(2, first.Config!.Version);
+        Assert.Equal("7", first.Config.Values[RemoteConfigKeys.AskQuotaFree]);
+        Assert.False(first.UpToDate);
+
+        store.Install = store.Install! with { LastSyncAt = null };
+        var same = Assert.IsType<SyncCompleted>(await SyncAsync(Request(configVersion: 2)));
+        Assert.Null(same.Config);
+    }
+
+    [Fact]
+    public async Task ServerOnlyKeysNeverReachTheAppButTheProviderNameDoes()
+    {
+        configRows.Rows =
+        [
+            new(RemoteConfigKeys.LlmProvider, "secret-id", 1, T0),
+            new(RemoteConfigKeys.LlmSpendCapUsd, "12.00", 1, T0),
+            new(RemoteConfigKeys.CatConfirmN, "4", 1, T0),
+            new(RemoteConfigKeys.LlmProviderNameAr, "المساعد", 1, T0),
+            new(RemoteConfigKeys.LlmProviderNameEn, "Online helper", 1, T0),
+        ];
+
+        var config = Assert.IsType<SyncCompleted>(await SyncAsync(Request())).Config!;
+
+        Assert.DoesNotContain(RemoteConfigKeys.LlmProvider, config.Values.Keys);
+        Assert.DoesNotContain(RemoteConfigKeys.LlmSpendCapUsd, config.Values.Keys);
+        Assert.DoesNotContain(RemoteConfigKeys.CatConfirmN, config.Values.Keys);
+        Assert.DoesNotContain(RemoteConfigKeys.LlmProviderNameAr, config.Values.Keys);
+        Assert.Equal(new ProviderName("المساعد", "Online helper"), config.ProviderName);
+        Assert.Equal(2, config.Version);
+    }
+
+    [Fact]
+    public async Task AConfigReadFailureDropsTheBlockButTheSyncSucceeds()
+    {
+        configRows.Throws = true;
+
+        var result = Assert.IsType<SyncCompleted>(await SyncAsync(Request()));
+
+        Assert.Null(result.Config);
+        Assert.Single(store.Claims);
+        Assert.Equal(SyncTags.ConfigBlockTag, Assert.Single(telemetry.Failures));
     }
 
     [Fact]
@@ -409,6 +466,16 @@ public class SyncServiceTests
 
         public Task<IReadOnlyList<FlagState>> ListAsync(CancellationToken cancellationToken) =>
             Throws ? throw new InvalidOperationException("flags down") : Task.FromResult(Stored);
+    }
+
+    private sealed class FakeConfigReader : IRemoteConfigReader
+    {
+        public bool Throws { get; set; }
+
+        public IReadOnlyList<RemoteConfigRow> Rows { get; set; } = [];
+
+        public Task<IReadOnlyList<RemoteConfigRow>> ListAsync(CancellationToken cancellationToken) =>
+            Throws ? throw new InvalidOperationException("config down") : Task.FromResult(Rows);
     }
 
     private sealed class ThrowingPriceReader : IPriceReader

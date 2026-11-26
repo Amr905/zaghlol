@@ -1,4 +1,5 @@
 using Zaghlol.Application.Catalog;
+using Zaghlol.Application.Config;
 using Zaghlol.Application.Flags;
 using Zaghlol.Application.Prices;
 using Zaghlol.Domain;
@@ -22,7 +23,8 @@ public sealed record SyncRequestData(
     DateTimeOffset? EntitlementIssuedAt,
     IReadOnlyList<SyncContribution> Contributions,
     IReadOnlyList<SyncBankRequest> BankRequests,
-    Sensitive<string>? AccountToken = null);
+    Sensitive<string>? AccountToken = null,
+    int ConfigVersion = 0);
 
 /// <summary>The install row as the sync sees it: platform and app version before this call, and the throttle state.</summary>
 public sealed record SyncInstall(string Platform, string AppVersion, DateTimeOffset? LastSyncAt);
@@ -61,10 +63,11 @@ public sealed record SyncCompleted(
     FlagSnapshot? Flags,
     PricesBlock? Prices,
     SyncEntitlementResult Entitlement,
-    SyncAcceptedCounts Accepted) : SyncResult
+    SyncAcceptedCounts Accepted,
+    SyncConfigBlock? Config = null) : SyncResult
 {
     /// <summary>NFR-BE-03: nothing the app must apply (drives the <c>up_to_date</c> tag of the size metric).</summary>
-    public bool UpToDate => Catalog is null && Flags is null && Prices is null && Entitlement.Entitlement is null;
+    public bool UpToDate => Catalog is null && Flags is null && Prices is null && Config is null && Entitlement.Entitlement is null;
 }
 
 /// <summary>Settings of the sync (<c>Sync:*</c>).</summary>

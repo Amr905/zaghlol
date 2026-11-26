@@ -10,10 +10,19 @@ public static class FlagKeys
     public const string SmartRoi = "smart_roi";
     public const string RoiNamedProducts = "roi_named_products";
 
+    /// <summary>Master flag of the online helper (FR-LLM-60); OFF by default.</summary>
+    public const string AskLlm = "ask_llm";
+
+    /// <summary>Investment illustrations in the online helper; needs <see cref="AskLlm"/>; OFF by default.</summary>
+    public const string AskLlmInvest = "ask_llm_invest";
+
+    /// <summary>Automatic categories for unknown merchants (FR-LCAT-42); OFF by default.</summary>
+    public const string LlmCategorise = "llm_categorise";
+
     /// <summary>The OpenAPI <c>FlagKey</c> pattern, character for character (a contract test compares them).</summary>
     public const string Pattern = "^[a-z][a-z0-9_]{1,63}$";
 
-    public static IReadOnlyList<string> Known { get; } = [Zakah, SmartRoi, RoiNamedProducts];
+    public static IReadOnlyList<string> Known { get; } = [Zakah, SmartRoi, RoiNamedProducts, AskLlm, AskLlmInvest, LlmCategorise];
 
     public static bool IsKnown(string? key) => key is not null && Known.Contains(key, StringComparer.Ordinal);
 

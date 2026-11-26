@@ -556,6 +556,7 @@ Design: [`ask-llm.md`](ask-llm.md) §2, §4, §5 and [`llm-categorise.md`](llm-c
 | `GET /admin/v1/contributions?status=ready_for_review` | catalog_editor | Review queue (aggregates only; `collecting` never shown) |
 | `POST /admin/v1/contributions:promote \| :reject` | catalog_editor | Promote into the draft / reject; key in the body |
 | `GET/PUT /admin/v1/flags/{key}` | flags_admin | View / change a flag and its targeting rules (audited, takes effect on next sync) |
+| `GET /admin/v1/config`, `GET/PUT /admin/v1/config/{key}` | flags_admin | View / change a `remote_config` key of the closed typed set (ask-llm §4.5; audited `config_update`; value is a canonical string; unknown key 404, wrong type or range 400; effective on the next request) |
 | `PUT /admin/v1/prices/override` | prices_admin | Override a price when the feed is wrong |
 | `POST /admin/v1/support/entitlement:lookup` | support_viewer | Entitlement and seat status only; install ID or e-mail in the body |
 | `POST /admin/v1/support/seat:move` | support_agent | Audited seat move past the cooldown (restarts the window), optional attach, correction move-back; live order-ID check (§5.3) |
@@ -585,6 +586,9 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 | `POST /admin/v1/contributions:reject` | catalog_editor |
 | `GET /admin/v1/flags/{key}` | flags_admin |
 | `PUT /admin/v1/flags/{key}` | flags_admin |
+| `GET /admin/v1/config` | flags_admin |
+| `GET /admin/v1/config/{key}` | flags_admin |
+| `PUT /admin/v1/config/{key}` | flags_admin |
 | `PUT /admin/v1/prices/override` | prices_admin |
 | `POST /admin/v1/support/entitlement:lookup` | support_viewer |
 | `POST /admin/v1/support/seat:move` | support_agent |
