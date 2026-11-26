@@ -89,11 +89,16 @@ abstract final class LlmConsentSettings {
 }
 
 final class LlmConsentStore {
-  LlmConsentStore(this._settings, {int Function()? nowMs})
-    : _nowMs = nowMs ?? _utcNowMs;
+  LlmConsentStore(
+    this._settings, {
+    int Function()? nowMs,
+    Future<void> Function(LlmFeature feature)? onCleared,
+  }) : _nowMs = nowMs ?? _utcNowMs,
+       _onCleared = onCleared;
 
   final SettingsRepository _settings;
   final int Function() _nowMs;
+  final Future<void> Function(LlmFeature feature)? _onCleared;
 
   static int _utcNowMs() => DateTime.now().toUtc().millisecondsSinceEpoch;
 
@@ -135,6 +140,9 @@ final class LlmConsentStore {
   }
 
   /// The Settings switch off, or a `409 LLM_CONSENT_REQUIRED`.
-  Future<void> clear(LlmFeature feature) =>
-      _settings.reset(LlmConsentSettings.of(feature));
+  Future<void> clear(LlmFeature feature) async {
+    await _settings.reset(LlmConsentSettings.of(feature));
+    // T-358 wiring: withdrawing categorise consent empties the queue.
+    await _onCleared?.call(feature);
+  }
 }

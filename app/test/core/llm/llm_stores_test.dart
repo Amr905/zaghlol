@@ -5,6 +5,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/backend/backend_client.dart' show LlmQuota;
+import 'package:zaghlol/core/db/daos/llm_cat_queue_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/llm/llm_consent.dart';
 import 'package:zaghlol/core/llm/llm_feature.dart';
@@ -40,6 +41,24 @@ void main() {
   });
 
   group('consent', () {
+    test(
+      'clearing categorise consent empties the queue; ask leaves it',
+      () async {
+        final q = LlmCatQueueDao(edb.db);
+        final c = LlmConsentStore(
+          repo,
+          onCleared: (LlmFeature f) async {
+            if (f == LlmFeature.categorise) await q.clear();
+          },
+        );
+        await q.enqueue('synthetic merchant', at: 1);
+        await c.clear(LlmFeature.ask);
+        expect(await q.count(), 1);
+        await c.clear(LlmFeature.categorise);
+        expect(await q.count(), 0);
+      },
+    );
+
     test('none stored → needsConsent; grant → covered; provider or v change '
         '→ needsConsent again', () async {
       for (final f in LlmFeature.values) {

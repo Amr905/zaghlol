@@ -32,6 +32,8 @@ import 'package:zaghlol_parsing/zaghlol_parsing.dart' show MaskResult;
 import '../../features/catalog_sync/application/sync_providers.dart'
     show backendClientProvider, clientPlatformProvider;
 import '../backend/backend_client.dart';
+import '../db/app_database_providers.dart';
+import '../db/daos/llm_cat_queue_dao.dart';
 import '../flags/feature_flags.dart';
 import '../flags/flags_providers.dart';
 import '../platform/pigeon_attestation.dart';
@@ -416,11 +418,15 @@ final class LlmGatewayClient {
 }
 
 /// The consent store over the encrypted settings.
-final llmConsentStoreProvider = FutureProvider<LlmConsentStore>(
-  (ref) async =>
-      LlmConsentStore(await ref.watch(settingsRepositoryProvider.future)),
-  name: 'llmConsentStoreProvider',
-);
+final llmConsentStoreProvider = FutureProvider<LlmConsentStore>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  return LlmConsentStore(
+    await ref.watch(settingsRepositoryProvider.future),
+    onCleared: (f) async {
+      if (f == LlmFeature.categorise) await LlmCatQueueDao(db).clear();
+    },
+  );
+}, name: 'llmConsentStoreProvider');
 
 /// The quota snapshot and pause store over the encrypted settings.
 final llmQuotaStoreProvider = FutureProvider<LlmQuotaStore>(

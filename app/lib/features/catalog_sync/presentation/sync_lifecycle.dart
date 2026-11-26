@@ -10,6 +10,8 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/llm/llm_gateway_client.dart' show LlmLang;
+import '../../categorization/data/llm_cat_sender_providers.dart';
 import '../../gold/application/entitlement.dart';
 import '../../gold/application/gold_providers.dart';
 import '../application/sync_providers.dart';
@@ -77,6 +79,22 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle>
     } on Object {
       // Typed failures are recorded by the orchestrator; a database that is
       // not open yet simply means no sync this time.
+    }
+    await _sendCategories();
+  }
+
+  /// T-358: offer the auto-category queue after sync / on foreground. The
+  /// sender gates and rate-limits itself; failures are swallowed unlogged.
+  Future<void> _sendCategories() async {
+    try {
+      final s = await ref.read(llmCatSenderProvider.future);
+      final ar = Localizations.maybeLocaleOf(context)?.languageCode != 'en';
+      await s.run(
+        now: DateTime.now().toUtc(),
+        lang: ar ? LlmLang.ar : LlmLang.en,
+      );
+    } on Object {
+      // Nothing is surfaced or logged (merchant names are sensitive).
     }
   }
 
