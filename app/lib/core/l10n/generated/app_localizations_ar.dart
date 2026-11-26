@@ -3065,7 +3065,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get savedToastTitle => 'اتسجلت!';
 
   @override
-  String savedToastBudgetLeft(Object amount, Object category) {
+  String savedToastBudgetLeft(String category, String amount) {
     return 'فاضلك في $category $amount';
   }
 

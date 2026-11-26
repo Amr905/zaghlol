@@ -4086,7 +4086,15 @@
   },
   "savedToastBudgetLeft": "فاضلك في {category} {amount}",
   "@savedToastBudgetLeft": {
-    "description": "T · category:String, amount:String (own currency)"
+    "description": "T · category:String, amount:String (own currency)",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "accountsMergePickTitle": "تدمجه مع أنهي كارت؟",
   "@accountsMergePickTitle": {

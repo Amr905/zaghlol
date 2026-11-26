@@ -2986,7 +2986,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savedToastTitle => 'Saved!';
 
   @override
-  String savedToastBudgetLeft(Object amount, Object category) {
+  String savedToastBudgetLeft(String category, String amount) {
     return '$amount left in $category';
   }
 

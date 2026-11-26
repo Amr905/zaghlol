@@ -4607,7 +4607,7 @@ abstract class AppLocalizations {
   ///
   /// In ar, this message translates to:
   /// **'فاضلك في {category} {amount}'**
-  String savedToastBudgetLeft(Object amount, Object category);
+  String savedToastBudgetLeft(String category, String amount);
 
   /// T
   ///
