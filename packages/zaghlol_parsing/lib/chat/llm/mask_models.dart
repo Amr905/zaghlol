@@ -20,7 +20,11 @@ final class ScrubToken {
 }
 
 final class ScrubResult {
-  const ScrubResult(this.text, this.tokens);
+  const ScrubResult(this.text, this.tokens, {this.failed = false});
+
+  /// FU-398: the scrub threw and the text is the fail-closed stand-in
+  /// (`⟦NUMBER⟧`). The caller must not send anything for this question.
+  final bool failed;
 
   /// The text with phones, e-mails, InstaPay addresses and long digit runs
   /// replaced by tokens.

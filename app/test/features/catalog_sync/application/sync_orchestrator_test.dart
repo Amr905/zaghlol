@@ -22,6 +22,8 @@ import 'package:zaghlol/core/db/daos/outbox_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
 import 'package:zaghlol/core/flags/feature_flags.dart';
 import 'package:zaghlol/core/flags/flags_service.dart';
+import 'package:zaghlol/core/llm/llm_feature.dart';
+import 'package:zaghlol/core/llm/llm_quota_snapshot.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart';
 import 'package:zaghlol/core/settings/settings_repository.dart';
 import 'package:zaghlol/features/catalog_sync/application/sync_adapters.dart';
@@ -233,6 +235,25 @@ void main() {
     backend.script.add(effective(serverAt: clock));
     expect((await o.run()).kind, SyncOutcomeKind.applied);
     expect(backend.requests.length, 2);
+  });
+
+  test('FU-415: a good sync ends the LLM pause; a failed or throttled one '
+      'does not', () async {
+    final q = LlmQuotaStore(settings);
+    await q.pause(LlmFeature.ask);
+    await q.pause(LlmFeature.categorise);
+    final o = make();
+    backend.script.add(BackendFailure(BackendFailureKind.offline));
+    await o.run(force: true);
+    clock += 21 * hr;
+    backend.script.add(throttled(clock, clock + 20 * hr));
+    await o.run(force: true);
+    expect(await q.isPaused(LlmFeature.ask), isTrue);
+    clock += 21 * hr;
+    backend.script.add(effective(serverAt: clock));
+    expect((await o.run(force: true)).kind, SyncOutcomeKind.applied);
+    expect(await q.isPaused(LlmFeature.ask), isFalse);
+    expect(await q.isPaused(LlmFeature.categorise), isFalse);
   });
 
   test('R4-2: fresh nonce per request; answers (throttle too) are handed to '

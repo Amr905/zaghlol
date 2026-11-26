@@ -25,6 +25,7 @@ import 'dart:typed_data';
 
 import 'package:zaghlol_domain/zaghlol_domain.dart' show SafeException;
 
+import '../../../core/llm/llm_quota_snapshot.dart' show LlmQuotaStore;
 import '../../../core/backend/backend_failure.dart';
 import '../../../core/backend/backend_state.dart';
 import '../../../core/backend/generated/api_models.g.dart';
@@ -303,6 +304,7 @@ class SyncOrchestrator {
         ),
       );
       await _record(DiagCodes.syncOk, DiagLevel.info);
+      await _resumeLlm();
       if (changed) await _afterCatalog();
       return SyncOutcome(SyncOutcomeKind.applied, catalogChanged: changed);
     } on BackendFailure catch (e) {
@@ -360,6 +362,16 @@ class SyncOrchestrator {
     } on Object {
       // Re-categorization is a follow-up: the next catalog change repeats it.
       await _record(DiagCodes.syncFailed, DiagLevel.warn);
+    }
+  }
+
+  /// FU-415: a good sync means the flags are fresh again, so a `503
+  /// LLM_SERVICE_PAUSED` mark ends. A failure leaves the pause (fail closed).
+  Future<void> _resumeLlm() async {
+    try {
+      await LlmQuotaStore(_settings).resumeAll();
+    } on Object {
+      // The feature stays paused until the next sync; sync itself succeeded.
     }
   }
 

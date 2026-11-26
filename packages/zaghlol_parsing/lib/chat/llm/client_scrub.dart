@@ -49,7 +49,7 @@ abstract final class ClientScrub {
       // Fail closed: nothing readable leaves.
       return const ScrubResult('⟦NUMBER⟧', [
         ScrubToken(ScrubKind.number, '⟦NUMBER⟧'),
-      ]);
+      ], failed: true);
     }
   }
 
