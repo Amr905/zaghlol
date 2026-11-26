@@ -124,10 +124,15 @@ object OcrMerger {
                 kept.add(line.copy(text = arabicText[i]))
             } else if (i in replacing) {
                 // FU-371: words a kept strong ML Kit line already has must not appear twice.
-                val strong = strongKept[i].orEmpty()
+                // Whole-token equality only (a substring match lost real amounts: "436" inside "1436").
+                val strongTokens = strongKept[i].orEmpty()
+                    .flatMap { it.split(WHITESPACE) }
+                    .map { normalizeDigits(it.trim(':', ')', '(', ',', '.')) }
+                    .filter { it.isNotEmpty() }
+                    .toSet()
                 val text = arabicText[i].split(WHITESPACE).filter { t ->
-                    val bare = t.trim(':', ')', '(', ',', '.')
-                    strong.none { bare.isNotEmpty() && it.contains(bare) }
+                    val bare = normalizeDigits(t.trim(':', ')', '(', ',', '.'))
+                    bare.isEmpty() || bare !in strongTokens
                 }.joinToString(" ")
                 if (text.isNotBlank()) kept.add(line.copy(text = text))
             }

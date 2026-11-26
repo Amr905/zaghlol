@@ -150,6 +150,15 @@ class OcrMergerTest {
     }
 
     @Test
+    fun deDuplicationDropsOnlyWholeTokensSoASubstringAmountSurvives() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Ref 1436", 0, 0, 200, 30), line("Jl 436", 0, 30, 200, 60, 0.3)),
+            arabic = listOf(line("الإجمالي ٤٣٦", 0, 0, 200, 60, 0.85)),
+        )
+        assertEquals(listOf("Ref 1436", "الإجمالي 436"), out.map { it.text })
+    }
+
+    @Test
     fun arabicNoiseDigitsDoNotDisagreeWithAStrongMlKitAmountOnTheSameBox() {
         val out = OcrMerger.merge(
             latin = listOf(line("Net Sales", 0, 300, 300, 340), line("382.46", 310, 300, 500, 340)),
