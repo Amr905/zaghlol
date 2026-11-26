@@ -1,0 +1,54 @@
+==== e2e-llm-cat ar
+Success
+e2e-llm-cat ar exit: 1
+E2ELCAT LANG ar
+00:00 +0 -1: Some tests failed.
+---- ar first exception
+00:00 +0: automatic category: consent, send, apply, feedback, off
+E2ELCAT LANG ar
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following ArgumentError was thrown running a test:
+Invalid argument(s): bad key
+
+When the exception was thrown, this was the stack:
+#0      new SeedSigner (package:zaghlol_catalog/src/seed_signature.dart:87:48)
+#1      FakeCatBackend.start (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/fake_cat_backend.dart:169:9)
+<asynchronous suspension>
+#2      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:88:23)
+<asynchronous suspension>
+#3      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#4      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:83:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+---- ar log tail (no message text is printed)
+
+When the exception was thrown, this was the stack:
+#0      new SeedSigner (package:zaghlol_catalog/src/seed_signature.dart:87:48)
+#1      FakeCatBackend.start (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/fake_cat_backend.dart:169:9)
+<asynchronous suspension>
+#2      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:88:23)
+<asynchronous suspension>
+#3      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#4      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:83:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  automatic category: consent, send, apply, feedback, off
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: automatic category: consent, send, apply, feedback, off [E]
+  Test failed. See exception logs above.
+  The test description was: automatic category: consent, send, apply, feedback, off
+  
+00:00 +0 -1: (tearDownAll)
+00:00 +0 -1: Some tests failed.
+
+Failing tests:
+  /home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart: automatic category: consent, send, apply, feedback, off
