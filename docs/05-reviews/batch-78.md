@@ -218,3 +218,8 @@ Kotlin compile and `OcrMergerTest` execution (no Android SDK/kotlinc; CI is the 
 ### Verdict (fix78)
 
 T-273: **APPROVED**. No blocker or major remains. Findings 1-3 become follow-ups (FU, owner T-273 / SPK-02), not merge-blocking.
+
+### Lead delta check (after the delta re-review)
+
+- Delta finding 1 (currency code lost on `KWD 5.000` / `CHF 20.00` when a 0.45–0.60 Arabic line overlaps): fixed in `OcrMerger.strongLatin` (a 3-letter all-caps token next to a digit token is a strong read), 6 changed lines, with `strongLatin("KWD 5.000")` / `("CHF 20.00")` assertions that fail without it. A lone `KWD` stays weak. Compiled and run by CI only.
+- Delta findings 2–5 stay follow-ups: FU-376 (amount append trusts Arabic digits at ≥ 0.60 on a digit-free strong line), FU-377 (noise at 0.45–0.60 overlapping a strong line by less than half is kept), FU-378 (redundant alias, gate-boundary tests).

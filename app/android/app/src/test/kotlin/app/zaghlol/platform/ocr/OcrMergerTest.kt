@@ -178,6 +178,9 @@ class OcrMergerTest {
         assertTrue(OcrMerger.strongLatin("Amount Due"))
         assertTrue(OcrMerger.strongLatin("VAT 53.54"))
         assertTrue(OcrMerger.strongLatin("Name: عميل"))
+        assertTrue(OcrMerger.strongLatin("KWD 5.000"))
+        assertTrue(OcrMerger.strongLatin("CHF 20.00"))
+        assertFalse(OcrMerger.strongLatin("KWD"))
         assertFalse(OcrMerger.hasArabicLetter("123 ٠١٢ abc"))
     }
 

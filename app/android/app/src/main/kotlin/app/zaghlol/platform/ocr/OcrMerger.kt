@@ -119,6 +119,9 @@ object OcrMerger {
         if (s.none { it.isLetter() }) return true
         val tokens = s.split(WHITESPACE).filter { it.isNotEmpty() }
         val words = tokens.filter { wordLike(it) }
+        // A currency code next to an amount ("KWD 5.000", "CHF 20.00") is a real read: the code must never be lost.
+        val hasDigitToken = tokens.any { t -> t.any { c -> c in '0'..'9' } }
+        if (hasDigitToken && tokens.any { t -> t.length == 3 && t.all { c -> c in 'A'..'Z' } }) return true
         if (words.isEmpty()) return false
         if (words.size >= 2 || words.any { latinLetters(it).length >= 5 }) return true
         return tokens.any { t -> t !in words && (t.any { isDigit(it) } || hasArabicLetter(t)) }

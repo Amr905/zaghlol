@@ -173,7 +173,7 @@ The PO asked the Lead to work on the tasks blocked on PO inputs (web research al
 2. **PO samples still useful:** a Vodafone Cash SMS, real bank statements, and any SMS the diagnostics screen shows as unread.
 3. **Remaining FUs:** the itemised table; about 20 UI items from batch 37 are not started (FU-257).
 
-Next free follow-up number: **FU-376** (PO-phone-feedback lane; batch 78 used FU-364…FU-375)
+Next free follow-up number: **FU-379** (PO-phone-feedback lane; batch 78 used FU-364…FU-378)
 Next free follow-up number: **FU-276** (FU-276 unused: batch 54 minors fixed in the fix round).
 
 ## Batch 39 (2026-11-18)
