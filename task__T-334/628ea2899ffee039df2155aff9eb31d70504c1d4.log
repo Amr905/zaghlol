@@ -1,5 +1,172 @@
 ﻿== SUMMARY ==
-RUNNING sha=628ea2899ffee039df2155aff9eb31d70504c1d4
+FAIL sha=628ea2899ffee039df2155aff9eb31d70504c1d4 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
+dotnet-build                 PASS  exit=0  91s
+dotnet-format                PASS  exit=0  86s
+dotnet-test                  FAIL  exit=1  308s
+
+== ERRORS: dotnet-test ==
+  Failed Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(name: "Zaghlol.Infrastructure") [5 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["Zaghlol.Infrastructure.Llm.FakeLlmProvider", "Zaghlol.Infrastructure.Llm.FakeReply"]
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(String name) in /_/backend/tests/Zaghlol.Api.Tests/Installs/TestSupportExclusionTests.cs:line 31
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+[xUnit.net 00:03:38.61]     Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [FAIL]
+  Failed Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [3 ms]
+  Error Message:
+
+  Failed Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [3 ms]
+  Error Message:
+   Assert.Equal() Failure: Collections differ
+                                                                                                                                             ↓ (pos 10)
+Expected: [···, "POST /admin/v1/support/purchase:unfreeze", "POST /admin/v1/support/seat:move", "PUT /admin/v1/catalog/draft/{entity}/{id}", "PUT /admin/v1/flags/{key}", "PUT /admin/v1/prices/override"]
+Actual:   [···, "POST /admin/v1/support/seat:move", "PUT /admin/v1/catalog/draft/{entity}/{id}", "PUT /admin/v1/config/{key}", "PUT /admin/v1/flags/{key}", "PUT /admin/v1/prices/override"]
+                                                                                                 ↑ (pos 10)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator() in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs:line 102
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:  1579, Skipped:     8, Total:  1587, Duration: 3 m 39 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:04:53.59]     Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup [FAIL]
+
+  Failed Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup [2 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["SyncRequestValidationTests"]
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup() in /_/backend/tests/Zaghlol.Api.Tests/HostStartupTests.cs:line 72
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+Failed!  - Failed:     3, Passed:   717, Skipped:     1, Total:   721, Duration: 4 m 56 s - Zaghlol.Api.Tests.dll (net10.0)
+
+
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-334 628ea2899ffee039df2155aff9eb31d70504c1d4 2026-11-26T21:04:40.8720703+02:00
+
+
+
+[21:04:49] === STEP dotnet-build (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+  Determining projects to restore...
+  Restored /work/backend/src/Zaghlol.Application/Zaghlol.Application.csproj (in 3.67 sec).
+  Restored /work/backend/tests/Zaghlol.Application.Tests/Zaghlol.Application.Tests.csproj (in 3.66 sec).
+  Restored /work/backend/src/Zaghlol.Workers/Zaghlol.Workers.csproj (in 3.66 sec).
+  Restored /work/backend/tests/Zaghlol.Workers.Tests/Zaghlol.Workers.Tests.csproj (in 3.67 sec).
+  Restored /work/backend/tests/Zaghlol.Ops.Tests/Zaghlol.Ops.Tests.csproj (in 3.66 sec).
+  Restored /work/backend/src/Zaghlol.Api/Zaghlol.Api.csproj (in 3.67 sec).
+  Restored /work/backend/src/Zaghlol.Infrastructure/Zaghlol.Infrastructure.csproj (in 3.72 sec).
+  Restored /work/backend/tests/Zaghlol.Infrastructure.Tests/Zaghlol.Infrastructure.Tests.csproj (in 3.72 sec).
+  Restored /work/backend/tests/Zaghlol.Api.Tests/Zaghlol.Api.Tests.csproj (in 3.72 sec).
+  Restored /work/backend/tests/Zaghlol.Contract.Tests/Zaghlol.Contract.Tests.csproj (in 3.73 sec).
+  2 of 12 projects are up-to-date for restore.
+  Zaghlol.Domain -> /work/backend/src/Zaghlol.Domain/bin/Release/net10.0/Zaghlol.Domain.dll
+  Zaghlol.Ops -> /work/backend/src/Zaghlol.Ops/bin/Release/net10.0/zaghlol-ops.dll
+  Zaghlol.Application -> /work/backend/src/Zaghlol.Application/bin/Release/net10.0/Zaghlol.Application.dll
+  Zaghlol.Application.Tests -> /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll
+  Zaghlol.Infrastructure -> /work/backend/src/Zaghlol.Infrastructure/bin/Release/net10.0/Zaghlol.Infrastructure.dll
+  Zaghlol.Workers -> /work/backend/src/Zaghlol.Workers/bin/Release/net10.0/Zaghlol.Workers.dll
+  Zaghlol.Workers.Tests -> /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll
+  Zaghlol.Infrastructure.Tests -> /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll
+  Zaghlol.Api -> /work/backend/src/Zaghlol.Api/bin/Release/net10.0/Zaghlol.Api.dll
+  Zaghlol.Ops.Tests -> /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll
+  Zaghlol.Contract.Tests -> /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll
+  Zaghlol.Api.Tests -> /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:01:28.84
+
+[21:06:20] === RESULT dotnet-build exit=0 (91s)
+[21:06:20] === STEP dotnet-format (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Formatting code files in workspace '/work/backend/Zaghlol.sln'.
+Format complete in 84315ms.
+
+[21:07:45] === RESULT dotnet-format exit=0 (86s)
+[21:07:45] === STEP dotnet-test (docker mcr.microsoft.com/dotnet/sdk:10.0.402, /work/backend)
+Test run for /work/backend/tests/Zaghlol.Workers.Tests/bin/Release/net10.0/Zaghlol.Workers.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Ops.Tests/bin/Release/net10.0/Zaghlol.Ops.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Application.Tests/bin/Release/net10.0/Zaghlol.Application.Tests.dll (.NETCoreApp,Version=v10.0)
+Test run for /work/backend/tests/Zaghlol.Api.Tests/bin/Release/net10.0/Zaghlol.Api.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Contract.Tests/bin/Release/net10.0/Zaghlol.Contract.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+A total of 1 test files matched the specified pattern.
+Test run for /work/backend/tests/Zaghlol.Infrastructure.Tests/bin/Release/net10.0/Zaghlol.Infrastructure.Tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:07.85]     Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppleNotificationRecordedVectorTests.TheRecordedSandboxTestNotificationVerifiesAgainstThePinnedAppleRoot [1 ms]
+
+Passed!  - Failed:     0, Passed:  1282, Skipped:     0, Total:  1282, Duration: 7 s - Zaghlol.Application.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:    39, Skipped:     0, Total:    39, Duration: 58 s - Zaghlol.Workers.Tests.dll (net10.0)
+
+Passed!  - Failed:     0, Passed:   124, Skipped:     0, Total:   124, Duration: 1 m 29 s - Zaghlol.Ops.Tests.dll (net10.0)
+[xUnit.net 00:01:40.88]     Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.ASandboxTransactionReadsFromTheRealAppStoreServerApiWhenConfigured [SKIP]
+[xUnit.net 00:01:40.89]     Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.TheRecordedSandboxTransactionVerifiesAgainstThePinnedAppleRoot [SKIP]
+[xUnit.net 00:01:40.89]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase1_EveryPortWorksAgainstARealOpenBao [SKIP]
+[xUnit.net 00:01:40.89]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseSealed_EveryCallIsUnavailable [SKIP]
+[xUnit.net 00:01:40.89]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase2_AfterARestartTheHashesAndEnvelopesAreUnchanged [SKIP]
+[xUnit.net 00:01:40.89]     Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseStopped_EveryCallIsUnavailable [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.ASandboxTransactionReadsFromTheRealAppStoreServerApiWhenConfigured [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.AppStore.AppStoreLiveSmokeTests.TheRecordedSandboxTransactionVerifiesAgainstThePinnedAppleRoot [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase1_EveryPortWorksAgainstARealOpenBao [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseSealed_EveryCallIsUnavailable [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.Phase2_AfterARestartTheHashesAndEnvelopesAreUnchanged [1 ms]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.OpenBaoLiveTests.PhaseStopped_EveryCallIsUnavailable [1 ms]
+[xUnit.net 00:01:41.09]     Zaghlol.Infrastructure.Tests.Kms.FileKmsPlatformTests.G2_TheFileProviderRefusesToStartOffLinux [SKIP]
+  Skipped Zaghlol.Infrastructure.Tests.Kms.FileKmsPlatformTests.G2_TheFileProviderRefusesToStartOffLinux [1 ms]
+
+Passed!  - Failed:     0, Passed:   206, Skipped:     0, Total:   206, Duration: 1 m 54 s - Zaghlol.Contract.Tests.dll (net10.0)
+[xUnit.net 00:02:59.31]     Zaghlol.Api.Tests.GooglePlay.RtdnRecordedVectorTests.TheRecordedTestNotificationAuthenticatesAndIsIngestedAsTest [SKIP]
+[xUnit.net 00:02:59.89]     Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(name: "Zaghlol.Infrastructure") [FAIL]
+  Skipped Zaghlol.Api.Tests.GooglePlay.RtdnRecordedVectorTests.TheRecordedTestNotificationAuthenticatesAndIsIngestedAsTest [1 ms]
+  Failed Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(name: "Zaghlol.Infrastructure") [5 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["Zaghlol.Infrastructure.Llm.FakeLlmProvider", "Zaghlol.Infrastructure.Llm.FakeReply"]
+  Stack Trace:
+     at Zaghlol.Api.Tests.Installs.TestSupportExclusionTests.NoProductionAssemblyContainsTestSupport(String name) in /_/backend/tests/Zaghlol.Api.Tests/Installs/TestSupportExclusionTests.cs:line 31
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+[xUnit.net 00:03:38.61]     Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [FAIL]
+  Failed Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator [3 ms]
+  Error Message:
+   Assert.Equal() Failure: Collections differ
+                                                                                                                                             ↓ (pos 10)
+Expected: [···, "POST /admin/v1/support/purchase:unfreeze", "POST /admin/v1/support/seat:move", "PUT /admin/v1/catalog/draft/{entity}/{id}", "PUT /admin/v1/flags/{key}", "PUT /admin/v1/prices/override"]
+Actual:   [···, "POST /admin/v1/support/seat:move", "PUT /admin/v1/catalog/draft/{entity}/{id}", "PUT /admin/v1/config/{key}", "PUT /admin/v1/flags/{key}", "PUT /admin/v1/prices/override"]
+                                                                                                 ↑ (pos 10)
+  Stack Trace:
+     at Zaghlol.Api.Tests.Operators.OperatorEndpointTests.EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator() in /_/backend/tests/Zaghlol.Api.Tests/Operators/OperatorEndpointTests.cs:line 102
+--- End of stack trace from previous location ---
+
+Passed!  - Failed:     0, Passed:  1579, Skipped:     8, Total:  1587, Duration: 3 m 39 s - Zaghlol.Infrastructure.Tests.dll (net10.0)
+[xUnit.net 00:04:53.59]     Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup [FAIL]
+  Failed Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup [2 ms]
+  Error Message:
+   Assert.Empty() Failure: Collection was not empty
+Collection: ["SyncRequestValidationTests"]
+  Stack Trace:
+     at Zaghlol.Api.Tests.HostStartupTests.EveryTestClassThatCanBootAHostIsInTheApiHostGroup() in /_/backend/tests/Zaghlol.Api.Tests/HostStartupTests.cs:line 72
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.RuntimeMethodHandle.InvokeMethod(ObjectHandleOnStack target, Void** arguments, ObjectHandleOnStack sig, BOOL isConstructor, ObjectHandleOnStack result)
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+
+Failed!  - Failed:     3, Passed:   717, Skipped:     1, Total:   721, Duration: 4 m 56 s - Zaghlol.Api.Tests.dll (net10.0)
+
+[21:12:54] === RESULT dotnet-test exit=1 (308s)
+[21:12:54] SUMMARY FAIL sha=628ea2899ffee039df2155aff9eb31d70504c1d4 pipeline=quick-backend dotnet-build=0 dotnet-format=0 dotnet-test=1
