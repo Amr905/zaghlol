@@ -364,6 +364,11 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-280](tasks/T-280.md) | "≈ total in EGP" line on Home + rate sheet (bank rate first) | US-P11 / D-86 | High (C4) | Sonnet | flutter-core-engineer | — | A | 79 | DONE (batch 79) |
 | [T-281](tasks/T-281.md) | An exchange is one row; delete/undo as one unit (FU-364/365) | US-P11 / D-86 | High (C4) | Opus | flutter-core-engineer | — | T | 79 | DONE (batch 79) |
 | [T-282](tasks/T-282.md) | Insights and Ask agree with Home on exchanges; SRS updates (FU-367) | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-core-engineer | — | I | 79 | DONE (batch 79) |
+| [T-283](tasks/T-283.md) | Insights in-and-out chart draws exchanges as their own bars | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-ui-engineer | — | U | 80 | TODO |
+| [T-284](tasks/T-284.md) | Home-screen widget "+USD" hint | US-P11 / D-86 | Medium (C3) | Sonnet | native-platform-engineer | — | N | 80 | TODO |
+| [T-285](tasks/T-285.md) | Export "pair" column for exchange/transfer legs | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-core-engineer | — | E | 80 | TODO |
+| [T-286](tasks/T-286.md) | Safe cross-channel exchange merge + bulk actions on an exchange row (FU-383/384) | US-P11 / D-86 | High (C4) | Opus | flutter-core-engineer | — | T | 80 | TODO |
+| [T-287](tasks/T-287.md) | Batch 79 minors (FU-379…382, FU-385) | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-core-engineer | — | A | 80 | TODO |
 | [T-263](tasks/T-263.md) | Sharing an image to Zaghlol opens the scan, never "not implemented" | US-P02 | High | Sonnet | native-platform-engineer | — | — | 77 | DONE (batch 76) |
 | [T-266](tasks/T-266.md) | Link a debit card to its bank account (one balance, set by the user) | US-P05 | High | Sonnet | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 | [T-268](tasks/T-268.md) | Mascot animation matches the approved art; left hand not cut | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | — | 77 | SUPERSEDED by T-274 (not merged) |
