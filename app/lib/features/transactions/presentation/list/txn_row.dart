@@ -3,6 +3,7 @@
 
 import '../../../../core/ui/bank_name_text.dart';
 import '../../../../core/l10n/card_number.dart';
+import '../../../categorization/presentation/ai_category_chip.dart';
 import '../../../categorization/presentation/category_visuals.dart';
 
 import 'package:flutter/material.dart';
@@ -74,6 +75,28 @@ String sourceLabel(AppLocalizations l, TxnSource s) => switch (s) {
   TxnSource.share => l.commonSourceShared,
 };
 
+/// The row's second line, plus the AI chip under it when [aiGuess].
+Widget? _withChip(bool aiGuess, String subtitle, Widget? base) {
+  if (!aiGuess) return base;
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      base ??
+          Builder(
+            builder: (ctx) => Text(
+              subtitle,
+              style: ZType.bodySmall.copyWith(color: ZColors.of(ctx).textMuted),
+            ),
+          ),
+      const Padding(
+        padding: EdgeInsetsDirectional.only(top: ZSpacing.xs),
+        child: AiCategoryChip(),
+      ),
+    ],
+  );
+}
+
 String categoryName(TxnCategory c, String lang) =>
     lang == 'ar' ? c.nameAr : c.nameEn;
 
@@ -130,6 +153,7 @@ class TxnRow extends StatelessWidget {
           );
     final amountText = fmt.money(signedAmount(txn));
     final catName = cat == null ? '' : categoryName(cat, fmt.lang);
+    final aiGuess = isAiUnconfirmed(txn);
     final Widget leading = selecting
         ? Icon(
             selected ? Icons.check_circle : Icons.radio_button_unchecked,
@@ -153,7 +177,8 @@ class TxnRow extends StatelessWidget {
       onLongPress: onLongPress,
       label: a11yAmounts(
         l,
-        l.transactionsRowLabelA11y(amountText, cardName, catName, title, time),
+        l.transactionsRowLabelA11y(amountText, cardName, catName, title, time) +
+            (aiGuess ? '. ${l.categorizationAiChipLabelA11y}' : ''),
       ),
       excludeSemantics: true,
       onTap: onTap,
@@ -171,22 +196,26 @@ class TxnRow extends StatelessWidget {
             ZListRow(
               title: title,
               subtitle: subtitle,
-              subtitleWidget: acc == null || txn.status == TxnStatus.declined
-                  ? null
-                  : BankNameText(
-                      name: acc.label,
-                      institutionCode: acc.institutionCode,
-                      last4: acc.last4,
-                      maxLines: 2,
-                      compose: (n) => withName(
-                        l.transactionsRowSubtitle(
-                          n,
-                          sourceLabel(l, txn.source),
-                          time,
+              subtitleWidget: _withChip(
+                aiGuess,
+                subtitle,
+                acc == null || txn.status == TxnStatus.declined
+                    ? null
+                    : BankNameText(
+                        name: acc.label,
+                        institutionCode: acc.institutionCode,
+                        last4: acc.last4,
+                        maxLines: 2,
+                        compose: (n) => withName(
+                          l.transactionsRowSubtitle(
+                            n,
+                            sourceLabel(l, txn.source),
+                            time,
+                          ),
                         ),
+                        style: ZType.bodySmall.copyWith(color: c.textMuted),
                       ),
-                      style: ZType.bodySmall.copyWith(color: c.textMuted),
-                    ),
+              ),
               leading: leading,
               trailing: ZMoneyText(
                 text: amountText,
