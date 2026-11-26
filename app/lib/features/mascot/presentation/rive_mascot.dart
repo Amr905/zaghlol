@@ -151,7 +151,23 @@ final riveMascotLoaderProvider = Provider<RiveMascotLoader>(
 /// T-276: called once at start-up so the first mascot never waits for the
 /// native runtime, the file decode or the asset manifest. Failures are
 /// swallowed; the mascot then shows the still as before.
-Future<void> preloadRiveMascot() async {
+Future<void> preloadRiveMascot({
+  bool? animationsDisabled,
+  Future<void> Function()? load,
+}) async {
+  // FU-374: reduce motion never mounts Rive, so it never loads it either.
+  final off =
+      animationsDisabled ??
+      WidgetsBinding
+          .instance
+          .platformDispatcher
+          .accessibilityFeatures
+          .disableAnimations;
+  if (off) return;
+  if (load != null) {
+    await load();
+    return;
+  }
   try {
     await AssetManifest.loadFromAssetBundle(rootBundle);
     await _loadSharedFile();

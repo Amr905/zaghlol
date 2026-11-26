@@ -159,7 +159,10 @@ class _InOutPainter extends CustomPainter {
         canvas.drawRRect(rect, Paint()..color = ink.withValues(alpha: .88));
       }
       // T-283: exchanged in / out, thin bars beside spending (never stacked).
-      final ew = math.min(7.0, slot * .12);
+      final ew = math.max(
+        1.0,
+        math.min(7.0, math.min(slot * .12, (slot / 2 - bw / 2 - 3.5) / 2)),
+      );
       final dirSign = rtl ? -1.0 : 1.0;
       var ex = cx + dirSign * (bw / 2 + 2);
       for (final e in [

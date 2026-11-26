@@ -57,11 +57,17 @@ void main() {
         expect(t[usd]!.exchangedOut, Money(usd, 60000), reason: 'run $run');
         expect(t[usd]!.spend, Money.zero(usd));
       }
-      expect(
-        (await repo.cachedTotals(october))![egp]!.exchangedIn,
-        Money.zero(egp),
-        reason: 'the cache itself has no exchange figures',
-      );
+      // FU-369: the cold-start cache read carries the same figures as the
+      // live totals (no jump when the live totals arrive).
+      final cold = (await repo.cachedTotals(october))!;
+      final live = await repo.totals(october);
+      for (final c in [egp, usd]) {
+        expect(cold[c]!.exchangedIn, live[c]!.exchangedIn);
+        expect(cold[c]!.exchangedOut, live[c]!.exchangedOut);
+        expect(cold[c]!.income, live[c]!.income);
+        expect(cold[c]!.spend, live[c]!.spend);
+      }
+      expect(cold[egp]!.exchangedIn, Money(egp, 2970000));
     },
   );
 }

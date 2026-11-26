@@ -142,7 +142,9 @@ class _State extends ConsumerState<TransactionsListScreen> {
               : null,
           title: Text(
             sel.active
-                ? l.transactionsListSelectedTitle(fmt.count(sel.ids.length))
+                ? l.transactionsListSelectedTitle(
+                    fmt.count(_selectedRowCount(sel.ids)),
+                  )
                 : l.transactionsListTitle,
           ),
           actions: [
@@ -363,6 +365,19 @@ class _State extends ConsumerState<TransactionsListScreen> {
   }
 
   static Set<String> _legs(TxnExchange x) => {x.sent.id, x.received.id};
+
+  /// FU-390: selected rows for the title; both legs of an exchange are one row.
+  int _selectedRowCount(Set<String> ids) {
+    final loaded = ref.watch(txnExchangesProvider).value;
+    if (loaded == null) return ids.length;
+    final pairs = <TxnExchange>{
+      for (final id in ids)
+        if (loaded[id] case final x?
+            when ids.contains(x.sent.id) && ids.contains(x.received.id))
+          x,
+    };
+    return ids.length - pairs.length;
+  }
 
   /// Whether a loaded exchange leg is selected (drives the action bar).
   bool _hasLoadedExchange(Set<String> ids) {

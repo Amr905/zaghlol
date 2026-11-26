@@ -18,6 +18,11 @@ const widgetAmountMask = '•••';
 /// How many days of "days to payday" lines one snapshot carries.
 const widgetMaxRollDays = 62;
 
+/// The longest line two the native widgets keep (`WidgetView.MAX_TEXT_CHARS`
+/// in `WidgetSnapshotStore.kt`, 120 UTF-16 units; they truncate beyond it).
+/// Mirror both if either changes (FU-387).
+const widgetMaxLineChars = 120;
+
 /// T-284 (D-86): the most ISO codes the hint names before "+N".
 const widgetMaxHintCodes = 2;
 
@@ -132,7 +137,10 @@ WidgetSnapshot buildWidgetSnapshot(WidgetSnapshotInput i) {
   final days = overview.daysRemaining;
   String line(int n) {
     final text = i.copy.daysToPayday(n, i.digits.render('$n'));
-    return hint.isEmpty ? text : '$text \u00b7 $hint';
+    if (hint.isEmpty) return text;
+    final withHint = '$text \u00b7 $hint';
+    // FU-387: when it would be cut, the hint goes, never the payday text.
+    return withHint.length > widgetMaxLineChars ? text : withHint;
   }
 
   // FU-206b: one finished line per coming day so the widget rolls the count

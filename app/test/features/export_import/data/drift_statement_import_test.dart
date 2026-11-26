@@ -16,6 +16,7 @@ import 'package:zaghlol/features/export_import/application/import_csv.dart'
 import 'package:zaghlol/features/export_import/application/import_statement_pdf.dart';
 import 'package:zaghlol/features/export_import/data/drift_csv_import_store.dart';
 import 'package:zaghlol/features/export_import/data/drift_statement_template_store.dart';
+import 'package:zaghlol/features/transactions/application/transfer_pairing.dart';
 import 'package:zaghlol/features/transactions/data/drift_transaction_repository.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -101,6 +102,44 @@ void main() {
     final saved = await templates.load('cib');
     expect(saved!.mapping.roles, mapping.roles);
     expect(await templates.load('nbe'), isNull);
+  });
+
+  test('FU-370: a statement debit matching a manually recorded exchange '
+      'leg (transfer_out, internal) is a duplicate, never spending', () async {
+    await accounts.insert(account('usd', last4: '9945', currency: 'USD'));
+    final at = DateTime(2026, 1, 5, 12);
+    await TransferPairingUseCase(
+      edb.db,
+      loadSchedule: () async => PaydaySchedule.single(1),
+    ).recordExchange(
+      fromAccountId: 'usd',
+      sent: Money.parse('45.00', Currency.of('USD')),
+      toAccountId: 'acc1',
+      received: Money.parse('2200.00', Currency.of('EGP')),
+      occurredAt: at.toUtc(),
+      tzOffsetMin: at.timeZoneOffset.inMinutes,
+    );
+    final before = await repo.count();
+    final reading = await uc.open(Uint8List.fromList([1]), bankKey: 'cib');
+    final usdMapping = StatementMapping(
+      currency: Currency.of('USD'),
+      roles: const [
+        StatementColumnRole.date,
+        StatementColumnRole.description,
+        StatementColumnRole.amount,
+      ],
+    );
+    final s = await uc.run(reading, usdMapping, accountId: 'usd');
+    expect(s.duplicates, 1); // the -45.00 debit
+    expect(s.imported, 1); // only the +45.00 row of the sample statement
+    final spending = await edb.db
+        .customSelect(
+          "SELECT COUNT(*) AS n FROM transactions WHERE account_id = 'usd' "
+          "AND source = 'pdf' AND direction = 'expense'",
+        )
+        .getSingle();
+    expect(spending.read<int>('n'), 0);
+    expect(await repo.count(), before + 1);
   });
 
   test('declined/reversed rows do not block a statement row', () async {

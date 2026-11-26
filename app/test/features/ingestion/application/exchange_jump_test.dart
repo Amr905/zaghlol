@@ -11,6 +11,10 @@ import 'package:zaghlol/core/db/daos/review_items_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 
 import '../../../core/db/financial_fixtures.dart' show account, txn;
+
+import 'package:zaghlol/features/ingestion/data/drift_ingest_store.dart';
+import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
+
 import '../support/ingest_harness.dart';
 
 const int day = 24 * 3600 * 1000;
@@ -109,5 +113,55 @@ void main() {
       sms('b2', 'ZBANK: Balance EGP 1,499.99 acct *1111', rx: t0 + day),
     ]);
     expect(await jumps(), isEmpty);
+  });
+
+  test('FU-366: an old jump (inbox catch-up, > 14 days) raises nothing; a '
+      'recent one still asks once', () async {
+    await usdSalary();
+    await w.run([sms('b1', 'ZBANK: Balance EGP 1,000.00 acct *1111')]);
+    w.clockMs = t0 + 30 * day;
+    await w.run([
+      sms(
+        'b2',
+        'ZBANK: Balance EGP 30,700.00 acct *1111',
+        rx: t0 + day,
+        origin: MessageOrigin.inboxScan,
+      ),
+    ]);
+    expect(await jumps(), isEmpty);
+
+    w.clockMs = t0 + 31 * day;
+    await w.run([
+      sms('b3', 'ZBANK: Balance EGP 60,700.00 acct *1111', rx: t0 + 30 * day),
+    ]);
+    expect(await jumps(), hasLength(1));
+  });
+
+  test('FU-366: the store reads the stored rate (direct or inverse) for '
+      'the threshold; none stored gives null', () async {
+    await AccountsDao(w.db).insert(account('usd', currency: 'USD'));
+    await w.db.customStatement(
+      'INSERT INTO account_balances (account_id, currency, balance_minor, '
+      "as_of) VALUES ('usd', 'USD', 10000, $t0)",
+    );
+    final store = DriftIngestStore(w.db);
+    Future<int?> rate() async => (await store.balanceJumpFacts(
+      accountId: 'usd',
+      currency: 'USD',
+      asOfMs: t0 + day,
+      lookbackMs: 45 * day,
+    ))!.egpPerUnitE9;
+
+    expect(await rate(), isNull);
+    await w.db.customStatement(
+      'INSERT INTO fx_rates (base, quote, rate_e9, as_of) '
+      "VALUES ('EGP', 'USD', 20000000, $t0)",
+    ); // 1 EGP = 0.02 USD
+    expect(await rate(), 50000000000); // 1 USD = 50 EGP
+    await w.db.customStatement(
+      'INSERT INTO fx_rates (base, quote, rate_e9, as_of) '
+      "VALUES ('USD', 'EGP', 48000000000, $t0)",
+    );
+    expect(await rate(), 48000000000); // direct row wins
   });
 }
