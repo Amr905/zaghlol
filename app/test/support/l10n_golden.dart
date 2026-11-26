@@ -59,6 +59,10 @@ void l10nGoldenMatrix(
           Builder(builder: (c) => build(AppLocalizations.of(c))),
         ),
       );
+      // Let the still-pose image decode so every variant shows the bird.
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 300)),
+      );
       await tester.pump(const Duration(milliseconds: 400));
       await expectLater(
         find.byKey(const ValueKey('golden-root')),
