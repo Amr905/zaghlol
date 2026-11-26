@@ -117,7 +117,6 @@ class VoiceController extends Notifier<VoiceState> {
   bool _retried = false;
   bool _userStopped = false;
   Duration _listenStartedAt = Duration.zero;
-  bool _lastOnDevice = true;
 
   @override
   VoiceState build() {
@@ -186,7 +185,6 @@ class VoiceController extends Notifier<VoiceState> {
 
   Future<void> _listen({required bool onDevice}) async {
     final id = ++_session;
-    _lastOnDevice = onDevice;
     _listenStartedAt = ref.read(voiceMonotonicProvider)();
     _set(
       state.copyWith(
