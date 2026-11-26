@@ -1,5 +1,7 @@
 // T-337: remote config parsing, storage, staleness. Synthetic data only.
 
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/config/remote_config.dart';
@@ -112,10 +114,56 @@ void main() {
       expect(s.current.askQuotaFree, 5);
     });
 
+    test('confirm() keeps a held version fresh past 14 days', () async {
+      await s.apply(version: 3, values: {'ask.quota_free': '9'});
+      now = now.add(const Duration(days: 10));
+      await s.confirm(3);
+      now = now.add(const Duration(days: 10));
+      expect(s.current.askQuotaFree, 9);
+      final s2 = make();
+      await s2.load();
+      expect(s2.current.askQuotaFree, 9);
+      now = now.add(const Duration(days: 5));
+      expect(s.current.askQuotaFree, 5);
+    });
+
+    test('confirm() of another version or with none held is ignored', () async {
+      await s.confirm(3);
+      expect(s.version, 0);
+      await s.apply(version: 3, values: {'ask.quota_free': '9'});
+      now = now.add(const Duration(days: 10));
+      await s.confirm(2);
+      now = now.add(const Duration(days: 5));
+      expect(s.current.askQuotaFree, 5);
+    });
+
     test('never synced reads defaults and version 0', () {
       expect(s.current, same(RemoteConfig.defaults));
       expect(s.version, 0);
     });
+  });
+
+  test('Delete everything: the config dies with the database file', () async {
+    final dir = await Directory.systemTemp.createTemp('zcfg');
+    addTearDown(() => dir.delete(recursive: true));
+    final file = File('${dir.path}/z.db');
+    var db = AppDatabase(NativeDatabase(file));
+    final s = RemoteConfigService(
+      dao: SecureStateDao(db),
+      clock: () => DateTime.utc(2026, 11, 26),
+    );
+    await s.apply(version: 3, values: {'ask.quota_free': '9'});
+    await db.close();
+    await file.delete(); // what the wipe does to the database files
+    db = AppDatabase(NativeDatabase(file));
+    addTearDown(db.close);
+    final s2 = RemoteConfigService(
+      dao: SecureStateDao(db),
+      clock: () => DateTime.utc(2026, 11, 26),
+    );
+    await s2.load();
+    expect(s2.version, 0);
+    expect(s2.current, same(RemoteConfig.defaults));
   });
 
   test('the three LLM flags exist and are unknown-safe', () {

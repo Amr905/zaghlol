@@ -54,6 +54,32 @@ void main() {
   FlagsService make({RemoteFlagsSource? remote}) =>
       FlagsService(store: store, clock: () => now, remote: remote);
 
+  test('confirm() keeps a held version fresh past 14 days (B92-M2)', () async {
+    await service.apply(flags(4, {'ask_llm': true}));
+    now = now.add(const Duration(days: 10));
+    await service.confirm(4);
+    now = now.add(const Duration(days: 10));
+    expect(service.current.isOn(FeatureFlag.askLlm), isTrue);
+    now = now.add(const Duration(days: 5));
+    expect(service.current.isOn(FeatureFlag.askLlm), isFalse);
+  });
+
+  test('without confirm the snapshot goes stale at 14 days', () async {
+    await service.apply(flags(4, {'ask_llm': true}));
+    now = now.add(const Duration(days: 14));
+    expect(service.current.isOn(FeatureFlag.askLlm), isFalse);
+  });
+
+  test('confirm() of a different version or none held is ignored', () async {
+    await service.confirm(4);
+    expect(store.writes, 0);
+    await service.apply(flags(4, {'ask_llm': true}));
+    now = now.add(const Duration(days: 10));
+    await service.confirm(3);
+    now = now.add(const Duration(days: 5));
+    expect(service.current.isOn(FeatureFlag.askLlm), isFalse);
+  });
+
   setUp(() {
     now = DateTime.utc(2026, 11, 11, 12);
     store = FakeStore();

@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/backend/backend_failure.dart';
 import 'package:zaghlol/core/backend/generated/api_models.g.dart';
 import 'package:zaghlol/core/backend/ids.dart';
+import 'package:zaghlol/core/config/remote_config_service.dart';
 import 'package:zaghlol/core/db/app_database.dart' hide Settings;
 import 'package:zaghlol/core/db/daos/accounts_dao.dart';
 import 'package:zaghlol/core/db/daos/catalog_dao.dart';
@@ -97,12 +98,14 @@ SyncResponse effective({
   int serverAt = 0,
   CatalogDelta? catalog,
   FlagsBlock? flags,
+  ConfigBlock? config,
   PricesBlock? prices,
 }) => SyncResponse(
   serverTime: isoZ(serverAt),
   nextSyncNotBefore: isoZ(serverAt + 24 * hr),
   catalog: catalog,
   flags: flags,
+  config: config,
   prices: prices,
   accepted: const AcceptedCounts(contributions: 0, bankRequests: 0),
 );
@@ -140,7 +143,9 @@ void main() {
     SyncAnchor? a,
     Future<void> Function()? recat,
     IngestionPauseGate? gate,
+    RemoteConfigService? config,
   }) => SyncOrchestrator(
+    config: config,
     db: db,
     backend: backend,
     anchor: a ?? anchor,
@@ -556,6 +561,62 @@ void main() {
     await make().run();
     expect(backend.requests.last.flagsVersion, 4);
     expect(backend.requests.last.pricesAsOf, isNotNull);
+  });
+
+  test('a sync that confirms flags and config versions keeps them fresh '
+      '(B92-M2, AC3)', () async {
+    DateTime now() => DateTime.fromMillisecondsSinceEpoch(clock, isUtc: true);
+    final cfg = RemoteConfigService(dao: SecureStateDao(db), clock: now);
+    await cfg.load();
+    backend.script.add(
+      effective(
+        serverAt: clock,
+        flags: const FlagsBlock(version: 4, values: {'zakah': true}),
+        config: const ConfigBlock(version: 7, values: {'ask.quota_free': '9'}),
+      ),
+    );
+    await make(config: cfg).run();
+    expect(backend.requests.last.configVersion, isNull);
+    // Ten days of daily syncs that omit both blocks (versions unchanged).
+    for (var d = 0; d < 20; d++) {
+      clock += 25 * hr;
+      backend.script.add(effective(serverAt: clock));
+      await make(config: cfg).run();
+      expect(backend.requests.last.configVersion, 7);
+      expect(backend.requests.last.flagsVersion, 4);
+    }
+    expect(flags.isOn(FeatureFlag.zakah), isTrue); // 20+ days after last edit
+    expect(cfg.current.askQuotaFree, 9);
+  });
+
+  test('a failed sync or an older config does not refresh freshness', () async {
+    DateTime now() => DateTime.fromMillisecondsSinceEpoch(clock, isUtc: true);
+    final cfg = RemoteConfigService(dao: SecureStateDao(db), clock: now);
+    await cfg.load();
+    backend.script.add(
+      effective(
+        serverAt: clock,
+        flags: const FlagsBlock(version: 4, values: {'zakah': true}),
+        config: const ConfigBlock(version: 7, values: {'ask.quota_free': '9'}),
+      ),
+    );
+    await make(config: cfg).run();
+    clock += 25 * hr;
+    backend.script.add(BackendFailure(BackendFailureKind.offline));
+    await make(config: cfg).run(force: true);
+    clock += 25 * hr;
+    backend.script.add(
+      effective(
+        serverAt: clock,
+        flags: const FlagsBlock(version: 3, values: {'zakah': false}),
+        config: const ConfigBlock(version: 6, values: {'ask.quota_free': '1'}),
+      ),
+    );
+    await make(config: cfg).run(force: true);
+    clock += 13 * 24 * hr;
+    expect(flags.isOn(FeatureFlag.zakah), isFalse);
+    expect(cfg.current.askQuotaFree, 5);
+    expect(cfg.version, 7);
   });
 
   test('two runners never sync at once (lease); the same instance shares '

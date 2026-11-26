@@ -158,6 +158,7 @@ const _install = Obj({
 const _sync = Obj({
   'catalogVersion': Leaf(WireClass.versions),
   'flagsVersion': Leaf(WireClass.versions),
+  'configVersion': Leaf(WireClass.versions),
   'pricesAsOf': Leaf(WireClass.versions),
   'entitlementIssuedAt': Leaf(WireClass.versions),
   'registryVersion': Leaf(WireClass.versions),

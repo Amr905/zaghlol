@@ -197,6 +197,24 @@ final class FlagsService {
     return FlagsApplyResult.applied;
   }
 
+  /// A successful sync that omitted `flags` confirms the held [version]:
+  /// the snapshot is refreshed (same version, new fetch time). Ignored when
+  /// nothing is held or the held version differs.
+  Future<void> confirm(int version) {
+    final run = _writes.then((_) async {
+      final s = _snapshot;
+      if (s == null || _unverifiable || s.version != version) return;
+      final now = _clock().toUtc().millisecondsSinceEpoch;
+      if (now <= s.fetchedAtMs) return;
+      final snap = _Snapshot(s.version, now, s.values);
+      await _store.write(snap.encode(), at: now);
+      _snapshot = snap;
+      _evaluate();
+    });
+    _writes = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
   void dispose() {
     _disposed = true;
     _expiry?.cancel();

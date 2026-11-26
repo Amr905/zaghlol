@@ -33,7 +33,7 @@ final class RemoteConfigService {
   final _changes = StreamController<RemoteConfig>.broadcast();
 
   /// Version of the stored block (0 when none): what the next sync may send
-  /// as `configVersion` once the SRS allows that member.
+  /// as `configVersion`.
   int get version => _version;
 
   /// Typed values now; defaults when missing, stale or the clock is odd.
@@ -106,6 +106,35 @@ final class RemoteConfigService {
       _loaded = true;
       _changes.add(current);
       return true;
+    });
+    _writes = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
+  /// A successful sync that omitted `config` confirms the held [version]:
+  /// freshness moves to now. Ignored when none is held or it differs.
+  Future<void> confirm(int version) {
+    final run = _writes.then((_) async {
+      if (_version == 0 || _version != version) return;
+      final now = _clock().toUtc().millisecondsSinceEpoch;
+      if (now <= _atMs) return;
+      await _dao.write(
+        remoteConfigSnapshotKey,
+        Uint8List.fromList(
+          utf8.encode(
+            jsonEncode({
+              'v': 1,
+              'version': _version,
+              'at': now,
+              'values': _values,
+              if (_names != null) 'names': {'ar': _names!.ar, 'en': _names!.en},
+            }),
+          ),
+        ),
+        at: now,
+      );
+      _atMs = now;
+      _changes.add(current);
     });
     _writes = run.then<void>((_) {}, onError: (Object _) {});
     return run;
