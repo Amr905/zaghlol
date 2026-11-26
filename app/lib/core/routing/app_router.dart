@@ -23,6 +23,7 @@ class TabRoots {
     this.zaghlol = _blank,
     this.review = _reviewPlaceholder,
     this.transactions = _blank,
+    this.currencyView = _blankIso,
     this.addSelected = _closeAdd,
   });
 
@@ -40,10 +41,15 @@ class TabRoots {
 
   /// S-11 Transactions list (T-079 supplies `TransactionsListScreen`).
   final WidgetBuilder transactions;
+
+  /// T-279: one currency's view of the month (`/home/currency/:iso`).
+  final Widget Function(BuildContext context, String iso) currencyView;
 }
 
 Widget _blank(BuildContext context) =>
     ColoredBox(color: ZColors.of(context).bg, child: const SizedBox.expand());
+
+Widget _blankIso(BuildContext context, String iso) => _blank(context);
 
 Widget _reviewPlaceholder(BuildContext context) => Scaffold(
   appBar: AppBar(
@@ -103,6 +109,11 @@ GoRouter buildAppRouter(TabRoots roots, {String initialLocation = '/home'}) {
                   GoRoute(
                     path: 'transactions',
                     builder: (c, s) => roots.transactions(c),
+                  ),
+                  GoRoute(
+                    path: 'currency/:iso',
+                    builder: (c, s) =>
+                        roots.currencyView(c, s.pathParameters['iso'] ?? ''),
                   ),
                   GoRoute(
                     path: 'add',

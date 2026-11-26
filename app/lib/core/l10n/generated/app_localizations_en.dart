@@ -1211,6 +1211,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String currencyViewTitle(String currency) {
+    return 'This month in $currency';
+  }
+
+  @override
+  String get currencyViewEmptyTitle => 'Nothing in this currency this month';
+
+  @override
+  String get currencyViewEmptyBody =>
+      'Once you earn or spend in it, it shows up here.';
+
+  @override
+  String currencyViewBudgetOffer(String currency) {
+    return 'Want a $currency budget?';
+  }
+
+  @override
   String homeHeroOtherCurrencyIncome(String amount) {
     return '+ $amount income';
   }

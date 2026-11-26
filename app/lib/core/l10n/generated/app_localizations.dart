@@ -2010,6 +2010,30 @@ abstract class AppLocalizations {
   /// **'وغيّرت {amount}'**
   String homeHeroKpiExchangedOut(String amount);
 
+  /// S · T-279: title of the per-currency view (D-86). {currency} is the ISO code.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده بالـ{currency}'**
+  String currencyViewTitle(String currency);
+
+  /// S · T-279: per-currency view with no activity, or an unknown currency code.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة بالعملة دي الشهر ده'**
+  String get currencyViewEmptyTitle;
+
+  /// S · T-279: hint under the empty title.
+  ///
+  /// In ar, this message translates to:
+  /// **'أول ما تدخل أو تصرف بيها هتلاقيها هنا.'**
+  String get currencyViewEmptyBody;
+
+  /// S · T-279 (budget.offer.foreign): offered once per currency per month; never creates a budget by itself.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعمل ميزانية بالـ{currency}؟'**
+  String currencyViewBudgetOffer(String currency);
+
   /// C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.
   ///
   /// In ar, this message translates to:

@@ -286,6 +286,12 @@ abstract final class Settings {
     'setup_suggestions_handled',
   );
 
+  /// T-279 (D-86): foreign-currency budget offers already shown or dismissed,
+  /// one slug per currency per month (`usd_<cycle start epoch day>`).
+  static final budgetOffersHandled = SettingKey.slugSet(
+    'budget_offers_handled',
+  );
+
   /// When the paywall was last shown: epoch milliseconds UTC; null: never.
   static final paywallLastShown = SettingKey.optionalInteger(
     'paywall_last_shown',

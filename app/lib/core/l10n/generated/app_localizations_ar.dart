@@ -1248,6 +1248,22 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String currencyViewTitle(String currency) {
+    return 'الشهر ده بالـ$currency';
+  }
+
+  @override
+  String get currencyViewEmptyTitle => 'مفيش حاجة بالعملة دي الشهر ده';
+
+  @override
+  String get currencyViewEmptyBody => 'أول ما تدخل أو تصرف بيها هتلاقيها هنا.';
+
+  @override
+  String currencyViewBudgetOffer(String currency) {
+    return 'تعمل ميزانية بالـ$currency؟';
+  }
+
+  @override
   String homeHeroOtherCurrencyIncome(String amount) {
     return '+ $amount دخل';
   }

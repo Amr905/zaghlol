@@ -1490,6 +1490,32 @@
       }
     }
   },
+  "currencyViewTitle": "الشهر ده بالـ{currency}",
+  "@currencyViewTitle": {
+    "description": "S · T-279: title of the per-currency view (D-86). {currency} is the ISO code.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyViewEmptyTitle": "مفيش حاجة بالعملة دي الشهر ده",
+  "@currencyViewEmptyTitle": {
+    "description": "S · T-279: per-currency view with no activity, or an unknown currency code."
+  },
+  "currencyViewEmptyBody": "أول ما تدخل أو تصرف بيها هتلاقيها هنا.",
+  "@currencyViewEmptyBody": {
+    "description": "S · T-279: hint under the empty title."
+  },
+  "currencyViewBudgetOffer": "تعمل ميزانية بالـ{currency}؟",
+  "@currencyViewBudgetOffer": {
+    "description": "S · T-279 (budget.offer.foreign): offered once per currency per month; never creates a budget by itself.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "homeHeroOtherCurrencyIncome": "+ {amount} دخل",
   "@homeHeroOtherCurrencyIncome": {
     "description": "C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.",
