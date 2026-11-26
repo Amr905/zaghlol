@@ -91,6 +91,7 @@ TransactionRecord rec(
   Money? original,
   String? category,
   DateTime? at,
+  String? pairId,
 }) => TransactionRecord(
   id: 't$i',
   accountId: 'a1',
@@ -103,6 +104,7 @@ TransactionRecord rec(
   occurredTzOffsetMin: 120,
   merchantRaw: merchant,
   categoryId: category,
+  transferPairId: pairId,
   note: note,
   categorySource: CategorySource.none,
   isUserVerified: true,
@@ -116,14 +118,16 @@ Uint8List csvOf(List<TransactionRecord> rs) =>
 
 Uint8List raw(String s) => Uint8List.fromList(utf8.encode(s));
 
-/// The pre-T-356 header (no `category_source`): the hand-built [line]s
-/// below have its 14 cells, so every test using them also proves that an
-/// export made before T-356 still imports.
-String hdr() =>
-    '${exportHeader.sublist(0, exportHeader.length - 1).join(',')}\r\n';
+/// The original header (14 columns, no `pair`, `kind`, `category_source`):
+/// the hand-built [line]s below have its 14 cells, so every test using them
+/// also proves that an export made before T-285 still imports.
+String hdr() => '${legacyExportHeader.join(',')}\r\n';
 
-/// The current header (T-356, with `category_source`).
-String hdr15() => '${exportHeader.join(',')}\r\n';
+/// T-285's header (16 columns: `pair`, `kind`; no `category_source`).
+String hdr16() => '${exportHeader.sublist(0, 16).join(',')}\r\n';
+
+/// The current header (17 columns: T-285's, then T-356's `category_source`).
+String hdrCurrent() => '${exportHeader.join(',')}\r\n';
 
 String line({
   String date = '2026-02-01T10:00:00.000Z',
@@ -157,6 +161,47 @@ void main() {
       return e.code;
     }
   }
+
+  group('T-285 pair and kind columns', () {
+    test(
+      'round trip of a new export with paired legs imports every row',
+      () async {
+        final bytes = csvOf([
+          rec(1, dir: TxnDirection.transferOut, pairId: 'p1'),
+          rec(2, dir: TxnDirection.transferIn, pairId: 'p1', cur: 'USD'),
+          rec(3),
+        ]);
+        expect(utf8.decode(bytes).split('\r\n').first, contains(',pair,kind'));
+        final s = await uc.run(bytes);
+        expect(s.imported, 3);
+        expect(s.invalid, 0);
+        expect((await uc.run(bytes)).duplicates, 3);
+      },
+    );
+
+    test('an old 14-column export is still read', () async {
+      final s = await uc.run(raw('${hdr()}${line()}'));
+      expect(s.imported, 1);
+    });
+
+    test('a 16-column header with a 14-column row is a column error', () async {
+      final s = await uc.run(raw('${hdr16()}${line()}'));
+      expect(s.invalid, 1);
+    });
+
+    test('a T-285 16-column export (pair, kind; no category_source) is read; '
+        'pair and kind are ignored', () async {
+      final s = await uc.run(
+        raw(
+          hdr16() +
+              line().replaceFirst('\r\n', ',abc,exchange\r\n') +
+              line(amount: '2').replaceFirst('\r\n', ',,\r\n'),
+        ),
+      );
+      expect(s.imported, 2);
+      expect(s.invalid, 0);
+    });
+  });
 
   group('AC: re-importing an export creates no duplicates', () {
     test('export -> import into empty -> import again: 0 new', () async {
@@ -240,21 +285,38 @@ void main() {
   });
 
   group('T-356 category_source column', () {
-    test('the current 15-column format imports; the column is not stored '
+    test('the current 17-column format imports; the column is not stored '
         'as anything', () async {
       final s = await uc.run(
         raw(
-          hdr15() +
+          hdrCurrent() +
               line(merchant: 'Ai Shop')
-                  .replaceFirst('\r\n', ',ai_unconfirmed\r\n'),
+                  .replaceFirst('\r\n', ',pa,transfer,ai_unconfirmed\r\n'),
         ),
       );
       expect(s.imported, 1);
     });
 
+    test('combined header round trip: pair, kind and category_source columns '
+        'export in that order and re-import with no duplicates', () async {
+      final bytes = csvOf([
+        rec(1, dir: TxnDirection.transferOut, pairId: 'p1'),
+        rec(2, dir: TxnDirection.transferIn, pairId: 'p1', cur: 'USD'),
+        rec(3),
+      ]);
+      expect(
+        utf8.decode(bytes).split('\r\n').first,
+        endsWith(',note,pair,kind,category_source'),
+      );
+      final s = await uc.run(bytes);
+      expect(s.imported, 3);
+      expect(s.invalid, 0);
+      expect((await uc.run(bytes)).duplicates, 3);
+    });
+
     test('rows must match the file\'s header width; a header with an extra '
         'or unknown last column is refused', () async {
-      final s = await uc.run(raw(hdr15() + line()));
+      final s = await uc.run(raw(hdrCurrent() + line()));
       expect(s.imported, 0);
       expect(s.invalid, 1);
       expect(
@@ -448,7 +510,7 @@ void main() {
       final s = await uc.run(
         raw(
           '\u{FEFF}${exportHeader.join(',')}\n\n'
-          'x,2026-02-01T10:00:00.000Z,0,a1,expense,posted,1,EGP,,,S,,csv,,'
+          'x,2026-02-01T10:00:00.000Z,0,a1,expense,posted,1,EGP,,,S,,csv,,,,'
           'none\n',
         ),
       );

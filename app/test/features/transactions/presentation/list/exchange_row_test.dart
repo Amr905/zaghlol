@@ -109,6 +109,84 @@ void main() {
     expect(['xo', 'xi'], contains(opened.single));
   });
 
+  group('T-286 FU-384: bulk actions on an exchange row', () {
+    TxnSelection selection(WidgetTester tester) => ProviderScope.containerOf(
+      tester.element(find.byType(TransactionsListScreen)),
+    ).read(txnSelectionProvider);
+
+    bool enabled(WidgetTester tester, String key) =>
+        tester.widget<InkWell>(find.byKey(ValueKey(key))).onTap != null;
+
+    for (final (name, locale) in [('en', const Locale('en')), ('ar', _ar)]) {
+      testWidgets('the row selects both legs; Category and Card are off with '
+          'the reason; Delete stays ($name)', (tester) async {
+        final h = exchangeHarness();
+        await pumpList(tester, h, locale: locale);
+        await tester.longPress(find.byType(TxnExchangeRow));
+        await tester.pumpAndSettle();
+        expect(selection(tester).ids, {'xo', 'xi'});
+        expect(enabled(tester, 'bulk-category'), isFalse);
+        expect(enabled(tester, 'bulk-account'), isFalse);
+        expect(enabled(tester, 'bulk-delete'), isTrue);
+        expect(
+          find.byKey(const ValueKey('bulk-exchange-reason')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+
+        // Adding an ordinary row keeps the edits off.
+        await tester.tap(find.byType(TxnRow));
+        await tester.pumpAndSettle();
+        expect(selection(tester).ids, {'xo', 'xi', 'a'});
+        expect(enabled(tester, 'bulk-category'), isFalse);
+
+        // Tapping the exchange row again drops both legs.
+        await tester.tap(find.byType(TxnExchangeRow));
+        await tester.pumpAndSettle();
+        expect(selection(tester).ids, {'a'});
+        expect(enabled(tester, 'bulk-category'), isTrue);
+        expect(enabled(tester, 'bulk-account'), isTrue);
+        expect(
+          find.byKey(const ValueKey('bulk-exchange-reason')),
+          findsNothing,
+        );
+      });
+    }
+
+    testWidgets('delete takes the exchange as a whole', (tester) async {
+      final h = exchangeHarness();
+      await pumpList(tester, h);
+      await tester.longPress(find.byType(TxnExchangeRow));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('bulk-delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete').last);
+      await tester.pumpAndSettle();
+      expect(h.actions.calls.single, 'delete:2');
+    });
+
+    testWidgets('Select all under a USD filter holds both legs and the edits '
+        'stay off', (tester) async {
+      final h = exchangeHarness();
+      await pumpList(tester, h);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TransactionsListScreen)),
+      );
+      container
+          .read(txnListFilterProvider.notifier)
+          .set(const TxnListFilter().copyWith(currency: usd));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Select'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Select all'));
+      await tester.pumpAndSettle();
+      expect(selection(tester).ids, {'xo', 'xi'});
+      expect(enabled(tester, 'bulk-category'), isFalse);
+      expect(enabled(tester, 'bulk-account'), isFalse);
+      expect(h.actions.calls, isEmpty);
+    });
+  });
+
   test('collapseExchangeLegs keeps the first leg of each exchange', () {
     final h = exchangeHarness();
     final rows = collapseExchangeLegs(h.repo.rows, h.exchanges);

@@ -225,12 +225,18 @@ class ImportCsvUseCase {
   Future<ImportSummary> run(Uint8List bytes, {bool dryRun = false}) async {
     final table = parseCsv(bytes);
     final header = table.first;
-    if (header.length != exportHeader.length &&
-        header.length != exportHeader.length - 1) {
+    // Every historical export header is read (original 14, T-285's 16, the
+    // current 17). The `pair`, `kind` and `category_source` columns are
+    // ignored: pairs are rebuilt by the post-import pairing hooks and the
+    // category source is set by the import itself, never taken from the file.
+    final expected = knownExportHeaders
+        .where((h) => h.length == header.length)
+        .firstOrNull;
+    if (expected == null) {
       throw ImportCsvException(ImportCsvException.badHeader);
     }
     for (var i = 0; i < header.length; i++) {
-      if (header[i] != exportHeader[i]) {
+      if (header[i] != expected[i]) {
         throw ImportCsvException(ImportCsvException.badHeader);
       }
     }

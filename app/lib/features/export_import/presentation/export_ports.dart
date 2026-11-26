@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
+import '../../../core/db/daos/transfers_dao.dart';
 import '../../categorization/data/drift_ai_suggestion_states.dart';
 import '../../transactions/data/transactions_providers.dart';
 import '../application/export.dart';
@@ -37,7 +38,16 @@ final class SystemExportDestination implements ExportDestination {
 final exportServiceProvider = FutureProvider<ExportService>((ref) async {
   final repo = await ref.watch(transactionRepositoryProvider.future);
   final db = await ref.watch(appDatabaseProvider.future);
-  return ExportService(repo, aiStates: DriftAiSuggestionStates(db));
+  final pairs = TransferPairsDao(db);
+  return ExportService(
+    repo,
+    aiStates: DriftAiSuggestionStates(db),
+    pairKinds: (ids) async => {
+      for (final id in ids) ...{
+        if (await pairs.byId(id) case final p?) id: p.kind,
+      },
+    },
+  );
 }, name: 'exportServiceProvider');
 
 /// Device tests only (T-238): lets an integration test that runs the real app

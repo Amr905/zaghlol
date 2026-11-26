@@ -119,6 +119,7 @@ TransactionRecord _t(
   DateTime? at,
   CategorySource categorySource = CategorySource.none,
   String? merchantNorm,
+  String? pairId,
 }) {
   final c = Currency.of(cur);
   return TransactionRecord(
@@ -131,6 +132,7 @@ TransactionRecord _t(
     occurredAt: at ?? DateTime.utc(2026, 1, 31, 23, 59),
     occurredTzOffsetMin: 120,
     merchantRaw: merchant,
+    transferPairId: pairId,
     note: note,
     merchantNorm: merchantNorm,
     categorySource: categorySource,
@@ -170,6 +172,48 @@ void main() {
     expect(exportRow(_t(1, cur: 'EGP', minor: -5))[6], '-0.05');
     expect(exportRow(_t(1, cur: 'USD', minor: 100))[7], 'USD');
   });
+
+  test(
+    'T-285 pair/kind: both legs share a pair id, ordinary rows empty',
+    () async {
+      final rows = [
+        _t(1, pairId: 'px', cur: 'EGP'),
+        _t(2, pairId: 'px', cur: 'USD'),
+        _t(3, pairId: 'py'),
+        _t(4, pairId: 'py'),
+        _t(5),
+      ];
+      final svc = ExportService(
+        _Repo(rows),
+        pairKinds: (ids) async => {'px': 'fx_conversion', 'py': 'auto'},
+      );
+      final d = _Dest();
+      await svc.export(
+        entitlement: goldForTest(),
+        filter: const TransactionFilter(),
+        format: ExportFormat.csv,
+        destination: d,
+        warningAcknowledged: true,
+      );
+      final lines = utf8
+          .decode(d.bytes!.sublist(3))
+          .trim()
+          .split('\r\n')
+          .map((l) => l.split(','))
+          .toList();
+      expect(lines.first.sublist(14), ['pair', 'kind', 'category_source']);
+      final byId = {for (final l in lines.skip(1)) l[0]: l};
+      expect(byId['t1']![14], byId['t2']![14]);
+      expect(byId['t1']![14], isNotEmpty);
+      expect(byId['t1']![15], 'exchange');
+      expect(byId['t2']![15], 'exchange');
+      expect(byId['t3']![14], byId['t4']![14]);
+      expect(byId['t3']![15], 'transfer');
+      expect(byId['t3']![14], isNot(byId['t1']![14]));
+      expect(byId['t5']![14], '');
+      expect(byId['t5']![15], '');
+    },
+  );
 
   test('formula injection is neutralised in free text', () {
     for (final p in ['=1+1', '+1', '-1', '@x', '\t=x']) {
@@ -311,9 +355,14 @@ void exportColumnConstantsTest() {
   group('T-356 AC4: category_source (FR-LCAT-25)', () {
     test('the column is appended last; earlier positions unchanged', () {
       expect(exportHeader.last, 'category_source');
-      expect(exportHeader, hasLength(15));
-      expect(exportHeader[13], 'note');
-      expect(exportRow(_t(1)), hasLength(15));
+      expect(exportHeader, hasLength(17));
+      expect(exportHeader.sublist(13), [
+        'note',
+        'pair',
+        'kind',
+        'category_source',
+      ]);
+      expect(exportRow(_t(1)), hasLength(17));
     });
 
     test('mapping: ai + unconfirmed (or no row, corrected, no_answer) is '
@@ -364,7 +413,7 @@ void exportColumnConstantsTest() {
         warningAcknowledged: true,
       );
       final lines = utf8.decode(d.bytes!.sublist(3)).split('\r\n');
-      expect(lines.first, endsWith(',note,category_source'));
+      expect(lines.first, endsWith(',note,pair,kind,category_source'));
       final bySource = {
         for (final l in lines.skip(1).where((l) => l.isNotEmpty))
           l.split(',').first: l.split(',').last,

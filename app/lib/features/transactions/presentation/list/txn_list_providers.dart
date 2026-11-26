@@ -411,6 +411,18 @@ class TxnSelectionNotifier extends Notifier<TxnSelection> {
     state = TxnSelection(active: true, ids: next);
   }
 
+  /// T-286 (FU-384): toggles [ids] as one unit (both legs of an exchange
+  /// row): all of them leave when all are selected, otherwise all join.
+  void toggleAll(Set<String> ids) {
+    final next = {...state.ids};
+    if (next.containsAll(ids)) {
+      next.removeAll(ids);
+    } else {
+      next.addAll(ids);
+    }
+    state = TxnSelection(active: true, ids: next);
+  }
+
   void setAll(Set<String> ids) => state = TxnSelection(active: true, ids: ids);
 
   void exit() => state = const TxnSelection();

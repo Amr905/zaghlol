@@ -5,6 +5,7 @@
 import 'package:drift/drift.dart' show Variable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart';
+import 'package:zaghlol/core/db/daos/categories_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/features/budget/data/cycle_repository.dart';
 import 'package:zaghlol/features/ingestion/data/device_local_zone.dart';
@@ -136,6 +137,51 @@ void main() {
   tearDown(() => edb.close());
 
   for (final which in ['out', 'in', 'both']) {
+    test('T-286 FU-384: bulk Set category / Set account on an exchange '
+        '($which leg picked, with an ordinary row) changes nothing', () async {
+      final picked = switch (which) {
+        'out' => {outId, 'food'},
+        'in' => {inId, 'food'},
+        _ => {outId, inId, 'food'},
+      };
+      await CategoriesDao(db).upsertSystem(
+        code: 'food',
+        nameAr: 'أكل',
+        nameEn: 'Food',
+        icon: 'i',
+        color: '#0F7A55',
+        bucket: 'needs',
+        sort: 1,
+      );
+      final before = {
+        for (final id in [outId, inId, 'food']) id: await row(id),
+      };
+      await expectLater(
+        actions.setCategory(picked, 'sys:food'),
+        throwsA(
+          isA<BulkEditException>().having(
+            (e) => e.code,
+            'code',
+            BulkEditException.exchange,
+          ),
+        ),
+      );
+      await expectLater(
+        actions.setAccount(picked, 'usd'),
+        throwsA(
+          isA<BulkEditException>().having(
+            (e) => e.code,
+            'code',
+            BulkEditException.paired,
+          ),
+        ),
+      );
+      for (final id in before.keys) {
+        expect(await row(id), before[id], reason: id);
+      }
+      expect(await pairs(), 1);
+    });
+
     test('delete exchange ($which leg picked): both legs and the pair go in '
         'one batch; Undo puts all back; totals identical', () async {
       final before = await snapshot();

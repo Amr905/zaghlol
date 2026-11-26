@@ -20,6 +20,8 @@ import '../../../core/platform/widget_bridge_api.g.dart';
 import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../budget/application/budget_providers.dart';
+import '../../home/application/home_read_model.dart'
+    show HomeCurrencyCard, homeModelProvider;
 import '../../security/domain/app_lock_controller.dart';
 import '../../transactions/data/transactions_providers.dart' show clockProvider;
 import '../domain/widget_snapshot_builder.dart';
@@ -32,6 +34,20 @@ final hideAmountsWidgetProvider = settingProvider(Settings.hideAmountsWidget);
 final widgetBridgeHostProvider = Provider<WidgetBridgeHostApi>(
   (ref) => WidgetBridgeHostApi(),
   name: 'widgetBridgeHostProvider',
+);
+
+/// T-284: ISO codes of the other currencies that have a Home card (T-278
+/// rule), in card order; empty while the Home model loads or fails. Reads the
+/// Home model, so it follows the Home card filter (assumption: only codes are
+/// published, never amounts).
+final widgetOtherCurrenciesProvider = Provider<List<String>>(
+  (ref) => [
+    for (final c
+        in ref.watch(homeModelProvider).value?.currencyCards ??
+            const <HomeCurrencyCard>[])
+      c.currency.code,
+  ],
+  name: 'widgetOtherCurrenciesProvider',
 );
 
 /// The localized copy for [languageCode] (`ar` or `en`), from the ARB strings
@@ -128,6 +144,9 @@ final widgetBridgeWiringProvider = Provider<void>((ref) {
   final away = ref.watch(appBackgroundedProvider);
   final maskForLock = lockOn && (locked || away);
   final primary = ref.watch(primaryCurrencyProvider).value;
+  // T-284: codes of the other currencies with a Home card (none while the
+  // model loads).
+  final others = ref.watch(widgetOtherCurrenciesProvider);
   final lang = _languageFor(ref.watch(appLocaleProvider));
   final digits = ref.watch(digitsModeProvider(lang));
   if (primary == null) return;
@@ -151,6 +170,7 @@ final widgetBridgeWiringProvider = Provider<void>((ref) {
         languageCode: lang,
         digits: digits,
         copy: copy,
+        otherCurrencies: others,
         nowMs: ref.read(clockProvider)().toUtc().millisecondsSinceEpoch,
       ),
     );

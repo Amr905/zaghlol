@@ -45,14 +45,43 @@ const List<String> exportHeader = [
   'category_id',
   'source',
   'note',
+  'pair',
+  'kind',
   // T-356 (FR-LCAT-25): appended last so the columns before keep their
   // positions. See [exportCategorySource].
   'category_source',
 ];
 
+/// Every header an export has ever been written with, which the importer
+/// reads: the original 14 columns, T-285's 16 (`pair`, `kind`) and the
+/// current 17 (`category_source` last). Extra columns are ignored on import.
+List<List<String>> get knownExportHeaders => [
+  exportHeader.sublist(0, 14),
+  exportHeader.sublist(0, 16),
+  exportHeader,
+];
+
+/// Header of exports written before T-285 (14 columns).
+List<String> get legacyExportHeader => exportHeader.sublist(0, 14);
+
 /// `category_source` of an export row whose stored category was not yet
 /// confirmed by the user (FR-LCAT-25).
 const String exportAiUnconfirmed = 'ai_unconfirmed';
+
+/// T-285: kind values for rows that are one leg of a pair.
+const String exportKindExchange = 'exchange';
+const String exportKindTransfer = 'transfer';
+
+/// Short stable id shared by both legs of a pair: FNV-1a (64-bit) of the
+/// pair id, 10 hex digits. Not the stored id, so the file reveals no
+/// internal ids.
+String exportPairLabel(String pairId) {
+  var h = 0xcbf29ce484222325;
+  for (final u in utf8.encode(pairId)) {
+    h = ((h ^ u) * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF;
+  }
+  return (h & 0xFFFFFFFFFF).toRadixString(16).padLeft(10, '0');
+}
 
 /// Positions in [exportHeader] the preview table reads.
 const int exportColDate = 1;
@@ -86,7 +115,15 @@ String exportCategorySource(CategorySource source, AiSuggestionState? state) =>
 
 /// One export row as strings, in [exportHeader] order. [aiState] is the
 /// state of the row's merchant's AI suggestion (read only for `ai` rows).
-List<String> exportRow(TransactionRecord t, {AiSuggestionState? aiState}) {
+///
+/// [pairKind] is the stored `transfer_pairs.kind` of the row's pair, when
+/// known; exchanges are `fx_conversion` / `cross_currency`.
+List<String> exportRow(
+  TransactionRecord t, {
+  AiSuggestionState? aiState,
+  String? pairKind,
+}) {
+  final pairId = t.transferPairId;
   final orig = t.originalAmount;
   // FU-131: ids are free-form text in the database (a restored or imported
   // row may carry any id), so they are neutralised too.
@@ -107,9 +144,17 @@ List<String> exportRow(TransactionRecord t, {AiSuggestionState? aiState}) {
     neutralizeFormula(t.categoryId ?? ''),
     t.source.code,
     neutralizeFormula(t.note ?? ''),
+    pairId == null ? '' : exportPairLabel(pairId),
+    pairId == null
+        ? ''
+        : (pairKind != null && _isExchange(pairKind)
+              ? exportKindExchange
+              : exportKindTransfer),
     exportCategorySource(t.categorySource, aiState),
   ];
 }
+
+bool _isExchange(String k) => k == 'fx_conversion' || k == 'cross_currency';
 
 /// RFC 4180 CSV, UTF-8 with BOM, CRLF line ends (opens Arabic correctly in
 /// Excel on Windows).
@@ -342,13 +387,18 @@ final class ExportTooLarge extends ExportOutcome {
 
 class ExportService {
   /// [aiStates] reads the AI suggestion states for `category_source`; when
-  /// null every `ai` row exports as [exportAiUnconfirmed].
-  ExportService(this._repo, {AiSuggestionStates? aiStates})
+  /// null every `ai` row exports as [exportAiUnconfirmed]. [pairKinds]
+  /// resolves pair ids to `transfer_pairs.kind`; without it every pair
+  /// exports as `transfer`.
+  ExportService(this._repo, {AiSuggestionStates? aiStates, this.pairKinds})
     : _aiStates = aiStates; // ignore: prefer_initializing_formals - a private named parameter can't be an initializing formal
   final TransactionRepository _repo;
   final AiSuggestionStates? _aiStates;
 
-  /// The rows as strings, with the AI suggestion states read in one go.
+  final Future<Map<String, String>> Function(Set<String> pairIds)? pairKinds;
+
+  /// The rows as strings, with the AI suggestion states and pair kinds read
+  /// in one go each.
   Future<List<List<String>>> _rows(List<TransactionRecord> rows) async {
     final merchants = {
       for (final r in rows)
@@ -358,6 +408,10 @@ class ExportService {
     final states = merchants.isEmpty || _aiStates == null
         ? const <String, AiSuggestionState>{}
         : await _aiStates.statesOf(merchants);
+    final ids = {for (final r in rows) ?r.transferPairId};
+    final kinds = ids.isEmpty || pairKinds == null
+        ? const <String, String>{}
+        : await pairKinds!(ids);
     return [
       for (final r in rows)
         exportRow(
@@ -365,6 +419,7 @@ class ExportService {
           aiState: r.categorySource == CategorySource.ai
               ? states[r.merchantNorm]
               : null,
+          pairKind: kinds[r.transferPairId],
         ),
     ];
   }

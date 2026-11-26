@@ -29,6 +29,12 @@ public class SyncLiveContractTests(CatalogContractFixture fixture) : IClassFixtu
     private static readonly string[] SyncRequestMembers =
         ["bankRequests", "catalogVersion", "contributions", "entitlementIssuedAt", "flagsVersion", "pricesAsOf", "registryVersion"];
 
+    /// <summary>
+    /// Request members the spec declares ahead of the code (spec first, T-322) that the C# type must NOT have yet: T-334 adds
+    /// <c>configVersion</c> and <c>llmCatFeedback</c> to <c>SyncRequest</c>, the BR-SYNC-03 row and removes them from this list.
+    /// </summary>
+    private static readonly string[] PlannedSyncRequestMembers = ["configVersion", "llmCatFeedback"];
+
     private static readonly string[] ContributionMembers = ["categoryCode", "institutionCode", "merchantNorm"];
 
     private static readonly string[] BankRequestMembers = ["channel", "country", "institutionName"];
@@ -134,7 +140,9 @@ public class SyncLiveContractTests(CatalogContractFixture fixture) : IClassFixtu
         Assert.Equal(ContributionMembers, JsonMembers(typeof(SyncContributionInput)));
         Assert.Equal(BankRequestMembers, JsonMembers(typeof(SyncBankRequestInput)));
 
-        Assert.Equal(SyncRequestMembers, SpecMembers("SyncRequest"));
+        // The server still rejects the planned members as unknown fields (BR-SYNC-03 allow-list); only the spec carries them.
+        Assert.Empty(JsonMembers(typeof(SyncRequest)).Intersect(PlannedSyncRequestMembers));
+        Assert.Equal(SyncRequestMembers.Concat(PlannedSyncRequestMembers).Order(StringComparer.Ordinal), SpecMembers("SyncRequest"));
         Assert.Equal(ContributionMembers, SpecMembers("ContributionInput"));
         Assert.Equal(BankRequestMembers, SpecMembers("BankRequestInput"));
         foreach (var schema in new[] { "SyncRequest", "ContributionInput", "BankRequestInput" })

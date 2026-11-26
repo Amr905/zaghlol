@@ -9,6 +9,8 @@ import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../budget/application/cycle_app_wiring.dart';
+import '../../insights/data/chart_providers.dart';
+import '../../insights/domain/chart_models.dart';
 import '../../wealth/data/prices_providers.dart';
 import '../../wealth/domain/income_approx.dart';
 
@@ -21,6 +23,37 @@ final homeApproxCycleTotalsProvider =
       return repo.totals(schedule.cycleOn(ref.watch(todayProvider)));
     }, name: 'homeApproxCycleTotalsProvider');
 
+/// This cycle's complete exchange pairs (given, received), live legs only.
+final homeApproxExchangePairsProvider =
+    FutureProvider<List<({Money given, Money received})>>((ref) async {
+      final schedule = await ref.watch(paydayScheduleProvider.future);
+      final charts = await ref.watch(chartRepositoryProvider.future);
+      ref.watch(cycleDataVersionProvider);
+      return charts.exchangePairs(
+        ChartPeriod.cycle(schedule.cycleOn(ref.watch(todayProvider))),
+      );
+    }, name: 'homeApproxExchangePairsProvider');
+
+/// The bank's rate per foreign currency, from the pairs that went into
+/// [target] only (FU-381): exchanges into a third currency never count.
+/// Display only.
+Map<Currency, int?> bankRatesE9(
+  List<({Money given, Money received})> pairs,
+  Currency target,
+) {
+  final given = <Currency, Money>{};
+  final received = <Currency, Money>{};
+  for (final x in pairs) {
+    if (x.received.currency != target || x.given.currency == target) continue;
+    final c = x.given.currency;
+    given[c] = (given[c] ?? Money.zero(c)) + x.given;
+    received[c] = (received[c] ?? Money.zero(target)) + x.received;
+  }
+  return {
+    for (final c in given.keys) c: impliedRateE9(given[c]!, received[c]!),
+  };
+}
+
 bool _active(CycleTotals t) =>
     t.moneyIn.minor != 0 || t.spend.minor != 0 || t.exchangedOut.minor != 0;
 
@@ -32,17 +65,8 @@ final homeApproxProvider = FutureProvider<IncomeApproxLine?>((ref) async {
   final totals = await ref.watch(homeApproxCycleTotalsProvider.future);
   final repo = await ref.watch(pricesRepositoryProvider.future);
 
-  // The bank's rate can be attributed only when exactly one foreign currency
-  // exchanged anything; otherwise it is left out (display only anyway).
-  final foreignExchanged = [
-    for (final t in totals.values)
-      if (t.currency != target && t.exchangedOut.isPositive) t,
-  ];
-  int? bankRate;
-  final targetIn = totals[target]?.exchangedIn;
-  if (foreignExchanged.length == 1 && targetIn != null && targetIn.isPositive) {
-    bankRate = impliedRateE9(foreignExchanged.single.exchangedOut, targetIn);
-  }
+  final pairs = await ref.watch(homeApproxExchangePairsProvider.future);
+  final bankRates = bankRatesE9(pairs, target);
 
   final result = buildIncomeApprox(
     target: target,
@@ -51,10 +75,7 @@ final homeApproxProvider = FutureProvider<IncomeApproxLine?>((ref) async {
         IncomeApproxInput(
           moneyIn: t.moneyIn,
           exchangedOut: t.exchangedOut,
-          bankRateE9:
-              foreignExchanged.length == 1 && foreignExchanged.single == t
-              ? bankRate
-              : null,
+          bankRateE9: bankRates[t.currency],
         ),
     ],
     rates: await repo.fxTable(),

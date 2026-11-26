@@ -163,7 +163,7 @@ public class InstallsLiveContractTests(InstallsContractFixture fixture) : IClass
     public static TheoryData<string> AppHeaderOperationIds()
     {
         var data = new TheoryData<string>();
-        foreach (var operation in Spec.Operations().Where(o => o.Path.StartsWith("/v1/", StringComparison.Ordinal) && RequiresAppHeader(o)))
+        foreach (var operation in Spec.Operations().Where(o => o.Path.StartsWith("/v1/", StringComparison.Ordinal) && RequiresAppHeader(o) && !OpenApiSpec.PlannedUnmapped.ContainsKey(o.Id)))
         {
             data.Add(operation.Id);
         }

@@ -104,6 +104,7 @@ final class TransactionRecord {
     this.note,
     this.counterpartyKind,
     this.counterpartyValue,
+    this.transferPairId,
     this.deletedAt,
   });
 
@@ -137,6 +138,10 @@ final class TransactionRecord {
   /// kept.
   final String? counterpartyKind;
   final String? counterpartyValue;
+
+  /// T-285: the `transfer_pairs` id when this row is one leg of an exchange or
+  /// an own-account transfer.
+  final String? transferPairId;
 
   /// Set while the row is in the Undo window (UTC).
   final DateTime? deletedAt;
