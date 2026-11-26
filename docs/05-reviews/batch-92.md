@@ -172,3 +172,26 @@ The channel takes exactly 32 caller bytes, never sees an install ID or the quest
 - Flags family (item 3): confirmed. Same gap existed (flags read OFF 14 days after the last flag edit); fixed with the same small pattern.
 - AC5 (T-337): test that a config stored in a file database is gone after the database file is deleted (remote_config_test.dart).
 - T-325 AC1/AC2 (B92-m10): `app/test/assets/eg_name_lists_test.dart` (counts, sorted, deduped, folded, NFC-safe, no digits, business words not in names). The lists are not required to be mutually disjoint beyond the task file's rule (business words vs names).
+
+---
+
+## Delta re-review (Sonnet code-reviewer, after the fix round)
+
+Scope: `git diff e132f657..HEAD` for backend/src, backend/tests, app/lib, app/test; main-merge changes ignored. Application Quota tests 17/17; app `test/core/config test/core/flags test/features/catalog_sync test/privacy` 93/93.
+
+### T-335 (B92-M1) — APPROVED
+- Retry now needs the install row, equal SHA-256(requestId) and `now - UpdatedAt <= 2 min` (`LlmQuotaStore.IsRetry`, used in precheck and commit). The account row never exempts. The commit guard `used < @limit AND (hash IS DISTINCT FROM @h OR updated_at <= @cutoff)` makes an old matching id count again below the limit. The account statement runs only after the install one applied, with a future cutoff. Correct.
+- Clock: `updated_at`, `@cutoff` and the in-code comparison all use the app server's `TimeProvider`, not DB `now()`. Skew between app servers only shifts the 2-minute window by the skew; no bypass. Two installs on one account: the second is refused at the limit and counted below it; the account counter is charged either way. Concurrent twins: the second statement sees the first's hash with `updated_at` inside the window and no-ops (existing negative proof kept).
+- Residual (accepted, not a blocker): a retry inside the window with a different question is free. The replay does not rewrite `updated_at`, so the window is anchored on the one counted request and cannot be renewed. Free provider calls per counted request: bounded by the 3/min burst over 2 minutes (about 6 at most, fewer in practice: the client retries once per request) and by the 20/day bucket in total; at the limit the abuser gets one window once, then Exhausted. That is a tiny constant against the old unlimited replay, and fine until the `last_body_hash` follow-up (architect, needs a column). Keep it listed as a follow-up.
+- Tests: the 4 new Application tests do not compile against the old code (`ILlmQuotaRepository.CommitAsync` signature and `LlmQuotaRow.UpdatedAt` changed), so "fails on old code" holds by construction; their assertions (Exhausted after window, other install Exhausted, retry inside window counts once, old id below the limit counts again) match the old behaviour's gaps.
+- Minor: m5 (install and account statements not in one transaction) stays a known under-count bound; m4 owner T-349.
+
+### T-337 (B92-M2 and AC3) — APPROVED
+- `confirm(version)` is called only inside `_applyAll` after a verified, non-throttle sync (throttle returns earlier; failures throw before). It refreshes only when the response omitted the block and the held version equals the sent one; a newer block goes through `apply`, an older or different version is ignored (`_version != version`, `_unverifiable`, `now <= fetchedAt`). `configVersion` is sent only when a config is held. The allow-list gained exactly `configVersion`.
+- Backend: `ConfigAsync` omits the block only when `snapshot.AppVersion == clientVersion`; flags via `SendFlags(... request.FlagsVersion ...)`. Caveat, accepted: ConfigAsync also returns null when the config read fails (advisory degrade), so a failing server counts as a confirmation and the held config stays fresh. This is a fail-static, not fail-open: the phone keeps the last signed values rather than reverting to defaults, which is the right outcome during a server-side config outage, and the tests stay `confirm`-only for the held version. A server that never sends blocks keeps the config fresh forever, which is the intended meaning (the server answers each sync and says the held version is current). Note the semantic for ops: removing a config block cannot be done by silence; it needs a new version.
+- Nit: flags `confirm` relies on the omit rule in `SendFlags`; if that function ever omits for another reason (app version gate), flags stay fresh; check when touching it.
+
+### Lead test edits — sane
+`OperatorEndpointTests`: `PutConfig` constant, list entry and a valid call (`ask.quota_free`) match the audited operation; keeps the "every admin write audited" guard intact. `SyncRequestValidationTests` joined `ApiHostGroup`; satisfies `HostStartupTests`; no behaviour change.
+
+**Verdicts: T-335 APPROVED, T-337 APPROVED.** No new blocker or major. Follow-ups: `last_body_hash` (T-335 follow-up, architect), m4, m5.
