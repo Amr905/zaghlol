@@ -601,4 +601,157 @@ void main() {
       },
     );
   });
+
+  group('T-272 exchanges (D-86)', () {
+    const day = 24 * 60 * min;
+
+    test('cross-bank, no rate known: ONE suggestion; decline is remembered; '
+        'never auto-paired', () async {
+      await add('o', 'usd', out: true, currency: 'USD', minor: 60000);
+      await add('i', 'nbe', out: false, minor: 2970000, at: day);
+      expect((await uc.onPersisted('o')).status, PairingStatus.suggested);
+      expect((await uc.onPersisted('i')).status, PairingStatus.suggested);
+      expect(await pairCount(), 0);
+      expect(await internal(), {'o': 0, 'i': 0});
+      final items = await rows(
+        "SELECT id FROM review_items WHERE kind = 'fx_pair_suggestion'",
+      );
+      expect(items, hasLength(1));
+      await db.customStatement(
+        "UPDATE review_items SET resolved_at = 1, resolution = 'dismissed'",
+      );
+      expect((await uc.onPersisted('i')).status, PairingStatus.none);
+      expect((await uc.onPersisted('o')).status, PairingStatus.none);
+      expect(
+        await rows('SELECT id FROM review_items WHERE resolved_at IS NULL'),
+        isEmpty,
+      );
+    });
+
+    test('accept (link) makes a cross_currency pair, both internal', () async {
+      await add('o', 'usd', out: true, currency: 'USD', minor: 60000);
+      await add('i', 'nbe', out: false, minor: 2970000, at: day);
+      await uc.onPersisted('i');
+      final r = await uc.link('o', 'i');
+      expect(r.pairKind, TransferPairKind.crossCurrency);
+      expect(await internal(), {'o': 1, 'i': 1});
+      expect(await spendAndIncome(), 0);
+    });
+
+    test('a known rate far off (more than 15%) is not suggested', () async {
+      await PricesDao(db).upsertRate((
+        base: Currency.of('USD'),
+        quote: Currency.of('EGP'),
+        rateE9: 49600000000,
+        asOf: t0,
+      ));
+      await add('o', 'usd', out: true, currency: 'USD', minor: 60000);
+      await add('i', 'nbe', out: false, minor: 2000000, at: day);
+      expect((await uc.onPersisted('i')).status, PairingStatus.none);
+      await add('i2', 'nbe', out: false, minor: 2970000, at: day);
+      expect((await uc.onPersisted('i2')).status, PairingStatus.suggested);
+    });
+
+    test('recordExchange: two legs + cross_currency pair in one transaction; '
+        'amounts exact; event published', () async {
+      final r = await uc.recordExchange(
+        fromAccountId: 'usd',
+        sent: Money(Currency.of('USD'), 60000),
+        toAccountId: 'nbe',
+        received: Money(Currency.of('EGP'), 2970000),
+        occurredAt: DateTime.fromMillisecondsSinceEpoch(t0, isUtc: true),
+        tzOffsetMin: 120,
+      );
+      expect(r.status, PairingStatus.paired);
+      expect(r.pairKind, TransferPairKind.crossCurrency);
+      final legs = await rows(
+        'SELECT direction, amount_minor, currency, is_internal, source, '
+        'is_user_verified, account_id, transfer_pair_id FROM transactions '
+        'ORDER BY direction',
+      );
+      expect(legs, [
+        {
+          'direction': 'transfer_in',
+          'amount_minor': 2970000,
+          'currency': 'EGP',
+          'is_internal': 1,
+          'source': 'manual',
+          'is_user_verified': 1,
+          'account_id': 'nbe',
+          'transfer_pair_id': r.pairId,
+        },
+        {
+          'direction': 'transfer_out',
+          'amount_minor': 60000,
+          'currency': 'USD',
+          'is_internal': 1,
+          'source': 'manual',
+          'is_user_verified': 1,
+          'account_id': 'usd',
+          'transfer_pair_id': r.pairId,
+        },
+      ]);
+      expect(seen.whereType<TransactionsChanged>(), hasLength(1));
+      expect(seen.whereType<MascotTrigger>(), isEmpty);
+    });
+
+    test('recordExchange in one account is fx_conversion; it resolves the '
+        'suggestion item it came from', () async {
+      await db.customStatement(
+        "INSERT INTO review_items (id, kind, payload, created_at) VALUES "
+        "('jump', 'low_confidence', '{\"reason\":\"exchangeBalanceJump\"}', 1)",
+      );
+      final r = await uc.recordExchange(
+        fromAccountId: 'multi',
+        sent: Money(Currency.of('USD'), 100),
+        toAccountId: 'multi',
+        received: Money(Currency.of('EGP'), 4950),
+        occurredAt: DateTime.fromMillisecondsSinceEpoch(t0, isUtc: true),
+        tzOffsetMin: 0,
+        resolveItemId: 'jump',
+      );
+      expect(r.pairKind, TransferPairKind.fxConversion);
+      expect(
+        (await rows("SELECT resolution FROM review_items WHERE id = 'jump'"))
+            .single['resolution'],
+        'linked',
+      );
+    });
+
+    test('recordExchange refuses zero, one currency, unknown account and '
+        'writes nothing', () async {
+      final usd = Currency.of('USD');
+      final egp = Currency.of('EGP');
+      final at = DateTime.fromMillisecondsSinceEpoch(t0, isUtc: true);
+      Future<String?> tryIt(
+        String from,
+        Money sent,
+        String to,
+        Money received,
+      ) => codeOf(
+        uc.recordExchange(
+          fromAccountId: from,
+          sent: sent,
+          toAccountId: to,
+          received: received,
+          occurredAt: at,
+          tzOffsetMin: 0,
+        ),
+      );
+      expect(
+        await tryIt('usd', Money(usd, 0), 'nbe', Money(egp, 1)),
+        TransferPairingException.invalid,
+      );
+      expect(
+        await tryIt('nbe', Money(egp, 1), 'cib', Money(egp, 1)),
+        TransferPairingException.invalid,
+      );
+      expect(
+        await tryIt('usd', Money(usd, 1), 'ghost', Money(egp, 1)),
+        TransferPairingException.notFound,
+      );
+      expect(await rows('SELECT id FROM transactions'), isEmpty);
+      expect(await pairCount(), 0);
+    });
+  });
 }
