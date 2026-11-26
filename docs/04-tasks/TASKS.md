@@ -359,6 +359,11 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-275](tasks/T-275.md) | Voice: first recording stops at once with "didn't hear anything" | PO report 2026-11-26 | Medium | Sonnet | flutter-core-engineer | — | A | 78 | DONE (batch 78) |
 | [T-276](tasks/T-276.md) | Mascot: tap switches animation smoothly | US-P07 | Medium | Sonnet | flutter-ui-engineer | T-274 | U | 78 | DONE (batch 78) |
 | [T-277](tasks/T-277.md) | More Zaghlol tips (how-to, smart features, funny) | PO 2026-11-26 | Low | Sonnet | flutter-ui-engineer | — | U | 78 | DONE (batch 78) |
+| [T-278](tasks/T-278.md) | Home: EGP main page + small currency cards (multi-currency slice 2) | US-P11 / D-86 | Medium (C3) | Sonnet | flutter-ui-engineer | — | U | 79 | TODO |
+| [T-279](tasks/T-279.md) | Per-currency view screen + "budget in USD?" offer | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-ui-engineer | — | U2 | 79 | TODO |
+| [T-280](tasks/T-280.md) | "≈ total in EGP" line on Home + rate sheet (bank rate first) | US-P11 / D-86 | High (C4) | Sonnet | flutter-core-engineer | — | A | 79 | TODO |
+| [T-281](tasks/T-281.md) | An exchange is one row; delete/undo as one unit (FU-364/365) | US-P11 / D-86 | High (C4) | Opus | flutter-core-engineer | — | T | 79 | TODO |
+| [T-282](tasks/T-282.md) | Insights and Ask agree with Home on exchanges; SRS updates (FU-367) | US-P11 / D-86 | Standard (C2) | Sonnet | flutter-core-engineer | — | I | 79 | TODO |
 | [T-263](tasks/T-263.md) | Sharing an image to Zaghlol opens the scan, never "not implemented" | US-P02 | High | Sonnet | native-platform-engineer | — | — | 77 | DONE (batch 76) |
 | [T-266](tasks/T-266.md) | Link a debit card to its bank account (one balance, set by the user) | US-P05 | High | Sonnet | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 | [T-268](tasks/T-268.md) | Mascot animation matches the approved art; left hand not cut | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | — | 77 | SUPERSEDED by T-274 (not merged) |
