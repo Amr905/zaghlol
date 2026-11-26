@@ -327,3 +327,8 @@ Verdict: **APPROVED**. M3 is closed, m13 is closed and m14 is closed. The remain
 
 All are under 50 ms.
 - **m18 (minor).** The worst case was already there before this round and has little margin on a slow phone. Follow-up: cap the token length, or cut the name scan short on long tokens.
+
+## Fix round — T-323
+- m10 fixed in place (migration not shipped): `app_rw` now has DELETE on `llm_quota_counters` and `llm_cat_answer_cache`.
+- Open points decided: `ops_rw` gets SELECT/INSERT/UPDATE on `remote_config` (the admin endpoint and ops CLI must write it; mirrors `feature_flags`); `ops_ro` gets SELECT on `remote_config` and the two review tables (operator review view; rows hold only the peppered install_hash), still nothing on quota counters.
+- `GrantMatrix.LlmTables`, `GrantTests`, backend-schema.md and T-323 updated.
