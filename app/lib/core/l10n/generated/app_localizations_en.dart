@@ -8965,4 +8965,542 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountsDetailDuePaid => 'This statement is paid';
+
+  @override
+  String get chatLlmInputHint => 'Ask in your own words…';
+
+  @override
+  String chatLlmInputCounter(int max, int n) {
+    return '$n/$max';
+  }
+
+  @override
+  String get chatLlmInputStop => 'Stop';
+
+  @override
+  String get chatLlmInputStopA11y => 'Stop the question';
+
+  @override
+  String chatQuotaRemaining(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n questions left',
+      one: '1 question left',
+      zero: 'No questions left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatQuotaRemainingA11y(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n online questions left this month',
+      one: '1 online question left this month',
+      zero: 'No online questions left this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatQuotaUnknown => '—';
+
+  @override
+  String get chatQuotaUnknownA11y =>
+      'The count shows after your first online question';
+
+  @override
+  String get chatQuotaInfoTitle => 'Online questions';
+
+  @override
+  String get chatQuotaInfoBody =>
+      'Questions I answer on your phone are free and unlimited. Questions that need the online helper have a monthly count that resets on the 1st.';
+
+  @override
+  String get chatQuotaLastOne => 'This is your last online question this month';
+
+  @override
+  String chatQuotaFreeOut(String date) {
+    return 'You\'ve used this month\'s free online questions. I can still answer the usual ones from your phone, and the count resets on $date.';
+  }
+
+  @override
+  String chatQuotaGoldHint(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Gold gives you $n questions a month.',
+      one: 'Gold gives you 1 question a month.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatQuotaSeeGold => 'See Gold';
+
+  @override
+  String chatQuotaGoldOut(String date) {
+    return 'You\'ve used this month\'s online questions. They reset on $date. Until then I\'ll answer the usual ones from your phone.';
+  }
+
+  @override
+  String get chatConsentTitle => 'This one needs the online helper';
+
+  @override
+  String chatConsentIntro(String aiProvider) {
+    return 'I can\'t answer it on your phone alone. If you allow it, I\'ll send the question text to Zaghlol\'s server and $aiProvider so they can understand it. All the maths happens on your phone.';
+  }
+
+  @override
+  String get chatConsentPreviewTitle => 'Exactly what will be sent';
+
+  @override
+  String get chatConsentSendsTitle => 'What\'s sent';
+
+  @override
+  String get chatConsentSends =>
+      'Your question goes without your account, card and bank names, and without the names of places you shop that Zaghlol recognises. Anything else you type, like an amount, goes as typed.';
+
+  @override
+  String get chatConsentNeverTitle => 'Never sent';
+
+  @override
+  String get chatConsentNever =>
+      'Your transactions, balances, budgets and bank messages. None of it leaves your phone.';
+
+  @override
+  String chatConsentStorage(String aiProvider) {
+    return 'Zaghlol\'s server doesn\'t keep your question, and $aiProvider doesn\'t learn from it. Details are in the privacy policy.';
+  }
+
+  @override
+  String chatConsentQuota(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You get $n online questions a month. Questions I answer on your phone don\'t count.',
+      one: 'You get 1 online question a month. Questions I answer on your phone don\'t count.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatConsentAllow => 'Allow and send';
+
+  @override
+  String get chatConsentSettingsHint =>
+      'You can turn it off any time in Privacy & data.';
+
+  @override
+  String get chatConsentDeclined =>
+      'No problem, your question wasn\'t sent. Try one of these:';
+
+  @override
+  String get chatLlmStatusSending => 'Sending just your question…';
+
+  @override
+  String get chatLlmStatusComputing => 'Working it out on your phone…';
+
+  @override
+  String get chatLlmStatusThinkingA11y =>
+      'Zaghlol is thinking. Only your question was sent';
+
+  @override
+  String get chatLlmStatusStopped => 'Question stopped.';
+
+  @override
+  String get chatLlmStatusNotQueued =>
+      'Your question wasn\'t sent and won\'t be sent later.';
+
+  @override
+  String get chatLlmStatusOffline =>
+      'This one needs the internet. Ask again once you\'re online. Meanwhile, try these:';
+
+  @override
+  String get chatLlmStatusTimeout =>
+      'The online helper took too long. It didn\'t count toward your questions.';
+
+  @override
+  String get chatLlmStatusError =>
+      'Something went wrong understanding your question. It didn\'t count.';
+
+  @override
+  String get chatLlmStatusSlowDown =>
+      'That\'s a lot of questions in a row. Wait a minute and try again.';
+
+  @override
+  String get chatLlmStatusIntegrity =>
+      'I couldn\'t verify this copy of Zaghlol. Update it from the store or try again.';
+
+  @override
+  String get chatLlmStatusPaused =>
+      'The online helper is resting this month. I can still answer the usual questions from your phone.';
+
+  @override
+  String get chatSentBadge => 'Online helper';
+
+  @override
+  String get chatSentBadgeA11y => 'This answer used the online helper';
+
+  @override
+  String get chatSentToggle => 'What I sent';
+
+  @override
+  String get chatSentTitle => 'Your question exactly as it left your phone:';
+
+  @override
+  String chatSentChip(int n, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'account': 'Account $n',
+      'card': 'Card $n',
+      'bank': 'Bank $n',
+      'merchant': 'Place $n',
+      'other': 'Name $n',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatSentChipA11y(int n, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'account': 'Account $n, its name stayed on your phone',
+      'card': 'Card $n, its number stayed on your phone',
+      'bank': 'Bank $n, its name stayed on your phone',
+      'merchant': 'Place $n, its name stayed on your phone',
+      'other': 'Name $n, it stayed on your phone',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatSentHidden(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'phone': 'Phone number',
+      'email': 'Email',
+      'instapay': 'InstaPay address',
+      'number': 'Long number',
+      'other': 'Removed',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get chatSentChipsNote =>
+      'The boxes stand in for names. What they mean stayed on your phone.';
+
+  @override
+  String chatSentAlsoSent(String aiProvider) {
+    return 'Also sent: the app language and version, a random app ID and a proof the phone is genuine. $aiProvider gets only the question and the language.';
+  }
+
+  @override
+  String chatSentTextA11y(String text) {
+    return 'Sent: $text';
+  }
+
+  @override
+  String get chatSentLocal => 'Answered on your phone';
+
+  @override
+  String chatClarifyNoCard(String last4) {
+    return 'I can\'t find a card ending $last4. Which card do you mean?';
+  }
+
+  @override
+  String chatClarifySameLast4(String last4) {
+    return 'You have more than one card ending $last4. Which one?';
+  }
+
+  @override
+  String chatClarifyNoBankAccount(String bank) {
+    return 'I can\'t find an account of yours at $bank. Which account do you mean?';
+  }
+
+  @override
+  String chatClarifyUnknownBank(String bank) {
+    return 'I don\'t know a bank called $bank. Which account do you mean?';
+  }
+
+  @override
+  String get chatClarifyNoAccount =>
+      'I can\'t find that account. Which one do you mean?';
+
+  @override
+  String get chatClarifyNotSent =>
+      'Your question wasn\'t sent and didn\'t count.';
+
+  @override
+  String chatClarifyNotFound(String query) {
+    return 'I couldn\'t find \"$query\" in your transactions. Did you mean one of these?';
+  }
+
+  @override
+  String chatLlmAnswerAverage(
+    String average,
+    String span,
+    String state,
+    String subject,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'day': 'a day',
+      'week': 'a week',
+      'other': 'a month',
+    });
+    return 'Your average spend on $subject $span: $average $_temp0.';
+  }
+
+  @override
+  String chatLlmAnswerFullUnits(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'day': 'I counted full days only, leaving out today.',
+      'week': 'I counted full weeks only, leaving out this week.',
+      'other': 'I counted full months only, leaving out this month.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatLlmAnswerIncome(String income, String span) {
+    return 'Your income $span: $income.';
+  }
+
+  @override
+  String chatLlmAnswerBreakdown(String list, String span) {
+    return 'Where your money went $span: $list.';
+  }
+
+  @override
+  String chatLlmAnswerTopCategories(String list, String span) {
+    return 'Your top categories $span: $list.';
+  }
+
+  @override
+  String get chatLlmAnswerOtherBucket => 'Other';
+
+  @override
+  String chatLlmAnswerChangePct(String percent) {
+    return 'That\'s a $percent change.';
+  }
+
+  @override
+  String chatLlmAnswerSafeSpend(String perDay) {
+    return 'You can spend $perDay a day until payday.';
+  }
+
+  @override
+  String get chatLlmAnswerSafeSpendNone =>
+      'There\'s no budget yet, so I can\'t work out a daily amount. Set one and I\'ll do the maths.';
+
+  @override
+  String chatUnitMonths(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n months',
+      one: '1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatWhatIfCutPercent(
+    String amount,
+    String monthly,
+    int months,
+    String percent,
+    String subject,
+  ) {
+    return 'Cut $subject by $percent and you\'d save about $monthly a month, $amount over $months.';
+  }
+
+  @override
+  String chatWhatIfCutAmount(
+    String amount,
+    String monthly,
+    int months,
+    String subject,
+  ) {
+    return 'Cut $subject by $monthly a month and you\'d save $amount over $months.';
+  }
+
+  @override
+  String chatWhatIfCapped(String average, String subject) {
+    return 'You average only $average a month on $subject, so that\'s the most you can save monthly.';
+  }
+
+  @override
+  String chatWhatIfSave(String amount, String monthly, int months) {
+    return 'Put aside $monthly every month and you\'ll have $amount after $months, before any returns.';
+  }
+
+  @override
+  String chatWhatIfBasis(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Based on the average of your last $n full months',
+      one: 'Based on your last full month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatWhatIfNotEnough =>
+      'There isn\'t a full month to work from yet. Check back at the end of the month.';
+
+  @override
+  String get chatSuggestIntro =>
+      'Here\'s where you could save most next month:';
+
+  @override
+  String chatSuggestAboveAverage(String amount, String category, String gap) {
+    return '$category came to $amount last month, $gap above your average. Bring it back and save $gap.';
+  }
+
+  @override
+  String chatSuggestSubscription(String item, String monthly) {
+    return '$item costs $monthly a month. If you don\'t use it, cancel it and save $monthly.';
+  }
+
+  @override
+  String chatSuggestCreep(
+    String category,
+    String endAmount,
+    String gap,
+    String startAmount,
+  ) {
+    return '$category has gone up every month, from $startAmount to $endAmount. Bring it back down and save $gap.';
+  }
+
+  @override
+  String chatSuggestCash(String amount, String target) {
+    return '$amount of withdrawn cash isn\'t logged anywhere. Log it and you could save about $target.';
+  }
+
+  @override
+  String get chatSuggestCashTip => 'Log cash as you spend it, even by voice.';
+
+  @override
+  String chatSuggestSaveLabel(String monthly) {
+    return 'Possible saving: $monthly a month';
+  }
+
+  @override
+  String get chatSuggestNone =>
+      'Nothing obvious to trim. Your spending is on its usual track. Keep it up!';
+
+  @override
+  String get chatSuggestFooter => 'Just suggestions. Nothing has been changed.';
+
+  @override
+  String chatInvestLead(String amount, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'saved': 'Last month you had $amount left over.',
+      'whatIf': 'If you had saved $amount:',
+      'other': 'If you had $amount:',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatInvestGold(String date, String grams, String karat, String price) {
+    return 'It could have bought about $grams of ${karat}K gold, at $price per gram on $date.';
+  }
+
+  @override
+  String chatInvestUsd(String amount2, String date, String rate) {
+    return 'It could have been worth ≈ $amount2, at $rate per dollar on $date.';
+  }
+
+  @override
+  String chatInvestCertificate(String exampleRate, int months, String payout) {
+    return 'In a savings certificate at an example rate of $exampleRate for $months, it could have earned about $payout before tax and fees. The rate is an illustration, not an offer.';
+  }
+
+  @override
+  String get chatInvestStocks =>
+      'An amount like this could be a small start in stocks in general. Learn first, and use a licensed provider.';
+
+  @override
+  String get chatInvestSmall =>
+      'Every pound counts. Keep going and next month will be better.';
+
+  @override
+  String get chatInvestNothingSaved =>
+      'Nothing was left over last month. Let\'s see where you can save next month.';
+
+  @override
+  String chatInvestNoPrice(String currency) {
+    return '$currency isn\'t included because there\'s no price for it.';
+  }
+
+  @override
+  String get chatInvestGramsHiddenA11y => 'Weight hidden';
+
+  @override
+  String get chatInvestSuggestChip => 'Help me save';
+
+  @override
+  String get chatInvestChip => 'If I had saved?';
+
+  @override
+  String get chatInvestDisclaimerSummary =>
+      'This is an illustration, not investment advice.';
+
+  @override
+  String get chatInvestDisclaimer =>
+      'These figures are an illustration only, not investment advice. Prices and returns change, and past values don\'t predict future ones. The final decision is yours.';
+
+  @override
+  String get chatRefuseOffTopic =>
+      'Money is my thing 😄 Ask me about your spending or saving:';
+
+  @override
+  String get chatRefuseUnsafe =>
+      'That\'s not something I can help with. If you have a question about your money, I\'m here.';
+
+  @override
+  String get chatRefuseSupport =>
+      'If things feel heavy, talk to someone you trust. You\'re not alone.';
+
+  @override
+  String get chatRefuseSpecificPick =>
+      'I can\'t pick a stock or fund for you. I can show what your money could have been worth, as an illustration only.';
+
+  @override
+  String get privacyAskLlmLabel => 'Ask the online helper';
+
+  @override
+  String get privacyAskLlmSentence =>
+      'Sends only your question text, without your account, card and bank names. Your transactions and balances never leave your phone.';
+
+  @override
+  String privacyAskLlmQuota(int count, String date, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n questions left this month. Resets on $date.',
+      one: '1 question left this month. Resets on $date.',
+      zero: 'No questions left this month. They reset on $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get privacyAskLlmQuotaUnknown =>
+      'The count shows after your first online question.';
+
+  @override
+  String get privacyAskLlmDetails => 'What\'s sent?';
+
+  @override
+  String get privacyAskLlmTurnedOff =>
+      'Turned off. No question is sent until you allow it again.';
+
+  @override
+  String get privacyServerItemAskLlm =>
+      'Your question text for the online helper, only if you allow it and never stored, plus your monthly question count';
 }
