@@ -350,6 +350,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-265](tasks/T-265.md) | InstaPay transactions show "InstaPay" then the person's name | US-P04 | Medium | Sonnet | flutter-ui-engineer | — | — | 76 | DONE (batch 76) |
 | [T-267](tasks/T-267.md) | Receipt totals are cross-checked; restaurant layout fixtures (PO receipt 2) | US-P06 | Medium | Sonnet | parsing-engine-engineer | — | — | 76 | DONE (batch 76) |
 | [T-271](tasks/T-271.md) | A salary in any currency is salary income and can drive the payday | US-P10 / D-85 | Medium | Sonnet | flutter-core-engineer | — | — | 76 | DONE (batch 76) |
+| [T-272](tasks/T-272.md) | Exchanged money reaches the EGP month, counted once (multi-currency slice 1) | US-P11 / D-86 | High (C4) | Sonnet | flutter-core-engineer | — | A | 78 | TODO |
 | [T-263](tasks/T-263.md) | Sharing an image to Zaghlol opens the scan, never "not implemented" | US-P02 | High | Sonnet | native-platform-engineer | — | — | 77 | DONE (batch 76) |
 | [T-266](tasks/T-266.md) | Link a debit card to its bank account (one balance, set by the user) | US-P05 | High | Sonnet | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 | [T-268](tasks/T-268.md) | Mascot animation matches the approved art; left hand not cut | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | — | 77 | BUILT, held for the PO (branch task/T-268-po2) |
