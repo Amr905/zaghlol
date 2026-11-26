@@ -1,0 +1,1357 @@
+Resolving dependencies in `/home/runner/work/zaghlol/zaghlol`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  android_file_picker 2.1.6 (2.2.1 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.2 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_ui 1.1.6 (1.1.7 available)
+  dart_style 3.1.3 (3.1.14 available)
+  dbus 0.8.0 (0.8.1 available)
+  drift 2.35.3 (2.35.4 available)
+  file_picker 13.3.3 (13.4.1 available)
+  file_picker_darwin 2.5.1 (2.5.2 available)
+  file_picker_linux 2.0.4 (2.0.5 available)
+  file_picker_platform_interface 4.2.0 (4.3.0 available)
+  file_picker_web 4.2.1 (4.2.2 available)
+  hashlib 2.4.2 (2.4.4 available)
+  image_picker_ios 0.8.13+15 (0.8.13+16 available)
+  jni 1.1.2 (1.2.1 available)
+  jni_flutter 1.0.4+1 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.11.0 (1.11.1 available)
+  objective_c 9.6.3 (9.6.4 available)
+  package_config 2.2.0 (3.0.0 available)
+  pdfium_dart 0.4.3 (0.4.4 available)
+  pdfium_flutter 0.4.3 (0.4.4 available)
+  pdfrx 3.0.0 (3.1.0 available)
+  pdfrx_engine 0.9.3 (0.9.6 available)
+  pigeon 26.3.2 (30.0.4 available)
+  sqlite3 3.9.1 (3.9.2 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+Got dependencies in `/home/runner/work/zaghlol/zaghlol`!
+33 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /home/runner/work/zaghlol/zaghlol/app/integration_test/app_explorer_test.dart
+Running Gradle task 'assembleDevSmsDebug'...                    
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter, rive_native
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDevSmsDebug'...                       58.7s
+✓ Built build/app/outputs/flutter-apk/app-devsms-debug.apk
+Installing build/app/outputs/flutter-apk/app-devsms-debug.apk...      2,445ms
+00:00 +0: explorer[ar]: taps every control of every screen
+EXPLORER_STAGE catalog ready
+EXPLORER_SEEDED accounts=5 txns=30 reviews=2
+EXPLORER_STAGE seeded; closing the seed database
+EXPLORER_STAGE starting the app
+EXPLORER_STAGE main() returned
+NOTIF_PROBE launch route=false
+EXPLORER_STAGE mode=ar textScale=1.0 shell shown: true
+EXPLORER_SCREEN 1 الرئيسية (Scaffold, depth 0) rssMB=558
+EXPLORER_TAP 1 الرئيسية / inkwell "كل الكروت"
+EXPLORER_SCREEN 2 تشوف أنهي كروت؟ (BottomSheet, depth 1) rssMB=577
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "كل الكروت"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Debit ••1234 ⁦•••• 1234⁩ / ديبت"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Credit card ••4455 ⁦•••• 4455⁩ / كريدت"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Wallet / محفظة"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Cash / كاش"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Dollar account ⁦•••• 9876⁩ / حساب بنك"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / inkwell "تمام"
+EXPLORER_TAP 1 الرئيسية / inkwell "icon U+e34d"
+EXPLORER_SCREEN 3 شارك إنجازك (Scaffold, depth 1) rssMB=584
+EXPLORER_TAP 3 شارك إنجازك / inkwell "EGP"
+EXPLORER_TAP 3 شارك إنجازك / inkwell "USD"
+EXPLORER_TAP 3 شارك إنجازك / inkwell "icon U+e16a"
+EXPLORER_TAP 1 الرئيسية / iconbutton "الإعدادات"
+EXPLORER_SCREEN 4 الإعدادات (Scaffold, depth 1) rssMB=586
+EXPLORER_TAP 4 الإعدادات / inkwell "زغلول جولد / إنت على الباقة المجانية"
+EXPLORER_SCREEN 5 استرجع مشترياتي (Scaffold, depth 2) rssMB=586
+EXPLORER_TAP 5 استرجع مشترياتي / inkwell "icon U+e16a"
+EXPLORER_TAP 5 استرجع مشترياتي / button "استرجع مشترياتي"
+EXPLORER_TAP 4 الإعدادات / inkwell "التفضيلات"
+EXPLORER_SCREEN 6 التفضيلات (Scaffold, depth 2) rssMB=633
+EXPLORER_TAP 6 التفضيلات / inkwell "عربي"
+EXPLORER_TAP 6 التفضيلات / inkwell "العملة الأساسية / EGP"
+EXPLORER_SCREEN 7 العملة الأساسية (BottomSheet, depth 3) rssMB=617
+EXPLORER_TAP 7 العملة الأساسية / inkwell "EGP"
+EXPLORER_TAP 7 العملة الأساسية / inkwell "USD"
+EXPLORER_STUCK العملة الأساسية want=4 have=3 extra=[]
+EXPLORER_TAP 6 التفضيلات / inkwell "العملة الأساسية / USD"
+EXPLORER_TAP 6 التفضيلات / listtile "اعرض مجموع تقريبي (≈) / بيتحسب بسعر تقريبي ومكتوب عليه كده. مفيش حاجة بتتحوّل فعلاً."
+EXPLORER_TAP 6 التفضيلات / switch "Switch"
+EXPLORER_TAP 6 التفضيلات / switch "Switch"
+EXPLORER_TAP 6 التفضيلات / inkwell "يوم القبض / أول الشهر"
+EXPLORER_SCREEN 8 يوم القبض (BottomSheet, depth 3) rssMB=619
+EXPLORER_TAP 8 يوم القبض / button "١"
+EXPLORER_TAP 8 يوم القبض / button "٢"
+EXPLORER_SCREEN 9 تغيّر يوم القبض في نص الشهر؟ (Dialog, depth 4) rssMB=625
+EXPLORER_TAP 9 تغيّر يوم القبض في نص الشهر؟ / button "إلغاء"
+EXPLORER_TAP 9 تغيّر يوم القبض في نص الشهر؟ / button "تمام"
+EXPLORER_STUCK يوم القبض want=4 have=3 extra=[]
+EXPLORER_STUCK تغيّر يوم القبض في نص الشهر؟ want=4 have=1 extra=[]
+EXPLORER_STUCK يوم القبض want=4 have=1 extra=[]
+EXPLORER_TAP 6 التفضيلات / inkwell "يوم القبض / يوم ٢"
+EXPLORER_TAP 6 التفضيلات / inkwell "مرتبي / ضيفه وزغلول يتابعه معاك"
+EXPLORER_SCREEN 10 مرتبي (BottomSheet, depth 3) rssMB=648
+EXPLORER_TAP 10 مرتبي / inkwell "EGP"
+EXPLORER_TAP 10 مرتبي / inkwell "USD"
+EXPLORER_TAP 10 مرتبي / inkwell "SAR"
+EXPLORER_TAP 10 مرتبي / inkwell "EUR"
+EXPLORER_TAP 10 مرتبي / inkwell "AED"
+EXPLORER_TAP 10 مرتبي / inkwell "QAR"
+EXPLORER_TAP 10 مرتبي / inkwell "KWD"
+EXPLORER_TAP 10 مرتبي / inkwell "BHD"
+EXPLORER_TAP 10 مرتبي / inkwell "GBP"
+EXPLORER_TAP 10 مرتبي / inkwell "INR"
+EXPLORER_TAP 10 مرتبي / inkwell "الكاش"
+EXPLORER_TAP 10 مرتبي / inkwell "Debit ••1234 1234"
+EXPLORER_TAP 10 مرتبي / inkwell "Credit card ••4455 4455"
+EXPLORER_TAP 10 مرتبي / inkwell "Wallet"
+EXPLORER_TAP 10 مرتبي / inkwell "Cash"
+EXPLORER_TAP 6 التفضيلات / listtile "قفل التطبيق"
+EXPLORER_TAP 4 الإعدادات / inkwell "جولد وحسابك"
+EXPLORER_SCREEN 11 جولد وحسابك (Scaffold, depth 2) rssMB=654
+EXPLORER_TAP 11 جولد وحسابك / inkwell "كمّل بحساب Google"
+EXPLORER_TAP 4 الإعدادات / inkwell "التنبيهات"
+EXPLORER_SCREEN 12 التنبيهات (Scaffold, depth 2) rssMB=677
+EXPLORER_TAP 12 التنبيهات / listtile "تنبيهات الميزانية"
+EXPLORER_TAP 12 التنبيهات / switch "Switch"
+EXPLORER_TAP 12 التنبيهات / listtile "لما الصرف يزيد"
+EXPLORER_TAP 12 التنبيهات / switch "Switch"
+EXPLORER_TAP 12 التنبيهات / listtile "الأقساط والفواتير"
+EXPLORER_TAP 12 التنبيهات / switch "Switch"
+EXPLORER_TAP 12 التنبيهات / inkwell "قبلها بـ ٣ أيام"
+EXPLORER_SCREEN 13 يوم الميعاد نفسه (BottomSheet, depth 3) rssMB=651
+EXPLORER_TAP 13 يوم الميعاد نفسه / listtile "يوم الميعاد نفسه"
+EXPLORER_STUCK يوم الميعاد نفسه want=4 have=3 extra=[]
+EXPLORER_TAP 12 التنبيهات / inkwell "يوم الميعاد نفسه"
+EXPLORER_TAP 12 التنبيهات / listtile "حركة اتسجلت مرتين"
+EXPLORER_TAP 12 التنبيهات / switch "Switch"
+EXPLORER_TAP 12 التنبيهات / listtile "فواتير اتضافت لوحدها"
+EXPLORER_TAP 12 التنبيهات / switch "Switch"
+EXPLORER_TAP 12 التنبيهات / listtile "مشاكل النسخة الاحتياطية"
+EXPLORER_TAP 12 التنبيهات / switch "Switch"
+EXPLORER_TAP 12 التنبيهات / listtile "ملخص الأسبوع / كل جمعة الصبح"
+EXPLORER_TAP 12 التنبيهات / switch "Switch"
+EXPLORER_TAP 12 التنبيهات / listtile "ساعات الهدوء / من ١١:٠٠ م لحد ٨:٠٠ ص"
+EXPLORER_TAP 12 التنبيهات / listtile "ساعات الهدوء"
+EXPLORER_TAP 12 التنبيهات / inkwell "١١:٠٠ م"
+EXPLORER_SCREEN 14 اختيار الوقت (Dialog, depth 3) rssMB=659
+EXPLORER_TAP 14 اختيار الوقت / inkwell "11"
+EXPLORER_TAP 14 اختيار الوقت / inkwell "00"
+EXPLORER_TAP 14 اختيار الوقت / inkwell "ص"
+EXPLORER_TAP 14 اختيار الوقت / inkwell "م"
+EXPLORER_TAP 14 اختيار الوقت / iconbutton "التبديل إلى وضع "إدخال النص""
+EXPLORER_TAP 14 اختيار الوقت / iconbutton "التبديل إلى وضع "منتقي قُرص الساعة""
+EXPLORER_TAP 14 اختيار الوقت / button "الإلغاء"
+EXPLORER_TAP 14 اختيار الوقت / button "حسنًا"
+EXPLORER_TAP 12 التنبيهات / inkwell "٨:٠٠ ص"
+EXPLORER_TAP 12 التنبيهات / listtile "اخفي المبالغ على شاشة القفل / التنبيه بيوصل من غير مبلغ ولا اسم تاجر."
+EXPLORER_TAP 4 الإعدادات / inkwell "زغلول بيقرا منين / كله شغال"
+EXPLORER_SCREEN 15 زغلول بيقرا منين (Scaffold, depth 2) rssMB=671
+EXPLORER_TAP 15 زغلول بيقرا منين / button "صلّحها"
+EXPLORER_TAP 15 زغلول بيقرا منين / inkwell "ابعت أو الزق رسالة"
+EXPLORER_SCREEN 16 إزاي تبعت رسالة لزغلول (BottomSheet, depth 3) rssMB=676
+EXPLORER_TAP 15 زغلول بيقرا منين / inkwell "متتابعش كارت أو بنك"
+EXPLORER_SCREEN 17 متتابعش كارت أو بنك (BottomSheet, depth 3) rssMB=695
+EXPLORER_TAP 17 متتابعش كارت أو بنك / gesture "البنك العربي الأفريقي الدولي / البنك الزراعي المصري / البنك الأهلي الكويتي مصر"
+EXPLORER_TAP 17 متتابعش كارت أو بنك / inkwell "البنك العربي الأفريقي الدولي"
+EXPLORER_TAP 17 متتابعش كارت أو بنك / listtile "رسايل البنك"
+EXPLORER_TAP 17 متتابعش كارت أو بنك / checkbox "Checkbox"
+EXPLORER_TAP 17 متتابعش كارت أو بنك / listtile "إشعارات التطبيقات"
+EXPLORER_TAP 17 متتابعش كارت أو بنك / checkbox "Checkbox"
+EXPLORER_TAP 17 متتابعش كارت أو بنك / inkwell "تمام"
+EXPLORER_TAP 15 زغلول بيقرا منين / inkwell "دوّر في الرسايل القديمة تاني"
+EXPLORER_SCREEN 18 دوّر في الرسايل القديمة (BottomSheet, depth 3) rssMB=682
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / listtile "آخر ٦ شهور"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / gesture "GestureDetector"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / listtile "آخر ١٢ شهر"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / gesture "GestureDetector"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / listtile "آخر ١٨ شهر"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / gesture "GestureDetector"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / listtile "آخر ٢٤ شهر"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / gesture "GestureDetector"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / inkwell "ابدأ"
+EXPLORER_TAP 18 دوّر في الرسايل القديمة / inkwell "تمام"
+EXPLORER_TAP 15 زغلول بيقرا منين / inkwell "البنوك اللي زغلول بيفهمها"
+EXPLORER_SCREEN 19 البنوك اللي زغلول بيفهمها (Scaffold, depth 3) rssMB=705
+EXPLORER_TAP 15 زغلول بيقرا منين / inkwell "قوالب رسايل خاصة بيك / جولد"
+EXPLORER_TAP 4 الإعدادات / inkwell "التصنيفات"
+EXPLORER_SCREEN 20 التصنيفات (Scaffold, depth 2) rssMB=703
+EXPLORER_TAP 20 التصنيفات / inkwell "التصنيفات"
+EXPLORER_TAP 20 التصنيفات / inkwell "القواعد"
+EXPLORER_TAP 4 الإعدادات / inkwell "نسخة احتياطية / لسه مفيش نسخة"
+EXPLORER_SCREEN 21 نسخة احتياطية (Scaffold, depth 2) rssMB=692
+EXPLORER_TAP 21 نسخة احتياطية / inkwell "نسخ تلقائي / النسخ التلقائي مع جولد / جولد"
+EXPLORER_TAP 21 نسخة احتياطية / inkwell "النسخ المحفوظة / جولد بيحتفظ بخمس نسخ / جولد"
+EXPLORER_TAP 21 نسخة احتياطية / inkwell "كلمة سر النسخة / غيّر"
+EXPLORER_SCREEN 22 غيّر كلمة سر النسخة (BottomSheet, depth 3) rssMB=695
+EXPLORER_TAP 22 غيّر كلمة سر النسخة / listtile "فاهم إنها مش بتترجّع"
+EXPLORER_TAP 22 غيّر كلمة سر النسخة / checkbox "Checkbox"
+EXPLORER_TAP 22 غيّر كلمة سر النسخة / button "اعرض"
+EXPLORER_TAP 22 غيّر كلمة سر النسخة / button "اخفي"
+EXPLORER_TAP 22 غيّر كلمة سر النسخة / inkwell "احفظ"
+EXPLORER_TAP 22 غيّر كلمة سر النسخة / listtile "فاهم إنها مش بتترجّع / علّم إنك فاهم الأول"
+EXPLORER_TAP 21 نسخة احتياطية / inkwell "استرجاع نسخة"
+EXPLORER_SCREEN 23 استرجاع نسخة (Scaffold, depth 3) rssMB=705
+EXPLORER_TAP 23 استرجاع نسخة / listtile "Google Drive"
+EXPLORER_TAP 23 استرجاع نسخة / gesture "GestureDetector"
+EXPLORER_TAP 23 استرجاع نسخة / inkwell "كمّل"
+EXPLORER_TAP 23 استرجاع نسخة / inkwell "ابدأ من جديد"
+EXPLORER_TAP 4 الإعدادات / inkwell "إكسيل وكشوف البنوك"
+EXPLORER_SCREEN 24 إكسيل وكشوف البنوك (Scaffold, depth 2) rssMB=714
+EXPLORER_TAP 24 إكسيل وكشوف البنوك / inkwell "icon U+e15e"
+EXPLORER_TAP 24 إكسيل وكشوف البنوك / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 24 إكسيل وكشوف البنوك / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 24 إكسيل وكشوف البنوك / inkwell "CSV"
+EXPLORER_TAP 24 إكسيل وكشوف البنوك / inkwell "Excel"
+EXPLORER_TAP 24 إكسيل وكشوف البنوك / inkwell "صدّر"
+EXPLORER_TAP 24 إكسيل وكشوف البنوك / inkwell "ضيف كشف حساب / ضيف شهور فاتت مرة واحدة. الملف بيتقرا على موبايلك بس، ومش بيتبعت لأي حد."
+EXPLORER_SCREEN 25 ضيف كشف حساب (Scaffold, depth 3) rssMB=729
+EXPLORER_TAP 25 ضيف كشف حساب / inkwell "icon U+e15e"
+EXPLORER_TAP 25 ضيف كشف حساب / inkwell "CIB / CIB / PDF من الموبايل أو الإيميل"
+EXPLORER_TAP 25 ضيف كشف حساب / inkwell "NBE / البنك الأهلي / PDF"
+EXPLORER_TAP 25 ضيف كشف حساب / inkwell "BM / بنك مصر / PDF"
+EXPLORER_TAP 25 ضيف كشف حساب / inkwell "QNB / QNB / PDF"
+EXPLORER_TAP 25 ضيف كشف حساب / inkwell "إزاي أنزّل الكشف؟"
+EXPLORER_SCREEN 26 إزاي أنزّل الكشف؟ (BottomSheet, depth 4) rssMB=722
+EXPLORER_TAP 25 ضيف كشف حساب / inkwell "ملف زغلول CSV / نسخة إنت صدرتها قبل كده"
+EXPLORER_TAP 4 الإعدادات / inkwell "خصوصيتك"
+EXPLORER_SCREEN 27 خصوصيتك (Scaffold, depth 2) rssMB=729
+EXPLORER_TAP 27 خصوصيتك / listtile "رقم عشوائي بيتأكد بيه السيرفر من الوقت، ومفيهوش أي حاجة عنك."
+EXPLORER_TAP 27 خصوصيتك / listtile "لو الدعم ربط الجولد بحساب، موبايلك اللي اشتريت عليه بيتبلّغ."
+EXPLORER_TAP 27 خصوصيتك / listtile "لما تمسح حسابك، بنمسح كل حاجة، وأثر الدعم بيتمسح بعد سنة."
+EXPLORER_TAP 27 خصوصيتك / listtile "ساعد في تحسين قايمة التجار / لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس."
+EXPLORER_TAP 27 خصوصيتك / switch "Switch"
+EXPLORER_TAP 27 خصوصيتك / inkwell "بالظبط إيه اللي بيتبعت؟"
+EXPLORER_SCREEN 28 بالظبط إيه اللي بيتبعت؟ (Dialog, depth 3) rssMB=729
+EXPLORER_TAP 27 خصوصيتك / listtile "التعرّف على الصوت أونلاين / بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول."
+EXPLORER_TAP 27 خصوصيتك / switch "Switch"
+EXPLORER_TAP 27 خصوصيتك / inkwell "قفل التطبيق"
+EXPLORER_TAP 4 الإعدادات / inkwell "عن زغلول"
+EXPLORER_SCREEN 29 عن زغلول (Scaffold, depth 2) rssMB=727
+EXPLORER_TAP 29 عن زغلول / inkwell "تراخيص المصدر المفتوح"
+EXPLORER_SCREEN 30 التراخيص (Scaffold, depth 3) rssMB=727
+EXPLORER_TAP 30 التراخيص / listtile "IBM Plex Sans Arabic / ترخيص واحد"
+EXPLORER_SCREEN 31 IBM Plex Sans Arabic (Scaffold, depth 4) rssMB=740
+EXPLORER_STUCK عن زغلول want=3 have=4 extra=[Scaffold:MaterialPageRoute<dynamic>:first=true:nav=true]
+EXPLORER_TAP 1 الرئيسية / inkwell "USD"
+EXPLORER_TAP 1 الرئيسية / inkwell "EGP"
+EXPLORER_TAP 1 الرئيسية / inkwell "مسموحلك تصرف النهارده / ⁨⁨****⁩⁩ ج.م / فاضل ٦ أيام على القبض · ٢ نوفمبر – ١ ديسمبر"
+EXPLORER_SCREEN 32 الميزانية (Scaffold, depth 1) rssMB=744
+EXPLORER_TAP 32 الميزانية / inkwell "EGP"
+EXPLORER_TAP 32 الميزانية / inkwell "USD"
+EXPLORER_TAP 32 الميزانية / inkwell "حط ميزانية"
+EXPLORER_TAP 32 الميزانية / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 32 الميزانية / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 1 الرئيسية / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 1 الرئيسية / inkwell "مسموحلك تصرف النهارده / ⁨⁨٥٬٦١٦٫٤٤⁩⁩ ج.م / فاضل ٦ أيام على القبض · ٢ نوفمبر – ١ ديسمبر"
+EXPLORER_TAP 1 الرئيسية / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 1 الرئيسية / inkwell "صرفت / ⁨****⁩"
+EXPLORER_SCREEN 33 الحركات (Scaffold, depth 1) rssMB=759
+EXPLORER_TAP 33 الحركات / inkwell "كل الكروت"
+EXPLORER_TAP 33 الحركات / inkwell "شهر المرتب ده"
+EXPLORER_SCREEN 34 المدة (BottomSheet, depth 2) rssMB=753
+EXPLORER_TAP 34 المدة / inkwell "شهر المرتب ده"
+EXPLORER_TAP 34 المدة / inkwell "شهر المرتب اللي فات"
+EXPLORER_STUCK المدة want=3 have=2 extra=[]
+EXPLORER_TAP 33 الحركات / inkwell "icon U+e16a"
+EXPLORER_TAP 33 الحركات / inkwell "المدة"
+EXPLORER_TAP 33 الحركات / inkwell "التصنيف"
+EXPLORER_SCREEN 35 التصنيف (BottomSheet, depth 2) rssMB=748
+EXPLORER_TAP 35 التصنيف / inkwell "🛒 / خزين البيت والسوبرماركت"
+EXPLORER_TAP 35 التصنيف / inkwell "🍔 / أكل بره وكافيهات ودليفري"
+EXPLORER_TAP 35 التصنيف / inkwell "🚗 / مواصلات وبنزين وعربية"
+EXPLORER_TAP 35 التصنيف / inkwell "⚡ / فواتير وشحن ومرافق"
+EXPLORER_TAP 35 التصنيف / inkwell "🏠 / إيجار ومصاريف البيت"
+EXPLORER_TAP 35 التصنيف / inkwell "🛍️ / لبس وشوبينج وإلكترونيات"
+EXPLORER_TAP 35 التصنيف / inkwell "💳 / أقساط وجمعيات وكريدت"
+EXPLORER_TAP 35 التصنيف / inkwell "📺 / اشتراكات وتطبيقات"
+EXPLORER_TAP 35 التصنيف / inkwell "تمام"
+EXPLORER_STUCK التصنيف want=3 have=2 extra=[]
+EXPLORER_TAP 33 الحركات / inkwell "EGP"
+EXPLORER_TAP 33 الحركات / inkwell "icon U+e16a"
+EXPLORER_TAP 33 الحركات / inkwell "USD"
+EXPLORER_TAP 33 الحركات / inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · ١٠:١٤ م · بإيدك"
+EXPLORER_SCREEN 36 🏠 (Scaffold, depth 2) rssMB=774
+EXPLORER_TAP 36 🏠 / inkwell "إيجار ومصاريف البيت"
+EXPLORER_TAP 36 🏠 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 36 🏠 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 36 🏠 / iconbutton "عدّل"
+EXPLORER_SCREEN 37 عدّل الحركة (Scaffold, depth 3) rssMB=772
+EXPLORER_TAP 37 عدّل الحركة / inkwell "مصروف"
+EXPLORER_TAP 37 عدّل الحركة / inkwell "دخل"
+EXPLORER_TAP 37 عدّل الحركة / inkwell "التصنيف / إيجار ومصاريف البيت"
+EXPLORER_TAP 37 عدّل الحركة / inkwell "الحساب / Dollar account ⁦•••• 9876⁩"
+EXPLORER_SCREEN 38 الحساب (BottomSheet, depth 4) rssMB=776
+EXPLORER_TAP 38 الحساب / inkwell "Debit ••1234 ⁦•••• 1234⁩ / ديبت · EGP"
+EXPLORER_STUCK الحساب want=5 have=4 extra=[]
+EXPLORER_TAP 37 عدّل الحركة / inkwell "إمتى / ٢١ نوفمبر ٢٠٢٦"
+EXPLORER_SCREEN 39 اختيار التاريخ (Dialog, depth 4) rssMB=793
+EXPLORER_TAP 39 اختيار التاريخ / iconbutton "التبديل إلى الإدخال"
+EXPLORER_TAP 39 اختيار التاريخ / iconbutton "التبديل إلى التقويم"
+EXPLORER_TAP 39 اختيار التاريخ / iconbutton "الشهر السابق"
+EXPLORER_TAP 39 اختيار التاريخ / iconbutton "الشهر التالي"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "1"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "2"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "3"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "4"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "5"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "6"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "7"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "8"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "9"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "10"
+EXPLORER_TAP 39 اختيار التاريخ / inkwell "11"
+EXPLORER_TAP 37 عدّل الحركة / inkwell "icon U+e16a"
+EXPLORER_TAP 37 عدّل الحركة / inkwell "احفظ"
+EXPLORER_TAP 36 🏠 / inkwell "icon U+e402"
+EXPLORER_TAP 36 🏠 / inkwell "امسح"
+EXPLORER_SCREEN 40 تمسح الحركة دي؟ (Dialog, depth 3) rssMB=799
+EXPLORER_TAP 40 تمسح الحركة دي؟ / button "إلغاء"
+EXPLORER_STUCK تمسح الحركة دي؟ want=4 have=3 extra=[]
+EXPLORER_TAP 36 🏠 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_SCREEN 41 ملاحظة (BottomSheet, depth 3) rssMB=839
+EXPLORER_TAP 41 ملاحظة / inkwell "احفظ"
+EXPLORER_TAP 41 ملاحظة / gesture "GestureDetector"
+EXPLORER_TAP 36 🏠 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_SCREEN 42 تقسيم العزومة (BottomSheet, depth 3) rssMB=808
+EXPLORER_TAP 42 تقسيم العزومة / iconbutton "شيل "
+EXPLORER_TAP 42 تقسيم العزومة / inkwell "ضيف حد"
+EXPLORER_TAP 42 تقسيم العزومة / inkwell "قسّم بالتساوي"
+EXPLORER_TAP 42 تقسيم العزومة / inkwell "احفظ"
+EXPLORER_TAP 36 🏠 / inkwell "دي تحويلة لنفسي"
+EXPLORER_SCREEN 43 ربط تحويلة لنفسي (BottomSheet, depth 3) rssMB=825
+EXPLORER_TAP 43 ربط تحويلة لنفسي / inkwell "⁨**** ج.م⁩ · Wallet / قبلها بـ ٥ أيام / سعر التحويل ≈ ⁨**** ج.م⁩ لكل USD"
+EXPLORER_TAP 43 ربط تحويلة لنفسي / gesture "GestureDetector"
+EXPLORER_TAP 43 ربط تحويلة لنفسي / inkwell "اربط"
+EXPLORER_TAP 36 🏠 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "🛒 / Carrefour Maadi / CIB ⁦•••• 1234⁩ · ٢:١٤ ص · بإيدك"
+EXPLORER_SCREEN 44 🛒 (Scaffold, depth 2) rssMB=833
+EXPLORER_TAP 44 🛒 / inkwell "خزين البيت والسوبرماركت"
+EXPLORER_TAP 44 🛒 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 44 🛒 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 44 🛒 / iconbutton "عدّل"
+EXPLORER_TAP 44 🛒 / inkwell "icon U+e402"
+EXPLORER_TAP 44 🛒 / inkwell "امسح"
+EXPLORER_TAP 44 🛒 / inkwell "ملاحظة / synthetic note"
+EXPLORER_TAP 44 🛒 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 44 🛒 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 44 🛒 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "🍔 / Uber / NBE ⁦•••• 4455⁩ · ١:١٤ ص · بإيدك"
+EXPLORER_SCREEN 45 🍔 (Scaffold, depth 2) rssMB=840
+EXPLORER_TAP 45 🍔 / inkwell "أكل بره وكافيهات ودليفري"
+EXPLORER_TAP 45 🍔 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 45 🍔 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 45 🍔 / iconbutton "عدّل"
+EXPLORER_TAP 45 🍔 / inkwell "icon U+e402"
+EXPLORER_TAP 45 🍔 / inkwell "امسح"
+EXPLORER_TAP 45 🍔 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 45 🍔 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 45 🍔 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 45 🍔 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 33 الحركات / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 33 الحركات / button "اختار"
+EXPLORER_TAP 33 الحركات / inkwell "Carrefour Maadi / CIB ⁦•••• 1234⁩ · ٢:١٤ ص · بإيدك / ⁨⁨-**** ج.م⁩⁩"
+EXPLORER_TAP 33 الحركات / inkwell "Uber / NBE ⁦•••• 4455⁩ · ١:١٤ ص · بإيدك / ⁨⁨-**** ج.م⁩⁩"
+EXPLORER_TAP 33 الحركات / iconbutton "إلغاء"
+EXPLORER_TAP 33 الحركات / inkwell "• / Talabat / Cash · ١١:١٤ م · بإيدك"
+EXPLORER_SCREEN 46 • (Scaffold, depth 2) rssMB=841
+EXPLORER_TAP 46 • / inkwell "اختار"
+EXPLORER_TAP 46 • / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 46 • / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 46 • / iconbutton "عدّل"
+EXPLORER_TAP 46 • / inkwell "icon U+e402"
+EXPLORER_TAP 46 • / inkwell "امسح"
+EXPLORER_TAP 46 • / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 46 • / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 46 • / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 46 • / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "💳 / Breadfast / Wallet · ٨:١٤ م · بإيدك"
+EXPLORER_SCREEN 47 💳 (Scaffold, depth 2) rssMB=861
+EXPLORER_TAP 47 💳 / inkwell "أقساط وجمعيات وكريدت"
+EXPLORER_TAP 47 💳 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 47 💳 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 47 💳 / iconbutton "عدّل"
+EXPLORER_TAP 47 💳 / inkwell "icon U+e402"
+EXPLORER_TAP 47 💳 / inkwell "امسح"
+EXPLORER_TAP 47 💳 / inkwell "ملاحظة / synthetic note"
+EXPLORER_TAP 47 💳 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 47 💳 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 47 💳 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "📺 / Cilantro / Cash · ٢:١٤ ص · بإيدك"
+EXPLORER_SCREEN 48 📺 (Scaffold, depth 2) rssMB=851
+EXPLORER_TAP 48 📺 / inkwell "اشتراكات وتطبيقات"
+EXPLORER_TAP 48 📺 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 48 📺 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 48 📺 / iconbutton "عدّل"
+EXPLORER_TAP 48 📺 / inkwell "icon U+e402"
+EXPLORER_TAP 48 📺 / inkwell "امسح"
+EXPLORER_TAP 48 📺 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 48 📺 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 48 📺 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 48 📺 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "💊 / Fawry / CIB ⁦•••• 1234⁩ · ١:١٤ ص · بإيدك"
+EXPLORER_SCREEN 49 💊 (Scaffold, depth 2) rssMB=861
+EXPLORER_TAP 49 💊 / inkwell "صحة وأدوية وجيم"
+EXPLORER_TAP 49 💊 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 49 💊 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 49 💊 / iconbutton "عدّل"
+EXPLORER_TAP 49 💊 / inkwell "icon U+e402"
+EXPLORER_TAP 49 💊 / inkwell "امسح"
+EXPLORER_TAP 49 💊 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 49 💊 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 49 💊 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 49 💊 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · ١٢:١٤ ص · بإيدك"
+EXPLORER_SCREEN 50 🎓 (Scaffold, depth 2) rssMB=864
+EXPLORER_TAP 50 🎓 / inkwell "تعليم ومدارس وكورسات"
+EXPLORER_TAP 50 🎓 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 50 🎓 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 50 🎓 / iconbutton "عدّل"
+EXPLORER_TAP 50 🎓 / inkwell "icon U+e402"
+EXPLORER_TAP 50 🎓 / inkwell "امسح"
+EXPLORER_TAP 50 🎓 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 50 🎓 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 50 🎓 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 50 🎓 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "🎬 / Salary / Wallet · ١١:١٤ م · بإيدك"
+EXPLORER_SCREEN 51 🎬 (Scaffold, depth 2) rssMB=872
+EXPLORER_TAP 51 🎬 / inkwell "فسح وسفر وخروجات"
+EXPLORER_TAP 51 🎬 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 51 🎬 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 51 🎬 / iconbutton "عدّل"
+EXPLORER_TAP 51 🎬 / inkwell "icon U+e402"
+EXPLORER_TAP 51 🎬 / inkwell "امسح"
+EXPLORER_TAP 51 🎬 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 51 🎬 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 51 🎬 / inkwell "دي فلوس راجعة عن…"
+EXPLORER_SCREEN 52 وزّعها على مصاريف (BottomSheet, depth 3) rssMB=878
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Carrefour Maadi / ٢٦ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 52 وزّعها على مصاريف / checkbox "Checkbox"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Uber / ٢٥ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 52 وزّعها على مصاريف / checkbox "Checkbox"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Vodafone / ٢٤ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 52 وزّعها على مصاريف / checkbox "Checkbox"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Talabat / ٢٣ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 52 وزّعها على مصاريف / checkbox "Checkbox"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Careem / ٢٠ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 52 وزّعها على مصاريف / checkbox "Checkbox"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Breadfast / ١٩ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 52 وزّعها على مصاريف / checkbox "Checkbox"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "احفظ"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Cilantro / ١٩ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 52 وزّعها على مصاريف / inkwell "Fawry / ١٨ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩"
+EXPLORER_TAP 51 🎬 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "🎁 / Uber / Cash · ١٠:١٤ م · بإيدك"
+EXPLORER_SCREEN 53 🎁 (Scaffold, depth 2) rssMB=891
+EXPLORER_TAP 53 🎁 / inkwell "عيلة وهدايا وصدقات"
+EXPLORER_TAP 53 🎁 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 53 🎁 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 53 🎁 / iconbutton "عدّل"
+EXPLORER_TAP 53 🎁 / inkwell "icon U+e402"
+EXPLORER_TAP 53 🎁 / inkwell "امسح"
+EXPLORER_TAP 53 🎁 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 53 🎁 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 53 🎁 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 53 🎁 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "🐷 / Vodafone / CIB ⁦•••• 1234⁩ · ٩:١٤ م · بإيدك"
+EXPLORER_SCREEN 54 🐷 (Scaffold, depth 2) rssMB=898
+EXPLORER_TAP 54 🐷 / inkwell "تحويش ودهب واستثمار"
+EXPLORER_TAP 54 🐷 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 54 🐷 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 54 🐷 / iconbutton "عدّل"
+EXPLORER_TAP 54 🐷 / inkwell "icon U+e402"
+EXPLORER_TAP 54 🐷 / inkwell "امسح"
+EXPLORER_TAP 54 🐷 / inkwell "ملاحظة / synthetic note"
+EXPLORER_TAP 54 🐷 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 54 🐷 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 54 🐷 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "💼 / Talabat / NBE ⁦•••• 4455⁩ · ٨:١٤ م · بإيدك"
+EXPLORER_SCREEN 55 💼 (Scaffold, depth 2) rssMB=904
+EXPLORER_TAP 55 💼 / inkwell "مرتب ودخل وكاش باك"
+EXPLORER_TAP 55 💼 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 55 💼 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 55 💼 / iconbutton "عدّل"
+EXPLORER_TAP 55 💼 / inkwell "icon U+e402"
+EXPLORER_TAP 55 💼 / inkwell "امسح"
+EXPLORER_TAP 55 💼 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 55 💼 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 55 💼 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 55 💼 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "💵 / Spinneys / WISE ⁦•••• 9876⁩ · ٢:١٤ ص · بإيدك"
+EXPLORER_SCREEN 56 💵 (Scaffold, depth 2) rssMB=905
+EXPLORER_TAP 56 💵 / inkwell "كاش"
+EXPLORER_TAP 56 💵 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 56 💵 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 56 💵 / iconbutton "عدّل"
+EXPLORER_TAP 56 💵 / inkwell "icon U+e402"
+EXPLORER_TAP 56 💵 / inkwell "امسح"
+EXPLORER_TAP 56 💵 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 56 💵 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 56 💵 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 56 💵 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 33 الحركات / inkwell "🛒 / Breadfast / CIB ⁦•••• 1234⁩ · ١٢:١٤ ص · بإيدك"
+EXPLORER_TAP 33 الحركات / inkwell "🍔 / Cilantro / NBE ⁦•••• 4455⁩ · ١١:١٤ م · بإيدك"
+EXPLORER_TAP 1 الرئيسية / inkwell "صرفت في نوفمبر / ⁨⁨****⁩⁩ USD / فاضل ٦ أيام على القبض · ٢ نوفمبر – ١ ديسمبر"
+EXPLORER_TAP 1 الرئيسية / inkwell "حط ميزانية"
+EXPLORER_TAP 1 الرئيسية / inkwell "عاش يا وحش! صارف أقل من خطتك لحد دلوقتي 👏"
+EXPLORER_TAP 1 الرئيسية / inkwell "إيه يا عم، بتزغزغني؟ 😄"
+EXPLORER_TAP 1 الرئيسية / inkwell "أنا هنا يا كبير، وفلوسك في عينيّا"
+EXPLORER_TAP 1 الرئيسية / inkwell "كل قرش بتحوشه بيطلّعلي ريشة جديدة 🪶"
+EXPLORER_TAP 1 الرئيسية / inkwell "الكابتن جاهز، وإنت القائد"
+EXPLORER_TAP 1 الرئيسية / inkwell "اللي يحوش النهارده يتفسح بكره"
+EXPLORER_TAP 1 الرئيسية / inkwell "أنا بقرا رسايل البنوك بس، الباقي مش شغلي"
+EXPLORER_TAP 1 الرئيسية / inkwell "حمامة ولا محاسب؟ الاتنين!"
+EXPLORER_TAP 1 الرئيسية / inkwell "جناحي سريع وحساباتي مظبوطة"
+EXPLORER_TAP 1 الرئيسية / inkwell "عايز تعرف فلوسك راحت فين؟ افتح الحسبة"
+EXPLORER_TAP 1 الرئيسية / inkwell "أنا بحسب والدهب بيلمع، وإنت بتحوّش"
+EXPLORER_TAP 1 الرئيسية / switch "Switch"
+EXPLORER_TAP 1 الرئيسية / inkwell "حركتين مستنيين رأيك 👀"
+EXPLORER_SCREEN 57 مستني رأيك 👀 (Scaffold, depth 1) rssMB=924
+EXPLORER_TAP 57 مستني رأيك 👀 / inkwell "الكل ٢"
+EXPLORER_TAP 57 مستني رأيك 👀 / inkwell "تصنيف"
+EXPLORER_TAP 57 مستني رأيك 👀 / inkwell "رسايل جديدة"
+EXPLORER_TAP 57 مستني رأيك 👀 / listtile "شوف الرسالة الأصلية"
+EXPLORER_TAP 57 مستني رأيك 👀 / listtile "اخفي الرسالة الأصلية"
+EXPLORER_TAP 57 مستني رأيك 👀 / inkwell "اكتب التفاصيل"
+EXPLORER_SCREEN 58 تحب تسجل إيه؟ (BottomSheet, depth 2) rssMB=915
+EXPLORER_TAP 58 تحب تسجل إيه؟ / inkwell "قولها / بصوتك في ثانيتين"
+EXPLORER_SCREEN 59 ? (Scaffold, depth 3) rssMB=924
+EXPLORER_TAP 59 ? / inkwell "وافق"
+EXPLORER_STUCK ? want=4 have=2 extra=[]
+EXPLORER_STUCK تحب تسجل إيه؟ want=3 have=1 extra=[]
+EXPLORER_TAP 57 مستني رأيك 👀 / inkwell "خزين البيت والسوبرماركت"
+EXPLORER_TAP 57 مستني رأيك 👀 / inkwell "سيبها"
+EXPLORER_TAP 57 مستني رأيك 👀 / button "تراجع"
+EXPLORER_TAP 57 مستني رأيك 👀 / inkwell "اطلب دعم البنك ده"
+EXPLORER_SCREEN 60 اطلب دعم بنكك (BottomSheet, depth 2) rssMB=934
+EXPLORER_TAP 60 اطلب دعم بنكك / inkwell "رسالة SMS"
+EXPLORER_TAP 60 اطلب دعم بنكك / inkwell "إشعار"
+EXPLORER_TAP 60 اطلب دعم بنكك / inkwell "ابعت"
+EXPLORER_STUCK اطلب دعم بنكك want=3 have=2 extra=[]
+EXPLORER_STUCK مستني رأيك 👀 want=2 have=1 extra=[]
+EXPLORER_TAP 1 الرئيسية / inkwell "🛒 / Talabat / Cash · ٢٢ نوفمبر"
+EXPLORER_TAP 1 الرئيسية / inkwell "🏠 / Spinneys / Dollar account ⁦•••• 9876⁩ · ٢١ نوفمبر"
+EXPLORER_TAP 1 الرئيسية / inkwell "🛍️ / Careem / Credit card ••4455 ⁦•••• 4455⁩ · ٢٠ نوفمبر"
+EXPLORER_SCREEN 61 🛍️ (Scaffold, depth 1) rssMB=895
+EXPLORER_TAP 61 🛍️ / inkwell "لبس وشوبينج وإلكترونيات"
+EXPLORER_TAP 61 🛍️ / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 61 🛍️ / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 61 🛍️ / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 61 🛍️ / iconbutton "عدّل"
+EXPLORER_TAP 61 🛍️ / inkwell "icon U+e402"
+EXPLORER_TAP 61 🛍️ / inkwell "امسح"
+EXPLORER_TAP 61 🛍️ / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 61 🛍️ / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 61 🛍️ / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "💳 / Breadfast / Wallet · ١٩ نوفمبر"
+EXPLORER_TAP 1 الرئيسية / inkwell "📺 / Cilantro / Cash · ١٩ نوفمبر"
+EXPLORER_TAP 1 الرئيسية / inkwell "💊 / Fawry / Debit ••1234 ⁦•••• 1234⁩ · ١٨ نوفمبر"
+EXPLORER_TAP 1 الرئيسية / inkwell "🎓 / Metro Market / Dollar account ⁦•••• 9876⁩ · ١٧ نوفمبر"
+EXPLORER_DONE screens=61 taps=434 issues=11 deadTaps=15 minutes=11
+EXPLORER_REPORT # Explorer run 2026-11-26 (Android emulator, mode ar, synthetic data)
+EXPLORER_REPORT 
+EXPLORER_REPORT Screens: 61. Taps: 434. Issues: 11 (exceptions 0, overflows 0, dead taps 7, dead ends 1, not reopened 3, left app 0).
+EXPLORER_REPORT 
+EXPLORER_REPORT ## Issues
+EXPLORER_REPORT 
+EXPLORER_REPORT | Screen | Kind | Where | Detail |
+EXPLORER_REPORT |---|---|---|---|
+EXPLORER_REPORT | تغيّر يوم القبض في نص الشهر؟ (x-09) | restore | تغيّر يوم القبض في نص الشهر؟ | the screen could not be reopened after its state changed |
+EXPLORER_REPORT | دوّر في الرسايل القديمة (x-18) | dead-tap | gesture "GestureDetector" | no route, text or state change after the tap |
+EXPLORER_REPORT | دوّر في الرسايل القديمة (x-18) | dead-tap | gesture "GestureDetector" | no route, text or state change after the tap |
+EXPLORER_REPORT | دوّر في الرسايل القديمة (x-18) | dead-tap | gesture "GestureDetector" | no route, text or state change after the tap |
+EXPLORER_REPORT | دوّر في الرسايل القديمة (x-18) | dead-tap | gesture "GestureDetector" | no route, text or state change after the tap |
+EXPLORER_REPORT | استرجاع نسخة (x-23) | dead-tap | gesture "GestureDetector" | no route, text or state change after the tap |
+EXPLORER_REPORT | عن زغلول (x-29) | dead-end | عن زغلول | a screen stayed open after going back; went Home |
+EXPLORER_REPORT | ملاحظة (x-41) | dead-tap | gesture "GestureDetector" | no route, text or state change after the tap |
+EXPLORER_REPORT | ربط تحويلة لنفسي (x-43) | dead-tap | gesture "GestureDetector" | no route, text or state change after the tap |
+EXPLORER_REPORT | مستني رأيك 👀 (x-57) | restore | مستني رأيك 👀 | the screen could not be reopened after its state changed |
+EXPLORER_REPORT | اطلب دعم بنكك (x-60) | restore | اطلب دعم بنكك | the screen could not be reopened after its state changed |
+EXPLORER_REPORT 
+EXPLORER_REPORT ## Allowed (expected, not counted)
+EXPLORER_REPORT 
+EXPLORER_REPORT | Screen | Kind | Where | Why it is expected |
+EXPLORER_REPORT |---|---|---|---|
+EXPLORER_REPORT | تشوف أنهي كروت؟ (x-02) | dead-tap | listtile "كل الكروت" | every card is already selected, so tapping "All cards" is a no-op |
+EXPLORER_REPORT | تشوف أنهي كروت؟ (x-02) | dead-tap | checkbox "Checkbox" | every card is already selected, so tapping "All cards" is a no-op |
+EXPLORER_REPORT | العملة الأساسية (x-07) | restore | العملة الأساسية | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | يوم القبض (x-08) | restore | يوم القبض | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | يوم القبض (x-08) | restore | يوم القبض | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | يوم الميعاد نفسه (x-13) | restore | يوم الميعاد نفسه | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | اختيار الوقت (x-14) | dead-tap | inkwell "11" | a digit of the system time picker (the dial is the control) |
+EXPLORER_REPORT | اختيار الوقت (x-14) | dead-tap | inkwell "00" | a digit of the system time picker (the dial is the control) |
+EXPLORER_REPORT | زغلول بيقرا منين (x-15) | left-app | button "صلّحها" | opens the Android system settings (leaves the app on purpose) |
+EXPLORER_REPORT | زغلول بيقرا منين (x-15) | dead-tap | button "صلّحها" | opens the Android system settings (leaves the app on purpose) |
+EXPLORER_REPORT | دوّر في الرسايل القديمة (x-18) | dead-tap | listtile "آخر ٦ شهور" | "6 months" is already selected; the radio's own gesture area repeats the row tap |
+EXPLORER_REPORT | استرجاع نسخة (x-23) | dead-tap | listtile "Google Drive" | Google Drive is already the selected provider (radio) |
+EXPLORER_REPORT | المدة (x-34) | restore | المدة | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | التصنيف (x-35) | restore | التصنيف | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | الحساب (x-38) | restore | الحساب | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | تمسح الحركة دي؟ (x-40) | restore | تمسح الحركة دي؟ | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | ربط تحويلة لنفسي (x-43) | dead-tap | inkwell "⁨**** ج.م⁩ · Wallet / قبلها بـ ٥ أيام / سعر التحويل ≈ ⁨**** ج.م⁩ لكل USD" | the first candidate is preselected (the sheet keeps `_picked` null until a tap), so tapping it again changes nothing |
+EXPLORER_REPORT | تحب تسجل إيه؟ (x-58) | restore | تحب تسجل إيه؟ | a choice closes or changes this sheet or screen, so the control that opened it is gone (by design) |
+EXPLORER_REPORT | ? (x-59) | restore | ? | the detail screen is titled by its category emoji, which a category change replaces |
+EXPLORER_REPORT 
+EXPLORER_REPORT ## Screens
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 1. الرئيسية (`x-01`, Scaffold, depth 0)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 9. Tapped: 32.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "كل الكروت" -> opens "تشوف أنهي كروت؟" (BottomSheet)
+EXPLORER_REPORT - inkwell "icon U+e34d" -> opens "شارك إنجازك" (Scaffold)
+EXPLORER_REPORT - iconbutton "الإعدادات" -> opens "الإعدادات" (Scaffold)
+EXPLORER_REPORT - inkwell "USD" -> no change (already selected)
+EXPLORER_REPORT - inkwell "EGP" -> changed the screen
+EXPLORER_REPORT - inkwell "مسموحلك تصرف النهارده / ⁨⁨****⁩⁩ ج.م / فاضل ٦ أيام على القبض · ٢ نوفمبر – ١ ديسمبر" -> opens "الميزانية" (Scaffold)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - inkwell "مسموحلك تصرف النهارده / ⁨⁨٥٬٦١٦٫٤٤⁩⁩ ج.م / فاضل ٦ أيام على القبض · ٢ نوفمبر – ١ ديسمبر" -> opens "الميزانية" (seen)
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - inkwell "صرفت / ⁨****⁩" -> opens "الحركات" (Scaffold)
+EXPLORER_REPORT - inkwell "صرفت في نوفمبر / ⁨⁨****⁩⁩ USD / فاضل ٦ أيام على القبض · ٢ نوفمبر – ١ ديسمبر" -> opens "الميزانية" (seen)
+EXPLORER_REPORT - inkwell "حط ميزانية" -> opens "الميزانية" (seen)
+EXPLORER_REPORT - inkwell "عاش يا وحش! صارف أقل من خطتك لحد دلوقتي 👏" -> changed the screen
+EXPLORER_REPORT - inkwell "إيه يا عم، بتزغزغني؟ 😄" -> changed the screen
+EXPLORER_REPORT - inkwell "أنا هنا يا كبير، وفلوسك في عينيّا" -> changed the screen
+EXPLORER_REPORT - inkwell "كل قرش بتحوشه بيطلّعلي ريشة جديدة 🪶" -> changed the screen
+EXPLORER_REPORT - inkwell "الكابتن جاهز، وإنت القائد" -> changed the screen
+EXPLORER_REPORT - inkwell "اللي يحوش النهارده يتفسح بكره" -> changed the screen
+EXPLORER_REPORT - inkwell "أنا بقرا رسايل البنوك بس، الباقي مش شغلي" -> changed the screen
+EXPLORER_REPORT - inkwell "حمامة ولا محاسب؟ الاتنين!" -> changed the screen
+EXPLORER_REPORT - inkwell "جناحي سريع وحساباتي مظبوطة" -> changed the screen
+EXPLORER_REPORT - inkwell "عايز تعرف فلوسك راحت فين؟ افتح الحسبة" -> changed the screen
+EXPLORER_REPORT - inkwell "أنا بحسب والدهب بيلمع، وإنت بتحوّش" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - inkwell "حركتين مستنيين رأيك 👀" -> opens "مستني رأيك 👀" (Scaffold)
+EXPLORER_REPORT - inkwell "🛒 / Talabat / Cash · ٢٢ نوفمبر" -> opens "🛒" (seen)
+EXPLORER_REPORT - inkwell "🏠 / Spinneys / Dollar account ⁦•••• 9876⁩ · ٢١ نوفمبر" -> opens "🏠" (seen)
+EXPLORER_REPORT - inkwell "🛍️ / Careem / Credit card ••4455 ⁦•••• 4455⁩ · ٢٠ نوفمبر" -> opens "🛍️" (Scaffold)
+EXPLORER_REPORT - inkwell "💳 / Breadfast / Wallet · ١٩ نوفمبر" -> opens "💳" (seen)
+EXPLORER_REPORT - inkwell "📺 / Cilantro / Cash · ١٩ نوفمبر" -> opens "📺" (seen)
+EXPLORER_REPORT - inkwell "💊 / Fawry / Debit ••1234 ⁦•••• 1234⁩ · ١٨ نوفمبر" -> opens "💊" (seen)
+EXPLORER_REPORT - inkwell "🎓 / Metro Market / Dollar account ⁦•••• 9876⁩ · ١٧ نوفمبر" -> opens "🎓" (seen)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 2. تشوف أنهي كروت؟ (`x-02`, BottomSheet, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 13. Tapped: 13.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "كل الكروت" -> NOTHING HAPPENED
+EXPLORER_REPORT - checkbox "Checkbox" -> NOTHING HAPPENED
+EXPLORER_REPORT - listtile "Debit ••1234 ⁦•••• 1234⁩ / ديبت" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Credit card ••4455 ⁦•••• 4455⁩ / كريدت" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Wallet / محفظة" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Cash / كاش" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "Dollar account ⁦•••• 9876⁩ / حساب بنك" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "تمام" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 3. شارك إنجازك (`x-03`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 3.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "EGP" -> no change (already selected)
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "icon U+e16a" -> closed Scaffold
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 4. الإعدادات (`x-04`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 9. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "زغلول جولد / إنت على الباقة المجانية" -> opens "استرجع مشترياتي" (Scaffold)
+EXPLORER_REPORT - inkwell "التفضيلات" -> opens "التفضيلات" (Scaffold)
+EXPLORER_REPORT - inkwell "جولد وحسابك" -> opens "جولد وحسابك" (Scaffold)
+EXPLORER_REPORT - inkwell "التنبيهات" -> opens "التنبيهات" (Scaffold)
+EXPLORER_REPORT - inkwell "زغلول بيقرا منين / كله شغال" -> opens "زغلول بيقرا منين" (Scaffold)
+EXPLORER_REPORT - inkwell "التصنيفات" -> opens "التصنيفات" (Scaffold)
+EXPLORER_REPORT - inkwell "نسخة احتياطية / لسه مفيش نسخة" -> opens "نسخة احتياطية" (Scaffold)
+EXPLORER_REPORT - inkwell "إكسيل وكشوف البنوك" -> opens "إكسيل وكشوف البنوك" (Scaffold)
+EXPLORER_REPORT - inkwell "خصوصيتك" -> opens "خصوصيتك" (Scaffold)
+EXPLORER_REPORT - inkwell "عن زغلول" -> opens "عن زغلول" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 5. استرجع مشترياتي (`x-05`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "icon U+e16a" -> closed Scaffold
+EXPLORER_REPORT - button "استرجع مشترياتي" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 6. التفضيلات (`x-06`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 8. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "عربي" -> no change (already selected)
+EXPLORER_REPORT - inkwell "العملة الأساسية / EGP" -> opens "العملة الأساسية" (BottomSheet)
+EXPLORER_REPORT - inkwell "العملة الأساسية / USD" -> opens "العملة الأساسية" (seen)
+EXPLORER_REPORT - listtile "اعرض مجموع تقريبي (≈) / بيتحسب بسعر تقريبي ومكتوب عليه كده. مفيش حاجة بتتحوّل فعلاً." -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - inkwell "يوم القبض / أول الشهر" -> opens "يوم القبض" (BottomSheet)
+EXPLORER_REPORT - inkwell "يوم القبض / يوم ٢" -> opens "يوم القبض" (seen)
+EXPLORER_REPORT - inkwell "مرتبي / ضيفه وزغلول يتابعه معاك" -> opens "مرتبي" (BottomSheet)
+EXPLORER_REPORT - listtile "قفل التطبيق" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 7. العملة الأساسية (`x-07`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 10. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "EGP" -> closed BottomSheet
+EXPLORER_REPORT - inkwell "USD" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 8. يوم القبض (`x-08`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 27. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - button "١" -> closed BottomSheet
+EXPLORER_REPORT - button "٢" -> opens "تغيّر يوم القبض في نص الشهر؟" (Dialog)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 9. تغيّر يوم القبض في نص الشهر؟ (`x-09`, Dialog, depth 4)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - button "إلغاء" -> closed Dialog
+EXPLORER_REPORT - button "تمام" -> closed Dialog
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 10. مرتبي (`x-10`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 15. Tapped: 15 (capped).
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "EGP" -> changed the screen
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "SAR" -> changed the screen
+EXPLORER_REPORT - inkwell "EUR" -> changed the screen
+EXPLORER_REPORT - inkwell "AED" -> changed the screen
+EXPLORER_REPORT - inkwell "QAR" -> changed the screen
+EXPLORER_REPORT - inkwell "KWD" -> changed the screen
+EXPLORER_REPORT - inkwell "BHD" -> changed the screen
+EXPLORER_REPORT - inkwell "GBP" -> changed the screen
+EXPLORER_REPORT - inkwell "INR" -> changed the screen
+EXPLORER_REPORT - inkwell "الكاش" -> no change (already selected)
+EXPLORER_REPORT - inkwell "Debit ••1234 1234" -> changed the screen
+EXPLORER_REPORT - inkwell "Credit card ••4455 4455" -> changed the screen
+EXPLORER_REPORT - inkwell "Wallet" -> changed the screen
+EXPLORER_REPORT - inkwell "Cash" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 11. جولد وحسابك (`x-11`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 1. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "كمّل بحساب Google" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 12. التنبيهات (`x-12`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 17. Tapped: 21.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "تنبيهات الميزانية" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - listtile "لما الصرف يزيد" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - listtile "الأقساط والفواتير" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - inkwell "قبلها بـ ٣ أيام" -> opens "يوم الميعاد نفسه" (BottomSheet)
+EXPLORER_REPORT - inkwell "يوم الميعاد نفسه" -> opens "يوم الميعاد نفسه" (seen)
+EXPLORER_REPORT - listtile "حركة اتسجلت مرتين" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - listtile "فواتير اتضافت لوحدها" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - listtile "مشاكل النسخة الاحتياطية" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - listtile "ملخص الأسبوع / كل جمعة الصبح" -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - listtile "ساعات الهدوء / من ١١:٠٠ م لحد ٨:٠٠ ص" -> changed the screen
+EXPLORER_REPORT - listtile "ساعات الهدوء" -> changed the screen
+EXPLORER_REPORT - inkwell "١١:٠٠ م" -> opens "اختيار الوقت" (Dialog)
+EXPLORER_REPORT - inkwell "٨:٠٠ ص" -> opens "اختيار الوقت" (seen)
+EXPLORER_REPORT - listtile "اخفي المبالغ على شاشة القفل / التنبيه بيوصل من غير مبلغ ولا اسم تاجر." -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 13. يوم الميعاد نفسه (`x-13`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "يوم الميعاد نفسه" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 14. اختيار الوقت (`x-14`, Dialog, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 8.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "11" -> NOTHING HAPPENED
+EXPLORER_REPORT - inkwell "00" -> NOTHING HAPPENED
+EXPLORER_REPORT - inkwell "ص" -> changed the screen
+EXPLORER_REPORT - inkwell "م" -> changed the screen
+EXPLORER_REPORT - iconbutton "التبديل إلى وضع "إدخال النص"" -> changed the screen
+EXPLORER_REPORT - iconbutton "التبديل إلى وضع "منتقي قُرص الساعة"" -> changed the screen
+EXPLORER_REPORT - button "الإلغاء" -> closed Dialog
+EXPLORER_REPORT - button "حسنًا" -> closed Dialog
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 15. زغلول بيقرا منين (`x-15`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 6. Tapped: 6.
+EXPLORER_REPORT 
+EXPLORER_REPORT - button "صلّحها" -> left the app
+EXPLORER_REPORT - inkwell "ابعت أو الزق رسالة" -> opens "إزاي تبعت رسالة لزغلول" (BottomSheet)
+EXPLORER_REPORT - inkwell "متتابعش كارت أو بنك" -> opens "متتابعش كارت أو بنك" (BottomSheet)
+EXPLORER_REPORT - inkwell "دوّر في الرسايل القديمة تاني" -> opens "دوّر في الرسايل القديمة" (BottomSheet)
+EXPLORER_REPORT - inkwell "البنوك اللي زغلول بيفهمها" -> opens "البنوك اللي زغلول بيفهمها" (Scaffold)
+EXPLORER_REPORT - inkwell "قوالب رسايل خاصة بيك / جولد" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 16. إزاي تبعت رسالة لزغلول (`x-16`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 0. Tapped: 0.
+EXPLORER_REPORT 
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 17. متتابعش كارت أو بنك (`x-17`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 11. Tapped: 7.
+EXPLORER_REPORT 
+EXPLORER_REPORT - gesture "البنك العربي الأفريقي الدولي / البنك الزراعي المصري / البنك الأهلي الكويتي مصر" -> changed the screen
+EXPLORER_REPORT - inkwell "البنك العربي الأفريقي الدولي" -> changed the screen
+EXPLORER_REPORT - listtile "رسايل البنك" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - listtile "إشعارات التطبيقات" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "تمام" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 18. دوّر في الرسايل القديمة (`x-18`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 9. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "آخر ٦ شهور" -> NOTHING HAPPENED
+EXPLORER_REPORT - gesture "GestureDetector" -> NOTHING HAPPENED
+EXPLORER_REPORT - listtile "آخر ١٢ شهر" -> changed the screen
+EXPLORER_REPORT - gesture "GestureDetector" -> NOTHING HAPPENED
+EXPLORER_REPORT - listtile "آخر ١٨ شهر" -> changed the screen
+EXPLORER_REPORT - gesture "GestureDetector" -> NOTHING HAPPENED
+EXPLORER_REPORT - listtile "آخر ٢٤ شهر" -> changed the screen
+EXPLORER_REPORT - gesture "GestureDetector" -> NOTHING HAPPENED
+EXPLORER_REPORT - inkwell "ابدأ" -> changed the screen
+EXPLORER_REPORT - inkwell "تمام" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 19. البنوك اللي زغلول بيفهمها (`x-19`, Scaffold, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 0. Tapped: 0.
+EXPLORER_REPORT 
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 20. التصنيفات (`x-20`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 9. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "التصنيفات" -> no change (already selected)
+EXPLORER_REPORT - inkwell "القواعد" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 21. نسخة احتياطية (`x-21`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 4. Tapped: 4.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "نسخ تلقائي / النسخ التلقائي مع جولد / جولد" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT - inkwell "النسخ المحفوظة / جولد بيحتفظ بخمس نسخ / جولد" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT - inkwell "كلمة سر النسخة / غيّر" -> opens "غيّر كلمة سر النسخة" (BottomSheet)
+EXPLORER_REPORT - inkwell "استرجاع نسخة" -> opens "استرجاع نسخة" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 22. غيّر كلمة سر النسخة (`x-22`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 4. Tapped: 6.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "فاهم إنها مش بتترجّع" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - button "اعرض" -> changed the screen
+EXPLORER_REPORT - button "اخفي" -> changed the screen
+EXPLORER_REPORT - inkwell "احفظ" -> changed the screen
+EXPLORER_REPORT - listtile "فاهم إنها مش بتترجّع / علّم إنك فاهم الأول" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 23. استرجاع نسخة (`x-23`, Scaffold, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 3. Tapped: 4.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "Google Drive" -> NOTHING HAPPENED
+EXPLORER_REPORT - gesture "GestureDetector" -> NOTHING HAPPENED
+EXPLORER_REPORT - inkwell "كمّل" -> changed the screen
+EXPLORER_REPORT - inkwell "ابدأ من جديد" -> closed Scaffold
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 24. إكسيل وكشوف البنوك (`x-24`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 4. Tapped: 7.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "icon U+e15e" -> closed Scaffold
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - inkwell "CSV" -> no change (already selected)
+EXPLORER_REPORT - inkwell "Excel" -> changed the screen
+EXPLORER_REPORT - inkwell "صدّر" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT - inkwell "ضيف كشف حساب / ضيف شهور فاتت مرة واحدة. الملف بيتقرا على موبايلك بس، ومش بيتبعت لأي حد." -> opens "ضيف كشف حساب" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 25. ضيف كشف حساب (`x-25`, Scaffold, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 5. Tapped: 7.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "icon U+e15e" -> closed Scaffold
+EXPLORER_REPORT - inkwell "CIB / CIB / PDF من الموبايل أو الإيميل" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT - inkwell "NBE / البنك الأهلي / PDF" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT - inkwell "BM / بنك مصر / PDF" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT - inkwell "QNB / QNB / PDF" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT - inkwell "إزاي أنزّل الكشف؟" -> opens "إزاي أنزّل الكشف؟" (BottomSheet)
+EXPLORER_REPORT - inkwell "ملف زغلول CSV / نسخة إنت صدرتها قبل كده" -> opens "استرجع مشترياتي" (seen)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 26. إزاي أنزّل الكشف؟ (`x-26`, BottomSheet, depth 4)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 0. Tapped: 0.
+EXPLORER_REPORT 
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 27. خصوصيتك (`x-27`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 8. Tapped: 9.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "رقم عشوائي بيتأكد بيه السيرفر من الوقت، ومفيهوش أي حاجة عنك." -> changed the screen
+EXPLORER_REPORT - listtile "لو الدعم ربط الجولد بحساب، موبايلك اللي اشتريت عليه بيتبلّغ." -> changed the screen
+EXPLORER_REPORT - listtile "لما تمسح حسابك، بنمسح كل حاجة، وأثر الدعم بيتمسح بعد سنة." -> changed the screen
+EXPLORER_REPORT - listtile "ساعد في تحسين قايمة التجار / لو شغّلتها، بنبعت اسم التاجر والتصنيف اللي اخترته بس." -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - inkwell "بالظبط إيه اللي بيتبعت؟" -> opens "بالظبط إيه اللي بيتبعت؟" (Dialog)
+EXPLORER_REPORT - listtile "التعرّف على الصوت أونلاين / بس لو تليفونك مش بيعرف يسمعك من غير نت. الصوت بيروح جوجل أو أبل، مش زغلول." -> changed the screen
+EXPLORER_REPORT - switch "Switch" -> changed the screen
+EXPLORER_REPORT - inkwell "قفل التطبيق" -> opens "التفضيلات" (seen)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 28. بالظبط إيه اللي بيتبعت؟ (`x-28`, Dialog, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 0. Tapped: 0.
+EXPLORER_REPORT 
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 29. عن زغلول (`x-29`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "تراخيص المصدر المفتوح" -> opens "التراخيص" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 30. التراخيص (`x-30`, Scaffold, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 1. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - listtile "IBM Plex Sans Arabic / ترخيص واحد" -> opens "IBM Plex Sans Arabic" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 31. IBM Plex Sans Arabic (`x-31`, Scaffold, depth 4)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 0. Tapped: 0.
+EXPLORER_REPORT 
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 32. الميزانية (`x-32`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 6. Tapped: 5.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "EGP" -> no change (already selected)
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "حط ميزانية" -> opens "الميزانية" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 33. الحركات (`x-33`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 14. Tapped: 29.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "كل الكروت" -> opens "تشوف أنهي كروت؟" (seen)
+EXPLORER_REPORT - inkwell "شهر المرتب ده" -> opens "المدة" (BottomSheet)
+EXPLORER_REPORT - inkwell "icon U+e16a" -> changed the screen
+EXPLORER_REPORT - inkwell "المدة" -> opens "المدة" (seen)
+EXPLORER_REPORT - inkwell "التصنيف" -> opens "التصنيف" (BottomSheet)
+EXPLORER_REPORT - inkwell "EGP" -> changed the screen
+EXPLORER_REPORT - inkwell "icon U+e16a" -> changed the screen
+EXPLORER_REPORT - inkwell "USD" -> changed the screen
+EXPLORER_REPORT - inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · ١٠:١٤ م · بإيدك" -> opens "🏠" (Scaffold)
+EXPLORER_REPORT - inkwell "🛒 / Carrefour Maadi / CIB ⁦•••• 1234⁩ · ٢:١٤ ص · بإيدك" -> opens "🛒" (Scaffold)
+EXPLORER_REPORT - inkwell "🍔 / Uber / NBE ⁦•••• 4455⁩ · ١:١٤ ص · بإيدك" -> opens "🍔" (Scaffold)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - button "اختار" -> changed the screen
+EXPLORER_REPORT - inkwell "Carrefour Maadi / CIB ⁦•••• 1234⁩ · ٢:١٤ ص · بإيدك / ⁨⁨-**** ج.م⁩⁩" -> changed the screen
+EXPLORER_REPORT - inkwell "Uber / NBE ⁦•••• 4455⁩ · ١:١٤ ص · بإيدك / ⁨⁨-**** ج.م⁩⁩" -> changed the screen
+EXPLORER_REPORT - iconbutton "إلغاء" -> changed the screen
+EXPLORER_REPORT - inkwell "• / Talabat / Cash · ١١:١٤ م · بإيدك" -> opens "•" (Scaffold)
+EXPLORER_REPORT - inkwell "💳 / Breadfast / Wallet · ٨:١٤ م · بإيدك" -> opens "💳" (Scaffold)
+EXPLORER_REPORT - inkwell "📺 / Cilantro / Cash · ٢:١٤ ص · بإيدك" -> opens "📺" (Scaffold)
+EXPLORER_REPORT - inkwell "💊 / Fawry / CIB ⁦•••• 1234⁩ · ١:١٤ ص · بإيدك" -> opens "💊" (Scaffold)
+EXPLORER_REPORT - inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · ١٢:١٤ ص · بإيدك" -> opens "🎓" (Scaffold)
+EXPLORER_REPORT - inkwell "🎬 / Salary / Wallet · ١١:١٤ م · بإيدك" -> opens "🎬" (Scaffold)
+EXPLORER_REPORT - inkwell "🎁 / Uber / Cash · ١٠:١٤ م · بإيدك" -> opens "🎁" (Scaffold)
+EXPLORER_REPORT - inkwell "🐷 / Vodafone / CIB ⁦•••• 1234⁩ · ٩:١٤ م · بإيدك" -> opens "🐷" (Scaffold)
+EXPLORER_REPORT - inkwell "💼 / Talabat / NBE ⁦•••• 4455⁩ · ٨:١٤ م · بإيدك" -> opens "💼" (Scaffold)
+EXPLORER_REPORT - inkwell "💵 / Spinneys / WISE ⁦•••• 9876⁩ · ٢:١٤ ص · بإيدك" -> opens "💵" (Scaffold)
+EXPLORER_REPORT - inkwell "🛒 / Breadfast / CIB ⁦•••• 1234⁩ · ١٢:١٤ ص · بإيدك" -> opens "🛒" (seen)
+EXPLORER_REPORT - inkwell "🍔 / Cilantro / NBE ⁦•••• 4455⁩ · ١١:١٤ م · بإيدك" -> opens "🍔" (seen)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 34. المدة (`x-34`, BottomSheet, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 4. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "شهر المرتب ده" -> closed BottomSheet
+EXPLORER_REPORT - inkwell "شهر المرتب اللي فات" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 35. التصنيف (`x-35`, BottomSheet, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 9. Tapped: 9.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "🛒 / خزين البيت والسوبرماركت" -> changed the screen
+EXPLORER_REPORT - inkwell "🍔 / أكل بره وكافيهات ودليفري" -> changed the screen
+EXPLORER_REPORT - inkwell "🚗 / مواصلات وبنزين وعربية" -> changed the screen
+EXPLORER_REPORT - inkwell "⚡ / فواتير وشحن ومرافق" -> changed the screen
+EXPLORER_REPORT - inkwell "🏠 / إيجار ومصاريف البيت" -> changed the screen
+EXPLORER_REPORT - inkwell "🛍️ / لبس وشوبينج وإلكترونيات" -> changed the screen
+EXPLORER_REPORT - inkwell "💳 / أقساط وجمعيات وكريدت" -> changed the screen
+EXPLORER_REPORT - inkwell "📺 / اشتراكات وتطبيقات" -> changed the screen
+EXPLORER_REPORT - inkwell "تمام" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 36. 🏠 (`x-36`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "إيجار ومصاريف البيت" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (Scaffold)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (Dialog)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (BottomSheet)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (BottomSheet)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (BottomSheet)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 37. عدّل الحركة (`x-37`, Scaffold, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 7.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "مصروف" -> no change (already selected)
+EXPLORER_REPORT - inkwell "دخل" -> changed the screen
+EXPLORER_REPORT - inkwell "التصنيف / إيجار ومصاريف البيت" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - inkwell "الحساب / Dollar account ⁦•••• 9876⁩" -> opens "الحساب" (BottomSheet)
+EXPLORER_REPORT - inkwell "إمتى / ٢١ نوفمبر ٢٠٢٦" -> opens "اختيار التاريخ" (Dialog)
+EXPLORER_REPORT - inkwell "icon U+e16a" -> closed Scaffold
+EXPLORER_REPORT - inkwell "احفظ" -> closed Scaffold
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 38. الحساب (`x-38`, BottomSheet, depth 4)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 5. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Debit ••1234 ⁦•••• 1234⁩ / ديبت · EGP" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 39. اختيار التاريخ (`x-39`, Dialog, depth 4)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 37. Tapped: 15 (capped).
+EXPLORER_REPORT 
+EXPLORER_REPORT - iconbutton "التبديل إلى الإدخال" -> changed the screen
+EXPLORER_REPORT - iconbutton "التبديل إلى التقويم" -> changed the screen
+EXPLORER_REPORT - iconbutton "الشهر السابق" -> changed the screen
+EXPLORER_REPORT - iconbutton "الشهر التالي" -> changed the screen
+EXPLORER_REPORT - inkwell "1" -> changed the screen
+EXPLORER_REPORT - inkwell "2" -> changed the screen
+EXPLORER_REPORT - inkwell "3" -> changed the screen
+EXPLORER_REPORT - inkwell "4" -> changed the screen
+EXPLORER_REPORT - inkwell "5" -> changed the screen
+EXPLORER_REPORT - inkwell "6" -> changed the screen
+EXPLORER_REPORT - inkwell "7" -> changed the screen
+EXPLORER_REPORT - inkwell "8" -> changed the screen
+EXPLORER_REPORT - inkwell "9" -> changed the screen
+EXPLORER_REPORT - inkwell "10" -> changed the screen
+EXPLORER_REPORT - inkwell "11" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 40. تمسح الحركة دي؟ (`x-40`, Dialog, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - button "إلغاء" -> closed Dialog
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 41. ملاحظة (`x-41`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 2.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "احفظ" -> closed BottomSheet
+EXPLORER_REPORT - gesture "GestureDetector" -> NOTHING HAPPENED
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 42. تقسيم العزومة (`x-42`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 4. Tapped: 4.
+EXPLORER_REPORT 
+EXPLORER_REPORT - iconbutton "شيل " -> changed the screen
+EXPLORER_REPORT - inkwell "ضيف حد" -> changed the screen
+EXPLORER_REPORT - inkwell "قسّم بالتساوي" -> changed the screen
+EXPLORER_REPORT - inkwell "احفظ" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 43. ربط تحويلة لنفسي (`x-43`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 3. Tapped: 3.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "⁨**** ج.م⁩ · Wallet / قبلها بـ ٥ أيام / سعر التحويل ≈ ⁨**** ج.م⁩ لكل USD" -> NOTHING HAPPENED
+EXPLORER_REPORT - gesture "GestureDetector" -> NOTHING HAPPENED
+EXPLORER_REPORT - inkwell "اربط" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 44. 🛒 (`x-44`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "خزين البيت والسوبرماركت" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / synthetic note" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 45. 🍔 (`x-45`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "أكل بره وكافيهات ودليفري" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 46. • (`x-46`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "اختار" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 47. 💳 (`x-47`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "أقساط وجمعيات وكريدت" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / synthetic note" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 48. 📺 (`x-48`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "اشتراكات وتطبيقات" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 49. 💊 (`x-49`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "صحة وأدوية وجيم" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 50. 🎓 (`x-50`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "تعليم ومدارس وكورسات" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 51. 🎬 (`x-51`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "فسح وسفر وخروجات" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - inkwell "دي فلوس راجعة عن…" -> opens "وزّعها على مصاريف" (BottomSheet)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 52. وزّعها على مصاريف (`x-52`, BottomSheet, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 15. Tapped: 15 (capped).
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "Carrefour Maadi / ٢٦ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "Uber / ٢٥ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "Vodafone / ٢٤ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "Talabat / ٢٣ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "Careem / ٢٠ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "Breadfast / ١٩ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT - checkbox "Checkbox" -> changed the screen
+EXPLORER_REPORT - inkwell "احفظ" -> changed the screen
+EXPLORER_REPORT - inkwell "Cilantro / ١٩ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT - inkwell "Fawry / ١٨ نوفمبر ٢٠٢٦ · ⁨-**** ج.م⁩" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 53. 🎁 (`x-53`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "عيلة وهدايا وصدقات" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 54. 🐷 (`x-54`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "تحويش ودهب واستثمار" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / synthetic note" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 55. 💼 (`x-55`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "مرتب ودخل وكاش باك" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 56. 💵 (`x-56`, Scaffold, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "كاش" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 57. مستني رأيك 👀 (`x-57`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 8. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "الكل ٢" -> no change (already selected)
+EXPLORER_REPORT - inkwell "تصنيف" -> changed the screen
+EXPLORER_REPORT - inkwell "رسايل جديدة" -> changed the screen
+EXPLORER_REPORT - listtile "شوف الرسالة الأصلية" -> changed the screen
+EXPLORER_REPORT - listtile "اخفي الرسالة الأصلية" -> changed the screen
+EXPLORER_REPORT - inkwell "اكتب التفاصيل" -> opens "تحب تسجل إيه؟" (BottomSheet)
+EXPLORER_REPORT - inkwell "خزين البيت والسوبرماركت" -> changed the screen
+EXPLORER_REPORT - inkwell "سيبها" -> changed the screen
+EXPLORER_REPORT - button "تراجع" -> changed the screen
+EXPLORER_REPORT - inkwell "اطلب دعم البنك ده" -> opens "اطلب دعم بنكك" (BottomSheet)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 58. تحب تسجل إيه؟ (`x-58`, BottomSheet, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 4. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "قولها / بصوتك في ثانيتين" -> opens "?" (Scaffold)
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 59. ? (`x-59`, Scaffold, depth 3)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 2. Tapped: 1.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "وافق" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 60. اطلب دعم بنكك (`x-60`, BottomSheet, depth 2)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 3. Tapped: 3.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "رسالة SMS" -> no change (already selected)
+EXPLORER_REPORT - inkwell "إشعار" -> changed the screen
+EXPLORER_REPORT - inkwell "ابعت" -> closed BottomSheet
+EXPLORER_REPORT 
+EXPLORER_REPORT ### 61. 🛍️ (`x-61`, Scaffold, depth 1)
+EXPLORER_REPORT 
+EXPLORER_REPORT Tappable: 7. Tapped: 10.
+EXPLORER_REPORT 
+EXPLORER_REPORT - inkwell "لبس وشوبينج وإلكترونيات" -> opens "التصنيف" (seen)
+EXPLORER_REPORT - inkwell "ملاحظة / ضيف ملاحظة" -> opens "ملاحظة" (seen)
+EXPLORER_REPORT - iconbutton "إظهار المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "إخفاء المبالغ" -> changed the screen
+EXPLORER_REPORT - iconbutton "عدّل" -> opens "عدّل الحركة" (seen)
+EXPLORER_REPORT - inkwell "icon U+e402" -> changed the screen
+EXPLORER_REPORT - inkwell "امسح" -> opens "تمسح الحركة دي؟" (seen)
+EXPLORER_REPORT - inkwell "تقسيم / فلوس راجعة من صحابك" -> opens "تقسيم العزومة" (seen)
+EXPLORER_REPORT - inkwell "دي تحويلة لنفسي" -> opens "ربط تحويلة لنفسي" (seen)
+EXPLORER_REPORT - listtile "إزاي زغلول قرا الرسالة" -> changed the screen
+EXPLORER_REPORT 
+EXPLORER_REPORT 
+11:52 +1: (tearDownAll)
+11:52 +1: All tests passed!
