@@ -71,12 +71,21 @@ class CycleRepository {
   }
 
   /// The cached totals of [cycle] (cold start: show these first), or null.
-  /// `pendingSpend` is not cached (zero here); it is only live. The
-  /// exchange figures are not cached either: they read as zero here.
+  /// `pendingSpend` is not cached (zero here); it is only live. FU-369: the
+  /// exchange figures are overlaid exactly like the live totals, so money in
+  /// and left do not jump when the live totals arrive.
   Future<Map<Currency, CycleTotals>?> cachedTotals(
     Cycle cycle, {
     String accountFilter = '*',
-  }) => _cached(cycle, accountFilter);
+  }) async {
+    final cached = await _cached(cycle, accountFilter);
+    if (cached == null) return null;
+    return _withExchanges(
+      cycle,
+      cached,
+      accounts: accountFilter == '*' ? const {} : {accountFilter},
+    );
+  }
 
   /// T-272: [cached] with the exchange figures of [cycle] read live from
   /// the exchange legs only (the cache has no column for them). A currency

@@ -213,6 +213,18 @@ void main() {
       expect(locked.secondaryText, '7 days to payday');
     });
 
+    test('FU-387: a line over the native max drops the hint, keeps payday', () {
+      final long = WidgetCopy(
+        setBudget: 'b',
+        perDay: (a) => '$a/day',
+        daysToPayday: (n, f) => '$f ${'x' * 110}',
+        openApp: 'o',
+      );
+      final s = buildWidgetSnapshot(input(ov: ov, others: ['USD'], copy: long));
+      expect(s.secondaryText, '7 ${'x' * 110}');
+      expect(s.secondaryTextByDay, everyElement(isNot(contains('USD'))));
+    });
+
     test('every rolled day line carries the hint, no amount in it', () {
       final s = buildWidgetSnapshot(input(ov: ov, others: ['USD', 'EUR']));
       expect(s.secondaryTextByDay, everyElement(contains('+ USD, EUR')));

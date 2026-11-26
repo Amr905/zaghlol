@@ -454,11 +454,38 @@ final class DriftIngestStore implements IngestStorePort {
         )
         .getSingle();
     return BalanceJumpFacts(
+      egpPerUnitE9: await _egpPerUnitE9(currency),
       previousMinor: prevMinor,
       countedEffectMinor: eff.read<int>('eff'),
       foreignCredit: foreign.read<int>('f') != 0,
     );
   });
+
+  /// FU-366: 1 [currency] in EGP (rate / 1e9), from the direct row or the
+  /// inverse of the EGP row; null when neither is stored.
+  Future<int?> _egpPerUnitE9(String currency) async {
+    if (currency == 'EGP') return null;
+    final r = await _db
+        .customSelect(
+          'SELECT base, quote, rate_e9 FROM fx_rates '
+          "WHERE (base = ?1 AND quote = 'EGP') "
+          "OR (base = 'EGP' AND quote = ?1) "
+          "ORDER BY (base = 'EGP') LIMIT 1",
+          variables: [Variable.withString(currency)],
+          readsFrom: {_db.fxRates},
+        )
+        .getSingleOrNull();
+    if (r == null) return null;
+    final rate = r.read<int>('rate_e9');
+    if (rate <= 0) return null;
+    if (r.read<String>('base') == currency) return rate;
+    final inv =
+        (BigInt.from(1000000000) * BigInt.from(1000000000)) ~/
+        BigInt.from(rate);
+    return inv > BigInt.zero && inv <= BigInt.from(9007199254740991)
+        ? inv.toInt()
+        : null;
+  }
 
   @override
   Future<int> updateTxn(String txnId, TxnPatch p, {required int atMs}) {

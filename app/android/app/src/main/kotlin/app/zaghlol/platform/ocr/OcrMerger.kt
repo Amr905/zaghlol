@@ -32,6 +32,9 @@ object OcrMerger {
     /** Needed only where the line overlaps a strong ML Kit line; PO photo: noise 0.00-0.56, real line 0.67. */
     const val STRONG_OVERLAP_CONFIDENCE = 0.60
 
+    /** Gate only (FU-377): share of the smaller height two boxes must share vertically to count as one row. */
+    const val GATE_ROW_OVERLAP = 0.3
+
     fun merge(latin: List<RawLine>?, arabic: List<RawLine>?): List<RawLine> {
         val l = latin?.filter { it.text.isNotBlank() }
         val a = arabic?.filter { it.text.isNotBlank() }
@@ -44,10 +47,28 @@ object OcrMerger {
         return merged.sortedWith(compareBy({ it.top }, { it.left }))
     }
 
-    /** Below [STRONG_OVERLAP_CONFIDENCE] a line must not sit on a strong ML Kit line. */
+    /**
+     * Below [STRONG_OVERLAP_CONFIDENCE] a line must not sit on a strong ML Kit line. The gate uses a
+     * looser test than the merge match (FU-377): noise that drifted vertically still overlaps by
+     * [GATE_ROW_OVERLAP] of the smaller height, so it counts; a real line on its own row does not.
+     */
     private fun passesOverlapGate(line: RawLine, latin: List<RawLine>): Boolean =
         line.confidence >= STRONG_OVERLAP_CONFIDENCE ||
-            latin.none { strongLatin(it.text) && overlap(it, line) >= OVERLAP }
+            latin.none { strongLatin(it.text) && sharesRow(it, line) }
+
+    private fun sharesRow(a: RawLine, b: RawLine): Boolean {
+        val w = minOf(a.right, b.right) - maxOf(a.left, b.left)
+        val h = minOf(a.bottom, b.bottom) - maxOf(a.top, b.top)
+        val smallerHeight = minOf(a.bottom - a.top, b.bottom - b.top)
+        if (w <= 0 || h <= 0 || smallerHeight <= 0) return false
+        return h.toDouble() / smallerHeight >= GATE_ROW_OVERLAP
+    }
+
+    /** A strong ML Kit amount line on the same box: its digits win over the Arabic line's (FU-376). */
+    private fun strongAmountOverlaps(arabicLine: RawLine, latin: List<RawLine>): Boolean =
+        latin.any {
+            strongLatin(it.text) && digitTokens(it.text).isNotEmpty() && overlap(it, arabicLine) >= OVERLAP
+        }
 
     private fun mergeBoth(latin: List<RawLine>, arabic: List<RawLine>): List<RawLine> {
         val match = latin.map { line ->
@@ -62,6 +83,7 @@ object OcrMerger {
         val arabicText = arabic.map { it.text }.toTypedArray()
         val appended = HashSet<Int>()
         val digitsWin = HashMap<Int, MutableList<String>>()
+        val strongKept = HashMap<Int, MutableList<String>>()
         val kept = ArrayList<RawLine>()
         for ((i, line) in latin.withIndex()) {
             val idx = match[i]
@@ -70,6 +92,7 @@ object OcrMerger {
                 idx in replacing -> {
                     if (strongLatin(line.text)) {
                         kept.add(line)
+                        strongKept.getOrPut(idx) { ArrayList() }.add(line.text)
                     } else {
                         val d = digitTokens(line.text)
                         if (d.isNotEmpty()) digitsWin.getOrPut(idx) { ArrayList() }.addAll(d)
@@ -80,11 +103,14 @@ object OcrMerger {
                         emptyList()
                     } else {
                         arabicWords(arabicText[idx], latinText[i]) +
-                            if (digitTokens(line.text).isEmpty()) arabicAmountTokens(arabicText[idx]) else emptyList()
+                            if (digitTokens(line.text).isEmpty() && !strongAmountOverlaps(arabic[idx], latin)) {
+                                arabicAmountTokens(arabicText[idx])
+                            } else {
+                                emptyList()
+                            }
                     }
-                    val words = extra
                     appended.add(idx)
-                    kept.add(if (words.isEmpty()) line else line.copy(text = line.text + " " + words.joinToString(" ")))
+                    kept.add(if (extra.isEmpty()) line else line.copy(text = line.text + " " + extra.joinToString(" ")))
                 }
             }
         }
@@ -94,7 +120,22 @@ object OcrMerger {
         }
         arabic.forEachIndexed { i, line ->
             val overlapped = match.any { it == i }
-            if (!overlapped || i in replacing) kept.add(line.copy(text = arabicText[i]))
+            if (!overlapped) {
+                kept.add(line.copy(text = arabicText[i]))
+            } else if (i in replacing) {
+                // FU-371: words a kept strong ML Kit line already has must not appear twice.
+                // Whole-token equality only (a substring match lost real amounts: "436" inside "1436").
+                val strongTokens = strongKept[i].orEmpty()
+                    .flatMap { it.split(WHITESPACE) }
+                    .map { normalizeDigits(it.trim(':', ')', '(', ',', '.')) }
+                    .filter { it.isNotEmpty() }
+                    .toSet()
+                val text = arabicText[i].split(WHITESPACE).filter { t ->
+                    val bare = normalizeDigits(t.trim(':', ')', '(', ',', '.'))
+                    bare.isEmpty() || bare !in strongTokens
+                }.joinToString(" ")
+                if (text.isNotBlank()) kept.add(line.copy(text = text))
+            }
         }
         return kept
     }

@@ -42,11 +42,7 @@ final exportServiceProvider = FutureProvider<ExportService>((ref) async {
   return ExportService(
     repo,
     aiStates: DriftAiSuggestionStates(db),
-    pairKinds: (ids) async => {
-      for (final id in ids) ...{
-        if (await pairs.byId(id) case final p?) id: p.kind,
-      },
-    },
+    pairKinds: pairs.kindsByIds,
   );
 }, name: 'exportServiceProvider');
 

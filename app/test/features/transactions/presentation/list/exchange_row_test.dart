@@ -125,6 +125,11 @@ void main() {
         await tester.longPress(find.byType(TxnExchangeRow));
         await tester.pumpAndSettle();
         expect(selection(tester).ids, {'xo', 'xi'});
+        // FU-390: the pair counts once in the title.
+        expect(
+          find.text(locale == const Locale('en') ? '1 selected' : 'اخترت ١'),
+          findsOneWidget,
+        );
         expect(enabled(tester, 'bulk-category'), isFalse);
         expect(enabled(tester, 'bulk-account'), isFalse);
         expect(enabled(tester, 'bulk-delete'), isTrue);
