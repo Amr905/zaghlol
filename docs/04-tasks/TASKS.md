@@ -389,7 +389,7 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-322](tasks/T-322.md) | LLM contracts: plan schema, categorise result schema, shared vectors, API contract, fake fixtures | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | — | B | 90 | DONE (batch 90) |
 | [T-323](tasks/T-323.md) | Backend migration: LLM quota, spend, remote config, categorise tables | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | — | B | 90 | DONE (batch 90) |
 | [T-324](tasks/T-324.md) | ARB strings: copy-deck Part 4 (105 keys) | ASK-LLM | Low | Haiku | boilerplate-engineer | — | U | 90 | DONE (batch 90) |
-| [T-325](tasks/T-325.md) | Given-name, honorific and business-word lists (assets) | LLM-CAT | Low | Haiku | boilerplate-engineer | — | P | 92 | TODO |
+| [T-325](tasks/T-325.md) | Given-name, honorific and business-word lists (assets) | LLM-CAT | Low | Haiku | boilerplate-engineer | — | P | 92 | DONE (batch 92) |
 | [T-326](tasks/T-326.md) | What-if and saving-suggestion calculators (pure) | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | — | Q | 90 | DONE (batch 90) |
 | [T-327](tasks/T-327.md) | Investment illustrations and D-93 bands (pure) | ASK-LLM / D-93 | High (C4) | Sonnet | flutter-core-engineer | — | Q | 91 | DONE (batch 91) |
 | [T-328](tasks/T-328.md) | Client scrub and reference masker (pure) | ASK-LLM / D-92 | High (C4) | Sonnet | parsing-engine-engineer | — | P | 90 | DONE (batch 90) |
@@ -398,14 +398,14 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-331](tasks/T-331.md) | Dart plan types, phone validator, template grammar, number words | ASK-LLM | High | Sonnet | parsing-engine-engineer | T-322 | P | 91 | DONE (batch 91) |
 | [T-332](tasks/T-332.md) | LLM gateway core, `Sensitive<T>`, OpenAI adapter, fake provider, resilience | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-322 | B | 91 | DONE (batch 91) |
 | [T-333](tasks/T-333.md) | Provider API keys from KMS secret stores | ASK-LLM | High (C4) | Opus | backend-engineer | T-332 | B | 93 | TODO |
-| [T-334](tasks/T-334.md) | LLM flags, remote config, admin endpoint, ops CLI, sync `config` block (backend) | ASK-LLM / LLM-CAT | Medium | Sonnet | backend-engineer | T-322, T-323 | B | 92 | TODO |
-| [T-335](tasks/T-335.md) | LLM quota store: Cairo month, tiers, account, idempotent commit, purge | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | T-323 | B | 92 | BUILT |
+| [T-334](tasks/T-334.md) | LLM flags, remote config, admin endpoint, ops CLI, sync `config` block (backend) | ASK-LLM / LLM-CAT | Medium | Sonnet | backend-engineer | T-322, T-323 | B | 92 | DONE (batch 92) |
+| [T-335](tasks/T-335.md) | LLM quota store: Cairo month, tiers, account, idempotent commit, purge | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | T-323 | B | 92 | DONE (batch 92) |
 | [T-336](tasks/T-336.md) | Attestation for LLM endpoints: binding, staged modes, production guard | ASK-LLM / LLM-CAT | High (C4) | Opus | backend-engineer | T-322 | B | 93 | TODO |
-| [T-337](tasks/T-337.md) | App: LLM flags and remote config store | ASK-LLM / LLM-CAT | Medium | Sonnet | flutter-core-engineer | T-322 | A | 92 | TODO |
+| [T-337](tasks/T-337.md) | App: LLM flags and remote config store | ASK-LLM / LLM-CAT | Medium | Sonnet | flutter-core-engineer | T-322 | A | 92 | DONE (batch 92) |
 | [T-338](tasks/T-338.md) | Vertex Gemini and Anthropic adapters | ASK-LLM | High | Sonnet | backend-engineer | T-332 | B | 94 | TODO |
 | [T-339](tasks/T-339.md) | Spend ledger, USD 10 cap, 80 % alert, pause, metrics | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-332, T-323, T-334 | B | 94 | TODO |
 | [T-340](tasks/T-340.md) | App core/llm: consent, quota snapshot, attestation binding, gateway client | ASK-LLM / LLM-CAT | High (C4) | Opus | flutter-core-engineer | T-322, T-337, T-341 | A | 93 | TODO |
-| [T-341](tasks/T-341.md) | Native: Play Integrity standard request + App Attest assertion over a hash | ASK-LLM / LLM-CAT | High (C4) | Sonnet | native-platform-engineer | — | N | 92 | BUILT |
+| [T-341](tasks/T-341.md) | Native: Play Integrity standard request + App Attest assertion over a hash | ASK-LLM / LLM-CAT | High (C4) | Sonnet | native-platform-engineer | — | N | 92 | DONE (batch 92) |
 | [T-342](tasks/T-342.md) | Plan executor over repositories, per currency | ASK-LLM | High | Sonnet | flutter-core-engineer | T-331, T-326, T-327 | A | 93 | TODO |
 | [T-343](tasks/T-343.md) | Ask flow orchestrator with outgoing-request proofs | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | T-328, T-331, T-340, T-342 | A | 94 | TODO |
 | [T-344](tasks/T-344.md) | Template filler and app answer templates | ASK-LLM | Medium | Sonnet | flutter-core-engineer | T-331, T-324, T-342 | A | 95 | TODO |
