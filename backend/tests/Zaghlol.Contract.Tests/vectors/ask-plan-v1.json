@@ -1,0 +1,3025 @@
+{
+  "$comment": "Synthetic vectors for ask-plan/1 (docs/03-technical/ask-llm.md section 2.4). plans[].plan is the model's reply; plans[].sent is the text sent to the backend (placeholders already inserted); plans[].expect.outcome 'accept' means steps 1-5 pass (a template, if any, is judged by the templates section); 'fallback' means PL-FALLBACK with counted=false and the failing step and reason code. Step 1 = backend/contracts/ask-plan-v1.schema.json. All data is synthetic.",
+  "version": 1,
+  "planVersion": 1,
+  "normalisation": {
+    "rule": "norm(s) = foldKey(s) from packages/zaghlol_parsing/lib/normalize/text_normalizer.dart: Arabic-Indic and extended digits to ASCII, U+066B to '.', U+066C to ',', odd spaces to one space (runs collapsed, trimmed), invisible and direction marks removed, tatweel and harakat removed, alef variants to alef, alef maksura to yeh, teh marbuta to heh, ASCII lowercase. Step 3: norm(mention) is an ordinal substring of norm(sent). Step 4 numbers: in norm(sent), a number is [0-9]+(,[0-9]{3})*(.[0-9]+)? with commas removed; equality is decimal equality (500 = 500.00). Step 2/ref: the ref string occurs verbatim (no folding) in the sent text.",
+    "cases": [
+      {
+        "id": "case-insensitive",
+        "sent": "how much on TALABAT?",
+        "mention": "Talabat",
+        "expect": true
+      },
+      {
+        "id": "alef-hamza",
+        "sent": "صرفت على أبو طارق",
+        "mention": "ابو طارق",
+        "expect": true
+      },
+      {
+        "id": "alef-hamza-reverse",
+        "sent": "صرفت على ابو طارق",
+        "mention": "أبو طارق",
+        "expect": true
+      },
+      {
+        "id": "teh-marbuta",
+        "sent": "كام على مكتبة النور؟",
+        "mention": "مكتبه النور",
+        "expect": true
+      },
+      {
+        "id": "alef-maksura",
+        "sent": "كام على مستشفى الشفاء؟",
+        "mention": "مستشفي الشفاء",
+        "expect": true
+      },
+      {
+        "id": "tatweel-in-sent",
+        "sent": "كام على كــافيه؟",
+        "mention": "كافيه",
+        "expect": true
+      },
+      {
+        "id": "harakat-in-sent",
+        "sent": "كام على كَافِيه؟",
+        "mention": "كافيه",
+        "expect": true
+      },
+      {
+        "id": "zero-width-in-sent",
+        "sent": "how much at tal​abat?",
+        "mention": "talabat",
+        "expect": true
+      },
+      {
+        "id": "double-space",
+        "sent": "how much at   zawya   coffee?",
+        "mention": "zawya coffee",
+        "expect": true
+      },
+      {
+        "id": "inside-word",
+        "sent": "how much on Talabat's orders",
+        "mention": "Talabat",
+        "expect": true
+      },
+      {
+        "id": "different-word",
+        "sent": "how much on groceries?",
+        "mention": "Carrefour",
+        "expect": false
+      },
+      {
+        "id": "word-order",
+        "sent": "صرفت على ابو طارق",
+        "mention": "طارق ابو",
+        "expect": false
+      },
+      {
+        "id": "split-word",
+        "sent": "how much at tal abat",
+        "mention": "talabat",
+        "expect": false
+      },
+      {
+        "id": "empty-after-fold",
+        "sent": "how much?",
+        "mention": "​",
+        "expect": false
+      }
+    ]
+  },
+  "currencyExponents": {
+    "default": 2,
+    "3": [
+      "KWD",
+      "BHD",
+      "OMR",
+      "JOD",
+      "TND",
+      "LYD",
+      "IQD"
+    ],
+    "0": [
+      "JPY",
+      "KRW"
+    ]
+  },
+  "numberWords": {
+    "note": "Minimum bundled list; the phone may bundle more. Words are matched after foldKey, as whole words.",
+    "words": {
+      "ألف": "1000",
+      "الف": "1000",
+      "ميت": "100",
+      "مية": "100",
+      "مئة": "100",
+      "مليون": "1000000",
+      "thousand": "1000",
+      "hundred": "100",
+      "million": "1000000"
+    }
+  },
+  "registryAliases": {
+    "note": "A small slice of the bundled institution registry, enough for the plain-name vectors (step 2).",
+    "aliases": [
+      "cib",
+      "nbe",
+      "banque misr",
+      "بنك مصر",
+      "سي آي بي",
+      "الأهلي",
+      "فودافون كاش",
+      "wise"
+    ]
+  },
+  "templateBlanks": {
+    "note": "Blanks a template may use per plan (step 6). Plans not listed never use a model template (BR-LLM-04).",
+    "PL-SPEND": [
+      "target",
+      "period",
+      "amount",
+      "count"
+    ],
+    "PL-COMPARE": [
+      "target",
+      "period",
+      "periodB",
+      "amount",
+      "amountB",
+      "diff",
+      "pct"
+    ],
+    "PL-BREAKDOWN": [
+      "period",
+      "count"
+    ],
+    "PL-TOPN": [
+      "period",
+      "count"
+    ],
+    "PL-AVERAGE": [
+      "target",
+      "period",
+      "amount",
+      "count"
+    ],
+    "PL-INCOME": [
+      "period",
+      "amount"
+    ],
+    "PL-SAVED": [
+      "period",
+      "amount"
+    ],
+    "PL-BILLS-DUE": [
+      "count",
+      "amount",
+      "date"
+    ],
+    "PL-BUDGET-LEFT": [
+      "target",
+      "amount"
+    ],
+    "PL-SAFE-SPEND": [
+      "amount"
+    ],
+    "PL-BALANCE": [
+      "amount"
+    ],
+    "PL-WHATIF-CUT": [
+      "target",
+      "pct",
+      "monthly",
+      "total",
+      "months"
+    ],
+    "PL-WHATIF-SAVE": [
+      "monthly",
+      "total",
+      "months"
+    ]
+  },
+  "plans": [
+    {
+      "id": "valid-spend-card-ref",
+      "group": "data",
+      "lang": "ar",
+      "sent": "صرفت كام بكارت ⟦CARD_1⟧ الشهر ده؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": "⟦CARD_1⟧",
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-19/21"
+    },
+    {
+      "id": "valid-spend-slug-lastdays",
+      "group": "data",
+      "lang": "en",
+      "sent": "how much did I spend on groceries in the last 30 days?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "lastDays",
+            "o": 0,
+            "n": 30,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "groceries",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-spend-mention-substring",
+      "group": "data",
+      "lang": "en",
+      "sent": "how much on Talabat's orders last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "Talabat",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-07",
+      "note": "mention is a substring (not a whole token) of the sent text"
+    },
+    {
+      "id": "valid-spend-currency-filter",
+      "group": "data",
+      "lang": "en",
+      "sent": "how much did I spend in USD this month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": null,
+            "currency": "USD"
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-compare-dining",
+      "group": "data",
+      "lang": "en",
+      "sent": "Did I spend more on dining last month than the month before?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-COMPARE",
+        "p": {
+          "periodA": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "periodB": {
+            "k": "cycle",
+            "o": -2,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10 PL-COMPARE"
+    },
+    {
+      "id": "valid-breakdown-category",
+      "group": "data",
+      "lang": "ar",
+      "sent": "الفلوس راحت فين الشهر ده؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-BREAKDOWN",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "by": "category",
+          "limit": 5
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-topn-merchant-arabic-indic",
+      "group": "data",
+      "lang": "ar",
+      "sent": "إيه أكتر ٣ محلات صرفت فيهم؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-TOPN",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "of": "merchant",
+          "n": 3
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10.1"
+    },
+    {
+      "id": "valid-average-day",
+      "group": "data",
+      "lang": "ar",
+      "sent": "متوسط صرفي في اليوم الشهر اللي فات؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-AVERAGE",
+        "p": {
+          "per": "day",
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10 PL-AVERAGE"
+    },
+    {
+      "id": "valid-average-week-since-july",
+      "group": "data",
+      "lang": "en",
+      "sent": "avg spend per week on Talabat since July",
+      "plan": {
+        "v": 1,
+        "plan": "PL-AVERAGE",
+        "p": {
+          "per": "week",
+          "period": {
+            "k": "monthOfYear",
+            "o": 0,
+            "n": null,
+            "m": 7,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "Talabat",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10.1"
+    },
+    {
+      "id": "valid-income",
+      "group": "data",
+      "lang": "ar",
+      "sent": "دخلي كام الشهر اللي فات؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INCOME",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-saved",
+      "group": "data",
+      "lang": "en",
+      "sent": "How much did I save last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10 PL-SAVED"
+    },
+    {
+      "id": "valid-bills-due",
+      "group": "data",
+      "lang": "ar",
+      "sent": "إيه الفواتير اللي عليا الشهر الجاي؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-BILLS-DUE",
+        "p": {
+          "windowDays": 30
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-budget-left",
+      "group": "data",
+      "lang": "ar",
+      "sent": "كام فاضل في budget الأكل؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-BUDGET-LEFT",
+        "p": {
+          "slug": "dining"
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10.1"
+    },
+    {
+      "id": "valid-safe-spend",
+      "group": "data",
+      "lang": "en",
+      "sent": "how much can I safely spend per day?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAFE-SPEND",
+        "p": {},
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-balance-bank-ref",
+      "group": "data",
+      "lang": "ar",
+      "sent": "رصيدي في ⟦BANK_1⟧ كام؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-BALANCE",
+        "p": {
+          "ref": "⟦BANK_1⟧"
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-whatif-cut-percent",
+      "group": "what-if",
+      "lang": "ar",
+      "sent": "لو وفرت نص الأكل بره، هوفر كام في سنة؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "percent",
+            "percent": 50,
+            "amount": null,
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 3.2"
+    },
+    {
+      "id": "valid-whatif-cut-amount",
+      "group": "what-if",
+      "lang": "en",
+      "sent": "If I cut dining by 500 a month for 6 months",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "amount",
+            "percent": null,
+            "amount": "500",
+            "currency": null
+          },
+          "months": 6
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10 PL-WHATIF-CUT",
+      "note": "amount 500 occurs in the sent text"
+    },
+    {
+      "id": "valid-whatif-cut-arabic-indic-digits",
+      "group": "what-if",
+      "lang": "ar",
+      "sent": "لو قللت الأكل بره ٥٠٪ لمدة ١٢ شهر",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "percent",
+            "percent": 50,
+            "amount": null,
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-40..42"
+    },
+    {
+      "id": "valid-whatif-cut-kwd-three-decimals",
+      "group": "what-if",
+      "lang": "en",
+      "sent": "if I cut dining by 10.500 KWD a month for 3 months",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "amount",
+            "percent": null,
+            "amount": "10.500",
+            "currency": "KWD"
+          },
+          "months": 3
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "note": "KWD exponent 3 allows three decimals"
+    },
+    {
+      "id": "valid-whatif-save-thousands-separator",
+      "group": "what-if",
+      "lang": "en",
+      "sent": "If I save 1,000 every month for a year",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "1000",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "note": "1,000 in the text equals amount 1000"
+    },
+    {
+      "id": "valid-whatif-save-number-word",
+      "group": "what-if",
+      "lang": "ar",
+      "sent": "لو حوشت ألف جنيه كل شهر لمدة ٦ شهور؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "1000",
+            "currency": "EGP"
+          },
+          "months": 6
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-04",
+      "note": "ألف is a bundled number word worth 1000"
+    },
+    {
+      "id": "valid-whatif-save-arabic-indic-amount",
+      "group": "what-if",
+      "lang": "ar",
+      "sent": "لو وفرت ٥٠٠ في الشهر لمدة سنة",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "500",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-suggest",
+      "group": "suggest",
+      "lang": "ar",
+      "sent": "أوفر منين الشهر الجاي؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SUGGEST",
+        "p": {
+          "currency": null
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10 PL-SUGGEST"
+    },
+    {
+      "id": "valid-invest-saved-gold",
+      "group": "invest",
+      "lang": "ar",
+      "sent": "لو كنت حوشت اللي فضل الشهر اللي فات، كان يجيب كام جرام دهب؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "savedLastPeriod",
+            "whatIf": null,
+            "amount": null
+          },
+          "instruments": [
+            "gold"
+          ],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 3.4"
+    },
+    {
+      "id": "valid-invest-amount",
+      "group": "invest",
+      "lang": "en",
+      "sent": "what if I put 5000 EGP into dollars or a certificate for a year?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "amount",
+            "whatIf": null,
+            "amount": {
+              "amount": "5000",
+              "currency": "EGP"
+            }
+          },
+          "instruments": [
+            "usd",
+            "certificate"
+          ],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-invest-whatif-source",
+      "group": "invest",
+      "lang": "en",
+      "sent": "if I cut dining by half what would that buy in gold?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "whatIf",
+            "amount": null,
+            "whatIf": {
+              "target": {
+                "slug": "dining",
+                "ref": null,
+                "mention": null,
+                "currency": null
+              },
+              "mode": {
+                "kind": "percent",
+                "percent": 50,
+                "amount": null,
+                "currency": null
+              },
+              "months": 12
+            }
+          },
+          "instruments": [
+            "gold"
+          ],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-fallback-zakah",
+      "group": "fallback",
+      "lang": "en",
+      "sent": "how much zakah do I owe?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-FALLBACK",
+        "p": {
+          "reason": "zakah"
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10.1"
+    },
+    {
+      "id": "valid-fallback-unsupported",
+      "group": "fallback",
+      "lang": "en",
+      "sent": "what will the dollar rate be next year?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-FALLBACK",
+        "p": {
+          "reason": "unsupported"
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      }
+    },
+    {
+      "id": "valid-refuse-specific-pick",
+      "group": "refuse",
+      "lang": "en",
+      "sent": "Which Egyptian stock will double this year?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-REFUSE",
+        "p": {
+          "reason": "specificPick",
+          "selfHarm": false
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10 PL-REFUSE"
+    },
+    {
+      "id": "valid-refuse-off-topic",
+      "group": "refuse",
+      "lang": "en",
+      "sent": "write me a poem about football",
+      "plan": {
+        "v": 1,
+        "plan": "PL-REFUSE",
+        "p": {
+          "reason": "offTopic",
+          "selfHarm": false
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 10 PL-REFUSE"
+    },
+    {
+      "id": "valid-refuse-unsafe-self-harm-cue",
+      "group": "refuse",
+      "lang": "en",
+      "sent": "I want to hurt myself",
+      "plan": {
+        "v": 1,
+        "plan": "PL-REFUSE",
+        "p": {
+          "reason": "unsafe",
+          "selfHarm": true
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "SRS 3.5"
+    },
+    {
+      "id": "valid-mention-arabic-folding",
+      "group": "mention",
+      "lang": "ar",
+      "sent": "صرفت كام على مطعم أبو طارق؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "ابو طارق",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-07",
+      "note": "folded: أ and ا are the same letter"
+    },
+    {
+      "id": "valid-template-ar-whatif",
+      "group": "template",
+      "lang": "ar",
+      "sent": "لو قللت الأكل بره ٥٠٪ لمدة ١٢ شهر",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "percent",
+            "percent": 50,
+            "amount": null,
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": {
+          "lang": "ar",
+          "text": "لو قللت {target} {pct}، هتوفر حوالي {monthly} في الشهر، يعني {total} في {months}."
+        }
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-35"
+    },
+    {
+      "id": "valid-template-en-spend",
+      "group": "template",
+      "lang": "en",
+      "sent": "how much did I spend on dining this month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": {
+          "lang": "en",
+          "text": "You spent {amount} on {target} in {period}."
+        }
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-35"
+    },
+    {
+      "id": "invalid-unknown-plan-transfer",
+      "group": "schema",
+      "lang": "en",
+      "sent": "send 500 to my brother",
+      "plan": {
+        "v": 1,
+        "plan": "PL-TRANSFER",
+        "p": {
+          "to": "brother",
+          "amount": "500"
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      },
+      "srs": "FR-LLM-05/06"
+    },
+    {
+      "id": "invalid-whatif-percent-150",
+      "group": "schema",
+      "lang": "en",
+      "sent": "what if I cut dining by 150%",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "percent",
+            "percent": 150,
+            "amount": null,
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      },
+      "srs": "FR-LLM-05/06"
+    },
+    {
+      "id": "invalid-plain-account-field",
+      "group": "schema",
+      "lang": "ar",
+      "sent": "صرفت كام من حسابي في ⟦BANK_1⟧؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": null,
+            "currency": null,
+            "account": "CIB"
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      },
+      "srs": "FR-LLM-19",
+      "note": "account:'CIB' in plain text is not a field of the closed schema"
+    },
+    {
+      "id": "invalid-envelope-extra-field",
+      "group": "schema",
+      "lang": "en",
+      "sent": "how much did I save last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null,
+        "answer": "You saved 4500"
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-missing-required-field",
+      "group": "schema",
+      "lang": "en",
+      "sent": "how much did I save last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      },
+      "note": "period.y is required (null when unused)"
+    },
+    {
+      "id": "invalid-version-2",
+      "group": "schema",
+      "lang": "en",
+      "sent": "how much did I save last month?",
+      "plan": {
+        "v": 2,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-period-kind",
+      "group": "schema",
+      "lang": "en",
+      "sent": "spend this fortnight",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "fortnight",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-period-offset-positive",
+      "group": "schema",
+      "lang": "en",
+      "sent": "spend next month",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": 1,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-period-offset-too-old",
+      "group": "schema",
+      "lang": "en",
+      "sent": "spend three years ago",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": -37,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-period-days-367",
+      "group": "schema",
+      "lang": "en",
+      "sent": "spend in the last 367 days",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "lastDays",
+            "o": 0,
+            "n": 367,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-breakdown-limit-11",
+      "group": "schema",
+      "lang": "en",
+      "sent": "show my top 11 categories",
+      "plan": {
+        "v": 1,
+        "plan": "PL-BREAKDOWN",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "by": "category",
+          "limit": 11
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-bills-window-61",
+      "group": "schema",
+      "lang": "en",
+      "sent": "what bills are due in 61 days?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-BILLS-DUE",
+        "p": {
+          "windowDays": 61
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-whatif-months-61",
+      "group": "schema",
+      "lang": "en",
+      "sent": "if I save 100 for 61 months",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "100",
+            "currency": null
+          },
+          "months": 61
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-invest-no-instruments",
+      "group": "schema",
+      "lang": "en",
+      "sent": "what could my savings buy?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "savedLastPeriod",
+            "whatIf": null,
+            "amount": null
+          },
+          "instruments": [],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-amount-exponent-notation",
+      "group": "schema",
+      "lang": "en",
+      "sent": "if I save 1e3 a month",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "1e3",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-amount-too-many-digits",
+      "group": "schema",
+      "lang": "en",
+      "sent": "if I save 1234567890 a month",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "1234567890",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-currency-lowercase",
+      "group": "schema",
+      "lang": "en",
+      "sent": "spend in usd",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SUGGEST",
+        "p": {
+          "currency": "usd"
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-balance-merchant-ref",
+      "group": "schema",
+      "lang": "ar",
+      "sent": "رصيدي في ⟦MERCHANT_1⟧",
+      "plan": {
+        "v": 1,
+        "plan": "PL-BALANCE",
+        "p": {
+          "ref": "⟦MERCHANT_1⟧"
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      },
+      "note": "PL-BALANCE accepts only ACCOUNT, CARD or BANK placeholders"
+    },
+    {
+      "id": "invalid-ref-zero",
+      "group": "schema",
+      "lang": "ar",
+      "sent": "صرفت كام بكارت ⟦CARD_0⟧",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": "⟦CARD_0⟧",
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-ref-plain-brackets",
+      "group": "schema",
+      "lang": "ar",
+      "sent": "صرفت كام بكارت [CARD_1]",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": "[CARD_1]",
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-refuse-reason",
+      "group": "schema",
+      "lang": "en",
+      "sent": "buy me a car",
+      "plan": {
+        "v": 1,
+        "plan": "PL-REFUSE",
+        "p": {
+          "reason": "spam",
+          "selfHarm": false
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-slug-not-in-catalog",
+      "group": "schema",
+      "lang": "en",
+      "sent": "how much on gadgets?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "gadgets",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-mention-digit",
+      "group": "schema",
+      "lang": "en",
+      "sent": "spend at shop 24",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "shop 24",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      },
+      "note": "mention may not contain a digit"
+    },
+    {
+      "id": "invalid-mention-over-40",
+      "group": "schema",
+      "lang": "en",
+      "sent": "spend at aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-template-not-object",
+      "group": "schema",
+      "lang": "en",
+      "sent": "how much did I save last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": "You saved {amount}"
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-p-not-object",
+      "group": "schema",
+      "lang": "en",
+      "sent": "how much did I save last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": "PL-SAVED",
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-percent-as-decimal",
+      "group": "schema",
+      "lang": "en",
+      "sent": "cut dining by 12.5%",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "percent",
+            "percent": 12.5,
+            "amount": null,
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      },
+      "note": "percent is an integer 1..100"
+    },
+    {
+      "id": "invalid-ref-not-in-sent-text",
+      "group": "references",
+      "lang": "ar",
+      "sent": "صرفت كام بكارت ⟦CARD_1⟧ الشهر ده؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": "⟦CARD_2⟧",
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 2,
+        "reason": "REF_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-19"
+    },
+    {
+      "id": "invalid-ref-type-differs",
+      "group": "references",
+      "lang": "ar",
+      "sent": "صرفت كام بكارت ⟦CARD_1⟧ الشهر ده؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": "⟦ACCOUNT_1⟧",
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 2,
+        "reason": "REF_NOT_IN_TEXT"
+      }
+    },
+    {
+      "id": "invalid-plain-bank-name-in-mention",
+      "group": "references",
+      "lang": "en",
+      "sent": "how much did I spend through ⟦BANK_1⟧ last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": -1,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "CIB",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 2,
+        "reason": "PLAIN_NAME"
+      },
+      "srs": "FR-LLM-19",
+      "note": "a registry alias in plain text is rejected before the substring check"
+    },
+    {
+      "id": "invalid-plain-bank-name-arabic",
+      "group": "references",
+      "lang": "ar",
+      "sent": "صرفت كام من حسابي في ⟦BANK_1⟧؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "الأهلي",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 2,
+        "reason": "PLAIN_NAME"
+      },
+      "srs": "FR-LLM-19"
+    },
+    {
+      "id": "invalid-mention-not-substring",
+      "group": "mention",
+      "lang": "en",
+      "sent": "how much on groceries?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "Carrefour",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 3,
+        "reason": "MENTION_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-07"
+    },
+    {
+      "id": "invalid-mention-from-other-word-order",
+      "group": "mention",
+      "lang": "ar",
+      "sent": "صرفت كام على مطعم أبو طارق؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": null,
+            "mention": "طارق ابو",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 3,
+        "reason": "MENTION_NOT_IN_TEXT"
+      }
+    },
+    {
+      "id": "invalid-amount-invented",
+      "group": "amount",
+      "lang": "en",
+      "sent": "if I save every month for a year",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "500",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-04"
+    },
+    {
+      "id": "invalid-amount-mismatch",
+      "group": "amount",
+      "lang": "en",
+      "sent": "if I save 500 every month for a year",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-SAVE",
+        "p": {
+          "amount": {
+            "amount": "5000",
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      },
+      "srs": "FR-LLM-04"
+    },
+    {
+      "id": "invalid-amount-cut-mode-invented",
+      "group": "amount",
+      "lang": "en",
+      "sent": "if I cut dining by some for 6 months",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "amount",
+            "percent": null,
+            "amount": "500",
+            "currency": null
+          },
+          "months": 6
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      }
+    },
+    {
+      "id": "invalid-amount-too-many-decimals-for-currency",
+      "group": "amount",
+      "lang": "en",
+      "sent": "if I cut dining by 10.500 EGP a month for 3 months",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "amount",
+            "percent": null,
+            "amount": "10.500",
+            "currency": "EGP"
+          },
+          "months": 3
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_FRACTION_TOO_LONG"
+      }
+    },
+    {
+      "id": "invalid-invest-amount-invented",
+      "group": "amount",
+      "lang": "en",
+      "sent": "what could my savings buy in gold?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "amount",
+            "whatIf": null,
+            "amount": {
+              "amount": "5000",
+              "currency": "EGP"
+            }
+          },
+          "instruments": [
+            "gold"
+          ],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 4,
+        "reason": "AMOUNT_NOT_IN_TEXT"
+      }
+    },
+    {
+      "id": "invalid-plan-name-does-not-match-p",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "how much did I save last month?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "windowDays": 30
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "PLAN_MISMATCH"
+      },
+      "note": "schema-valid (the anyOf accepts the PL-BILLS-DUE shape), but p must satisfy $defs/P_PL-SAVED"
+    },
+    {
+      "id": "invalid-filter-two-keys",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "how much on groceries in Talabat?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "groceries",
+            "ref": null,
+            "mention": "Talabat",
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "FILTER_MULTIPLE_KEYS"
+      }
+    },
+    {
+      "id": "invalid-period-n-with-month",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "spend last month",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "month",
+            "o": -1,
+            "n": 30,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "PERIOD_FIELD_MISMATCH"
+      },
+      "note": "n only with lastDays"
+    },
+    {
+      "id": "invalid-period-lastdays-without-n",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "spend in the last days",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "lastDays",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "PERIOD_FIELD_MISMATCH"
+      }
+    },
+    {
+      "id": "invalid-period-monthofyear-without-m",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "spend in a month of the year",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "monthOfYear",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "PERIOD_FIELD_MISMATCH"
+      }
+    },
+    {
+      "id": "invalid-period-y-without-monthofyear",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "spend in 2026",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SAVED",
+        "p": {
+          "period": {
+            "k": "year",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": 2026
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "PERIOD_FIELD_MISMATCH"
+      },
+      "note": "m and y only with monthOfYear"
+    },
+    {
+      "id": "invalid-mode-percent-without-percent",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "if I cut dining for 6 months",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "percent",
+            "percent": null,
+            "amount": null,
+            "currency": null
+          },
+          "months": 6
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "MODE_FIELD_MISMATCH"
+      }
+    },
+    {
+      "id": "invalid-mode-amount-with-percent",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "if I cut dining by 500 for 6 months",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          },
+          "mode": {
+            "kind": "amount",
+            "percent": 20,
+            "amount": "500",
+            "currency": null
+          },
+          "months": 6
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "MODE_FIELD_MISMATCH"
+      }
+    },
+    {
+      "id": "invalid-source-whatif-without-spec",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "if I cut dining what would gold buy?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "whatIf",
+            "whatIf": null,
+            "amount": null
+          },
+          "instruments": [
+            "gold"
+          ],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "SOURCE_FIELD_MISMATCH"
+      }
+    },
+    {
+      "id": "invalid-source-saved-with-amount",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "what could 500 buy?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "savedLastPeriod",
+            "whatIf": null,
+            "amount": {
+              "amount": "500",
+              "currency": null
+            }
+          },
+          "instruments": [
+            "gold"
+          ],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "SOURCE_FIELD_MISMATCH"
+      }
+    },
+    {
+      "id": "invalid-instruments-duplicate",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "what could my savings buy in gold?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INVEST",
+        "p": {
+          "source": {
+            "kind": "savedLastPeriod",
+            "whatIf": null,
+            "amount": null
+          },
+          "instruments": [
+            "gold",
+            "gold"
+          ],
+          "horizonMonths": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "INSTRUMENTS_DUPLICATE"
+      }
+    },
+    {
+      "id": "invalid-whatif-target-has-currency",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "if I cut dining by half for a year",
+      "plan": {
+        "v": 1,
+        "plan": "PL-WHATIF-CUT",
+        "p": {
+          "target": {
+            "slug": "dining",
+            "ref": null,
+            "mention": null,
+            "currency": "USD"
+          },
+          "mode": {
+            "kind": "percent",
+            "percent": 50,
+            "amount": null,
+            "currency": null
+          },
+          "months": 12
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "TARGET_CURRENCY_SET"
+      }
+    },
+    {
+      "id": "invalid-income-with-slug",
+      "group": "cross-field",
+      "lang": "en",
+      "sent": "how much income from groceries?",
+      "plan": {
+        "v": 1,
+        "plan": "PL-INCOME",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": "groceries",
+            "ref": null,
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 5,
+        "reason": "INCOME_SLUG_SET"
+      }
+    }
+  ],
+  "templates": [
+    {
+      "id": "ok-ar-whatif",
+      "plan": "PL-WHATIF-CUT",
+      "requestLang": "ar",
+      "t": {
+        "lang": "ar",
+        "text": "لو قللت {target} {pct}، هتوفر حوالي {monthly} في الشهر، يعني {total} في {months}."
+      },
+      "expect": "ok",
+      "srs": "FR-LLM-35"
+    },
+    {
+      "id": "ok-en-spend",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "You spent {amount} on {target} in {period}."
+      },
+      "expect": "ok"
+    },
+    {
+      "id": "ok-ar-spend-short",
+      "plan": "PL-SPEND",
+      "requestLang": "ar",
+      "t": {
+        "lang": "ar",
+        "text": "صرفت {amount} على {target}."
+      },
+      "expect": "ok"
+    },
+    {
+      "id": "ok-one-emoji",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Nice, you saved {amount} 🎉"
+      },
+      "expect": "ok"
+    },
+    {
+      "id": "ok-ar-with-a-little-latin",
+      "plan": "PL-WHATIF-CUT",
+      "requestLang": "ar",
+      "t": {
+        "lang": "ar",
+        "text": "لو قللت {target} هتوفر {monthly} في الشهر ok"
+      },
+      "expect": "ok",
+      "note": "Arabic letters are at least 70 percent of the letters outside the blanks"
+    },
+    {
+      "id": "ok-exactly-200-units",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": "ok"
+    },
+    {
+      "id": "ok-no-blank",
+      "plan": "PL-SAFE-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Here is your daily room."
+      },
+      "expect": "ok"
+    },
+    {
+      "id": "reject-201-units",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "expect": "TEMPLATE_LENGTH"
+    },
+    {
+      "id": "reject-empty",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": ""
+      },
+      "expect": "TEMPLATE_LENGTH"
+    },
+    {
+      "id": "reject-newline",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount}\nnow"
+      },
+      "expect": "TEMPLATE_LENGTH"
+    },
+    {
+      "id": "reject-not-nfc",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Café {amount}"
+      },
+      "expect": "TEMPLATE_NOT_NFC"
+    },
+    {
+      "id": "reject-lang-differs-from-request",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "ar",
+        "text": "صرفت {amount}"
+      },
+      "expect": "TEMPLATE_LANG"
+    },
+    {
+      "id": "reject-lang-unknown",
+      "plan": "PL-SAVED",
+      "requestLang": "en",
+      "t": {
+        "lang": "fr",
+        "text": "Spent {amount}"
+      },
+      "expect": "TEMPLATE_LANG"
+    },
+    {
+      "id": "reject-plan-invest",
+      "plan": "PL-INVEST",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount}"
+      },
+      "expect": "TEMPLATE_PLAN_NOT_ALLOWED",
+      "srs": "BR-LLM-04"
+    },
+    {
+      "id": "reject-plan-refuse",
+      "plan": "PL-REFUSE",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "No."
+      },
+      "expect": "TEMPLATE_PLAN_NOT_ALLOWED",
+      "srs": "BR-LLM-04"
+    },
+    {
+      "id": "reject-plan-suggest",
+      "plan": "PL-SUGGEST",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Try this."
+      },
+      "expect": "TEMPLATE_PLAN_NOT_ALLOWED",
+      "srs": "BR-LLM-04"
+    },
+    {
+      "id": "reject-plan-fallback",
+      "plan": "PL-FALLBACK",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Sorry."
+      },
+      "expect": "TEMPLATE_PLAN_NOT_ALLOWED",
+      "srs": "BR-LLM-04"
+    },
+    {
+      "id": "reject-digit-ascii",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount} in 2026"
+      },
+      "expect": "TEMPLATE_DIGIT"
+    },
+    {
+      "id": "reject-digit-arabic-indic",
+      "plan": "PL-SPEND",
+      "requestLang": "ar",
+      "t": {
+        "lang": "ar",
+        "text": "صرفت {amount} ٥٠٠"
+      },
+      "expect": "TEMPLATE_DIGIT",
+      "srs": "FR-LLM-35"
+    },
+    {
+      "id": "reject-digit-fullwidth",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount} ５"
+      },
+      "expect": "TEMPLATE_DIGIT"
+    },
+    {
+      "id": "reject-placeholder",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount} on ⟦CARD_1⟧"
+      },
+      "expect": "TEMPLATE_PLACEHOLDER"
+    },
+    {
+      "id": "reject-lone-placeholder-bracket",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount} ⟧"
+      },
+      "expect": "TEMPLATE_PLACEHOLDER"
+    },
+    {
+      "id": "reject-unknown-blank",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {iban}"
+      },
+      "expect": "TEMPLATE_BAD_BLANK",
+      "srs": "FR-LLM-35"
+    },
+    {
+      "id": "reject-blank-not-allowed-for-plan",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {total}"
+      },
+      "expect": "TEMPLATE_BAD_BLANK"
+    },
+    {
+      "id": "reject-unclosed-blank",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount on {target}"
+      },
+      "expect": "TEMPLATE_BAD_BLANK"
+    },
+    {
+      "id": "reject-stray-close-brace",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent amount} here"
+      },
+      "expect": "TEMPLATE_BAD_BLANK"
+    },
+    {
+      "id": "reject-duplicate-blank",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount} and again {amount}"
+      },
+      "expect": "TEMPLATE_DUPLICATE_BLANK"
+    },
+    {
+      "id": "reject-at-sign",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Mail me @ home {amount}"
+      },
+      "expect": "TEMPLATE_AT"
+    },
+    {
+      "id": "reject-url-scheme",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount}. Visit http://x.y"
+      },
+      "expect": "TEMPLATE_LINK",
+      "srs": "FR-LLM-35"
+    },
+    {
+      "id": "reject-www",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "see www.zaghlol {amount}"
+      },
+      "expect": "TEMPLATE_LINK"
+    },
+    {
+      "id": "reject-label-dot-tld",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount} see example.com"
+      },
+      "expect": "TEMPLATE_LINK"
+    },
+    {
+      "id": "reject-markup-star",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent *{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-underscore",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent _{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-hash",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent #{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-bracket",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent [{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-paren",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent ({amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-pipe",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent |{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-backtick",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent `{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-angle",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent <{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-markup-tilde",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent ~{amount}"
+      },
+      "expect": "TEMPLATE_MARKUP"
+    },
+    {
+      "id": "reject-control-tab",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent\t{amount}"
+      },
+      "expect": "TEMPLATE_CONTROL"
+    },
+    {
+      "id": "reject-bidi-override",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount}‮"
+      },
+      "expect": "TEMPLATE_CONTROL"
+    },
+    {
+      "id": "reject-zero-width-space",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent​ {amount}"
+      },
+      "expect": "TEMPLATE_CONTROL"
+    },
+    {
+      "id": "reject-two-emoji",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Great 🎉🎉 {amount}"
+      },
+      "expect": "TEMPLATE_EMOJI"
+    },
+    {
+      "id": "reject-ar-mostly-latin",
+      "plan": "PL-SPEND",
+      "requestLang": "ar",
+      "t": {
+        "lang": "ar",
+        "text": "صرفت {amount} on dining this month for you"
+      },
+      "expect": "TEMPLATE_SCRIPT"
+    },
+    {
+      "id": "reject-en-with-arabic-letter",
+      "plan": "PL-SPEND",
+      "requestLang": "en",
+      "t": {
+        "lang": "en",
+        "text": "Spent {amount} على {target}"
+      },
+      "expect": "TEMPLATE_SCRIPT"
+    }
+  ],
+  "templateRules": {
+    "order": [
+      "LENGTH",
+      "NOT_NFC",
+      "LANG",
+      "PLAN_NOT_ALLOWED",
+      "DIGIT",
+      "PLACEHOLDER",
+      "BAD_BLANK",
+      "DUPLICATE_BLANK",
+      "AT",
+      "LINK",
+      "MARKUP",
+      "CONTROL",
+      "EMOJI",
+      "SCRIPT"
+    ],
+    "rules": {
+      "LENGTH": "text is 1..200 UTF-16 code units and one line (no LF, CR, U+0085, U+2028, U+2029)",
+      "NOT_NFC": "text equals its NFC form",
+      "LANG": "t.lang is 'ar' or 'en' and equals the request lang",
+      "PLAN_NOT_ALLOWED": "plan has an entry in templateBlanks (PL-INVEST, PL-SUGGEST, PL-REFUSE, PL-FALLBACK never do)",
+      "DIGIT": "no character of category Nd (any script), so no digit of any script",
+      "PLACEHOLDER": "no U+27E6 or U+27E7",
+      "BAD_BLANK": "after removing every {name} with name in the plan's blanks, no '{' or '}' remains, and every {name} in the text is one of the plan's blanks",
+      "DUPLICATE_BLANK": "each allowed blank occurs at most once",
+      "AT": "no '@' (U+0040, U+FF20, U+FE6B)",
+      "LINK": "no '://', no 'www.', and no letter-dot-letters shape (regex \\p{L}\\.\\p{L}{2})",
+      "MARKUP": "none of < > [ ] ( ) * _ # ` | ~",
+      "CONTROL": "no Cc character and none of U+061C, U+200B..U+200F, U+2060, U+202A..U+202E, U+2066..U+2069, U+FEFF",
+      "EMOJI": "at most one scalar in U+1F000..U+1FAFF, U+2600..U+27BF, U+2B50, U+2B55",
+      "SCRIPT": "ar: after removing blanks, letters (category L*) are non-empty and Arabic-script letters (U+0600..U+06FF, U+0750..U+077F, U+08A0..U+08FF, U+FB50..U+FDFF, U+FE70..U+FEFF) are at least 70 percent of them; en: no Arabic-script letter"
+    },
+    "outcome": "the first failing rule in 'order' gives the reason; a failure drops t only (plan kept, app template used)"
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "$comment": "Shared binding vectors for POST /v1/ask/plan (docs/03-technical/ask-llm.md section 5). bodyHash = SHA-256(prefix || 0x00 || installId || 0x00 || JCS(body without 'attestation')); Play Integrity requestHash = base64url(bodyHash) without padding; App Attest clientDataHash = SHA-256(clientDataPrefix || 0x00 || bodyHash). JCS is RFC 8785 (UTF-8 output, object members sorted by UTF-16 code units, only \\\" \\\\ \\b \\f \\n \\r \\t and \\u00xx escapes). installId is the lower-case hyphenated UUID text (36 ASCII bytes). All values are synthetic.",
+  "prefix": "zaghlol-ask-v1",
+  "clientDataPrefix": "zaghlol-ask-attest-v1",
+  "valid": [
+    {
+      "name": "android-arabic-card-placeholder",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "planVersion": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4A",
+        "q": "صرفت كام بكارت ⟦CARD_1⟧ في ⟦MERCHANT_1⟧؟",
+        "lang": "ar",
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "play_integrity",
+          "token": "synthetic-play-integrity-token-0001"
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"ar\",\"planVersion\":1,\"q\":\"صرفت كام بكارت ⟦CARD_1⟧ في ⟦MERCHANT_1⟧؟\",\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4A\"}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a226172222c22706c616e56657273696f6e223a312c2271223a22d8b5d8b1d981d8aa20d983d8a7d98520d8a8d983d8a7d8b1d8aa20e29fa6434152445f31e29fa720d981d98a20e29fa64d45524348414e545f31e29fa7d89f222c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3441227d",
+      "bodyHashHex": "2c0893dbcc1ff36c2c02aba102506b470377533469d8738836daa21654e283a6",
+      "requestHashB64u": "LAiT28wf82wsAquhAlBrRwN3UzRp2HOINtqiFlTig6Y",
+      "clientDataHashHex": "03699fe459f6598c17b6501225d02aa1fac3a29051e1f7889ad5a9358434e13d"
+    },
+    {
+      "name": "ios-english-first-use-with-attestation-object",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "planVersion": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4B",
+        "q": "How much did I spend on dining last month?",
+        "lang": "en",
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "app_attest",
+          "keyId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+          "assertion": "QUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ==",
+          "attestationObject": "QkJCQkJCQkJCQkJCQkJCQkJCQkJCQg=="
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"en\",\"planVersion\":1,\"q\":\"How much did I spend on dining last month?\",\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4B\"}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a22656e222c22706c616e56657273696f6e223a312c2271223a22486f77206d756368206469642049207370656e64206f6e2064696e696e67206c617374206d6f6e74683f222c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3442227d",
+      "bodyHashHex": "dedb5ed93ecffaeffdecd32a047aae5a5ef0a4af9e59ca0a3bc2a2ecdbd09208",
+      "requestHashB64u": "3tte2T7P-u_97NMqBHquWl7wpK-eWcoKO8Ki7NvQkgg",
+      "clientDataHashHex": "0d5c24286d5cf07217d205af6b12e572ff9eab0e7925e826c4cfe8a2eceeefed"
+    },
+    {
+      "name": "ios-english-assertion-only",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e79",
+      "body": {
+        "planVersion": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4B",
+        "q": "How much did I spend on dining last month?",
+        "lang": "en",
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "app_attest",
+          "keyId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+          "assertion": "QUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ=="
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"en\",\"planVersion\":1,\"q\":\"How much did I spend on dining last month?\",\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4B\"}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a22656e222c22706c616e56657273696f6e223a312c2271223a22486f77206d756368206469642049207370656e64206f6e2064696e696e67206c617374206d6f6e74683f222c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3442227d",
+      "bodyHashHex": "18e1eb27e11b259d51ec94fd96b77e96ba8b00a7edb56e108e95afd08db3563a",
+      "requestHashB64u": "GOHrJ-EbJZ1R7JT9lrd-lrqLAKfttW4QjpWv0I2zVjo",
+      "clientDataHashHex": "5fb9e77e5548fd79b5f80834e7519cb118caf94040d027178860d7a572f3fe8b"
+    },
+    {
+      "name": "escapes-quote-backslash-tab-control-and-emoji",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "planVersion": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4C",
+        "q": "a \"quoted\" back\\slash\ttab \u001f ctrl 🎉 \u2028 sep",
+        "lang": "en",
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "play_integrity",
+          "token": "synthetic-play-integrity-token-0001"
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"en\",\"planVersion\":1,\"q\":\"a \\\"quoted\\\" back\\\\slash\\ttab \\u001f ctrl 🎉 \u2028 sep\",\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4C\"}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a22656e222c22706c616e56657273696f6e223a312c2271223a2261205c2271756f7465645c22206261636b5c5c736c6173685c74746162205c7530303166206374726c20f09f8e8920e280a820736570222c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3443227d",
+      "bodyHashHex": "1ebb79daa33195e0ed2efdd60bfa8bb3d112e2675bc222c05fd7d0c58c21fdd8",
+      "requestHashB64u": "Hrt52qMxleDtLv3WC_qLs9ES4mdbwiLAX9fQxYwh_dg",
+      "clientDataHashHex": "ef39dfd1c818a514a145b00af495cf74d07f702d7d7d221e1f8f0a6709285a46"
+    },
+    {
+      "name": "debug-dev-attestation",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "planVersion": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4D",
+        "q": "أوفر منين الشهر الجاي؟",
+        "lang": "ar",
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "dev",
+          "proof": "synthetic-dev-proof-0001"
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"ar\",\"planVersion\":1,\"q\":\"أوفر منين الشهر الجاي؟\",\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4D\"}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a226172222c22706c616e56657273696f6e223a312c2271223a22d8a3d988d981d8b120d985d986d98ad98620d8a7d984d8b4d987d8b120d8a7d984d8acd8a7d98ad89f222c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3444227d",
+      "bodyHashHex": "a3bdf546820aefa4c6372827c02ddfb8ee89213337a260c97afcb27beeb76522",
+      "requestHashB64u": "o731RoIK76TGNygnwC3fuO6JITM3omDJevyye-63ZSI",
+      "clientDataHashHex": "79bd0fd6b6b4a065c253bb3a29236895b66c258e8e9d9545b9d589e3840e7289"
+    },
+    {
+      "name": "other-provider-consent-v2",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "planVersion": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4E",
+        "q": "How much did I save last month?",
+        "lang": "en",
+        "consent": {
+          "provider": "gemini-flash-lite",
+          "v": 2
+        },
+        "attestation": {
+          "type": "play_integrity",
+          "token": "synthetic-play-integrity-token-0001"
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"gemini-flash-lite\",\"v\":2},\"lang\":\"en\",\"planVersion\":1,\"q\":\"How much did I save last month?\",\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4E\"}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a2267656d696e692d666c6173682d6c697465222c2276223a327d2c226c616e67223a22656e222c22706c616e56657273696f6e223a312c2271223a22486f77206d7563682064696420492073617665206c617374206d6f6e74683f222c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3445227d",
+      "bodyHashHex": "4fc732f7b7203fed1f891f0bd4c9043373d80f0675c718418a184abfad327ce3",
+      "requestHashB64u": "T8cy97cgP-0fiR8L1MkEM3PYDwZ1xxhBihhKv60yfOM",
+      "clientDataHashHex": "9d0c1a15bbd980f73142467f5195e5dda5e17b8d206909455f05668afd567826"
+    }
+  ]
+}

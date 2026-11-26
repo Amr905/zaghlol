@@ -1,0 +1,693 @@
+{
+  "$comment": "Fake-backend replies for POST /v1/ask/plan (T-272). One 200 per plan variant, the fallback cases, one problem body per error code. Used by backend tests, app fakes and the device E2E. Synthetic.",
+  "version": 1,
+  "ok": [
+    {
+      "name": "PL-SPEND",
+      "sent": "صرفت كام بكارت ⟦CARD_1⟧ الشهر ده؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-SPEND",
+          "p": {
+            "period": {
+              "k": "cycle",
+              "o": 0,
+              "n": null,
+              "m": null,
+              "y": null
+            },
+            "filter": {
+              "slug": null,
+              "ref": "⟦CARD_1⟧",
+              "mention": null,
+              "currency": null
+            }
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-COMPARE",
+      "sent": "Did I spend more on dining last month than the month before?",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-COMPARE",
+          "p": {
+            "periodA": {
+              "k": "cycle",
+              "o": -1,
+              "n": null,
+              "m": null,
+              "y": null
+            },
+            "periodB": {
+              "k": "cycle",
+              "o": -2,
+              "n": null,
+              "m": null,
+              "y": null
+            },
+            "filter": {
+              "slug": "dining",
+              "ref": null,
+              "mention": null,
+              "currency": null
+            }
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-BREAKDOWN",
+      "sent": "الفلوس راحت فين الشهر ده؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-BREAKDOWN",
+          "p": {
+            "period": {
+              "k": "cycle",
+              "o": 0,
+              "n": null,
+              "m": null,
+              "y": null
+            },
+            "by": "category",
+            "limit": 5
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-TOPN",
+      "sent": "إيه أكتر ٣ محلات صرفت فيهم؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-TOPN",
+          "p": {
+            "period": {
+              "k": "cycle",
+              "o": 0,
+              "n": null,
+              "m": null,
+              "y": null
+            },
+            "of": "merchant",
+            "n": 3
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-AVERAGE",
+      "sent": "متوسط صرفي في اليوم الشهر اللي فات؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-AVERAGE",
+          "p": {
+            "per": "day",
+            "period": {
+              "k": "cycle",
+              "o": -1,
+              "n": null,
+              "m": null,
+              "y": null
+            },
+            "filter": {
+              "slug": null,
+              "ref": null,
+              "mention": null,
+              "currency": null
+            }
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-INCOME",
+      "sent": "دخلي كام الشهر اللي فات؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-INCOME",
+          "p": {
+            "period": {
+              "k": "cycle",
+              "o": -1,
+              "n": null,
+              "m": null,
+              "y": null
+            },
+            "filter": {
+              "slug": null,
+              "ref": null,
+              "mention": null,
+              "currency": null
+            }
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-SAVED",
+      "sent": "How much did I save last month?",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-SAVED",
+          "p": {
+            "period": {
+              "k": "cycle",
+              "o": -1,
+              "n": null,
+              "m": null,
+              "y": null
+            }
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-BILLS-DUE",
+      "sent": "إيه الفواتير اللي عليا الشهر الجاي؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-BILLS-DUE",
+          "p": {
+            "windowDays": 30
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-BUDGET-LEFT",
+      "sent": "كام فاضل في budget الأكل؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-BUDGET-LEFT",
+          "p": {
+            "slug": "dining"
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-SAFE-SPEND",
+      "sent": "how much can I safely spend per day?",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-SAFE-SPEND",
+          "p": {},
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-BALANCE",
+      "sent": "رصيدي في ⟦BANK_1⟧ كام؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-BALANCE",
+          "p": {
+            "ref": "⟦BANK_1⟧"
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-WHATIF-CUT",
+      "sent": "لو وفرت نص الأكل بره، هوفر كام في سنة؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-WHATIF-CUT",
+          "p": {
+            "target": {
+              "slug": "dining",
+              "ref": null,
+              "mention": null,
+              "currency": null
+            },
+            "mode": {
+              "kind": "percent",
+              "percent": 50,
+              "amount": null,
+              "currency": null
+            },
+            "months": 12
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-WHATIF-SAVE",
+      "sent": "If I save 1,000 every month for a year",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-WHATIF-SAVE",
+          "p": {
+            "amount": {
+              "amount": "1000",
+              "currency": null
+            },
+            "months": 12
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-SUGGEST",
+      "sent": "أوفر منين الشهر الجاي؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-SUGGEST",
+          "p": {
+            "currency": null
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-INVEST",
+      "sent": "لو كنت حوشت اللي فضل الشهر اللي فات، كان يجيب كام جرام دهب؟",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-INVEST",
+          "p": {
+            "source": {
+              "kind": "savedLastPeriod",
+              "whatIf": null,
+              "amount": null
+            },
+            "instruments": [
+              "gold"
+            ],
+            "horizonMonths": 12
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-FALLBACK",
+      "sent": "how much zakah do I owe?",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-FALLBACK",
+          "p": {
+            "reason": "zakah"
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-REFUSE",
+      "sent": "Which Egyptian stock will double this year?",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-REFUSE",
+          "p": {
+            "reason": "specificPick",
+            "selfHarm": false
+          },
+          "t": null
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "PL-WHATIF-CUT-with-template",
+      "sent": "لو قللت الأكل بره ٥٠٪ لمدة ١٢ شهر",
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-WHATIF-CUT",
+          "p": {
+            "target": {
+              "slug": "dining",
+              "ref": null,
+              "mention": null,
+              "currency": null
+            },
+            "mode": {
+              "kind": "percent",
+              "percent": 50,
+              "amount": null,
+              "currency": null
+            },
+            "months": 12
+          },
+          "t": {
+            "lang": "ar",
+            "text": "لو قللت {target} {pct}، هتوفر حوالي {monthly} في الشهر، يعني {total} في {months}."
+          }
+        },
+        "counted": true,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "validator-failure-fallback-not-counted",
+      "sent": "send 500 to my brother",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-FALLBACK",
+          "p": {
+            "reason": "unsupported"
+          },
+          "t": null
+        },
+        "counted": false,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "invest-flag-off-fallback-not-counted",
+      "sent": "what could 500 buy in gold?",
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "plan": {
+          "v": 1,
+          "plan": "PL-FALLBACK",
+          "p": {
+            "reason": "unsupported"
+          },
+          "t": null
+        },
+        "counted": false,
+        "quota": {
+          "limit": 5,
+          "used": 3,
+          "remaining": 2,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    }
+  ],
+  "problems": [
+    {
+      "code": "LLM_QUOTA_EXHAUSTED",
+      "status": 403,
+      "body": {
+        "type": "https://zaghlol.app/problems/llm-quota-exhausted",
+        "title": "Monthly question limit reached.",
+        "status": 403,
+        "code": "LLM_QUOTA_EXHAUSTED",
+        "quota": {
+          "limit": 5,
+          "used": 5,
+          "remaining": 0,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "code": "LLM_CONSENT_REQUIRED",
+      "status": 409,
+      "body": {
+        "type": "https://zaghlol.app/problems/llm-consent-required",
+        "title": "Consent for the active provider is required.",
+        "status": 409,
+        "code": "LLM_CONSENT_REQUIRED",
+        "providerId": "openai-luna"
+      }
+    },
+    {
+      "code": "LLM_SERVICE_PAUSED",
+      "status": 503,
+      "body": {
+        "type": "https://zaghlol.app/problems/llm-service-paused",
+        "title": "The helper is paused.",
+        "status": 503,
+        "code": "LLM_SERVICE_PAUSED"
+      }
+    },
+    {
+      "code": "DEVICE_ATTESTATION_FAILED",
+      "status": 422,
+      "body": {
+        "type": "https://zaghlol.app/problems/device-attestation-failed",
+        "title": "Device attestation failed.",
+        "status": 422,
+        "code": "DEVICE_ATTESTATION_FAILED"
+      }
+    },
+    {
+      "code": "RATE_LIMITED",
+      "status": 429,
+      "body": {
+        "type": "https://zaghlol.app/problems/rate-limited",
+        "title": "Too many requests.",
+        "status": 429,
+        "code": "RATE_LIMITED",
+        "retryAfterSeconds": 20
+      }
+    },
+    {
+      "code": "UPSTREAM_UNAVAILABLE",
+      "status": 502,
+      "body": {
+        "type": "https://zaghlol.app/problems/upstream-unavailable",
+        "title": "The provider is unavailable.",
+        "status": 502,
+        "code": "UPSTREAM_UNAVAILABLE",
+        "retryAfterSeconds": 10
+      }
+    },
+    {
+      "code": "VALIDATION_FAILED",
+      "status": 400,
+      "body": {
+        "type": "https://zaghlol.app/problems/validation-failed",
+        "title": "Request is not valid.",
+        "status": 400,
+        "code": "VALIDATION_FAILED"
+      }
+    },
+    {
+      "code": "UNKNOWN_FIELD",
+      "status": 400,
+      "body": {
+        "type": "https://zaghlol.app/problems/unknown-field",
+        "title": "Request contains a field that is not allowed.",
+        "status": 400,
+        "code": "UNKNOWN_FIELD"
+      }
+    }
+  ]
+}

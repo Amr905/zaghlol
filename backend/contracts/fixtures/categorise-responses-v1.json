@@ -1,0 +1,321 @@
+{
+  "$comment": "Fake-backend replies for POST /v1/categorise (T-272). One 200 per result status, a mixed batch, one problem body per error code (quota is reported per merchant, never as 403). Synthetic; 'order 000000 cafe' is a deliberately ineligible name for the rejected status.",
+  "version": 1,
+  "ok": [
+    {
+      "name": "status-ok-llm",
+      "merchants": [
+        "zawya coffee"
+      ],
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 1,
+        "results": [
+          {
+            "merchant": "zawya coffee",
+            "status": "ok",
+            "category": "dining",
+            "confidence": 88,
+            "source": "llm"
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 4,
+          "remaining": 11,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "status-ok-cache",
+      "merchants": [
+        "مكتبة النور"
+      ],
+      "lang": "ar",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 0,
+        "results": [
+          {
+            "merchant": "مكتبة النور",
+            "status": "ok",
+            "category": "education",
+            "confidence": 90,
+            "source": "cache"
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 4,
+          "remaining": 11,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "status-ok-catalog",
+      "merchants": [
+        "green leaf pharmacy"
+      ],
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 0,
+        "results": [
+          {
+            "merchant": "green leaf pharmacy",
+            "status": "ok",
+            "category": "health",
+            "confidence": 100,
+            "source": "catalog"
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 4,
+          "remaining": 11,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "status-unknown",
+      "merchants": [
+        "xq trading"
+      ],
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 0,
+        "results": [
+          {
+            "merchant": "xq trading",
+            "status": "unknown",
+            "category": null,
+            "confidence": null,
+            "source": null
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 4,
+          "remaining": 11,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "status-low-confidence",
+      "merchants": [
+        "blue door"
+      ],
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 0,
+        "results": [
+          {
+            "merchant": "blue door",
+            "status": "low_confidence",
+            "category": null,
+            "confidence": 41,
+            "source": null
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 4,
+          "remaining": 11,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "status-rejected",
+      "merchants": [
+        "order 000000 cafe"
+      ],
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 0,
+        "results": [
+          {
+            "merchant": "order 000000 cafe",
+            "status": "rejected",
+            "category": null,
+            "confidence": null,
+            "source": null
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 4,
+          "remaining": 11,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "status-quota",
+      "merchants": [
+        "nile market"
+      ],
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 0,
+        "results": [
+          {
+            "merchant": "nile market",
+            "status": "quota",
+            "category": null,
+            "confidence": null,
+            "source": null
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 15,
+          "remaining": 0,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    },
+    {
+      "name": "mixed-batch-quota-trimmed",
+      "merchants": [
+        "zawya coffee",
+        "مكتبة النور",
+        "green leaf pharmacy",
+        "nile market"
+      ],
+      "lang": "en",
+      "status": 200,
+      "body": {
+        "serverTime": "2026-11-26T10:00:00Z",
+        "counted": 1,
+        "results": [
+          {
+            "merchant": "zawya coffee",
+            "status": "ok",
+            "category": "dining",
+            "confidence": 88,
+            "source": "llm"
+          },
+          {
+            "merchant": "مكتبة النور",
+            "status": "ok",
+            "category": "education",
+            "confidence": 90,
+            "source": "cache"
+          },
+          {
+            "merchant": "green leaf pharmacy",
+            "status": "ok",
+            "category": "health",
+            "confidence": 100,
+            "source": "catalog"
+          },
+          {
+            "merchant": "nile market",
+            "status": "quota",
+            "category": null,
+            "confidence": null,
+            "source": null
+          }
+        ],
+        "quota": {
+          "limit": 15,
+          "used": 15,
+          "remaining": 0,
+          "resetsAt": "2026-11-30T22:00:00Z"
+        }
+      }
+    }
+  ],
+  "problems": [
+    {
+      "code": "LLM_CONSENT_REQUIRED",
+      "status": 409,
+      "body": {
+        "type": "https://zaghlol.app/problems/llm-consent-required",
+        "title": "Consent for the active provider is required.",
+        "status": 409,
+        "code": "LLM_CONSENT_REQUIRED",
+        "providerId": "openai-luna"
+      }
+    },
+    {
+      "code": "LLM_SERVICE_PAUSED",
+      "status": 503,
+      "body": {
+        "type": "https://zaghlol.app/problems/llm-service-paused",
+        "title": "The helper is paused.",
+        "status": 503,
+        "code": "LLM_SERVICE_PAUSED"
+      }
+    },
+    {
+      "code": "DEVICE_ATTESTATION_FAILED",
+      "status": 422,
+      "body": {
+        "type": "https://zaghlol.app/problems/device-attestation-failed",
+        "title": "Device attestation failed.",
+        "status": 422,
+        "code": "DEVICE_ATTESTATION_FAILED"
+      }
+    },
+    {
+      "code": "RATE_LIMITED",
+      "status": 429,
+      "body": {
+        "type": "https://zaghlol.app/problems/rate-limited",
+        "title": "Too many requests.",
+        "status": 429,
+        "code": "RATE_LIMITED",
+        "retryAfterSeconds": 60
+      }
+    },
+    {
+      "code": "UPSTREAM_UNAVAILABLE",
+      "status": 502,
+      "body": {
+        "type": "https://zaghlol.app/problems/upstream-unavailable",
+        "title": "The provider is unavailable.",
+        "status": 502,
+        "code": "UPSTREAM_UNAVAILABLE",
+        "retryAfterSeconds": 10
+      }
+    },
+    {
+      "code": "VALIDATION_FAILED",
+      "status": 400,
+      "body": {
+        "type": "https://zaghlol.app/problems/validation-failed",
+        "title": "Request is not valid.",
+        "status": 400,
+        "code": "VALIDATION_FAILED"
+      }
+    },
+    {
+      "code": "UNKNOWN_FIELD",
+      "status": 400,
+      "body": {
+        "type": "https://zaghlol.app/problems/unknown-field",
+        "title": "Request contains a field that is not allowed.",
+        "status": 400,
+        "code": "UNKNOWN_FIELD"
+      }
+    }
+  ]
+}
