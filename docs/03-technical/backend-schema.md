@@ -480,6 +480,12 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 | `purchase_seats.recent_rebinds`, `purchases.dispute_frozen_until`, `purchases.support_link_notice_pending`, `purchases.support_link_notice_iat` | With the purchase; rebind times older than 30 days are pruned on every seat check | — |
 | `idempotency_records` | 24 h (never served after `expires_at`); deleted at once with its install or account | `RetentionPurger` + delete endpoints |
 | `installs.registration_*` | Cleared at first authenticated call or after 24 h | API + `RetentionPurger` |
+| `llm_quota_counters` | Rows of months before the previous Cairo month are deleted (current and previous month kept); the rows of a deleted install go with its purge, and `DELETE /v1/installs/me` and `DELETE /v1/accounts/me` delete their subject's rows | `RetentionPurger` (`llm_quota_months`) + delete endpoints |
+| `llm_spend_daily` | 13 months (UTC day; the alert-marker rows share the table) (FR-LLM-62) | `RetentionPurger` (`llm_spend_daily`) |
+| `llm_cat_confirmations` | 365 days, or as soon as the review is settled (`promoted` or `rejected`) (FR-LCAT-34) | `RetentionPurger` (`llm_cat_confirmations`) |
+| `llm_cat_corrections` | 90 days after `resolved_at`, or 180 days after creation, whichever comes first (FR-LCAT-34) | `RetentionPurger` (`llm_cat_corrections`) |
+| `llm_cat_answer_cache` | Lives 90 days (`expires_at`); a read ignores an expired row and a new answer for the name overwrites it. **As built there is no purge rule for expired cache rows**: they stay in the table until overwritten or deleted by the 3-correction rule. Follow-up for the backend lane (the rows hold a shop name and a category only, no install data) | read filter `expires_at > now`; no job |
+| `remote_config` | Until changed; no personal data (`updated_by` is an operator id) | — |
 | DB backups (PITR) | 14 days | provider |
 
 **Retention indexes (T-122):** `installs(last_seen_at)`; `installs(deleted_at) WHERE deleted_at IS NOT NULL`; `installs(first_seen_at) WHERE registration_key_hash IS NOT NULL`; `store_notifications(received_at)`; `merchant_contributions(received_at)`; `bank_requests(received_at)`; `audit_log(at)` plus `audit_log(at) WHERE action IN ('support_lookup','support_seat_move','support_detach','support_unfreeze')`; `replay_guard(expires_at)`; `seat_claimants(claimed_at)`; `idempotency_records(expires_at)`.
@@ -487,6 +493,23 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 **Foreign-key indexes (EF convention, T-122):** `ix_account_installs_install_id`, `ix_seat_claimants_install_id`, `ix_purchase_events_purchase_id`, `ix_catalog_categories_parent_code`, `ix_catalog_merchants_category_code`, `ix_catalog_aliases_merchant_id`, `ix_audit_log_operator_id`. They serve the cascades and the purges. The unique contribution key is named `ux_merchant_contributions_identity` (the convention name would exceed PostgreSQL's 63-byte limit).
 
 **`audit_log` purges are enforced by the database too:** the `worker_rw` DELETE policy admits only rows past these ages (support actions 1 year, others 3 years), so a purger bug can't erase recent evidence.
+
+### 4.1 The six LLM tables as built: what a row stores (T-323, T-335, T-339, T-352, T-353)
+
+Migration `20261126090000_LlmQuotaSpendConfigCategorise` (expand-only; the column lists are in the SQL of §2). No column anywhere holds a question, a plan, a template or a provider reply. The only text that can hold user-derived content is `merchant_norm`, in three tables, and each has the same backstop CHECK as `merchant_contributions` (2..64 characters, no run of 6 digits in any script, no `@`).
+
+| Table | One row is | Stores | Does not store |
+|---|---|---|---|
+| `llm_quota_counters` | one subject, one feature, one Cairo month | `feature` (`ask` or `cat`), `subject_kind` (`install` or `account`), `subject_id` (the install or account id: the only place an id is kept), `month_key` (`yyyymm`), `used`, `last_request_hash` (SHA-256 of the retry key, `requestId` + body hash, backend-api §4.9.1), `updated_at` | the request id itself, the body, any text. It is also the attestation evidence the feedback intake reads (a `cat` install row with `used > 0` in the current or previous month) |
+| `llm_spend_daily` | one UTC day, feature, provider id and model | `calls`, `input_tokens`, `cached_tokens`, `output_tokens`, `cost_usd` (`numeric(14,6)`, from the configured prices); alert-marker rows share the table | anything about a user or a request |
+| `remote_config` | one key of the closed set | `key`, canonical string `value`, `version`, `updated_by` (operator id), `updated_at` | per-user values |
+| `llm_cat_answer_cache` | one normalised shop name | `merchant_norm`, `category_code`, `confidence` (0..100), `provider_id`, `prompt_version`, `created_at`, `expires_at` (+90 days), `hits`. Written only from a request that held exactly one name, and served only at `confidence >= cat.cache_min_confidence`; the catalog is always read first | any install, account, IP, app version, token or time of a request |
+| `llm_cat_confirmations` | one install's "Right" on one shop name (unique per `merchant_norm` + `install_hash`) | random `id`, `merchant_norm`, `category_code` (the guess the user kept), `source` (`llm`, `cache`, `catalog`), `install_hash`, `created_at` (cut to the UTC day), `status` (`collecting`, `promoted`, `rejected`) | install id, account id, IP, app version, token, exact time |
+| `llm_cat_corrections` | one install's "Wrong" on one shop name (same unique key) | random `id`, `merchant_norm`, `ai_category`, `user_category` (a system code or the literal `custom`; a custom category's own name is never sent), `source`, `install_hash`, `created_at` (UTC day), `status` (`open`, `promoted`, `rejected`, `prompt_issue`), `operator_id` and `resolved_at` (empty until an operator resolves it, T-354) | the same list as above |
+
+`install_hash` is the KMS-peppered HMAC of the install id that `merchant_contributions` already uses (same value), so it counts distinct installs and cannot be joined to `installs`; it is never joined to `llm_quota_counters`. Residual (accepted, to be named in the privacy text): the same hash links one install's contributions, confirmations and corrections to each other, not to the install. Grants: `GrantMatrix.LlmTables` (summary in the comment in §2). A cache row is deleted when at least 3 corrections from distinct installs, written after the row was created, name the cached category (`SyncStore`, in the sync's claim transaction).
+
+**Evidence is per install, not per merchant (FU-446).** An install that only ever received cache hits has no `cat` counter row with `used > 0` and cannot vote against the cache; a counter row says "this install made an attested, counted categorise call", not "for this shop". Follow-up for the backend lane after launch.
 
 ## 5. Capacity check (NFR-BE-04)
 

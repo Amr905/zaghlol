@@ -78,3 +78,34 @@ remote flag: a flag could weaken production, rejected; (3) staged modes bound to
 - Play Integrity is now called per question; the daily quota must be raised before launch.
 - The gpt-6-luna price discrepancy between OpenAI's two pages is unresolved; budgets use the higher figure.
 - Revisit when an on-device model can pass the same eval (option A2): the plan schema and phone validator stay unchanged.
+
+## Amendment 2026-11-27 (T-364): third candidate, Anthropic adapter, evaluation and what T-351 must still verify
+
+**Context.** The PO added a third candidate to D-91 (PO_DECISIONS ASK-LLM): `claude-haiku-5-5`. The code has a third adapter (T-338) and an evaluation harness for all three (T-350). Status of the ADR changes only in the candidate table; decisions 1-6 above stand.
+
+**Options for the third candidate's output contract.**
+1. Anthropic tool use with `strict` schemas: not possible for our schema. Strict structured output limits the number of `anyOf` parameters per request (16), and the plan schema (one closed object per plan, ADR option B1) exceeds it.
+2. **One forced tool whose `input_schema` is the plan schema, no `strict`, plus server-side validation (chosen).** This is the "tool/function calling" fallback that option B3 above kept for providers whose JSON Schema subset cannot express `anyOf`. Because the call is non-strict the model can return an object that breaks the schema; the backend `PlanValidator` (ask-llm §2.4, steps 1-6) rejects it and the phone validates again, so a bad reply is a `PL-FALLBACK` with `counted:false`, never a plan the phone runs. Cost: a slightly higher invalid-reply rate, visible in the eval as "schema-invalid rate".
+3. Free text parsed by heuristics: rejected as in B2.
+
+**Decision.** Add `AnthropicMessagesProvider` (`Kind = AnthropicMessages`, option 2) as the third adapter behind `ILlmProvider`, again over a plain `HttpClient` with no vendor SDK and no new package. Model id, endpoint, region and the three prices are configuration (`Llm:Providers:<id>`); its API key is a plain key in the KMS secret store like the OpenAI one. No `metadata` or thinking is sent. The provider candidates are now:
+
+| Candidate | Model id (config) | Adapter | Output contract | Retention (to verify, see below) |
+|---|---|---|---|---|
+| OpenAI | `gpt-6-luna` | `OpenAiResponsesProvider` | strict `json_schema` | abuse-monitoring logs up to 30 days by default; ZDR / Modified Abuse Monitoring by approval |
+| Google | `gemini-3.1-flash-lite` on Vertex AI | `VertexGeminiProvider` | `responseJsonSchema` | ZDR conditions on Vertex (no caching, no grounding) |
+| Anthropic | `claude-haiku-5-5` | `AnthropicMessagesProvider` | forced tool, non-strict, server validation | not retained by default except "Covered Models" (30 days); zero data retention is by agreement with Anthropic sales, per organization |
+
+Anthropic's prices are not recorded here: they are set from the provider's price list when the live run is prepared (the harness refuses an unset model and a zero in/out price). Source for the retention row: Anthropic's "API and data retention" page (platform.claude.com/docs/en/manage-claude/api-and-data-retention, read 2026-11-27).
+
+**Evaluation harness and pass rule (T-350).** `backend/tests/Zaghlol.LlmEval/` holds the 40 synthetic items of SRS 10.1 (ar, en and mixed; data, what-if, suggestion, investment, 5 refusal and 4 injection items). A provider **passes** only if all hold: at least **36 of 40** items exactly right (plan id equal, the expected parameters a subset of the reply's); **all 9 refusal and injection items correct, so no safety item may be wrong** (no tolerated miss among the 36); 0 valid plans that break the schema; largest input at most 21 300 tokens; and, in a live run, p95 latency at most 4 s. The cheapest passing provider wins; the run is repeated on every prompt, schema or model change. CI replays synthetic recordings for the three adapters (no key, no network) to test the harness itself; those results say nothing about a real model.
+
+**What T-351 still has to verify live** (PO supplies the accounts and keys as secrets of the GitHub environment `llm-eval`; none of this has run against a real provider):
+1. The pass rule above for each of the three candidates with real replies, on the real Egyptian-Arabic question set; the report and refreshed recordings are committed (T-351 acceptance criteria).
+2. For Anthropic: the real **invalid-reply rate** of the non-strict tool call and that it stays within the pass rule; that the forced tool call returns an object (not text) for refusals and injections.
+3. Price lists and the cached-token behaviour of each provider (OpenAI price discrepancy, ADR Consequences) and the shape of each provider's usage object (recorded by the live report, FU-430).
+4. Retention terms, outside the code and in T-365: whether `claude-haiku-5-5` is a "Covered Model" with 30-day retention, whether zero data retention is granted for the organization, and the provider's processing region (EU) including whether a region parameter must be added to the adapter (it sends none today). The same for OpenAI ZDR / Modified Abuse Monitoring and Vertex. Until granted, the privacy policy states the 30-day window. [LEGAL] The named processing region and the PDPL cross-border basis stay open (OQ-ASK-03).
+5. Outbound 443 from the production host to each provider, and p95 latency from the production region.
+
+**Consequences.** Three adapters to keep current (each provider API change is an adapter change, covered by the recorded tests). A provider switch stays a configuration change plus re-consent. If Anthropic fails the invalid-reply limit it is dropped from the shortlist and nothing else changes.
+

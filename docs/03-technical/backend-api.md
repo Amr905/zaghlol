@@ -547,6 +547,52 @@ Design: [`ask-llm.md`](ask-llm.md) §2, §4, §5 and [`llm-categorise.md`](llm-c
 
 **Sync additions** (`POST /v1/sync`): request `configVersion` (int) and `llmCatFeedback` (at most 50 items `{merchantNorm 2..64, verdict right|wrong, aiCategory, userCategory (a category code or custom), source llm|cache|catalog}`); response `config` (`{version, values: {key: canonical string}, providerName {ar, en}}`, null when unchanged) and `accepted.llmCatFeedback`. Config values are strings so that decimals never become JSON numbers; the app parses each key with its own typed table.
 
+#### 4.9.1 As built (batches 90-97; T-364 brought this section in line with the code and `zaghlol-v1.yaml`)
+
+**Order of the gates** (`LlmGateChain`, shared by both endpoints, cheapest first, each refusal answers before the next gate runs): pipeline network bucket and install token -> `Zaghlol-App` header -> body read once (415 / 413) -> closed parse (`UNKNOWN_FIELD`, `VALIDATION_FAILED`) and body binding -> flag per install (`ask_llm` or `llm_categorise`, read on every request) -> spend pause -> consent (`consent.provider` = active provider id and `consent.v` = 1, else `409 LLM_CONSENT_REQUIRED`; a provider without an API key is `503 LLM_SERVICE_PAUSED` here) -> `Zaghlol-Account` (validated once; none or invalid = no account, never an error) -> **owner stage of the buckets** (the per-network attempts bucket, then install and account, all before attestation) -> device attestation -> **shared stage** (per-network and global buckets, only after attestation passed, so an unattested caller cannot drain them) -> tier and quota pre-check -> spend reservation -> provider -> validation -> commit.
+
+**Retry key (FU-442, FU-413 closed for Ask).** A retry is recognised by `requestId` **and** the body hash: the key handed to the quota store is `requestId + ":" + hex(bodyHash)`, where `bodyHash` is the binding hash of §4.9 (JCS of the body without `attestation`, bound to the install id). `last_request_hash` is SHA-256 of that key. So the same `requestId` with a different body is a **new** request and counts again; the same body re-sent with a fresh attestation (the Android and iOS retry rule) is a retry and is never counted twice. A retry is recognised only on the install row, within 2 minutes of its `updated_at` (`LlmQuotaStore.RetryWindow`); the commit guard has the same window. Ask stores no response, so a retry calls the provider again (charged to the spend ledger, not to the user). A categorise retry is not trimmed to the remaining quota and its commit adds nothing.
+
+**Pre-attestation bucket (FU-442).** Before any attestation is verified, both endpoints draw from one bucket per client network (the /24 of an IPv4 address or the /56 of an IPv6 one): `RateLimits:LlmAttemptNetwork`, default 300 a minute. Verifying a Play Integrity token or an App Attest assertion costs a call to Google or CPU for Apple, so without this a script could force unlimited verifications from one network with bodies that never pass. It is generous on purpose (a mobile carrier's /24 holds many phones) and is separate from the post-attestation buckets below. Its refusals carry the bucket name `network` as the metric tag (the others are `install`, `account` and `global`); keys are never logged. The post-attestation per-network bucket (`RateLimits:AskNetwork`, 30 a minute) is keyed per feature but takes its numbers from the Ask setting for both endpoints.
+
+**What attestation proves (FU-447).** A valid Play Integrity verdict or App Attest assertion proves that **one genuine app on a genuine phone made this request, and that this body was not altered or replayed**. It does **not** limit an install, a person or a phone to one install ID: the same phone can be reinstalled (or "Delete everything" used) and then registers a new install ID with a fresh counter, and attestation passes again. The abuse limits are therefore the per-install and per-account buckets and monthly counters, the per-network buckets, the global bucket, and the spend cap, not attestation alone. Consequences recorded for the feedback rules: a feedback vote is evidence of an install that made at least one attested, counted categorise call (B97-M1); **three votes mean three install IDs that each passed attestation, which a single phone reinstalled three times can also produce**. The 3-correction rule that deletes a cache row and the 3-confirmation rule that queues a name for operator review therefore reduce casual abuse and need a script and several reinstalls to game, but they do not prove three people. Both outcomes stay harmless by design: a deleted cache row is re-learned on the next request, and a confirmed name only reaches an operator, who decides (never automatic).
+
+**Rate-limit keys** (configuration `RateLimits:*`, `ZaghlolRateLimits`; in process, so N instances give up to N times the numbers):
+
+| Key | Default | Applies to |
+|---|---|---|
+| `RateLimits:LlmAttemptNetwork` | 300 / min per network | both endpoints, before attestation |
+| `RateLimits:AskInstall` | burst 3, 3 / min | `/v1/ask/plan` per install |
+| `RateLimits:AskInstallPerDay` | 20 | per install, sliding day |
+| `RateLimits:AskAccount`, `RateLimits:AskAccountPerDay` | burst 3, 3 / min, 20 a day | per signed-in account (an account can span installs) |
+| `RateLimits:AskNetwork` | 30 / min per network | both endpoints, one bucket per feature, after attestation |
+| `RateLimits:CatInstall`, `RateLimits:CatInstallPerDay` | 2 / min, 30 a day | `/v1/categorise` per install |
+| `RateLimits:LlmGlobalPerMinute` (or `Llm:GlobalPerMinute`) | 120 | all LLM calls of the process |
+
+**Remote-config keys** (`remote_config`, closed set `RemoteConfigKeys`, canonical strings, a missing row means the default; changes take effect on the next request):
+
+| Key | Default / range | Visible to the app (sync `config`) |
+|---|---|---|
+| `llm.provider` | provider id `^[a-z0-9][a-z0-9-]{1,31}$`; unset = host `Llm:ActiveProvider` | yes, only together with both display names |
+| `llm.spend_cap_usd` | `10.00` | no |
+| `ask.quota_free`, `ask.quota_gold` | 5, 50 (0..100000) | yes |
+| `ask.s1_pct`, `ask.s4_share_pct`, `ask.s4_saving_pct` | 15 (1..1000), 20, 25 (1..100) | yes |
+| `ask.cd_example_rate_bp` | 2000 (0..10000; an example value, not a rate decision) | yes |
+| `ask.invest_min_egp`, `ask.invest_gold_min_cg`, `ask.invest_gold_karat` | `100.00`, 25, 21 (18, 21, 22 or 24) | yes |
+| `cat.batch_max`, `cat.min_confidence` | 20 (1..20), 60 (0..100) | yes |
+| `cat.quota_free`, `cat.quota_gold` | 15, 150 | yes |
+| `cat.cache_min_confidence`, `cat.confirm_n` | 80, 3 | no |
+
+The retired keys `llm.provider_name.ar` and `.en` are not in the set (a stored row is ignored; the admin API answers `404`). The flags `ask_llm`, `ask_llm_invest` (needs `ask_llm`) and `llm_categorise` are in `FlagKeys`, off until set (§2 flags note).
+
+**Sync `config` block (FU-425).** `config = {version, values, providerName {ar, en}}`, null when `configVersion` equals the stored version. `version` is the sum of the versions of the app-visible keys (server-only keys never move it; no block is sent at version 0). `values["llm.provider"]` is the **effective** provider id and `providerName` is `Llm:Providers:<id>:DisplayNameAr` / `DisplayNameEn` of that same provider; the two are both present or both absent, and absent means the app has no consent terms and sends nothing. The whole sync response is signed, so the block is covered by the signature. The consent version (1) is a code constant on both sides, pinned by `consentVersion` in `fixtures/ask-plan-responses-v1.json`. A config read failure drops the block.
+
+**`accepted.llmCatFeedback`.** The number of feedback rows actually stored (not items sent). `0` when the install's own `llm_categorise` flag is off, when the install has no attested categorise call in the current or previous Cairo month (B97-M1), or when every item was dropped; the member is absent when the request carried no `llmCatFeedback`. Invalid items are dropped one by one, silently, and never echoed: the name must pass `CategoriseNameFilter` after `CatalogText.Normalize`; `aiCategory` must be a live system category code (never `custom`); `userCategory` must be one too or, on `wrong`, the literal `custom`; `right` needs both equal and `wrong` needs them to differ; one row per name and verdict in a call. Storage and retention: `backend-schema.md` §2 (LLM tables) and §4.
+
+> **PENDING PO (a): BR-SYNC-03 wording for `llmCatFeedback` (FU-412, FU-441).** The field is accepted and stored, but the app keeps `kSendLlmCatFeedback = false` until the PO approves the wording, so no feedback leaves a phone today. Draft wording (from `T-359.md` "For the PO"): *"When you tap Right or Wrong on a guessed category, the shop name, Zaghlol's guess, your category (or 'custom') and where the guess came from are sent with the next sync, only while auto-categories are on. Nothing else."* Points the PO must settle: (1) the `source` field (`llm`, `cache`, `catalog`) is in the OpenAPI schema and the table but not named in D-96; (2) the shop name travels in the same request as the anonymous install ID (and the install token), even though the stored row keeps only a keyed hash; (3) **Undo only works until the next sync**: it removes the item from the outbox within 5 seconds, but an item that already left in a sync cannot be taken back; (4) D-94...D-96 are still marked **draft** in the SRS and stay draft until the PO approves them. Nothing in this document decides these.
+
+**Operator review endpoints** (`/admin/v1/llm-cat/corrections/*`, `/admin/v1/llm-cat/confirmed/*`, `llm-categorise.md` §6) are **not built yet** (T-354) and are not in `zaghlol-v1.yaml`.
+
 ## 5. Admin API (operators, v1 used by `zaghlol-ops`; web admin later per D-37)
 
 | Method & path | Role | Purpose |
