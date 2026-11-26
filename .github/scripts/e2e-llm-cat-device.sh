@@ -23,7 +23,7 @@ PORT=18480
 mkdir -p "$OUT/screens"
 cd "$(dirname "$0")/../../app"
 
-b64u() { perl -ne 'print pack("H*", $_)' | base64 -w0 | tr '+/' '-_' | tr -d '='; }
+b64u() { perl -ne 'chomp; print pack("H*", $_)' | base64 -w0 | tr '+/' '-_' | tr -d '='; }
 
 keydir=$(mktemp -d)
 openssl ecparam -name prime256v1 -genkey -noout -out "$keydir/k.pem" || exit 1
