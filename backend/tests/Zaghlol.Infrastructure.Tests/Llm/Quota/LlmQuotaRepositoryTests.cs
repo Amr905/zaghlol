@@ -94,7 +94,9 @@ public class LlmQuotaRepositoryTests(LlmQuotaFixture fixture) : IClassFixture<Ll
         Assert.True(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 4, 5, Hash("b"), Now, CancellationToken.None));
         Assert.False(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 1, 5, Hash("c"), Now, CancellationToken.None));
         Assert.Equal(5, await UsedAsync("ask", subject));
-        Assert.Equal(new LlmQuotaRow(5, Hash("b")), await ReadBack(subject));
+        var row = await ReadBack(subject);
+        Assert.Equal(5, row?.Used);
+        Assert.Equal(Hash("b"), row?.LastRequestHash);
     }
 
     private async Task<LlmQuotaRow?> ReadBack(Guid subject)
