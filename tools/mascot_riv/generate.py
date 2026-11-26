@@ -14,7 +14,7 @@ import labcss as L
 import motion
 import scene
 import shapes as S
-from rig import parse_svg
+from rig import parse_svg, trim_cuff_tab
 from rivefile import RiveFile
 
 HERE = Path(__file__).resolve().parent
@@ -172,7 +172,7 @@ def all_ease_keys(anims):
 
 # ---------------------------------------------------------------- main
 def main(out):
-    groups = parse_svg(SVG)
+    groups = trim_cuff_tab(parse_svg(SVG))
     f = RiveFile()
     f.add("Backboard")
     f.add("Artboard", name="Zaghlol", width=scene.ART, height=scene.ART, clip=True)
