@@ -418,19 +418,19 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-344](tasks/T-344.md) | Template filler and app answer templates | ASK-LLM | Medium | Sonnet | flutter-core-engineer | T-331, T-324, T-342 | A | 95 | DONE (batch 95) |
 | [T-345](tasks/T-345.md) | UI: consent sheet, "What I sent", S-71 row | ASK-LLM | Medium | Sonnet | flutter-ui-engineer | T-324, T-328, T-340 | U | 94 | DONE (batch 94) |
 | [T-346](tasks/T-346.md) | UI: S-50 online-helper states | ASK-LLM | Medium | Sonnet | flutter-ui-engineer | T-324, T-343 | U | 95 | DONE (batch 95) |
-| [T-347](tasks/T-347.md) | UI: answer views per plan, investment bands + disclaimer | ASK-LLM | Medium | Sonnet | flutter-ui-engineer | T-324, T-344 | U | 96 | TODO |
+| [T-347](tasks/T-347.md) | UI: answer views per plan, investment bands + disclaimer | ASK-LLM | Medium | Sonnet | flutter-ui-engineer | T-324, T-344 | U | 96 | DONE (batch 96) |
 | [T-348](tasks/T-348.md) | Device E2E: online helper with a fake backend | ASK-LLM | Medium | Sonnet | flutter-core-engineer | T-345, T-346, T-347 | A | 97 | TODO |
 | [T-349](tasks/T-349.md) | `POST /v1/ask/plan` pipeline, prompt, error codes, scrub tests | ASK-LLM | High (C4) | Sonnet | backend-engineer | T-330, T-332, T-334, T-335, T-336, T-339 | B | 95 | DONE (batch 95) |
-| [T-350](tasks/T-350.md) | Evaluation harness: 40 questions, recorded CI run, live workflow | ASK-LLM / D-91 | High | Sonnet | backend-engineer | T-349, T-338 | B | 96 | TODO |
+| [T-350](tasks/T-350.md) | Evaluation harness: 40 questions, recorded CI run, live workflow | ASK-LLM / D-91 | High | Sonnet | backend-engineer | T-349, T-338 | B | 96 | DONE (batch 96) |
 | [T-351](tasks/T-351.md) | Live provider evaluation run and provider choice | ASK-LLM / D-91 | Medium | Sonnet | backend-engineer (Lead triggers) | T-350, T-333 | B | — | BLOCKED (PO: provider accounts + keys) |
-| [T-352](tasks/T-352.md) | `POST /v1/categorise` with answer cache | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-349, T-323 | B | 96 | TODO |
+| [T-352](tasks/T-352.md) | `POST /v1/categorise` with answer cache | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-349, T-323 | B | 96 | DONE (batch 96) |
 | [T-353](tasks/T-353.md) | Feedback intake through sync, corrections review table, retention | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-352, T-334 | B | 97 | TODO |
 | [T-354](tasks/T-354.md) | Operator review admin endpoints and `zaghlol-ops llmcat` | LLM-CAT | Medium | Sonnet | backend-engineer | T-353 | B | 98 | TODO |
 | [T-355](tasks/T-355.md) | Categorise eligibility rule (pure) | LLM-CAT | High (C4) | Sonnet | parsing-engine-engineer | T-325 | P | 94 | DONE (batch 94) |
 | [T-356](tasks/T-356.md) | Drift migration: AI suggestions, queue, outbox kinds, `CategorySource.ai`, export | LLM-CAT | High (C4) | Opus | flutter-core-engineer | — | A | 91 | DONE (batch 91) |
 | [T-357](tasks/T-357.md) | Categorizer AI tier and recategorizer | LLM-CAT | High (C4) | Opus | flutter-core-engineer | T-356 | A | 95 | DONE (batch 95) |
-| [T-358](tasks/T-358.md) | Categorise queue and sender with outgoing-body proofs | LLM-CAT | High (C4) | Sonnet | flutter-core-engineer | T-355, T-356, T-340 | A | 96 | TODO |
-| [T-359](tasks/T-359.md) | Right/Wrong actions, Undo, `llmCatFeedback` through sync | LLM-CAT | High | Sonnet | flutter-core-engineer | T-356, T-357, T-322 | A | 96 | TODO |
+| [T-358](tasks/T-358.md) | Categorise queue and sender with outgoing-body proofs | LLM-CAT | High (C4) | Sonnet | flutter-core-engineer | T-355, T-356, T-340 | A | 96 | DONE (batch 96) |
+| [T-359](tasks/T-359.md) | Right/Wrong actions, Undo, `llmCatFeedback` through sync | LLM-CAT | High | Sonnet | flutter-core-engineer | T-356, T-357, T-322 | A | 96 | DONE (batch 96) |
 | [T-360](tasks/T-360.md) | ARB strings: automatic category (§4.12) | LLM-CAT | Low | Haiku | boilerplate-engineer | T-329 | U | 95 | DONE (batch 95) |
 | [T-361](tasks/T-361.md) | UI: AI chip, ✓/✗ controls, picker, Undo | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-359, T-360 | U | 97 | TODO |
 | [T-362](tasks/T-362.md) | UI: discovery card, consent sheet, Settings row, counter | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-358, T-360 | U | 97 | TODO |
