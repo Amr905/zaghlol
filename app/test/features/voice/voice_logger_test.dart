@@ -162,6 +162,7 @@ void main() {
   ) async {
     final r = VoiceRig();
     await r.pump(t);
+    r.elapsed = const Duration(seconds: 5);
     r.speech.end();
     await t.pumpAndSettle();
     expect(find.text("I didn't catch an amount"), findsOneWidget);
@@ -169,6 +170,56 @@ void main() {
     await t.tap(find.text('Try again'));
     await t.pumpAndSettle();
     expect(find.text('Tell me what you paid'), findsOneWidget);
+  });
+
+  testWidgets('T-275 cold start: quick end retries silently, then works', (
+    t,
+  ) async {
+    final r = VoiceRig();
+    await r.pump(t);
+    r.elapsed = const Duration(milliseconds: 300);
+    r.speech.end();
+    await t.pumpAndSettle();
+    expect(find.text("I didn't catch an amount"), findsNothing);
+    expect(r.speech.onDeviceCalls.length, 2);
+    expect(find.text('Tell me what you paid'), findsOneWidget);
+    await speakAndStop(t, r, 'خضار ٥٠ جنيه');
+    expect(find.text("I didn't catch an amount"), findsNothing);
+    expect(r.editor.added, isEmpty);
+  });
+
+  testWidgets('T-275 a quick no-match error retries once, not twice', (
+    t,
+  ) async {
+    final r = VoiceRig();
+    await r.pump(t);
+    r.speech.fail(SpeechError.noSpeech);
+    await t.pumpAndSettle();
+    expect(r.speech.onDeviceCalls.length, 2);
+    r.speech.fail(SpeechError.noSpeech);
+    await t.pumpAndSettle();
+    expect(r.speech.onDeviceCalls.length, 2);
+    expect(find.text("I didn't catch an amount"), findsOneWidget);
+  });
+
+  testWidgets('T-275 genuine silence still shows the message', (t) async {
+    final r = VoiceRig();
+    await r.pump(t);
+    r.elapsed = const Duration(seconds: 4);
+    r.speech.fail(SpeechError.noSpeech);
+    await t.pumpAndSettle();
+    expect(r.speech.onDeviceCalls.length, 1);
+    expect(find.text("I didn't catch an amount"), findsOneWidget);
+  });
+
+  testWidgets('T-275 the user stopping never retries', (t) async {
+    final r = VoiceRig();
+    await r.pump(t);
+    await t.tap(find.byKey(const ValueKey('voice-done')));
+    r.speech.end();
+    await t.pumpAndSettle();
+    expect(r.speech.onDeviceCalls.length, 1);
+    expect(find.text("I didn't catch an amount"), findsOneWidget);
   });
 
   testWidgets('words without an amount end as empty', (t) async {
