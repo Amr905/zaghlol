@@ -29,8 +29,8 @@ SuggestInputs fixture() => SuggestInputs(
     ),
   ],
   subscriptions: [
-    SubscriptionCost(name: 'Streaming', monthly: e('300')),
-    SubscriptionCost(name: 'Music', monthly: e('150')),
+    SuggestSubscriptionCost(name: 'Streaming', monthly: e('300')),
+    SuggestSubscriptionCost(name: 'Music', monthly: e('150')),
   ],
   cashWithdrawn: e('4000'),
   cashUnattributed: e('2400'),
@@ -205,12 +205,12 @@ void main() {
       inputs: [
         SuggestInputs(
           currency: egp,
-          subscriptions: [SubscriptionCost(name: 'A', monthly: e('10'))],
+          subscriptions: [SuggestSubscriptionCost(name: 'A', monthly: e('10'))],
         ),
         SuggestInputs(
           currency: usd,
           subscriptions: [
-            SubscriptionCost(name: 'B', monthly: Money.parse('5', usd)),
+            SuggestSubscriptionCost(name: 'B', monthly: Money.parse('5', usd)),
           ],
         ),
       ],
@@ -223,7 +223,10 @@ void main() {
           SuggestInputs(
             currency: egp,
             subscriptions: [
-              SubscriptionCost(name: 'B', monthly: Money.parse('5', usd)),
+              SuggestSubscriptionCost(
+                name: 'B',
+                monthly: Money.parse('5', usd),
+              ),
             ],
           ),
         ],

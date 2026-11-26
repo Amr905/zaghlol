@@ -41,8 +41,8 @@ final class CategorySpend {
   final List<Money> periods;
 }
 
-final class SubscriptionCost {
-  const SubscriptionCost({required this.name, required this.monthly});
+final class SuggestSubscriptionCost {
+  const SuggestSubscriptionCost({required this.name, required this.monthly});
   final String name;
   final Money monthly;
 }
@@ -57,7 +57,7 @@ final class SuggestInputs {
   });
   final Currency currency;
   final List<CategorySpend> categories;
-  final List<SubscriptionCost> subscriptions;
+  final List<SuggestSubscriptionCost> subscriptions;
 
   /// Cash withdrawn in the last full period and the part not attributed to
   /// any category (CAT-CASH pool).
@@ -191,7 +191,7 @@ List<Suggestion> _forCurrency(
   final all = <Suggestion>[...byCategory.values];
 
   // S2: largest active subscription (ties by name).
-  SubscriptionCost? top;
+  SuggestSubscriptionCost? top;
   for (final s in input.subscriptions) {
     same(s.monthly);
     if (s.monthly.minor <= 0) continue;
