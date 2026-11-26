@@ -1455,10 +1455,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeApproxSheetBody =>
-      'بنحسبها بسعر البنك للي حولته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.';
+      'بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.';
 
   @override
-  String get homeApproxSheetOwn => 'اللي دخلك بالعملة دي (بما فيه اللي حولته)';
+  String get homeApproxSheetOwn => 'اللي دخلك بالعملة دي (بما فيه اللي غيّرته)';
 
   @override
   String homeApproxSheetHeld(String amount) {
@@ -1467,12 +1467,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String homeApproxSheetExchanged(String amount) {
-    return '$amount حولتها، واتحسبت مرة واحدة بالفعل';
+    return '$amount غيّرتها، واتحسبت مرة واحدة بالفعل';
   }
 
   @override
   String homeApproxSheetExchangedBank(String amount, String rate) {
-    return '$amount حولتها بسعر البنك $rate، واتحسبت مرة واحدة بالفعل';
+    return '$amount غيّرتها بسعر البنك $rate، واتحسبت مرة واحدة بالفعل';
   }
 
   @override

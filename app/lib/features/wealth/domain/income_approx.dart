@@ -3,8 +3,9 @@
 // added, and only ever as a display-only, always-approximate figure.
 //
 // Rules (multi-currency-hybrid-plan §2 step 5, §3):
-// - total = target money in (it already holds what was exchanged INTO the
-//   target, at the bank's real rate) + for each other currency the part still
+// - total = target held part `max(0, moneyIn - exchangedOut)` (money in holds
+//   what was exchanged INTO the target at the bank's real rate; what the
+//   target exchanged OUT is already in the foreign money in) + for each other currency the part still
 //   held, `max(0, moneyIn - exchangedOut)`, converted once at the daily rate.
 // - The exchanged part of a foreign currency is NOT converted and added
 //   again: its target amount is already in the target money in.
@@ -124,7 +125,8 @@ IncomeApprox buildIncomeApprox({
   final foreign = <IncomeApproxInput>[];
   for (final i in inputs) {
     if (i.currency == target) {
-      targetIn = i.moneyIn;
+      final left = i.moneyIn - i.exchangedOut;
+      targetIn = left.isPositive ? left : Money.zero(target);
     } else if (i.moneyIn.minor != 0 || i.exchangedOut.minor != 0) {
       foreign.add(i);
     }

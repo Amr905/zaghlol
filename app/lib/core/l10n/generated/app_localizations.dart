@@ -2298,13 +2298,13 @@ abstract class AppLocalizations {
   /// B
   ///
   /// In ar, this message translates to:
-  /// **'بنحسبها بسعر البنك للي حولته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.'**
+  /// **'بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.'**
   String get homeApproxSheetBody;
 
   /// L · the target currency's own money in
   ///
   /// In ar, this message translates to:
-  /// **'اللي دخلك بالعملة دي (بما فيه اللي حولته)'**
+  /// **'اللي دخلك بالعملة دي (بما فيه اللي غيّرته)'**
   String get homeApproxSheetOwn;
 
   /// L · the part of a foreign currency not exchanged
@@ -2316,13 +2316,13 @@ abstract class AppLocalizations {
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'{amount} حولتها، واتحسبت مرة واحدة بالفعل'**
+  /// **'{amount} غيّرتها، واتحسبت مرة واحدة بالفعل'**
   String homeApproxSheetExchanged(String amount);
 
   /// S
   ///
   /// In ar, this message translates to:
-  /// **'{amount} حولتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل'**
+  /// **'{amount} غيّرتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل'**
   String homeApproxSheetExchangedBank(String amount, String rate);
 
   /// S
