@@ -217,7 +217,7 @@ class _Bubble extends StatelessWidget {
   const _Bubble({
     required this.fromUser,
     required this.child,
-    required this.semanticsLabel,
+    this.semanticsLabel,
     this.mood = ZaghlolMoment.tourGuide,
     this.talk = false,
     this.tag,
@@ -226,7 +226,9 @@ class _Bubble extends StatelessWidget {
   });
   final bool fromUser;
   final Widget child;
-  final String semanticsLabel;
+
+  /// Null: the child supplies its own semantics.
+  final String? semanticsLabel;
   final ZaghlolMoment mood;
   final bool talk;
 
@@ -301,7 +303,7 @@ class _Bubble extends StatelessWidget {
                 child: Semantics(
                   container: true,
                   label: semanticsLabel,
-                  excludeSemantics: true,
+                  excludeSemantics: semanticsLabel != null,
                   child: bubble,
                 ),
               ),
@@ -324,7 +326,7 @@ class _Bubble extends StatelessWidget {
                           container: true,
                           liveRegion: liveRegion,
                           label: semanticsLabel,
-                          excludeSemantics: true,
+                          excludeSemantics: semanticsLabel != null,
                           child: bubble,
                         ),
                         ?actions,

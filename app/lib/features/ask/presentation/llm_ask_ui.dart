@@ -15,7 +15,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/theme/z_tokens.dart';
+import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../application/llm_ask_flow.dart';
+import '../domain/llm_answer_models.dart';
 import 'consent_sheet.dart';
 import 'sent_text_parser.dart';
 
@@ -34,6 +36,18 @@ final llmAnswerViewBuilderProvider = Provider<LlmAnswerViewBuilder>(
       ),
   name: 'llmAnswerViewBuilderProvider',
 );
+
+/// The pose of the avatar for [a] (ux table): `proud` for what-ifs and for
+/// "nothing to trim", `professor` for investment, `tourGuide` otherwise.
+ZaghlolMoment llmAnswerMood(LlmAnswer a) => switch (a) {
+  LlmWhatIfAnswer() || LlmWhatIfSaveAnswer() => ZaghlolMoment.proud,
+  LlmSuggestAnswer(:final perCurrency) =>
+    perCurrency.every((c) => c.suggestions.isEmpty)
+        ? ZaghlolMoment.proud
+        : ZaghlolMoment.tourGuide,
+  LlmInvestAnswer() => ZaghlolMoment.professor,
+  _ => ZaghlolMoment.tourGuide,
+};
 
 /// The mounted S-50 registers itself here so the consent sheet (asked by the
 /// flow, which has no context) opens over the chat. Not state: nothing

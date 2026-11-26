@@ -12,6 +12,7 @@
 //   categoriser uses, so no migration is needed. The chart reads PlanExecutor
 //   uses match those rows by the same key (ChartRepository._merchantMatch).
 //   Deduped in SQL. No cap: a name left out here would be sent in plain text.
+//   `recurring_items.name` (FU-424) is added the same way.
 //   Adding a "counterparty" kind later (open PO decision, not masked now) is
 //   one more query over counterparty_value, merged the same way.
 //   There is no user-alias table; catalog aliases are public.
@@ -153,6 +154,24 @@ final class MaskSourcesDrift implements MaskSources {
       if (id.isEmpty) continue;
       final set = names.putIfAbsent(id, () => {id});
       if (hasRaw) set.add(raw);
+    }
+    // FU-424: hand-added subscriptions and bills carry a name the user typed.
+    // Every status counts (a dismissed one is still the user's own word). The
+    // id is the item's merchant_norm when it has one (so it joins that
+    // merchant), else the same read-time key the merchant rows use.
+    final items = await db
+        .customSelect(
+          'SELECT name, merchant_norm AS m FROM recurring_items',
+          variables: const <Variable>[],
+          readsFrom: {db.recurringItems},
+        )
+        .get();
+    for (final r in items) {
+      final name = r.read<String>('name');
+      if (name.trim().isEmpty) continue;
+      final id = r.readNullable<String>('m') ?? merchantKey(name);
+      if (id.isEmpty) continue;
+      names.putIfAbsent(id, () => {id}).add(name);
     }
     final all = await accounts();
     return MaskSourcesDrift._(

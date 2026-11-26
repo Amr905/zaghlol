@@ -2,7 +2,9 @@
 // their ids, nothing is capped) and the registry short aliases (FU-399).
 // Synthetic data only.
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/app_database.dart' hide Settings;
 import 'package:zaghlol/features/accounts/domain/account.dart';
 import 'package:zaghlol/features/ask/data/mask_sources_drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -140,6 +142,45 @@ void main() {
       );
       expect(s.institutions.single.id, 'cib');
       expect(s.toString(), isNot(contains('Carrefour')));
+    });
+
+    test('FU-424: a hand-added recurring item name is a mask source, and a '
+        'question naming it leaves with a placeholder', () async {
+      final db = edb.db;
+      Future<void> item(String id, String name, {String? norm}) => db
+          .into(db.recurringItems)
+          .insert(
+            RecurringItemsCompanion.insert(
+              id: id,
+              kind: 'subscription',
+              status: 'dismissed',
+              name: name,
+              merchantNorm: Value(norm),
+              amountMinor: 10000,
+              currency: 'EGP',
+              cadence: 'monthly',
+              createdAt: 1,
+            ),
+          );
+      await item('r1', 'Zorbaplex Gym');
+      await item('r2', 'Netflix Family', norm: 'netflix');
+      final s = await MaskSourcesDrift.load(
+        db,
+        accounts: () async => const [],
+        registry: const [],
+      );
+      expect(
+        s.merchants.singleWhere((m) => m.id == merchantKey('Zorbaplex Gym')),
+        isNotNull,
+      );
+      expect(
+        s.merchants.singleWhere((m) => m.id == 'netflix').names,
+        contains('Netflix Family'),
+      );
+      final o = ReferenceMasker.mask('what did Zorbaplex Gym cost me', s);
+      expect(o, isA<MaskResult>());
+      expect((o as MaskResult).sentText, isNot(contains('Zorbaplex')));
+      expect(o.sentText, contains('MERCHANT'));
     });
 
     test('B94-M2: 5,000 transactions over 50 merchants load fast '

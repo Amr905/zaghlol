@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app_navigation.dart';
+import 'app/ask_wiring.dart';
 import 'app/app_restart.dart';
 import 'app/notification_taps.dart';
 import 'app/onboarding_gate.dart';
@@ -92,6 +93,8 @@ Future<void> main() async {
           ...syncWiringOverrides,
           // T-145: seat keys and the purchase flow.
           ...goldWiringOverrides,
+          // T-347: online-helper consent sheet and answer views.
+          ...askLlmWiringOverrides,
           // T-100: backup failure and reminder alerts through notifications.
           backupAlertSinkOverride,
           // NOTIF-GW: the real local-notification gateway, permission and taps.

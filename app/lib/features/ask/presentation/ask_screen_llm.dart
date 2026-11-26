@@ -179,10 +179,11 @@ class _LlmMessageView extends ConsumerWidget {
         );
       case AskLlmAnswered():
         final build = ref.watch(llmAnswerViewBuilderProvider);
+        // The view builds its own semantics (figures, masked amounts, the
+        // badge and chips stay separate nodes).
         return _Bubble(
           fromUser: false,
-          liveRegion: true,
-          semanticsLabel: l.chatMainZaghlolA11y(l.chatFallbackText),
+          mood: llmAnswerMood(s.answer),
           child: build(context, s),
         );
       default:
