@@ -1,0 +1,4 @@
+[
+  { "contains": "refuse-me", "outcome": "Refused", "json": null, "usage": { "inputTokens": 5, "cachedTokens": 0, "outputTokens": 1 } },
+  { "contains": null, "outcome": "Ok", "json": { "v": 1, "plan": "PL-SUGGEST", "p": { "currency": null }, "t": null }, "usage": { "inputTokens": 10, "cachedTokens": 4, "outputTokens": 20 } }
+]

@@ -1,0 +1,13 @@
+{
+  "id": "resp_synthetic_002",
+  "object": "response",
+  "status": "completed",
+  "output": [
+    {
+      "type": "message",
+      "role": "assistant",
+      "content": [ { "type": "refusal", "refusal": "I can't help with that." } ]
+    }
+  ],
+  "usage": { "input_tokens": 2200, "input_tokens_details": { "cached_tokens": 0 }, "output_tokens": 9 }
+}
