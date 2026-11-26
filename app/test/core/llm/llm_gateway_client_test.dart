@@ -349,22 +349,15 @@ void main() {
       expect(r.server.llm, hasLength(1));
     });
 
-    test('409 LLM_CONSENT_REQUIRED → consent cleared, providerId', () async {
+    test('409 LLM_CONSENT_REQUIRED → consent cleared; the body\'s providerId '
+        'is dropped (FU-425)', () async {
       final r = _Rig();
       await r.allow();
       r.server.reply = (_) =>
           jsonResponse(409, _problemBody(_ask, 'LLM_CONSENT_REQUIRED'));
-      await expectLater(
-        r.ask(),
-        throwsA(
-          isA<LlmConsentRequired>().having(
-            (e) => e.providerId,
-            'providerId',
-            'openai-luna',
-          ),
-        ),
-      );
+      await expectLater(r.ask(), throwsA(isA<LlmConsentRequired>()));
       expect(await r.consent.read(LlmFeature.ask), isNull);
+      // A later grant is the app's own terms, never the 409's.
       expect(await r.consent.read(LlmFeature.categorise), isNotNull);
     });
 

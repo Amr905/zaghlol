@@ -192,6 +192,33 @@ final syncOrchestratorProvider = FutureProvider<SyncOrchestrator>((ref) async {
   );
 }, name: 'syncOrchestratorProvider');
 
+/// FU-425 safety net, both LLM features: after a `409 LLM_CONSENT_REQUIRED`
+/// the next sync omits `configVersion`, so the server sends its block again.
+/// It runs no sync and sends nothing.
+final llmConfigCursorResetProvider = Provider<Future<void> Function()>(
+  (ref) => () async {
+    final c = await ref.read(remoteConfigServiceProvider.future);
+    c.resetCursor();
+  },
+  name: 'llmConfigCursorResetProvider',
+);
+
+/// FU-425 safety net, Ask: reset the cursor, run ONE sync (it carries no
+/// question and no merchant name, only what every sync sends) and re-read the
+/// config, so the flow sees the provider the server has now. A failed or
+/// paused sync leaves the old terms (the flow then answers with the paused
+/// copy and sends nothing).
+final llmConfigResyncProvider = Provider<Future<void> Function()>(
+  (ref) => () async {
+    await ref.read(llmConfigCursorResetProvider)();
+    final o = await ref.read(syncOrchestratorProvider.future);
+    await o.run(force: true);
+    ref.invalidate(remoteConfigProvider);
+    await ref.read(remoteConfigProvider.future);
+  },
+  name: 'llmConfigResyncProvider',
+);
+
 /// Data for the About status line (T-146 owns the strings).
 final syncStatusProvider = FutureProvider<SyncStatus>((ref) async {
   final o = await ref.watch(syncOrchestratorProvider.future);

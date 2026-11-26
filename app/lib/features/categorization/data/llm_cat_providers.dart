@@ -10,12 +10,12 @@ import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
-import '../../../core/config/remote_config_providers.dart';
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/flags/feature_flags.dart';
 import '../../../core/flags/flags_providers.dart';
 import '../../../core/llm/llm_feature.dart';
 import '../../../core/llm/llm_gateway_client.dart';
+import '../../../core/llm/llm_provider_terms.dart';
 import '../../../ingestion/bundled_registry.dart';
 import '../application/llm_cat_business_templates.dart';
 import '../application/llm_cat_feedback.dart';
@@ -39,11 +39,12 @@ final nameLexiconProvider = FutureProvider<NameLexicon>(
   name: 'nameLexiconProvider',
 );
 
-/// The auto-category consent terms: the remote config's provider id at
-/// [catLlmConsentVersion]. Null while the provider isn't known.
+/// The auto-category consent terms: the one provider of
+/// [llmProviderTermsProvider] at [catLlmConsentVersion]. Null while the
+/// provider or its names aren't known (nothing is sent).
 final llmCatTermsProvider = Provider<LlmTerms?>((ref) {
-  final p = ref.watch(remoteConfigProvider).value?.llmProvider ?? '';
-  return p.isEmpty ? null : LlmTerms(provider: p, v: catLlmConsentVersion);
+  final p = ref.watch(llmProviderTermsProvider);
+  return p == null ? null : LlmTerms(provider: p.id, v: catLlmConsentVersion);
 }, name: 'llmCatTermsProvider');
 
 final llmCatQueueFillerProvider = FutureProvider<LlmCatQueueFiller>((

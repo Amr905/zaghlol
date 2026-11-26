@@ -77,6 +77,7 @@ final class SheetConsentPrompter implements ConsentPrompter {
       context,
       ref,
       preview: parseSentText(request.sentText),
+      expect: request.terms,
     );
   }
 }

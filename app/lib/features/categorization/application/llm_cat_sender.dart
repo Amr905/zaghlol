@@ -89,6 +89,7 @@ class LlmCatSender {
     required this.newRequestId,
     required this.terms,
     required this.allowedCategoryIds,
+    this.onConsentRequired = _noop,
     required this.batchMax,
     this.minInterval = const Duration(minutes: 10),
     this.backoff = const Duration(hours: 1),
@@ -100,6 +101,11 @@ class LlmCatSender {
   final AiSuggestionApplier applier;
   final LlmCategoriseCall call;
   final String Function() newRequestId;
+
+  /// FU-425: runs on a `409 LLM_CONSENT_REQUIRED`: resets the config cursor so
+  /// the next sync brings the provider the server has now. No sync, no send.
+  final Future<void> Function() onConsentRequired;
+  static Future<void> _noop() async {}
 
   /// The consent terms of the active provider; null until it is known
   /// (nothing is sent then).
@@ -175,8 +181,15 @@ class LlmCatSender {
       _lastSendAt = last;
       return idle;
     } on LlmConsentRequired {
-      // The client cleared the consent; nothing more until the user agrees.
+      // The client cleared the consent (the gate is closed from now on), the
+      // queue stays (not a withdrawal); the provider id of the 409 is never
+      // used. Nothing more until the user agrees again.
       _pending = null;
+      try {
+        await onConsentRequired();
+      } on Object {
+        // Resetting the cursor is best effort.
+      }
       return idle;
     } on LlmServicePaused {
       return idle;

@@ -16,10 +16,13 @@ import '../../../core/flags/feature_flags.dart';
 import '../../../core/flags/flags_providers.dart';
 import '../../../core/llm/llm_feature.dart';
 import '../../../core/llm/llm_gateway_client.dart';
+import '../../../core/llm/llm_provider_terms.dart';
 import '../../../core/llm/llm_quota_snapshot.dart';
 import '../../../ingestion/bundled_registry.dart';
 import '../../accounts/data/accounts_providers.dart';
 import '../../budget/application/budget_providers.dart';
+import '../../catalog_sync/application/sync_providers.dart'
+    show llmConfigResyncProvider;
 import '../../wealth/data/prices_providers.dart';
 import '../../wealth/domain/price_feed.dart' show Approx;
 import '../../insights/data/chart_providers.dart';
@@ -45,11 +48,12 @@ final askOnlineCheckProvider = Provider<Future<bool> Function()>(
   name: 'askOnlineCheckProvider',
 );
 
-/// The terms the user agrees to: the remote config's provider id at the
-/// sheet's version. Null while the provider id isn't known (nothing is sent).
+/// The terms the user agrees to: the one provider of
+/// [llmProviderTermsProvider] at the sheet's version. Null while the provider
+/// or its names aren't known (nothing is sent).
 final askLlmTermsProvider = Provider<LlmTerms?>((ref) {
-  final p = ref.watch(remoteConfigProvider).value?.llmProvider ?? '';
-  return p.isEmpty ? null : LlmTerms(provider: p, v: askLlmConsentVersion);
+  final p = ref.watch(llmProviderTermsProvider);
+  return p == null ? null : LlmTerms(provider: p.id, v: askLlmConsentVersion);
 }, name: 'askLlmTermsProvider');
 
 /// The stored quota snapshot (null: unknown or past `resetsAt`).
@@ -149,6 +153,7 @@ final llmAskFlowProvider = FutureProvider<LlmAskFlow>((ref) async {
     prompter: ref.watch(consentPrompterProvider),
     isFlagOn: () => flags.isOn(FeatureFlag.askLlm),
     terms: () => ref.read(askLlmTermsProvider),
+    resyncConfig: ref.read(llmConfigResyncProvider),
     now: () => DateTime.now().toUtc(),
     isOnline: ref.watch(askOnlineCheckProvider),
   );

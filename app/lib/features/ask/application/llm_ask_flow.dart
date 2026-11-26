@@ -172,6 +172,7 @@ class LlmAskFlow {
     required this.terms,
     required this.now,
     this.isOnline = _alwaysOnline,
+    this.resyncConfig = _noResync,
     this.scrub = ClientScrub.apply,
     this.mask = ReferenceMasker.mask,
     this.validatorFor = _defaultValidator,
@@ -195,12 +196,18 @@ class LlmAskFlow {
   final LlmTerms? Function() terms;
   final DateTime Function() now;
   final Future<bool> Function() isOnline;
+
+  /// FU-425: after a 409 (consent already cleared by the gateway) resets the
+  /// config cursor, runs one sync that carries no question and refreshes what
+  /// [terms] returns. The default changes nothing.
+  final Future<void> Function() resyncConfig;
   final ScrubResult Function(String) scrub;
   final MaskOutcome Function(String, MaskSources) mask;
   final PlanValidator Function(MaskSources) validatorFor;
   final String primaryCurrency;
 
   static Future<bool> _alwaysOnline() async => true;
+  static Future<void> _noResync() async {}
   static PlanValidator _defaultValidator(MaskSources s) =>
       PlanValidator(sources: s);
 
@@ -293,17 +300,29 @@ class LlmAskFlow {
           stop: stop,
           forceNewKey: keyRetried,
         );
-      } on LlmConsentRequired catch (e) {
-        final p = e.providerId;
+      } on LlmConsentRequired {
+        // Safety net (FU-425): never take the provider from the 409. Sync
+        // once, then re-prompt only when the synced terms differ from what
+        // was just refused; otherwise the app is behind (paused copy).
         if (consentRetried) {
           yield const AskLlmConsentDeclined();
           return;
         }
         consentRetried = true;
-        if (p != null && LlmConsentGrant.validTerms(p, active!.v)) {
-          active = LlmTerms(provider: p, v: active.v);
+        try {
+          await resyncConfig();
+        } on Object {
+          // A failed sync keeps the old terms: no resend below.
         }
-        if (!await _ask(masked, active!)) {
+        final fresh = terms();
+        if (fresh == null ||
+            !LlmConsentGrant.validTerms(fresh.provider, fresh.v) ||
+            (fresh.provider == active!.provider && fresh.v == active.v)) {
+          yield const AskLlmPaused();
+          return;
+        }
+        active = fresh;
+        if (!await _ask(masked, active)) {
           yield const AskLlmConsentDeclined();
           return;
         }

@@ -79,11 +79,11 @@ final class LlmQuotaExhausted extends LlmGatewayException {
   final LlmQuotaSnapshot? quota;
 }
 
-/// `409 LLM_CONSENT_REQUIRED`; the stored consent was cleared. [providerId]
-/// is the backend's active provider.
+/// `409 LLM_CONSENT_REQUIRED`; the stored consent was cleared. The body's
+/// `providerId` is deliberately dropped here (FU-425): the app learns the
+/// provider only from the signed sync config, never from this answer.
 final class LlmConsentRequired extends LlmGatewayException {
-  LlmConsentRequired(this.providerId) : super('LLM_CONSENT_REQUIRED');
-  final String? providerId;
+  LlmConsentRequired() : super('LLM_CONSENT_REQUIRED');
 }
 
 /// `503 LLM_SERVICE_PAUSED`; the feature is paused until the next sync.
@@ -392,7 +392,7 @@ final class LlmGatewayClient {
         );
       case ProblemCode.llmConsentRequired:
         if (live) await _consent.clear(f);
-        return LlmConsentRequired(e.providerId);
+        return LlmConsentRequired();
       case ProblemCode.llmServicePaused:
         if (live) await _quota.pause(f);
         return LlmServicePaused();

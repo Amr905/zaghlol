@@ -63,9 +63,16 @@ abstract final class AskConsentFlow {
     BuildContext context,
     WidgetRef ref, {
     List<SentSegment>? preview,
+    LlmTerms? expect,
   }) async {
     final terms = ref.read(askConsentTermsProvider);
     if (terms == null) return false;
+    // FU-431: the sheet and the flow must name and store the same provider
+    // and version; anything else asks nothing and stores nothing.
+    if (expect != null &&
+        (expect.provider != terms.providerId || expect.v != terms.version)) {
+      return false;
+    }
     final store = await ref.read(llmConsentStoreProvider.future);
     if (!context.mounted) return false;
     final allowed = await showModalBottomSheet<bool>(
