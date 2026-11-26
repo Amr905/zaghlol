@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Zaghlol.Application.Config;
 using Zaghlol.Application.Llm;
+using Zaghlol.Infrastructure.Llm.Keys;
 
 namespace Zaghlol.Infrastructure.Llm;
 
@@ -14,8 +15,8 @@ public static class LlmServiceCollectionExtensions
 
     /// <summary>
     /// Registers the gateway core: one adapter (and one <see cref="HttpClient"/> and one <see cref="LlmCallGuard"/>) per configured
-    /// provider under <c>Llm:Providers</c>, the registry and the startup check. The host must also register
-    /// <see cref="ILlmApiKeyProvider"/> (T-333) and <see cref="ILlmPromptCatalog"/> (T-339). Not called by the API host yet.
+    /// provider under <c>Llm:Providers</c>, the registry, the startup check and the provider keys (<see cref="LlmApiKeyStore"/> from
+    /// the KMS secret store, T-333). The host must also register <see cref="ILlmPromptCatalog"/> (T-339). Not called by the API host yet.
     /// </summary>
     public static IServiceCollection AddZaghlolLlm(this IServiceCollection services, IConfiguration configuration)
     {
@@ -32,6 +33,16 @@ public static class LlmServiceCollectionExtensions
             : configured);
         services.TryAddSingleton<ILlmProviderRegistry, LlmProviderRegistry>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, LlmStartupCheck>());
+
+        // T-333: provider keys from the KMS secret store, loaded once at start; a host's own ILlmApiKeyProvider (tests) wins.
+        services.TryAddSingleton<LlmApiKeyStore>();
+        services.TryAddSingleton<ILlmApiKeyProvider>(provider => provider.GetRequiredService<LlmApiKeyStore>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, LlmKeyStartup>(provider => new LlmKeyStartup(
+            provider,
+            provider.GetRequiredService<LlmRegisteredProviders>(),
+            provider.GetService<IConfiguration>() ?? configuration,
+            provider.GetRequiredService<IHostEnvironment>(),
+            provider.GetRequiredService<ILogger<LlmKeyStartup>>())));
         services.AddSingleton(new LlmRegisteredProviders(providers));
 
         foreach (var options in providers)

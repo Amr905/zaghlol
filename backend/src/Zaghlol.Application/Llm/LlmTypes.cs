@@ -61,10 +61,40 @@ public interface ILlmProvider
     Task<LlmResult> CompleteAsync(LlmCall request, CancellationToken cancellationToken);
 }
 
-/// <summary>The provider API key. Real sources (File KMS, HostSecrets, OpenBao) are T-333; the key is never logged or cached by callers.</summary>
+/// <summary>
+/// The provider API keys, loaded once at start from the active KMS provider's secret store (T-333). A provider without a key is
+/// paused: <see cref="HasKey"/> is false and <see cref="GetKeyAsync"/> throws <see cref="LlmServicePausedException"/>. The key is
+/// never logged or cached by callers; <see cref="LlmSensitive{T}"/> writes <c>***</c> wherever it is printed or serialised.
+/// </summary>
 public interface ILlmApiKeyProvider
 {
-    ValueTask<Sensitive<string>> GetKeyAsync(string providerId, CancellationToken cancellationToken);
+    bool HasKey(string providerId);
+
+    ValueTask<LlmSensitive<string>> GetKeyAsync(string providerId, CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// The LLM module can't serve this call (no key for the provider, T-333): the endpoints answer <c>LLM_SERVICE_PAUSED</c>. Not a
+/// provider failure (never counted by the circuit). The message is constant.
+/// </summary>
+public sealed class LlmServicePausedException : SafeException
+{
+    public const string DefaultMessage = "The LLM provider has no API key; the LLM module is paused.";
+
+    public LlmServicePausedException()
+        : base(DefaultMessage)
+    {
+    }
+
+    public LlmServicePausedException(string message)
+        : base(message)
+    {
+    }
+
+    public LlmServicePausedException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
 }
 
 /// <summary>The static system prompt for a <see cref="LlmCall.PromptId"/> (the files are T-339's).</summary>

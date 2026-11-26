@@ -20,6 +20,9 @@
 #   ZAGHLOL_BOUND_CIDRS           comma-separated CIDRs the AppRole secret-ids and tokens are bound to (the stack network);
 #                                 required by apply (review S2): unbound credentials would work from anywhere
 #   ZAGHLOL_AUDIT_FILE            only if no audit device is declared in openbao.hcl and API creation is allowed (CI)
+#
+# LLM provider keys (T-333): a KV v2 mount "zaghlol" (created by apply); the api policy may read zaghlol/llm/<id> only. The
+# operator writes each key (deployment.md section 3 "LLM provider keys"); this script never sees one.
 set -eu
 
 MOUNT="${ZAGHLOL_MOUNT:-transit}"
@@ -28,6 +31,7 @@ HMAC_KEYS="${ZAGHLOL_HMAC_KEYS:-seat audit install-pepper}"
 ENVELOPE_KEYS="${ZAGHLOL_ENVELOPE_KEYS:-}"
 LEGACY_ENVELOPE_KEYS="${ZAGHLOL_LEGACY_ENVELOPE_KEYS:-}"
 BOUND_CIDRS="${ZAGHLOL_BOUND_CIDRS:-}"
+KV_MOUNT="zaghlol"
 
 die() {
   echo "setup.sh: $*" >&2
@@ -43,6 +47,7 @@ check_name() {
 
 for n in $MOUNT $KIDS $HMAC_KEYS $ENVELOPE_KEYS; do check_name "$n"; done
 for n in $LEGACY_ENVELOPE_KEYS; do check_name "file-$n"; done
+[ "$MOUNT" != "$KV_MOUNT" ] || die "ZAGHLOL_MOUNT can't be '$KV_MOUNT' (the KV mount of the LLM provider keys)"
 for k in $KIDS; do
   case "$k" in
     [se][0-9][0-9][0-9][0-9][a-z]) ;;
@@ -97,6 +102,7 @@ policy() {
         p "$MOUNT/hmac/$h/sha2-256" '"update"'
       done
       envelope_paths
+      p "$KV_MOUNT/data/llm/*" '"read"'
       p "$MOUNT/keys/+/import*" '"deny"'
       p "$MOUNT/wrapping_key" '"deny"'
       denies
@@ -191,6 +197,12 @@ apply() {
     bao secrets enable -path="$MOUNT" transit >/dev/null
   fi
   echo "mount: $MOUNT"
+
+  # T-333: LLM provider keys (KV v2; values written by the operator, never by this script).
+  if ! bao secrets list -format=json | grep -q "\"$KV_MOUNT/\""; then
+    bao secrets enable -path="$KV_MOUNT" -version=2 kv >/dev/null
+  fi
+  echo "kv mount: $KV_MOUNT"
 
   for k in $KIDS; do ensure_key "$k" ecdsa-p256; done
   for e in $ENVELOPE_KEYS; do ensure_key "$e" aes256-gcm96; done

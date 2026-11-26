@@ -5,7 +5,6 @@ using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using Zaghlol.Application.Llm;
-using Zaghlol.Domain;
 using Zaghlol.Infrastructure.Llm;
 
 namespace Zaghlol.Infrastructure.Tests.Llm;
@@ -15,8 +14,10 @@ internal sealed class TestKeys : ILlmApiKeyProvider
 {
     public const string Value = "test-key-placeholder";
 
-    public ValueTask<Sensitive<string>> GetKeyAsync(string providerId, CancellationToken cancellationToken) =>
-        ValueTask.FromResult(new Sensitive<string>(Value));
+    public bool HasKey(string providerId) => true;
+
+    public ValueTask<LlmSensitive<string>> GetKeyAsync(string providerId, CancellationToken cancellationToken) =>
+        ValueTask.FromResult(new LlmSensitive<string>(Value));
 }
 
 internal sealed class TestPrompts : ILlmPromptCatalog

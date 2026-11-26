@@ -31,6 +31,13 @@ public sealed class OpenAiResponsesProvider(
     public Task<LlmResult> CompleteAsync(LlmCall request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+
+        // T-333: no key = the module is paused for this provider; refused before the guard, so it is never a provider failure.
+        if (!keys.HasKey(options.Id))
+        {
+            throw new LlmServicePausedException();
+        }
+
         return guard.RunAsync(ct => SendOnceAsync(request, ct), cancellationToken);
     }
 

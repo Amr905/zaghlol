@@ -83,6 +83,56 @@ internal sealed class OpenBaoKms : IKmsBackend, IVerifyOnlySigningKeys, IDisposa
     /// <summary>The client, for tests (login count).</summary>
     internal OpenBaoClient Client => client;
 
+    /// <summary>The KV v2 mount that holds the LLM provider keys (T-333): <c>zaghlol/llm/&lt;id&gt;</c>.</summary>
+    internal const string KvMount = "zaghlol";
+
+    /// <summary>
+    /// T-333: reads the KV v2 secret <c>zaghlol/&lt;path&gt;</c> (<c>GET /v1/zaghlol/data/&lt;path&gt;</c>) with this adapter's AppRole
+    /// session. Its <c>data</c> must be exactly <c>{"secret": "&lt;text&gt;"}</c>. A 404 is <see cref="KvSecretStatus.NotFound"/>;
+    /// a refusal (403 after one re-login), a transport failure or another status throws <see cref="OpenBaoUnavailableException"/>
+    /// (the caller runs it under <see cref="KmsCall"/>). The answer buffer is zeroed on return; no path or value reaches a message.
+    /// </summary>
+    internal async Task<(KvSecretStatus Status, string? Secret)> ReadKvSecretAsync(string path, CancellationToken cancellationToken)
+    {
+        using var answer = await client.SendAsync(HttpMethod.Get, $"{KvMount}/data/{path}", null, cancellationToken).ConfigureAwait(false);
+        if (answer.Status == HttpStatusCode.NotFound)
+        {
+            return (KvSecretStatus.NotFound, null);
+        }
+
+        if (!answer.IsSuccess)
+        {
+            throw new OpenBaoUnavailableException();
+        }
+
+        if (answer.Data is not { } outer
+            || !outer.TryGetProperty("data", out var data)
+            || data.ValueKind != JsonValueKind.Object)
+        {
+            return (KvSecretStatus.Malformed, null);
+        }
+
+        string? secret = null;
+        var members = 0;
+        foreach (var member in data.EnumerateObject())
+        {
+            members++;
+            if (member.NameEquals("secret") && member.Value.ValueKind == JsonValueKind.String)
+            {
+                secret = member.Value.GetString();
+            }
+        }
+
+        return members == 1 && secret is not null ? (KvSecretStatus.Found, secret) : (KvSecretStatus.Malformed, null);
+    }
+
+    internal enum KvSecretStatus
+    {
+        Found,
+        NotFound,
+        Malformed,
+    }
+
     /// <summary>Checks every setting and the credential directory, then builds the client. No network call.</summary>
     public static OpenBaoKms Create(KmsSettings settings, IHostEnvironment environment, TimeProvider clock, KmsCallPolicy policy, HttpMessageHandler? handler = null)
     {

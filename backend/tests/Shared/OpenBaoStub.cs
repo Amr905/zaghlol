@@ -38,6 +38,7 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
     private readonly ConcurrentDictionary<string, (string SecretId, string[] Policies)> roles = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, (string[] Policies, DateTimeOffset? Expires)> tokens = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, List<(string Pattern, string[] Capabilities)>> policies = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, JsonObject> kv = new(StringComparer.Ordinal);
     private readonly X509Certificate2 serverCertificate;
     private WebApplication? app;
     private int port;
@@ -136,6 +137,9 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
     public void DeleteKey(string name) => keys.TryRemove(name, out _);
 
     public bool HasKey(string name) => keys.ContainsKey(name);
+
+    /// <summary>T-333: a KV v2 secret at <c>zaghlol/&lt;path&gt;</c> (read as <c>GET /v1/zaghlol/data/&lt;path&gt;</c>); <paramref name="data"/> is its <c>data</c>.</summary>
+    public void PutKv(string path, JsonObject data) => kv[path] = data;
 
     public void SetPolicy(string name, string hcl)
     {
@@ -247,6 +251,23 @@ internal sealed partial class OpenBaoStub : IAsyncDisposable
         }
 
         var segments = path.Split('/');
+        if (segments is ["zaghlol", "data", _, ..] && context.Request.Method == "GET")
+        {
+            if (kv.TryGetValue(string.Join('/', segments[2..]), out var secret))
+            {
+                await Json(context, 200, new JsonObject
+                {
+                    ["data"] = new JsonObject { ["data"] = secret.DeepClone(), ["metadata"] = new JsonObject { ["version"] = 1 } },
+                });
+            }
+            else
+            {
+                await Error(context, 404);
+            }
+
+            return;
+        }
+
         if (segments.Length < 2 || segments[0] != Mount)
         {
             await Error(context, 404, "1 error occurred:\n\t* unsupported path\n\n");
