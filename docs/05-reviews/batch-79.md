@@ -161,3 +161,7 @@ Card figures are per currency, no summing; `left = moneyIn − spend − exchang
 Cross-task consistency: the Home cards follow the card filter (T-278), the currency view reads the same `homeModelProvider` (T-279), the ≈ line deliberately uses all cards (T-280, written in its assumptions), and Insights/Ask take their own account filter (T-282). With no filter all four agree on per-currency left; with a filter the ≈ line is the only figure that does not narrow, as documented.
 
 Follow-ups proposed: FU-379 (dead pager code + unused strings), FU-380 (currency view feed day/tz), FU-381 (≈ sheet bank-rate attribution), FU-382 (first-foreign notice trigger vs copy, PO/UX), FU-383 (cross-channel merge marker), FU-384 (bulk actions on an exchange row), FU-385 (Ask exchange-out-only currency + BR-FX-01 text).
+
+### Lead delta check (fix79)
+
+- T-280 major fixed in `income_approx.dart` (3 production lines): the target currency now uses `max(0, moneyIn − exchangedOut)` like the others. New test "negative proof: target exchanged out is not counted twice" (EGP 50,000 in, 10,000 out, USD 200 in, rate 50 → ≈ 50,000.00) failed before the fix (12 pass / 1 fail) and passes after (13/13); the PO story still gives ≈ 49,540. Arabic ≈ sheet strings now say «غيّرته/غيّرتها». **T-280: APPROVED.**
