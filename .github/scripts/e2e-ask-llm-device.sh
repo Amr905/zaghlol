@@ -104,7 +104,9 @@ run_lang() { # ar | en
 flutter devices
 echo "==== build and install"
 adb -s "$DEVICE" uninstall "$PKG" > /dev/null 2>&1 || true
-flutter build apk --debug --flavor devSms --dart-define-from-file="$DEFINES" 2>&1 | tail -3
+flutter build apk --debug --flavor devSms --dart-define-from-file="$DEFINES" > "$OUT/build.log" 2>&1
+tail -3 "$OUT/build.log" | cut -c1-220
+grep -m1 -B3 -A14 -E "What went wrong|FAILURE:|Error:|error:" "$OUT/build.log" | cut -c1-220
 apk=$(ls build/app/outputs/flutter-apk/*.apk 2> /dev/null | grep -i devsms | head -1)
 echo "apk: ${apk:-none}"
 [ -n "$apk" ] || exit 1
