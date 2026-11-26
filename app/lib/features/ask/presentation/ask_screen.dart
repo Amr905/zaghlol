@@ -4,21 +4,36 @@
 // Lives on the Zaghlol tab (override `TabRoots.zaghlol` with `AskScreen`).
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
+import '../../../core/config/remote_config_providers.dart';
+import '../../../core/flags/feature_flags.dart';
+import '../../../core/flags/flags_providers.dart';
+import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
+import '../../../core/llm/llm_quota_snapshot.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../budget/application/budget_providers.dart'
     show paydayScheduleProvider, todayProvider;
 import '../../budget/presentation/budget_providers_ui.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
+import '../../gold/application/gating.dart';
+import '../application/llm_ask_flow.dart';
+import '../data/llm_ask_providers.dart';
 import '../domain/ask_models.dart';
+import '../../settings/presentation/privacy_ask_llm_section.dart'
+    show askQuotaStateProvider;
 import 'ask_answer_text.dart';
 import 'ask_chat_controller.dart';
+import 'llm_ask_ui.dart';
+
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/ui/amount_semantics.dart';
+
+part 'ask_screen_llm.dart';
 
 /// The category id to localized name map the answers need.
 final askCategoryNamesProvider =
@@ -39,9 +54,15 @@ class AskScreen extends ConsumerStatefulWidget {
 class _AskScreenState extends ConsumerState<AskScreen> {
   final _text = TextEditingController();
   final _scroll = ScrollController();
+  late final AskConsentHost _host = ref.read(askConsentHostProvider);
 
   @override
   void dispose() {
+    if (_host.context == context) {
+      _host
+        ..context = null
+        ..ref = null;
+    }
     _text.dispose();
     _scroll.dispose();
     super.dispose();
@@ -58,6 +79,13 @@ class _AskScreenState extends ConsumerState<AskScreen> {
     });
   }
 
+  void _pick(String label, String? question) {
+    final q = (question ?? _text.text).trim();
+    final next = q.isEmpty ? label : '$q $label';
+    _text.text = next.runes.length <= askLlmMaxQuestionChars ? next : label;
+    _text.selection = TextSelection.collapsed(offset: _text.text.length);
+  }
+
   Future<void> _send() async {
     final sent = await ref.read(askChatProvider.notifier).sendText(_text.text);
     if (sent) _text.clear();
@@ -68,7 +96,14 @@ class _AskScreenState extends ConsumerState<AskScreen> {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final chat = ref.watch(askChatProvider);
+    _host
+      ..context = context
+      ..ref = ref;
     ref.listen(askChatProvider, (prev, next) {
+      if (prev != null && prev.stoppedCount != next.stoppedCount) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l.chatLlmStatusStopped)));
+      }
       if (prev?.messages.length != next.messages.length ||
           prev?.thinking != next.thinking) {
         _toEnd();
@@ -135,8 +170,9 @@ class _AskScreenState extends ConsumerState<AskScreen> {
                       semanticsLabel: l.chatMainZaghlolA11y(l.chatMainGreeting),
                       child: Text(l.chatMainGreeting),
                     ),
-                  for (final m in chat.messages) _MessageView(message: m),
-                  if (chat.thinking) const _TypingBubble(),
+                  for (final m in chat.messages)
+                    _MessageView(message: m, onPick: _pick),
+                  if (chat.thinking) _TypingBubble(phase: chat.phase),
                 ],
               ),
             ),
@@ -185,12 +221,20 @@ class _Bubble extends StatelessWidget {
     this.mood = ZaghlolMoment.tourGuide,
     this.talk = false,
     this.tag,
+    this.liveRegion = false,
+    this.actions,
   });
   final bool fromUser;
   final Widget child;
   final String semanticsLabel;
   final ZaghlolMoment mood;
   final bool talk;
+
+  /// Announce the bubble politely when it appears (status changes, T-346).
+  final bool liveRegion;
+
+  /// Buttons under the bubble (outside its merged semantics node).
+  final Widget? actions;
 
   /// Small label above a Zaghlol bubble (roast mode).
   final String? tag;
@@ -272,11 +316,19 @@ class _Bubble extends StatelessWidget {
                 Flexible(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: width * 0.78),
-                    child: Semantics(
-                      container: true,
-                      label: semanticsLabel,
-                      excludeSemantics: true,
-                      child: bubble,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Semantics(
+                          container: true,
+                          liveRegion: liveRegion,
+                          label: semanticsLabel,
+                          excludeSemantics: true,
+                          child: bubble,
+                        ),
+                        ?actions,
+                      ],
                     ),
                   ),
                 ),
@@ -287,12 +339,16 @@ class _Bubble extends StatelessWidget {
 }
 
 class _MessageView extends ConsumerWidget {
-  const _MessageView({required this.message});
+  const _MessageView({required this.message, required this.onPick});
   final AskMessage message;
+  final void Function(String label, String? question) onPick;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    if (message.llm != null) {
+      return _LlmMessageView(message: message, onPick: onPick);
+    }
     if (message.fromUser) {
       return _Bubble(
         fromUser: true,
@@ -424,7 +480,8 @@ class _MiniBars extends StatelessWidget {
 }
 
 class _TypingBubble extends StatelessWidget {
-  const _TypingBubble();
+  const _TypingBubble({this.phase = AskLlmPhase.none});
+  final AskLlmPhase phase;
 
   @override
   Widget build(BuildContext context) {
@@ -434,7 +491,12 @@ class _TypingBubble extends StatelessWidget {
       fromUser: false,
       mood: ZaghlolMoment.thinking,
       talk: true,
-      semanticsLabel: l.chatMainTypingA11y,
+      liveRegion: phase != AskLlmPhase.none,
+      semanticsLabel: switch (phase) {
+        AskLlmPhase.none => l.chatMainTypingA11y,
+        AskLlmPhase.sending => l.chatLlmStatusThinkingA11y,
+        AskLlmPhase.computing => l.chatLlmStatusComputing,
+      },
       child: Row(
         mainAxisSize: MainAxisSize.min,
         key: const ValueKey('ask-typing'),
@@ -449,6 +511,17 @@ class _TypingBubble extends StatelessWidget {
                     color: c.textMuted,
                     shape: BoxShape.circle,
                   ),
+                ),
+              ),
+            ),
+          if (phase != AskLlmPhase.none)
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(start: ZSpacing.xs),
+                child: Text(
+                  phase == AskLlmPhase.sending
+                      ? l.chatLlmStatusSending
+                      : l.chatLlmStatusComputing,
                 ),
               ),
             ),
@@ -565,10 +638,23 @@ class _InputRow extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final c = ZColors.of(context);
     final busy = ref.watch(askChatProvider.select((s) => s.thinking));
+    final llm = ref.watch(featureFlagProvider(FeatureFlag.askLlm));
+    final phase = ref.watch(askChatProvider.select((s) => s.phase));
+    final chatPaused = ref.watch(askChatProvider.select((s) => s.paused));
+    final storedPaused =
+        ref.watch(askQuotaStateProvider).value?.paused ?? false;
+    final paused = chatPaused || storedPaused;
+    final snapshot = ref.watch(askQuotaSnapshotProvider).value;
+    final stoppable = llm && phase != AskLlmPhase.none;
+    final bigText = MediaQuery.textScalerOf(context).scale(10) >= 13;
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: controller,
       builder: (context, v, _) {
-        final tooLong = v.text.trim().length > askMaxQuestionChars;
+        final len = v.text.trim().length;
+        // With the helper on, the field stops at 300 and says so there.
+        final tooLong = llm
+            ? len >= askMaxQuestionChars
+            : len > askMaxQuestionChars;
         final ok = AskChatController.isValid(v.text) && !busy;
         return Padding(
           padding: EdgeInsetsDirectional.fromSTEB(
@@ -582,6 +668,12 @@ class _InputRow extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (llm && !paused)
+                _CounterLine(
+                  snapshot: snapshot,
+                  stacked: bigText,
+                  lastOne: snapshot?.remaining == 1,
+                ),
               DecoratedBox(
                 decoration: BoxDecoration(
                   color: c.surface,
@@ -641,11 +733,20 @@ class _InputRow extends ConsumerWidget {
                         enableIMEPersonalizedLearning: false,
                         enableSuggestions: false,
                         autocorrect: false,
+                        inputFormatters: llm
+                            ? [
+                                LengthLimitingTextInputFormatter(
+                                  askMaxQuestionChars,
+                                ),
+                              ]
+                            : null,
                         onSubmitted: (_) {
                           if (ok) onSend();
                         },
                         decoration: InputDecoration(
-                          hintText: l.chatMainInputHint,
+                          hintText: llm
+                              ? l.chatLlmInputHint
+                              : l.chatMainInputHint,
                           filled: false,
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
@@ -661,28 +762,59 @@ class _InputRow extends ConsumerWidget {
                       padding: const EdgeInsetsDirectional.only(
                         end: ZSpacing.xs,
                       ),
-                      child: IconButton(
-                        key: const ValueKey('ask-send'),
-                        tooltip: l.chatMainSendA11y,
-                        style: IconButton.styleFrom(
-                          backgroundColor: c.primary,
-                          foregroundColor: c.onPrimary,
-                          disabledBackgroundColor: c.primary.withValues(
-                            alpha: 0.38,
-                          ),
-                          disabledForegroundColor: c.onPrimary,
-                          fixedSize: const Size(44, 44),
-                          minimumSize: const Size(44, 44),
-                          tapTargetSize: MaterialTapTargetSize.padded,
-                        ),
-                        // Icons.send mirrors automatically (matchTextDirection).
-                        icon: const Icon(Icons.send_rounded, size: 20),
-                        onPressed: ok ? onSend : null,
-                      ),
+                      child: stoppable
+                          ? IconButton(
+                              key: const ValueKey('ask-stop'),
+                              tooltip: l.chatLlmInputStopA11y,
+                              style: IconButton.styleFrom(
+                                backgroundColor: c.primary,
+                                foregroundColor: c.onPrimary,
+                                fixedSize: const Size(44, 44),
+                                minimumSize: const Size(44, 44),
+                                tapTargetSize: MaterialTapTargetSize.padded,
+                              ),
+                              // The stop square never mirrors.
+                              icon: const Icon(Icons.stop_rounded, size: 22),
+                              onPressed: ref
+                                  .read(askChatProvider.notifier)
+                                  .stop,
+                            )
+                          : IconButton(
+                              key: const ValueKey('ask-send'),
+                              tooltip: l.chatMainSendA11y,
+                              style: IconButton.styleFrom(
+                                backgroundColor: c.primary,
+                                foregroundColor: c.onPrimary,
+                                disabledBackgroundColor: c.primary.withValues(
+                                  alpha: 0.38,
+                                ),
+                                disabledForegroundColor: c.onPrimary,
+                                fixedSize: const Size(44, 44),
+                                minimumSize: const Size(44, 44),
+                                tapTargetSize: MaterialTapTargetSize.padded,
+                              ),
+                              // Icons.send mirrors automatically (matchTextDirection).
+                              icon: const Icon(Icons.send_rounded, size: 20),
+                              onPressed: ok ? onSend : null,
+                            ),
                     ),
                   ],
                 ),
               ),
+              if (llm && len >= 250)
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      top: ZSpacing.xs,
+                      end: ZSpacing.lg,
+                    ),
+                    child: Text(
+                      l.chatLlmInputCounter(len, askMaxQuestionChars),
+                      style: ZType.caption.copyWith(color: c.textMuted),
+                    ),
+                  ),
+                ),
               if (tooLong)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(
@@ -701,6 +833,47 @@ class _InputRow extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Above the field: the "last question" note at the start, the counter at the
+/// end; stacked (counter on its own line) at 130 % text.
+class _CounterLine extends StatelessWidget {
+  const _CounterLine({
+    required this.snapshot,
+    required this.stacked,
+    required this.lastOne,
+  });
+  final LlmQuotaSnapshot? snapshot;
+  final bool stacked;
+  final bool lastOne;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = ZColors.of(context);
+    final counter = _QuotaCounter(snapshot: snapshot);
+    final note = lastOne
+        ? Text(
+            l.chatQuotaLastOne,
+            style: ZType.caption.copyWith(color: c.textMuted),
+          )
+        : null;
+    if (stacked) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ?note,
+          Align(alignment: AlignmentDirectional.centerEnd, child: counter),
+        ],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: note ?? const SizedBox.shrink()),
+        counter,
+      ],
     );
   }
 }
