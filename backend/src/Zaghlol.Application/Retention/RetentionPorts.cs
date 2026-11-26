@@ -17,11 +17,13 @@ public static class RetentionRules
     public const string ReplayGuard = "replay_guard";
     public const string SeatClaimants = "seat_claimants";
     public const string IdempotencyRecords = "idempotency_records";
+    public const string LlmQuotaMonths = "llm_quota_months";
 
     public static IReadOnlyList<string> All { get; } =
     [
         RegistrationColumns, TombstonedInstalls, InactiveInstalls, StoreNotifications, Contributions, BankRequests,
         AuditSupport, AuditOther, ReplayGuard, SeatClaimants, IdempotencyRecords,
+        LlmQuotaMonths,
     ];
 }
 

@@ -188,6 +188,8 @@ internal sealed class NpgsqlAccountStore(IServiceProvider services) : IAccountSt
 
     private const string DeleteIdempotencySql = "DELETE FROM zaghlol.idempotency_records WHERE account_id = @id";
 
+    private const string DeleteQuotaSql = "DELETE FROM zaghlol.llm_quota_counters WHERE subject_kind = 'account' AND subject_id = @id";
+
     private const string DeleteAccountSql = "DELETE FROM zaghlol.accounts WHERE id = @id";
 
     // Only the sealed blob and the times: no account, install or subject reference (Lead decision, T-135).
@@ -246,7 +248,7 @@ internal sealed class NpgsqlAccountStore(IServiceProvider services) : IAccountSt
             await orderCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        foreach (var sql in new[] { ClearPurchasesSql, DeleteIdempotencySql, DeleteAccountSql })
+        foreach (var sql in new[] { ClearPurchasesSql, DeleteIdempotencySql, DeleteQuotaSql, DeleteAccountSql })
         {
             await using var command = new NpgsqlCommand(sql, connection, transaction);
             command.Parameters.Add(new("id", NpgsqlDbType.Uuid) { Value = accountId });

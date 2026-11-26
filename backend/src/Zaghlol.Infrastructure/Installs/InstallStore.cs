@@ -192,6 +192,11 @@ internal sealed class InstallStore(IAppDbContextFactory contexts) : IInstallStor
                     .SetProperty(i => i.RegistrationBodySha256, (byte[]?)null),
                 cancellationToken);
         await db.IdempotencyRecords.Where(r => r.InstallId == id).ExecuteDeleteAsync(cancellationToken);
+
+        // T-335: the install's LLM quota counters go with it (ask-llm §4.2).
+        await db.Database.ExecuteSqlInterpolatedAsync(
+            $"DELETE FROM zaghlol.llm_quota_counters WHERE subject_kind = 'install' AND subject_id = {id}",
+            cancellationToken);
         await transaction.CommitAsync(cancellationToken);
     }
 }

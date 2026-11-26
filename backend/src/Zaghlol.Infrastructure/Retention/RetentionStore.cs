@@ -53,6 +53,9 @@ internal sealed class RetentionStore(IZaghlolDbContextFactory contexts) : IReten
         [RetentionRules.ReplayGuard] = Delete("replay_guard", "expires_at < @now"),
         [RetentionRules.SeatClaimants] = Delete("seat_claimants", "claimed_at < @now - interval '7 days'"),
         [RetentionRules.IdempotencyRecords] = Delete("idempotency_records", "expires_at < @now"),
+
+        // T-335: only the current and the previous Cairo month are kept; the cut-off key is computed by CairoMonth (one definition).
+        [RetentionRules.LlmQuotaMonths] = Delete("llm_quota_counters", "month_key < @llmcutoff"),
     };
 
     public async Task<int> PurgeBatchAsync(string rule, DateTimeOffset now, int batchSize, CancellationToken cancellationToken)
@@ -72,6 +75,7 @@ internal sealed class RetentionStore(IZaghlolDbContextFactory contexts) : IReten
 #pragma warning restore CA2100
         command.Parameters.Add(new NpgsqlParameter("now", NpgsqlDbType.TimestampTz) { Value = now.ToUniversalTime() });
         command.Parameters.Add(new NpgsqlParameter("batch", NpgsqlDbType.Integer) { Value = batchSize });
+        command.Parameters.Add(new NpgsqlParameter("llmcutoff", NpgsqlDbType.Integer) { Value = Zaghlol.Application.Llm.Quota.CairoMonth.PreviousKey(now) });
 
         // The install rules select the number of installs removed (their statement also deletes idempotency rows).
         return rule is RetentionRules.TombstonedInstalls or RetentionRules.InactiveInstalls
