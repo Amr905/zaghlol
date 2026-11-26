@@ -9123,4 +9123,557 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get accountsDetailDuePaid => 'سددت المطلوب للكشف ده';
+
+  @override
+  String get chatLlmInputHint => 'اسألني بكلامك عن فلوسك…';
+
+  @override
+  String chatLlmInputCounter(int max, int n) {
+    return '$n من $max';
+  }
+
+  @override
+  String get chatLlmInputStop => 'وقّف';
+
+  @override
+  String get chatLlmInputStopA11y => 'وقّف السؤال';
+
+  @override
+  String chatQuotaRemaining(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n سؤال',
+      many: 'فاضل $n سؤال',
+      few: 'فاضل $n أسئلة',
+      two: 'فاضل سؤالين',
+      one: 'فاضل سؤال واحد',
+      zero: 'خلصت أسئلة الشهر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatQuotaRemainingA11y(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n سؤال أونلاين الشهر ده',
+      many: 'فاضل $n سؤال أونلاين الشهر ده',
+      few: 'فاضل $n أسئلة أونلاين الشهر ده',
+      two: 'فاضل سؤالين أونلاين الشهر ده',
+      one: 'فاضل سؤال أونلاين واحد الشهر ده',
+      zero: 'خلصت الأسئلة الأونلاين الشهر ده',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatQuotaUnknown => '—';
+
+  @override
+  String get chatQuotaUnknownA11y => 'عدد الأسئلة هيظهر بعد أول سؤال أونلاين';
+
+  @override
+  String get chatQuotaInfoTitle => 'الأسئلة الأونلاين';
+
+  @override
+  String get chatQuotaInfoBody =>
+      'الأسئلة اللي بجاوبها من موبايلك ببلاش ومن غير حد. الأسئلة اللي محتاجة المساعد الأونلاين ليها عدد في الشهر، وبيرجع أول كل شهر.';
+
+  @override
+  String get chatQuotaLastOne => 'ده آخر سؤال أونلاين الشهر ده';
+
+  @override
+  String chatQuotaFreeOut(String date) {
+    return 'خلّصت أسئلتك الأونلاين ببلاش الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك، والعداد بيرجع يوم $date.';
+  }
+
+  @override
+  String chatQuotaGoldHint(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'مع جولد بيبقى عندك $n سؤال في الشهر.',
+      many: 'مع جولد بيبقى عندك $n سؤال في الشهر.',
+      few: 'مع جولد بيبقى عندك $n أسئلة في الشهر.',
+      two: 'مع جولد بيبقى عندك سؤالين في الشهر.',
+      one: 'مع جولد بيبقى عندك سؤال واحد في الشهر.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatQuotaSeeGold => 'شوف جولد';
+
+  @override
+  String chatQuotaGoldOut(String date) {
+    return 'خلّصت أسئلتك الأونلاين الشهر ده، وبترجع يوم $date. لحد ساعتها بجاوبك على الأسئلة العادية من موبايلك.';
+  }
+
+  @override
+  String get chatConsentTitle => 'السؤال ده محتاج المساعد الأونلاين';
+
+  @override
+  String chatConsentIntro(String aiProvider) {
+    return 'مقدرش أجاوبه من موبايلك لوحدي. لو وافقت، هبعت نص سؤالك لسيرفر زغلول ولـ $aiProvider علشان يفهموه، والحساب كله بيحصل على موبايلك.';
+  }
+
+  @override
+  String get chatConsentPreviewTitle => 'ده اللي هيتبعت بالظبط';
+
+  @override
+  String get chatConsentSendsTitle => 'بيتبعت';
+
+  @override
+  String get chatConsentSends =>
+      'سؤالك بيتبعت من غير أسماء حساباتك وكروتك وبنوكك، ومن غير أسماء الأماكن اللي بتشتري منها واللي زغلول عارفها. أي حاجة تانية تكتبها، زي مبلغ، بتتبعت زي ما هي.';
+
+  @override
+  String get chatConsentNeverTitle => 'عمره ما بيتبعت';
+
+  @override
+  String get chatConsentNever =>
+      'حركاتك وأرصدتك وميزانياتك ورسايل البنوك. ولا حاجة فيهم بتسيب موبايلك.';
+
+  @override
+  String chatConsentStorage(String aiProvider) {
+    return 'سيرفر زغلول مبيحفظش سؤالك، و$aiProvider مبيتعلمش منه. التفاصيل في سياسة الخصوصية.';
+  }
+
+  @override
+  String chatConsentQuota(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'عندك $n سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      many:
+          'عندك $n سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      few:
+          'عندك $n أسئلة أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      two: 'عندك سؤالين أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      one: 'عندك سؤال أونلاين واحد في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatConsentAllow => 'تمام، ابعت';
+
+  @override
+  String get chatConsentSettingsHint => 'تقدر تقفلها في أي وقت من «خصوصيتك».';
+
+  @override
+  String get chatConsentDeclined =>
+      'ولا يهمك، سؤالك ماتبعتش. جرّب واحد من دول:';
+
+  @override
+  String get chatLlmStatusSending => 'ببعت سؤالك من غير بياناتك…';
+
+  @override
+  String get chatLlmStatusComputing => 'بحسبها على موبايلك…';
+
+  @override
+  String get chatLlmStatusThinkingA11y => 'زغلول بيفكر. سؤالك بس اللي اتبعت';
+
+  @override
+  String get chatLlmStatusStopped => 'وقّفت السؤال.';
+
+  @override
+  String get chatLlmStatusNotQueued => 'سؤالك ماتبعتش، ومش هيتبعت بعدين.';
+
+  @override
+  String get chatLlmStatusOffline =>
+      'السؤال ده محتاج نت. ابعته تاني لما النت يرجع، ولحد ساعتها جرّب دول:';
+
+  @override
+  String get chatLlmStatusTimeout =>
+      'المساعد الأونلاين اتأخر في الرد، ومتحسبش من أسئلتك.';
+
+  @override
+  String get chatLlmStatusError =>
+      'حصلت مشكلة وأنا بفهم سؤالك، ومتحسبش من أسئلتك.';
+
+  @override
+  String get chatLlmStatusSlowDown =>
+      'أسئلة كتير ورا بعض. استنى دقيقة وجرّب تاني.';
+
+  @override
+  String get chatLlmStatusIntegrity =>
+      'مقدرتش أتأكد إن نسخة زغلول دي سليمة. حدّثها من المتجر أو جرّب تاني.';
+
+  @override
+  String get chatLlmStatusPaused =>
+      'المساعد الأونلاين واخد راحة الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك.';
+
+  @override
+  String get chatSentBadge => 'أونلاين';
+
+  @override
+  String get chatSentBadgeA11y => 'الإجابة دي اتفهمت بالمساعد الأونلاين';
+
+  @override
+  String get chatSentToggle => 'اللي بعته';
+
+  @override
+  String get chatSentTitle => 'ده سؤالك زي ما خرج من موبايلك:';
+
+  @override
+  String chatSentChip(int n, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'account': 'حساب $n',
+      'card': 'كارت $n',
+      'bank': 'بنك $n',
+      'merchant': 'مكان $n',
+      'other': 'اسم $n',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatSentChipA11y(int n, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'account': 'حساب رقم $n، اسمه فضل على موبايلك',
+      'card': 'كارت رقم $n، رقمه فضل على موبايلك',
+      'bank': 'بنك رقم $n، اسمه فضل على موبايلك',
+      'merchant': 'مكان رقم $n، اسمه فضل على موبايلك',
+      'other': 'اسم رقم $n، فضل على موبايلك',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatSentHidden(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'phone': 'رقم موبايل',
+      'email': 'إيميل',
+      'instapay': 'عنوان إنستاباي',
+      'number': 'رقم طويل',
+      'other': 'متشال',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get chatSentChipsNote =>
+      'المربعات دي مكان الأسامي. معناها فضل على موبايلك ومتبعتش.';
+
+  @override
+  String chatSentAlsoSent(String aiProvider) {
+    return 'ومعاه بس: لغة التطبيق وإصداره، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. $aiProvider بيوصله السؤال واللغة بس.';
+  }
+
+  @override
+  String chatSentTextA11y(String text) {
+    return 'اللي اتبعت: $text';
+  }
+
+  @override
+  String get chatSentLocal => 'اتجاوب على موبايلك';
+
+  @override
+  String chatClarifyNoCard(String last4) {
+    return 'مش لاقي كارت آخره $last4. تقصد أنهي كارت؟';
+  }
+
+  @override
+  String chatClarifySameLast4(String last4) {
+    return 'عندك أكتر من كارت آخره $last4. تقصد أنهي واحد؟';
+  }
+
+  @override
+  String chatClarifyNoBankAccount(String bank) {
+    return 'مش لاقي حساب ليك في $bank. تقصد أنهي حساب؟';
+  }
+
+  @override
+  String chatClarifyUnknownBank(String bank) {
+    return 'مش عارف بنك اسمه $bank. تقصد أنهي حساب؟';
+  }
+
+  @override
+  String get chatClarifyNoAccount => 'مش لاقي الحساب ده. تقصد أنهي واحد؟';
+
+  @override
+  String get chatClarifyNotSent => 'سؤالك ماتبعتش ومتحسبش من أسئلتك.';
+
+  @override
+  String chatClarifyNotFound(String query) {
+    return 'ملقتش «$query» في حركاتك. تقصد واحد من دول؟';
+  }
+
+  @override
+  String chatLlmAnswerAverage(
+    String average,
+    String span,
+    String state,
+    String subject,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'day': 'في اليوم',
+      'week': 'في الأسبوع',
+      'other': 'في الشهر',
+    });
+    return 'متوسط صرفك على $subject $span: $average $_temp0.';
+  }
+
+  @override
+  String chatLlmAnswerFullUnits(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'day': 'حسبت الأيام الكاملة بس، من غير النهارده.',
+      'week': 'حسبت الأسابيع الكاملة بس، من غير الأسبوع ده.',
+      'other': 'حسبت الشهور الكاملة بس، من غير الشهر ده.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatLlmAnswerIncome(String income, String span) {
+    return 'دخلك $span: $income.';
+  }
+
+  @override
+  String chatLlmAnswerBreakdown(String list, String span) {
+    return 'فلوسك راحت فين $span: $list.';
+  }
+
+  @override
+  String chatLlmAnswerTopCategories(String list, String span) {
+    return 'أكتر التصنيفات صرفًا $span: $list.';
+  }
+
+  @override
+  String get chatLlmAnswerOtherBucket => 'حاجات تانية';
+
+  @override
+  String chatLlmAnswerChangePct(String percent) {
+    return 'يعني فرق $percent.';
+  }
+
+  @override
+  String chatLlmAnswerSafeSpend(String perDay) {
+    return 'تقدر تصرف $perDay في اليوم لحد القبض.';
+  }
+
+  @override
+  String get chatLlmAnswerSafeSpendNone =>
+      'لسه مفيش ميزانية، فمقدرش أحسب تصرف كام في اليوم. حط ميزانية وأنا أحسبهالك.';
+
+  @override
+  String chatUnitMonths(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n شهر',
+      many: '$n شهر',
+      few: '$n شهور',
+      two: 'شهرين',
+      one: 'شهر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatWhatIfCutPercent(
+    String amount,
+    String monthly,
+    int months,
+    String percent,
+    String subject,
+  ) {
+    return 'لو قللت $subject $percent، هتوفر حوالي $monthly في الشهر، يعني $amount في $months.';
+  }
+
+  @override
+  String chatWhatIfCutAmount(
+    String amount,
+    String monthly,
+    int months,
+    String subject,
+  ) {
+    return 'لو قللت $subject بـ $monthly في الشهر، هتوفر $amount في $months.';
+  }
+
+  @override
+  String chatWhatIfCapped(String average, String subject) {
+    return 'متوسط صرفك على $subject $average بس، فده أقصى توفير في الشهر.';
+  }
+
+  @override
+  String chatWhatIfSave(String amount, String monthly, int months) {
+    return 'لو حوشت $monthly كل شهر، هيبقى معاك $amount بعد $months، من غير أي عائد.';
+  }
+
+  @override
+  String chatWhatIfBasis(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'على أساس متوسط آخر $n شهر كامل',
+      many: 'على أساس متوسط آخر $n شهر كامل',
+      few: 'على أساس متوسط آخر $n شهور كاملة',
+      two: 'على أساس متوسط آخر شهرين كاملين',
+      one: 'على أساس آخر شهر كامل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatWhatIfNotEnough =>
+      'لسه مفيش شهر كامل أحسب عليه. استناني لآخر الشهر وأنا أحسبهالك.';
+
+  @override
+  String get chatSuggestIntro => 'دي أكتر حاجات ممكن توفر منها الشهر الجاي:';
+
+  @override
+  String chatSuggestAboveAverage(String amount, String category, String gap) {
+    return '$category الشهر اللي فات $amount، يعني $gap فوق متوسطك. لو رجعته للمتوسط هتوفر $gap.';
+  }
+
+  @override
+  String chatSuggestSubscription(String item, String monthly) {
+    return 'اشتراك $item بـ $monthly في الشهر. لو مش بتستخدمه، وقفه ووفر $monthly.';
+  }
+
+  @override
+  String chatSuggestCreep(
+    String category,
+    String endAmount,
+    String gap,
+    String startAmount,
+  ) {
+    return '$category بيزيد كل شهر، من $startAmount لـ $endAmount. لو رجعته لأوله هتوفر $gap.';
+  }
+
+  @override
+  String chatSuggestCash(String amount, String target) {
+    return '$amount كاش سحبته ومش متسجل راح فين. لو سجلته، ممكن توفر حوالي $target.';
+  }
+
+  @override
+  String get chatSuggestCashTip => 'سجّل الكاش وإنت بتصرفه، حتى بصوتك.';
+
+  @override
+  String chatSuggestSaveLabel(String monthly) {
+    return 'توفير متوقع: $monthly في الشهر';
+  }
+
+  @override
+  String get chatSuggestNone =>
+      'مش لاقي حاجة واضحة توفر منها. صرفك ماشي على متوسطه، كمّل كده!';
+
+  @override
+  String get chatSuggestFooter => 'دي اقتراحات بس، ومفيش حاجة اتغيرت.';
+
+  @override
+  String chatInvestLead(String amount, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'saved': 'الشهر اللي فات فضل معاك $amount.',
+      'whatIf': 'لو كنت وفرت $amount:',
+      'other': 'لو معاك $amount:',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatInvestGold(String date, String grams, String karat, String price) {
+    return 'كان ممكن يجيب حوالي $grams دهب عيار $karat، بسعر $price للجرام يوم $date.';
+  }
+
+  @override
+  String chatInvestUsd(String amount2, String date, String rate) {
+    return 'كان ممكن يساوي ≈ $amount2، بسعر $rate للدولار يوم $date.';
+  }
+
+  @override
+  String chatInvestCertificate(String exampleRate, int months, String payout) {
+    return 'في شهادة بعائد مثال $exampleRate لمدة $months، كان ممكن يطلع عائد حوالي $payout، قبل الضرايب والمصاريف. ده معدل للتوضيح، مش عرض.';
+  }
+
+  @override
+  String get chatInvestStocks =>
+      'مبلغ زي ده ممكن يبقى بداية صغيرة في الأسهم عمومًا. اتعلم الأول، واتعامل مع جهة مرخصة.';
+
+  @override
+  String get chatInvestSmall =>
+      'كل جنيه بيفرق، كمّل كده والشهر الجاي هيبقى أحسن.';
+
+  @override
+  String get chatInvestNothingSaved =>
+      'الشهر اللي فات مفضلش حاجة. تعالى نشوف نوفر منين الشهر الجاي.';
+
+  @override
+  String chatInvestNoPrice(String currency) {
+    return '$currency مش داخل هنا، علشان مفيش سعر ليه.';
+  }
+
+  @override
+  String get chatInvestGramsHiddenA11y => 'الوزن مخفي';
+
+  @override
+  String get chatInvestSuggestChip => 'أوفر منين؟';
+
+  @override
+  String get chatInvestChip => 'لو كنت حوشت؟';
+
+  @override
+  String get chatInvestDisclaimerSummary => 'ده توضيح بس، مش نصيحة استثمار.';
+
+  @override
+  String get chatInvestDisclaimer =>
+      'هذه الأرقام للتوضيح فقط وليست نصيحة استثمارية. الأسعار والعوائد تتغير، والقيم السابقة لا تدل على القيم المستقبلية. القرار النهائي لك.';
+
+  @override
+  String get chatRefuseOffTopic =>
+      'أنا شاطر في الفلوس بس 😄 اسألني عن صرفك أو تحويشك:';
+
+  @override
+  String get chatRefuseUnsafe =>
+      'ده مش حاجة أقدر أساعد فيها. لو عندك سؤال عن فلوسك، أنا موجود.';
+
+  @override
+  String get chatRefuseSupport =>
+      'لو الدنيا تقيلة عليك، كلم حد بتثق فيه. إنت مش لوحدك.';
+
+  @override
+  String get chatRefuseSpecificPick =>
+      'مقدرش أرشحلك سهم أو صندوق بعينه. أقدر أوريك فلوسك كانت ممكن تساوي كام، كتوضيح بس.';
+
+  @override
+  String get privacyAskLlmLabel => 'اسأل المساعد الأونلاين';
+
+  @override
+  String get privacyAskLlmSentence =>
+      'بيبعت نص سؤالك بس، من غير أسماء حساباتك وكروتك وبنوكك. حركاتك وأرصدتك عمرها ما بتسيب موبايلك.';
+
+  @override
+  String privacyAskLlmQuota(int count, String date, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n سؤال الشهر ده، والعداد بيرجع يوم $date.',
+      many: 'فاضل $n سؤال الشهر ده، والعداد بيرجع يوم $date.',
+      few: 'فاضل $n أسئلة الشهر ده، والعداد بيرجع يوم $date.',
+      two: 'فاضل سؤالين الشهر ده، والعداد بيرجع يوم $date.',
+      one: 'فاضل سؤال واحد الشهر ده، والعداد بيرجع يوم $date.',
+      zero: 'خلصت أسئلة الشهر، وبترجع يوم $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get privacyAskLlmQuotaUnknown =>
+      'عدد الأسئلة هيظهر بعد أول سؤال أونلاين.';
+
+  @override
+  String get privacyAskLlmDetails => 'إيه اللي بيتبعت؟';
+
+  @override
+  String get privacyAskLlmTurnedOff =>
+      'اتقفل. مش هبعت أي سؤال غير لما توافق تاني.';
+
+  @override
+  String get privacyServerItemAskLlm =>
+      'نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر';
 }
