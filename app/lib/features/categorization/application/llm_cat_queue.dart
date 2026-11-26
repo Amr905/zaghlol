@@ -139,56 +139,10 @@ class LlmCatQueueFiller {
     final nowMs = now.toUtc().millisecondsSinceEpoch;
     final since = nowMs - llmCatQueueMaxAge.inMilliseconds;
     final queue = LlmCatQueueDao(_db);
-    final suggestions = AiMerchantSuggestionsDao(_db);
 
     return guardWrite(
       () => _db.transaction(() async {
-        final rows = await _db
-            .customSelect(
-              'SELECT merchant_norm, merchant_raw, direction, source, '
-              'counterparty_kind, counterparty_value, is_internal, template_id, '
-              'transfer_pair_id IS NOT NULL AS paired, created_at '
-              'FROM transactions WHERE merchant_norm IS NOT NULL '
-              'AND created_at >= ?1 AND $needsClassificationSql',
-              variables: [Variable.withInt(since)],
-              readsFrom: {_db.transactions},
-            )
-            .get();
-        final ruled = {
-          for (final r
-              in await _db
-                  .customSelect(
-                    'SELECT match_value FROM merchant_rules '
-                    "WHERE match_kind = 'merchant_norm'",
-                    readsFrom: {_db.merchantRules},
-                  )
-                  .get())
-            r.read<String>('match_value'),
-        };
-
-        final byKey = <String, List<QueryRow>>{};
-        for (final r in rows) {
-          (byKey[r.read<String>('merchant_norm')] ??= []).add(r);
-        }
-        final tried = await suggestions.statesOf(byKey.keys);
-        final events = templateEvents();
-
-        final eligible = <({String key, int count, int lastSeen})>[];
-        for (final e in byKey.entries) {
-          final key = e.key;
-          if (!isQueueableKey(key) || ruled.contains(key)) continue;
-          if (e.value.every(
-            (r) => _rowEligible(r, key, lx, tried, events, businessTemplates),
-          )) {
-            eligible.add((
-              key: key,
-              count: e.value.length,
-              lastSeen: e.value
-                  .map((r) => r.read<int>('created_at'))
-                  .reduce((a, b) => a > b ? a : b),
-            ));
-          }
-        }
+        final eligible = await _eligible(lx, since);
         // Newest first; the cap keeps the most recently seen merchants.
         eligible.sort((a, b) {
           final c = b.lastSeen.compareTo(a.lastSeen);
@@ -221,6 +175,71 @@ class LlmCatQueueFiller {
         );
       }),
     );
+  }
+
+  /// The merchants that qualify now (read only), in no particular order.
+  Future<List<({String key, int count, int lastSeen})>> _eligible(
+    NameLexicon lx,
+    int since,
+  ) async {
+    final rows = await _db
+        .customSelect(
+          'SELECT merchant_norm, merchant_raw, direction, source, '
+          'counterparty_kind, counterparty_value, is_internal, template_id, '
+          'transfer_pair_id IS NOT NULL AS paired, created_at '
+          'FROM transactions WHERE merchant_norm IS NOT NULL '
+          'AND created_at >= ?1 AND $needsClassificationSql',
+          variables: [Variable.withInt(since)],
+          readsFrom: {_db.transactions},
+        )
+        .get();
+    final ruled = {
+      for (final r
+          in await _db
+              .customSelect(
+                'SELECT match_value FROM merchant_rules '
+                "WHERE match_kind = 'merchant_norm'",
+                readsFrom: {_db.merchantRules},
+              )
+              .get())
+        r.read<String>('match_value'),
+    };
+
+    final byKey = <String, List<QueryRow>>{};
+    for (final r in rows) {
+      (byKey[r.read<String>('merchant_norm')] ??= []).add(r);
+    }
+    final tried = await AiMerchantSuggestionsDao(_db).statesOf(byKey.keys);
+    final events = templateEvents();
+
+    final eligible = <({String key, int count, int lastSeen})>[];
+    for (final e in byKey.entries) {
+      final key = e.key;
+      if (!isQueueableKey(key) || ruled.contains(key)) continue;
+      if (e.value.every(
+        (r) => _rowEligible(r, key, lx, tried, events, businessTemplates),
+      )) {
+        eligible.add((
+          key: key,
+          count: e.value.length,
+          lastSeen: e.value
+              .map((r) => r.read<int>('created_at'))
+              .reduce((a, b) => a > b ? a : b),
+        ));
+      }
+    }
+    return eligible;
+  }
+
+  /// T-362: how many distinct merchants qualify for the discovery card.
+  /// Needs only the flag (the card is shown before consent); reads, never
+  /// writes or queues, and returns 0 while the flag is off.
+  Future<int> countEligible({required DateTime now}) async {
+    if (!gate.isFlagOn()) return 0;
+    final lx = await lexicon();
+    final since =
+        now.toUtc().millisecondsSinceEpoch - llmCatQueueMaxAge.inMilliseconds;
+    return (await _eligible(lx, since)).length;
   }
 
   static bool _rowEligible(
