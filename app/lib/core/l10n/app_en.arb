@@ -689,6 +689,8 @@
   "ingestionReviewExchangeJumpNo": "No",
   "ingestionReviewOldDueAlreadyHandled": "Already handled, nothing to do here",
   "ingestionReviewEmptyTitle": "All clear! Nothing to review ✨",
+  "ingestionReviewHeaderTitle": "{count, plural, =1{1 message needs a look} other{{n} messages need a look}}",
+  "ingestionReviewHeaderHelper": "Swipe to accept or dismiss, or tap a card to fix it.",
   "ingestionAlwaysSenderTitle": "Always capture messages from {sender}?",
   "ingestionAlwaysSenderBody": "{count, plural, =0{From now on I'll log its messages myself.} =1{They'll still come here for review until you've confirmed 1, then I'll log them myself.} other{They'll still come here for review until you've confirmed {n}, then I'll log them myself.}}",
   "ingestionAlwaysSenderYes": "Yes, always",

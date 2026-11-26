@@ -3047,6 +3047,22 @@
   "@ingestionReviewEmptyTitle": {
     "description": "T · C-28, Rive proud"
   },
+  "ingestionReviewHeaderTitle": "{count, plural, =1{رسالة واحدة محتاجة نظرة} =2{رسالتين محتاجين نظرة} few{{n} رسايل محتاجين نظرة} many{{n} رسالة محتاجين نظرة} other{{n} رسالة محتاجين نظرة}}",
+  "@ingestionReviewHeaderTitle": {
+    "description": "C · T-296 review header, count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewHeaderHelper": "اسحب عشان تقبل أو تشيل، أو دوس على الكارت وظبّطه.",
+  "@ingestionReviewHeaderHelper": {
+    "description": "T · T-296 review header helper line"
+  },
   "ingestionAlwaysSenderTitle": "أقرا رسايل {sender} على طول؟",
   "@ingestionAlwaysSenderTitle": {
     "description": "T · A-66 sheet, after confirming a generic parse",

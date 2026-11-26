@@ -3481,6 +3481,18 @@ abstract class AppLocalizations {
   /// **'كله تمام! مفيش حاجة مستنية رأيك ✨'**
   String get ingestionReviewEmptyTitle;
 
+  /// C · T-296 review header, count:int, n
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{رسالة واحدة محتاجة نظرة} =2{رسالتين محتاجين نظرة} few{{n} رسايل محتاجين نظرة} many{{n} رسالة محتاجين نظرة} other{{n} رسالة محتاجين نظرة}}'**
+  String ingestionReviewHeaderTitle(int count, String n);
+
+  /// T · T-296 review header helper line
+  ///
+  /// In ar, this message translates to:
+  /// **'اسحب عشان تقبل أو تشيل، أو دوس على الكارت وظبّطه.'**
+  String get ingestionReviewHeaderHelper;
+
   /// T · A-66 sheet, after confirming a generic parse
   ///
   /// In ar, this message translates to:
