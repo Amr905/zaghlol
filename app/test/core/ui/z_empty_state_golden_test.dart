@@ -1,6 +1,7 @@
 @Tags(['golden'])
 library;
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/ui/z_empty_state.dart';
 
 import '../../support/l10n_golden.dart';
