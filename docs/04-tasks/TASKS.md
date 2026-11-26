@@ -404,7 +404,7 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-338](tasks/T-338.md) | Vertex Gemini and Anthropic adapters | ASK-LLM | High | Sonnet | backend-engineer | T-332 | B | 94 | TODO |
 | [T-339](tasks/T-339.md) | Spend ledger, USD 10 cap, 80 % alert, pause, metrics | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-332, T-323, T-334 | B | 94 | TODO |
 | [T-340](tasks/T-340.md) | App core/llm: consent, quota snapshot, attestation binding, gateway client | ASK-LLM / LLM-CAT | High (C4) | Opus | flutter-core-engineer | T-322, T-337, T-341 | A | 93 | TODO |
-| [T-341](tasks/T-341.md) | Native: Play Integrity standard request + App Attest assertion over a hash | ASK-LLM / LLM-CAT | High (C4) | Sonnet | native-platform-engineer | — | N | 92 | TODO |
+| [T-341](tasks/T-341.md) | Native: Play Integrity standard request + App Attest assertion over a hash | ASK-LLM / LLM-CAT | High (C4) | Sonnet | native-platform-engineer | — | N | 92 | BUILT |
 | [T-342](tasks/T-342.md) | Plan executor over repositories, per currency | ASK-LLM | High | Sonnet | flutter-core-engineer | T-331, T-326, T-327 | A | 93 | TODO |
 | [T-343](tasks/T-343.md) | Ask flow orchestrator with outgoing-request proofs | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | T-328, T-331, T-340, T-342 | A | 94 | TODO |
 | [T-344](tasks/T-344.md) | Template filler and app answer templates | ASK-LLM | Medium | Sonnet | flutter-core-engineer | T-331, T-324, T-342 | A | 95 | TODO |
