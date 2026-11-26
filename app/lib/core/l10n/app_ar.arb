@@ -1836,11 +1836,11 @@
   "@homeApproxSheetTitle": {
     "description": "T"
   },
-  "homeApproxSheetBody": "بنحسبها بسعر البنك للي حولته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.",
+  "homeApproxSheetBody": "بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.",
   "@homeApproxSheetBody": {
     "description": "B"
   },
-  "homeApproxSheetOwn": "اللي دخلك بالعملة دي (بما فيه اللي حولته)",
+  "homeApproxSheetOwn": "اللي دخلك بالعملة دي (بما فيه اللي غيّرته)",
   "@homeApproxSheetOwn": {
     "description": "L · the target currency's own money in"
   },
@@ -1853,7 +1853,7 @@
       }
     }
   },
-  "homeApproxSheetExchanged": "{amount} حولتها، واتحسبت مرة واحدة بالفعل",
+  "homeApproxSheetExchanged": "{amount} غيّرتها، واتحسبت مرة واحدة بالفعل",
   "@homeApproxSheetExchanged": {
     "description": "S",
     "placeholders": {
@@ -1862,7 +1862,7 @@
       }
     }
   },
-  "homeApproxSheetExchangedBank": "{amount} حولتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل",
+  "homeApproxSheetExchangedBank": "{amount} غيّرتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل",
   "@homeApproxSheetExchangedBank": {
     "description": "S",
     "placeholders": {

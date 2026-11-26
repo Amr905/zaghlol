@@ -70,6 +70,14 @@ void main() {
     expect(a.total, Money(egp, 4954000));
   });
 
+  test('negative proof: target exchanged out is not counted twice', () {
+    final r = q(usd, egp, 50000000000, now - h);
+    final a = line(
+      build([inp(egp, 5000000, 1000000), inp(usd, 20000, 0)], [r]),
+    );
+    expect(a.total.minor, 5000000);
+  });
+
   test('everything exchanged: no daily rate needed, total is EGP money in', () {
     final a = line(
       build([
