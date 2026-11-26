@@ -306,6 +306,23 @@ final class DriftIngestStore implements IngestStorePort {
   }
 
   @override
+  Future<String?> exchangeInLegOf(String outTxnId) => guardRead(() async {
+    final row = await _db
+        .customSelect(
+          'SELECT p.in_txn_id AS in_id FROM transfer_pairs p '
+          'JOIN transactions o ON o.id = p.out_txn_id '
+          'JOIN transactions i ON i.id = p.in_txn_id '
+          "WHERE p.out_txn_id = ?1 AND p.kind IN ('fx_conversion', "
+          "'cross_currency') AND o.deleted_at IS NULL "
+          'AND i.deleted_at IS NULL',
+          variables: [Variable.withString(outTxnId)],
+          readsFrom: {_db.transferPairs, _db.transactions},
+        )
+        .getSingleOrNull();
+    return row?.read<String>('in_id');
+  });
+
+  @override
   Future<BalanceJumpFacts?> balanceJumpFacts({
     required String accountId,
     required String currency,

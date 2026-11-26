@@ -22,6 +22,8 @@ abstract interface class TxnBulkActions {
   Future<BulkEditResult> setAccount(Set<String> ids, String accountId);
 
   /// Soft-deletes [ids] and dissolves their transfer pairs and offset links.
+  /// An exchange leg takes its other leg and the pair with it (T-281); Undo
+  /// puts all of it back.
   Future<BulkEditResult> delete(Set<String> ids);
 
   Future<UndoResult> undo(String batchId);
@@ -75,15 +77,21 @@ class BulkActions implements TxnBulkActions {
 
   @override
   Future<BulkEditResult> delete(Set<String> ids) async {
-    final result = await _bulk.apply(ids, const DeleteTransactions());
+    // T-281: the user deletes what the list shows, and an exchange is one
+    // row, so both of its legs and the pair go in the one transaction.
+    final result = await _bulk.apply(
+      ids,
+      const DeleteTransactions(wholeExchanges: true),
+    );
+    final removed = {...ids, ...result.ids};
     // After the soft delete: free pairs and links of every removed row.
     // FU-132: remember the batch first and give every id its turn, so one
     // failing hook neither loses the Undo ids nor skips the other rows. The
     // first failure is rethrown at the end.
-    _deleted[result.batchId] = {...ids};
+    _deleted[result.batchId] = removed;
     Object? failure;
     StackTrace? trace;
-    for (final id in ids) {
+    for (final id in removed) {
       try {
         await _pairing.onRemoved(id);
         await _refunds.onRemoved(id);

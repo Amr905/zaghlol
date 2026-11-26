@@ -2374,6 +2374,35 @@ abstract class AppLocalizations {
   /// **'تحويلة لنفسك'**
   String get transactionsRowInternalTitle;
 
+  /// T-281 list row and detail title; arrow points from what you gave to what you got (mirrors in LTR); amounts are LTR runs
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت {from} ← {to}'**
+  String transactionsExchangeTitle(String from, String to);
+
+  /// T-281 second line of the exchange row
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك {rate} · مش مصروف'**
+  String transactionsExchangeRate(String rate);
+
+  /// T-281 second line when the two amounts give no rate
+  ///
+  /// In ar, this message translates to:
+  /// **'مش مصروف'**
+  String get transactionsExchangeNotSpending;
+
+  /// T-281 screen-reader label of the exchange row
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير عملة: دفعت {from} ووصلك {to}، {rate}، {time}'**
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  );
+
   /// L · title of an InstaPay row (US-P04)
   ///
   /// In ar, this message translates to:
@@ -2823,6 +2852,71 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الحركة دي مبقتش موجودة'**
   String get transactionsDetailGone;
+
+  /// T-281 detail banner
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير عملة، مش محسوب لا مصروف ولا دخل'**
+  String get transactionsExchangeBanner;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعت'**
+  String get transactionsExchangeFieldSent;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'وصلني'**
+  String get transactionsExchangeFieldReceived;
+
+  /// T-281 detail field: account of the money given
+  ///
+  /// In ar, this message translates to:
+  /// **'من حساب'**
+  String get transactionsExchangeFieldFrom;
+
+  /// T-281 detail field: account of the money got
+  ///
+  /// In ar, this message translates to:
+  /// **'لحساب'**
+  String get transactionsExchangeFieldTo;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك'**
+  String get transactionsExchangeFieldRate;
+
+  /// T-281 detail rate value; one and rate are rendered in the user's digits
+  ///
+  /// In ar, this message translates to:
+  /// **'{one} {from} = {rate} {to}'**
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  );
+
+  /// T-281 delete dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'تمسح تغيير العملة ده؟'**
+  String get transactionsExchangeDeleteTitle;
+
+  /// T-281 delete dialog body
+  ///
+  /// In ar, this message translates to:
+  /// **'الناحيتين هيتمسحوا مع بعض.'**
+  String get transactionsExchangeDeleteBody;
+
+  /// T-281 snackbar after delete; with Undo
+  ///
+  /// In ar, this message translates to:
+  /// **'اتمسح تغيير العملة'**
+  String get transactionsExchangeDeleted;
 
   /// T · FR-CAT-05 sheet, owned by the categorization module (F-19)
   ///

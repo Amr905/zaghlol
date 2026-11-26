@@ -63,6 +63,11 @@ abstract interface class IngestStorePort {
     required int createdAtMs,
   });
 
+  /// T-281 (FU-364): the in leg of the complete exchange pair
+  /// (`fx_conversion` / `cross_currency`) whose out leg is [outTxnId], when
+  /// both legs are live; null otherwise.
+  Future<String?> exchangeInLegOf(String outTxnId);
+
   /// Applies [patch] to [txnId] and sets `updated_at`. Returns rows changed.
   /// T-272: the facts for the unexplained-rise check of [accountId] in
   /// [currency] before a balance dated [asOfMs] is recorded; null when the

@@ -1898,6 +1898,49 @@
   "@transactionsRowInternalTitle": {
     "description": "L · ⇄ icon, muted"
   },
+  "transactionsExchangeTitle": "غيّرت {from} ← {to}",
+  "@transactionsExchangeTitle": {
+    "description": "T-281 list row and detail title; arrow points from what you gave to what you got (mirrors in LTR); amounts are LTR runs",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeRate": "سعر البنك {rate} · مش مصروف",
+  "@transactionsExchangeRate": {
+    "description": "T-281 second line of the exchange row",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeNotSpending": "مش مصروف",
+  "@transactionsExchangeNotSpending": {
+    "description": "T-281 second line when the two amounts give no rate"
+  },
+  "transactionsExchangeRowA11y": "تغيير عملة: دفعت {from} ووصلك {to}، {rate}، {time}",
+  "@transactionsExchangeRowA11y": {
+    "description": "T-281 screen-reader label of the exchange row",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "transactionsInstapayTitle": "إنستاباي",
   "@transactionsInstapayTitle": {
     "description": "L · title of an InstaPay row (US-P04)"
@@ -2363,6 +2406,60 @@
   "transactionsDetailGone": "الحركة دي مبقتش موجودة",
   "@transactionsDetailGone": {
     "description": "N · deleted elsewhere; goes back"
+  },
+  "transactionsExchangeBanner": "تغيير عملة، مش محسوب لا مصروف ولا دخل",
+  "@transactionsExchangeBanner": {
+    "description": "T-281 detail banner"
+  },
+  "transactionsExchangeFieldSent": "دفعت",
+  "@transactionsExchangeFieldSent": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeFieldReceived": "وصلني",
+  "@transactionsExchangeFieldReceived": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeFieldFrom": "من حساب",
+  "@transactionsExchangeFieldFrom": {
+    "description": "T-281 detail field: account of the money given"
+  },
+  "transactionsExchangeFieldTo": "لحساب",
+  "@transactionsExchangeFieldTo": {
+    "description": "T-281 detail field: account of the money got"
+  },
+  "transactionsExchangeFieldRate": "سعر البنك",
+  "@transactionsExchangeFieldRate": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeRateValue": "{one} {from} = {rate} {to}",
+  "@transactionsExchangeRateValue": {
+    "description": "T-281 detail rate value; one and rate are rendered in the user's digits",
+    "placeholders": {
+      "one": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeDeleteTitle": "تمسح تغيير العملة ده؟",
+  "@transactionsExchangeDeleteTitle": {
+    "description": "T-281 delete dialog"
+  },
+  "transactionsExchangeDeleteBody": "الناحيتين هيتمسحوا مع بعض.",
+  "@transactionsExchangeDeleteBody": {
+    "description": "T-281 delete dialog body"
+  },
+  "transactionsExchangeDeleted": "اتمسح تغيير العملة",
+  "@transactionsExchangeDeleted": {
+    "description": "T-281 snackbar after delete; with Undo"
   },
   "categorizationRuleTitle": "أستخدم {category} دايماً لـ {merchant}؟",
   "@categorizationRuleTitle": {

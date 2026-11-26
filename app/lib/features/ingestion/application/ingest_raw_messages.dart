@@ -1287,8 +1287,8 @@ final class IngestRawMessages {
     final outKey = dedupeKeyOf(inst, TxnDirection.transferOut, sent);
     final inKey = dedupeKeyOf(inst, TxnDirection.transferIn, received);
 
-    // Dedupe 2 on the sent leg: never merged (a conversion seen on another
-    // channel is rare and merging could drop the other leg).
+    // Dedupe 2 on the sent leg. Merged only when both legs match one stored
+    // exchange (T-281); otherwise a second pair plus a review item.
     final matches = crossChannelMatches(
       NewTxnKeys(
         source: p.txnSource!.code,
@@ -1305,6 +1305,59 @@ final class IngestRawMessages {
     );
     if (userConfirmed && matches.isNotEmpty) {
       return IngestPossibleDuplicate([for (final c in matches) c.id]);
+    }
+
+    // T-281 (FU-364): the same conversion seen on another channel. When the
+    // sent leg matches exactly one out leg of a live exchange pair and the
+    // received leg matches that pair's in leg (same keys, window and last-4
+    // rules as dedupe 2), the message joins the stored exchange: no second
+    // pair, the stored legs stay exactly as they are (no field fill: a
+    // patch could move one leg to another account or give the out leg the
+    // received amount as its original amount).
+    if (matches.length == 1 && !matches.single.isDeleted) {
+      final target = matches.single;
+      final inLeg = await _store.exchangeInLegOf(target.id);
+      if (inLeg != null) {
+        final inMatches = crossChannelMatches(
+          NewTxnKeys(
+            source: p.txnSource!.code,
+            status: TxnStatus.posted,
+            occurredAtMs: occurredMs,
+            receivedAtMs: p.m.receivedAtMs,
+            last4: f.last4,
+          ),
+          await _store.crossChannelCandidates(
+            dedupeKey: inKey,
+            fromMs: occurredMs - kCrossChannelFetchMs,
+            toMs: occurredMs + kCrossChannelFetchMs,
+          ),
+        );
+        if (inMatches.length == 1 &&
+            inMatches.single.id == inLeg &&
+            inMatches.single.accountId == target.accountId) {
+          await _insertRaw(
+            p,
+            status: RawStatus.parsed,
+            institution: inst,
+            templateId: r.templateId,
+            templateVersion: r.templateVersion,
+          );
+          final balance = f.balance;
+          await _recordBalance(
+            local,
+            accountId: target.accountId,
+            occurredAtMs: occurredMs,
+            balance: balance,
+            available: f.available,
+            sourceTxnId:
+                balance != null && balance.currency == received.currency
+                ? inLeg
+                : target.id,
+          );
+          local.diag(IngestDiag.mergeCrossChannel);
+          return IngestMergedCrossChannel(target.id);
+        }
+      }
     }
 
     final account = await _resolve(
