@@ -43,7 +43,7 @@ works with OpenAI strict structured outputs and Gemini `responseJsonSchema`. `t`
 
 ### 2.2 Common types and plan variants
 - **Period** `{k, o, n, m, y}`: `k` ∈ day·week·month·year·cycle·lastDays·monthOfYear·allTime (= `AskPeriodKind`); `o` int −36…0; `n` 1…366 only for lastDays; `m` 1…12 and `y` 2000…2100|null only for monthOfYear; others `null`.
-- **Filter** `{slug, ref, mention, currency}`: at most one of `slug` (system category code, enum from the bundled catalog), `ref` (placeholder `^⟦(ACCOUNT|CARD|BANK|MERCHANT)_[1-9]⟧$`, U+27E6/U+27E7), `mention` (1…40 chars, no digits); `currency` ISO 4217 `^[A-Z]{3}$`|null.
+- **Filter** `{slug, ref, mention, currency}`: at most one of `slug` (system category code, enum from the bundled catalog), `ref` (placeholder `^⟦(ACCOUNT|CARD|BANK|MERCHANT)_[1-9][0-9]?⟧$`, U+27E6/U+27E7), `mention` (1…40 chars, no digits); `currency` ISO 4217 `^[A-Z]{3}$`|null.
 - **Amount** `{amount, currency}`: `amount` decimal string `^[0-9]{1,9}(\.[0-9]{1,3})?$`, fraction ≤ the currency exponent; `currency` null = primary. Must equal a number in the sent question or a bundled number word («ألف», «ميت», "thousand"…); otherwise PL-FALLBACK (the model may not invent amounts).
 
 | Plan | `p` fields (ranges) |

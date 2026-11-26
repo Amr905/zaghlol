@@ -41,7 +41,12 @@ FoldedText _fold(String input, {required bool loose}) {
   for (var i = 0; i < units.length; i++) {
     final u = units[i];
     if (_isSpace(u) ||
-        (loose && (u == 0x2D || u == 0x5F || u == 0x2F || u == 0x2212))) {
+        (loose &&
+            (u == 0x2D ||
+                u == 0x5F ||
+                u == 0x2F ||
+                u == 0x2212 ||
+                (u >= 0x2010 && u <= 0x2015)))) {
       if (pendingSpace < 0) {
         pendingSpace = i;
       }

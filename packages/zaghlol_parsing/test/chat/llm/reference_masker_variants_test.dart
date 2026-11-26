@@ -286,12 +286,12 @@ void main() {
       expect(s, 'كارت اربعة تلاتة اتنين واحد');
     });
 
-    test('a last-4 more than 3 words from the card word is not caught', () {
-      expect(sent('الكارت بتاعي اللي رقمه في الآخر 4321'), contains('4321'));
+    test('a far last-4 is not masked but the net now blocks it (m14)', () {
+      expect(sent('الكارت بتاعي اللي رقمه في الآخر 4321'), isNull);
     });
 
-    test('possessive suffix on a name is not caught', () {
-      expect(sent('صرفت في كارفوري'), contains('كارفوري'));
+    test('possessive suffix on a name: blocked by the net (m14)', () {
+      expect(sent('صرفت في كارفوري'), isNull);
     });
   });
 
@@ -418,6 +418,58 @@ void main() {
           }
         }
       }
+    });
+  });
+
+  group('fix round 2 (M3, m13, m14)', () {
+    const leaky = [
+      'كارت4321',
+      'كارت٤٣٢١',
+      'visa4321',
+      'كارتك 4321',
+      'كارتها 4321',
+      'كارتي 4321',
+      'بكارته 4321',
+      'والفيزا 4321',
+      'كارت 43–21',
+      'كارت 43—21',
+      'كارت 43‐21',
+      'كارت 43,21',
+      'كارت ٤٣،٢١',
+      'كارت 4,3,2,1',
+      'كارت 4-3-2-1',
+      'كارت 43.21',
+      'كارت 43 / 21',
+    ];
+    for (final q in leaky) {
+      test('no last-4 in [$q]', () => expectNoLast4(q));
+    }
+
+    test('thousands separators are not a last-4', () {
+      expect(pipeline('كارت 1,000 جنيه', withCosta), isA<MaskResult>());
+    });
+
+    test('net blocks a last-4 anywhere, however it is written', () {
+      for (final t in ['اشتريت 43-21 من', 'x 4,3,2,1', 'abc4321', '43 – 21']) {
+        expect(ReferenceMasker.leaksForTest(t, withCosta), isTrue, reason: t);
+      }
+      expect(ReferenceMasker.leaksForTest('عندي 14321 جنيه', withCosta), false);
+      expect(ReferenceMasker.leaksForTest('يوم 10/05/2024', withCosta), false);
+    });
+
+    test('net blocks names with non-letters inside', () {
+      for (final t in ['ك ا ر فور', 'C.a-r r e f o u r', 'tal_a_bat']) {
+        expect(ReferenceMasker.leaksForTest(t, withCosta), isTrue, reason: t);
+      }
+    });
+
+    test('more than 99 placeholders of one kind is unresolved', () {
+      final ms = [
+        for (var i = 0; i < 100; i++) MaskMerchant('m$i', ['Shop${'x' * i}ab']),
+      ];
+      final q = [for (var i = 0; i < 100; i++) 'Shop${'x' * i}ab'].join(' ');
+      final o = ReferenceMasker.mask(q, StaticMaskSources(merchants: ms));
+      expect(o, isA<MaskUnresolved>());
     });
   });
 }

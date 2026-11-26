@@ -233,6 +233,36 @@
       "srs": "FR-LLM-19/21"
     },
     {
+      "id": "valid-ref-two-digits",
+      "group": "data",
+      "lang": "ar",
+      "sent": "صرفت كام بكارت ⟦CARD_10⟧ الشهر ده؟",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": "⟦CARD_10⟧",
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "accept"
+      },
+      "srs": "FR-LLM-19/21"
+    },
+    {
       "id": "valid-spend-slug-lastdays",
       "group": "data",
       "lang": "en",
@@ -1558,6 +1588,38 @@
           "filter": {
             "slug": null,
             "ref": "⟦CARD_0⟧",
+            "mention": null,
+            "currency": null
+          }
+        },
+        "t": null
+      },
+      "expect": {
+        "outcome": "fallback",
+        "counted": false,
+        "step": 1,
+        "reason": "SCHEMA_INVALID"
+      }
+    },
+    {
+      "id": "invalid-ref-three-digits",
+      "group": "schema",
+      "lang": "ar",
+      "sent": "صرفت كام بكارت ⟦CARD_100⟧",
+      "plan": {
+        "v": 1,
+        "plan": "PL-SPEND",
+        "p": {
+          "period": {
+            "k": "cycle",
+            "o": 0,
+            "n": null,
+            "m": null,
+            "y": null
+          },
+          "filter": {
+            "slug": null,
+            "ref": "⟦CARD_100⟧",
             "mention": null,
             "currency": null
           }

@@ -3,12 +3,18 @@
 /// question leaves the phone. Pure, deterministic, total: it never throws
 /// and never echoes a source name. Any unexpected error returns
 /// [MaskUnresolved] (nothing is sent).
+///
+/// Safety net (m14): after masking, `_looseLeak` re-checks the sent text
+/// without the masker's matching: known last-4s across any non-letter
+/// separators and names with all non-letters removed. See its doc for the
+/// rule and the kept cases (amounts, dates). Placeholders are capped at 99
+/// per kind (more: unresolved, nothing sent).
 library;
 
 import 'loose_text.dart';
 import 'mask_models.dart';
 
-final RegExp _wordRun = RegExp(r'[\p{L}\p{N}]+', unicode: true);
+final RegExp _wordRun = RegExp(r'\p{L}+|\p{N}+', unicode: true);
 final RegExp _forgedBracket = RegExp('⟦(PHONE|EMAIL|IPA|NUMBER)⟧|[⟦⟧]');
 
 /// Arabic clitic prefixes that can sit in front of a name or word:
@@ -240,7 +246,9 @@ final class _DigitHit {
   final String digits;
 }
 
-final RegExp _digitGroups = RegExp(r'[0-9]+(?: [0-9]+)*');
+final RegExp _digitGroups = RegExp(r'[0-9]+(?:[ ,،]+[0-9]+)*');
+final RegExp _thousands = RegExp(r'^[0-9]{1,3}(?:,[0-9]{3})+$');
+final RegExp _nonDigit = RegExp('[^0-9]');
 
 /// Last-4 candidates in folded text: a 4-digit token, or 2 to 4 adjacent
 /// digit groups (`43 21`, `4 3 2 1`; `-` and `.` are already folded away or
@@ -300,12 +308,15 @@ List<_DigitHit> _digitHits(
         if (a == b && _decimalNeighbour(f, start, end)) {
           break;
         }
+        if (a != b && _thousands.hasMatch(f.substring(start, end))) {
+          break; // «1,000», not a split last-4
+        }
         final ti = tokenAt(start);
         final tj = tokenAt(end - 1);
         if (ti < 0 || tj < 0 || !near(ti, tj) || inProtected(start, end)) {
           break;
         }
-        final digits = f.substring(start, end).replaceAll(' ', '');
+        final digits = f.substring(start, end).replaceAll(_nonDigit, '');
         final next = tj + 1 < tokens.length ? tokens[tj + 1].text : '';
         if (!lastFours.containsKey(digits) && _currencyWords.contains(next)) {
           break; // an amount: «كارت 4321 جنيه» with no such card
@@ -317,6 +328,38 @@ List<_DigitHit> _digitHits(
   }
   return out;
 }
+
+const List<String> _cardSuffixes = [
+  '', 'ك', 'ه', 'ها', 'نا', 'كم', 'هم', 'و', 'ي', //
+];
+
+/// Card/account word, also with a pronoun suffix (كارتك, كارتها, بكارته) and
+/// an attached clitic prefix (والفيزا).
+bool _isCardWord(String token) {
+  for (final p in _clitics) {
+    if (token.length <= p.length || !token.startsWith(p)) {
+      continue;
+    }
+    for (final x in _cardSuffixes) {
+      final end = token.length - x.length;
+      if (end > p.length &&
+          token.endsWith(x) &&
+          _cardWords.contains(token.substring(p.length, end))) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/// Per token: a card word, or `last` followed by `4`/a 4-digit group.
+List<bool> _cardish(List<_Tok> tokens) => [
+  for (var i = 0; i < tokens.length; i++)
+    _isCardWord(tokens[i].text) ||
+        (tokens[i].text == 'last' &&
+            i + 1 < tokens.length &&
+            (tokens[i + 1].text == '4' || tokens[i + 1].text == '4digits')),
+];
 
 bool _hasWord(String token, Set<String> words) {
   if (words.contains(token)) {
@@ -392,7 +435,7 @@ abstract final class ReferenceMasker {
     final tokens = <_Tok>[
       for (final m in _wordRun.allMatches(f)) _Tok(m.start, m.end, m.group(0)!),
     ];
-    final cardish = [for (final t in tokens) _hasWord(t.text, _cardWords)];
+    final cardish = _cardish(tokens);
     final bankish = [for (final t in tokens) _hasWord(t.text, _bankWords)];
 
     bool inProtected(int s, int e) =>
@@ -632,6 +675,9 @@ abstract final class ReferenceMasker {
       var placeholder = byEntity[key];
       if (placeholder == null) {
         final n = counters[kind]! + 1;
+        if (n > 99) {
+          return const MaskUnresolved(MaskUnresolvedReason.failed, []);
+        }
         counters[kind] = n;
         placeholder = '⟦${kind.name.toUpperCase()}_$n⟧';
         byEntity[key] = placeholder;
@@ -667,6 +713,9 @@ bool _leaks(
   List<MaskInstitution> institutions,
   List<MaskMerchant> merchants,
 ) {
+  if (_looseLeak(sent, accounts, institutions, merchants)) {
+    return true;
+  }
   final f = looseFold(sent.replaceAll(_placeholderText, ' ')).text;
   bool hasName(String name) {
     final key = looseKey(name);
@@ -707,11 +756,111 @@ bool _leaks(
     final tokens = <_Tok>[
       for (final m in _wordRun.allMatches(f)) _Tok(m.start, m.end, m.group(0)!),
     ];
-    final cardish = [for (final t in tokens) _hasWord(t.text, _cardWords)];
+    final cardish = _cardish(tokens);
     final hits = _digitHits(f, tokens, cardish, lastFours, (_, _) => false);
     if (hits.any((h) => lastFours.containsKey(h.digits))) {
       return true;
     }
+  }
+  return false;
+}
+
+final RegExp _nonLetter = RegExp(r'[^\p{L}]', unicode: true);
+final RegExp _nonLetterRun = RegExp(r'[^\p{L}]+', unicode: true);
+final RegExp _leadWord = RegExp(r'^\p{L}+', unicode: true);
+
+/// Independent of the masker's matching (m14). Each piece of [sent] between
+/// placeholders is folded (digits to ASCII) and then checked on its own:
+/// - names: any account/nickname/extra name, merchant name or non-ordinary
+///   bank alias of 4 or more letters, with every non-letter removed on both
+///   sides, must not occur as a substring (so `ك ا ر-فور` is caught);
+/// - last-4: each maximal run without letters has its non-digits removed
+///   (`43–21`, `4,3,2,1`, `كارت4321`); if that holds a known last-4 it is a
+///   leak, whatever surrounds it. Kept (not a leak): a single unbroken digit
+///   group longer than 4 digits (`14321`), a lone group equal to the last-4
+///   followed by a currency word (an amount, the documented
+///   «صرفت 4321 جنيه» rule), and a valid day/month/year date. It prefers
+///   blocking: `12,4321` blocks.
+bool _looseLeak(
+  String sent,
+  List<MaskAccount> accounts,
+  List<MaskInstitution> institutions,
+  List<MaskMerchant> merchants,
+) {
+  final names = <String>{};
+  void add(String n) {
+    for (final k in {
+      looseFold(n).text.replaceAll(_nonLetter, ''),
+      if (looseFold(n).text.replaceAll(_nonLetter, '').startsWith('ال'))
+        looseFold(n).text.replaceAll(_nonLetter, '').substring(2),
+    }) {
+      if (k.length >= 4) {
+        names.add(k);
+      }
+    }
+  }
+
+  for (final a in accounts) {
+    [a.label, ?a.nickname, ...a.extraNames].forEach(add);
+  }
+  for (final i in institutions) {
+    for (final al in i.aliases) {
+      if (!al.ordinaryWord) {
+        add(al.text);
+      }
+    }
+  }
+  for (final m in merchants) {
+    m.names.forEach(add);
+  }
+  final last4s = {
+    for (final a in accounts)
+      if (a.last4 != null && a.last4!.length == 4) a.last4!,
+  };
+  for (final piece in sent.split(_placeholderText)) {
+    final f = looseFold(piece).text;
+    final letters = f.replaceAll(_nonLetter, '');
+    if (names.any(letters.contains)) {
+      return true;
+    }
+    if (last4s.isEmpty) {
+      continue;
+    }
+    for (final m in _nonLetterRun.allMatches(f)) {
+      final seg = m.group(0)!;
+      final digits = seg.replaceAll(_nonDigit, '');
+      if (!last4s.any(digits.contains)) {
+        continue;
+      }
+      final groups = RegExp('[0-9]+').allMatches(seg).map((g) => g.group(0)!);
+      if (groups.length == 1) {
+        if (digits.length > 4) {
+          continue;
+        }
+        final next = _leadWord.stringMatch(f.substring(m.end)) ?? '';
+        if (_currencyWords.contains(next)) {
+          continue;
+        }
+      } else if (_isDate(groups.toList())) {
+        continue;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+bool _isDate(List<String> g) {
+  if (g.length != 3) {
+    return false;
+  }
+  final n = [for (final x in g) int.parse(x)];
+  bool ok(int d, int mo) => d >= 1 && d <= 31 && mo >= 1 && mo <= 12;
+  if (g[2].length == 4 && g[0].length <= 2 && g[1].length <= 2) {
+    return ok(n[0], n[1]);
+  }
+  if (g[0].length == 4 && g[1].length <= 2 && g[2].length <= 2) {
+    return ok(n[2], n[1]);
   }
   return false;
 }
