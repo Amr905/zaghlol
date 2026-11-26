@@ -11,6 +11,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../../routing/app_routes.dart';
 import '../../theme/z_tokens.dart';
 import '../z_haptics.dart';
+import 'shell_bar_height.dart';
 
 class _Destination {
   const _Destination(this.icon, this.selectedIcon);
@@ -133,13 +134,15 @@ class ShellScaffold extends StatelessWidget {
           if (barVisible)
             LayoutId(
               id: _ShellSlot.bar,
-              child: ZBottomBar(
-                labels: labels,
-                addCaption: addCaption ?? addLabel,
-                selected: selected,
-                onSelect: select,
-                onAdd: add,
-                badges: badges,
+              child: ShellBarHeightReporter(
+                child: ZBottomBar(
+                  labels: labels,
+                  addCaption: addCaption ?? addLabel,
+                  selected: selected,
+                  onSelect: select,
+                  onAdd: add,
+                  badges: badges,
+                ),
               ),
             ),
           if (barVisible)

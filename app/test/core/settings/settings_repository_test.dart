@@ -69,6 +69,7 @@ allKeys = [
   (key: Settings.approxViewEnabled, byDefault: false, other: true),
   (key: Settings.approxViewTarget, byDefault: egp, other: Currency.of('USD')),
   (key: Settings.approxAutoOnDone, byDefault: false, other: true),
+  (key: Settings.hapticsEnabled, byDefault: true, other: false),
   (key: Settings.approxFirstForeignNotice, byDefault: false, other: true),
   (
     key: Settings.budgetOffersHandled,

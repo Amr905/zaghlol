@@ -240,6 +240,12 @@ abstract final class Settings {
     max: 3600,
   );
 
+  /// T-298: vibration (haptic ticks); on by default.
+  static final hapticsEnabled = SettingKey.boolean(
+    'haptics.enabled',
+    byDefault: true,
+  );
+
   /// T-197 / D-73: the Money tab lists accounts in sections by type (on) or
   /// as one list (off).
   static final moneyGroupByType = SettingKey.boolean(

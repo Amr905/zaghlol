@@ -13,6 +13,7 @@ import '../../../core/l10n/date_format.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/l10n/locale_providers.dart';
 import '../../../core/l10n/money_format.dart';
+import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../wealth/presentation/assets_section.dart';
@@ -847,6 +848,8 @@ class _Empty extends StatelessWidget {
     return ZCard(
       child: Column(
         children: [
+          const ZaghlolAvatar(moment: ZaghlolMoment.sleep, size: 120),
+          const SizedBox(height: ZSpacing.sm),
           Text(
             l10n.accountsOverviewEmptyTitle,
             textAlign: TextAlign.center,

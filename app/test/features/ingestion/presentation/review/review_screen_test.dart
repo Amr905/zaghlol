@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/ui/z_empty_state.dart';
+import 'package:zaghlol/features/ingestion/presentation/review/review_header.dart';
 import 'package:zaghlol/core/l10n/date_format.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/l10n/locale_providers.dart';
@@ -26,6 +28,7 @@ void main() {
         );
         expect(tester.takeException(), isNull);
         expect(find.byType(Dismissible), findsNWidgets(sampleCards.length));
+        expect(find.byType(ReviewHeader), findsOneWidget);
       });
 
       testWidgets('empty state', (tester) async {
@@ -33,7 +36,8 @@ void main() {
           tester,
           reviewApp(actions: FakeActions(), queue: [], locale: locale),
         );
-        expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+        expect(find.byType(ZEmptyState), findsOneWidget);
+        expect(find.byType(ReviewHeader), findsNothing);
         expect(find.byType(Dismissible), findsNothing);
       });
 

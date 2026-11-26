@@ -189,6 +189,35 @@ class OcrMergerTest {
     }
 
     @Test
+    fun smallAmountOnTheRowOfATotalWordKeepsArabicNoiseDigitsOut() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Total Amount", 0, 0, 300, 30), line("85", 320, 0, 400, 30)),
+            arabic = listOf(line("كلمة ٤٨١٢", 0, 0, 400, 30, 0.65)),
+        )
+        assertEquals("Total Amount كلمة", out.first { it.left == 0 }.text)
+        assertTrue(out.none { it.text.contains("4812") })
+    }
+
+    @Test
+    fun smallAmountOnALineWithAnAmountWordCountsAsAmountLike() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Total", 0, 0, 150, 30), line("Amount 85", 160, 0, 400, 30)),
+            arabic = listOf(line("كلمة ٤٨١٢", 0, 0, 400, 30, 0.65)),
+        )
+        assertTrue(out.none { it.text.contains("4812") })
+    }
+
+    @Test
+    fun smallNumberWithoutAnAmountWordIsNotAmountLike() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Order Reference", 0, 0, 300, 30), line("12", 320, 0, 400, 30)),
+            arabic = listOf(line("كلمة ٤٨١٢", 0, 0, 400, 30, 0.65)),
+        )
+        // Unchanged behaviour: "Ref 12" style tokens are not amounts, so the Arabic digits may be appended.
+        assertTrue(out.any { it.text.contains("4812") })
+    }
+
+    @Test
     fun confidenceBarsAreInclusiveAtExactly045AndExactly060() {
         val kept = OcrMerger.merge(
             latin = listOf(line("Ref 5555", 0, 100, 200, 130)),

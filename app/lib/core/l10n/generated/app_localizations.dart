@@ -3481,6 +3481,18 @@ abstract class AppLocalizations {
   /// **'كله تمام! مفيش حاجة مستنية رأيك ✨'**
   String get ingestionReviewEmptyTitle;
 
+  /// C · T-296 review header, count:int, n
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{رسالة واحدة محتاجة نظرة} =2{رسالتين محتاجين نظرة} few{{n} رسايل محتاجين نظرة} many{{n} رسالة محتاجين نظرة} other{{n} رسالة محتاجين نظرة}}'**
+  String ingestionReviewHeaderTitle(int count, String n);
+
+  /// T · T-296 review header helper line
+  ///
+  /// In ar, this message translates to:
+  /// **'اسحب عشان تقبل أو تشيل، أو دوس على الكارت وظبّطه.'**
+  String get ingestionReviewHeaderHelper;
+
   /// T · A-66 sheet, after confirming a generic parse
   ///
   /// In ar, this message translates to:
@@ -4865,6 +4877,18 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'{count, plural, =0{بدوّر…} =1{بدوّر… لقيت حركة جديدة} =2{بدوّر… لقيت حركتين جداد} few{بدوّر… لقيت {n} حركات جديدة} many{بدوّر… لقيت {n} حركة جديدة} other{بدوّر… لقيت {n} حركة جديدة}}'**
   String captureRescanRunning(int count, String n);
+
+  /// No description provided for @workingBirdA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول شغال على الموضوع'**
+  String get workingBirdA11y;
+
+  /// No description provided for @workingBirdFailedA11y.
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول بيقولك حصلت مشكلة'**
+  String get workingBirdFailedA11y;
 
   /// N · count:int, n
   ///
@@ -12243,6 +12267,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اخفي المبالغ في التطبيق'**
   String get settingsPrefsHideAmounts;
+
+  /// T-298 Preferences switch: haptic ticks on or off
+  ///
+  /// In ar, this message translates to:
+  /// **'الاهتزاز'**
+  String get settingsPrefsHaptics;
 
   /// D-67 hint under the hide-amounts switch
   ///
