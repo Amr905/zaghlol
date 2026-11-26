@@ -247,6 +247,55 @@ public sealed record ContributionDecisionAudit(
     }
 }
 
+/// <summary>The operator decisions on AI-category review groups (T-354).</summary>
+public enum LlmCatReviewKind
+{
+    CorrectionPromote,
+    CorrectionReject,
+    CorrectionPromptIssue,
+    ConfirmedPromote,
+    ConfirmedReject,
+}
+
+/// <summary>
+/// <c>llmcat_*</c>: the merchant text as <c>b64u</c> (kept encoded, like an alias path id), the category codes, the number of rows
+/// the decision moved and, for a promote, the draft merchant. Never an install hash: the rows hold none that the service reads.
+/// </summary>
+public sealed record LlmCatReviewAudit(
+    LlmCatReviewKind Kind,
+    string MerchantNormB64,
+    string? AiCategory,
+    string Category,
+    int Rows,
+    int? MerchantId) : AuditEntry
+{
+    public override string Action => Kind switch
+    {
+        LlmCatReviewKind.CorrectionPromote => "llmcat_correction_promote",
+        LlmCatReviewKind.CorrectionReject => "llmcat_correction_reject",
+        LlmCatReviewKind.CorrectionPromptIssue => "llmcat_correction_prompt_issue",
+        LlmCatReviewKind.ConfirmedPromote => "llmcat_confirmed_promote",
+        _ => "llmcat_confirmed_reject",
+    };
+
+    public override string Target => (Kind <= LlmCatReviewKind.CorrectionPromptIssue ? "llmcat/corrections:" : "llmcat/confirmed:") + MerchantNormB64;
+
+    private protected override void WriteDetails(Utf8JsonWriter writer)
+    {
+        if (AiCategory is not null)
+        {
+            writer.WriteString("ai_category", AiCategory);
+        }
+
+        writer.WriteString("category", Category);
+        writer.WriteNumber("rows", Rows);
+        if (MerchantId is { } id)
+        {
+            writer.WriteNumber("merchant_id", id);
+        }
+    }
+}
+
 /// <summary>The ownership-check outcomes an audit row can name (backend-api 5.3 <c>ownership_outcome</c>).</summary>
 public static class SupportOwnershipOutcomes
 {

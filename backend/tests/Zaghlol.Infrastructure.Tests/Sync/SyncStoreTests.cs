@@ -276,6 +276,49 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         Assert.Equal(3L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1", merchant));
     }
 
+    // FU-448: corrections carry only their UTC day, so the ones made on the day the cache row was written (after it, in the day) count against it.
+    [Fact]
+    public async Task CorrectionsMadeOnTheDayTheCacheRowWasWrittenCountAgainstIt()
+    {
+        var merchant = Marker();
+        await Db.InsertAsync(
+            fixture.Database.Migrator,
+            "llm_cat_answer_cache",
+            new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                ["merchant_norm"] = merchant,
+                ["category_code"] = "dining",
+                ["confidence"] = (short)90,
+                ["provider_id"] = "fake",
+                ["prompt_version"] = "v1",
+                ["created_at"] = Now.AddHours(-1),
+                ["expires_at"] = Now.AddDays(90),
+            });
+
+        await CorrectAsync(merchant);
+        await CorrectAsync(merchant);
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+
+        await CorrectAsync(merchant);
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+    }
+
+    // FU-448, the other side: corrections of the day before the row was written still do not count.
+    [Fact]
+    public async Task CorrectionsOfAnEarlierDayDoNotCountAgainstARowWrittenLater()
+    {
+        var merchant = Marker();
+        await CorrectAsync(merchant, at: Now.AddDays(-1));
+        await CorrectAsync(merchant, at: Now.AddDays(-1));
+        await CorrectAsync(merchant, at: Now.AddDays(-1));
+        await SeedCacheAsync(merchant, "dining");
+        await Db.ExecuteAsync(fixture.Database.Superuser, "UPDATE zaghlol.llm_cat_answer_cache SET created_at = $2 WHERE merchant_norm = $1", merchant, Now);
+
+        await CorrectAsync(merchant, "dining", "education", at: Now);
+
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+    }
+
     // B97-M1: scripted installs (register + sync, no attestation) cannot delete a shared cache row, however many there are.
     [Fact]
     public async Task UnattestedInstallsCannotDeleteACacheRow()

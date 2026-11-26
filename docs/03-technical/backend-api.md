@@ -555,6 +555,7 @@ Design: [`ask-llm.md`](ask-llm.md) §2, §4, §5 and [`llm-categorise.md`](llm-c
 | `POST /admin/v1/catalog/publish` | catalog_editor | Publish draft → new immutable version, build + sign full snapshot, upload to CDN |
 | `GET /admin/v1/contributions?status=ready_for_review` | catalog_editor | Review queue (aggregates only; `collecting` never shown) |
 | `POST /admin/v1/contributions:promote \| :reject` | catalog_editor | Promote into the draft / reject; key in the body |
+| `POST /admin/v1/llm-cat/corrections/query \| resolve`, `.../confirmed/query \| resolve` | catalog_editor | Review of automatic categories (llm-categorise §6): groups of corrections and AI-confirmed merchants; resolve promotes into the draft / rejects / marks a prompt issue |
 | `GET/PUT /admin/v1/flags/{key}` | flags_admin | View / change a flag and its targeting rules (audited, takes effect on next sync) |
 | `GET /admin/v1/config`, `GET/PUT /admin/v1/config/{key}` | flags_admin | View / change a `remote_config` key of the closed typed set (ask-llm §4.5; audited `config_update`; value is a canonical string; unknown key 404, wrong type or range 400; effective on the next request) |
 | `PUT /admin/v1/prices/override` | prices_admin | Override a price when the feed is wrong |
@@ -584,6 +585,10 @@ The table above uses shorthand. These are the exact operations in `zaghlol-v1.ya
 | `GET /admin/v1/contributions` | catalog_editor |
 | `POST /admin/v1/contributions:promote` | catalog_editor |
 | `POST /admin/v1/contributions:reject` | catalog_editor |
+| `POST /admin/v1/llm-cat/corrections/query` | catalog_editor |
+| `POST /admin/v1/llm-cat/corrections/resolve` | catalog_editor |
+| `POST /admin/v1/llm-cat/confirmed/query` | catalog_editor |
+| `POST /admin/v1/llm-cat/confirmed/resolve` | catalog_editor |
 | `GET /admin/v1/flags/{key}` | flags_admin |
 | `PUT /admin/v1/flags/{key}` | flags_admin |
 | `GET /admin/v1/config` | flags_admin |

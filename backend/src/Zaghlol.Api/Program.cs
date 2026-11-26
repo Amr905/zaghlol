@@ -82,6 +82,8 @@ builder.Services.AddZaghlolInstalls();
 builder.Services.AddZaghlolCatalog();
 // Contribution review queue (T-129): promote edits the draft under the catalog lock, so it follows the catalog registration.
 builder.Services.AddZaghlolContributionAdmin();
+// AI-category review (T-354): the same draft-catalog promote path, on the Admin login.
+builder.Services.AddZaghlolLlmCatReview();
 builder.Services.AddZaghlolOpsReports();
 // Feature flags (T-126): the admin store on the Admin login, the reader on the App login, the ops-channel notifier.
 builder.Services.AddZaghlolFlagAdmin();
@@ -156,6 +158,7 @@ app.MapGoogleNotifications();
 app.MapCatalog();
 app.MapCatalogAdmin();
 app.MapContributionAdmin();
+app.MapLlmCatReviewAdmin();
 app.MapOpsReports();
 app.MapFlagAdmin();
 app.MapConfigAdmin();
