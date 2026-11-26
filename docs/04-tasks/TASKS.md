@@ -12,6 +12,8 @@
 
 **v1.1 changes (2026-11-06):** 9 new M5 tasks (T-178…T-186); T-132 and T-136 split; T-145 lost its binding library to T-183; classes changed: T-137 C2→C3, T-138 C2→C3, T-140 C3→C4. Every changed task file ends with a "Plan revision v1.1" section that says what changed and why. `plan_data.py` / `gen.py` are frozen at v1.0: **do not regenerate** (it would drop v1.1 and the Lead's review follow-ups).
 
+**M9 addition (2026-11-26, approved by the PO in advance (2026-11-26 03:25 Cairo: start the first batch without waiting)):** 44 tasks T-272…T-315 for ASK-LLM and LLM-CATEGORISE (C1 3 · C2 12 · C3 9 · C4 17 · docs/ops 3; Opus 5), batches 78–86; see `m9-llm-plan.md`.
+
 **Open PO decisions carried in task files:** R5-3 (iOS sign-in attestation; criteria written for option (b), with "if (a)" notes in T-131, T-135, T-147, T-145, T-178, T-181, T-183); R6-1 (server-side rule in T-186 by default, disjoint roles alternative in T-137).
 
 
@@ -34,6 +36,7 @@ Every task file has: ID, description, technical details, dependencies, affected 
 | **M6 — Backup, import/export, OCR, settings & security** | Encrypted Drive/iCloud backup & restore, CSV/XLSX/PDF/online statements, OCR, settings, app lock, delete everything. | 19 |
 | **M7 — Flagged features, hardening & launch** | Zakah & ROI behind flags, privacy/perf/a11y/security verification, store release pipelines. | 11 |
 | **M8 — Post-audit improvements** | PO requests of 2026-11-19 (hide amounts, charts, app size, dark-mode quip, salary, recurring bills, card types, bank badges, net-worth breakdown) and the open QA / security bugs; self-hosted key custody. | 15 |
+| **M9 — LLM helper** | Ask Zaghlol online helper (ASK-LLM, D-88…D-93) and automatic category for unknown merchants (LLM-CATEGORISE, D-94…D-96) on one backend LLM gateway (ADR-027), behind flags that stay off until the launch checklist (T-315). Plan: `m9-llm-plan.md`. **Awaiting PO approval (Phase 4).** | 44 |
 
 ## M0 — Foundations & spikes
 
@@ -356,9 +359,62 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-269](tasks/T-269.md) | Bank statement import UI: PDF or image → rows to confirm → saved | US-P08 (FU-262) | High | Sonnet | flutter-ui-engineer | — | — | 77 | DONE (batch 77) |
 | [T-270](tasks/T-270.md) | Backup export works or says exactly why not | US-P09 | High | Opus | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 
+## M9 — LLM helper
+
+Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m9-llm-plan.md). Lanes: B backend · A app core · P parsing package · Q domain package · U UI + l10n · N native · Doc docs. Wave = planned batch.
+
+| ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| [T-272](tasks/T-272.md) | LLM contracts: plan schema, categorise result schema, shared vectors, API contract, fake fixtures | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | — | B | 78 | TODO |
+| [T-273](tasks/T-273.md) | Backend migration: LLM quota, spend, remote config, categorise tables | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | — | B | 78 | TODO |
+| [T-274](tasks/T-274.md) | ARB strings: copy-deck Part 4 (105 keys) | ASK-LLM | Low | Haiku | boilerplate-engineer | — | U | 78 | TODO |
+| [T-275](tasks/T-275.md) | Given-name, honorific and business-word lists (assets) | LLM-CAT | Low | Haiku | boilerplate-engineer | — | P | 80 | TODO |
+| [T-276](tasks/T-276.md) | What-if and saving-suggestion calculators (pure) | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | — | Q | 78 | TODO |
+| [T-277](tasks/T-277.md) | Investment illustrations and D-93 bands (pure) | ASK-LLM / D-93 | High (C4) | Sonnet | flutter-core-engineer | — | Q | 79 | TODO |
+| [T-278](tasks/T-278.md) | Client scrub and reference masker (pure) | ASK-LLM / D-92 | High (C4) | Sonnet | parsing-engine-engineer | — | P | 78 | TODO |
+| [T-279](tasks/T-279.md) | Copy deck §4.12: automatic-category strings | LLM-CAT | Docs | Sonnet | ux-designer | — | Doc | 81 | TODO |
+| [T-280](tasks/T-280.md) | Backend plan validator and template grammar | ASK-LLM | High | Sonnet | backend-engineer | T-272 | B | 79 | TODO |
+| [T-281](tasks/T-281.md) | Dart plan types, phone validator, template grammar, number words | ASK-LLM | High | Sonnet | parsing-engine-engineer | T-272 | P | 79 | TODO |
+| [T-282](tasks/T-282.md) | LLM gateway core, `Sensitive<T>`, OpenAI adapter, fake provider, resilience | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-272 | B | 79 | TODO |
+| [T-283](tasks/T-283.md) | Provider API keys from KMS secret stores | ASK-LLM | High (C4) | Opus | backend-engineer | T-282 | B | 81 | TODO |
+| [T-284](tasks/T-284.md) | LLM flags, remote config, admin endpoint, ops CLI, sync `config` block (backend) | ASK-LLM / LLM-CAT | Medium | Sonnet | backend-engineer | T-272, T-273 | B | 80 | TODO |
+| [T-285](tasks/T-285.md) | LLM quota store: Cairo month, tiers, account, idempotent commit, purge | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | T-273 | B | 80 | TODO |
+| [T-286](tasks/T-286.md) | Attestation for LLM endpoints: binding, staged modes, production guard | ASK-LLM / LLM-CAT | High (C4) | Opus | backend-engineer | T-272 | B | 81 | TODO |
+| [T-287](tasks/T-287.md) | App: LLM flags and remote config store | ASK-LLM / LLM-CAT | Medium | Sonnet | flutter-core-engineer | T-272 | A | 80 | TODO |
+| [T-288](tasks/T-288.md) | Vertex Gemini and Anthropic adapters | ASK-LLM | High | Sonnet | backend-engineer | T-282 | B | 82 | TODO |
+| [T-289](tasks/T-289.md) | Spend ledger, USD 10 cap, 80 % alert, pause, metrics | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-282, T-273, T-284 | B | 82 | TODO |
+| [T-290](tasks/T-290.md) | App core/llm: consent, quota snapshot, attestation binding, gateway client | ASK-LLM / LLM-CAT | High (C4) | Opus | flutter-core-engineer | T-272, T-287, T-291 | A | 81 | TODO |
+| [T-291](tasks/T-291.md) | Native: Play Integrity standard request + App Attest assertion over a hash | ASK-LLM / LLM-CAT | High (C4) | Sonnet | native-platform-engineer | — | N | 80 | TODO |
+| [T-292](tasks/T-292.md) | Plan executor over repositories, per currency | ASK-LLM | High | Sonnet | flutter-core-engineer | T-281, T-276, T-277 | A | 81 | TODO |
+| [T-293](tasks/T-293.md) | Ask flow orchestrator with outgoing-request proofs | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | T-278, T-281, T-290, T-292 | A | 82 | TODO |
+| [T-294](tasks/T-294.md) | Template filler and app answer templates | ASK-LLM | Medium | Sonnet | flutter-core-engineer | T-281, T-274, T-292 | A | 83 | TODO |
+| [T-295](tasks/T-295.md) | UI: consent sheet, "What I sent", S-71 row | ASK-LLM | Medium | Sonnet | flutter-ui-engineer | T-274, T-278, T-290 | U | 82 | TODO |
+| [T-296](tasks/T-296.md) | UI: S-50 online-helper states | ASK-LLM | Medium | Sonnet | flutter-ui-engineer | T-274, T-293 | U | 83 | TODO |
+| [T-297](tasks/T-297.md) | UI: answer views per plan, investment bands + disclaimer | ASK-LLM | Medium | Sonnet | flutter-ui-engineer | T-274, T-294 | U | 84 | TODO |
+| [T-298](tasks/T-298.md) | Device E2E: online helper with a fake backend | ASK-LLM | Medium | Sonnet | flutter-core-engineer | T-295, T-296, T-297 | A | 85 | TODO |
+| [T-299](tasks/T-299.md) | `POST /v1/ask/plan` pipeline, prompt, error codes, scrub tests | ASK-LLM | High (C4) | Sonnet | backend-engineer | T-280, T-282, T-284, T-285, T-286, T-289 | B | 83 | TODO |
+| [T-300](tasks/T-300.md) | Evaluation harness: 40 questions, recorded CI run, live workflow | ASK-LLM / D-91 | High | Sonnet | backend-engineer | T-299, T-288 | B | 84 | TODO |
+| [T-301](tasks/T-301.md) | Live provider evaluation run and provider choice | ASK-LLM / D-91 | Medium | Sonnet | backend-engineer (Lead triggers) | T-300, T-283 | B | — | BLOCKED (PO: provider accounts + keys) |
+| [T-302](tasks/T-302.md) | `POST /v1/categorise` with answer cache | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-299, T-273 | B | 84 | TODO |
+| [T-303](tasks/T-303.md) | Feedback intake through sync, corrections review table, retention | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-302, T-284 | B | 85 | TODO |
+| [T-304](tasks/T-304.md) | Operator review admin endpoints and `zaghlol-ops llmcat` | LLM-CAT | Medium | Sonnet | backend-engineer | T-303 | B | 86 | TODO |
+| [T-305](tasks/T-305.md) | Categorise eligibility rule (pure) | LLM-CAT | High (C4) | Sonnet | parsing-engine-engineer | T-275 | P | 82 | TODO |
+| [T-306](tasks/T-306.md) | Drift migration: AI suggestions, queue, outbox kinds, `CategorySource.ai`, export | LLM-CAT | High (C4) | Opus | flutter-core-engineer | — | A | 79 | TODO |
+| [T-307](tasks/T-307.md) | Categorizer AI tier and recategorizer | LLM-CAT | High (C4) | Opus | flutter-core-engineer | T-306 | A | 83 | TODO |
+| [T-308](tasks/T-308.md) | Categorise queue and sender with outgoing-body proofs | LLM-CAT | High (C4) | Sonnet | flutter-core-engineer | T-305, T-306, T-290 | A | 84 | TODO |
+| [T-309](tasks/T-309.md) | Right/Wrong actions, Undo, `llmCatFeedback` through sync | LLM-CAT | High | Sonnet | flutter-core-engineer | T-306, T-307, T-272 | A | 84 | TODO |
+| [T-310](tasks/T-310.md) | ARB strings: automatic category (§4.12) | LLM-CAT | Low | Haiku | boilerplate-engineer | T-279 | U | 83 | TODO |
+| [T-311](tasks/T-311.md) | UI: AI chip, ✓/✗ controls, picker, Undo | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-309, T-310 | U | 85 | TODO |
+| [T-312](tasks/T-312.md) | UI: discovery card, consent sheet, Settings row, counter | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-308, T-310 | U | 85 | TODO |
+| [T-313](tasks/T-313.md) | Device E2E: automatic category with a fake backend | LLM-CAT | Medium | Sonnet | flutter-core-engineer | T-311, T-312 | A | 86 | TODO |
+| [T-314](tasks/T-314.md) | Docs: API/schema, BR-SYNC-03, ADR-027 amendment, privacy policy, store drafts | ASK-LLM / LLM-CAT | Docs | Sonnet | solution-architect | T-299, T-302, T-303 | Doc | 86 | TODO |
+| [T-315](tasks/T-315.md) | Launch checklist for the three LLM flags | ASK-LLM / LLM-CAT | Docs/ops | — | Lead | T-298, T-301, T-304, T-313, T-314 | — | — | BLOCKED (PO: legal, provider, store accounts) |
+
 ## Blocked or external items
 | ID | Task | Waiting for |
 |---|---|---|
+| [T-301](tasks/T-301.md) | Live LLM provider evaluation and choice | PO: provider accounts (OpenAI EU, Vertex AI EU, Anthropic) and keys as `llm-eval` environment secrets |
+| [T-315](tasks/T-315.md) | LLM launch checklist (flags on in production) | PO/legal: OQ-ASK-01, OQ-ASK-03, OQ-LCAT-08, zero-retention grant, provider key in production KMS, Play Console + Integrity quota, App Store Connect |
 | [T-031](tasks/T-031.md) | Convert real SMS/notification/statement samples into synthetic fixtures (OQ-04/18) | Waiting for samples from product owner (OQ-04/OQ-18) |
 | [T-127](tasks/T-127.md) | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | Provider contract for local gold feed (D-41) needed before go-live; build continues with fakes |
 | [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | CR-03 / OQ-16: hosting provider & region + PDPL licence decision |
