@@ -13794,5 +13794,293 @@
   "privacyServerItemAskLlm": "نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر",
   "@privacyServerItemAskLlm": {
     "description": "S · BR-SYNC-03 amendment (D-90); added to the §3.10 list while ask_llm is on"
-  }
+  },
+    "categorizationAiChipLabel": "اقتراح زغلول",
+    "@categorizationAiChipLabel": {
+      "description": "C · icon + text, never colour alone (FR-LCAT-21)"
+    },
+    "categorizationAiChipLabelA11y": "اقتراح من زغلول، لسه متأكدتش",
+    "@categorizationAiChipLabelA11y": {
+      "description": "A · verbatim from the a11y row (§8)"
+    },
+    "categorizationAiChipHint": "زغلول خمّن التصنيف ده من اسم المحل. قولّه لو صح.",
+    "@categorizationAiChipHint": {
+      "description": "S · text of the chip's info tooltip or sheet on tap"
+    },
+    "categorizationAiChipRightLabel": "صح",
+    "@categorizationAiChipRightLabel": {
+      "description": "B · ✓ button, 48 dp, separate target ≥ 8 dp from Wrong"
+    },
+    "categorizationAiChipWrongLabel": "مش صح",
+    "@categorizationAiChipWrongLabel": {
+      "description": "B · ✗ button"
+    },
+    "categorizationAiChipRightA11y": "التصنيف ده صح",
+    "@categorizationAiChipRightA11y": {
+      "description": "A · verbatim from §8"
+    },
+    "categorizationAiChipWrongA11y": "التصنيف ده غلط",
+    "@categorizationAiChipWrongA11y": {
+      "description": "A · verbatim from §8"
+    },
+    "categorizationAiChipRightDone": "تمام، هفتكر إن {merchant} يعني {category}.",
+    "@categorizationAiChipRightDone": {
+      "description": "N · merchant, category · snackbar and polite live-region announcement after Right; both buttons disappear for that shop",
+      "placeholders": {
+        "merchant": {
+          "type": "String"
+        },
+        "category": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiChipWrongDone": "تمام، {merchant} بقى {category} في كل حركاته.",
+    "@categorizationAiChipWrongDone": {
+      "description": "N · merchant, category · after a pick in the picker; announced",
+      "placeholders": {
+        "merchant": {
+          "type": "String"
+        },
+        "category": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiPickerTitle": "التصنيف الصح إيه؟",
+    "@categorizationAiPickerTitle": {
+      "description": "T"
+    },
+    "categorizationAiPickerHint": "اختار تصنيف {merchant}، وهيتطبق على كل حركاته.",
+    "@categorizationAiPickerHint": {
+      "description": "S · merchant",
+      "placeholders": {
+        "merchant": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiUndoMessage": "اتغيّر لـ {category}.",
+    "@categorizationAiUndoMessage": {
+      "description": "N · category · snackbar, 5 s",
+      "placeholders": {
+        "category": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiUndoAction": "تراجع",
+    "@categorizationAiUndoAction": {
+      "description": "B · snackbar action, 48 dp"
+    },
+    "categorizationAiCardTitle": "{count, plural, =1{عندك محل واحد مش عارف أصنفه} =2{عندك محلين مش عارف أصنفهم} few{عندك {n} محلات مش عارف أصنفهم} many{عندك {n} محل مش عارف أصنفهم} other{عندك {n} محل مش عارف أصنفهم}}",
+    "@categorizationAiCardTitle": {
+      "description": "T · count:int, n · shown from 3, so no zero",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiCardBody": "تحب زغلول يخمّن تصنيفهم من اسم المحل؟ بيتبعت اسم المحل بس، والكلمة الأخيرة ليك.",
+    "@categorizationAiCardBody": {
+      "description": "E"
+    },
+    "categorizationAiCardAllow": "يلا يخمّن",
+    "@categorizationAiCardAllow": {
+      "description": "B · opens the consent sheet (§4.12.4), sends nothing yet"
+    },
+    "categorizationAiCardNotNow": "مش دلوقتي",
+    "@categorizationAiCardNotNow": {
+      "description": "B · same words as `common_action_notNow`; kept apart so the card can be restyled"
+    },
+    "categorizationAiCardNever": "بلاش تسألني تاني",
+    "@categorizationAiCardNever": {
+      "description": "B · text button; stops the card for good"
+    },
+    "categorizationAiConsentTitle": "تحب زغلول يخمّن التصنيفات؟",
+    "@categorizationAiConsentTitle": {
+      "description": "T"
+    },
+    "categorizationAiConsentIntro": "للمحلات اللي مش عارفها، هبعت اسم المحل لسيرفر زغلول ولـ {aiProvider} علشان يخمّنوا تصنيفه. وأنت اللي بتقرر لو التخمين صح.",
+    "@categorizationAiConsentIntro": {
+      "description": "E · aiProvider · names the server and the provider; never \"no server\"",
+      "placeholders": {
+        "aiProvider": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiConsentSendsTitle": "بيتبعت",
+    "@categorizationAiConsentSendsTitle": {
+      "description": "L"
+    },
+    "categorizationAiConsentSends": "اسم المحل بس، ولغة التطبيق.",
+    "@categorizationAiConsentSends": {
+      "description": "S · FR-LCAT-02/44"
+    },
+    "categorizationAiConsentSendsMore": "ومعاه: إصدار التطبيق ونوع الموبايل، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. {aiProvider} بيوصله اسم المحل واللغة بس.",
+    "@categorizationAiConsentSendsMore": {
+      "description": "E · aiProvider · FR-LCAT-02, technical fields for the monthly count",
+      "placeholders": {
+        "aiProvider": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiConsentNeverTitle": "عمره ما بيتبعت",
+    "@categorizationAiConsentNeverTitle": {
+      "description": "L"
+    },
+    "categorizationAiConsentNever": "المبلغ ولا الرصيد ولا التاريخ ولا البنك ولا الكارت ولا نص الرسالة. والتحويلات وأسامي الناس مش بتتبعت خالص.",
+    "@categorizationAiConsentNever": {
+      "description": "S · FR-LCAT-02/05; the PO's rule: amounts, balances and messages are not sent"
+    },
+    "categorizationAiConsentStorage": "سيرفر زغلول بيحتفظ باسم المحل وتصنيفه علشان نحسّن قايمة المحلات، من غير أي حاجة تدل عليك.",
+    "@categorizationAiConsentStorage": {
+      "description": "S · FR-LCAT-12/31; wording to legal with the policy section"
+    },
+    "categorizationAiConsentFeedback": "لما تقول «صح» أو «مش صح»، بنبعت اسم المحل والتصنيف بس، وحد من فريقنا بيراجع الغلط. لو اخترت تصنيف من عندك، مبنبعتش اسمه.",
+    "@categorizationAiConsentFeedback": {
+      "description": "E · FR-LCAT-24/30/31; custom names never leave (sent as \"custom\")"
+    },
+    "categorizationAiConsentQuota": "{count, plural, =1{عندك تخمين واحد في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} =2{عندك تخمينين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} few{عندك {n} تخمينات في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} many{عندك {n} تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} other{عندك {n} تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.}}",
+    "@categorizationAiConsentQuota": {
+      "description": "S · count:int = the tier quota (15 Free, 150 Gold, remote), n",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiConsentAllow": "موافق، خمّن",
+    "@categorizationAiConsentAllow": {
+      "description": "B · stores `cat.llm_consent`; from Settings it keeps this label"
+    },
+    "categorizationAiConsentNotNow": "مش دلوقتي",
+    "@categorizationAiConsentNotNow": {
+      "description": "B · stores nothing; drag or back = Not now"
+    },
+    "categorizationAiConsentSettingsHint": "تقدر تقفله في أي وقت من «خصوصيتك».",
+    "@categorizationAiConsentSettingsHint": {
+      "description": "S"
+    },
+    "categorizationAiConsentDeclined": "ولا يهمك، مبعتّش حاجة.",
+    "@categorizationAiConsentDeclined": {
+      "description": "N · snackbar after Not now"
+    },
+    "categorizationAiQueuePassiveRow": "خلّي زغلول يخمّن التصنيفات",
+    "@categorizationAiQueuePassiveRow": {
+      "description": "L · always available while off; opens the consent sheet"
+    },
+    "categorizationAiQueueCounter": "{count, plural, =0{خلصت تخمينات الشهر} =1{فاضل تخمين واحد من {max}} =2{فاضل تخمينين من {max}} few{فاضل {n} تخمينات من {max}} many{فاضل {n} تخمين من {max}} other{فاضل {n} تخمين من {max}}}",
+    "@categorizationAiQueueCounter": {
+      "description": "L · count:int, n, max · last backend reply (FR-LCAT-41)",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "max": {
+          "type": "String"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueCounterUnknown": "—",
+    "@categorizationAiQueueCounterUnknown": {
+      "description": "C · before the first backend reply"
+    },
+    "categorizationAiQueueCounterA11y": "{count, plural, =0{خلصت تخمينات التصنيف الشهر ده} =1{فاضل تخمين تصنيف واحد الشهر ده} =2{فاضل تخمينين تصنيف الشهر ده} few{فاضل {n} تخمينات تصنيف الشهر ده} many{فاضل {n} تخمين تصنيف الشهر ده} other{فاضل {n} تخمين تصنيف الشهر ده}}",
+    "@categorizationAiQueueCounterA11y": {
+      "description": "A · count:int, n",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueResetOn": "زغلول هيخمّن تاني يوم {date}.",
+    "@categorizationAiQueueResetOn": {
+      "description": "N · at 0, the 1st of next month (Cairo), locale date",
+      "placeholders": {
+        "date": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueGoldHint": "{count, plural, =1{مع جولد بيبقى عندك تخمين واحد في الشهر.} =2{مع جولد بيبقى عندك تخمينين في الشهر.} few{مع جولد بيبقى عندك {n} تخمينات في الشهر.} many{مع جولد بيبقى عندك {n} تخمين في الشهر.} other{مع جولد بيبقى عندك {n} تخمين في الشهر.}}",
+    "@categorizationAiQueueGoldHint": {
+      "description": "S · count:int = `cat.quota_gold`, n · Free at 0 only, one text line plus `chat_quota_seeGold`, never a modal",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueOffline": "المحلات دي مستنية النت، وهتتخمّن أول ما يرجع.",
+    "@categorizationAiQueueOffline": {
+      "description": "S · offline or paused (FR-LCAT-04)"
+    },
+    "categorizationAiQueueNoGuess": "زغلول مقدرش يخمّن ده. اختار التصنيف بإيدك.",
+    "@categorizationAiQueueNoGuess": {
+      "description": "S · low confidence or `unknown` (FR-LCAT-13); not counted"
+    },
+    "privacyLlmCatLabel": "زغلول يخمّن التصنيف",
+    "@privacyLlmCatLabel": {
+      "description": "L · switch; on = consent stored"
+    },
+    "privacyLlmCatSentence": "بيبعت اسم المحل بس لسيرفر زغلول ولـ {aiProvider}، من غير المبلغ ولا الرصيد ولا الرسايل.",
+    "@privacyLlmCatSentence": {
+      "description": "S · aiProvider",
+      "placeholders": {
+        "aiProvider": {
+          "type": "String"
+        }
+      }
+    },
+    "privacyLlmCatQuota": "{count, plural, =0{خلصت تخمينات الشهر، وبترجع يوم {date}.} =1{فاضل تخمين واحد الشهر ده، والعداد بيرجع يوم {date}.} =2{فاضل تخمينين الشهر ده، والعداد بيرجع يوم {date}.} few{فاضل {n} تخمينات الشهر ده، والعداد بيرجع يوم {date}.} many{فاضل {n} تخمين الشهر ده، والعداد بيرجع يوم {date}.} other{فاضل {n} تخمين الشهر ده، والعداد بيرجع يوم {date}.}}",
+    "@privacyLlmCatQuota": {
+      "description": "S · count:int, n, date · under the switch while on",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "date": {
+          "type": "String"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "privacyLlmCatQuotaUnknown": "عدد التخمينات هيظهر بعد أول مرة زغلول يخمّن.",
+    "@privacyLlmCatQuotaUnknown": {
+      "description": "S"
+    },
+    "privacyLlmCatDetails": "إيه اللي بيتبعت؟",
+    "@privacyLlmCatDetails": {
+      "description": "L · text button, opens the consent sheet read-only (Close only)"
+    },
+    "privacyLlmCatTurnedOff": "اتقفل. مش هبعت أي اسم محل غير لما توافق تاني، والتصنيفات اللي اتحطت قبل كده فاضلة.",
+    "@privacyLlmCatTurnedOff": {
+      "description": "N · snackbar"
+    },
+    "privacyServerItemLlmCat": "اسم المحل لتخمين التصنيف لو وافقت، وإجابتك «صح» أو «مش صح» على التخمين، من غير أي حاجة تدل عليك، وعدّاد التخمينات في الشهر",
+    "@privacyServerItemLlmCat": {
+      "description": "S · BR-SYNC-03 amendment (D-96); added to the §3.10 list while `llm_categorise` is on"
+    }
 }

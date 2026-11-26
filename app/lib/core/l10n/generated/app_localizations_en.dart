@@ -9922,4 +9922,226 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get privacyServerItemAskLlm =>
       'Your question text for the online helper, only if you allow it and never stored, plus your monthly question count';
+
+  @override
+  String get categorizationAiChipLabel => 'Zaghlol\'s guess';
+
+  @override
+  String get categorizationAiChipLabelA11y => 'Zaghlol\'s guess, not confirmed';
+
+  @override
+  String get categorizationAiChipHint =>
+      'Zaghlol guessed this category from the shop name. Tell him if it\'s right.';
+
+  @override
+  String get categorizationAiChipRightLabel => 'Right';
+
+  @override
+  String get categorizationAiChipWrongLabel => 'Wrong';
+
+  @override
+  String get categorizationAiChipRightA11y => 'This category is right';
+
+  @override
+  String get categorizationAiChipWrongA11y => 'This category is wrong';
+
+  @override
+  String categorizationAiChipRightDone(String merchant, String category) {
+    return 'Got it, I\'ll remember $merchant as $category.';
+  }
+
+  @override
+  String categorizationAiChipWrongDone(String merchant, String category) {
+    return 'Done, $merchant is now $category everywhere.';
+  }
+
+  @override
+  String get categorizationAiPickerTitle => 'What\'s the right category?';
+
+  @override
+  String categorizationAiPickerHint(String merchant) {
+    return 'Pick a category for $merchant. It applies to all its transactions.';
+  }
+
+  @override
+  String categorizationAiUndoMessage(String category) {
+    return 'Changed to $category.';
+  }
+
+  @override
+  String get categorizationAiUndoAction => 'Undo';
+
+  @override
+  String categorizationAiCardTitle(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You have $n shops I couldn\'t sort',
+      one: 'You have 1 shop I couldn\'t sort',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiCardBody =>
+      'Want Zaghlol to guess their categories from the shop name? Only the shop name is sent, and you have the last word.';
+
+  @override
+  String get categorizationAiCardAllow => 'Let him guess';
+
+  @override
+  String get categorizationAiCardNotNow => 'Not now';
+
+  @override
+  String get categorizationAiCardNever => 'Don\'t ask again';
+
+  @override
+  String get categorizationAiConsentTitle =>
+      'Want Zaghlol to guess categories?';
+
+  @override
+  String categorizationAiConsentIntro(String aiProvider) {
+    return 'For shops I don\'t know, I\'ll send the shop name to Zaghlol\'s server and $aiProvider so they can guess its category. You decide whether the guess is right.';
+  }
+
+  @override
+  String get categorizationAiConsentSendsTitle => 'What\'s sent';
+
+  @override
+  String get categorizationAiConsentSends =>
+      'Only the shop name, and the app language.';
+
+  @override
+  String categorizationAiConsentSendsMore(String aiProvider) {
+    return 'Also sent: the app version and phone type, a random app ID and a proof the phone is genuine. $aiProvider gets only the shop name and the language.';
+  }
+
+  @override
+  String get categorizationAiConsentNeverTitle => 'Never sent';
+
+  @override
+  String get categorizationAiConsentNever =>
+      'Amounts, balances, dates, banks, cards or message text. Transfers and people\'s names are never sent either.';
+
+  @override
+  String get categorizationAiConsentStorage =>
+      'Zaghlol\'s server keeps the shop name and its category to improve the shop list, without anything that identifies you.';
+
+  @override
+  String get categorizationAiConsentFeedback =>
+      'When you tap Right or Wrong, we send only the shop name and the category, and someone on our team reviews the wrong ones. If you pick one of your own categories, its name isn\'t sent.';
+
+  @override
+  String categorizationAiConsentQuota(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You get $n guesses a month. Shops Zaghlol already knows don\'t count.',
+      one: 'You get 1 guess a month. Shops Zaghlol already knows don\'t count.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiConsentAllow => 'Allow';
+
+  @override
+  String get categorizationAiConsentNotNow => 'Not now';
+
+  @override
+  String get categorizationAiConsentSettingsHint =>
+      'You can turn it off any time in Privacy & data.';
+
+  @override
+  String get categorizationAiConsentDeclined => 'No problem, nothing was sent.';
+
+  @override
+  String get categorizationAiQueuePassiveRow => 'Let Zaghlol guess categories';
+
+  @override
+  String categorizationAiQueueCounter(int count, String max, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n of $max guesses left',
+      one: '1 of $max guesses left',
+      zero: 'No guesses left this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiQueueCounterUnknown => '—';
+
+  @override
+  String categorizationAiQueueCounterA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n category guesses left this month',
+      one: '1 category guess left this month',
+      zero: 'No category guesses left this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String categorizationAiQueueResetOn(String date) {
+    return 'Zaghlol will guess again on $date.';
+  }
+
+  @override
+  String categorizationAiQueueGoldHint(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Gold gives you $n guesses a month.',
+      one: 'Gold gives you 1 guess a month.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiQueueOffline =>
+      'These shops are waiting for the internet and will be guessed once it\'s back.';
+
+  @override
+  String get categorizationAiQueueNoGuess =>
+      'Zaghlol couldn\'t guess this one. Pick the category yourself.';
+
+  @override
+  String get privacyLlmCatLabel => 'Let Zaghlol guess categories';
+
+  @override
+  String privacyLlmCatSentence(String aiProvider) {
+    return 'Sends only the shop name to Zaghlol\'s server and $aiProvider, never amounts, balances or messages.';
+  }
+
+  @override
+  String privacyLlmCatQuota(int count, String date, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n guesses left this month. Resets on $date.',
+      one: '1 guess left this month. Resets on $date.',
+      zero: 'No guesses left this month. They reset on $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get privacyLlmCatQuotaUnknown =>
+      'The count shows after Zaghlol\'s first guess.';
+
+  @override
+  String get privacyLlmCatDetails => 'What\'s sent?';
+
+  @override
+  String get privacyLlmCatTurnedOff =>
+      'Turned off. No shop name is sent until you allow it again, and the categories already set stay.';
+
+  @override
+  String get privacyServerItemLlmCat =>
+      'The shop name for a category guess, only if you allow it, your Right or Wrong answers on guesses without anything that identifies you, and your monthly guess count';
 }
