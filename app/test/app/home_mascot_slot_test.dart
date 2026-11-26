@@ -19,7 +19,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 Widget _host(
   HomeMascotMessage? message,
   Locale locale, {
-  CivilDate? payday,
+  PaydayCelebration? payday,
   MascotTip? tip,
 }) => ProviderScope(
   overrides: [
@@ -46,10 +46,19 @@ Widget _host(
 
 void main() {
   for (final locale in const [Locale('ar'), Locale('en')]) {
-    testWidgets('payday celebrates once (${locale.languageCode})', (t) async {
-      await t.pumpWidget(_host(null, locale, payday: CivilDate(2026, 11, 25)));
+    testWidgets('payday opens the sheet, no bubble (${locale.languageCode})', (
+      t,
+    ) async {
+      await t.pumpWidget(
+        _host(
+          null,
+          locale,
+          payday: PaydayCelebration('s1', Money(Currency.of('EGP'), 2970000)),
+        ),
+      );
       await t.pumpAndSettle();
-      expect(find.byKey(const ValueKey('home-mascot-payday')), findsOneWidget);
+      expect(find.byKey(const ValueKey('payday-amount')), findsOneWidget);
+      expect(find.byKey(const ValueKey('home-mascot-payday')), findsNothing);
       final bird = t.widget<ZaghlolAvatar>(find.byType(ZaghlolAvatar));
       expect(bird.moment, ZaghlolMoment.payday);
     });
@@ -59,7 +68,7 @@ void main() {
     ) async {
       await t.pumpWidget(_host(null, locale));
       await t.pumpAndSettle();
-      expect(find.byKey(const ValueKey('home-mascot-payday')), findsNothing);
+      expect(find.byKey(const ValueKey('payday-amount')), findsNothing);
     });
   }
 
@@ -132,17 +141,18 @@ void main() {
     });
 
     testWidgets(
-      'a tip never covers payday or a proud line (${locale.languageCode})',
+      'a tip never covers the payday sheet (${locale.languageCode})',
       (t) async {
         await t.pumpWidget(
-          _host(null, locale, tip: tip, payday: CivilDate(2026, 11, 25)),
+          _host(
+            null,
+            locale,
+            tip: tip,
+            payday: PaydayCelebration('s1', Money(Currency.of('EGP'), 100)),
+          ),
         );
         await t.pumpAndSettle();
-        expect(find.byKey(const ValueKey('home-mascot-tip')), findsNothing);
-        expect(
-          find.byKey(const ValueKey('home-mascot-payday')),
-          findsOneWidget,
-        );
+        expect(find.byKey(const ValueKey('payday-amount')), findsOneWidget);
       },
     );
 

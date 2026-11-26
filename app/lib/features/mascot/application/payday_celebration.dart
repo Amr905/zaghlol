@@ -1,6 +1,8 @@
-// T-215: decides when Captain Zaghlol celebrates a payday (08-mascot-motion
-// section 1: "salary detected, once per payday"). Pure logic here; the Home
-// slot reads [paydayCelebrationProvider]. Nothing logs or shows an amount.
+// T-215 / T-294: decides when Captain Zaghlol celebrates a payday
+// (08-mascot-motion section 1: "salary detected, once per salary"). The Home
+// slot reads [paydayCelebrationProvider] and opens the payday sheet. Salaries
+// of any currency count (D-85), from a bank message or entered by hand
+// (cash). Nothing logs an amount.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
@@ -9,42 +11,62 @@ import '../../../core/settings/settings_keys.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../budget/application/budget_providers.dart' show todayProvider;
 import '../../salary/application/salary_providers.dart';
+import '../../transactions/data/transactions_providers.dart';
+import '../../transactions/domain/transaction.dart';
 
 /// A salary tied to a payday older than this many days is history (e.g. the
 /// first import of old messages) and never celebrates.
-const int kPaydayFreshDays = 3;
+const int kPaydayFreshDays = 7;
 
-enum PaydayVerdict { celebrate, markSilently, nothing }
+/// How many celebrated ids are remembered.
+const int kPaydayRememberedIds = 32;
 
-/// The newest captured (bank-message) salary anchor in [state], or null.
-CivilDate? latestCapturedPayday(SalaryState state) {
-  CivilDate? best;
-  for (final e in state.entries) {
-    if (!e.captured) continue;
-    if (best == null || e.anchor > best) best = e.anchor;
-  }
-  return best;
+/// The salary to celebrate: its transaction and its own amount.
+final class PaydayCelebration {
+  const PaydayCelebration(this.txnId, this.amount);
+  final String txnId;
+  final Money amount;
 }
 
-/// [lastCelebrated] is the epoch day stored after the last celebration.
-PaydayVerdict paydayVerdict({
-  required CivilDate? latest,
-  required int? lastCelebrated,
+/// What to do with the salary entries not celebrated yet.
+final class PaydayDecision {
+  const PaydayDecision({required this.fresh, required this.all});
+
+  /// Fresh candidates, newest anchor first.
+  final List<SalaryEntry> fresh;
+
+  /// Every candidate (fresh or old): all get marked as celebrated.
+  final List<SalaryEntry> all;
+}
+
+/// Pure. [celebrated] are the remembered txn ids; [legacyMarkEpochDay] is the
+/// anchor day stored by the first (T-215) version, or null.
+PaydayDecision paydayDecision({
+  required SalaryState state,
+  required Set<String> celebrated,
+  required int? legacyMarkEpochDay,
   required CivilDate today,
 }) {
-  if (latest == null) return PaydayVerdict.nothing;
-  if (lastCelebrated != null && latest.epochDay <= lastCelebrated) {
-    return PaydayVerdict.nothing;
-  }
-  return today.difference(latest) <= kPaydayFreshDays
-      ? PaydayVerdict.celebrate
-      : PaydayVerdict.markSilently;
+  final all = [
+    for (final e in state.entries)
+      if (!celebrated.contains(e.txnId) &&
+          (legacyMarkEpochDay == null ||
+              e.anchor.epochDay > legacyMarkEpochDay))
+        e,
+  ];
+  final fresh = [
+    for (final e in all)
+      if (today.difference(e.anchor) <= kPaydayFreshDays) e,
+  ]..sort((a, b) => b.anchor.epochDay.compareTo(a.anchor.epochDay));
+  return PaydayDecision(fresh: fresh, all: all);
 }
 
-/// Emits the payday to celebrate (once), after storing it as celebrated.
-/// Old salaries are stored silently. Survives restarts: the mark is in the
-/// encrypted settings.
-final paydayCelebrationProvider = StreamProvider<CivilDate?>((ref) async* {
+/// Emits the salary to celebrate (once), after storing it as celebrated.
+/// Old, deleted and non-income salaries are stored silently. Survives
+/// restarts: the marks are in the encrypted settings.
+final paydayCelebrationProvider = StreamProvider<PaydayCelebration?>((
+  ref,
+) async* {
   final repo = await ref.watch(settingsRepositoryProvider.future);
   final state = ref.watch(salaryStateProvider).value;
   final today = ref.watch(todayProvider);
@@ -52,15 +74,35 @@ final paydayCelebrationProvider = StreamProvider<CivilDate?>((ref) async* {
     yield null;
     return;
   }
-  final latest = latestCapturedPayday(state);
-  final last = await repo.get(Settings.mascotPaydayCelebrated);
-  final verdict = paydayVerdict(
-    latest: latest,
-    lastCelebrated: last,
+  final done = await repo.get(Settings.mascotPaydayCelebratedTxns);
+  final legacy = await repo.get(Settings.mascotPaydayCelebrated);
+  final d = paydayDecision(
+    state: state,
+    celebrated: done.toSet(),
+    legacyMarkEpochDay: legacy,
     today: today,
   );
-  if (verdict != PaydayVerdict.nothing) {
-    await repo.set(Settings.mascotPaydayCelebrated, latest!.epochDay);
+  if (d.all.isEmpty) {
+    yield null;
+    return;
   }
-  yield verdict == PaydayVerdict.celebrate ? latest : null;
+  PaydayCelebration? pick;
+  if (d.fresh.isNotEmpty) {
+    final txns = await ref.read(transactionRepositoryProvider.future);
+    for (final e in d.fresh) {
+      final t = await txns.byId(e.txnId);
+      if (t != null && t.direction == TxnDirection.income) {
+        pick = PaydayCelebration(t.id, t.amount);
+        break;
+      }
+    }
+  }
+  final next = [...done, for (final e in d.all) e.txnId];
+  await repo.set(
+    Settings.mascotPaydayCelebratedTxns,
+    next.length <= kPaydayRememberedIds
+        ? next
+        : next.sublist(next.length - kPaydayRememberedIds),
+  );
+  yield pick;
 });

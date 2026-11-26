@@ -3457,7 +3457,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mascotTapLine10 => 'أنا بحسب والدهب بيلمع، وإنت بتحوّش';
 
   @override
-  String get mascotPaydayLine => 'القبض نزل يا كبير! 🎉';
+  String get paydaySheetTitle => 'وصل المرتب!';
+
+  @override
+  String paydaySheetAmount(String amount) {
+    return '+$amount';
+  }
+
+  @override
+  String paydaySheetPerDay(String perDay) {
+    return 'زغلول حسبها: تقدر تصرف حوالي $perDay في اليوم لحد المرتب الجاي.';
+  }
+
+  @override
+  String get paydaySheetPlan => 'خطّط الشهر';
+
+  @override
+  String get paydaySheetDone => 'تمام';
+
+  @override
+  String paydaySheetA11y(String amount) {
+    return 'وصل المرتب، $amount';
+  }
 
   @override
   String get mascotTipUseScan =>
@@ -8437,7 +8458,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get salaryFoundNo => 'لأ، دخل تاني';
 
   @override
-  String get salaryAddSwitch => 'ده مرتب';
+  String get salaryAddSwitch => 'ده مرتب؟';
 
   @override
   String get salaryAddSwitchHint =>

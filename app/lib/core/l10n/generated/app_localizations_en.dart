@@ -3360,7 +3360,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mascotTapLine10 => 'I count, the gold shines, you save';
 
   @override
-  String get mascotPaydayLine => 'Payday landed! 🎉';
+  String get paydaySheetTitle => 'Payday is here!';
+
+  @override
+  String paydaySheetAmount(String amount) {
+    return '+$amount';
+  }
+
+  @override
+  String paydaySheetPerDay(String perDay) {
+    return 'Zaghlol did the maths: you can spend about $perDay a day until the next payday.';
+  }
+
+  @override
+  String get paydaySheetPlan => 'Plan the month';
+
+  @override
+  String get paydaySheetDone => 'Got it';
+
+  @override
+  String paydaySheetA11y(String amount) {
+    return 'Payday is here, $amount';
+  }
 
   @override
   String get mascotTipUseScan =>
@@ -8298,7 +8319,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salaryFoundNo => 'No, another income';
 
   @override
-  String get salaryAddSwitch => 'This is a salary';
+  String get salaryAddSwitch => 'Is this a salary?';
 
   @override
   String get salaryAddSwitchHint =>
