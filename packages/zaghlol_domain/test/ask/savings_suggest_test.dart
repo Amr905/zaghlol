@@ -289,4 +289,28 @@ void main() {
       }
     },
   );
+
+  test('FU-401 same-named categories with different ids stay separate', () {
+    final r = suggestSavings(
+      inputs: [
+        SuggestInputs(
+          currency: egp,
+          categories: [
+            CategorySpend(
+              id: 'sys:fun',
+              name: 'Fun',
+              periods: ps(['1000', '1000', '2000']),
+            ),
+            CategorySpend(
+              id: 'c-custom',
+              name: 'Fun',
+              periods: ps(['500', '500', '1500']),
+            ),
+          ],
+        ),
+      ],
+    );
+    final s = r.single.suggestions;
+    expect(s.map((x) => x.categoryId), ['sys:fun', 'c-custom']);
+  });
 }

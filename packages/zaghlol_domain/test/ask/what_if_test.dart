@@ -182,4 +182,28 @@ void main() {
       '3.750',
     );
   });
+
+  group('FU-401 negative or zero base', () {
+    for (final mode in <WhatIfMode>[
+      const WhatIfPercent(50),
+      WhatIfAmount(e('100')),
+    ]) {
+      test('net-negative base gives NotEnoughData for ${mode.runtimeType}', () {
+        final o = whatIfCut(
+          spendPerFullPeriod: [e('-50'), e('-20'), e('-30')],
+          mode: mode,
+          months: 12,
+        );
+        expect(o, isA<NotEnoughData>());
+      });
+    }
+    test('zero base gives NotEnoughData', () {
+      final o = whatIfCut(
+        spendPerFullPeriod: [e('0')],
+        mode: const WhatIfPercent(10),
+        months: 3,
+      );
+      expect(o, isA<NotEnoughData>());
+    });
+  });
 }
