@@ -60,7 +60,7 @@ Isolate = the presentation layer wraps the value in FSI U+2068 … PDI U+2069 (�
 | `day` | String | Digits | yes | day of month, 1–31 |
 | `done` | String | Digits | yes | automations found |
 | `index` | String | Digits | yes | pager position |
-| `max` | String | Digits | yes | upper bound in a validation message |
+| `max` | String | Digits | yes | upper bound in a validation message; also a quota total (Part 4 §4.12) |
 | `min` | String | Digits | yes | lower bound in a validation message |
 | `step` | String | Digits | yes | stepper position |
 | `total` | String | Digits | yes | stepper / pager total |
@@ -219,6 +219,7 @@ ARB type for every Select placeholder is String (gen-l10n requirement).
 | `notifications_alert_overdue`, `notifications_alert_overdueHidden` | sent only on day 1 and day 3 after the due date (PO OVERDUE-REMINDERS), so the count is never 0 |
 | `chat_quota_goldHint`, `chat_consent_quota` | count = the tier's monthly quota (remote config); the line is hidden when it is 0 (Part 4) |
 | `chat_unit_months`, `chat_whatIf_basis` | months are 1–60; the basis is 1–3 full periods, and 0 shows `chat_whatIf_notEnough` instead (Part 4) |
+| `categorization_aiCard_title`, `categorization_aiConsent_quota`, `categorization_aiQueue_goldHint` | the card shows from 3 shops; the consent and Gold hint lines are hidden when the tier quota is 0 (Part 4 §4.12) |
 
 - Every plural row's note states `count:int, n` plus its other placeholders.
 - Egyptian noun forms used throughout:
@@ -3179,5 +3180,94 @@ Unsupported, invalid and Zakah questions use `chat_fallback_text` (PL-FALLBACK).
 | `privacy_askLlm_turnedOff` | اتقفل. مش هبعت أي سؤال غير لما توافق تاني. | Turned off. No question is sent until you allow it again. | N |
 | `privacy_server_itemAskLlm` | نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر | Your question text for the online helper, only if you allow it and never stored, plus your monthly question count | S · BR-SYNC-03 amendment (D-90); added to the §3.10 list while `ask_llm` is on |
 
+## 4.12 Automatic category — `categorization_ai*_*`, `privacy_llmCat_*` (flag `llm_categorise`)
+Source: `docs/01-requirements/llm-categorise.md` §4–§5, §8 (a11y row), D-94…D-96; PO row LLM-CATEGORISE. The feature is **off by default** and suggested once by a card (FR-LCAT-43). The chip and Right/Wrong stay for suggestions that already exist even if the flag goes off (FR-LCAT-42). Reused, not redefined: `common_action_notNow`, `chat_quota_seeGold` (text button, opens S-68), `categorization_*` category names, `chat_consent_*` layout (C-17 sheet, same buttons). Money is never shown in this feature, so hide-amounts (D-67) changes nothing. No emoji on consent, quota or error lines (tone gate 1). The consent sheet is colloquial but exact: it names the shop name, the server and `{aiProvider}`, and it never says "no server" (tone gate 4). **Legal wording sign-off pending** on `categorization_aiConsent_*` and `privacy_server_itemLlmCat` (OQ-LCAT-08, with OQ-ASK-03).
+
+### 4.12.1 AI chip, Right / Wrong, results — `categorization_aiChip_*`
+Shown next to the category on the transaction row, details, the needs-classification queue and the category drill-down while the suggestion is unconfirmed (FR-LCAT-21). Right and Wrong show on details and in the queue only (FR-LCAT-22). Feedback is per shop.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `categorization_aiChip_label` | اقتراح زغلول | Zaghlol's guess | C · icon + text, never colour alone (FR-LCAT-21) |
+| `categorization_aiChip_labelA11y` | اقتراح من زغلول، لسه متأكدتش | Zaghlol's guess, not confirmed | A · verbatim from the a11y row (§8) |
+| `categorization_aiChip_hint` | زغلول خمّن التصنيف ده من اسم المحل. قولّه لو صح. | Zaghlol guessed this category from the shop name. Tell him if it's right. | S · text of the chip's info tooltip or sheet on tap |
+| `categorization_aiChip_rightLabel` | صح | Right | B · ✓ button, 48 dp, separate target ≥ 8 dp from Wrong |
+| `categorization_aiChip_wrongLabel` | مش صح | Wrong | B · ✗ button |
+| `categorization_aiChip_rightA11y` | التصنيف ده صح | This category is right | A · verbatim from §8 |
+| `categorization_aiChip_wrongA11y` | التصنيف ده غلط | This category is wrong | A · verbatim from §8 |
+| `categorization_aiChip_rightDone` | تمام، هفتكر إن {merchant} يعني {category}. | Got it, I'll remember {merchant} as {category}. | N · merchant, category · snackbar and polite live-region announcement after Right; both buttons disappear for that shop |
+| `categorization_aiChip_wrongDone` | تمام، {merchant} بقى {category} في كل حركاته. | Done, {merchant} is now {category} everywhere. | N · merchant, category · after a pick in the picker; announced |
+
+### 4.12.2 Wrong: picker and undo — `categorization_aiPicker_*`, `categorization_aiUndo_*`
+Picker (system categories + the user's custom ones) opens after Wrong. Cancelling changes nothing. Undo lasts 5 s and removes the rule and the queued correction (FR-LCAT-24).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `categorization_aiPicker_title` | التصنيف الصح إيه؟ | What's the right category? | T |
+| `categorization_aiPicker_hint` | اختار تصنيف {merchant}، وهيتطبق على كل حركاته. | Pick a category for {merchant}. It applies to all its transactions. | S · merchant |
+| `categorization_aiUndo_message` | اتغيّر لـ {category}. | Changed to {category}. | N · category · snackbar, 5 s |
+| `categorization_aiUndo_action` | تراجع | Undo | B · snackbar action, 48 dp |
+
+### 4.12.3 Discovery card — `categorization_aiCard_*`
+One-time card in the Home feed or the needs-classification queue when there are 3 or more distinct eligible shops (FR-LCAT-43). At most once per 30 days and 3 times ever. "Not now" counts as a showing. Never a modal or a push. Rive `tourGuide` still, no loop.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `categorization_aiCard_title` | `{count, plural, =1{عندك محل واحد مش عارف أصنفه} =2{عندك محلين مش عارف أصنفهم} few{عندك {n} محلات مش عارف أصنفهم} many{عندك {n} محل مش عارف أصنفهم} other{عندك {n} محل مش عارف أصنفهم}}` | `{count, plural, =1{You have 1 shop I couldn't sort} other{You have {n} shops I couldn't sort}}` | T · count:int, n · shown from 3, so no zero |
+| `categorization_aiCard_body` | تحب زغلول يخمّن تصنيفهم من اسم المحل؟ بيتبعت اسم المحل بس، والكلمة الأخيرة ليك. | Want Zaghlol to guess their categories from the shop name? Only the shop name is sent, and you have the last word. | E |
+| `categorization_aiCard_allow` | يلا يخمّن | Let him guess | B · opens the consent sheet (§4.12.4), sends nothing yet |
+| `categorization_aiCard_notNow` | مش دلوقتي | Not now | B · same words as `common_action_notNow`; kept apart so the card can be restyled |
+| `categorization_aiCard_never` | بلاش تسألني تاني | Don't ask again | B · text button; stops the card for good |
+
+### 4.12.4 Consent sheet — `categorization_aiConsent_*`
+C-17 sheet, shown once before the first send (FR-LCAT-44), from the card's "Let him guess" or from the Settings switch. Stored as `cat.llm_consent`. Not now stores nothing. There is no question preview (nothing is pending); the sheet lists the data kinds instead. Layout and buttons follow `chat_consent_*` (§4.2).
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `categorization_aiConsent_title` | تحب زغلول يخمّن التصنيفات؟ | Want Zaghlol to guess categories? | T |
+| `categorization_aiConsent_intro` | للمحلات اللي مش عارفها، هبعت اسم المحل لسيرفر زغلول ولـ {aiProvider} علشان يخمّنوا تصنيفه. وأنت اللي بتقرر لو التخمين صح. | For shops I don't know, I'll send the shop name to Zaghlol's server and {aiProvider} so they can guess its category. You decide whether the guess is right. | E · aiProvider · names the server and the provider; never "no server" |
+| `categorization_aiConsent_sendsTitle` | بيتبعت | What's sent | L |
+| `categorization_aiConsent_sends` | اسم المحل بس، ولغة التطبيق. | Only the shop name, and the app language. | S · FR-LCAT-02/44 |
+| `categorization_aiConsent_sendsMore` | ومعاه: إصدار التطبيق ونوع الموبايل، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. {aiProvider} بيوصله اسم المحل واللغة بس. | Also sent: the app version and phone type, a random app ID and a proof the phone is genuine. {aiProvider} gets only the shop name and the language. | E · aiProvider · FR-LCAT-02, technical fields for the monthly count |
+| `categorization_aiConsent_neverTitle` | عمره ما بيتبعت | Never sent | L |
+| `categorization_aiConsent_never` | المبلغ ولا الرصيد ولا التاريخ ولا البنك ولا الكارت ولا نص الرسالة. والتحويلات وأسامي الناس مش بتتبعت خالص. | Amounts, balances, dates, banks, cards or message text. Transfers and people's names are never sent either. | S · FR-LCAT-02/05; the PO's rule: amounts, balances and messages are not sent |
+| `categorization_aiConsent_storage` | سيرفر زغلول بيحتفظ باسم المحل وتصنيفه علشان نحسّن قايمة المحلات، من غير أي حاجة تدل عليك. | Zaghlol's server keeps the shop name and its category to improve the shop list, without anything that identifies you. | S · FR-LCAT-12/31; wording to legal with the policy section |
+| `categorization_aiConsent_feedback` | لما تقول «صح» أو «مش صح»، بنبعت اسم المحل والتصنيف بس، وحد من فريقنا بيراجع الغلط. لو اخترت تصنيف من عندك، مبنبعتش اسمه. | When you tap Right or Wrong, we send only the shop name and the category, and someone on our team reviews the wrong ones. If you pick one of your own categories, its name isn't sent. | E · FR-LCAT-24/30/31; custom names never leave (sent as "custom") |
+| `categorization_aiConsent_quota` | `{count, plural, =1{عندك تخمين واحد في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} =2{عندك تخمينين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} few{عندك {n} تخمينات في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} many{عندك {n} تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} other{عندك {n} تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.}}` | `{count, plural, =1{You get 1 guess a month. Shops Zaghlol already knows don't count.} other{You get {n} guesses a month. Shops Zaghlol already knows don't count.}}` | S · count:int = the tier quota (15 Free, 150 Gold, remote), n |
+| `categorization_aiConsent_allow` | موافق، خمّن | Allow | B · stores `cat.llm_consent`; from Settings it keeps this label |
+| `categorization_aiConsent_notNow` | مش دلوقتي | Not now | B · stores nothing; drag or back = Not now |
+| `categorization_aiConsent_settingsHint` | تقدر تقفله في أي وقت من «خصوصيتك». | You can turn it off any time in Privacy & data. | S |
+| `categorization_aiConsent_declined` | ولا يهمك، مبعتّش حاجة. | No problem, nothing was sent. | N · snackbar after Not now |
+
+### 4.12.5 Counter, queue and passive row — `categorization_aiQueue_*`
+In the needs-classification queue header (FR-LCAT-41, FR-LCAT-43). While the feature is off the header shows only the passive row.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `categorization_aiQueue_passiveRow` | خلّي زغلول يخمّن التصنيفات | Let Zaghlol guess categories | L · always available while off; opens the consent sheet |
+| `categorization_aiQueue_counter` | `{count, plural, =0{خلصت تخمينات الشهر} =1{فاضل تخمين واحد من {max}} =2{فاضل تخمينين من {max}} few{فاضل {n} تخمينات من {max}} many{فاضل {n} تخمين من {max}} other{فاضل {n} تخمين من {max}}}` | `{count, plural, =0{No guesses left this month} =1{1 of {max} guesses left} other{{n} of {max} guesses left}}` | L · count:int, n, max · last backend reply (FR-LCAT-41) |
+| `categorization_aiQueue_counterUnknown` | — | — | C · before the first backend reply |
+| `categorization_aiQueue_counterA11y` | `{count, plural, =0{خلصت تخمينات التصنيف الشهر ده} =1{فاضل تخمين تصنيف واحد الشهر ده} =2{فاضل تخمينين تصنيف الشهر ده} few{فاضل {n} تخمينات تصنيف الشهر ده} many{فاضل {n} تخمين تصنيف الشهر ده} other{فاضل {n} تخمين تصنيف الشهر ده}}` | `{count, plural, =0{No category guesses left this month} =1{1 category guess left this month} other{{n} category guesses left this month}}` | A · count:int, n |
+| `categorization_aiQueue_resetOn` | زغلول هيخمّن تاني يوم {date}. | Zaghlol will guess again on {date}. | N · at 0, the 1st of next month (Cairo), locale date |
+| `categorization_aiQueue_goldHint` | `{count, plural, =1{مع جولد بيبقى عندك تخمين واحد في الشهر.} =2{مع جولد بيبقى عندك تخمينين في الشهر.} few{مع جولد بيبقى عندك {n} تخمينات في الشهر.} many{مع جولد بيبقى عندك {n} تخمين في الشهر.} other{مع جولد بيبقى عندك {n} تخمين في الشهر.}}` | `{count, plural, =1{Gold gives you 1 guess a month.} other{Gold gives you {n} guesses a month.}}` | S · count:int = `cat.quota_gold`, n · Free at 0 only, one text line plus `chat_quota_seeGold`, never a modal |
+| `categorization_aiQueue_offline` | المحلات دي مستنية النت، وهتتخمّن أول ما يرجع. | These shops are waiting for the internet and will be guessed once it's back. | S · offline or paused (FR-LCAT-04) |
+| `categorization_aiQueue_noGuess` | زغلول مقدرش يخمّن ده. اختار التصنيف بإيدك. | Zaghlol couldn't guess this one. Pick the category yourself. | S · low confidence or `unknown` (FR-LCAT-13); not counted |
+
+### 4.12.6 S-71 Privacy — `privacy_llmCat_*`
+New C-16 row group under the Ask-LLM row, visible while `llm_categorise` is on (FR-LCAT-42). Switch on opens the consent sheet (§4.12.4); off clears `cat.llm_consent` and empties the queue. Local suggestions and rules stay.
+
+| Key | AR | EN | Notes |
+|---|---|---|---|
+| `privacy_llmCat_label` | زغلول يخمّن التصنيف | Let Zaghlol guess categories | L · switch; on = consent stored |
+| `privacy_llmCat_sentence` | بيبعت اسم المحل بس لسيرفر زغلول ولـ {aiProvider}، من غير المبلغ ولا الرصيد ولا الرسايل. | Sends only the shop name to Zaghlol's server and {aiProvider}, never amounts, balances or messages. | S · aiProvider |
+| `privacy_llmCat_quota` | `{count, plural, =0{خلصت تخمينات الشهر، وبترجع يوم {date}.} =1{فاضل تخمين واحد الشهر ده، والعداد بيرجع يوم {date}.} =2{فاضل تخمينين الشهر ده، والعداد بيرجع يوم {date}.} few{فاضل {n} تخمينات الشهر ده، والعداد بيرجع يوم {date}.} many{فاضل {n} تخمين الشهر ده، والعداد بيرجع يوم {date}.} other{فاضل {n} تخمين الشهر ده، والعداد بيرجع يوم {date}.}}` | `{count, plural, =0{No guesses left this month. They reset on {date}.} =1{1 guess left this month. Resets on {date}.} other{{n} guesses left this month. Resets on {date}.}}` | S · count:int, n, date · under the switch while on |
+| `privacy_llmCat_quotaUnknown` | عدد التخمينات هيظهر بعد أول مرة زغلول يخمّن. | The count shows after Zaghlol's first guess. | S |
+| `privacy_llmCat_details` | إيه اللي بيتبعت؟ | What's sent? | L · text button, opens the consent sheet read-only (Close only) |
+| `privacy_llmCat_turnedOff` | اتقفل. مش هبعت أي اسم محل غير لما توافق تاني، والتصنيفات اللي اتحطت قبل كده فاضلة. | Turned off. No shop name is sent until you allow it again, and the categories already set stay. | N · snackbar |
+| `privacy_server_itemLlmCat` | اسم المحل لتخمين التصنيف لو وافقت، وإجابتك «صح» أو «مش صح» على التخمين، من غير أي حاجة تدل عليك، وعدّاد التخمينات في الشهر | The shop name for a category guess, only if you allow it, your Right or Wrong answers on guesses without anything that identifies you, and your monthly guess count | S · BR-SYNC-03 amendment (D-96); added to the §3.10 list while `llm_categorise` is on |
+
+Rive: the discovery card uses `tourGuide` still; the consent sheet header uses `tourGuide` still; the chip, Right/Wrong and the queue have no mascot, and no animation blocks the buttons. Mirrored LTR: ✓ and ✗ keep their glyphs; their order follows the reading direction.
+
 ## 4.K Key count and changelog (Part 4)
 - 2026-11-26 — first draft (ASK-LLM UX): **105 ARB keys** in §4.1–§4.11 (input and quota 15, consent 12, status 11, what I sent 11, clarify 7, data answers 9, what-if 7, suggestions 9, investment 13, refusals 4, privacy 7 — §4.11 counts `privacy_server_itemAskLlm`). Registry: `aiProvider`, `months`. No-zero rows: `chat_quota_goldHint`, `chat_consent_quota`, `chat_unit_months`, `chat_whatIf_basis`. Parts 1–3 rows unchanged. Native-speaker review (T-058 process) and legal sign-off of `chat_invest_disclaimer`, `chat_consent_storage` and `privacy_server_itemAskLlm` pending.
+- 2026-11-26 — §4.12 automatic category (T-329, LLM-CATEGORISE): **47 ARB keys** (chip and results 9, picker and undo 4, discovery card 5, consent 14, queue and counter 8, S-71 privacy 7 including `privacy_server_itemLlmCat`). Plurals: 6 (`=0` on `categorization_aiQueue_counter`, `…counterA11y`, `privacy_llmCat_quota`; no-zero: `categorization_aiCard_title`, `categorization_aiConsent_quota`, `categorization_aiQueue_goldHint`). Registry: no new names (`max` also a quota total). Part 4 total **152 keys**. Legal sign-off pending on `categorization_aiConsent_*` and `privacy_server_itemLlmCat`.
