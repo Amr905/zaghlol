@@ -2,7 +2,7 @@ using Npgsql;
 
 namespace Zaghlol.Infrastructure.Tests;
 
-/// <summary>T-273: the six LLM-helper tables (column lists, privacy inventory, merchant_norm backstop, range checks).</summary>
+/// <summary>T-323: the six LLM-helper tables (column lists, privacy inventory, merchant_norm backstop, range checks).</summary>
 [Collection(SchemaGroup.Name)]
 public class LlmTablesTests(SchemaFixture fixture)
 {

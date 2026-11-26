@@ -395,7 +395,7 @@ CREATE TABLE operators (id uuid PRIMARY KEY, oidc_subject text NOT NULL UNIQUE, 
 CREATE TABLE pending_apple_revocations (id uuid PRIMARY KEY, sealed_blob bytea NOT NULL, attempts integer NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL, next_attempt_at timestamptz NOT NULL, expires_at timestamptz NOT NULL,
   CHECK (attempts >= 0), CHECK (expires_at > created_at));
--- T-273: LLM helper tables (ask-llm.md §4.5, llm-categorise.md §4). No column holds a question text; subject_id is the only
+-- T-323: LLM helper tables (ask-llm.md §4.5, llm-categorise.md §4). No column holds a question text; subject_id is the only
 -- install/account id (llm_quota_counters); the review tables carry only the peppered install_hash. merchant_norm has the same
 -- backstop CHECK as merchant_contributions, plus length 2..64. Grants (GrantMatrix.LlmTables): app_rw R/W on counters, ledger and
 -- cache, R on remote_config, INSERT+SELECT on confirmations/corrections; worker_rw SELECT+DELETE on all but remote_config;

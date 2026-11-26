@@ -1,5 +1,5 @@
 {
-  "$comment": "Fake-backend replies for POST /v1/categorise (T-272). One 200 per result status, a mixed batch, one problem body per error code (quota is reported per merchant, never as 403). Synthetic; 'order 000000 cafe' is a deliberately ineligible name for the rejected status.",
+  "$comment": "Fake-backend replies for POST /v1/categorise (T-322). One 200 per result status, a mixed batch, one problem body per error code (quota is reported per merchant, never as 403). Synthetic; 'order 000000 cafe' is a deliberately ineligible name for the rejected status.",
   "version": 1,
   "ok": [
     {

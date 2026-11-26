@@ -6,9 +6,9 @@ using System.Text.Json.Nodes;
 namespace Zaghlol.Contract.Tests;
 
 /// <summary>
-/// T-272 AC3: recomputes every binding vector of <c>ask-binding-v1.json</c> and <c>cat-binding-v1.json</c> byte for byte
+/// T-322 AC3: recomputes every binding vector of <c>ask-binding-v1.json</c> and <c>cat-binding-v1.json</c> byte for byte
 /// (ask-llm.md section 5): <c>SHA-256(prefix || 0x00 || installId || 0x00 || JCS(body without attestation))</c>, the Play
-/// <c>requestHash</c> and the App Attest <c>clientDataHash</c>. The Dart app reads the same files (T-290).
+/// <c>requestHash</c> and the App Attest <c>clientDataHash</c>. The Dart app reads the same files (T-340).
 /// </summary>
 public class LlmBindingVectorTests
 {

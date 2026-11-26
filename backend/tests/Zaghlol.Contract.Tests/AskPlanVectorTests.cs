@@ -4,8 +4,8 @@ using Json.Schema;
 namespace Zaghlol.Contract.Tests;
 
 /// <summary>
-/// T-272 AC1 and AC2: the shared plan vectors against <c>ask-plan-v1.schema.json</c> and the section 2.4 rules, and the
-/// provider keyword subset of the schema files. The same vectors are run by the Dart tests (T-281).
+/// T-322 AC1 and AC2: the shared plan vectors against <c>ask-plan-v1.schema.json</c> and the section 2.4 rules, and the
+/// provider keyword subset of the schema files. The same vectors are run by the Dart tests (T-331).
 /// </summary>
 public class AskPlanVectorTests
 {

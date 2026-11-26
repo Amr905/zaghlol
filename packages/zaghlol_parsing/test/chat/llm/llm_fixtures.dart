@@ -1,4 +1,4 @@
-// Synthetic sources for the T-278 tests (Ahmed fixture of SRS §10). Fake
+// Synthetic sources for the T-328 tests (Ahmed fixture of SRS §10). Fake
 // names, fake last-4s; nothing here is real user data.
 
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';

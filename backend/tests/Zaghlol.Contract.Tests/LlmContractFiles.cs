@@ -4,7 +4,7 @@ using Json.Schema;
 namespace Zaghlol.Contract.Tests;
 
 /// <summary>
-/// Loads the LLM contract files (T-272): the two JSON Schemas under <c>backend/contracts</c>, the shared vectors and the
+/// Loads the LLM contract files (T-322): the two JSON Schemas under <c>backend/contracts</c>, the shared vectors and the
 /// fake-backend fixtures. The csproj copies them next to the test assembly.
 /// </summary>
 internal static class LlmContractFiles

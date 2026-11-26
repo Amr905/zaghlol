@@ -1,5 +1,5 @@
 {
-  "$comment": "Fake-backend replies for POST /v1/ask/plan (T-272). One 200 per plan variant, the fallback cases, one problem body per error code. Used by backend tests, app fakes and the device E2E. Synthetic.",
+  "$comment": "Fake-backend replies for POST /v1/ask/plan (T-322). One 200 per plan variant, the fallback cases, one problem body per error code. Used by backend tests, app fakes and the device E2E. Synthetic.",
   "version": 1,
   "ok": [
     {

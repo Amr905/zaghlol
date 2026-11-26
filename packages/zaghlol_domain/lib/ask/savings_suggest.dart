@@ -1,4 +1,4 @@
-/// Saving suggestions S1-S4 for the Ask helper (T-276, SRS ask-llm §3.3).
+/// Saving suggestions S1-S4 for the Ask helper (T-326, SRS ask-llm §3.3).
 ///
 /// Pure and per currency. Every threshold test is done on integers in minor
 /// units, with no division before the comparison.

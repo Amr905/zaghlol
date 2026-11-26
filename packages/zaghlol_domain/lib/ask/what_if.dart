@@ -1,4 +1,4 @@
-/// What-if calculators for the Ask helper (T-276, SRS ask-llm §3.2, EC-23).
+/// What-if calculators for the Ask helper (T-326, SRS ask-llm §3.2, EC-23).
 ///
 /// Pure functions over already-aggregated inputs. All arithmetic is integer
 /// minor units; rounding is half-even and applied once per figure.

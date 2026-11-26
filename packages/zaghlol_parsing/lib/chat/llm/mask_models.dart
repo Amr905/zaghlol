@@ -1,4 +1,4 @@
-/// Value types of the client scrub and the reference masker (T-278,
+/// Value types of the client scrub and the reference masker (T-328,
 /// FR-LLM-03, FR-LLM-18..20, D-92). Pure Dart. Every type that can hold the
 /// user's own names, digits or question has a redacted `toString`.
 library;
@@ -115,7 +115,7 @@ final class MaskMerchant {
   String toString() => 'MaskMerchant(<redacted>)';
 }
 
-/// What the masker may replace. The Drift adapter is T-293.
+/// What the masker may replace. The Drift adapter is T-343.
 abstract interface class MaskSources {
   List<MaskAccount> get accounts;
   List<MaskInstitution> get institutions;

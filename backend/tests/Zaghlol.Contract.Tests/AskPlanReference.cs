@@ -9,7 +9,7 @@ namespace Zaghlol.Contract.Tests;
 /// <summary>
 /// A small reference implementation of steps 2 to 6 of <c>ask-llm.md</c> section 2.4, written only to prove that the
 /// shared vectors are self-consistent (every vector gets the outcome it declares). The production validators
-/// (backend T-280, phone T-281) are separate code that must give the same answers on the same vectors.
+/// (backend T-330, phone T-331) are separate code that must give the same answers on the same vectors.
 /// </summary>
 internal sealed partial class AskPlanReference
 {
@@ -191,7 +191,7 @@ internal sealed partial class AskPlanReference
     /// <summary>
     /// The backend test host runs with invariant globalization, where <c>string.Normalize</c> is a no-op for non-ASCII text, so the
     /// reference also rejects any Latin combining mark (U+0300..U+036F), which is what the vectors use. Production code must use a real
-    /// NFC implementation (the T-280 validator may not rely on <c>string.IsNormalized</c> under invariant globalization).
+    /// NFC implementation (the T-330 validator may not rely on <c>string.IsNormalized</c> under invariant globalization).
     /// </summary>
     private static bool IsNfc(string text) => text.IsNormalized(NormalizationForm.FormC) && !text.Any(c => c is >= '\u0300' and <= '\u036f');
 

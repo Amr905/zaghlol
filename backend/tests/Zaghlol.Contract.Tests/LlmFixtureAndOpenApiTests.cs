@@ -4,7 +4,7 @@ using Json.Schema;
 namespace Zaghlol.Contract.Tests;
 
 /// <summary>
-/// T-272 AC4 to AC6: the LLM operations of the OpenAPI file are closed and bounded, and every fake-backend fixture
+/// T-322 AC4 to AC6: the LLM operations of the OpenAPI file are closed and bounded, and every fake-backend fixture
 /// validates against the OpenAPI response and problem schemas (and the plan against the JSON Schema file).
 /// </summary>
 public class LlmFixtureAndOpenApiTests

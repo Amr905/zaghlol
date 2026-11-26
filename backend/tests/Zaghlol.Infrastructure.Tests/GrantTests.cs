@@ -91,7 +91,7 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "UPDATE zaghlol.pending_apple_revocations SET sealed_blob = NULL WHERE false" },
         { "zaghlol_worker", "INSERT INTO zaghlol.pending_apple_revocations (id) SELECT gen_random_uuid() WHERE false" },
 
-        // T-273 LLM tables: the API never writes remote_config, never deletes (the purger does), never updates a review row; the
+        // T-323 LLM tables: the API never writes remote_config, never deletes (the purger does), never updates a review row; the
         // worker only deletes; ops_rw moves only the review columns; ops_ro sees none of them.
         { "zaghlol_api", "INSERT INTO zaghlol.remote_config (key, value, version, updated_at) VALUES ('x', 'y', 1, now())" },
         { "zaghlol_api", "UPDATE zaghlol.remote_config SET value = 'z' WHERE false" },
@@ -143,7 +143,7 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_api", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
         { "zaghlol_api", "UPDATE zaghlol.installs SET last_sync_at = now() WHERE false" },
 
-        // T-273 LLM tables.
+        // T-323 LLM tables.
         { "zaghlol_api", "UPDATE zaghlol.llm_quota_counters SET used = used + 1, last_request_hash = NULL, updated_at = now() WHERE false" },
         { "zaghlol_api", "UPDATE zaghlol.llm_spend_daily SET calls = calls + 1 WHERE false" },
         { "zaghlol_api", "UPDATE zaghlol.llm_cat_answer_cache SET hits = hits + 1 WHERE false" },

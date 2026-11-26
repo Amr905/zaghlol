@@ -1,4 +1,4 @@
-// T-278: ReferenceMasker (FR-LLM-18..20, D-92). Synthetic fixtures only.
+// T-328: ReferenceMasker (FR-LLM-18..20, D-92). Synthetic fixtures only.
 //
 // AC -> test map
 //  AC1  'AC1 FR-LLM-03 ...'

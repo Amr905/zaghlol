@@ -75,7 +75,7 @@ substring of the sent text after normalisation. 4. Amount rule (§2.2). 5. Cross
 their `k`). 6. Template grammar (failure drops `t` only). Failures 1–5 → **PL-FALLBACK, `counted:false`**. The phone pins its
 schema copy per release and applies the same steps after the backend (defence in depth, FR-LLM-06).
 
-### 2.4a Contract details fixed by T-272 (vectors are authoritative)
+### 2.4a Contract details fixed by T-322 (vectors are authoritative)
 - **Step 5 also ties `plan` to `p`:** `p` must validate against `$defs/P_<plan>` of the schema (the `anyOf` alone can't), reason `PLAN_MISMATCH`. Other cross-field rules: `n` only with `lastDays` and required there, `m` only with and required for `monthOfYear`, `y` only with `monthOfYear`; `mode.percent` set exactly when `kind = percent`, `mode.amount` exactly when `kind = amount`; `source.whatIf` exactly for `whatIf`, `source.amount` exactly for `amount`; `instruments` unique; `PL-WHATIF-CUT` `target.currency` null; `PL-INCOME` `filter.slug` null.
 - **Normalisation** for steps 3 and 4 is `foldKey` (`packages/zaghlol_parsing/lib/normalize/text_normalizer.dart`). A number in the text is `[0-9]+(,[0-9]{3})*(.[0-9]+)?` after folding, compared as a decimal; number words are whole words after folding. The fraction rule applies when `currency` is non-null (the phone re-checks `null` against its primary currency).
 - **Template blanks per plan** and the ordered step 6 rules with reason codes are in `vectors/ask-plan-v1.json` (`templateBlanks`, `templateRules`). `t.lang` and `t.text` carry no schema constraint, so a bad template drops only `t`.

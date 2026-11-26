@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Zaghlol.Infrastructure.Persistence.Migrations
 {
     /// <summary>
-    /// T-273 (ask-llm §4.5, llm-categorise §4): the six tables of the LLM helper, expand-only. Plain SQL outside the EF model (like
+    /// T-323 (ask-llm §4.5, llm-categorise §4): the six tables of the LLM helper, expand-only. Plain SQL outside the EF model (like
     /// the T-135 table), so the model snapshot is unchanged. No table has a column that can hold a question text; the only subject
     /// identifier is <c>llm_quota_counters.subject_id</c>, and the two categorise review tables carry only the peppered
     /// <c>install_hash</c>. Down drops the tables (and with them their grants).

@@ -50,14 +50,14 @@
     <None Update="vectors\keyed-hash-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <!-- T-125 catalog snapshot vector (public test key only; also read by the Dart verifier). -->
     <None Update="vectors\catalog-snapshot-v1.json" CopyToOutputDirectory="PreserveNewest" />
-    <!-- T-272 LLM contracts: plan vectors (also read by the Dart validator, T-281) and the body-bound attestation vectors (T-286, T-290). -->
+    <!-- T-322 LLM contracts: plan vectors (also read by the Dart validator, T-331) and the body-bound attestation vectors (T-336, T-340). -->
     <None Update="vectors\ask-plan-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="vectors\ask-binding-v1.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="vectors\cat-binding-v1.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- T-272: the JSON Schemas and fake-backend fixtures live in backend/contracts and are copied next to the test assembly. -->
+    <!-- T-322: the JSON Schemas and fake-backend fixtures live in backend/contracts and are copied next to the test assembly. -->
     <Content Include="..\..\contracts\**\*.json" Link="contracts\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

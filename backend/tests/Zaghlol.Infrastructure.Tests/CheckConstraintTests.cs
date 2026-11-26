@@ -165,7 +165,7 @@ public class CheckConstraintTests(SchemaFixture fixture)
             ["pending_apple_revocations: negative attempts"] = ("pending_apple_revocations", Set("attempts", -1), "ck_pending_apple_revocations_attempts"),
             ["pending_apple_revocations: expires before it was created"] = ("pending_apple_revocations", Set("expires_at", Rows.Now().AddDays(-1)), "ck_pending_apple_revocations_window"),
 
-            // LLM helper tables (T-273)
+            // LLM helper tables (T-323)
             ["llm_quota_counters: unknown feature"] = ("llm_quota_counters", Set("feature", "chat"), "ck_llm_quota_counters_feature"),
             ["llm_quota_counters: unknown subject_kind"] = ("llm_quota_counters", Set("subject_kind", "device"), "ck_llm_quota_counters_subject_kind"),
             ["llm_quota_counters: month_key below 202601"] = ("llm_quota_counters", Set("month_key", 202512), "ck_llm_quota_counters_month_key"),
@@ -245,7 +245,7 @@ public class CheckConstraintTests(SchemaFixture fixture)
         // 23 documented + 24 hardening (octet/char lengths, cause regex, audit, codes, formats) + 1 catalog_drafts (T-125) + 2 price_quotes (T-127)
         // + 2 idempotency_records claim checks (T-130) + ck_store_notifications_google_shape (T-133)
         // + 2 pending_apple_revocations (T-135) + ck_installs_catalog_version (BUG-009)
-        // + 13 LLM helper tables (T-273).
+        // + 13 LLM helper tables (T-323).
         Assert.Equal(71, inSchema.Count);
         Assert.Empty(inSchema.Except(tested));
         Assert.Empty(tested.Except(inSchema));

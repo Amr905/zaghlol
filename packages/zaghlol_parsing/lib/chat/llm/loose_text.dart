@@ -1,5 +1,5 @@
 /// Matching fold and span replacement shared by the scrub and the masker
-/// (T-278). Internal: not exported.
+/// (T-328). Internal: not exported.
 library;
 
 import '../../normalize/text_normalizer.dart';

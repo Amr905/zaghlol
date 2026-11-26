@@ -282,7 +282,7 @@ public static class GrantMatrix
     ];
 
     /// <summary>
-    /// The grants of the LlmQuotaSpendConfigCategorise migration (T-273; ask-llm §4.5, llm-categorise §4). Frozen: never edit after it
+    /// The grants of the LlmQuotaSpendConfigCategorise migration (T-323; ask-llm §4.5, llm-categorise §4). Frozen: never edit after it
     /// ships. <c>app_rw</c> reads and writes the quota counters, spend ledger and answer cache, only reads <c>remote_config</c>, and
     /// inserts and reads the confirmation and correction rows; <c>worker_rw</c> is the retention purger (DELETE); <c>ops_rw</c>
     /// reads the two review tables and moves only the review columns. <c>ops_ro</c> has no grant on any of them.

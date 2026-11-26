@@ -1,4 +1,4 @@
-/// Client scrub (T-278, FR-LLM-03): phones, e-mails, InstaPay addresses and
+/// Client scrub (T-328, FR-LLM-03): phones, e-mails, InstaPay addresses and
 /// digit runs of 8 or more become neutral tokens before anything else runs.
 /// Pure, total, never throws, never logs.
 library;
