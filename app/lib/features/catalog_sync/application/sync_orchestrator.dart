@@ -33,6 +33,7 @@ import '../../../core/db/app_database.dart' hide Settings;
 import '../../../core/db/daos/catalog_dao.dart';
 import '../../../core/db/daos/misc_daos.dart' show DiagLevel;
 import '../../../core/db/daos/outbox_dao.dart';
+import '../../../core/config/remote_config_service.dart';
 import '../../../core/flags/flags_service.dart';
 import '../../../core/logging/diag_code.dart';
 import '../../../core/logging/diag_event.dart';
@@ -127,6 +128,7 @@ class SyncOrchestrator {
     this._diag,
     this._registryVersion,
     this._pauseGate,
+    this._config,
   }) : _now = now ?? (() => DateTime.now().toUtc().millisecondsSinceEpoch),
        _applier = CatalogApplier(_db);
 
@@ -135,6 +137,7 @@ class SyncOrchestrator {
   final SyncAnchor _anchor;
   final BackendStateStore _store;
   final FlagsService _flags;
+  final RemoteConfigService? _config;
   final PricesRepository _prices;
   final SettingsRepository _settings;
   final Future<void> Function()? _recategorize;
@@ -317,6 +320,7 @@ class SyncOrchestrator {
       r.accepted == null &&
       r.catalog == null &&
       r.flags == null &&
+      r.config == null &&
       r.prices == null &&
       r.entitlement == null;
 
@@ -551,6 +555,16 @@ class SyncOrchestrator {
         final f = r.flags;
         if (f != null) {
           await _flags.apply(RemoteFlags(version: f.version, values: f.values));
+        }
+        final c = r.config;
+        if (c != null) {
+          await _config?.apply(
+            version: c.version,
+            values: c.values,
+            providerName: c.providerName == null
+                ? null
+                : {'ar': c.providerName!.ar, 'en': c.providerName!.en},
+          );
         }
       });
     } on Object {

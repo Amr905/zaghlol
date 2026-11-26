@@ -21,6 +21,7 @@ import '../../../core/backend/response_signature.dart';
 import '../../../core/backend/transport.dart';
 import '../../../core/db/app_database_providers.dart';
 import '../../../core/db/daos/settings_dao.dart';
+import '../../../core/config/remote_config_providers.dart';
 import '../../../core/flags/flags_providers.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../categorization/data/categorizer_ports.dart';
@@ -166,6 +167,7 @@ final syncOrchestratorProvider = FutureProvider<SyncOrchestrator>((ref) async {
     anchor: EntitlementSyncAnchor(ref.watch(entitlementServiceProvider)),
     store: ref.watch(backendStateStoreProvider),
     flags: flags,
+    config: await ref.watch(remoteConfigServiceProvider.future),
     prices: PricesRepository(db: db, clock: clock),
     settings: settings,
     pauseGate: ref.watch(syncPauseGateProvider),

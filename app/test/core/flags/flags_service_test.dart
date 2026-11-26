@@ -73,7 +73,14 @@ void main() {
   test('flag keys match the backend set', () {
     expect(
       [for (final f in FeatureFlag.values) f.key],
-      ['zakah', 'smart_roi', 'roi_named_products'],
+      [
+        'zakah',
+        'smart_roi',
+        'roi_named_products',
+        'ask_llm',
+        'ask_llm_invest',
+        'llm_categorise',
+      ],
     );
     expect(FeatureFlag.fromKey('Zakah'), isNull);
   });
