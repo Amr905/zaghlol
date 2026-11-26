@@ -5,6 +5,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- T-330: the shared ask-plan vectors (also run by Contract.Tests and the Dart validator). -->
+    <Content Include="..\Zaghlol.Contract.Tests\vectors\ask-plan-v1.json" Link="vectors\ask-plan-v1.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- T-182: real software-key seat proofs for the production verifier. -->
     <Compile Include="..\Shared\SeatKeyTestSigner.cs" Link="Shared\SeatKeyTestSigner.cs" />
   </ItemGroup>
