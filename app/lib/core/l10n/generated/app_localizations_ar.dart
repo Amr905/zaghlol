@@ -1238,6 +1238,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeroKpiLeft => 'فاضلك';
 
   @override
+  String homeHeroKpiIncomeFromExchange(String amount) {
+    return 'منهم $amount من تحويل عملة';
+  }
+
+  @override
+  String homeHeroKpiExchangedOut(String amount) {
+    return 'وحولت $amount';
+  }
+
+  @override
   String homeHeroApproxTitle(String currency) {
     return 'كله تقريباً بالـ $currency';
   }

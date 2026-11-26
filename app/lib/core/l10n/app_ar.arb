@@ -1472,6 +1472,24 @@
   "@homeHeroKpiLeft": {
     "description": "C"
   },
+  "homeHeroKpiIncomeFromExchange": "منهم {amount} من تحويل عملة",
+  "@homeHeroKpiIncomeFromExchange": {
+    "description": "C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroKpiExchangedOut": "وحولت {amount}",
+  "@homeHeroKpiExchangedOut": {
+    "description": "C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "homeHeroApproxTitle": "كله تقريباً بالـ {currency}",
   "@homeHeroApproxTitle": {
     "description": "L · last pager page, only when the ≈ view is on (FR-CUR-04)",

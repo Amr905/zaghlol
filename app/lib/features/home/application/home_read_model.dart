@@ -33,6 +33,16 @@ final class HomeCurrencyFigures {
 
   Currency get currency => overview.currency;
   Money get income => overview.totals.income;
+
+  /// T-272 (D-86): the month's money in: income plus money received by
+  /// exchanging another currency. The income KPI shows this.
+  Money get moneyIn => overview.totals.moneyIn;
+
+  /// The exchanged-in part of [moneyIn] (never income, never spending).
+  Money get exchangedIn => overview.totals.exchangedIn;
+
+  /// Money of this currency given away in exchanges (never spending).
+  Money get exchangedOut => overview.totals.exchangedOut;
   Money get spend => overview.totals.spend;
   Money get pending => overview.totals.pendingSpend;
 
@@ -40,7 +50,8 @@ final class HomeCurrencyFigures {
   final Money? safeToSpend;
   Money? get budget => overview.budget;
 
-  /// Income minus spend, same currency.
+  /// What is left: money in minus spend minus exchanged out, same
+  /// currency (T-272; was income minus spend).
   final Money net;
 }
 
@@ -145,9 +156,7 @@ final homeModelProvider = FutureProvider<HomeModel>((ref) async {
         HomeCurrencyFigures(
           overview: overview.byCurrency[c]!,
           safeToSpend: all.byCurrency[c]?.safeToSpend,
-          net:
-              overview.byCurrency[c]!.totals.income -
-              overview.byCurrency[c]!.totals.spend,
+          net: overview.byCurrency[c]!.totals.left,
         ),
     ],
     recent: [

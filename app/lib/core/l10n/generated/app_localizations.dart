@@ -1998,6 +1998,18 @@ abstract class AppLocalizations {
   /// **'فاضلك'**
   String get homeHeroKpiLeft;
 
+  /// C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.
+  ///
+  /// In ar, this message translates to:
+  /// **'منهم {amount} من تحويل عملة'**
+  String homeHeroKpiIncomeFromExchange(String amount);
+
+  /// C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.
+  ///
+  /// In ar, this message translates to:
+  /// **'وحولت {amount}'**
+  String homeHeroKpiExchangedOut(String amount);
+
   /// L · last pager page, only when the ≈ view is on (FR-CUR-04)
   ///
   /// In ar, this message translates to:

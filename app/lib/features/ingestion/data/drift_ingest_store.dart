@@ -12,7 +12,9 @@ import '../../../core/db/daos/capture_controls_dao.dart';
 import '../../../core/db/daos/raw_messages_dao.dart';
 import '../../../core/db/daos/review_items_dao.dart';
 import '../../../core/db/daos/transactions_dao.dart';
+import '../../../core/db/daos/transfers_dao.dart';
 import '../../../core/db/daos/write_errors.dart';
+import '../../../core/db/db_errors.dart';
 import '../../transactions/domain/transaction.dart';
 import '../application/ingest_store_port.dart';
 import '../domain/ingest_records.dart';
@@ -266,6 +268,41 @@ final class DriftIngestStore implements IngestStorePort {
         updatedAt: t.createdAtMs,
       ),
     );
+  }
+
+  @override
+  Future<void> insertExchangePair({
+    required String id,
+    required String outTxnId,
+    required String inTxnId,
+    required int createdAtMs,
+  }) async {
+    await TransferPairsDao(_db).insert(
+      TransferPairsCompanion.insert(
+        id: id,
+        outTxnId: outTxnId,
+        inTxnId: Value(inTxnId),
+        kind: TransferPairKind.fxConversion,
+        createdAt: createdAtMs,
+      ),
+    );
+    for (final leg in [outTxnId, inTxnId]) {
+      final n = await guardWrite(
+        () => _db.customUpdate(
+          'UPDATE transactions SET is_internal = 1, transfer_pair_id = ?2, '
+          'updated_at = ?3 WHERE id = ?1 AND deleted_at IS NULL '
+          'AND transfer_pair_id IS NULL',
+          variables: [
+            Variable.withString(leg),
+            Variable.withString(id),
+            Variable.withInt(createdAtMs),
+          ],
+          updates: {_db.transactions},
+        ),
+      );
+      // Exactly one row: the leg this savepoint just inserted.
+      if (n != 1) throw DbWriteException(DbWriteException.constraint);
+    }
   }
 
   @override

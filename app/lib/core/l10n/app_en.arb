@@ -344,6 +344,8 @@
   "homeHeroKpiIncome": "Income",
   "homeHeroKpiSpent": "Spent",
   "homeHeroKpiLeft": "Left",
+  "homeHeroKpiIncomeFromExchange": "incl. {amount} exchanged in",
+  "homeHeroKpiExchangedOut": "+ {amount} exchanged",
   "homeHeroApproxTitle": "Everything, roughly in {currency}",
   "homeHeroSummaryA11y": "Safe to spend today: {amount}. {payday}. Income {income}, spent {spent}, left {left}.",
   "homeMascotShockedCategory": "Heads up! {category} is at {percent} of its budget and the month's still young.",

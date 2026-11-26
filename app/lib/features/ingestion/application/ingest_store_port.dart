@@ -52,6 +52,17 @@ abstract interface class IngestStorePort {
 
   Future<void> insertTxn(TxnInsert row);
 
+  /// T-272: pairs the two legs of one conversion message as an
+  /// `fx_conversion` transfer pair and marks both internal. Both legs must
+  /// be live and unpaired (they were inserted in this savepoint); otherwise
+  /// it throws and the message's savepoint rolls back.
+  Future<void> insertExchangePair({
+    required String id,
+    required String outTxnId,
+    required String inTxnId,
+    required int createdAtMs,
+  });
+
   /// Applies [patch] to [txnId] and sets `updated_at`. Returns rows changed.
   Future<int> updateTxn(String txnId, TxnPatch patch, {required int atMs});
 

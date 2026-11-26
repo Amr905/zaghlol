@@ -1201,6 +1201,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeHeroKpiLeft => 'Left';
 
   @override
+  String homeHeroKpiIncomeFromExchange(String amount) {
+    return 'incl. $amount exchanged in';
+  }
+
+  @override
+  String homeHeroKpiExchangedOut(String amount) {
+    return '+ $amount exchanged';
+  }
+
+  @override
   String homeHeroApproxTitle(String currency) {
     return 'Everything, roughly in $currency';
   }
