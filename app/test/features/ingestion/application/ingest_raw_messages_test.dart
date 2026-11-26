@@ -126,6 +126,31 @@ void main() {
       expect(payload['candidateTxnIds'], [first]);
     });
 
+    test('FU-389: SMS pending, notification pending (merged), SMS posted '
+        'settles in place, notification posted → still one expense', () async {
+      await w.run([
+        sms('s1', 'ZBANK: Hold EGP 120.50 at Synth Shop card *4321'),
+      ]);
+      final n1 = await w.run([
+        notif('n1', 'Hold EGP 120.50 at Synth Shop', rx: t0 + 10000),
+      ]);
+      expect(n1.outcomes['n1'], isA<IngestMergedCrossChannel>());
+      final s2 = await w.run([
+        sms(
+          's2',
+          'ZBANK: Settled EGP 120.50 at Synth Shop card *4321',
+          rx: t0 + 30000,
+        ),
+      ]);
+      expect(s2.outcomes['s2'], isA<IngestMergedPending>());
+      final n2 = await w.run([
+        notif('n2', 'Settled EGP 120.50 at Synth Shop', rx: t0 + 60000),
+      ]);
+      expect(n2.outcomes['n2'], isA<IngestMergedCrossChannel>());
+      expect(await txnCount(), 1);
+      expect(await w.count('review_items', 'resolved_at IS NULL'), 0);
+    });
+
     test('T-286: a copy from a third channel still merges', () async {
       await w.run([sms('s', purchase)]);
       await w.run([notif('n1', purchaseNotif, rx: t0 + 40000)]);

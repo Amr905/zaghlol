@@ -1093,6 +1093,7 @@ final class IngestRawMessages {
         !await _store.hasCrossChannelCopy(
           matches.single.id,
           p.txnSource!.code,
+          statusClass: _markClass(status),
         )) {
       final target = matches.single;
       // Raw first (CR-6 backstop), then the attach and its mark.
@@ -1104,7 +1105,7 @@ final class IngestRawMessages {
         templateVersion: r.templateVersion,
       );
       await _attach(local, b, target, r, occurredMs);
-      await _markCopy(p, rawId, target.id);
+      await _markCopy(p, rawId, target.id, statusClass: _markClass(status));
       local.diag(IngestDiag.mergeCrossChannel);
       return IngestMergedCrossChannel(target.id);
     }
@@ -1929,14 +1930,25 @@ final class IngestRawMessages {
 
   /// T-286 (FU-383): remembers that [rawId] was merged into [txnId], in
   /// the message's savepoint, so the same source never merges into it again.
-  Future<void> _markCopy(_Prepared p, String rawId, String txnId) =>
-      _store.recordCrossChannelCopy(
-        id: _newId(),
-        rawMessageId: rawId,
-        txnId: txnId,
-        source: p.txnSource!.code,
-        atMs: _nowMs(),
-      );
+  /// FU-389: a mark blocks a merge only for the same status class, so a
+  /// pending→posted settle in place does not turn a true copy into a
+  /// second expense.
+  static String _markClass(TxnStatus s) =>
+      s == TxnStatus.pending ? 'pending' : 'posted';
+
+  Future<void> _markCopy(
+    _Prepared p,
+    String rawId,
+    String txnId, {
+    String? statusClass,
+  }) => _store.recordCrossChannelCopy(
+    id: _newId(),
+    rawMessageId: rawId,
+    txnId: txnId,
+    source: p.txnSource!.code,
+    atMs: _nowMs(),
+    statusClass: statusClass,
+  );
 
   Future<void> _review({
     required String kind,
