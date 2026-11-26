@@ -74,6 +74,8 @@ public static class SyncTags
 
     public const string Contribution = "contribution";
     public const string BankRequest = "bank_request";
+    public const string LlmCatConfirmation = "llm_cat_confirmation";
+    public const string LlmCatCorrection = "llm_cat_correction";
 
     public const string Accepted = "accepted";
     public const string Filtered = "filtered";
@@ -91,7 +93,7 @@ public static class SyncTags
 
     public static IReadOnlyList<string> CatalogModeValues { get; } = [CatalogModes.None, CatalogModes.Delta, CatalogModes.Full];
 
-    public static IReadOnlyList<string> IntakeKinds { get; } = [Contribution, BankRequest];
+    public static IReadOnlyList<string> IntakeKinds { get; } = [Contribution, BankRequest, LlmCatConfirmation, LlmCatCorrection];
 
     public static IReadOnlyList<string> IntakeResults { get; } = [Accepted, Filtered, InvalidCode, Duplicate, DroppedHasher];
 

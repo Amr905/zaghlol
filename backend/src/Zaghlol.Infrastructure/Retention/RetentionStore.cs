@@ -59,6 +59,11 @@ internal sealed class RetentionStore(IZaghlolDbContextFactory contexts) : IReten
 
         // T-339: the spend ledger keeps 13 months (FR-LLM-62): a UTC day older than today minus 13 calendar months goes. The alert marker rows share the table and age out with it.
         [RetentionRules.LlmSpendDaily] = Delete("llm_spend_daily", "day < ((@now AT TIME ZONE 'UTC')::date - interval '13 months')"),
+
+        // T-353 (FR-LCAT-34): a confirmation goes after 365 days or once its review is settled (promoted / rejected); a correction
+        // 90 days after the operator resolved it, or 180 days after it was written whichever comes first.
+        [RetentionRules.LlmCatConfirmations] = Delete("llm_cat_confirmations", "created_at < @now - interval '365 days' OR status IN ('promoted', 'rejected')"),
+        [RetentionRules.LlmCatCorrections] = Delete("llm_cat_corrections", "(resolved_at IS NOT NULL AND resolved_at < @now - interval '90 days') OR created_at < @now - interval '180 days'"),
     };
 
     public async Task<int> PurgeBatchAsync(string rule, DateTimeOffset now, int batchSize, CancellationToken cancellationToken)

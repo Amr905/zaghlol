@@ -188,6 +188,10 @@ internal sealed class SyncAcceptedDto
     public required int Contributions { get; init; }
 
     public required int BankRequests { get; init; }
+
+    /// <summary>Feedback rows stored; absent when the request carried no <c>llmCatFeedback</c> member.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? LlmCatFeedback { get; init; }
 }
 
 /// <summary>

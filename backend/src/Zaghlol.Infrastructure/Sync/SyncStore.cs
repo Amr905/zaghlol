@@ -36,6 +36,41 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
         ON CONFLICT DO NOTHING
         """;
 
+    // T-353. The row's only identity is install_hash (the KMS-peppered HMAC), and created_at is cut to the UTC day: no install ID,
+    // account, IP or app version, and no time that could be matched to one sync. Duplicates per (merchant_norm, install_hash) keep the first.
+    private const string ConfirmationsSql = """
+        INSERT INTO zaghlol.llm_cat_confirmations (id, merchant_norm, category_code, source, install_hash, created_at)
+        SELECT u.id, u.merchant_norm, u.category_code, u.source, @install_hash, @day
+        FROM unnest(@ids, @merchants, @categories, @sources) AS u(id, merchant_norm, category_code, source)
+        ON CONFLICT DO NOTHING
+        """;
+
+    private const string CorrectionsSql = """
+        INSERT INTO zaghlol.llm_cat_corrections (id, merchant_norm, ai_category, user_category, source, install_hash, created_at)
+        SELECT u.id, u.merchant_norm, u.ai_category, u.user_category, u.source, @install_hash, @day
+        FROM unnest(@ids, @merchants, @ai_categories, @user_categories, @sources) AS u(id, merchant_norm, ai_category, user_category, source)
+        ON CONFLICT DO NOTHING
+        """;
+
+    // Two syncs correcting one merchant at once must not both miss the third row: the merchants are locked in sorted order for the
+    // transaction (one fixed order, so no deadlock) before the insert, and the next statement sees what the other committed.
+    private const string LockMerchantsSql = """
+        SELECT pg_advisory_xact_lock(hashtextextended('llmcat:' || m, 0))
+        FROM (SELECT DISTINCT m FROM unnest(@merchants) AS m ORDER BY m) AS s
+        """;
+
+    // FR-LCAT-12: three corrections (distinct installs, by the unique key; one a rejected review doesn't count) of the very category the
+    // cache holds delete that cache row. The next ask for the name goes back to the model.
+    private const string ContradictionSql = """
+        DELETE FROM zaghlol.llm_cat_answer_cache c
+        WHERE c.merchant_norm = ANY(@merchants)
+          AND (SELECT count(*) FROM zaghlol.llm_cat_corrections x
+               WHERE x.merchant_norm = c.merchant_norm AND x.ai_category = c.category_code AND x.status <> 'rejected') >= @threshold
+        """;
+
+    /// <summary>Distinct-install corrections of the cached category that remove the cache row (FR-LCAT-12).</summary>
+    public const int ContradictionThreshold = 3;
+
     // app_rw has no privilege on daily_active_counts; this SECURITY DEFINER function can only add 1 to today's (database UTC
     // date) row of android or ios (DailyActiveServerDaySql).
     private const string DailyActiveSql = "SELECT zaghlol.count_daily_active(@platform, @app_version)";
@@ -104,6 +139,49 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
             }
         }
 
+        var confirmations = 0;
+        var corrections = 0;
+        if (claim.InstallHash is { IsEmpty: false } feedbackHash && claim.Feedback is { IsEmpty: false } feedback)
+        {
+            var day = new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero);
+            if (feedback.Corrections.Count > 0)
+            {
+                await using var @lock = new NpgsqlCommand(LockMerchantsSql, connection, transaction);
+                @lock.Parameters.Add(Texts("merchants", feedback.Corrections.Select(c => c.MerchantNorm)));
+                await @lock.ExecuteNonQueryAsync(cancellationToken);
+            }
+
+            if (feedback.Confirmations.Count > 0)
+            {
+                await using var insert = new NpgsqlCommand(ConfirmationsSql, connection, transaction);
+                insert.Parameters.AddWithValue("ids", feedback.Confirmations.Select(_ => Guid.CreateVersion7(now)).ToArray());
+                insert.Parameters.Add(Texts("merchants", feedback.Confirmations.Select(c => c.MerchantNorm)));
+                insert.Parameters.Add(Texts("categories", feedback.Confirmations.Select(c => c.CategoryCode)));
+                insert.Parameters.Add(Texts("sources", feedback.Confirmations.Select(c => c.Source)));
+                insert.Parameters.Add(new NpgsqlParameter("install_hash", NpgsqlDbType.Bytea) { Value = feedbackHash.ToArray() });
+                insert.Parameters.Add(new NpgsqlParameter("day", NpgsqlDbType.TimestampTz) { Value = day });
+                confirmations = await insert.ExecuteNonQueryAsync(cancellationToken);
+            }
+
+            if (feedback.Corrections.Count > 0)
+            {
+                await using var insert = new NpgsqlCommand(CorrectionsSql, connection, transaction);
+                insert.Parameters.AddWithValue("ids", feedback.Corrections.Select(_ => Guid.CreateVersion7(now)).ToArray());
+                insert.Parameters.Add(Texts("merchants", feedback.Corrections.Select(c => c.MerchantNorm)));
+                insert.Parameters.Add(Texts("ai_categories", feedback.Corrections.Select(c => c.AiCategory)));
+                insert.Parameters.Add(Texts("user_categories", feedback.Corrections.Select(c => c.UserCategory)));
+                insert.Parameters.Add(Texts("sources", feedback.Corrections.Select(c => c.Source)));
+                insert.Parameters.Add(new NpgsqlParameter("install_hash", NpgsqlDbType.Bytea) { Value = feedbackHash.ToArray() });
+                insert.Parameters.Add(new NpgsqlParameter("day", NpgsqlDbType.TimestampTz) { Value = day });
+                corrections = await insert.ExecuteNonQueryAsync(cancellationToken);
+
+                await using var contradiction = new NpgsqlCommand(ContradictionSql, connection, transaction);
+                contradiction.Parameters.Add(Texts("merchants", feedback.Corrections.Select(c => c.MerchantNorm)));
+                contradiction.Parameters.AddWithValue("threshold", ContradictionThreshold);
+                await contradiction.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
+
         // At most one increment per install per UTC day follows from the 24 h window. The day is the database's own.
         await using (var active = new NpgsqlCommand(DailyActiveSql, connection, transaction))
         {
@@ -113,7 +191,7 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
         }
 
         await transaction.CommitAsync(cancellationToken);
-        return new SyncClaimResult(true, contributions, bankRequests);
+        return new SyncClaimResult(true, contributions, bankRequests, confirmations, corrections);
     }
 
     private static NpgsqlParameter<string[]> Texts(string name, IEnumerable<string> values) =>

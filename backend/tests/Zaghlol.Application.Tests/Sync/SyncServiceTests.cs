@@ -1,6 +1,7 @@
 using Zaghlol.Application.Catalog;
 using Zaghlol.Application.Config;
 using Zaghlol.Application.Flags;
+using Zaghlol.Application.Llm.Categorise.Feedback;
 using Zaghlol.Application.Prices;
 using Zaghlol.Application.Sync;
 using Zaghlol.Application.Tests.Prices;
@@ -35,8 +36,9 @@ public class SyncServiceTests
         DateTimeOffset? entitlementIssuedAt = null,
         IReadOnlyList<SyncContribution>? contributions = null,
         IReadOnlyList<SyncBankRequest>? bankRequests = null,
-        int configVersion = 0) =>
-        new(catalogVersion, flagsVersion, pricesAsOf, entitlementIssuedAt, contributions ?? [], bankRequests ?? [], ConfigVersion: configVersion);
+        int configVersion = 0,
+        IReadOnlyList<SyncLlmCatFeedback>? feedback = null) =>
+        new(catalogVersion, flagsVersion, pricesAsOf, entitlementIssuedAt, contributions ?? [], bankRequests ?? [], ConfigVersion: configVersion, LlmCatFeedback: feedback);
 
     private Task<SyncResult> SyncAsync(SyncRequestData request, string appVersion = "1.0.0") =>
         Service.SyncAsync(Id, appVersion, request, CancellationToken.None);
@@ -395,6 +397,69 @@ public class SyncServiceTests
         Assert.Equal(0, hasher.Calls);
     }
 
+    // T-353
+
+    private static readonly SyncLlmCatFeedback Right = new("zawya coffee", "right", "dining", "dining", "llm");
+    private static readonly SyncLlmCatFeedback Wrong = new("maktabet elnour", "wrong", "dining", "custom", "cache");
+
+    private void FeedbackFlag(bool on)
+    {
+        catalog.Categories = new HashSet<string>(["dining", "groceries"], StringComparer.Ordinal);
+        flags.Stored = [new FlagState("llm_categorise", on, FlagRules.None, 1, T0)];
+    }
+
+    // AC 1: stored with the keyed install hash, counted in accepted.llmCatFeedback
+    [Fact]
+    public async Task FeedbackIsStoredWithTheInstallHashOnlyAndCountedWhileTheFlagIsOn()
+    {
+        FeedbackFlag(true);
+
+        var result = Assert.IsType<SyncCompleted>(await SyncAsync(Request(feedback: [Right, Wrong])));
+
+        var claim = Assert.Single(store.Claims);
+        Assert.Equal(FakeHasher.Hash, claim.InstallHash!.Value.ToArray());
+        Assert.Equal("zawya coffee", Assert.Single(claim.Feedback!.Confirmations).MerchantNorm);
+        Assert.Equal("custom", Assert.Single(claim.Feedback.Corrections).UserCategory);
+        Assert.Equal(2, result.Accepted.LlmCatFeedback);
+        Assert.Contains((SyncTags.LlmCatConfirmation, SyncTags.Accepted, 1), telemetry.Intakes);
+    }
+
+    // AC 2
+    [Fact]
+    public async Task WithTheFlagOffFeedbackIsIgnoredNothingIsHashedAndTheCountIsZero()
+    {
+        FeedbackFlag(false);
+
+        var result = Assert.IsType<SyncCompleted>(await SyncAsync(Request(feedback: [Right, Wrong])));
+
+        Assert.True(Assert.Single(store.Claims).Feedback!.IsEmpty);
+        Assert.Equal(0, hasher.Calls);
+        Assert.Equal(0, result.Accepted.LlmCatFeedback);
+    }
+
+    [Fact]
+    public async Task WithoutTheMemberTheAcceptedCountIsAbsent()
+    {
+        FeedbackFlag(true);
+
+        var result = Assert.IsType<SyncCompleted>(await SyncAsync(Request()));
+
+        Assert.Null(result.Accepted.LlmCatFeedback);
+    }
+
+    [Fact]
+    public async Task AKmsOutageDropsTheFeedbackAndTheSyncStillSucceeds()
+    {
+        FeedbackFlag(true);
+        hasher.Throws = true;
+
+        var result = Assert.IsType<SyncCompleted>(await SyncAsync(Request(feedback: [Right, Wrong])));
+
+        Assert.True(Assert.Single(store.Claims).Feedback!.IsEmpty);
+        Assert.Equal(0, result.Accepted.LlmCatFeedback);
+        Assert.Contains((SyncTags.LlmCatConfirmation, SyncTags.DroppedHasher, 1), telemetry.Intakes);
+    }
+
     private static CatalogOp Op(string code) =>
         new(new CatalogEntryKey { Entity = CatalogEntity.Categories, PathId = code, StorageKey = code, Code = code }, false, new CatalogFields { NameAr = "x", NameEn = "x" });
 
@@ -426,7 +491,7 @@ public class SyncServiceTests
 
             Claims.Add(claim);
             var contributions = InsertedContributions >= 0 ? InsertedContributions : claim.Contributions.Count;
-            return Task.FromResult(new SyncClaimResult(true, contributions, claim.BankRequests.Count));
+            return Task.FromResult(new SyncClaimResult(true, contributions, claim.BankRequests.Count, claim.Feedback?.Confirmations.Count ?? 0, claim.Feedback?.Corrections.Count ?? 0));
         }
     }
 

@@ -1,6 +1,7 @@
 using Zaghlol.Application.Catalog;
 using Zaghlol.Application.Config;
 using Zaghlol.Application.Flags;
+using Zaghlol.Application.Llm.Categorise.Feedback;
 using Zaghlol.Application.Prices;
 using Zaghlol.Domain;
 
@@ -24,7 +25,8 @@ public sealed record SyncRequestData(
     IReadOnlyList<SyncContribution> Contributions,
     IReadOnlyList<SyncBankRequest> BankRequests,
     Sensitive<string>? AccountToken = null,
-    int ConfigVersion = 0);
+    int ConfigVersion = 0,
+    IReadOnlyList<SyncLlmCatFeedback>? LlmCatFeedback = null);
 
 /// <summary>The install row as the sync sees it: platform and app version before this call, and the throttle state.</summary>
 public sealed record SyncInstall(string Platform, string AppVersion, DateTimeOffset? LastSyncAt);
@@ -41,7 +43,8 @@ public static class CatalogModes
 public sealed record SyncCatalogBlock(int FromVersion, int ToVersion, string Mode, Uri? FullUrl, IReadOnlyList<CatalogOp> Ops);
 
 /// <summary>Rows actually inserted by this call (valid and not already stored).</summary>
-public sealed record SyncAcceptedCounts(int Contributions, int BankRequests);
+/// <param name="LlmCatFeedback">Feedback rows stored; <c>null</c> when the request carried no <c>llmCatFeedback</c> member (the wire member is then absent).</param>
+public sealed record SyncAcceptedCounts(int Contributions, int BankRequests, int? LlmCatFeedback = null);
 
 /// <summary>What the sync decided.</summary>
 public abstract record SyncResult;
@@ -101,10 +104,13 @@ public sealed record SyncClaim(
     string AppVersion,
     ReadOnlyMemory<byte>? InstallHash,
     IReadOnlyList<PreparedContribution> Contributions,
-    IReadOnlyList<PreparedBankRequest> BankRequests);
+    IReadOnlyList<PreparedBankRequest> BankRequests,
+    PreparedFeedback? Feedback = null);
 
 /// <summary>What the write did. Nothing at all was written when <see cref="Claimed"/> is false.</summary>
-public sealed record SyncClaimResult(bool Claimed, int ContributionsInserted, int BankRequestsInserted)
+public sealed record SyncClaimResult(bool Claimed, int ContributionsInserted, int BankRequestsInserted, int ConfirmationsInserted = 0, int CorrectionsInserted = 0)
 {
+    public int FeedbackInserted => ConfirmationsInserted + CorrectionsInserted;
+
     public static SyncClaimResult Lost { get; } = new(false, 0, 0);
 }

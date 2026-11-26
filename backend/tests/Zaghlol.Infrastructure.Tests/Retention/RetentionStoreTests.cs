@@ -290,4 +290,43 @@ public class RetentionStoreTests(RetentionFixture fixture) : IClassFixture<Reten
         Assert.Equal(7, result.Purged[RetentionRules.ReplayGuard]);
         Assert.Equal(0L, await Db.ScalarAsync(fixture.Database.Superuser, "SELECT count(*) FROM zaghlol.replay_guard WHERE expires_at < $1", Now));
     }
+
+    // T-353 AC 6 (FR-LCAT-34): a confirmation goes at 365 days or once settled (promoted / rejected).
+    [Fact]
+    public async Task ConfirmationsGoAtThreeHundredSixtyFiveDaysOrWhenSettled()
+    {
+        var old = await SeedAsync("llm_cat_confirmations", new() { ["created_at"] = Now.AddDays(-365) - Day });
+        var recent = await SeedAsync("llm_cat_confirmations", new() { ["created_at"] = Now.AddDays(-365) + Day });
+        var promoted = await SeedAsync("llm_cat_confirmations", new() { ["created_at"] = Now, ["status"] = "promoted" });
+        var rejected = await SeedAsync("llm_cat_confirmations", new() { ["created_at"] = Now, ["status"] = "rejected" });
+        var collecting = await SeedAsync("llm_cat_confirmations", new() { ["created_at"] = Now });
+
+        var result = await RunAsync();
+
+        Assert.True(result.Purged[RetentionRules.LlmCatConfirmations] >= 3);
+        Assert.False(await ExistsAsync("llm_cat_confirmations", "id", old["id"]));
+        Assert.False(await ExistsAsync("llm_cat_confirmations", "id", promoted["id"]));
+        Assert.False(await ExistsAsync("llm_cat_confirmations", "id", rejected["id"]));
+        Assert.True(await ExistsAsync("llm_cat_confirmations", "id", recent["id"]));
+        Assert.True(await ExistsAsync("llm_cat_confirmations", "id", collecting["id"]));
+    }
+
+    // T-353 AC 6: a correction goes 90 days after resolved_at, or 180 days after creation; an open one younger than that stays.
+    [Fact]
+    public async Task CorrectionsGoNinetyDaysAfterResolutionOrOneHundredEightyAfterCreation()
+    {
+        var operatorId = Guid.CreateVersion7();
+        var resolvedOld = await SeedAsync("llm_cat_corrections", new() { ["created_at"] = Now.AddDays(-100), ["status"] = "promoted", ["operator_id"] = operatorId, ["resolved_at"] = Now.AddDays(-90) - Day });
+        var resolvedRecent = await SeedAsync("llm_cat_corrections", new() { ["created_at"] = Now.AddDays(-100), ["status"] = "rejected", ["operator_id"] = operatorId, ["resolved_at"] = Now.AddDays(-90) + Day });
+        var openOld = await SeedAsync("llm_cat_corrections", new() { ["created_at"] = Now.AddDays(-180) - Day });
+        var openRecent = await SeedAsync("llm_cat_corrections", new() { ["created_at"] = Now.AddDays(-180) + Day });
+
+        var result = await RunAsync();
+
+        Assert.True(result.Purged[RetentionRules.LlmCatCorrections] >= 2);
+        Assert.False(await ExistsAsync("llm_cat_corrections", "id", resolvedOld["id"]));
+        Assert.False(await ExistsAsync("llm_cat_corrections", "id", openOld["id"]));
+        Assert.True(await ExistsAsync("llm_cat_corrections", "id", resolvedRecent["id"]));
+        Assert.True(await ExistsAsync("llm_cat_corrections", "id", openRecent["id"]));
+    }
 }
