@@ -288,7 +288,7 @@ class SyncOrchestrator {
           pendingFull = plan.toVersion;
         }
       }
-      final changed = await _applyAll(response, plan, snapshot, sent);
+      final changed = await _applyAll(response, plan, snapshot, sent, request);
       await _saveState(
         state.copyWith(
           lastOkWallMs: received,
@@ -446,6 +446,7 @@ class SyncOrchestrator {
     final request = SyncRequest(
       catalogVersion: meta?.version ?? 0,
       flagsVersion: _flags.current.version,
+      configVersion: (_config?.version ?? 0) > 0 ? _config!.version : null,
       pricesAsOf: price == null ? null : _iso(price),
       entitlementIssuedAt: iat == null ? null : _iso(iat),
       registryVersion: _registryVersion,
@@ -528,6 +529,7 @@ class SyncOrchestrator {
     _CatalogPlan plan,
     CatalogSnapshot? snapshot,
     List<_Sent> sent,
+    SyncRequest request,
   ) async {
     var changed = false;
     try {
@@ -555,6 +557,10 @@ class SyncOrchestrator {
         final f = r.flags;
         if (f != null) {
           await _flags.apply(RemoteFlags(version: f.version, values: f.values));
+        } else {
+          // The server omits `flags` when our version is current: that
+          // confirms the held snapshot, so it stays fresh (B92-M2 family).
+          await _flags.confirm(request.flagsVersion);
         }
         final c = r.config;
         if (c != null) {
@@ -565,6 +571,8 @@ class SyncOrchestrator {
                 ? null
                 : {'ar': c.providerName!.ar, 'en': c.providerName!.en},
           );
+        } else if (request.configVersion != null) {
+          await _config?.confirm(request.configVersion!);
         }
       });
     } on Object {
