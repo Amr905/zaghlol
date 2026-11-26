@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/ui/z_haptics.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
 import 'package:zaghlol/core/ui/z_saved_toast.dart';
@@ -47,6 +48,9 @@ Widget _host(
 }
 
 void main() {
+  // The haptic beats wait on timers; goldens only need the still frame.
+  setUp(() => ZHaptics.enabled = false);
+  tearDown(() => ZHaptics.enabled = true);
   for (final v in goldenVariants.where((v) => !v.dark)) {
     final title = v.isRtl ? 'اتسجلت!' : 'Saved!';
     final undo = v.isRtl ? 'تراجع' : 'Undo';

@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/ui/z_haptics.dart';
 import 'package:zaghlol/features/mascot/application/payday_celebration.dart';
 import 'package:zaghlol/features/mascot/presentation/payday_sheet.dart';
 import 'package:zaghlol/features/mascot/presentation/zaghlol_avatar.dart';
@@ -13,6 +14,9 @@ import '../../../support/golden_matrix.dart';
 import 'payday_sheet_test.dart' show host;
 
 void main() {
+  // The haptic beats wait on timers; goldens only need the still frame.
+  setUp(() => ZHaptics.enabled = false);
+  tearDown(() => ZHaptics.enabled = true);
   for (final v in goldenVariants) {
     testWidgets('payday_sheet ${v.name}', (tester) async {
       await tester.binding.setSurfaceSize(const Size(420, 780));
