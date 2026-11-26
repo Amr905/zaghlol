@@ -149,3 +149,33 @@ Feed now queries the cycle window (padded ±14 h) and tests the day with the row
 | T-285 | APPROVED |
 | T-286 | APPROVED (security part: no High/Medium; FU-389 Low) |
 | T-287 | APPROVED |
+
+---
+
+## Delta re-review (fix80)
+
+Scope: `git diff d0cc0dad origin/fix/fix80` (FU-389). Ran `flutter test -x golden test/features/ingestion test/ingestion`: 405 passed, 0 failed.
+
+**Verdict: RESOLVED**
+
+### Checks
+| Check | Result |
+|-------|--------|
+| 4-step SMS pending, notif pending (merged, mark `pending`), SMS posted (settles in place), notif posted | One expense. `crossChannelMatches` needs the candidate's current class to equal the new one; the posted row passes, the mark class `pending` differs from `posted`, so no block; merge + second mark `posted`. New test asserts 1 txn and 0 open review items. |
+| Real second identical payment, same class, other channel | Still blocked: mark class equals new class, so it is stored with possibleDuplicate. Existing T-286 tests still pass. |
+| Old marks without `statusClass` | SQL `json_extract(...) IS NULL` branch counts them, so T-286 behaviour is kept. |
+| SQL null handling | `?6` is bound as a null `Variable<String>` when no class is given, and `?6 IS NULL` short-circuits. A missing JSON key gives SQL NULL. Parentheses are correct. Placeholder reuse is fine in SQLite. |
+| Payload / logs | Payload gains only `statusClass` (`pending`/`posted`); no message text, no new logging. |
+| Fixtures | Synthetic (`ZBANK`, "Synth Shop", card `*4321`). |
+| Deletion | None added. Merge is attach-only, as before. |
+
+### Sequence where the class check lets a real second payment merge
+Reachable: SMS pending P1, notification pending (merged, mark `notification:pending`), SMS posted (P1 settles in place to posted), then a genuine second payment's posted notification with the same amount/last4 inside the cross-channel window. The row is posted, the mark says `pending`, so it merges and the second payment is silently not stored. It is indistinguishable from the true copy in step 4 of the target sequence (same data), so this is the inherent cost of FU-389, not a bug in the fix. It needs two identical payments within the short window plus a pending→posted settle, and the raw message is kept attached to the target. Impact: undercount by one expense with no review card; user can add it manually. Rated minor, accept.
+
+The other mixes do not merge: a pending notification vs a posted row fails the class match; a posted row with a `posted` mark blocks a second posted notification.
+
+### Findings
+| # | Sev | File:line | Issue | Required change |
+|---|-----|-----------|-------|-----------------|
+| 1 | minor | `ingest_raw_messages.dart` (`_markClass`, ~1930) | Residual ambiguity above: stale `pending` mark lets one genuine second posted copy merge after an in-place settle. | None; accept, document in FU-389 note. |
+| 2 | nit | `ingest_raw_messages.dart` `_markClass` | Any non-pending status maps to `posted` (includes failed/other if ever reachable); fine today since `crossChannelMatches` uses the same pending/other split. | None. |
