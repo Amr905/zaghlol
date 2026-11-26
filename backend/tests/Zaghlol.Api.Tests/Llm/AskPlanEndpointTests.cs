@@ -106,7 +106,7 @@ public class AskPlanEndpointTests(AskHostFixture fixture) : IClassFixture<AskHos
         }
 
         // 16 KB is allowed only with an attestationObject: 6 KB of it passes the size gate and then fails as a wrong-type proof (422, not 413).
-        var appAttest = AskHostFixture.Body(id, q, attest: false).TrimEnd('}')
+        var appAttest = AskHostFixture.Body(id, q, attest: false)[..^1]
             + $",\"attestation\":{{\"type\":\"app_attest\",\"keyId\":\"{new string('A', 43)}=\",\"assertion\":\"{new string('A', 32)}\",\"attestationObject\":\"{new string('A', 6000)}\"}}}}";
         using (var withObject = await fixture.PostAsync(token, appAttest))
         {
@@ -120,7 +120,7 @@ public class AskPlanEndpointTests(AskHostFixture fixture) : IClassFixture<AskHos
         }
 
         var other = AskHostFixture.Body(id, "another " + q);
-        var swapped = AskHostFixture.Body(id, q, attest: false).TrimEnd('}') + other[other.IndexOf(",\"attestation\"", StringComparison.Ordinal)..];
+        var swapped = AskHostFixture.Body(id, q, attest: false)[..^1] + other[other.IndexOf(",\"attestation\"", StringComparison.Ordinal)..];
         using (var replayed = await fixture.PostAsync(token, swapped))
         {
             AssertProblem(replayed, await replayed.Content.ReadAsStringAsync(), HttpStatusCode.UnprocessableEntity, "DEVICE_ATTESTATION_FAILED");
