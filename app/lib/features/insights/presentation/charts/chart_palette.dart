@@ -14,6 +14,11 @@ abstract final class ZChartColors {
   static const spend = Color(0xFF6B7F75);
   static const saved = Color(0xFF7DB89A);
 
+  /// T-283: exchanged in / out (apricot family; mid-tone, legible on True
+  /// Black and on the light card). Never stacked into income or spend.
+  static const exchangeIn = Color(0xFFFFB86B);
+  static const exchangeOut = Color(0xFFC97B2A);
+
   /// Budget bar at or over the limit (a warning, not a spending amount).
   static const overLimit = Color(0xFFD9765F);
 

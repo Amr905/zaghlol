@@ -187,7 +187,7 @@ void main() {
     );
     await t.pump();
     await t.pump(const Duration(milliseconds: 100));
-    expect(find.textContaining('قبضت بالدولار'), findsOneWidget);
+    expect(find.textContaining('عندك فلوس بعملة تانية'), findsOneWidget);
     expect(find.text('اقفلها'), findsOneWidget);
   });
 }

@@ -96,6 +96,10 @@ void main() {
   late StreamController<bool> lockOn;
   late NotifierProvider<_Ov, CycleOverview> ovState;
 
+  var others = <String>[];
+
+  setUp(() => others = <String>[]);
+
   ProviderContainer make({bool locked = false}) {
     host = FakeWidgetHost();
     hide = StreamController<bool>();
@@ -117,6 +121,7 @@ void main() {
           (ref) async => ref.watch(ovState),
         ),
         clockProvider.overrideWithValue(() => DateTime.utc(2026, 11, 3, 12)),
+        widgetOtherCurrenciesProvider.overrideWithValue(others),
       ],
     );
     addTearDown(() {
@@ -149,6 +154,19 @@ void main() {
     expect(host.sent, hasLength(2));
     expect(host.sent.last.primaryText, contains('200.00'));
   });
+
+  test(
+    'T-284: other currency cards add a code-only hint to line two',
+    () async {
+      others = ['USD', 'EUR', 'KWD'];
+      make();
+      hide.add(true);
+      lockOn.add(false);
+      await pastDebounce();
+      expect(host.sent.single.secondaryText, contains('+ USD, EUR +'));
+      expect(host.sent.single.primaryText, '•••/day');
+    },
+  );
 
   test('hide amounts: the amount never reaches the platform', () async {
     make();

@@ -1264,11 +1264,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String homeHeroOtherCurrencyIncome(String amount) {
-    return '+ $amount دخل';
-  }
-
-  @override
   String get homeCurrencyCardsTitle => 'فلوسك بعملات تانية';
 
   @override
@@ -1481,11 +1476,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeApproxSheetClose => 'تمام';
-
-  @override
   String get homeMascotFirstForeign =>
-      'قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.';
+      'عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.';
 
   @override
   String get homeApproxNoticeOff => 'اقفلها';
@@ -1805,6 +1797,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsListBulkAccount => 'الكارت';
+
+  @override
+  String get transactionsListBulkExchangeLocked =>
+      'تغيير العملة ملوش تصنيف ومينفعش يتنقل لكارت تاني لوحده. تقدر تمسحه عادي.';
 
   @override
   String get transactionsListBulkRule => 'استخدم ده دايماً للتجار دول';
@@ -9364,6 +9360,21 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String insightsV2TrendsInOutA11y(String list) {
     return 'رسم الداخل والخارج. $list';
+  }
+
+  @override
+  String get insightsV2TrendsLegendExchangeIn => 'غيّرت عملة: دخل';
+
+  @override
+  String get insightsV2TrendsLegendExchangeOut => 'غيّرت عملة: خرج';
+
+  @override
+  String insightsV2TrendsInOutExchangeA11y(
+    String month,
+    String inAmount,
+    String outAmount,
+  ) {
+    return '$month، غيّرت عملة: دخل $inAmount، خرج $outAmount';
   }
 
   @override

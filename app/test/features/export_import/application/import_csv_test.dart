@@ -91,6 +91,7 @@ TransactionRecord rec(
   Money? original,
   String? category,
   DateTime? at,
+  String? pairId,
 }) => TransactionRecord(
   id: 't$i',
   accountId: 'a1',
@@ -103,6 +104,7 @@ TransactionRecord rec(
   occurredTzOffsetMin: 120,
   merchantRaw: merchant,
   categoryId: category,
+  transferPairId: pairId,
   note: note,
   categorySource: CategorySource.none,
   isUserVerified: true,
@@ -116,7 +118,7 @@ Uint8List csvOf(List<TransactionRecord> rs) =>
 
 Uint8List raw(String s) => Uint8List.fromList(utf8.encode(s));
 
-String hdr() => '${exportHeader.join(',')}\r\n';
+String hdr() => '${legacyExportHeader.join(',')}\r\n';
 
 String line({
   String date = '2026-02-01T10:00:00.000Z',
@@ -150,6 +152,34 @@ void main() {
       return e.code;
     }
   }
+
+  group('T-285 pair and kind columns', () {
+    test(
+      'round trip of a new export with paired legs imports every row',
+      () async {
+        final bytes = csvOf([
+          rec(1, dir: TxnDirection.transferOut, pairId: 'p1'),
+          rec(2, dir: TxnDirection.transferIn, pairId: 'p1', cur: 'USD'),
+          rec(3),
+        ]);
+        expect(utf8.decode(bytes).split('\r\n').first, contains(',pair,kind'));
+        final s = await uc.run(bytes);
+        expect(s.imported, 3);
+        expect(s.invalid, 0);
+        expect((await uc.run(bytes)).duplicates, 3);
+      },
+    );
+
+    test('an old 14-column export is still read', () async {
+      final s = await uc.run(raw('${hdr()}${line()}'));
+      expect(s.imported, 1);
+    });
+
+    test('a 16-column header with a 14-column row is a column error', () async {
+      final s = await uc.run(raw('${exportHeader.join(',')}\r\n${line()}'));
+      expect(s.invalid, 1);
+    });
+  });
 
   group('AC: re-importing an export creates no duplicates', () {
     test('export -> import into empty -> import again: 0 new', () async {
@@ -407,7 +437,7 @@ void main() {
     test('BOM, LF-only line ends and blank lines are accepted', () async {
       final s = await uc.run(
         raw(
-          '\u{FEFF}${exportHeader.join(',')}\n\n'
+          '\u{FEFF}${legacyExportHeader.join(',')}\n\n'
           'x,2026-02-01T10:00:00.000Z,0,a1,expense,posted,1,EGP,,,S,,csv,\n',
         ),
       );

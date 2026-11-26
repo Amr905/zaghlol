@@ -467,7 +467,9 @@ class AskEngine {
       final r = await charts.cashFlow([p], _filter(c, s));
       if (r is! ChartReady<List<CashFlowPoint>>) continue;
       final pt = r.data.single;
-      if (pt.income.isZero && pt.exchangedInOrZero.isZero) {
+      if (pt.income.isZero &&
+          pt.exchangedInOrZero.isZero &&
+          pt.exchangedOutOrZero.isZero) {
         sawSpendOnly = true;
         continue;
       }

@@ -142,4 +142,25 @@ void main() {
     });
     expect(await c.read(homeApproxProvider.future), isNull);
   });
+
+  group('bankRatesE9 (FU-381)', () {
+    final eur = Currency.of('EUR');
+    test('only target-side pairs make the rate: 600 USD -> 29,700 EGP', () {
+      final rates = bankRatesE9([
+        (given: Money(usd, 60000), received: Money(egp, 2970000)),
+        (given: Money(usd, 10000), received: Money(eur, 9200)),
+      ], egp);
+      // 49.50 EGP per USD, not (29,700 / 700).
+      expect(rates, {usd: 49500000000});
+    });
+
+    test('nothing into the target: no rate', () {
+      expect(
+        bankRatesE9([
+          (given: Money(usd, 10000), received: Money(eur, 9200)),
+        ], egp),
+        isEmpty,
+      );
+    });
+  });
 }
