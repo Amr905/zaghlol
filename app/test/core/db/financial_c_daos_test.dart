@@ -771,6 +771,8 @@ void main() {
             expect((await dao.forTransaction('n1'))!.id, 'p1');
             expect((await dao.forTransaction('o1'))!.id, 'p1');
             expect(await dao.forTransaction('e1'), isNull);
+            expect(await dao.kindsByIds(['p1', 'nope']), {'p1': 'manual'});
+            expect(await dao.kindsByIds([]), isEmpty);
             expect(
               await codeOf(
                 dao.insert(
