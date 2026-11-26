@@ -331,6 +331,7 @@ final class DriftIngestStore implements IngestStorePort {
     required String txnId,
     required String source,
     required int atMs,
+    String? statusClass,
   }) => guardWrite(
     () => _db
         .into(_db.reviewItems)
@@ -344,6 +345,7 @@ final class DriftIngestStore implements IngestStorePort {
               jsonEncode({
                 'reason': ReviewReason.crossChannelCopy,
                 'source': source,
+                'statusClass': ?statusClass,
               }),
             ),
             createdAt: atMs,
@@ -354,26 +356,32 @@ final class DriftIngestStore implements IngestStorePort {
   );
 
   @override
-  Future<bool> hasCrossChannelCopy(String txnId, String source) =>
-      guardRead(() async {
-        final row = await _db
-            .customSelect(
-              'SELECT 1 AS x FROM review_items WHERE txn_id = ?1 '
-              'AND kind = ?2 AND resolution = ?3 AND json_valid(payload) '
-              "AND json_extract(payload, '\$.reason') = ?4 "
-              "AND json_extract(payload, '\$.source') = ?5 LIMIT 1",
-              variables: [
-                Variable.withString(txnId),
-                Variable.withString(ReviewKind.lowConfidence),
-                Variable.withString(ReviewReason.crossChannelCopyResolution),
-                Variable.withString(ReviewReason.crossChannelCopy),
-                Variable.withString(source),
-              ],
-              readsFrom: {_db.reviewItems},
-            )
-            .getSingleOrNull();
-        return row != null;
-      });
+  Future<bool> hasCrossChannelCopy(
+    String txnId,
+    String source, {
+    String? statusClass,
+  }) => guardRead(() async {
+    final row = await _db
+        .customSelect(
+          'SELECT 1 AS x FROM review_items WHERE txn_id = ?1 '
+          'AND kind = ?2 AND resolution = ?3 AND json_valid(payload) '
+          "AND json_extract(payload, '\$.reason') = ?4 "
+          "AND json_extract(payload, '\$.source') = ?5 "
+          "AND (?6 IS NULL OR json_extract(payload, '\$.statusClass') IS NULL "
+          "OR json_extract(payload, '\$.statusClass') = ?6) LIMIT 1",
+          variables: [
+            Variable.withString(txnId),
+            Variable.withString(ReviewKind.lowConfidence),
+            Variable.withString(ReviewReason.crossChannelCopyResolution),
+            Variable.withString(ReviewReason.crossChannelCopy),
+            Variable.withString(source),
+            Variable<String>(statusClass),
+          ],
+          readsFrom: {_db.reviewItems},
+        )
+        .getSingleOrNull();
+    return row != null;
+  });
 
   @override
   Future<BalanceJumpFacts?> balanceJumpFacts({

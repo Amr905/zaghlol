@@ -78,11 +78,19 @@ abstract interface class IngestStorePort {
     required String txnId,
     required String source,
     required int atMs,
+    String? statusClass,
   });
 
   /// T-286: whether [txnId] already has a merged copy from a message of
   /// transaction source [source] (see [recordCrossChannelCopy]).
-  Future<bool> hasCrossChannelCopy(String txnId, String source);
+  ///
+  /// FU-389: when [statusClass] is given, only a mark recorded with the same
+  /// status class (`pending` / `posted`) or with none (older rows) counts.
+  Future<bool> hasCrossChannelCopy(
+    String txnId,
+    String source, {
+    String? statusClass,
+  });
 
   /// Applies [patch] to [txnId] and sets `updated_at`. Returns rows changed.
   /// T-272: the facts for the unexplained-rise check of [accountId] in
