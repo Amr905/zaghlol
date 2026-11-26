@@ -102,6 +102,7 @@ internal sealed partial class LlmMetrics : ILlmMetrics, IDisposable
     private readonly Counter<long> limited;
     private readonly Counter<long> quota;
     private readonly Counter<long> paused;
+    private readonly Counter<long> prompts;
     private readonly Counter<long> tokens;
     private readonly Counter<decimal> cost;
     private readonly Histogram<double> latency;
@@ -116,6 +117,7 @@ internal sealed partial class LlmMetrics : ILlmMetrics, IDisposable
         limited = meter.CreateCounter<long>("zaghlol.llm.rate_limited", description: "429 answers by bucket.");
         quota = meter.CreateCounter<long>("zaghlol.llm.quota_hits", description: "Calls refused at the quota.");
         paused = meter.CreateCounter<long>("zaghlol.llm.paused", description: "Calls refused by the spend guard, by reason.");
+        prompts = meter.CreateCounter<long>("zaghlol.llm.prompt_uses", description: "Requests by the hash prefix of the system prompt they used.");
         tokens = meter.CreateCounter<long>("zaghlol.llm.tokens", description: "Provider tokens by feature, provider and kind (reason tag: input, cached, output).");
         cost = meter.CreateCounter<decimal>("zaghlol.llm.cost_usd", description: "Provider cost in USD (decimal) by feature and provider.");
         latency = meter.CreateHistogram<double>("zaghlol.llm.latency", "ms", "Provider call latency (p50 and p95 come from the histogram).");
@@ -150,6 +152,9 @@ internal sealed partial class LlmMetrics : ILlmMetrics, IDisposable
 
     public void QuotaHit(LlmFeature feature) => quota.Add(1, Tag(LlmMetricTags.Feature, Feature(feature)));
 
+    public void Prompt(LlmFeature feature, string promptHashPrefix) =>
+        prompts.Add(1, Tag(LlmMetricTags.Feature, Feature(feature)), Tag(LlmMetricTags.Prompt, PromptHashPattern().IsMatch(promptHashPrefix ?? string.Empty) ? promptHashPrefix! : "other"));
+
     public void Paused(LlmFeature feature, string reason) =>
         paused.Add(1, Tag(LlmMetricTags.Feature, Feature(feature)), Tag(LlmMetricTags.Reason, Code(reason)));
 
@@ -165,6 +170,9 @@ internal sealed partial class LlmMetrics : ILlmMetrics, IDisposable
 
     [GeneratedRegex(@"^PL-[A-Z]{2,16}\z", RegexOptions.CultureInvariant, 250)]
     private static partial Regex PlanPattern();
+
+    [GeneratedRegex(@"^[0-9a-f]{12}\z", RegexOptions.CultureInvariant, 250)]
+    private static partial Regex PromptHashPattern();
 
     [GeneratedRegex(@"^[a-z0-9][a-z0-9-]{0,31}\z", RegexOptions.CultureInvariant, 250)]
     private static partial Regex ProviderPattern();

@@ -125,7 +125,8 @@ public class LlmQuotaRepositoryTests(LlmQuotaFixture fixture) : IClassFixture<Ll
     [Fact]
     public async Task LimitsComeFromRemoteConfigWithTheDefaultsAsFallback()
     {
-        var limits = new RemoteConfigQuotaLimits(fixture.Services.GetRequiredKeyedService<Npgsql.NpgsqlDataSource>(DatabaseRole.App));
+        var limits = new RemoteConfigQuotaLimits(new Zaghlol.Application.Config.RemoteConfigService(
+            new Zaghlol.Infrastructure.Config.RemoteConfigReader(fixture.Services.GetRequiredService<Zaghlol.Infrastructure.Persistence.IAppDbContextFactory>())));
         Assert.Equal(5, await limits.LimitAsync(LlmFeature.Ask, false, CancellationToken.None));
         Assert.Equal(150, await limits.LimitAsync(LlmFeature.Categorise, true, CancellationToken.None));
 

@@ -61,7 +61,7 @@ public static partial class RemoteConfigKeys
     public const string Pattern = "^[a-z][a-z0-9_.]{1,63}$";
 
     /// <summary>Provider ids and display names carry no <c>@</c>, so the audit CHECKs can never reject a value.</summary>
-    public const string ProviderIdPattern = "^[a-z0-9][a-z0-9-]{0,31}$";
+    public const string ProviderIdPattern = "^[a-z0-9][a-z0-9-]{1,31}$";
 
     public const string ProviderNamePattern = @"^[\p{L}\p{N} ._-]{1,64}$";
 

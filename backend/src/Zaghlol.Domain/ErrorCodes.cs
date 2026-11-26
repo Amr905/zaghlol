@@ -48,5 +48,14 @@ public static class ErrorCodes
 
     /// <summary>422 (operator API only, T-186): the store order ID didn't match this purchase live at Google Play or the App Store, or the order is refunded or cancelled.</summary>
     public const string OwnershipCheckFailed = "OWNERSHIP_CHECK_FAILED";
+
+    /// <summary>403 (LLM endpoints, T-349): the install or account counter is at its monthly limit. Carries <c>quota</c>.</summary>
+    public const string LlmQuotaExhausted = "LLM_QUOTA_EXHAUSTED";
+
+    /// <summary>409 (LLM endpoints, T-349): the consent names another provider or consent version than the active ones. Carries <c>providerId</c>.</summary>
+    public const string LlmConsentRequired = "LLM_CONSENT_REQUIRED";
+
+    /// <summary>503 (LLM endpoints, T-349): the flag is off for this install, the spend cap is reached, or the LLM module is disabled.</summary>
+    public const string LlmServicePaused = "LLM_SERVICE_PAUSED";
     public const string Internal = "INTERNAL";
 }

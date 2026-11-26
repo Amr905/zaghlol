@@ -23,6 +23,9 @@ public interface ILlmMetrics
 
     void QuotaHit(LlmFeature feature);
 
+    /// <summary>One request used the system prompt whose text hashes to <paramref name="promptHashPrefix"/> (12 hex characters): a prompt change shows in the metrics. Other values are tagged <c>other</c>.</summary>
+    void Prompt(LlmFeature feature, string promptHashPrefix);
+
     /// <summary>The guard refused a call because the cap is reached or the ledger could not be read or written.</summary>
     void Paused(LlmFeature feature, string reason);
 }
@@ -36,8 +39,9 @@ public static class LlmMetricTags
     public const string Plan = "plan";
     public const string Reason = "reason";
     public const string Bucket = "bucket";
+    public const string Prompt = "prompt";
 
-    public static IReadOnlyList<string> AllowedKeys { get; } = [Feature, Provider, Outcome, Plan, Reason, Bucket];
+    public static IReadOnlyList<string> AllowedKeys { get; } = [Feature, Provider, Outcome, Plan, Reason, Bucket, Prompt];
 }
 
 /// <summary>Does nothing; the default when no meter is registered.</summary>
@@ -68,6 +72,10 @@ public sealed class NullLlmMetrics : ILlmMetrics
     }
 
     public void QuotaHit(LlmFeature feature)
+    {
+    }
+
+    public void Prompt(LlmFeature feature, string promptHashPrefix)
     {
     }
 

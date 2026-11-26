@@ -57,18 +57,14 @@ internal sealed class LlmQuotaRepository([FromKeyedServices(DatabaseRole.App)] N
     }
 }
 
-/// <summary>Limits from <c>remote_config</c> (read-only on the App login); a missing, non-integer or negative value uses the PO default.</summary>
-internal sealed class RemoteConfigQuotaLimits([FromKeyedServices(DatabaseRole.App)] NpgsqlDataSource source) : ILlmQuotaLimits
+/// <summary>
+/// Limits through <see cref="Zaghlol.Application.Config.IRemoteConfigService"/>, which canonicalises and range-checks every stored value
+/// (B92-m4: one key catalogue, not a second parse); nothing is cached, so a change applies to the next request.
+/// </summary>
+internal sealed class RemoteConfigQuotaLimits(Zaghlol.Application.Config.IRemoteConfigService config) : ILlmQuotaLimits
 {
-    public async Task<int> LimitAsync(LlmFeature feature, bool gold, CancellationToken cancellationToken)
-    {
-        await using var command = source.CreateCommand("SELECT value FROM zaghlol.remote_config WHERE key = @k");
-        command.Parameters.Add(new("k", NpgsqlDbType.Text) { Value = LlmQuotaDefaults.Key(feature, gold) });
-        var value = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false) as string;
-        return int.TryParse(value, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var limit)
-            ? limit
-            : LlmQuotaDefaults.Default(feature, gold);
-    }
+    public async Task<int> LimitAsync(LlmFeature feature, bool gold, CancellationToken cancellationToken) =>
+        (await config.GetAsync(cancellationToken).ConfigureAwait(false)).GetInt(LlmQuotaDefaults.Key(feature, gold));
 }
 
 /// <summary>Gold limit only for an entitling seat: the same rules that sign the entitlement, never a client claim (CLAUDE.md 2a).</summary>

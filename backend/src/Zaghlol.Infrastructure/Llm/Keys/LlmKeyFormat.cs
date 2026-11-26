@@ -34,8 +34,11 @@ internal static partial class LlmKeyFormats
         _ => throw new LlmKeyConfigurationException("An LLM provider kind has no known key format."),
     };
 
-    /// <summary>Provider ids form a file name and a KV path, so they are restricted.</summary>
-    [GeneratedRegex("^[a-z0-9][a-z0-9-]{0,39}\\z", RegexOptions.CultureInvariant)]
+    /// <summary>
+    /// Provider ids form a file name and a KV path, so they are restricted to 2 to 32 characters: the OpenAPI <c>LlmConsent.provider</c> pattern the app
+    /// consents with (FU-417: a longer or one-character id would load a key that no phone can ever consent to).
+    /// </summary>
+    [GeneratedRegex("^[a-z0-9][a-z0-9-]{1,31}\\z", RegexOptions.CultureInvariant)]
     public static partial Regex ProviderId();
 
     /// <summary>

@@ -68,6 +68,28 @@ public sealed class RateLimitSettings
     /// <see cref="RestorePerHour"/> calls in a sliding hour (6 segments).
     /// </summary>
     public int RestorePerHour { get; set; } = 5;
+
+    /// <summary><c>POST /v1/ask/plan</c> per install (T-349, ask-llm §4.3): burst 3, 3 a minute, in addition to <see cref="PerToken"/>.</summary>
+    public TokenBucketSettings AskInstall { get; set; } = new() { TokenLimit = 3, TokensPerPeriod = 3, PeriodSeconds = 60 };
+
+    /// <summary>Ask questions per install in a sliding day: 20.</summary>
+    public int AskInstallPerDay { get; set; } = 20;
+
+    /// <summary>Per signed-in account, the same numbers as the install (an account can span several installs).</summary>
+    public TokenBucketSettings AskAccount { get; set; } = new() { TokenLimit = 3, TokensPerPeriod = 3, PeriodSeconds = 60 };
+
+    public int AskAccountPerDay { get; set; } = 20;
+
+    /// <summary>Per client /24 (IPv4) or /56 (IPv6) for the Ask endpoint: 30 a minute.</summary>
+    public TokenBucketSettings AskNetwork { get; set; } = new() { TokenLimit = 30, TokensPerPeriod = 30, PeriodSeconds = 60 };
+
+    /// <summary><c>POST /v1/categorise</c> per install (T-352 uses it through the same limiter): 2 a minute and 30 a day.</summary>
+    public TokenBucketSettings CatInstall { get; set; } = new() { TokenLimit = 2, TokensPerPeriod = 2, PeriodSeconds = 60 };
+
+    public int CatInstallPerDay { get; set; } = 30;
+
+    /// <summary>All LLM calls of this process in a minute (<c>RateLimits:LlmGlobalPerMinute</c>; ask-llm §4.3 names it <c>Llm:GlobalPerMinute</c> and that key is read too).</summary>
+    public int LlmGlobalPerMinute { get; set; } = 120;
 }
 
 /// <summary>Endpoint metadata: this endpoint also draws on the per-install restore bucket (5 an hour).</summary>

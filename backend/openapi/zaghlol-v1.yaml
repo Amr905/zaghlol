@@ -3036,8 +3036,11 @@ components:
       pattern: '^[0-7][0-9A-HJKMNP-TV-Z]{25}$'
     AskPlanRequest:
       type: object
+      description: |
+        `attestation` is not in `required` on purpose: a body without it is a proof failure (`422 DEVICE_ATTESTATION_FAILED`,
+        reason `missing`, nothing is sent to the provider), not a `400` (ask-llm.md section 5). Every conforming app sends it.
       additionalProperties: false
-      required: [planVersion, requestId, q, lang, consent, attestation]
+      required: [planVersion, requestId, q, lang, consent]
       properties:
         planVersion:
           type: integer
