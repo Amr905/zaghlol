@@ -250,7 +250,7 @@ Categorise tasks: sibling doc §8.
 ## 10. Open technical questions (recommended defaults)
 1. **Provider:** run the eval on both; default **gpt-6-luna** if it passes (cheapest), else **gemini-3.1-flash-lite on Vertex AI**.
 2. **Region / retention:** EU processing (OpenAI EU data residency, +10 % uplift on newer models; Vertex `europe-west`); request OpenAI ZDR or Modified Abuse Monitoring; until granted, the privacy policy states the 30-day abuse-monitoring window.
-3. **Spend cap:** `llm.spend_cap_usd` = **$20/month** at launch (≈ 20 000 questions or > 100 000 shops).
+3. **Spend cap:** `llm.spend_cap_usd` = **$10/month** at launch (PO 2026-11-26; ≈ 10 000 questions or > 50 000 shops).
 4. **gpt-6-luna price discrepancy** (pricing page $0.05/$0.25 vs model page $0.10/$0.50 per 1M): budget on the higher until billed.
 5. **`remote_config` table + signed sync `config` block** as the remote-config channel (no such channel exists today): approve.
 6. **Unsigned ask/categorise responses** (validated on the phone instead): approve.

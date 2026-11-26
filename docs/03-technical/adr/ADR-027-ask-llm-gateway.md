@@ -71,7 +71,7 @@ remote flag: a flag could weaken production, rejected; (3) staged modes bound to
    names are stored only in the categorise cache and feedback tables, as D-96 allows.
 
 ## Consequences
-- Cost: about $0.0001–0.001 per question and $0.00001–0.0002 per new shop; a $20 monthly cap covers ≈ 20 000 questions.
+- Cost: about $0.0001–0.001 per question and $0.00001–0.0002 per new shop; a $10 monthly cap (PO 2026-11-26; the figures after this are for $20, halve them) covers ≈ 20 000 questions.
 - A provider switch is a config change plus re-consent (UX-ASK-02); the eval must pass first.
 - Until store accounts exist, production can't serve either feature; staging and tests run on the fake/report-only modes.
 - A new remote-config channel (`remote_config` table, signed sync `config` block) is introduced and reused by later features.
