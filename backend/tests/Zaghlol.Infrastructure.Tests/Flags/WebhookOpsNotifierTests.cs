@@ -34,6 +34,22 @@ public class WebhookOpsNotifierTests
     }
 
     [Fact]
+    public async Task AnAlertGoesThroughTheSameChannelAndReportsDelivery()
+    {
+        using var ok = new RecordingHandler(HttpStatusCode.OK);
+        using var refused = new RecordingHandler(HttpStatusCode.InternalServerError);
+        using var good = new WebhookOpsNotifier(Config(Url), NullLogger<WebhookOpsNotifier>.Instance, ok);
+        using var bad = new WebhookOpsNotifier(Config(Url), NullLogger<WebhookOpsNotifier>.Instance, refused);
+        using var off = new WebhookOpsNotifier(Config(null), NullLogger<WebhookOpsNotifier>.Instance, ok);
+
+        Assert.True(await good.SendAsync("LLM spend warning", CancellationToken.None));
+        Assert.Contains("LLM spend warning", Assert.Single(ok.Requests).Body, StringComparison.Ordinal);
+        Assert.False(await bad.SendAsync("x", CancellationToken.None));
+        Assert.False(await off.SendAsync("x", CancellationToken.None));
+        Assert.Single(ok.Requests);
+    }
+
+    [Fact]
     public async Task WithoutAUrlNothingIsSent()
     {
         using var handler = new RecordingHandler(HttpStatusCode.OK);

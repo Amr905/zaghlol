@@ -12,7 +12,7 @@ namespace Zaghlol.Infrastructure.Flags;
 /// (the URL is a credential and exception messages can contain it) and never fails the change, which is already committed
 /// and audited. The message holds the flag key, its new value, version and rules; no operator name and no install data.
 /// </summary>
-internal sealed partial class WebhookOpsNotifier : IOpsNotifier, IDisposable
+internal sealed partial class WebhookOpsNotifier : IOpsNotifier, IOpsAlertSink, IDisposable
 {
     public const string UrlSetting = "OpsChannel:WebhookUrl";
 
@@ -78,6 +78,38 @@ internal sealed partial class WebhookOpsNotifier : IOpsNotifier, IDisposable
         }
     }
 
+    /// <summary>Posts one operator alert (T-339 spend warning). Same channel, timeout and logging rules as a flag change; <c>false</c> when not delivered.</summary>
+    public async Task<bool> SendAsync(string message, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        if (webhook is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            using var response = await client.PostAsJsonAsync(webhook, new Dictionary<string, string> { ["text"] = message }, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                AlertRefused(logger, (int)response.StatusCode);
+                return false;
+            }
+
+            return true;
+        }
+        catch (HttpRequestException)
+        {
+            AlertFailed(logger, "unreachable");
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            AlertFailed(logger, "timeout");
+            return false;
+        }
+    }
+
     public void Dispose() => client.Dispose();
 
     // Property names and shapes follow the log allow-list (LogFieldPolicy): status is a number, reason a lowercase word.
@@ -86,4 +118,10 @@ internal sealed partial class WebhookOpsNotifier : IOpsNotifier, IDisposable
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "The ops channel post for a flag change failed ({reason}).")]
     private static partial void PostFailed(ILogger logger, string reason);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The ops channel answered {status} to an alert post.")]
+    private static partial void AlertRefused(ILogger logger, int status);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "The ops channel post for an alert failed ({reason}).")]
+    private static partial void AlertFailed(ILogger logger, string reason);
 }
