@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -141,14 +142,16 @@ public sealed partial class PlanValidator
         var foldedSent = PlanText.Fold(sent);
         foreach (var mention in mentions)
         {
+            // No number character of any category (Nd, Nl, No: "½", "①", "Ⅻ"), wider than the schema pattern (FU-409, T-368).
             var folded = PlanText.Fold(mention);
-            if (folded.Length == 0 || !foldedSent.Contains(folded, StringComparison.Ordinal))
+            if (mention.EnumerateRunes().Any(Rune.IsNumber) || folded.Length == 0 || !foldedSent.Contains(folded, StringComparison.Ordinal))
             {
                 return PlanReason.MentionNotInText;
             }
         }
 
         // Step 4: amounts come from the question.
+        string? numbersText = null;
         HashSet<decimal>? known = null;
         HashSet<decimal>? words = null;
         foreach (var obj in Objects(p))
@@ -158,8 +161,11 @@ public sealed partial class PlanValidator
                 continue;
             }
 
-            known ??= NumbersIn(foldedSent);
-            words ??= numberWords.ValuesIn(foldedSent);
+            // Placeholders carry no numbers: every ⟦…⟧ token is cut out (a space is left, so its neighbours never join) before the
+            // numbers and number words are read (FU-409, T-368).
+            numbersText ??= PlaceholderRegex().Replace(foldedSent, " ");
+            known ??= NumbersIn(numbersText);
+            words ??= numberWords.ValuesIn(numbersText);
             if (!decimal.TryParse(amount, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var number) || !(known.Contains(number) || words.Contains(number)))
             {
                 return PlanReason.AmountNotInText;
@@ -360,4 +366,7 @@ public sealed partial class PlanValidator
 
     [GeneratedRegex(@"[0-9]+(?:,[0-9]{3})*(?:\.[0-9]+)?", RegexOptions.None, matchTimeoutMilliseconds: 200)]
     private static partial Regex NumberRegex();
+
+    [GeneratedRegex(@"\u27e6[^\u27e6\u27e7]*\u27e7", RegexOptions.None, matchTimeoutMilliseconds: 200)]
+    private static partial Regex PlaceholderRegex();
 }
