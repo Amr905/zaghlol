@@ -210,6 +210,25 @@ final class FaultyStore implements IngestStorePort {
   Future<String?> exchangeInLegOf(String outTxnId) =>
       _step(() => _inner.exchangeInLegOf(outTxnId));
   @override
+  Future<void> recordCrossChannelCopy({
+    required String id,
+    required String rawMessageId,
+    required String txnId,
+    required String source,
+    required int atMs,
+  }) => _step(
+    () => _inner.recordCrossChannelCopy(
+      id: id,
+      rawMessageId: rawMessageId,
+      txnId: txnId,
+      source: source,
+      atMs: atMs,
+    ),
+  );
+  @override
+  Future<bool> hasCrossChannelCopy(String txnId, String source) =>
+      _step(() => _inner.hasCrossChannelCopy(txnId, source));
+  @override
   Future<int> updateTxn(String txnId, TxnPatch patch, {required int atMs}) =>
       _step(() => _inner.updateTxn(txnId, patch, atMs: atMs));
   @override

@@ -574,6 +574,7 @@
   "transactionsListSelectedTitle": "{n} selected",
   "transactionsListBulkCategory": "Category",
   "transactionsListBulkAccount": "Card",
+  "transactionsListBulkExchangeLocked": "An exchange has no category and can't move to another card on its own. You can still delete it.",
   "transactionsListBulkRule": "Always use this for these merchants",
   "transactionsListBulkChanged": "{count, plural, =1{1 transaction updated} other{{n} transactions updated}}",
   "transactionsListBulkDeleteTitle": "{count, plural, =1{Delete 1 transaction?} other{Delete {n} transactions?}}",

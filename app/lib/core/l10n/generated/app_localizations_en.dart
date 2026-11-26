@@ -1763,6 +1763,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsListBulkAccount => 'Card';
 
   @override
+  String get transactionsListBulkExchangeLocked =>
+      'An exchange has no category and can\'t move to another card on its own. You can still delete it.';
+
+  @override
   String get transactionsListBulkRule => 'Always use this for these merchants';
 
   @override
