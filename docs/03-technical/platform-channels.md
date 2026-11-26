@@ -432,6 +432,9 @@ Pigeon file `app/pigeons/backup_work_api.dart`. Native code only keeps time: the
 - iOS: `BGProcessingTask` `app.zaghlol.backup`, network required, no external power required, earliest begin after the period; the launch handler is registered in `didFinishLaunching` and writes `Application Support/backupwork/due`. Info.plist: identifier in `BGTaskSchedulerPermittedIdentifiers`, `processing` in `UIBackgroundModes`. The next period is requested by Dart's `schedule` after it runs the backup.
 - Store policy: no new permission, no foreground service, no wake lock; `processing` is a background mode App Review checks against actual use (periodic backup).
 
+## 4e. Haptic patterns (plain `MethodChannel('app.zaghlol/haptics')`, both platforms; T-293)
+Not Pigeon: one method, `play({hits: [[offsetMs, strength 0 tick|1 click|2 thud, intensityPct 1..100], ...]})` (1 to 32 hits, offsets 0..5000 ms non-decreasing; else `invalid`) returning `true` when played and `false` when the device cannot, so Dart falls back to `HapticFeedback`. The beat table lives in Dart (`ZHaptics`); native only plays it. Android: `VibrationEffect.Composition` (API 30+, all three primitives supported), else `createWaveform` with amplitude control, honours system touch feedback off; adds the normal `VIBRATE` permission. iOS: `CHHapticEngine` transient events, else `UIImpactFeedbackGenerator`; no entitlement or Info.plist change. Payload is beats only, never financial data. Store policy: none (no prompt, no data).
+
 ## 5. Other hosts
 
 | API | Methods | Notes |

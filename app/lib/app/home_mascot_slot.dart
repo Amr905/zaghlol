@@ -2,6 +2,8 @@
 // [homeMascotMessageProvider]. The T-104 contextual cards stay below it, so
 // the slot never hides a setup prompt. No message: the cards alone.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +11,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/l10n/generated/app_localizations.dart';
 import '../core/routing/app_routes.dart';
+import '../core/settings/settings_providers.dart';
 import 'app_navigation.dart' show openImportFlow;
 import '../features/home/application/home_mascot.dart';
 import '../features/home/application/home_read_model.dart';
@@ -18,6 +21,7 @@ import '../features/home/presentation/home_screen.dart' show HomeActions;
 import '../features/mascot/application/mascot_tips.dart';
 import '../features/mascot/application/payday_celebration.dart';
 import '../features/mascot/presentation/mascot_moments.dart';
+import '../features/mascot/presentation/payday_sheet.dart';
 import '../features/mascot/presentation/zaghlol_avatar.dart';
 
 /// T-274: bigger than the 64 dp default; with the artboard's empty top
@@ -34,10 +38,52 @@ class HomeMascotSlot extends ConsumerStatefulWidget {
 }
 
 class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
-  // T-215: set once when a payday celebration fires; the bubble keeps the
-  // payday line for this visit (the mark is already stored, so a restart or
-  // a rebuild never celebrates the same payday twice).
-  bool _payday = false;
+  // T-294: a pending celebration waits until Home is the visible screen on
+  // the Home tab; the mark is stored only once the sheet is opened.
+  PaydayCelebration? _pending;
+  bool _scheduled = false;
+
+  void _celebrate(PaydayCelebration? salary) {
+    if (salary == null ||
+        ref.read(paydayShownThisSessionProvider).contains(salary.txnId)) {
+      return;
+    }
+    _pending = salary;
+    _schedule();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Route popped back to Home, or the Home tab became active.
+    if (_pending != null) _schedule();
+  }
+
+  void _schedule() {
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
+      final salary = _pending;
+      if (!mounted || salary == null) return;
+      // Only over Home on the Home tab, never over another screen or sheet;
+      // otherwise stay pending (didChangeDependencies retries).
+      if (ModalRoute.of(context)?.isCurrent != true) return;
+      if (!TickerMode.valuesOf(context).enabled) return;
+      final shown = ref.read(paydayShownThisSessionProvider);
+      _pending = null;
+      if (!shown.add(salary.txnId)) return;
+      unawaited(
+        ref
+            .read(settingsRepositoryProvider.future)
+            .then((r) => markPaydayCelebrated(r, salary.txnId))
+            .catchError((_) {}),
+      );
+      unawaited(
+        showPaydaySheet(context, salary, openBudget: widget.actions.openBudget),
+      );
+    });
+  }
 
   void _open(MascotTipTarget target) {
     final a = widget.actions;
@@ -66,12 +112,8 @@ class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
   @override
   Widget build(BuildContext context) {
     final actions = widget.actions;
-    ref.listen(paydayCelebrationProvider, (_, next) {
-      if (next.value != null && !_payday) setState(() => _payday = true);
-    });
-    if (!_payday && ref.read(paydayCelebrationProvider).value != null) {
-      _payday = true;
-    }
+    ref.listen(paydayCelebrationProvider, (_, next) => _celebrate(next.value));
+    _celebrate(ref.read(paydayCelebrationProvider).value);
     final l = AppLocalizations.of(context);
     final format = HomeFormat.of(context, ref);
     final message = ref.watch(homeMascotMessageProvider).value;
@@ -84,11 +126,8 @@ class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
       MascotOnTrack() => l.homeMascotProudOnTrack,
       null => null,
     };
-    // T-277: a tip only fills an empty slot; payday and the proud/alert
-    // lines always win.
-    final tip = (_payday || text != null)
-        ? null
-        : ref.watch(homeTipProvider).value;
+    // T-277: a tip only fills an empty slot; the proud/alert lines win.
+    final tip = text != null ? null : ref.watch(homeTipProvider).value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -111,13 +150,7 @@ class _HomeMascotSlotState extends ConsumerState<HomeMascotSlot> {
                 child: Text(l.mascotTipShowMe),
               ),
             ),
-        ] else if (_payday)
-          ZaghlolTapBubble(
-            key: const ValueKey('home-mascot-payday'),
-            message: l.mascotPaydayLine,
-            moment: ZaghlolMoment.payday,
-          )
-        else if (text != null)
+        ] else if (text != null)
           ZaghlolTapBubble(
             key: const ValueKey('home-mascot'),
             message: text,

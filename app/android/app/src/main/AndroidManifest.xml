@@ -11,6 +11,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- T-230: normal permission; lets the app re-arm its pending alerts after a restart. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- T-293: normal permission (no prompt, no data). Plays the short haptic
+         patterns that match the payday / saved animations; the app's haptics
+         setting and the system touch-feedback switch are both respected. -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <!-- T-120 (FR-VOI-01): the voice logger listens only while its screen is
          open, asked at first use (never at install). Audio is handled by the
          OS recognizer and never stored by the app; on-device recognition is

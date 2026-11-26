@@ -41,6 +41,7 @@
 		5A1480000000000000000C05 /* TextNormalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1480000000000000000C06 /* TextNormalizationTests.swift */; };
 		5A1800000000000000000D01 /* ClockApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D02 /* ClockApi.g.swift */; };
 		5A1900000000000000000E01 /* NotificationsApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1900000000000000000E02 /* NotificationsApi.g.swift */; };
+		5A93000000000000000000F1 /* HapticsHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A93000000000000000000F2 /* HapticsHost.swift */; };
 		5A1900000000000000000E03 /* NotificationsHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1900000000000000000E04 /* NotificationsHost.swift */; };
 		5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1800000000000000000D04 /* TrustedClockHost.swift */; };
 		5A1030000000000000000E01 /* DeviceApi.g.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1030000000000000000E02 /* DeviceApi.g.swift */; };
@@ -232,6 +233,7 @@
 		5A1480000000000000000C04 /* TextNormalizationHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationHost.swift; sourceTree = "<group>"; };
 		5A1480000000000000000C06 /* TextNormalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNormalizationTests.swift; sourceTree = "<group>"; };
 		5A1900000000000000000E02 /* NotificationsApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsApi.g.swift; sourceTree = "<group>"; };
+		5A93000000000000000000F2 /* HapticsHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsHost.swift; sourceTree = "<group>"; };
 		5A1900000000000000000E04 /* NotificationsHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsHost.swift; sourceTree = "<group>"; };
 		5A1800000000000000000D02 /* ClockApi.g.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockApi.g.swift; sourceTree = "<group>"; };
 		5A1800000000000000000D04 /* TrustedClockHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedClockHost.swift; sourceTree = "<group>"; };
@@ -521,6 +523,7 @@
 				5A1800000000000000000D02 /* ClockApi.g.swift */,
 				5A1900000000000000000E02 /* NotificationsApi.g.swift */,
 				5A1900000000000000000E04 /* NotificationsHost.swift */,
+				5A93000000000000000000F2 /* HapticsHost.swift */,
 				5B570000000000000000A004 /* BackupWorkHost.swift */,
 				5B570000000000000000A002 /* BackupWorkApi.g.swift */,
 				5A1030000000000000000E02 /* DeviceApi.g.swift */,
@@ -882,6 +885,7 @@
 				5A1800000000000000000D01 /* ClockApi.g.swift in Sources */,
 				5A1900000000000000000E01 /* NotificationsApi.g.swift in Sources */,
 				5A1900000000000000000E03 /* NotificationsHost.swift in Sources */,
+				5A93000000000000000000F1 /* HapticsHost.swift in Sources */,
 				5B570000000000000000A003 /* BackupWorkHost.swift in Sources */,
 				5B570000000000000000A001 /* BackupWorkApi.g.swift in Sources */,
 				5A1800000000000000000D03 /* TrustedClockHost.swift in Sources */,

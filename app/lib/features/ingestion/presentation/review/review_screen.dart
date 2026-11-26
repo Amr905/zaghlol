@@ -36,6 +36,7 @@ import '../../data/review_repository.dart' show ReviewException;
 import 'review_models.dart';
 import 'review_providers.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/ui/z_saved_toast.dart';
 import '../../../../core/settings/settings_providers.dart';
 
 class ReviewScreen extends ConsumerStatefulWidget {
@@ -347,32 +348,12 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
         ..showSnackBar(SnackBar(content: Text(l10n.reviewErrorSaveFailed)));
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        // TODO(SMS-fuzzy): copy-deck keys ingestionReviewGenSaved and
-        // ingestionReviewGenMakeTemplate (T-087 branch); interim reuse.
-        // The teach button lives in the content (its label wraps) instead of
-        // a SnackBarAction, whose label overflowed at 1.3x in English.
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.accountsEditSaved),
-            if (rawId != null)
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: TextButton(
-                  onPressed: () {
-                    ZHaptics.light();
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    unawaited(_learn(rawId));
-                  },
-                  child: Text(l10n.templatesBuilderTitle),
-                ),
-              ),
-          ],
-        ),
-      ),
+    // T-295: Saved! toast; the teach-a-template action replaces Undo here.
+    showSavedToast(
+      ScaffoldMessenger.of(context),
+      l10n,
+      extraLabel: rawId == null ? null : l10n.templatesBuilderTitle,
+      onExtra: rawId == null ? null : () => unawaited(_learn(rawId)),
     );
   }
 
