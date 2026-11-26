@@ -1,0 +1,6 @@
+{
+  "candidates": [
+    { "content": { "role": "model", "parts": [ { "text": "{\"v\":1,\"plan\":\"PL-SPEND\",\"plan\":\"PL-REFUSE\"}" } ] }, "finishReason": "STOP", "index": 0 }
+  ],
+  "usageMetadata": { "promptTokenCount": 2200, "candidatesTokenCount": 12 }
+}

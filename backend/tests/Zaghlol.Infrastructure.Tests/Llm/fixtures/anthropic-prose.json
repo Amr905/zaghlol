@@ -1,0 +1,9 @@
+{
+  "id": "msg_synthetic_004",
+  "type": "message",
+  "role": "assistant",
+  "model": "synthetic-model",
+  "content": [ { "type": "text", "text": "Sure, here is a plan." } ],
+  "stop_reason": "end_turn",
+  "usage": { "input_tokens": 2200, "output_tokens": 9 }
+}

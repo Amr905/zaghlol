@@ -29,7 +29,8 @@ internal static partial class LlmKeyFormats
     /// <summary>The provider kind decides the format. A kind without a known format is refused (fail closed).</summary>
     public static LlmKeyFormat For(LlmProviderKind kind) => kind switch
     {
-        LlmProviderKind.OpenAiResponses => LlmKeyFormat.BearerToken,
+        LlmProviderKind.OpenAiResponses or LlmProviderKind.AnthropicMessages => LlmKeyFormat.BearerToken,
+        LlmProviderKind.VertexGemini => LlmKeyFormat.ServiceAccountJson,
         _ => throw new LlmKeyConfigurationException("An LLM provider kind has no known key format."),
     };
 

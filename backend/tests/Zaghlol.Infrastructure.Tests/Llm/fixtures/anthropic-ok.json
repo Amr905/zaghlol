@@ -1,0 +1,11 @@
+{
+  "id": "msg_synthetic_001",
+  "type": "message",
+  "role": "assistant",
+  "model": "synthetic-model",
+  "content": [
+    { "type": "tool_use", "id": "toolu_synthetic_001", "name": "reply_json", "input": { "v": 1, "plan": "PL-SUGGEST", "p": { "currency": null }, "t": null } }
+  ],
+  "stop_reason": "tool_use",
+  "usage": { "input_tokens": 150, "cache_read_input_tokens": 2048, "cache_creation_input_tokens": 0, "output_tokens": 40 }
+}

@@ -159,4 +159,38 @@ public sealed class LlmCallGuardTests
 
         Assert.Equal(LlmOutcome.Timeout, result.Outcome);
     }
+
+    // FU-406
+    [Fact]
+    public async Task ALateResultOfACallThatStartedBeforeTheCircuitOpenedIsNotTheProbes()
+    {
+        var clock = new TestClock(Start);
+        var guard = LlmFixtures.Guard(clock);
+        var releaseLate = new TaskCompletionSource();
+        var late = guard.RunAsync(async ct => { await releaseLate.Task; return await Ok(ct); }, CancellationToken.None);
+        await Run(guard, Fail, 5);
+        Assert.Equal(LlmCircuitState.Open, guard.State);
+
+        releaseLate.SetResult();
+        await late;
+
+        // The late success must not close the circuit.
+        Assert.Equal(LlmCircuitState.Open, guard.State);
+    }
+
+    [Fact]
+    public async Task AConnectionDroppedMidBodyIsUpstreamAndCountsAsAFailure()
+    {
+        var guard = LlmFixtures.Guard(new TestClock(Start));
+
+        var result = await guard.RunAsync(_ => throw new IOException("reset while reading the body"), CancellationToken.None);
+
+        Assert.Equal(LlmOutcome.Upstream, result.Outcome);
+        for (var i = 0; i < 4; i++)
+        {
+            await guard.RunAsync(_ => throw new IOException("reset"), CancellationToken.None);
+        }
+
+        Assert.Equal(LlmCircuitState.Open, guard.State);
+    }
 }

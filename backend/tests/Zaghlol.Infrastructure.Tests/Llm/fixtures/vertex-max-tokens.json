@@ -1,0 +1,6 @@
+{
+  "candidates": [
+    { "content": { "role": "model", "parts": [ { "text": "{\"v\":1,\"plan\":\"PL-SUGG" } ] }, "finishReason": "MAX_TOKENS", "index": 0 }
+  ],
+  "usageMetadata": { "promptTokenCount": 2200, "candidatesTokenCount": 300, "totalTokenCount": 2500 }
+}

@@ -88,6 +88,23 @@ public class RemoteConfigTests
         Assert.Null(await service.GetAsync("nope.key", default));
     }
 
+    // FU-411
+    [Fact]
+    public async Task AnLlmProviderIdWithNoAdapterIsRefusedAndNeverWritten()
+    {
+        var store = new FakeStore();
+        var service = new RemoteConfigAdminService(store, new FixedClock(), new KnownIds("known-one"));
+
+        Assert.Equal(ConfigSetStatus.InvalidValue, (await service.SetAsync(RemoteConfigKeys.LlmProvider, "other-one", Operator, default)).Status);
+        Assert.Equal(0, store.Writes);
+        Assert.Equal(ConfigSetStatus.Ok, (await service.SetAsync(RemoteConfigKeys.LlmProvider, "known-one", Operator, default)).Status);
+    }
+
+    private sealed class KnownIds(string id) : Zaghlol.Application.Llm.IKnownLlmProviderIds
+    {
+        public bool IsKnown(string providerId) => providerId == id;
+    }
+
     [Fact]
     public async Task EverySuccessfulSetWritesOnceAndBumpsTheVersionByOne()
     {

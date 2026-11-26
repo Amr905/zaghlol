@@ -1,0 +1,6 @@
+{
+  "candidates": [
+    { "content": { "role": "model", "parts": [ { "text": "plan: spend" } ] }, "finishReason": "STOP", "index": 0 }
+  ],
+  "usageMetadata": { "promptTokenCount": 2200, "candidatesTokenCount": 3 }
+}

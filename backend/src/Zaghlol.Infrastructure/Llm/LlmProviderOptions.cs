@@ -4,10 +4,12 @@ using Zaghlol.Application.Llm;
 
 namespace Zaghlol.Infrastructure.Llm;
 
-/// <summary>The kinds of provider adapter. Vertex Gemini arrives with T-338.</summary>
+/// <summary>The kinds of provider adapter.</summary>
 public enum LlmProviderKind
 {
     OpenAiResponses,
+    VertexGemini,
+    AnthropicMessages,
 }
 
 /// <summary>
@@ -23,7 +25,8 @@ public sealed record LlmProviderOptions(
     TimeSpan AttemptTimeout,
     decimal PriceInPerMTok,
     decimal PriceCachedPerMTok,
-    decimal PriceOutPerMTok)
+    decimal PriceOutPerMTok,
+    string? Project = null)
 {
     public const string SectionName = "Llm";
     public const string ActiveKey = "Llm:ActiveProvider";
@@ -66,6 +69,19 @@ public sealed record LlmProviderOptions(
             throw new LlmConfigurationException($"Llm:Providers:{id}:TimeoutMs must be 100..8000.");
         }
 
+        var project = section["Project"];
+        if (kind == LlmProviderKind.VertexGemini
+            && (!VertexGeminiProvider.PathPart().IsMatch(project ?? string.Empty)
+                || !VertexGeminiProvider.PathPart().IsMatch(section["Region"] ?? string.Empty)))
+        {
+            throw new LlmConfigurationException($"Llm:Providers:{id}:Project and :Region are required for a Vertex provider.");
+        }
+
+        if (kind != LlmProviderKind.OpenAiResponses && !VertexGeminiProvider.PathPart().IsMatch(model))
+        {
+            throw new LlmConfigurationException($"Llm:Providers:{id}:Model has characters a model id cannot have.");
+        }
+
         return new LlmProviderOptions(
             id,
             kind,
@@ -75,7 +91,8 @@ public sealed record LlmProviderOptions(
             TimeSpan.FromMilliseconds(timeoutMs),
             Price(section, id, "PriceInPerMTok"),
             Price(section, id, "PriceCachedPerMTok"),
-            Price(section, id, "PriceOutPerMTok"));
+            Price(section, id, "PriceOutPerMTok"),
+            project);
     }
 
     private static int ParseInt(string value, string id, string name) =>

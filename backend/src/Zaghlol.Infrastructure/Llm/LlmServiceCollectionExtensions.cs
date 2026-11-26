@@ -44,6 +44,7 @@ public static class LlmServiceCollectionExtensions
             provider.GetRequiredService<IHostEnvironment>(),
             provider.GetRequiredService<ILogger<LlmKeyStartup>>())));
         services.AddSingleton(new LlmRegisteredProviders(providers));
+        services.TryAddSingleton<IKnownLlmProviderIds>(new ConfiguredLlmProviderIds(providers));
 
         foreach (var options in providers)
         {
@@ -51,6 +52,12 @@ public static class LlmServiceCollectionExtensions
             {
                 case LlmProviderKind.OpenAiResponses:
                     AddOpenAi(services, options);
+                    break;
+                case LlmProviderKind.VertexGemini:
+                    AddVertex(services, options);
+                    break;
+                case LlmProviderKind.AnthropicMessages:
+                    AddAnthropic(services, options);
                     break;
             }
         }
@@ -60,30 +67,66 @@ public static class LlmServiceCollectionExtensions
 
     private static void AddOpenAi(IServiceCollection services, LlmProviderOptions options)
     {
-        var name = HttpClientPrefix + options.Id;
-        services.AddHttpClient(name, client =>
-            {
-                // The endpoint ends in a slash so the relative "v1/responses" keeps any path prefix of a gateway.
-                var endpoint = options.Endpoint!.AbsoluteUri;
-                client.BaseAddress = new Uri(endpoint.EndsWith('/') ? endpoint : endpoint + "/");
-                client.MaxResponseContentBufferSize = OpenAiResponsesProvider.MaxResponseBytes;
-
-                // The guard owns the timeouts.
-                client.Timeout = Timeout.InfiniteTimeSpan;
-            })
-            .RemoveAllLoggers();
-
+        var name = AddClient(services, options, OpenAiResponsesProvider.MaxResponseBytes);
         services.AddSingleton<ILlmProvider>(provider => new OpenAiResponsesProvider(
             provider.GetRequiredService<IHttpClientFactory>().CreateClient(name),
             options,
             provider.GetRequiredService<ILlmApiKeyProvider>(),
             provider.GetRequiredService<ILlmPromptCatalog>(),
-            new LlmCallGuard(
-                options.Id,
-                LlmGuardOptions.Default with { AttemptTimeout = options.AttemptTimeout },
-                provider.GetRequiredService<TimeProvider>(),
-                provider.GetRequiredService<ILoggerFactory>().CreateLogger("Zaghlol.Llm"))));
+            NewGuard(provider, options)));
     }
+
+    private static void AddVertex(IServiceCollection services, LlmProviderOptions options)
+    {
+        var name = AddClient(services, options, VertexGeminiProvider.MaxResponseBytes);
+        services.AddSingleton<ILlmProvider>(provider => new VertexGeminiProvider(
+            provider.GetRequiredService<IHttpClientFactory>().CreateClient(name),
+            options,
+            provider.GetRequiredService<ILlmApiKeyProvider>(),
+            provider.GetService<IVertexAccessTokenSource>() ?? new GoogleVertexAccessTokenSource(),
+            provider.GetRequiredService<ILlmPromptCatalog>(),
+            NewGuard(provider, options)));
+    }
+
+    private static void AddAnthropic(IServiceCollection services, LlmProviderOptions options)
+    {
+        var name = AddClient(services, options, AnthropicMessagesProvider.MaxResponseBytes);
+        services.AddSingleton<ILlmProvider>(provider => new AnthropicMessagesProvider(
+            provider.GetRequiredService<IHttpClientFactory>().CreateClient(name),
+            options,
+            provider.GetRequiredService<ILlmApiKeyProvider>(),
+            provider.GetRequiredService<ILlmPromptCatalog>(),
+            NewGuard(provider, options)));
+    }
+
+    private static string AddClient(IServiceCollection services, LlmProviderOptions options, int maxResponseBytes)
+    {
+        var name = HttpClientPrefix + options.Id;
+        services.AddHttpClient(name, client =>
+            {
+                // The endpoint ends in a slash so a relative path keeps any path prefix of a gateway.
+                var endpoint = options.Endpoint!.AbsoluteUri;
+                client.BaseAddress = new Uri(endpoint.EndsWith('/') ? endpoint : endpoint + "/");
+                client.MaxResponseContentBufferSize = maxResponseBytes;
+
+                // The guard owns the timeouts.
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            })
+            .RemoveAllLoggers();
+        return name;
+    }
+
+    private static LlmCallGuard NewGuard(IServiceProvider provider, LlmProviderOptions options) => new(
+        options.Id,
+        LlmGuardOptions.Default with { AttemptTimeout = options.AttemptTimeout },
+        provider.GetRequiredService<TimeProvider>(),
+        provider.GetRequiredService<ILoggerFactory>().CreateLogger("Zaghlol.Llm"));
+}
+
+/// <summary>The provider ids that have an adapter in this host (FU-411: the admin API refuses an unknown <c>llm.provider</c>).</summary>
+internal sealed class ConfiguredLlmProviderIds(IReadOnlyList<LlmProviderOptions> providers) : IKnownLlmProviderIds
+{
+    public bool IsKnown(string providerId) => providers.Any(p => string.Equals(p.Id, providerId, StringComparison.Ordinal));
 }
 
 /// <summary>The provider options read at registration (for the startup check).</summary>

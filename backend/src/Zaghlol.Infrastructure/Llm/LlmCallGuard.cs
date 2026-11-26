@@ -70,13 +70,13 @@ public sealed partial class LlmCallGuard(string providerId, LlmGuardOptions opti
                 result = await Attempt(attempt, total.Token, cancellationToken);
             }
 
-            Record(result.Outcome is LlmOutcome.Timeout or LlmOutcome.Upstream);
+            Record(result.Outcome is LlmOutcome.Timeout or LlmOutcome.Upstream, isProbe);
             recorded = true;
             return result;
         }
         catch (ConnectFailureException)
         {
-            Record(failed: true);
+            Record(failed: true, isProbe);
             recorded = true;
             return LlmResult.Failed(LlmOutcome.Upstream);
         }
@@ -106,8 +106,9 @@ public sealed partial class LlmCallGuard(string providerId, LlmGuardOptions opti
         {
             throw new ConnectFailureException();
         }
-        catch (HttpRequestException)
+        catch (Exception e) when (e is HttpRequestException or IOException)
         {
+            // FU-406: a connection dropped mid-body surfaces as IOException from the stream; it is a transport failure.
             return LlmResult.Failed(LlmOutcome.Upstream);
         }
     }
@@ -158,11 +159,17 @@ public sealed partial class LlmCallGuard(string providerId, LlmGuardOptions opti
         }
     }
 
-    private void Record(bool failed)
+    private void Record(bool failed, bool isProbe)
     {
         lock (gate)
         {
             var now = clock.GetUtcNow();
+            if (openUntil is not null && !isProbe)
+            {
+                // FU-406: a call that began before the circuit opened and finished after it is not the probe's result.
+                return;
+            }
+
             if (openUntil is not null)
             {
                 // The half-open probe finished: success closes the circuit, failure re-opens it.
