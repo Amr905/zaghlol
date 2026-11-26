@@ -5,7 +5,7 @@
 import 'package:zaghlol_domain/zaghlol_domain.dart'
     show NetworkFailure, SafeException;
 
-import 'generated/api_models.g.dart' show ProblemCode;
+import 'generated/api_models.g.dart' show LlmQuota, ProblemCode;
 
 enum BackendFailureKind {
   /// No connection (DNS, socket, TLS setup).
@@ -34,6 +34,10 @@ enum BackendFailureKind {
 
   /// The app built a request the contract forbids (nothing was sent).
   clientBug,
+
+  /// The caller aborted the request (T-340: Stop, client timeout). Whether
+  /// the server finished it is unknown.
+  cancelled,
 }
 
 final class BackendFailure extends SafeException {
@@ -43,6 +47,8 @@ final class BackendFailure extends SafeException {
     this.problem,
     this.retryAfter,
     this.nextMoveAt,
+    this.llmQuota,
+    this.providerId,
   }) : super(_codeOf(kind));
 
   final BackendFailureKind kind;
@@ -61,6 +67,14 @@ final class BackendFailure extends SafeException {
   /// every other answer. T-145 stores it for the restore help text.
   final String? nextMoveAt;
 
+  /// T-340: the `quota` extension of a `403 LLM_QUOTA_EXHAUSTED`; null for
+  /// every other answer.
+  final LlmQuota? llmQuota;
+
+  /// T-340: the `providerId` extension of a `409 LLM_CONSENT_REQUIRED` (the
+  /// backend's active provider); null for every other answer.
+  final String? providerId;
+
   /// Whether a later retry can succeed without an app change.
   bool get retryable => switch (kind) {
     BackendFailureKind.offline ||
@@ -68,7 +82,9 @@ final class BackendFailure extends SafeException {
     BackendFailureKind.badSignature ||
     BackendFailureKind.malformedResponse ||
     BackendFailureKind.installReset => true,
-    BackendFailureKind.notSignedIn || BackendFailureKind.clientBug => false,
+    BackendFailureKind.notSignedIn ||
+    BackendFailureKind.clientBug ||
+    BackendFailureKind.cancelled => false,
     BackendFailureKind.problem =>
       httpStatus == 429 || (httpStatus != null && httpStatus! >= 500),
   };
@@ -89,6 +105,7 @@ final class BackendFailure extends SafeException {
     BackendFailureKind.installReset => 'BACKEND_INSTALL_RESET',
     BackendFailureKind.notSignedIn => 'BACKEND_NOT_SIGNED_IN',
     BackendFailureKind.clientBug => 'BACKEND_CLIENT_BUG',
+    BackendFailureKind.cancelled => 'BACKEND_CANCELLED',
   };
 
   @override

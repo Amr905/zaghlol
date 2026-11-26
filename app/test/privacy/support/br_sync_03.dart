@@ -9,7 +9,10 @@
 // restore), D-48 (classification of version cursors, restore productId,
 // sign-in nonce, time nonce), D-55/D-62 (iOS `seatKeys`, own key only on
 // verify per v1.8 R5-9), NFR-SEC-08 (`Zaghlol-Time-Nonce` on the six
-// anchoring requests); backend-api §1-§4.
+// anchoring requests); backend-api §1-§4. T-340: D-90 (ask-llm.md §6) and
+// D-96 (llm-categorise.md §6) with FR-LLM-02 / FR-LCAT-02 (what may be sent)
+// and FR-LLM-14 (attestation on every LLM request); members per backend-api
+// §4.9 / OpenAPI `AskPlanRequest`, `CategoriseRequest`.
 //
 // Everything is synthetic; nothing here is a real token or key.
 
@@ -40,8 +43,19 @@ enum WireClass {
   /// "Request my bank" (FR-PAR-14).
   bankRequest(ServerKnows.bankRequest),
 
-  /// Play Integrity / App Attest proof, restore only (D-45).
+  /// Play Integrity / App Attest proof: restore (D-45) and every LLM
+  /// request (FR-LLM-14).
   attestation(ServerKnows.attestation),
+
+  /// D-90: the scrubbed, placeholdered question text and the app language,
+  /// after consent. Disclosed on the consent sheet (FR-LLM-30); no privacy
+  /// screen row yet (follow-up).
+  llmQuestion(null),
+
+  /// D-96: eligible merchant names and the app language, after consent.
+  /// Disclosed on the consent sheet (FR-LCAT-44); no privacy screen row yet
+  /// (follow-up).
+  llmMerchants(null),
 
   /// iOS seat keys (D-55/D-62).
   seatKeys(ServerKnows.seatKeys),
@@ -115,6 +129,31 @@ const Map<String, Obj> androidBodies = {
     'authorizationCode': Leaf(WireClass.signIn),
     'replaceLink': Leaf(WireClass.signIn),
   }),
+  // T-340 (FR-LLM-02, D-90): question + language; consent terms, request
+  // ULID and plan version are protocol/version plumbing.
+  'POST /v1/ask/plan': Obj({
+    'planVersion': Leaf(WireClass.versions),
+    'requestId': Leaf(WireClass.protocol),
+    'q': Leaf(WireClass.llmQuestion),
+    'lang': Leaf(WireClass.llmQuestion),
+    'consent': _llmConsent,
+    'attestation': Obj({
+      'type': Leaf(WireClass.attestation),
+      'token': Leaf(WireClass.attestation),
+    }),
+  }),
+  // T-340 (FR-LCAT-02, D-96): merchant names + language.
+  'POST /v1/categorise': Obj({
+    'v': Leaf(WireClass.versions),
+    'requestId': Leaf(WireClass.protocol),
+    'lang': Leaf(WireClass.llmMerchants),
+    'merchants': Arr(Leaf(WireClass.llmMerchants), maxItems: 20),
+    'consent': _llmConsent,
+    'attestation': Obj({
+      'type': Leaf(WireClass.attestation),
+      'token': Leaf(WireClass.attestation),
+    }),
+  }),
 };
 
 /// iOS bodies (`platform: ios`).
@@ -147,7 +186,41 @@ const Map<String, Obj> iosBodies = {
     'replaceLink': Leaf(WireClass.signIn),
     'seatKeys': Arr(_seatKey, maxItems: 5),
   }),
+  'POST /v1/ask/plan': Obj({
+    'planVersion': Leaf(WireClass.versions),
+    'requestId': Leaf(WireClass.protocol),
+    'q': Leaf(WireClass.llmQuestion),
+    'lang': Leaf(WireClass.llmQuestion),
+    'consent': _llmConsent,
+    // No seat keys on LLM requests.
+    'attestation': Obj({
+      'type': Leaf(WireClass.attestation),
+      'keyId': Leaf(WireClass.attestation),
+      'assertion': Leaf(WireClass.attestation),
+      'attestationObject': Leaf(WireClass.attestation),
+    }),
+  }),
+  'POST /v1/categorise': Obj({
+    'v': Leaf(WireClass.versions),
+    'requestId': Leaf(WireClass.protocol),
+    'lang': Leaf(WireClass.llmMerchants),
+    'merchants': Arr(Leaf(WireClass.llmMerchants), maxItems: 20),
+    'consent': _llmConsent,
+    'attestation': Obj({
+      'type': Leaf(WireClass.attestation),
+      'keyId': Leaf(WireClass.attestation),
+      'assertion': Leaf(WireClass.attestation),
+      'attestationObject': Leaf(WireClass.attestation),
+    }),
+  }),
 };
+
+/// The consent terms the user agreed to (provider id from the backend's own
+/// config, sheet version): protocol, no user or device data.
+const _llmConsent = Obj({
+  'provider': Leaf(WireClass.protocol),
+  'v': Leaf(WireClass.protocol),
+});
 
 const _install = Obj({
   'installId': Leaf(WireClass.appId),
@@ -179,6 +252,14 @@ const _sync = Obj({
     maxItems: 10,
   ),
 });
+
+/// Requests whose `attestation.type` must be the platform's own (a `dev`
+/// proof or the other platform's type is a violation).
+const Set<String> attested = {
+  'POST /v1/purchases/restore',
+  'POST /v1/ask/plan',
+  'POST /v1/categorise',
+};
 
 /// Requests that carry no body.
 const Set<String> bodiless = {
@@ -212,6 +293,8 @@ const Set<String> idempotent = {
 /// Install token + install ID headers: every install-scoped request.
 const Set<String> installScoped = {
   'DELETE /v1/installs/me',
+  'POST /v1/ask/plan',
+  'POST /v1/categorise',
   'POST /v1/sync',
   'POST /v1/purchases/verify',
   'POST /v1/purchases/restore',
@@ -224,6 +307,8 @@ const Set<String> installScoped = {
 /// Where the optional account token may travel.
 const Set<String> accountAllowed = {
   'POST /v1/sync',
+  'POST /v1/ask/plan',
+  'POST /v1/categorise',
   'POST /v1/purchases/verify',
   'POST /v1/purchases/restore',
   'GET /v1/entitlement',
@@ -343,7 +428,7 @@ Checked checkRequest(BackendRequest r, {required String platform}) {
     if (json is Map && json['platform'] != null) {
       if (json['platform'] != platform) v.add('$op: body platform mismatch');
     }
-    if (op == 'POST /v1/purchases/restore' && json is Map) {
+    if (attested.contains(op) && json is Map) {
       final att = json['attestation'];
       final want = platform == 'ios' ? 'app_attest' : 'play_integrity';
       if (att is! Map || att['type'] != want) {

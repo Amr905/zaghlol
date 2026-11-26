@@ -12,12 +12,31 @@ import 'dart:typed_data';
 /// Largest response body read (the backend's signing buffer is 1 MiB, T-123).
 const int maxResponseBytes = 1 << 20;
 
+/// T-340: aborts one in-flight request (the user's Stop, a client-side
+/// timeout). Carries no data; never sent.
+final class AbortSignal {
+  final Completer<void> _done = Completer<void>();
+
+  bool get aborted => _done.isCompleted;
+
+  /// Completes once, when [abort] is first called.
+  Future<void> get whenAborted => _done.future;
+
+  void abort() {
+    if (!_done.isCompleted) _done.complete();
+  }
+
+  @override
+  String toString() => 'AbortSignal(${aborted ? 'aborted' : 'live'})';
+}
+
 final class BackendRequest {
   BackendRequest({
     required this.method,
     required this.uri,
     required Map<String, String> headers,
     this.body,
+    this.abort,
   }) : headers = Map.unmodifiable(headers);
 
   final String method;
@@ -26,6 +45,10 @@ final class BackendRequest {
   /// Lower-case header names.
   final Map<String, String> headers;
   final Uint8List? body;
+
+  /// When set and aborted, the transport drops the connection and the call
+  /// fails with [TransportFailureKind.cancelled].
+  final AbortSignal? abort;
 
   /// Never prints headers or body (tokens, keys, purchase data).
   @override
@@ -58,7 +81,15 @@ final class BackendResponse {
   String toString() => 'BackendResponse($status)';
 }
 
-enum TransportFailureKind { offline, timeout, tooLarge, protocol }
+enum TransportFailureKind {
+  offline,
+  timeout,
+  tooLarge,
+  protocol,
+
+  /// The request's [AbortSignal] fired (T-340).
+  cancelled,
+}
 
 /// A transport-level failure. Kind only; no OS message crosses over.
 final class TransportException implements Exception {
@@ -111,8 +142,19 @@ final class IoBackendTransport implements BackendTransport {
   }
 
   Future<BackendResponse> _send(BackendRequest request) async {
+    const cancelled = TransportException(TransportFailureKind.cancelled);
+    final abort = request.abort;
+    if (abort != null && abort.aborted) throw cancelled;
     final req = await _client.openUrl(request.method, request.uri);
     req.followRedirects = false;
+    if (abort != null) {
+      if (abort.aborted) {
+        req.abort(cancelled);
+        throw cancelled;
+      }
+      // Drops the socket: the server sees the request cancelled (Stop).
+      unawaited(abort.whenAborted.then((_) => req.abort(cancelled)));
+    }
     request.headers.forEach(req.headers.set);
     final body = request.body;
     if (body != null) {
