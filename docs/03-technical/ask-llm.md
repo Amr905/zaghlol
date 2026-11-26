@@ -196,7 +196,7 @@ purge and alert checks join the embedded retention/heartbeat jobs, outbound 443 
 
 | Stage | Environment | `Llm:Attestation:Mode` | Behaviour |
 |---|---|---|---|
-| 0 now | Development, Testing | `Fake` | accepts only `{"type":"dev","proof":"<HMAC of bodyHash with a test key>"}` from debug builds; refused at start in any other environment |
+| 0 now | Development, Testing | `Fake` | accepts only `{"type":"dev","proof":"<HMAC of bodyHash with a test key>"}` from debug builds; refused at start in any other environment. Format (T-340): unpadded base64url of HMAC-SHA256(key, bodyHash), 43 chars; the app reads the key from `--dart-define=ZAGHLOL_LLM_DEV_KEY` in debug builds only |
 | 1 now | Staging | `ReportOnly` | verifies real proofs when present, counts failures by reason, does not refuse (side-loaded builds) |
 | 2 store accounts live | Production | `Enforce` (forced) | Production ignores the setting and always enforces; with verifiers unconfigured every request is `503 UPSTREAM_UNAVAILABLE`, so `ask_llm` stays off |
 

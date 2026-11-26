@@ -13,6 +13,13 @@ import '../../core/backend/backend_test_support.dart';
 String isoMs(int ms) =>
     DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true).toIso8601String();
 
+Map<String, Object?> _llmQuota(String now) => {
+  'limit': 5,
+  'used': 1,
+  'remaining': 4,
+  'resetsAt': now,
+};
+
 final class FakeZaghlolServer implements BackendTransport {
   FakeZaghlolServer({
     required this.nowMs,
@@ -103,6 +110,25 @@ final class FakeZaghlolServer implements BackendTransport {
           'linkedInstalls': 1,
           'serverTime': now,
           'timeNonce': nonce,
+        });
+      case 'POST /v1/ask/plan':
+        return jsonResponse(200, {
+          'serverTime': now,
+          'plan': {
+            'v': 1,
+            'plan': 'PL-FALLBACK',
+            'p': <String, Object?>{},
+            't': null,
+          },
+          'counted': true,
+          'quota': _llmQuota(now),
+        });
+      case 'POST /v1/categorise':
+        return jsonResponse(200, {
+          'serverTime': now,
+          'counted': 0,
+          'results': <Object?>[],
+          'quota': _llmQuota(now),
         });
     }
     return problem(404, 'NOT_FOUND');

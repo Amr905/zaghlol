@@ -162,14 +162,44 @@ final class _Session {
       Uint8List.fromList(utf8.encode(_jws)),
     );
     await client.getEntitlement(timeNonce: nonce());
+    // T-340: the LLM gateway calls, every member filled (iOS with the
+    // first-use attestation object), with the account token present.
+    final LlmAttestation llmProof = ios
+        ? LlmAppAttestProof(
+            keyId: '${'A' * 43}=',
+            assertion: 'c3ludGhldGljLWFzc2VydGlvbg==',
+            attestationObject: 'c3ludGhldGljLW9iamVjdA==',
+          )
+        : const LlmPlayIntegrityProof(token: 'synthetic.integrity-token.0001');
+    await client.askPlan(
+      AskPlanRequest(
+        planVersion: 1,
+        requestId: client.newIdempotencyKey().value,
+        q: 'صرفت كام بكارت ⟦CARD_1⟧ في ⟦MERCHANT_1⟧؟',
+        lang: AskPlanRequestLang.ar,
+        consent: const LlmConsent(provider: 'openai-luna', v: 1),
+        attestation: llmProof,
+      ),
+    );
+    await client.categorise(
+      CategoriseRequest(
+        v: 1,
+        requestId: client.newIdempotencyKey().value,
+        lang: CategoriseRequestLang.en,
+        merchants: const ['zawya coffee', 'مكتبة النور'],
+        consent: const LlmConsent(provider: 'openai-luna', v: 1),
+        attestation: llmProof,
+      ),
+    );
     await client.signOut(timeNonce: nonce());
     await client.deleteAccount();
     await client.deleteInstall();
   }
 }
 
-/// Operations in the OpenAPI spec (T-322) with no client call yet.
-const _plannedNotInClient = {'POST /v1/ask/plan', 'POST /v1/categorise'};
+/// Operations in the OpenAPI spec with no client call yet (T-340 added the
+/// two LLM calls).
+const _plannedNotInClient = <String>{};
 
 void main() {
   for (final platform in ClientPlatform.values) {
@@ -193,6 +223,11 @@ void main() {
       // the call to `everything()`; an entry the client does send fails.
       final all = {for (final o in ApiOperations.all) '${o.method} ${o.path}'};
       expect(all, containsAll(_plannedNotInClient));
+      // T-340: both LLM classes went out and only on their own operation.
+      expect(
+        classes,
+        containsAll([WireClass.llmQuestion, WireClass.llmMerchants]),
+      );
       expect(seen.intersection(_plannedNotInClient), isEmpty);
       expect(seen, all.difference(_plannedNotInClient));
       // The six anchoring requests carried a time nonce (checked per
@@ -238,18 +273,37 @@ void main() {
       return out;
     }
 
-    // Attestation: restore only (D-45).
+    // Attestation: restore (D-45) and the two LLM requests (FR-LLM-14).
+    const attestedOps = {
+      'POST /v1/purchases/restore',
+      'POST /v1/ask/plan',
+      'POST /v1/categorise',
+    };
     expect(classed(androidBodies, WireClass.attestation), {
-      r'POST /v1/purchases/restore $.attestation.type',
-      r'POST /v1/purchases/restore $.attestation.token',
+      for (final op in attestedOps) ...{
+        '$op \$.attestation.type',
+        '$op \$.attestation.token',
+      },
     });
     expect(
       classed(
         iosBodies,
         WireClass.attestation,
-      ).map((p) => p.split(r' $').first),
-      everyElement(startsWith('POST /v1/purchases/restore')),
+      ).map((p) => p.split(r' $').first).toSet(),
+      attestedOps,
     );
+    // The question only on ask, merchant names only on categorise (D-90,
+    // D-96), never anywhere else.
+    for (final bodies in [androidBodies, iosBodies]) {
+      expect(classed(bodies, WireClass.llmQuestion), {
+        r'POST /v1/ask/plan $.q',
+        r'POST /v1/ask/plan $.lang',
+      });
+      expect(classed(bodies, WireClass.llmMerchants), {
+        r'POST /v1/categorise $.lang',
+        r'POST /v1/categorise $.merchants[]',
+      });
+    }
     // seatKeys: iOS only, on verify, restore and sign-in (D-62 v1.8).
     expect(classed(androidBodies, WireClass.seatKeys), isEmpty);
     expect(

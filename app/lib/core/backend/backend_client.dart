@@ -39,6 +39,7 @@ import 'transport.dart';
 export 'backend_failure.dart';
 export 'generated/api_models.g.dart';
 export 'ids.dart' show IdempotencyKey, TimeNonce;
+export 'transport.dart' show AbortSignal;
 
 enum ClientPlatform { android, ios }
 
@@ -333,6 +334,49 @@ final class BackendClient {
     await _call(ApiOperations.deleteInstall);
   }
 
+  /// T-340: `POST /v1/ask/plan` (ask-llm §4.1). Built only by
+  /// `LlmGatewayClient`, which gates, binds and attests first. Not signed;
+  /// the phone validates the plan itself. [abort] cancels the call.
+  Future<AskPlanResponse> askPlan(
+    AskPlanRequest request, {
+    AbortSignal? abort,
+  }) async {
+    _checkLlmProof(request.attestation);
+    final r = await _call(
+      ApiOperations.askPlan,
+      body: _encode(request.toJson),
+      abort: abort,
+    );
+    return _decode(r, AskPlanResponse.fromJson);
+  }
+
+  /// T-340: `POST /v1/categorise` (llm-categorise §3). As [askPlan].
+  Future<CategoriseResponse> categorise(
+    CategoriseRequest request, {
+    AbortSignal? abort,
+  }) async {
+    _checkLlmProof(request.attestation);
+    final r = await _call(
+      ApiOperations.categorise,
+      body: _encode(request.toJson),
+      abort: abort,
+    );
+    return _decode(r, CategoriseResponse.fromJson);
+  }
+
+  /// Play Integrity proofs leave Android builds only, App Attest proofs iOS
+  /// builds only, and the `dev` proof never leaves a product (release) build.
+  void _checkLlmProof(LlmAttestation a) {
+    switch (a) {
+      case LlmPlayIntegrityProof():
+        _checkPlatform(ClientPlatform.android);
+      case LlmAppAttestProof():
+        _checkPlatform(ClientPlatform.ios);
+      case LlmDevProof():
+        if (const bool.fromEnvironment('dart.vm.product')) throw _clientBug();
+    }
+  }
+
   /// A fresh key: a ULID whose 80 random bits come from the client's CSPRNG
   /// (`Random.secure()` unless a test injects one).
   IdempotencyKey newIdempotencyKey() => IdempotencyKey.generate(_rng, _now());
@@ -365,6 +409,7 @@ final class BackendClient {
     IdempotencyKey? idempotencyKey,
     TimeNonce? timeNonce,
     String? accountToken,
+    AbortSignal? abort,
   }) async {
     if (op.anchoring) {
       assert(
@@ -418,6 +463,7 @@ final class BackendClient {
         uri: _config.baseUri.replace(path: path),
         headers: headers,
         body: body,
+        abort: abort,
       ),
     );
 
@@ -467,15 +513,33 @@ final class BackendClient {
   }
 
   Future<BackendResponse> _send(BackendRequest request) async {
+    final abort = request.abort;
     try {
-      return await _transport.send(request);
+      if (abort == null) return await _transport.send(request);
+      if (abort.aborted) {
+        throw const TransportException(TransportFailureKind.cancelled);
+      }
+      // The abort wins even over a transport that ignores the signal; a late
+      // answer is dropped (Future.any keeps listening, so it can't escape).
+      return await Future.any([
+        _transport.send(request),
+        abort.whenAborted.then<BackendResponse>(
+          (_) => throw const TransportException(TransportFailureKind.cancelled),
+        ),
+      ]);
     } on TransportException catch (e) {
+      // The user's own Stop is not a backend failure: not recorded.
+      if (e.kind == TransportFailureKind.cancelled) {
+        throw BackendFailure(BackendFailureKind.cancelled);
+      }
       throw await _failed(
         BackendFailure(switch (e.kind) {
           TransportFailureKind.offline => BackendFailureKind.offline,
           TransportFailureKind.timeout => BackendFailureKind.timeout,
           TransportFailureKind.tooLarge ||
-          TransportFailureKind.protocol => BackendFailureKind.malformedResponse,
+          TransportFailureKind.protocol ||
+          TransportFailureKind.cancelled =>
+            BackendFailureKind.malformedResponse,
         }),
       );
     }
@@ -488,6 +552,8 @@ final class BackendClient {
     var code = ProblemCode.unknown;
     Duration? retry;
     String? nextMove;
+    LlmQuota? quota;
+    String? providerId;
     try {
       final p = Problem.fromJson(
         jsonDecode(const Utf8Decoder().convert(res.body)),
@@ -495,6 +561,9 @@ final class BackendClient {
       if (p.status == res.status) {
         code = p.code;
         if (code == ProblemCode.moveCooldown) nextMove = p.nextMoveAt;
+        // T-340: the LLM extensions, only on the codes that define them.
+        if (code == ProblemCode.llmQuotaExhausted) quota = p.quota;
+        if (code == ProblemCode.llmConsentRequired) providerId = p.providerId;
         if (p.retryAfterSeconds != null) {
           retry = Duration(seconds: min(p.retryAfterSeconds!, 86400));
         }
@@ -515,6 +584,8 @@ final class BackendClient {
       problem: code,
       retryAfter: retry,
       nextMoveAt: nextMove,
+      llmQuota: quota,
+      providerId: providerId,
     );
   }
 
