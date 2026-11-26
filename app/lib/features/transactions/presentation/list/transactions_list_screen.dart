@@ -26,7 +26,9 @@ import '../../../transfers/presentation/split_sheet.dart';
 import '../detail/transaction_detail_screen.dart';
 import '../edit/transaction_edit_screen.dart';
 import '../../../accounts/presentation/account_type.dart';
+import '../../domain/exchange.dart';
 import '../../domain/transaction.dart';
+import 'txn_exchange_row.dart';
 import 'txn_filter_sheets.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
@@ -239,8 +241,11 @@ class _State extends ConsumerState<TransactionsListScreen> {
     CivilDate today,
   ) {
     final l = AppLocalizations.of(context);
+    // T-281: an exchange is one row, where its first loaded leg is.
+    final exchanges =
+        ref.watch(txnExchangesProvider).value ?? const <String, TxnExchange>{};
     final groups = <(CivilDate, List<TransactionRecord>)>[];
-    for (final t in state.items) {
+    for (final t in collapseExchangeLegs(state.items, exchanges)) {
       final d = CivilDate.fromLocalMs(
         t.occurredAt.millisecondsSinceEpoch,
         t.occurredTzOffsetMin,
@@ -283,23 +288,41 @@ class _State extends ConsumerState<TransactionsListScreen> {
                 child: Column(
                   children: [
                     for (var j = 0; j < rows.length; j++)
-                      TxnRow(
-                        key: ValueKey(rows[j].id),
-                        txn: rows[j],
-                        lookups: lookups,
-                        fmt: fmt,
-                        divider: j > 0,
-                        selecting: sel.active,
-                        selected: sel.ids.contains(rows[j].id),
-                        onTap: () => sel.active
-                            ? notifier.toggle(rows[j].id)
-                            : (widget.onOpenTransaction ?? _openDetail)(
-                                rows[j].id,
-                              ),
-                        onLongPress: () => sel.active
-                            ? notifier.toggle(rows[j].id)
-                            : notifier.enter(rows[j].id),
-                      ),
+                      if (exchanges[rows[j].id] case final x?)
+                        TxnExchangeRow(
+                          key: ValueKey(rows[j].id),
+                          exchange: x,
+                          fmt: fmt,
+                          divider: j > 0,
+                          selecting: sel.active,
+                          selected: sel.ids.contains(rows[j].id),
+                          onTap: () => sel.active
+                              ? notifier.toggle(rows[j].id)
+                              : (widget.onOpenTransaction ?? _openDetail)(
+                                  rows[j].id,
+                                ),
+                          onLongPress: () => sel.active
+                              ? notifier.toggle(rows[j].id)
+                              : notifier.enter(rows[j].id),
+                        )
+                      else
+                        TxnRow(
+                          key: ValueKey(rows[j].id),
+                          txn: rows[j],
+                          lookups: lookups,
+                          fmt: fmt,
+                          divider: j > 0,
+                          selecting: sel.active,
+                          selected: sel.ids.contains(rows[j].id),
+                          onTap: () => sel.active
+                              ? notifier.toggle(rows[j].id)
+                              : (widget.onOpenTransaction ?? _openDetail)(
+                                  rows[j].id,
+                                ),
+                          onLongPress: () => sel.active
+                              ? notifier.toggle(rows[j].id)
+                              : notifier.enter(rows[j].id),
+                        ),
                   ],
                 ),
               ),

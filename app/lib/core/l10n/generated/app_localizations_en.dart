@@ -1615,6 +1615,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsRowInternalTitle => 'To yourself';
 
   @override
+  String transactionsExchangeTitle(String from, String to) {
+    return 'Exchanged $from → $to';
+  }
+
+  @override
+  String transactionsExchangeRate(String rate) {
+    return 'Bank rate $rate · not spending';
+  }
+
+  @override
+  String get transactionsExchangeNotSpending => 'Not spending';
+
+  @override
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  ) {
+    return 'Currency exchange: you gave $from and got $to, $rate, $time';
+  }
+
+  @override
   String get transactionsInstapayTitle => 'InstaPay';
 
   @override
@@ -1928,6 +1951,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsDetailGone => 'This transaction no longer exists';
+
+  @override
+  String get transactionsExchangeBanner =>
+      'Currency exchange — not counted as spending or income';
+
+  @override
+  String get transactionsExchangeFieldSent => 'You gave';
+
+  @override
+  String get transactionsExchangeFieldReceived => 'You got';
+
+  @override
+  String get transactionsExchangeFieldFrom => 'From';
+
+  @override
+  String get transactionsExchangeFieldTo => 'Into';
+
+  @override
+  String get transactionsExchangeFieldRate => 'Bank rate';
+
+  @override
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  ) {
+    return '$one $from = $rate $to';
+  }
+
+  @override
+  String get transactionsExchangeDeleteTitle => 'Delete this exchange?';
+
+  @override
+  String get transactionsExchangeDeleteBody =>
+      'Both sides are deleted together.';
+
+  @override
+  String get transactionsExchangeDeleted => 'Exchange deleted';
 
   @override
   String categorizationRuleTitle(String category, String merchant) {

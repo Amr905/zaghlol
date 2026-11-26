@@ -207,6 +207,9 @@ final class FaultyStore implements IngestStorePort {
     ),
   );
   @override
+  Future<String?> exchangeInLegOf(String outTxnId) =>
+      _step(() => _inner.exchangeInLegOf(outTxnId));
+  @override
   Future<int> updateTxn(String txnId, TxnPatch patch, {required int atMs}) =>
       _step(() => _inner.updateTxn(txnId, patch, atMs: atMs));
   @override

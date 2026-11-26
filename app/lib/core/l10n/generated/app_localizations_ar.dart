@@ -1662,6 +1662,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsRowInternalTitle => 'تحويلة لنفسك';
 
   @override
+  String transactionsExchangeTitle(String from, String to) {
+    return 'غيّرت $from ← $to';
+  }
+
+  @override
+  String transactionsExchangeRate(String rate) {
+    return 'سعر البنك $rate · مش مصروف';
+  }
+
+  @override
+  String get transactionsExchangeNotSpending => 'مش مصروف';
+
+  @override
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  ) {
+    return 'تغيير عملة: دفعت $from ووصلك $to، $rate، $time';
+  }
+
+  @override
   String get transactionsInstapayTitle => 'إنستاباي';
 
   @override
@@ -1978,6 +2001,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsDetailGone => 'الحركة دي مبقتش موجودة';
+
+  @override
+  String get transactionsExchangeBanner =>
+      'تغيير عملة، مش محسوب لا مصروف ولا دخل';
+
+  @override
+  String get transactionsExchangeFieldSent => 'دفعت';
+
+  @override
+  String get transactionsExchangeFieldReceived => 'وصلني';
+
+  @override
+  String get transactionsExchangeFieldFrom => 'من حساب';
+
+  @override
+  String get transactionsExchangeFieldTo => 'لحساب';
+
+  @override
+  String get transactionsExchangeFieldRate => 'سعر البنك';
+
+  @override
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  ) {
+    return '$one $from = $rate $to';
+  }
+
+  @override
+  String get transactionsExchangeDeleteTitle => 'تمسح تغيير العملة ده؟';
+
+  @override
+  String get transactionsExchangeDeleteBody => 'الناحيتين هيتمسحوا مع بعض.';
+
+  @override
+  String get transactionsExchangeDeleted => 'اتمسح تغيير العملة';
 
   @override
   String categorizationRuleTitle(String category, String merchant) {

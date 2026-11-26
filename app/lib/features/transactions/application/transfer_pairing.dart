@@ -359,6 +359,12 @@ class TransferPairingUseCase {
   /// and frees the surviving leg, which counts again unless it is an
   /// own-account leg by its own right. Returns the event, or null when the
   /// leg was in no pair.
+  ///
+  /// T-281: the surviving leg of an exchange (`fx_conversion` /
+  /// `cross_currency`) is not freed: it stays internal on its own, so it
+  /// never turns into income or spending. Nothing else is deleted; the user
+  /// can delete or unlink it. (A user delete from the list or the detail
+  /// removes both legs at once, so this is for rule-driven deletes.)
   Future<TransactionsChanged?> onRemoved(String txnId) async {
     if (txnId.isEmpty) _invalid();
     final schedule = await _loadSchedule();
@@ -367,11 +373,12 @@ class TransferPairingUseCase {
       final pair = await _pairs.forTransaction(txnId);
       if (pair == null) return null;
       if (await _pairs.deleteById(pair.id) != 1) return null;
+      final exchange = pair.inTxnId != null && isExchangePairKind(pair.kind);
       final rows = <_Row>[];
       for (final id in {pair.outTxnId, ?pair.inTxnId}) {
         final r = await _legRow(id, anyStatus: true);
         if (r != null) rows.add(r);
-        if (id == txnId) continue;
+        if (id == txnId || exchange) continue;
         await _freeLeg(id, now);
         final t = await _txns.byId(id);
         if (t != null &&
@@ -470,6 +477,13 @@ class TransferPairingUseCase {
       final other = await _txns.byId(otherId);
       if (other == null || other.deletedAt != null) {
         await _pairs.deleteById(existing.id);
+        if (isExchangePairKind(existing.kind)) {
+          // T-281: half an exchange stays internal (the FK already cleared
+          // its pair id); it is never freed into income or spending. Its
+          // cycle still hears about it: it is no longer exchanged in/out.
+          healed.add(txnId);
+          return skipped;
+        }
         await _freeLeg(txnId, now);
         healed.add(txnId);
         existing = null;
