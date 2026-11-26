@@ -38,6 +38,7 @@ public sealed class LlmCallGuardTests
         var called = false;
         var result = await guard.RunAsync(ct => { called = true; return Ok(ct); }, CancellationToken.None);
         Assert.Equal(LlmOutcome.Upstream, result.Outcome);
+        Assert.True(result.NeverSent); // B94-M1: only this kind of result settles at zero
         Assert.False(called);
     }
 

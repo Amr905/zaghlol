@@ -120,6 +120,15 @@ public sealed class VertexGeminiProviderTests : IDisposable
         Assert.Equal(LlmOutcome.Invalid, (await Provider().CompleteAsync(LlmFixtures.Call(), CancellationToken.None)).Outcome);
     }
 
+    [Fact]
+    public async Task ADuplicatePropertyInTheEnvelopeIsInvalid()
+    {
+        var ok = LlmFixtures.Read("vertex-ok.json");
+        Reply(200, ok.Replace("\"modelVersion\"", "\"usageMetadata\": {}, \"modelVersion\"", StringComparison.Ordinal));
+
+        Assert.Equal(LlmOutcome.Invalid, (await Provider().CompleteAsync(LlmFixtures.Call(), CancellationToken.None)).Outcome);
+    }
+
     [Theory]
     [InlineData("<html>gateway</html>")]
     [InlineData("{}")]

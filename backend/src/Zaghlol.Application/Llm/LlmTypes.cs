@@ -49,8 +49,13 @@ public sealed record LlmResult(
     LlmSensitive<byte[]> Json,
     LlmUsage Usage)
 {
+    /// <summary>True only when the request provably never reached the provider (open circuit, connection refused). Such a call costs nothing; every other zero-usage result is unknown usage.</summary>
+    public bool NeverSent { get; init; }
+
     public static LlmResult Failed(LlmOutcome outcome, LlmUsage? usage = null) =>
         new(outcome, new LlmSensitive<byte[]>([]), usage ?? LlmUsage.None);
+
+    public static LlmResult NotSent() => Failed(LlmOutcome.Upstream) with { NeverSent = true };
 }
 
 /// <summary>One provider adapter (<c>OpenAiResponsesProvider</c>, the fake, later Vertex Gemini).</summary>

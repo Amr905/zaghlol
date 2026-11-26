@@ -89,9 +89,9 @@ public sealed record LlmProviderOptions(
             endpoint,
             section["Region"],
             TimeSpan.FromMilliseconds(timeoutMs),
-            Price(section, id, "PriceInPerMTok"),
-            Price(section, id, "PriceCachedPerMTok"),
-            Price(section, id, "PriceOutPerMTok"),
+            Price(section, id, "PriceInPerMTok", mustBePositive: true),
+            Price(section, id, "PriceCachedPerMTok", mustBePositive: false),
+            Price(section, id, "PriceOutPerMTok", mustBePositive: true),
             project);
     }
 
@@ -100,8 +100,9 @@ public sealed record LlmProviderOptions(
             ? n
             : throw new LlmConfigurationException($"Llm:Providers:{id}:{name} must be a whole number.");
 
-    private static decimal Price(IConfigurationSection section, string id, string name) =>
-        decimal.TryParse(section[name], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var price) && price >= 0
+    // B94-m4: a zero in/out price would make every call free and the cap would never trip, so those two must be > 0 (cached may be 0).
+    private static decimal Price(IConfigurationSection section, string id, string name, bool mustBePositive) =>
+        decimal.TryParse(section[name], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var price) && (mustBePositive ? price > 0 : price >= 0)
             ? price
-            : throw new LlmConfigurationException($"Llm:Providers:{id}:{name} must be a non-negative decimal.");
+            : throw new LlmConfigurationException($"Llm:Providers:{id}:{name} must be a {(mustBePositive ? "positive" : "non-negative")} decimal.");
 }

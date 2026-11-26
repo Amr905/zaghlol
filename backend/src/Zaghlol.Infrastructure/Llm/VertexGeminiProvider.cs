@@ -112,7 +112,7 @@ public sealed partial class VertexGeminiProvider(
         JsonDocument doc;
         try
         {
-            doc = JsonDocument.Parse(body);
+            doc = JsonDocument.Parse(body, LlmReplyReader.NoDuplicates);
         }
         catch (JsonException)
         {

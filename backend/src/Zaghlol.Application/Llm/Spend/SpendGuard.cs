@@ -34,7 +34,19 @@ public static class SpendLedgerMarkers
 /// <summary>The settings of <see cref="SpendGuard"/>.</summary>
 public sealed record SpendGuardOptions(TimeSpan CacheTtl, int MaxInputTokens, decimal WarnFraction)
 {
-    public static SpendGuardOptions Default { get; } = new(TimeSpan.FromSeconds(60), 4000, 0.8m);
+    /// <summary>The longest question the API accepts (ask-llm.md), in characters; counted as one token per character (an upper bound for any script).</summary>
+    public const int MaxQuestionChars = 300;
+
+    /// <summary>System prompt plus the structured-output schema. The schema alone is about 14 KB (about 3.5-4.5 k tokens); 20 000 leaves more than 4 times headroom (one token per byte would be 14 k for the schema).</summary>
+    public const int PromptAndSchemaTokens = 20_000;
+
+    /// <summary>Provider-added overhead (Anthropic tool definition, Vertex wrapper).</summary>
+    public const int ProviderOverheadTokens = 1_000;
+
+    /// <summary>The input-token bound the worst case is priced with: question + prompt and schema + provider overhead (B94-m5). The output bound is the call's configured max output tokens.</summary>
+    public const int DefaultMaxInputTokens = MaxQuestionChars + PromptAndSchemaTokens + ProviderOverheadTokens;
+
+    public static SpendGuardOptions Default { get; } = new(TimeSpan.FromSeconds(60), DefaultMaxInputTokens, 0.8m);
 }
 
 /// <summary>
@@ -97,16 +109,20 @@ public sealed class SpendReservation : IAsyncDisposable
     public decimal WorstCaseUsd => worstCase;
 
     /// <summary>Records the real usage (also of a failed, refused or invalid call) and releases the reservation. Call once; later calls do nothing. Never throws.</summary>
-    public Task SettleAsync(LlmOutcome outcome, LlmUsage usage, TimeSpan latency) =>
+    /// <remarks>
+    /// B94-M1: when the usage is unknown (zero input and output tokens: timeout, transport failure after send, a reply without a usage
+    /// block) the call is charged at the reserved worst case. Only <paramref name="neverSent"/> (see <see cref="LlmResult.NeverSent"/>) settles at 0.
+    /// </remarks>
+    public Task SettleAsync(LlmOutcome outcome, LlmUsage usage, TimeSpan latency, bool neverSent = false) =>
         Interlocked.Exchange(ref done, 1) == 0
-            ? guard.SettleAsync(feature, providerId, price, worstCase, outcome, usage, latency)
+            ? guard.SettleAsync(feature, providerId, price, worstCase, outcome, usage, latency, worstUsage, neverSent)
             : Task.CompletedTask;
 
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref done, 1) == 0)
         {
-            await guard.SettleAsync(feature, providerId, price, worstCase, LlmOutcome.Upstream, worstUsage, TimeSpan.Zero).ConfigureAwait(false);
+            await guard.SettleAsync(feature, providerId, price, worstCase, LlmOutcome.Upstream, worstUsage, TimeSpan.Zero, worstUsage, neverSent: false).ConfigureAwait(false);
         }
     }
 }
@@ -175,7 +191,7 @@ public sealed partial class SpendGuard(
     public async Task<SpendReservation> ReserveAsync(LlmFeature feature, string providerId, int maxOutputTokens, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(providerId);
-        if (!prices.TryGet(providerId, out var price))
+        if (!prices.TryGet(providerId, out var price) || price.Prices.InPerMTok <= 0 || price.Prices.OutPerMTok <= 0)
         {
             metrics.Paused(feature, "no_price");
             throw new LlmServicePausedException();
@@ -242,8 +258,19 @@ public sealed partial class SpendGuard(
         return new SpendReservation(this, feature, providerId, price, worst, new LlmUsage(settings.MaxInputTokens, 0, maxOutputTokens));
     }
 
-    internal async Task SettleAsync(LlmFeature feature, string providerId, LlmPriceEntry price, decimal reserved, LlmOutcome outcome, LlmUsage usage, TimeSpan latency)
+    internal async Task SettleAsync(LlmFeature feature, string providerId, LlmPriceEntry price, decimal reserved, LlmOutcome outcome, LlmUsage usage, TimeSpan latency, LlmUsage worstUsage, bool neverSent)
     {
+        ArgumentNullException.ThrowIfNull(usage);
+        if (neverSent)
+        {
+            usage = LlmUsage.None;
+        }
+        else if (usage.InputTokens <= 0 && usage.OutputTokens <= 0)
+        {
+            usage = worstUsage;
+            LogUsageMissing(providerId);
+        }
+
         var cost = LlmCostCalculator.Cost(usage, price.Prices);
         var now = clock.GetUtcNow();
         var record = new SpendRecord(
@@ -358,14 +385,23 @@ public sealed partial class SpendGuard(
             var now = clock.GetUtcNow();
             var month = MonthStart(now);
             var capValue = (await config.GetAsync(cancellationToken).ConfigureAwait(false)).GetDecimal(RemoteConfigKeys.LlmSpendCapUsd);
+            decimal snapshot;
+            decimal pendingAtSnapshot;
+            lock (gate)
+            {
+                snapshot = localSettled;
+                pendingAtSnapshot = pending.Sum(r => r.CostUsd);
+            }
+
             var total = await ledger.TotalAsync(month, month.AddMonths(1), cancellationToken).ConfigureAwait(false);
             lock (gate)
             {
                 cachedMonth = month;
                 cachedAt = now;
                 hasCache = true;
-                baseTotal = total;
-                localSettled = 0;
+                // B94-m6: drop only what was counted before the read; add queued (unwritten) entries the read can't see.
+                baseTotal = total + pendingAtSnapshot;
+                localSettled -= snapshot;
                 cap = capValue;
             }
         }
@@ -430,6 +466,9 @@ public sealed partial class SpendGuard(
 
     [LoggerMessage(EventId = 1, Level = LogLevel.Warning, Message = "LLM spend guard failed closed ({operation}).")]
     private partial void LogFailClosed(string operation);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "LLM usage unknown for {providerId}; settled at the reserved worst case.")]
+    private partial void LogUsageMissing(string providerId);
 
     [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "LLM spend 80 % alert could not be recorded or sent.")]
     private partial void LogAlertFailed();

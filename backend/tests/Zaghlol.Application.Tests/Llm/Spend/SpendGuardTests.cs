@@ -303,7 +303,77 @@ public class SpendGuardTests
         await using var failed = await guard.ReserveAsync(LlmFeature.Categorise, "p1", 100, CancellationToken.None);
         await failed.SettleAsync(LlmOutcome.Timeout, LlmUsage.None, TimeSpan.FromSeconds(8));
         var row = Assert.Single(ledger.Rows);
-        Assert.Equal((new DateOnly(2026, 11, 10), LlmFeature.Categorise, "p1", "model-x", 1, 0m), (row.Day, row.Feature, row.ProviderId, row.Model, row.Calls, row.CostUsd));
+        Assert.Equal((new DateOnly(2026, 11, 10), LlmFeature.Categorise, "p1", "model-x", 1), (row.Day, row.Feature, row.ProviderId, row.Model, row.Calls));
+        Assert.Equal(failed.WorstCaseUsd, row.CostUsd); // B94-M1: unknown usage is charged at the worst case
+    }
+
+    [Theory]
+    [InlineData(LlmOutcome.Timeout)]
+    [InlineData(LlmOutcome.Upstream)]
+    [InlineData(LlmOutcome.Ok)]
+    [InlineData(LlmOutcome.Invalid)]
+    public async Task UnknownUsageOfASentCallIsSettledAtTheWorstCase(LlmOutcome outcome)
+    {
+        var guard = Guard();
+        await using var reservation = await guard.ReserveAsync(LlmFeature.Ask, "p1", 100, CancellationToken.None);
+        await reservation.SettleAsync(outcome, LlmUsage.None, TimeSpan.Zero);
+        Assert.Equal(reservation.WorstCaseUsd, Assert.Single(ledger.Rows).CostUsd);
+        Assert.True(reservation.WorstCaseUsd > 0m);
+    }
+
+    [Fact]
+    public async Task OnlyACallThatNeverReachedTheProviderIsSettledAtZero()
+    {
+        var guard = Guard();
+        await using var reservation = await guard.ReserveAsync(LlmFeature.Ask, "p1", 100, CancellationToken.None);
+        await reservation.SettleAsync(LlmOutcome.Upstream, LlmUsage.None, TimeSpan.Zero, neverSent: true);
+        Assert.Equal(0m, Assert.Single(ledger.Rows).CostUsd);
+    }
+
+    [Fact]
+    public async Task TheCapTripsWhenEveryCallHasUnknownUsage()
+    {
+        var guard = Guard(maxInput: 1_000_000);
+        config.Cap = "10";
+        for (var i = 0; i < 20 && !await guard.IsPausedAsync(CancellationToken.None); i++)
+        {
+            await using var r = await guard.ReserveAsync(LlmFeature.Ask, "p1", 1_000_000, CancellationToken.None);
+            await r.SettleAsync(LlmOutcome.Timeout, LlmUsage.None, TimeSpan.Zero);
+        }
+
+        Assert.True(await guard.IsPausedAsync(CancellationToken.None));
+    }
+
+    [Theory]
+    [InlineData(0, 0.5, 1)]
+    [InlineData(1, 0.5, 0)]
+    [InlineData(-1, 0.5, 1)]
+    public async Task AProviderWithAZeroOrNegativePriceIsPausedNotFree(double inPrice, double cached, double outPrice)
+    {
+        var guard = Guard(new LlmPrices((decimal)inPrice, (decimal)cached, (decimal)outPrice));
+        await Assert.ThrowsAsync<LlmServicePausedException>(() => guard.ReserveAsync(LlmFeature.Ask, "p1", 100, CancellationToken.None));
+    }
+
+    [Fact]
+    public void TheDefaultInputBoundCoversTheQuestionTheSchemaAndTheProviderOverhead()
+    {
+        Assert.Equal(300 + 20_000 + 1_000, SpendGuardOptions.Default.MaxInputTokens);
+        Assert.True(SpendGuardOptions.Default.MaxInputTokens >= SpendGuardOptions.MaxQuestionChars + 14_000); // 14 KB schema at one token per byte
+    }
+
+    [Fact]
+    public async Task ASettleDuringTheRefreshReadIsNotLost()
+    {
+        var guard = Guard();
+        config.Cap = "10";
+        await CallAsync(guard, LlmFeature.Ask); // 0.000 something, warms the cache
+        ledger.FailWrites = true;
+        await CallAsync(guard, LlmFeature.Ask, 1_000_000, 0, 1_000_000); // 5.00 stays queued, unwritten
+        ledger.FailWrites = false;
+        clock.Now = clock.Now.AddMinutes(2); // refresh: the ledger read can't see the queued 5.00
+        await using var r = await guard.ReserveAsync(LlmFeature.Ask, "p1", 1, CancellationToken.None);
+        await CallAsync(guard, LlmFeature.Ask, 1_000_000, 0, 1_000_000); // 5.00 more
+        Assert.True(await guard.IsPausedAsync(CancellationToken.None)); // 10.00 reached only if the queued one was kept
     }
 
     [Fact]

@@ -67,6 +67,8 @@ public sealed class LlmGatewayConfigurationTests
 
     [Theory]
     [InlineData("PriceInPerMTok", "-1")]
+    [InlineData("PriceInPerMTok", "0")]
+    [InlineData("PriceOutPerMTok", "0")]
     [InlineData("PriceInPerMTok", "1e3")]
     [InlineData("PriceInPerMTok", "abc")]
     [InlineData("Endpoint", "https://user:pw@llm.example.test/")]

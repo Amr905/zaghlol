@@ -51,7 +51,7 @@ public sealed partial class LlmCallGuard(string providerId, LlmGuardOptions opti
         ArgumentNullException.ThrowIfNull(attempt);
         if (!TryEnter(out var isProbe))
         {
-            return LlmResult.Failed(LlmOutcome.Upstream);
+            return LlmResult.NotSent();
         }
 
         var recorded = false;
@@ -78,7 +78,7 @@ public sealed partial class LlmCallGuard(string providerId, LlmGuardOptions opti
         {
             Record(failed: true, isProbe);
             recorded = true;
-            return LlmResult.Failed(LlmOutcome.Upstream);
+            return LlmResult.NotSent();
         }
         finally
         {

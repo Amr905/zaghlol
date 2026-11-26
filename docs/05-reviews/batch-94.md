@@ -180,3 +180,12 @@ No hard-coded strings. Every text comes from `AppLocalizations`, and the keys ma
 
 ## Follow-ups (minors; not blocking)
 B94-m1 (T-338/T-351), B94-m2 (FU-411 admin host), B94-m3, B94-m4–m6 (T-339 owner), B94-m7 (T-348), B94-m8 (T-348/T-346), B94-m9 (T-358), and the nickname/Coptic additions to `eg_given_names.txt` (T-325 list owner).
+
+## Fix round — backend
+
+- **B94-M1 (T-339):** `SpendReservation.SettleAsync` now settles unknown usage (zero input and output tokens: timeout, transport failure after send, reply without a usage block) at the reserved worst case. Only `neverSent: true` settles at 0; `LlmCallGuard` sets `LlmResult.NeverSent` for an open circuit and a connect failure. Tests: `UnknownUsageOfASentCallIsSettledAtTheWorstCase`, `OnlyACallThatNeverReachedTheProviderIsSettledAtZero`, `TheCapTripsWhenEveryCallHasUnknownUsage`, guard test asserts `NeverSent`.
+- **B94-m4:** `PriceInPerMTok` and `PriceOutPerMTok` must be `> 0` (cached may be 0) at config read; the guard also pauses a provider whose in or out price is `<= 0`. Tests: config theory rows, `AProviderWithAZeroOrNegativePriceIsPausedNotFree`.
+- **B94-m5:** the worst-case input bound is `MaxQuestionChars (300) + PromptAndSchemaTokens (20 000) + ProviderOverheadTokens (1 000)` = 21 300, explicit constants with comments; output is the call's max output tokens. Test: `TheDefaultInputBoundCoversTheQuestionTheSchemaAndTheProviderOverhead`.
+- **B94-m6:** refresh subtracts only the snapshot of `localSettled` taken before the ledger read and adds the queued (unwritten) entries to the base. Test: `ASettleDuringTheRefreshReadIsNotLost`.
+- **T-338 minor:** Vertex replies parse with `LlmReplyReader.NoDuplicates`. Test: `ADuplicatePropertyInTheEnvelopeIsInvalid`.
+- Local: `dotnet build -warnaserror` and `dotnet format --verify-no-changes` clean; Application Llm/Spend tests 265 passed; Infrastructure Llm (non-Docker) 176 passed.
