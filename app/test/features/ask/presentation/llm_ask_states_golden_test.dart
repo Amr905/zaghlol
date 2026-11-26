@@ -3,6 +3,8 @@
 @Tags(['golden'])
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/llm/llm_quota_snapshot.dart';
@@ -24,7 +26,8 @@ void main() {
   final states = <String, Script>{
     'sending': (_, _) async* {
       yield const AskLlmSending();
-      await Future<void>.delayed(const Duration(days: 1));
+      // Never completes: a timer would be left pending at the end of the test.
+      await Completer<void>().future;
     },
     'error': (_, _) => _one(const AskLlmFailed(AskLlmFailure.timeout)),
     'paused': (_, _) => _one(const AskLlmPaused()),
