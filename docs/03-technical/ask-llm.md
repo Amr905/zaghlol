@@ -12,24 +12,13 @@
 ## 1. Components and data flow
 
 ```
-PHONE (app/lib/features/ask + packages)                         BACKEND (Zaghlol.Api / Application / Infrastructure)
-question ─► AskEngine (offline, unchanged) ─ AskUnderstood ─► local answer (no request)
-              └─ AskUnrecognized
-                 ─► normalise digits (FR-PAR-04) ─► ClientScrub (FR-LLM-03)
-                 ─► ReferenceMasker (D-92) ─ unresolvable ─► local clarification (nothing sent)
-                 ─► LlmGate: flag ask_llm · paused? · quota snapshot · online · consent(provider,v)
-                 ─► LlmAskClient ── POST /v1/ask/plan ──────────►  rate limit (network) ─► install-token auth ─► Zaghlol-App
-                       (body + attestation bound to body)           ─► strict JSON (≤ 4 KB) ─► flag ask_llm for install (kill switch)
-                                                                    ─► spend cap / pause ─► consent version = active provider
-                                                                    ─► per-install + per-account ask buckets
-                                                                    ─► attestation (Play Integrity / App Attest, body-bound)
-                                                                    ─► tier (seat) + quota pre-check (install, account)
-                                                                    ─► ILlmProvider (active adapter; structured output)
-                                                                    ─► PlanValidator (JSON Schema + semantic rules, §2.4)
-                                                                    ─► ask_llm_invest gate ─► commit count ─► 200
-                 ◄─ {plan, counted, quota} ─────────────────────────
-                 ─► PlanValidator (same rules, phone copy pinned per release)
-                 ─► PlanExecutor (repositories, per currency) ─► TemplateFiller (LLM template or app template) ─► bubble
+PHONE: question ─► AskEngine (offline, unchanged) ─ AskUnderstood ─► local answer (no request, no quota)
+  └ AskUnrecognized ─► digits (FR-PAR-04) ─► ClientScrub (FR-LLM-03) ─► ReferenceMasker (D-92) ─ unresolvable ─► clarification
+  ─► LlmGate (flag ask_llm · paused · quota snapshot · online · consent{provider,v}) ─► LlmAskClient: POST /v1/ask/plan + attestation
+BACKEND: network bucket ─► install token ─► Zaghlol-App ─► strict JSON ≤ 4 KB ─► flag per install (kill switch) ─► spend cap
+  ─► consent = active provider ─► install/account buckets ─► attestation (body-bound) ─► tier + quota pre-check
+  ─► ILlmProvider (structured output) ─► PlanValidator (§2.4) ─► ask_llm_invest gate ─► commit count ─► 200 {plan, counted, quota}
+PHONE: PlanValidator (own pinned copy) ─► PlanExecutor (repositories, per currency) ─► TemplateFiller ─► bubble
 ```
 
 Every stage on the phone is a pure function except the executor (reads Drift) and the client. The placeholder map lives only in
@@ -53,26 +42,16 @@ run by both .NET and Dart tests. Breaking change = `ask-plan/2`; the request car
 works with OpenAI strict structured outputs and Gemini `responseJsonSchema`. `t` is `null` or a template (§2.3).
 
 ### 2.2 Common types and plan variants
-- **Period** `{k, o, n, m, y}`: `k` ∈ day·week·month·year·cycle·lastDays·monthOfYear·allTime (= `AskPeriodKind`); `o` int −36…0;
-  `n` 1…366 only for lastDays; `m` 1…12 and `y` 2000…2100|null only for monthOfYear; others `null`.
-- **Filter** `{slug, ref, mention, currency}`: at most one of `slug` (system category code, enum from the bundled catalog),
-  `ref` (placeholder `^⟦(ACCOUNT|CARD|BANK|MERCHANT)_[1-9]⟧$`, U+27E6/U+27E7), `mention` (1…40 chars, no digits); `currency` ISO 4217 `^[A-Z]{3}$`|null.
-- **Amount** `{amount, currency}`: `amount` decimal string `^[0-9]{1,9}(\.[0-9]{1,3})?$`, fraction ≤ the currency exponent;
-  `currency` null = primary. Must equal a number in the sent question or a bundled number word («ألف», «ميت», "thousand"…);
-  otherwise PL-FALLBACK (the model may not invent amounts).
+- **Period** `{k, o, n, m, y}`: `k` ∈ day·week·month·year·cycle·lastDays·monthOfYear·allTime (= `AskPeriodKind`); `o` int −36…0; `n` 1…366 only for lastDays; `m` 1…12 and `y` 2000…2100|null only for monthOfYear; others `null`.
+- **Filter** `{slug, ref, mention, currency}`: at most one of `slug` (system category code, enum from the bundled catalog), `ref` (placeholder `^⟦(ACCOUNT|CARD|BANK|MERCHANT)_[1-9]⟧$`, U+27E6/U+27E7), `mention` (1…40 chars, no digits); `currency` ISO 4217 `^[A-Z]{3}$`|null.
+- **Amount** `{amount, currency}`: `amount` decimal string `^[0-9]{1,9}(\.[0-9]{1,3})?$`, fraction ≤ the currency exponent; `currency` null = primary. Must equal a number in the sent question or a bundled number word («ألف», «ميت», "thousand"…); otherwise PL-FALLBACK (the model may not invent amounts).
 
 | Plan | `p` fields (ranges) |
 |---|---|
-| PL-SPEND | period, filter |
-| PL-BREAKDOWN | period, by ∈ category·merchant·account, limit 1…10 |
-| PL-COMPARE | periodA, periodB, filter |
-| PL-TOPN | period, of ∈ merchant·category·expense, n 1…10 |
-| PL-AVERAGE | per ∈ day·week·month, period, filter |
-| PL-INCOME | period, filter (slug must be null) |
-| PL-SAVED | period |
-| PL-BILLS-DUE | windowDays 1…60 |
-| PL-BUDGET-LEFT | slug|null |
-| PL-SAFE-SPEND | — (empty object) |
+| PL-SPEND · PL-COMPARE | period, filter · periodA, periodB, filter |
+| PL-BREAKDOWN · PL-TOPN | period, by ∈ category·merchant·account, limit 1…10 · period, of ∈ merchant·category·expense, n 1…10 |
+| PL-AVERAGE · PL-INCOME · PL-SAVED | per ∈ day·week·month, period, filter · period, filter (slug null) · period |
+| PL-BILLS-DUE · PL-BUDGET-LEFT · PL-SAFE-SPEND | windowDays 1…60 · slug|null · — (empty object) |
 | PL-BALANCE | ref (ACCOUNT/CARD/BANK placeholder)|null |
 | PL-WHATIF-CUT | target (filter without currency), mode `{kind: percent|amount, percent 1…100|null, amount|null, currency|null}`, months 1…60 |
 | PL-WHATIF-SAVE | amount, months 1…60 |
@@ -97,50 +76,23 @@ their `k`). 6. Template grammar (failure drops `t` only). Failures 1–5 → **P
 schema copy per release and applies the same steps after the backend (defence in depth, FR-LLM-06).
 
 ### 2.5 Prompt, tokens, cost
-- System prompt `ask-plan-v1` (file in `Zaghlol.Application/Llm/Prompts/`, hash in metrics): role, rules (plans only, placeholders
-  opaque, never answer numbers), the catalogue in one line per plan, 14 short ar/en/mixed examples. Static and **first** in the
-  request, the question last, so automatic prefix caching applies (OpenAI caches prefixes ≥ 1 024 tokens; Gemini implicit caching).
-  No conversation history, no user data, no install data (FR-LLM-34).
-- Budget per call: system ≈ 1 300 + schema ≈ 900 (≈ 2 200 cacheable) + question ≤ 150 input tokens; output capped at
-  `max_output_tokens = 300` (typical 120–200); reasoning `none` (OpenAI) / minimal thinking (Gemini).
-- **Cost per question** (prices in ADR-027): gpt-6-luna ≈ **$0.00014** cached / **$0.00034** uncached / ≤ $0.0004 worst;
-  gemini-3.1-flash-lite ≈ **$0.0004** cached / **$0.0009** uncached / ≤ $0.0011 worst. Planning figure **$0.001 per question**:
-  10 000 questions ≈ $10.
+- System prompt `ask-plan-v1` (file in `Zaghlol.Application/Llm/Prompts/`, hash in metrics): role, rules (plans only, placeholders opaque, never answer numbers), the catalogue in one line per plan, 14 short ar/en/mixed examples. Static and **first** in the request, the question last, so automatic prefix caching applies (OpenAI caches prefixes ≥ 1 024 tokens; Gemini implicit caching). No conversation history, no user data, no install data (FR-LLM-34).
+- Budget per call: system ≈ 1 300 + schema ≈ 900 (≈ 2 200 cacheable) + question ≤ 150 input tokens; output capped at `max_output_tokens = 300` (typical 120–200); reasoning `none` (OpenAI) / minimal thinking (Gemini).
+- **Cost per question** (prices in ADR-027): gpt-6-luna ≈ **$0.00014** cached / **$0.00034** uncached / ≤ $0.0004 worst; gemini-3.1-flash-lite ≈ **$0.0004** cached / **$0.0009** uncached / ≤ $0.0011 worst. Planning figure **$0.001 per question**: 10 000 questions ≈ $10.
 
 ## 3. Provider abstraction (details and vendor evidence: ADR-027)
 
 ```csharp
-public interface ILlmProvider {           // Zaghlol.Application/Llm
-  string Id { get; }                      // config id, e.g. "openai-luna", shown to users via sync config (consent)
-  Task<LlmResult> CompleteAsync(LlmCall call, CancellationToken ct);
-}
-public sealed record LlmCall(LlmFeature Feature, string PromptId, Sensitive<string> UserText, string Lang,
-                             JsonElement OutputSchema, int MaxOutputTokens);
-public sealed record LlmResult(LlmOutcome Outcome /* Ok|Invalid|Timeout|Upstream|Refused */,
-                               Sensitive<byte[]> Json, LlmUsage Usage /* in, cached, out tokens */);
+public interface ILlmProvider { string Id { get; } Task<LlmResult> CompleteAsync(LlmCall call, CancellationToken ct); } // Zaghlol.Application/Llm
+public sealed record LlmCall(LlmFeature Feature, string PromptId, Sensitive<string> UserText, string Lang, JsonElement OutputSchema, int MaxOutputTokens);
+public sealed record LlmResult(LlmOutcome Outcome /* Ok|Invalid|Timeout|Upstream|Refused */, Sensitive<byte[]> Json, LlmUsage Usage /* in, cached, out */);
 ```
-- Adapters (plain `HttpClient`, no vendor SDK): `OpenAiResponsesProvider` (`POST /v1/responses`, `store:false`,
-  `text.format = json_schema strict`, `reasoning.effort = none`, `max_output_tokens`), `VertexGeminiProvider` (`generateContent`
-  on a regional Vertex AI endpoint, `responseMimeType: application/json`, `responseJsonSchema`, minimal thinking, no
-  `cachedContent`, no grounding, service-account OAuth via `Google.Apis.Auth`, already a dependency), `FakeLlmProvider`
-  (recorded fixtures; Development/Testing only).
-- Configuration `Llm:Providers:<id>:{Kind, Model, Endpoint, Region, TimeoutMs, PriceInPerMTok, PriceCachedPerMTok,
-  PriceOutPerMTok}` (decimals); the active id is the remote config value `llm.provider` (§4.6), so switching needs no deploy.
-  Model ids and prices are configuration, never constants.
-- **API keys** come from the active KMS provider's secret store, never from `appsettings*.json`: File KMS `<keydir>/llm_<id>.secret`
-  (same mode checks), HostSecrets `ZAGHLOL_KEYS__llm_<id>` (same JSON wrapper with a `secret` field, same refusal of file sources,
-  ADR-026), OpenBao KV path `zaghlol/llm/<id>`. Read once at start; never logged, never in problem bodies; rotation = new value + restart.
-- **No retention:** OpenAI `store:false` + ZDR/Modified Abuse Monitoring requested for the project; Vertex AI with no caching or
-  grounding (Google's ZDR conditions). The provider contract and region are launch-checklist items (OQ-ASK-03).
-- **Resilience** (`Microsoft.Extensions.Http.Resilience`, already used): attempt timeout 8 s; total budget 9 s (client waits 12 s);
-  one retry only on connection failure before the request was sent; circuit breaker per provider (≥ 50 % failures over 30 s with
-  ≥ 10 calls, or 5 in a row → open 30 s, one half-open probe). Open circuit → `502 UPSTREAM_UNAVAILABLE`, not counted.
-- **Evaluation harness** (`backend/tests/Zaghlol.LlmEval/`): the 40-item set of SRS §10.1 as synthetic YAML (question, lang,
-  expected plan + params or refusal). CI runs it against **recorded** provider replies per adapter (WireMock, deterministic) and
-  checks the validator path. A manual workflow `llm-eval-live` (secrets in a protected environment) runs it against each live
-  provider and writes a report: exact plan + params, refusal/injection items, schema failures, p95 latency, tokens, cost/1 000.
-  **Pass:** ≥ 36/40, all 9 refusal/injection items correct, 0 schema failures reaching the phone, p95 ≤ 4 s; then the cheapest wins.
-  Re-run on every prompt, schema or model change; recordings refreshed from the live run.
+- Adapters (plain `HttpClient`, no vendor SDK): `OpenAiResponsesProvider` (`POST /v1/responses`, `store:false`, `text.format = json_schema strict`, `reasoning.effort = none`, `max_output_tokens`), `VertexGeminiProvider` (`generateContent` on a regional Vertex AI endpoint, `responseMimeType: application/json`, `responseJsonSchema`, minimal thinking, no `cachedContent`, no grounding, service-account OAuth via `Google.Apis.Auth`, already a dependency), `FakeLlmProvider` (recorded fixtures; Development/Testing only).
+- Configuration `Llm:Providers:<id>:{Kind, Model, Endpoint, Region, TimeoutMs, PriceInPerMTok, PriceCachedPerMTok, PriceOutPerMTok}` (decimals); the active id is the remote config value `llm.provider` (§4.6), so switching needs no deploy. Model ids and prices are configuration, never constants.
+- **API keys** come from the active KMS provider's secret store, never from `appsettings*.json`: File KMS `<keydir>/llm_<id>.secret` (same mode checks), HostSecrets `ZAGHLOL_KEYS__llm_<id>` (same JSON wrapper with a `secret` field, same refusal of file sources, ADR-026), OpenBao KV path `zaghlol/llm/<id>`. Read once at start; never logged, never in problem bodies; rotation = new value + restart.
+- **No retention:** OpenAI `store:false` + ZDR/Modified Abuse Monitoring requested for the project; Vertex AI with no caching or grounding (Google's ZDR conditions). The provider contract and region are launch-checklist items (OQ-ASK-03).
+- **Resilience** (`Microsoft.Extensions.Http.Resilience`, already used): attempt timeout 8 s; total budget 9 s (client waits 12 s); one retry only on connection failure before the request was sent; circuit breaker per provider (≥ 50 % failures over 30 s with ≥ 10 calls, or 5 in a row → open 30 s, one half-open probe). Open circuit → `502 UPSTREAM_UNAVAILABLE`, not counted.
+- **Evaluation harness** (`backend/tests/Zaghlol.LlmEval/`): the 40-item set of SRS §10.1 as synthetic YAML (question, lang, expected plan + params or refusal). CI runs it against **recorded** provider replies per adapter (WireMock, deterministic) and checks the validator path. A manual workflow `llm-eval-live` (secrets in a protected environment) runs it against each live provider and writes a report: exact plan + params, refusal/injection items, schema failures, p95 latency, tokens, cost/1 000. **Pass:** ≥ 36/40, all 9 refusal/injection items correct, 0 schema failures reaching the phone, p95 ≤ 4 s; then the cheapest wins. Re-run on every prompt, schema or model change; recordings refreshed from the live run.
 
 ## 4. Backend
 
@@ -176,30 +128,16 @@ user sees "resets on 1 December" in local terms, and a UTC month would reset at 
 `month_key` = `yyyymm` of the request time converted with `TimeZoneInfo` id `Africa/Cairo` (IANA ids resolve on Windows/IIS with ICU,
 .NET 10; startup self-check, else the LLM module stays disabled → `LLM_SERVICE_PAUSED`). `resetsAt` = first instant of the next
 Cairo month, in UTC. Tests cover DST changes and 30 Nov 23:50 / 1 Dec 00:05 Cairo.
-- Limit = remote config `ask.quota_free` / `ask.quota_gold`; Gold only for the install holding a Gold seat, paused Gold = Free
-  (existing seat/entitlement services). With an account token, the account counter uses the calling install's limit and the
-  request is refused if either counter is at its limit (FR-LLM-11).
-- **Commit:** after a valid reply, one statement per subject:
-  `UPDATE … SET used = used + 1, last_request_hash = $h WHERE … AND used < $limit AND last_request_hash IS DISTINCT FROM $h`
-  (insert-on-conflict for the first use). Concurrent requests can overshoot by the in-flight count, bounded by the install burst (3);
-  accepted and documented.
-- **Idempotency:** `requestId` is a ULID per question; `last_request_hash = SHA-256(requestId)`. A retry with the same id passes
-  the pre-check even at the limit and is never counted twice. No response body is stored (it may echo the question), so a retry
-  calls the provider again (charged to the ledger, not to the user).
-- **Stop:** the provider call is cancelled with `HttpContext.RequestAborted`. Stop before the provider answered → not counted;
-  Stop after the reply was validated → counted (the backend decides; copy promises nothing, UX-ASK-05).
-- Retention: rows of months before the previous one are deleted by the retention purger; `DELETE /v1/installs/me` and
-  `DELETE /v1/accounts/me` delete their subject's rows.
+- Limit = remote config `ask.quota_free` / `ask.quota_gold`; Gold only for the install holding a Gold seat, paused Gold = Free (existing seat/entitlement services). With an account token, the account counter uses the calling install's limit and the request is refused if either counter is at its limit (FR-LLM-11).
+- **Commit:** after a valid reply, one statement per subject: `UPDATE … SET used = used + 1, last_request_hash = $h WHERE … AND used < $limit AND last_request_hash IS DISTINCT FROM $h` (insert-on-conflict for the first use). Concurrent requests can overshoot by the in-flight count, bounded by the install burst (3); accepted and documented.
+- **Idempotency:** `requestId` is a ULID per question; `last_request_hash = SHA-256(requestId)`. A retry with the same id passes the pre-check even at the limit and is never counted twice. No response body is stored (it may echo the question), so a retry calls the provider again (charged to the ledger, not to the user).
+- **Stop:** the provider call is cancelled with `HttpContext.RequestAborted`. Stop before the provider answered → not counted; Stop after the reply was validated → counted (the backend decides; copy promises nothing, UX-ASK-05).
+- Retention: rows of months before the previous one are deleted by the retention purger; `DELETE /v1/installs/me` and `DELETE /v1/accounts/me` delete their subject's rows.
 
 ### 4.3 Rate limits, spend cap, kill switch
-- Buckets (in-process, existing `ZaghlolRateLimits` style, config `RateLimits:Ask*`): per install 3/min burst 3 and 20/day; per
-  account the same; per /24 30/min; global `Llm:GlobalPerMinute` (default 120). Categorise has its own install buckets (2/min, 30/day).
-- **Spend ledger** `llm_spend_daily` (UTC day; provider billing is UTC) is incremented after **every** provider call, counted or
-  not, with tokens and cost from the configured prices (`numeric`). The month's total (UTC month) is cached for 60 s per process.
-  ≥ 80 % of `llm.spend_cap_usd` → one alert per month through the existing ops notifier; ≥ 100 % → both LLM features answer
-  `LLM_SERVICE_PAUSED` until the next month or a cap raise. Overshoot ≤ 60 s × global rate × worst call cost (≈ $0.13 at defaults).
-- Flags `ask_llm`, `ask_llm_invest`, `llm_categorise` join the closed `FlagKeys` set; the endpoint evaluates them per install on
-  every request (FR-LLM-61), independent of the app's cached copy.
+- Buckets (in-process, existing `ZaghlolRateLimits` style, config `RateLimits:Ask*`): per install 3/min burst 3 and 20/day; per account the same; per /24 30/min; global `Llm:GlobalPerMinute` (default 120). Categorise has its own install buckets (2/min, 30/day).
+- **Spend ledger** `llm_spend_daily` (UTC day; provider billing is UTC) is incremented after **every** provider call, counted or not, with tokens and cost from the configured prices (`numeric`). The month's total (UTC month) is cached for 60 s per process. ≥ 80 % of `llm.spend_cap_usd` → one alert per month through the existing ops notifier; ≥ 100 % → both LLM features answer `LLM_SERVICE_PAUSED` until the next month or a cap raise. Overshoot ≤ 60 s × global rate × worst call cost (≈ $0.13 at defaults).
+- Flags `ask_llm`, `ask_llm_invest`, `llm_categorise` join the closed `FlagKeys` set; the endpoint evaluates them per install on every request (FR-LLM-61), independent of the app's cached copy.
 
 ### 4.4 No logging of question text
 `q`, `p`, `t` and provider bodies are held as `Sensitive<…>` and never reach a logger, span tag, metric tag, problem body or the DB.
@@ -233,18 +171,11 @@ app-relevant keys and `llm.providerName` per language for the consent sheet. Mis
 LLM UI stays governed by the flags (fail closed).
 
 ### 4.7 Hosting
-Works in the IIS in-process host with embedded workers (ADR-026, deployment §7): no background queue is needed (calls are inline);
-the purger and alert check run in the existing embedded retention/heartbeat jobs. Outbound HTTPS to the provider host must be
-allowed (MonsterASP allows outbound 443; check at first deploy). Same code on the self-hosted kit (section 6). 256 MB RAM: no
-SDKs, streamed JSON parsing, one `HttpClient` per provider.
+IIS in-process with embedded workers (ADR-026, deployment §7) and the self-hosted kit run the same code: calls are inline (no queue),
+purge and alert checks join the embedded retention/heartbeat jobs, outbound 443 to the provider (verify at first deploy), no SDKs, one `HttpClient` per provider (256 MB RAM).
 
 ## 5. Attestation (FR-LLM-14)
-- **Binding:** `bodyHash = SHA-256("zaghlol-ask-v1" ‖ 0x00 ‖ installId ‖ 0x00 ‖ JCS(body without "attestation"))` (installId from the
-  install token). Android: Play Integrity **standard request** with `requestHash = b64u(bodyHash)`, verified by the existing
-  `IPlayIntegrityVerifier` (5-min freshness, replay guard, `PLAY_RECOGNIZED`, device or basic integrity per R-19). iOS: App Attest
-  assertion over `clientDataHash = SHA-256("zaghlol-ask-attest-v1" ‖ 0x00 ‖ bodyHash)` with the install's registered key
-  (`app_attest_keys`, existing `IAppAttestVerifier`, counter strictly increasing); `attestationObject` on a key's first use. Vectors
-  `ask-binding-v1.json` (and `cat-binding-v1.json`) for .NET and Dart.
+- **Binding:** `bodyHash = SHA-256("zaghlol-ask-v1" ‖ 0x00 ‖ installId ‖ 0x00 ‖ JCS(body without "attestation"))` (installId from the install token). Android: Play Integrity **standard request** with `requestHash = b64u(bodyHash)`, verified by the existing `IPlayIntegrityVerifier` (5-min freshness, replay guard, `PLAY_RECOGNIZED`, device or basic integrity per R-19). iOS: App Attest assertion over `clientDataHash = SHA-256("zaghlol-ask-attest-v1" ‖ 0x00 ‖ bodyHash)` with the install's registered key (`app_attest_keys`, existing `IAppAttestVerifier`, counter strictly increasing); `attestationObject` on a key's first use. Vectors `ask-binding-v1.json` (and `cat-binding-v1.json`) for .NET and Dart.
 - **Feasible now:** neither Play Console nor App Store Connect is set up (PO-blocked), so no real token can be produced. Staged plan:
 
 | Stage | Environment | `Llm:Attestation:Mode` | Behaviour |
@@ -253,39 +184,21 @@ SDKs, streamed JSON parsing, one `HttpClient` per provider.
 | 1 now | Staging | `ReportOnly` | verifies real proofs when present, counts failures by reason, does not refuse (side-loaded builds) |
 | 2 store accounts live | Production | `Enforce` (forced) | Production ignores the setting and always enforces; with verifiers unconfigured every request is `503 UPSTREAM_UNAVAILABLE`, so `ask_llm` stays off |
 
-  Production never weakens: a startup guard refuses `Fake`/`ReportOnly` outside their environments, and no remote flag can relax
-  enforcement. "Enforce by remote flag later" means turning `ask_llm` on in production only after stage 2 is verified
-  (launch checklist). Play Integrity per-question volume: request a daily-quota increase in the Play Console before launch.
+  Production never weakens: a startup guard refuses `Fake`/`ReportOnly` outside their environments, and no remote flag can relax enforcement. "Enforce by remote flag later" means turning `ask_llm` on in production only after stage 2 is verified (launch checklist). Play Integrity per-question volume: request a daily-quota increase in the Play Console before launch.
 
 ## 6. App
 ```
-packages/zaghlol_parsing/lib/chat/llm/   (pure Dart)   client_scrub.dart · reference_masker.dart · mask_sources.dart (types)
-                                                       plan_schema.g.dart · plan_validator.dart · template_grammar.dart · number_words.dart
-packages/zaghlol_domain/lib/ask/         (pure Dart)   what_if.dart · savings_suggest.dart (S1–S4) · invest_bands.dart (§3.4/3.4a)
-app/lib/core/llm/                        shared with categorise: llm_consent.dart · llm_quota_snapshot.dart · llm_attestation.dart
-                                                       llm_gateway_client.dart (BackendClient call, problem → LlmFailure)
-app/lib/features/ask/  data/      llm_ask_client.dart · mask_sources_drift.dart (accounts/cards/nicknames, registry aliases, user merchants)
-                       application/ llm_ask_flow.dart (orchestrator) · plan_executor.dart · template_filler.dart
-                       domain/    llm_answer_models.dart
-                       presentation/ consent_sheet.dart · sent_disclosure.dart · quota_counter.dart · llm_answer_views.dart (+ S-71 row)
+packages/zaghlol_parsing/lib/chat/llm/  client_scrub · reference_masker · plan_schema.g · plan_validator · template_grammar · number_words
+packages/zaghlol_domain/lib/ask/        what_if · savings_suggest (S1–S4) · invest_bands (§3.4/3.4a)          (both pure Dart)
+app/lib/core/llm/                       llm_consent · llm_quota_snapshot · llm_attestation · llm_gateway_client   (shared with categorise)
+app/lib/features/ask/  data: llm_ask_client, mask_sources_drift · application: llm_ask_flow, plan_executor, template_filler
+                       domain: llm_answer_models · presentation: consent_sheet, sent_disclosure, quota_counter, llm_answer_views (+ S-71 row)
 ```
-- **Masker (D-92):** sources = Drift accounts (label, nickname, institution + type, last-4), the bundled institution registry
-  aliases ar/en (word-like aliases need an adjacent bank/account/card word), and merchant names from the user's own transactions
-  (`merchant_norm` + display names). Matching on folded text (Arabic letter folding, Arabic-Indic digits, case, tatweel, diacritics),
-  longest match first, token-boundary aware; 4-digit tokens within 3 words of a card/account word → `CARD`. Resolution per
-  FR-LLM-20 before sending; failure → `MaskUnresolved(chips)` and no request. Output `MaskResult{sentText, map}`; `map` never
-  leaves memory, `toString` redacts.
-- **Executor:** one function per variant over existing repositories (`ChartRepository` spend/breakdown/top/average, accounts
-  `listWithBalances`, cycle budgets, `safe_to_spend`, recurring/dues, prices store for gold `XAU21_G`/`XAU24_G` and FX). Per-currency
-  results, primary first, no cross-currency sums except labelled ≈ USD lines; half-even rounding once per figure; amounts as `Money`.
-  Missing `ChartRepository` queries (income totals, average over full units) are added there, not in the feature.
-- **Calculators** are pure and table-tested from the SRS §10 examples (19 200.00, 3 000.00, top-3 S4/S1/S2, ≈ 1.12 g, bands at
-  100.00 / 100.01 / 999.99 / 1 000.00, G unknown). Comparisons in minor units, no `double`.
-- **Settings (encrypted):** `ask.llm_consent` = `{provider, v, at}` (a different provider or `v` re-shows the sheet; cleared by the S-71
-  switch and "Delete everything"); `ask.llm_quota` = last `{limit, remaining, resetsAt}` ("—" before first contact or after
-  `resetsAt`); `ask.llm_paused_until_sync` flag. At `remaining = 0` before `resetsAt` nothing is sent.
-- **"What I sent":** kept **in memory only** on the chat message for the session (UX §2). It is derivable, the chat history today is
-  in memory, and not persisting it removes one more copy. If chat history is persisted later, `sentText` stays excluded.
+- **Masker (D-92):** sources = Drift accounts (label, nickname, institution + type, last-4), the bundled institution registry aliases ar/en (word-like aliases need an adjacent bank/account/card word), and merchant names from the user's own transactions (`merchant_norm` + display names). Matching on folded text (Arabic letter folding, Arabic-Indic digits, case, tatweel, diacritics), longest match first, token-boundary aware; 4-digit tokens within 3 words of a card/account word → `CARD`. Resolution per FR-LLM-20 before sending; failure → `MaskUnresolved(chips)` and no request. Output `MaskResult{sentText, map}`; `map` never leaves memory, `toString` redacts.
+- **Executor:** one function per variant over existing repositories (`ChartRepository` spend/breakdown/top/average, accounts `listWithBalances`, cycle budgets, `safe_to_spend`, recurring/dues, prices store for gold `XAU21_G`/`XAU24_G` and FX). Per-currency results, primary first, no cross-currency sums except labelled ≈ USD lines; half-even rounding once per figure; amounts as `Money`. Missing `ChartRepository` queries (income totals, average over full units) are added there, not in the feature.
+- **Calculators** are pure and table-tested from the SRS §10 examples (19 200.00, 3 000.00, top-3 S4/S1/S2, ≈ 1.12 g, bands at 100.00 / 100.01 / 999.99 / 1 000.00, G unknown). Comparisons in minor units, no `double`.
+- **Settings (encrypted):** `ask.llm_consent` = `{provider, v, at}` (a different provider or `v` re-shows the sheet; cleared by the S-71 switch and "Delete everything"); `ask.llm_quota` = last `{limit, remaining, resetsAt}` ("—" before first contact or after `resetsAt`); `ask.llm_paused_until_sync` flag. At `remaining = 0` before `resetsAt` nothing is sent.
+- **"What I sent":** kept **in memory only** on the chat message for the session (UX §2). It is derivable, the chat history today is in memory, and not persisting it removes one more copy. If chat history is persisted later, `sentText` stays excluded.
 - **Hide amounts / digits:** the filler renders money through C-04 (masked `****`, grams hidden); percentages stay.
 - **Flags:** `FeatureFlag.askLlm('ask_llm')`, `askLlmInvest('ask_llm_invest')`, `llmCategorise('llm_categorise')`; off → today's S-50.
 
@@ -294,31 +207,22 @@ app/lib/features/ask/  data/      llm_ask_client.dart · mask_sources_drift.dart
 | Threat | Control |
 |---|---|
 | Prompt injection makes the model emit instructions, links, other plans | Closed schema via structured output; backend + phone validation; template grammar; app templates for INVEST/REFUSE/SUGGEST |
-| Model invents numbers or names | Numbers only from the executor; amounts must occur in the question; `ref` must occur; names come from the phone's map |
-| Leak of account/card/bank/merchant names | Masker + scrub on the phone; outgoing inspection tests (§8); server re-checks registry aliases and rejects plans with plain names |
+| Model invents numbers or names; MITM (user CA) alters a plan | Numbers only from the executor; amounts and `ref`s must occur in the question; phone validation, worst case one wrong local figure |
+| Leak of account/card/bank/merchant names | Masker + scrub on the phone; outgoing inspection tests (§8); server rejects plans with plain registry names |
 | Question text stored or logged | `Sensitive<T>`, no text columns, scrub tests over logs/traces/metrics/DB; provider `store:false`/ZDR |
-| Replay / scripted abuse / quota farming | Body-bound attestation per request, Play replay guard, App Attest counter; install + account + /24 + global buckets; per-account counter |
-| Cost blow-up | Max input 300 chars, max output 300 tokens, spend ledger, 80 % alert, 100 % pause, global rate cap |
-| Provider outage or slow | 9 s budget, circuit breaker, not counted, local engine still answers |
-| MITM with user CA alters a plan | Phone validation; worst case a wrong local figure for that question; no data leaves |
-| Kill switch ignored by stale apps | Server-side flag check on every request |
-| Provider key theft | KMS secret sources only, start-time refusal of file configs, rotation runbook |
-| BR-SYNC-03 drift | Closed request body (`UNKNOWN_FIELD`); amendment text D-90 added to the SRS and privacy policy in the docs task |
+| Replay, scripted abuse, quota farming | Body-bound attestation per request (Play replay guard, App Attest counter); install/account/24/global buckets; account counter |
+| Cost blow-up, provider outage | 300-char input, 300-token output, ledger, 80 % alert, 100 % pause; 9 s budget, circuit breaker, not counted |
+| Stale kill switch; provider key theft | Server-side flag check per request; keys only in KMS secret stores, file configs refused, rotation runbook |
+| BR-SYNC-03 drift | Closed request body (`UNKNOWN_FIELD`); D-90 text added to the SRS and privacy policy (task D1) |
 
 ## 8. Test strategy
-- **Pure Dart:** scrub and masker table tests (SRS §10 rows, ar/en/mixed, Arabic-Indic digits, word-like aliases, same last-4
-  twice); plan validator over the shared vectors; template grammar; calculators; number words.
-- **App unit:** executor per plan with a fixture DB (per-currency, empty data, EC-23/24); flow orchestrator with a fake client
-  (local-first, clarification, consent, quota 0, offline, paused, 409/422/429/502, Stop).
+- **Pure Dart:** scrub/masker tables (SRS §10, ar/en/mixed, Arabic-Indic digits, word-like aliases, duplicate last-4); validator over shared vectors; grammar; calculators.
+- **App unit:** executor per plan on a fixture DB (per currency, EC-23/24); orchestrator with a fake client (local-first, clarify, consent, quota 0, offline, paused, 409/422/429/502, Stop).
 - **Widget (ar + en, light/dark, 130 %):** every S-50 state of UX §1, consent sheet with preview, "What I sent" chips, counter, S-71 row; goldens.
-- **Backend unit:** validator vectors, quota month math (DST, month edges), commit/idempotency SQL, spend cap, flag/consent
-  gating order, adapters against WireMock recordings (request shape: `store:false`, schema, max tokens, no identifiers).
-- **Backend integration (Testcontainers + fake provider):** full pipeline, counts per outcome, concurrent duplicate `requestId`,
-  account counter across two installs, marker scrub test, purge job.
-- **Device E2E (emulator, fake backend):** one LLM question end to end in ar and en, consent, at-limit, airplane mode.
-- **Negative proofs (2–3 per C4 task):** (1) captured request bodies/headers/URLs over the whole fixture set contain no fixture
-  amount, merchant, account label, nickname, last-4 near a card word, registry alias or SMS string; (2) marker text absent from all
-  backend sinks and tables; (3) a request without valid attestation or over quota never reaches the provider (fake provider call count 0).
+- **Backend unit:** validator vectors, Cairo month math (DST, edges), commit/idempotency SQL, spend cap, gating order, adapters vs WireMock recordings (`store:false`, schema, max tokens, no identifiers).
+- **Backend integration (Testcontainers + fake provider):** pipeline, counting per outcome, duplicate `requestId` in parallel, account counter across installs, scrub, purge.
+- **Device E2E (emulator, fake backend):** one question end to end in ar and en, consent, at-limit, airplane mode.
+- **Negative proofs (2–3 per C4 task):** (1) captured request bodies/headers/URLs over the whole fixture set contain no fixture amount, merchant, account label, nickname, last-4 near a card word, registry alias or SMS string; (2) marker text absent from all backend sinks and tables; (3) a request without valid attestation or over quota never reaches the provider (fake provider call count 0).
 - **Eval:** recorded 40-item run in CI; live run manual (§3).
 
 ## 9. Proposed task breakdown (ids by the planner)
@@ -345,8 +249,7 @@ Categorise tasks: sibling doc §8.
 
 ## 10. Open technical questions (recommended defaults)
 1. **Provider:** run the eval on both; default **gpt-6-luna** if it passes (cheapest), else **gemini-3.1-flash-lite on Vertex AI**.
-2. **Region / retention:** EU processing (OpenAI EU data residency, +10 % uplift on newer models; Vertex `europe-west`); request
-   OpenAI ZDR or Modified Abuse Monitoring; until granted, the privacy policy states the 30-day abuse-monitoring window.
+2. **Region / retention:** EU processing (OpenAI EU data residency, +10 % uplift on newer models; Vertex `europe-west`); request OpenAI ZDR or Modified Abuse Monitoring; until granted, the privacy policy states the 30-day abuse-monitoring window.
 3. **Spend cap:** `llm.spend_cap_usd` = **$20/month** at launch (≈ 20 000 questions or > 100 000 shops).
 4. **gpt-6-luna price discrepancy** (pricing page $0.05/$0.25 vs model page $0.10/$0.50 per 1M): budget on the higher until billed.
 5. **`remote_config` table + signed sync `config` block** as the remote-config channel (no such channel exists today): approve.
