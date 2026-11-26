@@ -4,6 +4,22 @@ using Zaghlol.Application.Llm;
 
 namespace Zaghlol.Infrastructure.Llm;
 
+/// <summary>The effective id (row over host fallback) and the display names from <c>Llm:Providers:&lt;id&gt;</c> (FU-425).</summary>
+public sealed class ConfiguredLlmProviderIdentity(ConfiguredActiveLlmProviderId fallback, IReadOnlyList<LlmProviderOptions> providers) : ILlmProviderIdentity
+{
+    public string EffectiveId(RemoteConfigSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        var stored = snapshot.Get(RemoteConfigKeys.LlmProvider);
+        return stored.Length > 0 ? stored : fallback.Current;
+    }
+
+    public ProviderName? Names(string providerId) =>
+        providers.FirstOrDefault(p => string.Equals(p.Id, providerId, StringComparison.Ordinal)) is { DisplayNameAr: { Length: > 0 } ar, DisplayNameEn: { Length: > 0 } en }
+            ? new ProviderName(ar, en)
+            : null;
+}
+
 /// <summary>The active provider id from <c>Llm:ActiveProvider</c>: the fallback while remote config has no <c>llm.provider</c>.</summary>
 public sealed class ConfiguredActiveLlmProviderId(IConfiguration configuration) : IActiveLlmProviderId
 {
@@ -18,11 +34,10 @@ public sealed class ConfiguredActiveLlmProviderId(IConfiguration configuration) 
 /// </summary>
 public sealed class RemoteConfigActiveLlmProviderId(IRemoteConfigService remote, ConfiguredActiveLlmProviderId fallback) : IActiveLlmProviderId
 {
-    public async ValueTask<string> CurrentAsync(CancellationToken cancellationToken)
-    {
-        var stored = (await remote.GetAsync(cancellationToken)).Get(RemoteConfigKeys.LlmProvider);
-        return stored.Length > 0 ? stored : fallback.Current;
-    }
+    private readonly ConfiguredLlmProviderIdentity identity = new(fallback, []);
+
+    public async ValueTask<string> CurrentAsync(CancellationToken cancellationToken) =>
+        identity.EffectiveId(await remote.GetAsync(cancellationToken));
 }
 
 /// <summary>Resolves providers by id; the active id is read on every call so a switch needs no restart. An unknown id fails closed.</summary>

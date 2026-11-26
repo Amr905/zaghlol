@@ -37,8 +37,6 @@ public static partial class RemoteConfigKeys
 {
     public const string LlmProvider = "llm.provider";
     public const string LlmSpendCapUsd = "llm.spend_cap_usd";
-    public const string LlmProviderNameAr = "llm.provider_name.ar";
-    public const string LlmProviderNameEn = "llm.provider_name.en";
 
     public const string AskQuotaFree = "ask.quota_free";
     public const string AskQuotaGold = "ask.quota_gold";
@@ -63,14 +61,13 @@ public static partial class RemoteConfigKeys
     /// <summary>Provider ids and display names carry no <c>@</c>, so the audit CHECKs can never reject a value.</summary>
     public const string ProviderIdPattern = "^[a-z0-9][a-z0-9-]{1,31}$";
 
+    /// <summary>Display names come from host configuration <c>Llm:Providers:&lt;id&gt;:DisplayNameAr/En</c> (FU-425), not from remote config.</summary>
     public const string ProviderNamePattern = @"^[\p{L}\p{N} ._-]{1,64}$";
 
     public static IReadOnlyList<ConfigKeyDefinition> All { get; } =
     [
-        new(LlmProvider, ConfigValueKind.Text, string.Empty, false, Pattern: ProviderIdPattern),
+        new(LlmProvider, ConfigValueKind.Text, string.Empty, true, Pattern: ProviderIdPattern),
         new(LlmSpendCapUsd, ConfigValueKind.Amount, "10.00", false, 0, 100000),
-        new(LlmProviderNameAr, ConfigValueKind.Text, string.Empty, true, Pattern: ProviderNamePattern),
-        new(LlmProviderNameEn, ConfigValueKind.Text, string.Empty, true, Pattern: ProviderNamePattern),
         new(AskQuotaFree, ConfigValueKind.WholeNumber, "5", true, 0, 100000),
         new(AskQuotaGold, ConfigValueKind.WholeNumber, "50", true, 0, 100000),
         new(AskS1Pct, ConfigValueKind.WholeNumber, "15", true, 1, 1000),
@@ -87,9 +84,6 @@ public static partial class RemoteConfigKeys
         new(CatQuotaFree, ConfigValueKind.WholeNumber, "15", true, 0, 100000),
         new(CatQuotaGold, ConfigValueKind.WholeNumber, "150", true, 0, 100000),
     ];
-
-    /// <summary>The two provider display-name keys: sent as <c>providerName {ar, en}</c>, not inside <c>values</c>.</summary>
-    public static bool IsProviderName(string key) => key is LlmProviderNameAr or LlmProviderNameEn;
 
     public static ConfigKeyDefinition? Find(string? key) =>
         key is null ? null : All.FirstOrDefault(d => string.Equals(d.Key, key, StringComparison.Ordinal));

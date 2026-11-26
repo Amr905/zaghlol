@@ -1557,8 +1557,10 @@ paths:
         Role `flags_admin`. Audited (`config_update`: key, new value, new version). Unknown key `404`; a value of the
         wrong type or outside the key's range is `400 VALIDATION_FAILED` and is never echoed. Each change increments the
         key `version` by one; the `config` block of the sync carries the sum of the versions of the app-visible keys.
-        Server-only keys (`llm.provider`, `llm.spend_cap_usd`, `cat.cache_min_confidence`, `cat.confirm_n`) are
-        never sent to the app. Takes effect on the next request (nothing is cached on the server).
+        Server-only keys (`llm.spend_cap_usd`, `cat.cache_min_confidence`, `cat.confirm_n`) are
+        never sent to the app. `llm.provider` is app-visible (FU-425): `PUT` refuses (`400`) an id with no
+        `Llm:Providers:<id>` section with both display names and an API key. The former keys `llm.provider_name.ar/.en`
+        are retired (`404`). Takes effect on the next request (nothing is cached on the server).
       x-required-roles: [flags_admin]
       security:
         - operatorOidc: []
@@ -2849,7 +2851,11 @@ components:
             type: string
             maxLength: 64
         providerName:
-          description: Display name of the active provider per language, for the consent sheet.
+          description: |
+            Display name of the active provider per language, for the consent sheet. From host configuration
+            `Llm:Providers:<id>:DisplayNameAr/En` of the same provider as `values["llm.provider"]` (FU-425). `values["llm.provider"]`
+            (the effective id, `^[a-z0-9][a-z0-9-]{1,31}$`) and `providerName` are both present or both absent; absent means
+            the app has no consent terms and sends nothing.
           $ref: '#/components/schemas/ProviderName'
     ProviderName:
       type: object

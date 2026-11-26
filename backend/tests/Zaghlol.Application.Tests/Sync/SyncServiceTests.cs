@@ -26,7 +26,7 @@ public class SyncServiceTests
     private readonly FakeConfigReader configRows = new();
 
     private SyncService Service => new(
-        store, catalog, flags, new PriceReadService(prices, clock), entitlement, hasher, telemetry, SyncOptions.Default, clock, new RemoteConfigService(configRows));
+        store, catalog, flags, new PriceReadService(prices, clock), entitlement, hasher, telemetry, SyncOptions.Default, clock, new RemoteConfigService(configRows), new FakeIdentity());
 
     private static SyncRequestData Request(
         int catalogVersion = 0,
@@ -215,35 +215,39 @@ public class SyncServiceTests
         ];
 
         var first = Assert.IsType<SyncCompleted>(await SyncAsync(Request(configVersion: 0)));
-        Assert.Equal(2, first.Config!.Version);
+        Assert.Equal(6, first.Config!.Version);
         Assert.Equal("7", first.Config.Values[RemoteConfigKeys.AskQuotaFree]);
         Assert.False(first.UpToDate);
 
         store.Install = store.Install! with { LastSyncAt = null };
-        var same = Assert.IsType<SyncCompleted>(await SyncAsync(Request(configVersion: 2)));
+        var same = Assert.IsType<SyncCompleted>(await SyncAsync(Request(configVersion: 6)));
         Assert.Null(same.Config);
     }
 
+    private sealed class FakeIdentity : Zaghlol.Application.Llm.ILlmProviderIdentity
+    {
+        public string EffectiveId(RemoteConfigSnapshot snapshot) => snapshot.Get(RemoteConfigKeys.LlmProvider);
+
+        public ProviderName? Names(string providerId) => providerId == "secret-id" ? new ProviderName("المساعد", "Online helper") : null;
+    }
+
     [Fact]
-    public async Task ServerOnlyKeysNeverReachTheAppButTheProviderNameDoes()
+    public async Task ServerOnlyKeysNeverReachTheAppButTheProviderIdWithItsNamesDoes()
     {
         configRows.Rows =
         [
             new(RemoteConfigKeys.LlmProvider, "secret-id", 1, T0),
             new(RemoteConfigKeys.LlmSpendCapUsd, "12.00", 1, T0),
             new(RemoteConfigKeys.CatConfirmN, "4", 1, T0),
-            new(RemoteConfigKeys.LlmProviderNameAr, "المساعد", 1, T0),
-            new(RemoteConfigKeys.LlmProviderNameEn, "Online helper", 1, T0),
         ];
 
         var config = Assert.IsType<SyncCompleted>(await SyncAsync(Request())).Config!;
 
-        Assert.DoesNotContain(RemoteConfigKeys.LlmProvider, config.Values.Keys);
         Assert.DoesNotContain(RemoteConfigKeys.LlmSpendCapUsd, config.Values.Keys);
         Assert.DoesNotContain(RemoteConfigKeys.CatConfirmN, config.Values.Keys);
-        Assert.DoesNotContain(RemoteConfigKeys.LlmProviderNameAr, config.Values.Keys);
+        Assert.Equal("secret-id", config.Values[RemoteConfigKeys.LlmProvider]);
         Assert.Equal(new ProviderName("المساعد", "Online helper"), config.ProviderName);
-        Assert.Equal(2, config.Version);
+        Assert.Equal(1, config.Version);
     }
 
     [Fact]

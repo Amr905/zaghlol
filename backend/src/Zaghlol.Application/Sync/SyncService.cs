@@ -1,6 +1,7 @@
 using Zaghlol.Application.Catalog;
 using Zaghlol.Application.Config;
 using Zaghlol.Application.Flags;
+using Zaghlol.Application.Llm;
 using Zaghlol.Application.Prices;
 using Zaghlol.Domain;
 
@@ -23,7 +24,8 @@ public sealed class SyncService(
     ISyncTelemetry telemetry,
     SyncOptions options,
     TimeProvider clock,
-    IRemoteConfigService? remoteConfig = null)
+    IRemoteConfigService? remoteConfig = null,
+    ILlmProviderIdentity? providerIdentity = null)
 {
     public async Task<SyncResult> SyncAsync(InstallId installId, string appVersion, SyncRequestData request, CancellationToken cancellationToken)
     {
@@ -181,7 +183,13 @@ public sealed class SyncService(
         try
         {
             var snapshot = await remoteConfig.GetAsync(cancellationToken);
-            return snapshot.AppVersion != clientVersion ? snapshot.ToAppBlock() : null;
+            if (snapshot.AppVersion == clientVersion)
+            {
+                return null;
+            }
+
+            var id = providerIdentity?.EffectiveId(snapshot) ?? string.Empty;
+            return snapshot.ToAppBlock(id, id.Length > 0 ? providerIdentity?.Names(id) : null);
         }
 #pragma warning disable CA1031 // Config is advisory: any failure degrades the block to null.
         catch (Exception ex) when (ex is not OperationCanceledException)

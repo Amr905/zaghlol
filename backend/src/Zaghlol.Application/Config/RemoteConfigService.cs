@@ -61,15 +61,23 @@ public sealed class RemoteConfigSnapshot
         }
     }
 
-    /// <summary>The block the app receives: app-visible keys except the provider names, and the names when both are set.</summary>
-    public SyncConfigBlock ToAppBlock()
+    /// <summary>
+    /// The block the app receives. <c>llm.provider</c> is the effective id (<paramref name="effectiveProviderId"/>, resolved from this
+    /// same snapshot) and is present only with both display names; otherwise the key is absent and the names are null.
+    /// </summary>
+    public SyncConfigBlock ToAppBlock(string effectiveProviderId, ProviderName? names)
     {
+        ArgumentNullException.ThrowIfNull(effectiveProviderId);
         var map = RemoteConfigKeys.All
-            .Where(d => d.SentToApp && !RemoteConfigKeys.IsProviderName(d.Key))
+            .Where(d => d.SentToApp && d.Key != RemoteConfigKeys.LlmProvider)
             .ToDictionary(d => d.Key, d => Get(d.Key), StringComparer.Ordinal);
-        var ar = Get(RemoteConfigKeys.LlmProviderNameAr);
-        var en = Get(RemoteConfigKeys.LlmProviderNameEn);
-        return new SyncConfigBlock(AppVersion, map, ar.Length > 0 && en.Length > 0 ? new ProviderName(ar, en) : null);
+        if (effectiveProviderId.Length == 0 || names is null || names.Ar.Length == 0 || names.En.Length == 0)
+        {
+            return new SyncConfigBlock(AppVersion, map, null);
+        }
+
+        map[RemoteConfigKeys.LlmProvider] = effectiveProviderId;
+        return new SyncConfigBlock(AppVersion, map, names);
     }
 }
 
@@ -159,6 +167,7 @@ public sealed class RemoteConfigAdminService(IRemoteConfigAdminStore store, Time
         }
 
         // FU-411: a provider id the host has no adapter for would make every LLM call fail closed with no hint.
+        // FU-425: and one without both display names (the block would carry no id), or without a key.
         if (key == RemoteConfigKeys.LlmProvider && canonical.Length > 0 && knownProviders is { } known && !known.IsKnown(canonical))
         {
             return new ConfigSetResult(ConfigSetStatus.InvalidValue);

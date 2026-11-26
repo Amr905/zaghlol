@@ -57,7 +57,6 @@ public class RemoteConfigTests
     [InlineData(RemoteConfigKeys.LlmProvider, "Has Space")]
     [InlineData(RemoteConfigKeys.LlmProvider, "x@y")]
     [InlineData(RemoteConfigKeys.LlmProvider, "ok\n")]
-    [InlineData(RemoteConfigKeys.LlmProviderNameEn, "a@b")]
     public void AWrongTypeOrOutOfRangeValueIsRejected(string key, string raw) =>
         Assert.False(RemoteConfigKeys.TryCanonicalize(RemoteConfigKeys.Find(key)!, raw, out _));
 
@@ -68,7 +67,6 @@ public class RemoteConfigTests
     [InlineData(RemoteConfigKeys.LlmSpendCapUsd, "7.5", "7.50")]
     [InlineData(RemoteConfigKeys.AskInvestGoldKarat, "24", "24")]
     [InlineData(RemoteConfigKeys.LlmProvider, "openai-luna", "openai-luna")]
-    [InlineData(RemoteConfigKeys.LlmProviderNameAr, "المساعد الأونلاين", "المساعد الأونلاين")]
     public void ValuesAreStoredInTheirCanonicalForm(string key, string raw, string expected)
     {
         Assert.True(RemoteConfigKeys.TryCanonicalize(RemoteConfigKeys.Find(key)!, raw, out var canonical));
@@ -143,12 +141,45 @@ public class RemoteConfigTests
         [
             new RemoteConfigRow(RemoteConfigKeys.AskQuotaFree, "6", 3, Now),
             new RemoteConfigRow(RemoteConfigKeys.CatQuotaFree, "20", 2, Now),
-            new RemoteConfigRow(RemoteConfigKeys.LlmProvider, "p", 9, Now),
+            new RemoteConfigRow(RemoteConfigKeys.LlmSpendCapUsd, "12.00", 9, Now),
         ]);
 
         Assert.Equal(5, snapshot.AppVersion);
         Assert.Equal(0, RemoteConfigService.Build([]).AppVersion);
-        Assert.Null(snapshot.ToAppBlock().ProviderName);
+        Assert.Null(snapshot.ToAppBlock("p", null).ProviderName);
+    }
+
+    [Fact]
+    public void ARowSwitchOfTheProviderMovesTheBlockVersion()
+    {
+        var a = RemoteConfigService.Build([new RemoteConfigRow(RemoteConfigKeys.LlmProvider, "prov-a", 1, Now)]);
+        var b = RemoteConfigService.Build([new RemoteConfigRow(RemoteConfigKeys.LlmProvider, "prov-b", 2, Now)]);
+
+        Assert.NotEqual(a.AppVersion, b.AppVersion);
+    }
+
+    [Fact]
+    public void ABlockNeverHasAnIdWithoutBothNamesAndNeverNamesWithoutAnId()
+    {
+        var snapshot = RemoteConfigService.Build([]);
+        var names = new ProviderName("المساعد", "Helper");
+
+        var full = snapshot.ToAppBlock("prov-a", names);
+        Assert.Equal("prov-a", full.Values[RemoteConfigKeys.LlmProvider]);
+        Assert.Equal(names, full.ProviderName);
+
+        foreach (var block in new[] { snapshot.ToAppBlock("prov-a", null), snapshot.ToAppBlock("prov-a", new ProviderName("x", "")), snapshot.ToAppBlock(string.Empty, names) })
+        {
+            Assert.DoesNotContain(RemoteConfigKeys.LlmProvider, block.Values.Keys);
+            Assert.Null(block.ProviderName);
+        }
+    }
+
+    [Fact]
+    public void TheProviderNameKeysAreRetired()
+    {
+        Assert.Null(RemoteConfigKeys.Find("llm.provider_name.ar"));
+        Assert.Null(RemoteConfigKeys.Find("llm.provider_name.en"));
     }
 
     private sealed class FixedClock : TimeProvider

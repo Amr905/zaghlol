@@ -14,6 +14,8 @@ public sealed class LlmGatewayConfigurationTests
 
     private static (string, string?)[] OpenAi(string id = "p1", string kind = "OpenAiResponses") =>
     [
+        ($"Llm:Providers:{id}:DisplayNameAr", "مساعد"),
+        ($"Llm:Providers:{id}:DisplayNameEn", "Helper"),
         ($"Llm:Providers:{id}:Kind", kind),
         ($"Llm:Providers:{id}:Model", "some-model"),
         ($"Llm:Providers:{id}:Endpoint", "https://llm.example.test/"),

@@ -26,7 +26,9 @@ public sealed record LlmProviderOptions(
     decimal PriceInPerMTok,
     decimal PriceCachedPerMTok,
     decimal PriceOutPerMTok,
-    string? Project = null)
+    string? Project = null,
+    string? DisplayNameAr = null,
+    string? DisplayNameEn = null)
 {
     public const string SectionName = "Llm";
     public const string ActiveKey = "Llm:ActiveProvider";
@@ -92,8 +94,18 @@ public sealed record LlmProviderOptions(
             Price(section, id, "PriceInPerMTok", mustBePositive: true),
             Price(section, id, "PriceCachedPerMTok", mustBePositive: false),
             Price(section, id, "PriceOutPerMTok", mustBePositive: true),
-            project);
+            project,
+            Name(section, id, "DisplayNameAr"),
+            Name(section, id, "DisplayNameEn"));
     }
+
+    // FU-425: absent is allowed here (the startup check refuses it); a present value must match the name pattern.
+    private static string? Name(IConfigurationSection section, string id, string name) =>
+        section[name] is not { } value
+            ? null
+            : System.Text.RegularExpressions.Regex.IsMatch(value, Zaghlol.Application.Config.RemoteConfigKeys.ProviderNamePattern, System.Text.RegularExpressions.RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(250)) && !value.EndsWith('\n')
+                ? value
+                : throw new LlmConfigurationException($"Llm:Providers:{id}:{name} must be 1 to 64 letters, digits, spaces or . _ -.");
 
     private static int ParseInt(string value, string id, string name) =>
         int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var n)
