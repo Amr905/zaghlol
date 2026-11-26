@@ -31,6 +31,7 @@ public enum PlanReason
     TemplateControl,
     TemplateEmoji,
     TemplateScript,
+    TemplatePlainName,
 }
 
 public static class PlanReasons
@@ -66,6 +67,7 @@ public static class PlanReasons
         PlanReason.TemplateControl => "TEMPLATE_CONTROL",
         PlanReason.TemplateEmoji => "TEMPLATE_EMOJI",
         PlanReason.TemplateScript => "TEMPLATE_SCRIPT",
+        PlanReason.TemplatePlainName => "TEMPLATE_PLAIN_NAME",
         _ => throw new ArgumentOutOfRangeException(nameof(reason)),
     };
 }

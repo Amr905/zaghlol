@@ -184,3 +184,9 @@
 ## Notes for the Lead
 - Fix round: M1 (T-330) and M2 (T-332) are both small (a few lines plus one test each); the Lead delta check should suffice. M1's fix should come with m7 in the same pass if the fix agent touches the adapter.
 - C1 is a spec decision, not a builder error; file it in `docs/01-requirements/open-questions.md` against FR-LLM-35 and block the LLM answer path (T-342/T-349) on it, not this batch.
+
+## Fix round — backend
+- **M1 (T-330):** `PlanValidator.Validate` wraps the plan check in a catch-all; any parse failure (duplicate keys, depth, anything) gives `SCHEMA_INVALID`, the exception is dropped and never logged. Tests `M1_*` (duplicate key at root, in `mention`, in `t`; default element; no plan text in the log).
+- **m7 (T-332):** the OpenAI adapter parses the reply with `AllowDuplicateProperties = false`, so duplicates give `Invalid`. Test `AReplyWithDuplicatePropertiesIsInvalid`.
+- **M2 (T-332):** new `Zaghlol.Application.Llm.LlmSensitive<T>` (ToString `***`, JSON writes `"***"`, still reads the bare value). Used for `LlmCall.UserText` and `LlmResult.Json`; T-349 must use it for `q`/`p`/`t`. `Domain.Sensitive<T>` is unchanged (the install token response needs the bare value). Tests `LlmSensitiveWrapperTests` (ToString, interpolation, STJ direct/nested/collection/dictionary/anonymous, `{@}` logger, exception).
+- **Plain-name scope (m3):** validator checks `t.text` (a hit drops the template only, new `TEMPLATE_PLAIN_NAME`, same code as the phone). New vectors `invalid-plain-name-in-template-text` (expect `accept` plus new field `expect.templateReason: "TEMPLATE_PLAIN_NAME"`) and `invalid-plain-name-in-currency` (fallback, step 2, `PLAIN_NAME`). The contract reference now checks every string of `p`.

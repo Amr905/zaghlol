@@ -38,7 +38,7 @@ public sealed record LlmUsage(int InputTokens, int CachedTokens, int OutputToken
 public sealed record LlmCall(
     LlmFeature Feature,
     string PromptId,
-    [property: JsonConverter(typeof(RedactedJsonConverter<Sensitive<string>>))] Sensitive<string> UserText,
+    LlmSensitive<string> UserText,
     string Lang,
     JsonElement OutputSchema,
     int MaxOutputTokens);
@@ -46,11 +46,11 @@ public sealed record LlmCall(
 /// <summary>The outcome, the reply JSON (sensitive: it may echo the question) and the usage. Serialising writes <c>"***"</c> for the JSON.</summary>
 public sealed record LlmResult(
     LlmOutcome Outcome,
-    [property: JsonConverter(typeof(RedactedJsonConverter<Sensitive<byte[]>>))] Sensitive<byte[]> Json,
+    LlmSensitive<byte[]> Json,
     LlmUsage Usage)
 {
     public static LlmResult Failed(LlmOutcome outcome, LlmUsage? usage = null) =>
-        new(outcome, new Sensitive<byte[]>([]), usage ?? LlmUsage.None);
+        new(outcome, new LlmSensitive<byte[]>([]), usage ?? LlmUsage.None);
 }
 
 /// <summary>One provider adapter (<c>OpenAiResponsesProvider</c>, the fake, later Vertex Gemini).</summary>

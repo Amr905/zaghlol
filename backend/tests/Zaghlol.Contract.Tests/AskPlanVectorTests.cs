@@ -177,6 +177,13 @@ public class AskPlanVectorTests
         foreach (var vector in PlanVectors.Where(v => v["plan"]!["t"] is JsonObject))
         {
             var t = vector["plan"]!["t"]!;
+            if (vector["expect"]!["templateReason"]?.GetValue<string>() is { } declared)
+            {
+                Assert.Equal("TEMPLATE_PLAIN_NAME", declared);
+                Assert.True(Reference.TemplateNamesAName(t["text"]!.GetValue<string>()), vector["id"]!.GetValue<string>());
+                continue;
+            }
+
             Assert.Null(Reference.CheckTemplate(vector["plan"]!["plan"]!.GetValue<string>(), vector["lang"]!.GetValue<string>(), t["lang"]!.GetValue<string>(), t["text"]!.GetValue<string>()));
         }
     }

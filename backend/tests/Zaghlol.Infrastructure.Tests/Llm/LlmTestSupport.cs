@@ -42,7 +42,7 @@ internal static class LlmFixtures
     public static JsonElement Schema { get; } = JsonDocument.Parse("""{"type":"object","properties":{"v":{"type":"integer"}},"required":["v"],"additionalProperties":false}""").RootElement.Clone();
 
     public static LlmCall Call(string text = Marker, int maxOutputTokens = 300) =>
-        new(LlmFeature.Ask, "ask-plan-v1", new Sensitive<string>(text), "ar", Schema, maxOutputTokens);
+        new(LlmFeature.Ask, "ask-plan-v1", new LlmSensitive<string>(text), "ar", Schema, maxOutputTokens);
 
     public static string Read(string name) => File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Llm", "fixtures", name));
 

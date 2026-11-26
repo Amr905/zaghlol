@@ -54,7 +54,18 @@ public sealed partial class PlanValidator
     /// </summary>
     public PlanValidationResult Validate(JsonElement planJson, string sentText, string lang)
     {
-        var failure = CheckPlan(planJson, sentText);
+        PlanReason? failure;
+        try
+        {
+            failure = CheckPlan(planJson, sentText);
+        }
+        catch (Exception)
+        {
+            // Duplicate keys, malformed or too deep JSON, anything else: a reason code only. The exception (whose message can quote
+            // plan text) is dropped here and never logged.
+            failure = PlanReason.SchemaInvalid;
+        }
+
         if (failure is { } reason)
         {
             LogPlanRejected(logger, reason);
@@ -62,6 +73,11 @@ public sealed partial class PlanValidator
         }
 
         var (template, rejection) = CheckTemplate(planJson, lang);
+        if (template is not null && NamesAName(template.Text))
+        {
+            (template, rejection) = (null, PlanReason.TemplatePlainName);
+        }
+
         if (rejection is { } dropped)
         {
             LogTemplateDropped(logger, dropped);
@@ -212,6 +228,12 @@ public sealed partial class PlanValidator
         }
 
         return null;
+    }
+
+    private bool NamesAName(string text)
+    {
+        var folded = PlanText.Fold(text);
+        return aliases.Any(a => PlanText.ContainsWord(folded, a));
     }
 
     private static (PlanTemplate? Template, PlanReason? Rejection) CheckTemplate(JsonElement planJson, string lang)

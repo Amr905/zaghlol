@@ -12,7 +12,7 @@ namespace Zaghlol.Infrastructure.Llm;
 /// <c>POST v1/responses</c> with <c>store:false</c>, a strict <c>json_schema</c> text format, <c>reasoning.effort:none</c> and
 /// <c>max_output_tokens</c>; the static system prompt comes first and the question last (prefix caching). Nothing identifying the
 /// install, the account, the network or the app goes into the body, the headers or the URL: the only header beyond the standard
-/// ones is the bearer key. The question and the reply are <see cref="Sensitive{T}"/>; an exception or log never carries a body.
+/// ones is the bearer key. The question and the reply are <see cref="LlmSensitive{T}"/>; an exception or log never carries a body.
 /// </summary>
 public sealed class OpenAiResponsesProvider(
     HttpClient http,
@@ -99,6 +99,8 @@ public sealed class OpenAiResponsesProvider(
     }
 
     /// <summary>Maps a Responses API reply to an <see cref="LlmResult"/>; anything unexpected is <see cref="LlmOutcome.Invalid"/>.</summary>
+    private static readonly JsonDocumentOptions NoDuplicates = new() { AllowDuplicateProperties = false };
+
     internal static LlmResult Parse(byte[] body)
     {
         JsonDocument doc;
@@ -163,7 +165,7 @@ public sealed class OpenAiResponsesProvider(
 
             try
             {
-                using var reply = JsonDocument.Parse(text);
+                using var reply = JsonDocument.Parse(text, NoDuplicates);
                 if (reply.RootElement.ValueKind != JsonValueKind.Object)
                 {
                     return LlmResult.Failed(LlmOutcome.Invalid, usage);
@@ -174,7 +176,7 @@ public sealed class OpenAiResponsesProvider(
                 return LlmResult.Failed(LlmOutcome.Invalid, usage);
             }
 
-            return new LlmResult(LlmOutcome.Ok, new Sensitive<byte[]>(Encoding.UTF8.GetBytes(text)), usage);
+            return new LlmResult(LlmOutcome.Ok, new LlmSensitive<byte[]>(Encoding.UTF8.GetBytes(text)), usage);
         }
     }
 

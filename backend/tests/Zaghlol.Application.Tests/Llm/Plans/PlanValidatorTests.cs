@@ -35,7 +35,12 @@ public class PlanValidatorTests
         {
             Assert.True(result.IsValid, result.Reason?.Code());
             Assert.Null(result.Reason);
-            if (vector["plan"]!["t"] is JsonObject)
+            if (expect["templateReason"] is JsonNode templateReason)
+            {
+                Assert.Null(result.Template);
+                Assert.Equal(templateReason.GetValue<string>(), result.TemplateRejection!.Value.Code());
+            }
+            else if (vector["plan"]!["t"] is JsonObject)
             {
                 Assert.NotNull(result.Template);
             }
@@ -118,6 +123,44 @@ public class PlanValidatorTests
         Assert.Null(result.Template);
         Assert.Equal(expected, result.TemplateRejection);
         Assert.Equal("PL-WHATIF-CUT", result.Plan.GetProperty("plan").GetString());
+    }
+
+    [Theory]
+    [InlineData("{\"v\":1,\"v\":1,\"plan\":\"PL-SPEND\",\"p\":{}}")]
+    [InlineData("{\"v\":1,\"plan\":\"PL-SPEND\",\"p\":{\"filter\":{\"mention\":\"zq-secret-a\",\"mention\":\"zq-secret-b\"}}}")]
+    [InlineData("{\"v\":1,\"plan\":\"PL-SPEND\",\"p\":{},\"t\":{\"text\":\"zq-secret-a\",\"text\":\"zq-secret-b\"}}")]
+    public void M1_ADuplicateKeyIsSchemaInvalidAndNeverThrowsNorLogsPlanText(string raw)
+    {
+        var logger = new CapturingLogger();
+        var validator = new PlanValidator(logger: logger);
+        var json = JsonDocument.Parse(raw).RootElement;
+
+        var result = validator.Validate(json, "how much did I spend?", "en");
+
+        Assert.False(result.IsValid);
+        Assert.Equal(PlanReason.SchemaInvalid, result.Reason);
+        Assert.DoesNotContain(logger.Lines, l => l.Contains("zq-secret", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void M1_ADefaultJsonElementIsSchemaInvalid()
+    {
+        var result = Validator.Validate(default, "x", "en");
+
+        Assert.Equal(PlanReason.SchemaInvalid, result.Reason);
+    }
+
+    private sealed class CapturingLogger : Microsoft.Extensions.Logging.ILogger<PlanValidator>
+    {
+        public List<string> Lines { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state)
+            where TState : notnull => null;
+
+        public bool IsEnabled(Microsoft.Extensions.Logging.LogLevel logLevel) => true;
+
+        public void Log<TState>(Microsoft.Extensions.Logging.LogLevel logLevel, Microsoft.Extensions.Logging.EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+            Lines.Add(formatter(state, exception) + exception);
     }
 
     [Fact]

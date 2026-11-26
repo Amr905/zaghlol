@@ -44,7 +44,7 @@ public sealed class FakeLlmProvider : ILlmProvider
             return Task.FromResult(LlmResult.Failed(LlmOutcome.Invalid));
         }
 
-        var json = reply.Json is { } j ? new Sensitive<byte[]>(Encoding.UTF8.GetBytes(j.GetRawText())) : new Sensitive<byte[]>([]);
+        var json = reply.Json is { } j ? new LlmSensitive<byte[]>(Encoding.UTF8.GetBytes(j.GetRawText())) : new LlmSensitive<byte[]>([]);
         return Task.FromResult(new LlmResult(reply.Outcome, json, reply.Usage ?? LlmUsage.None));
     }
 

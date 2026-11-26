@@ -18,7 +18,7 @@ public sealed class LlmSensitiveScrubTests
     public void ToStringNeverShowsTheValue()
     {
         var call = LlmFixtures.Call();
-        var result = new LlmResult(LlmOutcome.Ok, new Sensitive<byte[]>(Encoding.UTF8.GetBytes(Marker)), LlmUsage.None);
+        var result = new LlmResult(LlmOutcome.Ok, new LlmSensitive<byte[]>(Encoding.UTF8.GetBytes(Marker)), LlmUsage.None);
 
         Assert.DoesNotContain(Marker, new Sensitive<string>(Marker).ToString(), StringComparison.Ordinal);
         Assert.DoesNotContain(Marker, call.ToString(), StringComparison.Ordinal);
@@ -30,7 +30,7 @@ public sealed class LlmSensitiveScrubTests
     public void JsonSerialisationOfTheCallAndResultWritesTheFixedRedaction()
     {
         var call = LlmFixtures.Call();
-        var result = new LlmResult(LlmOutcome.Ok, new Sensitive<byte[]>(Encoding.UTF8.GetBytes(Marker)), LlmUsage.None);
+        var result = new LlmResult(LlmOutcome.Ok, new LlmSensitive<byte[]>(Encoding.UTF8.GetBytes(Marker)), LlmUsage.None);
 
         var json = JsonSerializer.Serialize(call) + JsonSerializer.Serialize(result);
 
@@ -44,7 +44,7 @@ public sealed class LlmSensitiveScrubTests
     public void TheStructuredLoggerNeverDestructuresTheValue()
     {
         var call = LlmFixtures.Call();
-        var result = new LlmResult(LlmOutcome.Ok, new Sensitive<byte[]>(Encoding.UTF8.GetBytes(Marker)), LlmUsage.None);
+        var result = new LlmResult(LlmOutcome.Ok, new LlmSensitive<byte[]>(Encoding.UTF8.GetBytes(Marker)), LlmUsage.None);
 
         var output = LogCapture.Run(log => log.Information("call {@Call} {Call} result {@Result} {Result} {@Text}", call, call, result, result, call.UserText));
 
