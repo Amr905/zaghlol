@@ -2,6 +2,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
+using Zaghlol.Application.Llm.Quota;
 using Zaghlol.Application.Sync;
 using Zaghlol.Domain;
 using Zaghlol.Infrastructure.Persistence;
@@ -65,7 +66,16 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
         DELETE FROM zaghlol.llm_cat_answer_cache c
         WHERE c.merchant_norm = ANY(@merchants)
           AND (SELECT count(*) FROM zaghlol.llm_cat_corrections x
-               WHERE x.merchant_norm = c.merchant_norm AND x.ai_category = c.category_code AND x.status <> 'rejected') >= @threshold
+               WHERE x.merchant_norm = c.merchant_norm AND x.ai_category = c.category_code AND x.status <> 'rejected'
+                 AND x.created_at > c.created_at) >= @threshold
+        """;
+
+    // B97-M1: feedback counts only from an install that has made an attested categorise call (the gate chain verifies the proof before
+    // any quota is spent), so its counter row for the current or previous Cairo month exists with used > 0. The weaker evidence is
+    // "any merchant": per-merchant evidence would need a new column (follow-up). The id is never stored with the feedback.
+    private const string AttestedSql = """
+        SELECT EXISTS (SELECT 1 FROM zaghlol.llm_quota_counters
+                       WHERE feature = 'cat' AND subject_kind = 'install' AND subject_id = @id AND used > 0 AND month_key IN (@current, @previous))
         """;
 
     /// <summary>Distinct-install corrections of the cached category that remove the cache row (FR-LCAT-12).</summary>
@@ -141,7 +151,8 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
 
         var confirmations = 0;
         var corrections = 0;
-        if (claim.InstallHash is { IsEmpty: false } feedbackHash && claim.Feedback is { IsEmpty: false } feedback)
+        if (claim.InstallHash is { IsEmpty: false } feedbackHash && claim.Feedback is { IsEmpty: false } feedback
+            && await HasAttestedAsync(connection, transaction, claim.InstallId, now, cancellationToken))
         {
             var day = new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero);
             if (feedback.Corrections.Count > 0)
@@ -192,6 +203,15 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
 
         await transaction.CommitAsync(cancellationToken);
         return new SyncClaimResult(true, contributions, bankRequests, confirmations, corrections);
+    }
+
+    private static async Task<bool> HasAttestedAsync(NpgsqlConnection connection, NpgsqlTransaction transaction, InstallId install, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        await using var command = new NpgsqlCommand(AttestedSql, connection, transaction);
+        command.Parameters.AddWithValue("id", install.Value);
+        command.Parameters.AddWithValue("current", CairoMonth.MonthKey(now));
+        command.Parameters.AddWithValue("previous", CairoMonth.PreviousKey(now));
+        return (bool)(await command.ExecuteScalarAsync(cancellationToken))!;
     }
 
     private static NpgsqlParameter<string[]> Texts(string name, IEnumerable<string> values) =>

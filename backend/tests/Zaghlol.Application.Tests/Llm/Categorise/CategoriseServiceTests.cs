@@ -144,7 +144,7 @@ public sealed class CategoriseServiceTests
 
         Assert.Equal(["ok/llm", "quota"], CategoriseTestKit.Statuses(result));
         Assert.Equal(1, result.Answer!.Counted);
-        Assert.Equal(["alpha cafe"], kit.Cache.Rows.Keys);
+        Assert.Empty(kit.Cache.Rows); // a two-name prompt is never cached (FU-439)
     }
 
     [Theory]
@@ -213,16 +213,45 @@ public sealed class CategoriseServiceTests
         Assert.Equal(1, kit.Ask.Quota.Commits);
     }
 
+    [Theory]
+    [InlineData(80, true)]
+    [InlineData(79, false)]
+    public async Task OnlyAnAnswerAtTheCacheThresholdIsCached(int confidence, bool cached)
+    {
+        var kit = new CategoriseTestKit();
+        kit.Ask.Quota.Commit = new LlmQuotaCommit(LlmQuotaCheckKind.Allowed, 1, 9, false);
+        kit.ProviderReplies(CategoriseTestKit.Reply((0, "dining", confidence)));
+
+        await kit.RunAsync(["alpha cafe"]);
+
+        Assert.Equal(cached ? ["alpha cafe"] : [], kit.Cache.Rows.Keys);
+    }
+
+    // FU-439: one provider call carries every name of a request, so a sibling name could steer another name's answer into the shared cache.
     [Fact]
-    public async Task OnlyAnswersAtTheCacheThresholdAreCached()
+    public async Task AnswersFromAPromptWithSeveralNamesAreNeverWrittenToTheSharedCache()
     {
         var kit = new CategoriseTestKit();
         kit.Ask.Quota.Commit = new LlmQuotaCommit(LlmQuotaCheckKind.Allowed, 2, 9, false);
-        kit.ProviderReplies(CategoriseTestKit.Reply((0, "dining", 80), (1, "health", 79)));
+        kit.ProviderReplies(CategoriseTestKit.Reply((0, "dining", 95), (1, "health", 95)));
 
-        await kit.RunAsync(["alpha cafe", "beta clinic"]);
+        var result = await kit.RunAsync(["alpha cafe", "beta clinic"]);
 
-        Assert.Equal(["alpha cafe"], kit.Cache.Rows.Keys);
+        Assert.Equal(["ok/llm", "ok/llm"], CategoriseTestKit.Statuses(result));
+        Assert.Empty(kit.Cache.Rows);
+    }
+
+    [Fact]
+    public async Task ACachedRowBelowTheCurrentFloorIsNotServedAndGoesToTheModel()
+    {
+        var kit = new CategoriseTestKit();
+        kit.Cache.Rows["cafe nile"] = new CachedAnswer("dining", 70);
+        kit.ProviderReplies(CategoriseTestKit.Reply((0, "dining", 90)));
+
+        var result = await kit.RunAsync(["cafe nile"]);
+
+        Assert.Equal(["ok/llm"], CategoriseTestKit.Statuses(result));
+        Assert.Equal(1, kit.Ask.Provider.Calls);
     }
 
     [Fact]

@@ -29,6 +29,27 @@ public class SyncFeedbackEndpointTests(SyncHostFixture fixture) : IClassFixture<
         return document.RootElement.GetProperty("accepted").Clone();
     }
 
+    // B97-M1: the install has made an attested categorise call (its counter row for the current Cairo month).
+    private Task AttestAsync(string installId) => ZaghlolTestDatabase.ExecuteAsync(
+        fixture.Database.Superuser,
+        "INSERT INTO zaghlol.llm_quota_counters (feature, subject_kind, subject_id, month_key, used, updated_at) " +
+        $"VALUES ('cat', 'install', '{Guid.Parse(installId):D}', {Zaghlol.Application.Llm.Quota.CairoMonth.MonthKey(DateTimeOffset.UtcNow)}, 1, now())");
+
+    [Fact]
+    public async Task FeedbackFromAnInstallThatNeverAttestedIsDroppedAndNotCounted()
+    {
+        await SetFlagAsync(true);
+        var (_, token) = await fixture.NewInstallAsync();
+        var merchant = SyncHostFixture.UniqueName("fbunattested");
+
+        using var response = await fixture.SyncAsync(token, SyncHostFixture.Body(extra: Feedback(Item(merchant, "right", "dining", "dining"), Item(merchant + " x", "wrong", "dining", "groceries"))));
+        var accepted = await AcceptedAsync(response);
+
+        Assert.Equal(0, accepted.GetProperty("llmCatFeedback").GetInt32());
+        Assert.Equal(0L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_confirmations WHERE merchant_norm LIKE $1", "%fbunattested%"));
+        Assert.Equal(0L, await fixture.ScalarAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm LIKE $1", "%fbunattested%"));
+    }
+
     // AC 1, 2, 4 and 5 (negative proofs 1 and 2 of the task)
     [Fact]
     public async Task FeedbackIsStoredByVerdictWithOnlyTheHashAndTheMarkerNeverReachesALogATraceAMetricOrAnotherTable()
@@ -37,6 +58,7 @@ public class SyncFeedbackEndpointTests(SyncHostFixture fixture) : IClassFixture<
         using var telemetry = new TelemetryCapture();
         var appVersion = SyncHostFixture.UniqueAppVersion();
         var (installId, token) = await fixture.NewInstallAsync(appVersion);
+        await AttestAsync(installId);
         var right = SyncHostFixture.UniqueName("fbright");
         var wrong = SyncHostFixture.UniqueName("fbwrong");
         var custom = SyncHostFixture.UniqueName("fbcustom");

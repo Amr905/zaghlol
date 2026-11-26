@@ -133,7 +133,7 @@ internal sealed class ConfiguredLlmProviderIds(IReadOnlyList<LlmProviderOptions>
     public bool IsKnown(string providerId) =>
         providers.Any(p => string.Equals(p.Id, providerId, StringComparison.Ordinal)
             && p.DisplayNameAr is { Length: > 0 } && p.DisplayNameEn is { Length: > 0 })
-        && (services.GetService<ILlmApiKeyProvider>()?.HasKey(providerId) ?? true);
+        && (services.GetService<ILlmApiKeyProvider>()?.HasKey(providerId) ?? false);
 }
 
 /// <summary>The provider options read at registration (for the startup check).</summary>

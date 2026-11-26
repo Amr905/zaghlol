@@ -62,7 +62,21 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
 
     private ISyncStore Store => fixture.Services.GetRequiredService<ISyncStore>();
 
-    private async Task<(InstallId Id, string AppVersion)> NewInstallAsync()
+    // B97-M1: feedback counts only from an install with an attested categorise call (a counter row for this or the previous Cairo month).
+    private Task AttestAsync(InstallId id, int monthKey = 202611, int used = 1) => Db.InsertAsync(
+        fixture.Database.Migrator,
+        "llm_quota_counters",
+        new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["feature"] = "cat",
+            ["subject_kind"] = "install",
+            ["subject_id"] = id.Value,
+            ["month_key"] = monthKey,
+            ["used"] = used,
+            ["updated_at"] = Now,
+        });
+
+    private async Task<(InstallId Id, string AppVersion)> NewInstallAsync(bool attested = true)
     {
         var id = InstallId.Parse(Guid.NewGuid().ToString("D"));
         var appVersion = "1.0.0-t" + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(4));
@@ -70,6 +84,11 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         Assert.Equal(
             RegistrationOutcome.Created,
             await installs.RegisterAsync(id, Platform.Android, appVersion, Rows.Bytes(), Rows.Bytes(), Rows.Bytes(), Now, CancellationToken.None));
+        if (attested)
+        {
+            await AttestAsync(id);
+        }
+
         return (id, appVersion);
     }
 
@@ -184,10 +203,10 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
     private static PreparedFeedback Feedback(IEnumerable<PreparedConfirmation>? right = null, IEnumerable<PreparedCorrection>? wrong = null) =>
         new([.. right ?? []], new IntakeCounts(0, 0, 0), [.. wrong ?? []], new IntakeCounts(0, 0, 0));
 
-    private async Task<SyncClaimResult> CorrectAsync(string merchant, string aiCategory = "dining", string userCategory = "groceries")
+    private async Task<SyncClaimResult> CorrectAsync(string merchant, string aiCategory = "dining", string userCategory = "groceries", bool attested = true, DateTimeOffset? at = null)
     {
-        var (id, appVersion) = await NewInstallAsync();
-        return await Store.ClaimAsync(Claim(id, appVersion, Now, Rows.Bytes(), feedback: Feedback(wrong: [new PreparedCorrection(merchant, aiCategory, userCategory, "llm")])), CancellationToken.None);
+        var (id, appVersion) = await NewInstallAsync(attested);
+        return await Store.ClaimAsync(Claim(id, appVersion, at ?? Now, Rows.Bytes(), feedback: Feedback(wrong: [new PreparedCorrection(merchant, aiCategory, userCategory, "llm")])), CancellationToken.None);
     }
 
     private Task SeedCacheAsync(string merchant, string category) => Db.InsertAsync(
@@ -200,7 +219,7 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
             ["confidence"] = (short)90,
             ["provider_id"] = "fake",
             ["prompt_version"] = "v1",
-            ["created_at"] = Now,
+            ["created_at"] = Now.AddDays(-3),
             ["expires_at"] = Now.AddDays(90),
         });
 
@@ -255,6 +274,79 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         await CorrectAsync(merchant);
         Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
         Assert.Equal(3L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1", merchant));
+    }
+
+    // B97-M1: scripted installs (register + sync, no attestation) cannot delete a shared cache row, however many there are.
+    [Fact]
+    public async Task UnattestedInstallsCannotDeleteACacheRow()
+    {
+        var merchant = Marker();
+        await SeedCacheAsync(merchant, "dining");
+
+        for (var i = 0; i < 5; i++)
+        {
+            Assert.Equal(new SyncClaimResult(true, 0, 0, 0, 0), await CorrectAsync(merchant, attested: false));
+        }
+
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1", merchant));
+    }
+
+    [Fact]
+    public async Task ThreeFakeConfirmationsFromUnattestedInstallsDoNotCount()
+    {
+        var merchant = Marker();
+        for (var i = 0; i < 3; i++)
+        {
+            var (id, appVersion) = await NewInstallAsync(attested: false);
+            await Store.ClaimAsync(Claim(id, appVersion, Now, Rows.Bytes(), feedback: Feedback([new PreparedConfirmation(merchant, "dining", "llm")])), CancellationToken.None);
+        }
+
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_confirmations WHERE merchant_norm = $1", merchant));
+
+        var (real, version) = await NewInstallAsync();
+        var counted = await Store.ClaimAsync(Claim(real, version, Now, Rows.Bytes(), feedback: Feedback([new PreparedConfirmation(merchant, "dining", "llm")])), CancellationToken.None);
+        Assert.Equal(1, counted.ConfirmationsInserted);
+    }
+
+    [Fact]
+    public async Task OnlyAnAttestedCallInTheCurrentOrPreviousMonthWithUsedAboveZeroCounts()
+    {
+        var merchant = Marker();
+        var (old, oldVersion) = await NewInstallAsync(attested: false);
+        await AttestAsync(old, 202609);
+        var (zero, zeroVersion) = await NewInstallAsync(attested: false);
+        await AttestAsync(zero, 202611, 0);
+        var (previous, previousVersion) = await NewInstallAsync(attested: false);
+        await AttestAsync(previous, 202610);
+        var feedback = Feedback([new PreparedConfirmation(merchant, "dining", "llm")]);
+
+        Assert.Equal(0, (await Store.ClaimAsync(Claim(old, oldVersion, Now, Rows.Bytes(), feedback: feedback), CancellationToken.None)).ConfirmationsInserted);
+        Assert.Equal(0, (await Store.ClaimAsync(Claim(zero, zeroVersion, Now, Rows.Bytes(), feedback: feedback), CancellationToken.None)).ConfirmationsInserted);
+        Assert.Equal(1, (await Store.ClaimAsync(Claim(previous, previousVersion, Now, Rows.Bytes(), feedback: feedback), CancellationToken.None)).ConfirmationsInserted);
+    }
+
+    // B97-M1: after three corrections delete a row and the name is learned again, the same three corrections must not delete it a second time.
+    [Fact]
+    public async Task ARelearnedCacheRowIsNotDeletedAgainByTheCorrectionsThatDeletedItsPredecessor()
+    {
+        var merchant = Marker();
+        await SeedCacheAsync(merchant, "dining");
+        await CorrectAsync(merchant);
+        await CorrectAsync(merchant);
+        await CorrectAsync(merchant);
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+
+        await Db.ExecuteAsync(fixture.Database.Superuser, "INSERT INTO zaghlol.llm_cat_answer_cache (merchant_norm, category_code, confidence, provider_id, prompt_version, created_at, expires_at, hits) VALUES ($1, 'dining', 90, 'fake', 'v1', $2, $3, 0)", merchant, Now.AddDays(2), Now.AddDays(92));
+
+        // A fourth, new install's correction on a later day: 1 new correction, not 3.
+        await CorrectAsync(merchant, at: Now.AddDays(3));
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+
+        // Two more new ones make three since the row was re-created: it goes again.
+        await CorrectAsync(merchant, at: Now.AddDays(4));
+        await CorrectAsync(merchant, at: Now.AddDays(5));
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
     }
 
     [Fact]

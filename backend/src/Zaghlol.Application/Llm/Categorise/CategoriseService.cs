@@ -128,9 +128,11 @@ public sealed partial class CategoriseService(
 
         var cached = await ReadCacheAsync(pending.Select(i => request.Keys[i].Reveal()).ToList(), now, cancellationToken).ConfigureAwait(false);
         var rest = new List<int>();
+        var cacheFloor = settings.GetInt(RemoteConfigKeys.CatCacheMinConfidence);
         foreach (var i in pending)
         {
-            if (cached.TryGetValue(request.Keys[i].Reveal(), out var hit) && live.Contains(hit.Category))
+            // FU-439: a shared row serves other installs only at cat.cache_min_confidence (a raised floor retires weaker rows); the catalog was checked first.
+            if (cached.TryGetValue(request.Keys[i].Reveal(), out var hit) && live.Contains(hit.Category) && hit.Confidence >= cacheFloor)
             {
                 items[i] = new CategoriseItem(request.Merchants[i], CategoriseStatus.Ok, hit.Category, hit.Confidence, CategoriseSource.Cache);
             }
@@ -318,7 +320,8 @@ public sealed partial class CategoriseService(
         {
             var (index, verdict) = candidates[c];
             items[index] = new CategoriseItem(request.Merchants[index], CategoriseStatus.Ok, verdict.Code, verdict.Confidence, CategoriseSource.Llm);
-            if (verdict.Confidence >= cacheMin)
+            // FU-439: the cache is shared, so an answer is stored only when its name was the only one in the prompt (no sibling name can steer it).
+            if (verdict.Confidence >= cacheMin && send.Count == 1)
             {
                 writes.Add(new CacheWrite(request.Keys[index].Reveal(), verdict.Code, verdict.Confidence, admitted.ProviderId, LlmPromptIds.CatV1));
             }
