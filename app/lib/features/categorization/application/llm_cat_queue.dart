@@ -27,6 +27,7 @@ import '../../../core/db/daos/llm_cat_queue_dao.dart';
 import '../../../core/db/daos/write_errors.dart';
 import '../../../core/llm/llm_feature.dart';
 import '../../../core/llm/llm_quota_snapshot.dart';
+import 'llm_cat_business_templates.dart';
 import '../data/recategorizer.dart';
 import '../domain/categorize_input.dart';
 import '../domain/llm_payment_kind.dart';
@@ -77,10 +78,20 @@ final class LlmCatFillReport {
   );
 }
 
-/// A card purchase on an expense row, or a card refund on a refund row.
-bool _businessEvidence(TemplateEvent e, String direction) =>
-    (direction == 'expense' && _cardEvents.contains(e)) ||
-    (direction == 'refund' && e == TemplateEvent.refund);
+/// A card purchase on an expense row from an allowed template, or a refund
+/// on a refund row whose purchase sibling is allowed (B95-M1).
+bool _businessEvidence(
+  String templateId,
+  TemplateEvent e,
+  String direction,
+  Set<String> allowed,
+) =>
+    (direction == 'expense' &&
+        _cardEvents.contains(e) &&
+        allowed.contains(templateId)) ||
+    (direction == 'refund' &&
+        e == TemplateEvent.refund &&
+        isBusinessRefundTemplate(templateId, allowed));
 
 /// Template events that are a card / POS / online purchase at a business.
 const Set<TemplateEvent> _cardEvents = {
@@ -100,7 +111,12 @@ class LlmCatQueueFiller {
     required this.gate,
     required this.lexicon,
     this.templateEvents = _noEvents,
+    this.businessTemplates = const {},
   });
+
+  /// Card-purchase template ids whose payee is a merchant by construction
+  /// ([llmBusinessPurchaseTemplates] in production). Empty: fail closed.
+  final Set<String> businessTemplates;
 
   /// Template id -> the event the registry declares for it. The only typed
   /// evidence that a row without a counterparty is a card / POS purchase
@@ -161,7 +177,9 @@ class LlmCatQueueFiller {
         for (final e in byKey.entries) {
           final key = e.key;
           if (!isQueueableKey(key) || ruled.contains(key)) continue;
-          if (e.value.every((r) => _rowEligible(r, key, lx, tried, events))) {
+          if (e.value.every(
+            (r) => _rowEligible(r, key, lx, tried, events, businessTemplates),
+          )) {
             eligible.add((
               key: key,
               count: e.value.length,
@@ -211,6 +229,7 @@ class LlmCatQueueFiller {
     NameLexicon lx,
     Map<String, String> tried,
     Map<String, TemplateEvent> events,
+    Set<String> allowed,
   ) {
     final direction = r.read<String>('direction');
     final storedKind = r.read<String?>('counterparty_kind');
@@ -222,7 +241,7 @@ class LlmCatQueueFiller {
     // stay null (the rule then refuses).
     final counterpartyKind =
         storedKind ??
-        (event != null && _businessEvidence(event, direction)
+        (event != null && _businessEvidence(tid!, event, direction, allowed)
             ? 'merchant'
             : null);
     final paymentKind =

@@ -149,3 +149,8 @@ All 47 keys are present in both locales and the Egyptian voice is consistent. No
 
 ## Follow-ups to file
 B95-m1…m9 and B95-n1…n3, as above. FU-413 stays open (retry not bound to body).
+
+## Fix round — T-357
+**B95-M1 (privacy, major): fixed.** Business evidence is now an explicit per-template allowlist (`llm_cat_business_templates.dart`), passed to `LlmCatQueueFiller.businessTemplates` (default empty: fail closed). Of 136 card-purchase templates, 115 are allowed (bank/issuer card POS or online notifications) and 19 are refused (wallets, InstaPay, Revolut, Paytm, Vodafone/Orange/WE/Fawry/Telda/OneBank, OCR purchase text, one account debit without a merchant). Refund evidence requires an allowed purchase sibling in the same institution (also covers B95-m9). Eligibility rule untouched. Per-template decisions are in `docs/04-tasks/tasks/T-357.md`.
+
+Tests (`llm_cat_queue_test.dart`): wallet-template rows for `rahul sharma`, `priya`, and a wallet refund are not queued while `kosharyx` on an allowed bank template is; a registry-wide test requires a decision for every card-purchase template and no stale ids. Local run: format, analyze, `flutter test test/features/categorization test/privacy --exclude-tags golden` green.

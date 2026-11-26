@@ -17,6 +17,7 @@ import '../../../core/flags/flags_providers.dart';
 import '../../../core/llm/llm_feature.dart';
 import '../../../core/llm/llm_gateway_client.dart';
 import '../../../ingestion/bundled_registry.dart';
+import '../application/llm_cat_business_templates.dart';
 import '../application/llm_cat_queue.dart';
 import 'categorizer_ports.dart';
 import 'rules_providers.dart';
@@ -59,6 +60,7 @@ final llmCatQueueFillerProvider = FutureProvider<LlmCatQueueFiller>((
   return LlmCatQueueFiller(
     db,
     templateEvents: () => events,
+    businessTemplates: llmBusinessPurchaseTemplates,
     gate: LlmCatGate(
       isFlagOn: () => flags.isOn(FeatureFlag.llmCategorise),
       hasConsent: () async {

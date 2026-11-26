@@ -19,7 +19,9 @@ import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/core/llm/llm_feature.dart';
 import 'package:zaghlol/core/llm/llm_quota_snapshot.dart';
 import 'package:zaghlol/core/settings/settings_repository.dart';
+import 'package:zaghlol/features/categorization/application/llm_cat_business_templates.dart';
 import 'package:zaghlol/features/categorization/application/llm_cat_queue.dart';
+import 'package:zaghlol/ingestion/bundled_registry.dart';
 import 'package:zaghlol/features/categorization/data/rules_repository.dart';
 import 'package:zaghlol/features/categorization/domain/llm_payment_kind.dart';
 import 'package:zaghlol/features/categorization/domain/merchant_rule.dart';
@@ -43,11 +45,13 @@ void main() {
   late LlmCatQueueDao queue;
   // Template id -> registry event (the typed evidence of the row kind).
   const events = {
-    'card': TemplateEvent.cardPurchase,
+    'bank.card': TemplateEvent.cardPurchase,
+    'wal.pay': TemplateEvent.cardPurchase,
     'ipa': TemplateEvent.instapayOut,
     'wallet': TemplateEvent.transferOut,
     'atm': TemplateEvent.atmWithdrawal,
-    'refund': TemplateEvent.refund,
+    'bank.refund': TemplateEvent.refund,
+    'wal.refund': TemplateEvent.refund,
   };
   var flagOn = true;
   var consent = true;
@@ -61,6 +65,7 @@ void main() {
     ),
     lexicon: () async => lexicon,
     templateEvents: () => events,
+    businessTemplates: const {'bank.card'},
   );
 
   Future<void> put(
@@ -74,7 +79,7 @@ void main() {
     String categorySource = 'none',
     int createdAt = t0,
     bool internal = false,
-    String? template = 'card',
+    String? template = 'bank.card',
   }) => txns.insert(
     txn(id, merchantNorm: norm, direction: direction).copyWith(
       source: Value(source),
@@ -153,7 +158,12 @@ void main() {
 
   test('queues eligible merchants with their counts; idempotent', () async {
     await put('a1', 'zawya cinema');
-    await put('a2', 'zawya cinema', direction: 'refund', template: 'refund');
+    await put(
+      'a2',
+      'zawya cinema',
+      direction: 'refund',
+      template: 'bank.refund',
+    );
     await put('b1', 'kosharyx', source: 'notification');
     final r = await filler().fill(now: now);
     expect(r.ran, isTrue);
@@ -184,6 +194,74 @@ void main() {
       expect(await queued(), {'kosharyz': 1});
     },
   );
+
+  test(
+    'B95-M1: a wallet "paid to" payee is never business evidence, even '
+    'when the event says card purchase; a refund follows its sibling',
+    () async {
+      await put('w1', 'rahul sharma', template: 'wal.pay');
+      await put('w2', 'priya', template: 'wal.pay');
+      await put('w3', 'zawya cinema', template: 'wal.pay');
+      await put('w4', 'kosharyz', direction: 'refund', template: 'wal.refund');
+      await put('b1', 'kosharyx', template: 'bank.card');
+      // Same names on the allowed bank template: no business word is
+      // needed, the person-like names still fail the lexicon.
+      await put('b2', 'rahul sharma', template: 'bank.card');
+      await filler().fill(now: now);
+      expect(await queued(), {'kosharyx': 1});
+    },
+  );
+
+  test('B95-M1: every bundled card-purchase template has an explicit '
+      'decision, and the lists hold no stale id', () async {
+    final registry = await preloadBundledRegistry();
+    final cards = <String>{};
+    for (final i in registry.institutions) {
+      for (final t in i.templates) {
+        if (t.event == TemplateEvent.cardPurchase ||
+            t.event == TemplateEvent.cardPurchaseFx) {
+          cards.add(t.id);
+        }
+      }
+    }
+    final allowed = llmBusinessPurchaseTemplates;
+    final refused = llmRefusedPurchaseTemplates.keys.toSet();
+    expect(allowed.intersection(refused), isEmpty);
+    expect(
+      cards.difference(allowed.union(refused)),
+      isEmpty,
+      reason: 'decide every new card-purchase template',
+    );
+    expect(allowed.union(refused).difference(cards), isEmpty);
+    // The reviewer's probes stay refused.
+    for (final id in [
+      'vodafone_cash.payment.ar',
+      'vodafone_cash.ocr_payment.en',
+      'vodafone_cash.ocr_payment.ar',
+      'revolut.card_purchase.en',
+      'paytm.card_purchase.en',
+      'orange_cash.card_purchase.ar',
+      'we_pay.card_purchase.en',
+      'instapay.bill.en',
+    ]) {
+      expect(refused, contains(id));
+    }
+    // Refund evidence: only where a purchase sibling is allowed.
+    final refunds = [
+      for (final i in registry.institutions)
+        for (final t in i.templates)
+          if (t.event == TemplateEvent.refund) t.id,
+    ];
+    expect(refunds, isNotEmpty);
+    for (final id in refunds) {
+      final sibling = allowed.any(
+        (p) => templateInstitution(p) == templateInstitution(id),
+      );
+      expect(isBusinessRefundTemplate(id, allowed), sibling, reason: id);
+    }
+    expect(isBusinessRefundTemplate('revolut.refund.en', allowed), isFalse);
+    expect(isBusinessRefundTemplate('instapay.refund.en', allowed), isFalse);
+  });
 
   test('without template evidence nothing is a business payment', () async {
     await put('c1', 'kosharyx');
