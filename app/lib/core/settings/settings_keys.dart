@@ -109,6 +109,20 @@ abstract final class Settings {
     byDefault: Currency.of('EGP'),
   );
 
+  /// T-280 (Q2): the ≈ view was turned on by itself once, the first time a
+  /// second currency had activity. Never reset, so it never turns on again
+  /// after the user turns it off.
+  static final approxAutoOnDone = SettingKey.boolean(
+    'approx_view.auto_on_done',
+    byDefault: false,
+  );
+
+  /// T-280: Captain Zaghlol's "first foreign currency" notice is waiting.
+  static final approxFirstForeignNotice = SettingKey.boolean(
+    'approx_view.first_foreign_notice',
+    byDefault: false,
+  );
+
   // FR-NTF-01: every type can be switched off; all on by default.
   static final notifBudgetThreshold = SettingKey.boolean(
     'notif.budget_threshold',

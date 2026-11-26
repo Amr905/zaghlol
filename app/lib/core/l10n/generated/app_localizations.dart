@@ -2188,6 +2188,108 @@ abstract class AppLocalizations {
   /// **'المرتب نزل! {amount} 🎉 يلا نخطط له من أوله'**
   String homeMascotPayday(String amount);
 
+  /// L · T-280, home.approx.line
+  ///
+  /// In ar, this message translates to:
+  /// **'≈ {amount} دخلك كله تقريباً'**
+  String homeApproxLine(String amount);
+
+  /// A · read before the amount; tap opens the sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تقريبي: {amount} دخلك كله، بكل العملات'**
+  String homeApproxLineA11y(String amount);
+
+  /// S · bank rate for the exchanged part, daily rate for the rest
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك + سعر {date}'**
+  String homeApproxRateNoteBoth(String date);
+
+  /// S · only the daily rate was used
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر {date}'**
+  String homeApproxRateNoteDaily(String date);
+
+  /// S · everything foreign was already exchanged
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك'**
+  String get homeApproxRateNoteBank;
+
+  /// S · a daily rate older than 24 h
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر قديم'**
+  String get homeApproxStale;
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'الحسبة دي تقريبية'**
+  String get homeApproxSheetTitle;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'بنحسبها بسعر البنك للي حولته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.'**
+  String get homeApproxSheetBody;
+
+  /// L · the target currency's own money in
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي دخلك بالعملة دي (بما فيه اللي حولته)'**
+  String get homeApproxSheetOwn;
+
+  /// L · the part of a foreign currency not exchanged
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} لسه معاك'**
+  String homeApproxSheetHeld(String amount);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} حولتها، واتحسبت مرة واحدة بالفعل'**
+  String homeApproxSheetExchanged(String amount);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} حولتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل'**
+  String homeApproxSheetExchangedBank(String amount, String rate);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر {date}: {from} الواحد بـ {rate}'**
+  String homeApproxSheetDailyRate(String date, String from, String rate);
+
+  /// C
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام'**
+  String get homeApproxSheetClose;
+
+  /// M · Captain, Proud coach; mascot.fx.firstForeign
+  ///
+  /// In ar, this message translates to:
+  /// **'قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.'**
+  String get homeMascotFirstForeign;
+
+  /// C · turns the ≈ line off
+  ///
+  /// In ar, this message translates to:
+  /// **'اقفلها'**
+  String get homeApproxNoticeOff;
+
+  /// C · dismisses the notice
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام'**
+  String get homeApproxNoticeOk;
+
   /// A · × on C-14
   ///
   /// In ar, this message translates to:

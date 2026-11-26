@@ -1331,6 +1331,76 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String homeApproxLine(String amount) {
+    return '≈ $amount in, all currencies';
+  }
+
+  @override
+  String homeApproxLineA11y(String amount) {
+    return 'Approximate: $amount in, all currencies';
+  }
+
+  @override
+  String homeApproxRateNoteBoth(String date) {
+    return 'Bank rate + rate of $date';
+  }
+
+  @override
+  String homeApproxRateNoteDaily(String date) {
+    return 'Rate of $date';
+  }
+
+  @override
+  String get homeApproxRateNoteBank => 'Bank rate';
+
+  @override
+  String get homeApproxStale => 'Old rate';
+
+  @override
+  String get homeApproxSheetTitle => 'This total is approximate';
+
+  @override
+  String get homeApproxSheetBody =>
+      'We use your bank\'s rate for what you exchanged and today\'s rate for the rest. Your money stays saved in its own currency.';
+
+  @override
+  String get homeApproxSheetOwn =>
+      'Already in this currency (incl. what you exchanged)';
+
+  @override
+  String homeApproxSheetHeld(String amount) {
+    return '$amount still held';
+  }
+
+  @override
+  String homeApproxSheetExchanged(String amount) {
+    return '$amount exchanged, already counted once';
+  }
+
+  @override
+  String homeApproxSheetExchangedBank(String amount, String rate) {
+    return '$amount exchanged at the bank rate $rate, already counted once';
+  }
+
+  @override
+  String homeApproxSheetDailyRate(String date, String from, String rate) {
+    return 'Rate of $date: 1 $from = $rate';
+  }
+
+  @override
+  String get homeApproxSheetClose => 'Got it';
+
+  @override
+  String get homeMascotFirstForeign =>
+      'Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.';
+
+  @override
+  String get homeApproxNoticeOff => 'Turn it off';
+
+  @override
+  String get homeApproxNoticeOk => 'Got it';
+
+  @override
   String get homeMascotDismissA11y => 'Dismiss message';
 
   @override
