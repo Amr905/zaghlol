@@ -159,6 +159,15 @@ class OcrMergerTest {
     }
 
     @Test
+    fun anUnrelatedShortDigitLineOnTheSameBoxDoesNotBlockTheArabicAmount() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Total Amount", 0, 0, 200, 30), line("Ref 12", 210, 0, 400, 30)),
+            arabic = listOf(line("الإجمالي ٨٥٫٥٠", 0, 0, 400, 30, 0.85)),
+        )
+        assertEquals(listOf("Total Amount الإجمالي 85.50", "Ref 12"), out.map { it.text })
+    }
+
+    @Test
     fun arabicNoiseDigitsDoNotDisagreeWithAStrongMlKitAmountOnTheSameBox() {
         val out = OcrMerger.merge(
             latin = listOf(line("Net Sales", 0, 300, 300, 340), line("382.46", 310, 300, 500, 340)),

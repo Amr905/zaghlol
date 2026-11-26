@@ -7,7 +7,13 @@
 
 import 'dart:typed_data';
 
-import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
+import 'package:drift/drift.dart'
+    show
+        QueryExecutor,
+        ApplyInterceptor,
+        QueryInterceptor,
+        Value,
+        driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart';
 import 'package:zaghlol/core/db/daos/assets_dao.dart';
@@ -39,6 +45,21 @@ Future<Object?> errorOf(Future<Object?> f) async {
     return null;
   } on Object catch (e) {
     return e;
+  }
+}
+
+/// Counts `SELECT`s on `transfer_pairs` (FU-394).
+class _SelectCounter extends QueryInterceptor {
+  int pairSelects = 0;
+
+  @override
+  Future<List<Map<String, Object?>>> runSelect(
+    QueryExecutor parent,
+    String statement,
+    List<Object?> args,
+  ) {
+    if (statement.contains('FROM "transfer_pairs"')) pairSelects++;
+    return parent.runSelect(statement, args);
   }
 }
 
@@ -793,6 +814,55 @@ void main() {
             expect(o1.transferPairId, isNull);
           },
         );
+
+        test('FU-394: kindsByIds over 500 ids runs one query per 500 ids '
+            'and finds pairs in both chunks', () async {
+          await db
+              .into(db.transactions)
+              .insert(txn('o1', direction: 'transfer_out'));
+          await db
+              .into(db.transactions)
+              .insert(txn('o2', direction: 'transfer_out'));
+          final seed = TransferPairsDao(db);
+          await seed.insert(
+            TransferPairsCompanion.insert(
+              id: 'first',
+              outTxnId: 'o1',
+              kind: TransferPairKind.manual,
+              createdAt: t0,
+            ),
+          );
+          await seed.insert(
+            TransferPairsCompanion.insert(
+              id: 'last',
+              outTxnId: 'o2',
+              kind: TransferPairKind.auto,
+              createdAt: t0,
+            ),
+          );
+          final counter = _SelectCounter();
+          driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+          final counted = AppDatabase(
+            openEncryptedExecutor(
+              edb.world.mainFile,
+              keyOf(61),
+              inBackground: !background,
+            ).interceptWith(counter),
+            validateSchema: false,
+          );
+          addTearDown(counted.close);
+          final ids = [
+            'first',
+            for (var i = 0; i < 549; i++) 'ghost$i',
+            'last',
+          ]; // 551 distinct ids -> chunks of 500 and 51
+          final kinds = await TransferPairsDao(counted).kindsByIds(ids);
+          expect(kinds, {'first': 'manual', 'last': 'auto'});
+          expect(counter.pairSelects, 2);
+          counter.pairSelects = 0;
+          await TransferPairsDao(counted).kindsByIds(['first', 'first']);
+          expect(counter.pairSelects, 1);
+        });
 
         test('split participants: by expense, share update, delete keeps '
             'the link without its participant', () async {
