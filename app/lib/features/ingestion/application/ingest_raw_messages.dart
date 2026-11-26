@@ -1910,6 +1910,9 @@ final class IngestRawMessages {
             balance.currency != available.currency
         ? null
         : available;
+    if (balance != null) {
+      await _checkBalanceJump(accountId, occurredAtMs, balance);
+    }
     final changed = await _accounts.recordBalance(
       accountId: accountId,
       asOf: DateTime.fromMillisecondsSinceEpoch(occurredAtMs, isUtc: true),
@@ -1918,6 +1921,41 @@ final class IngestRawMessages {
       sourceTxnId: sourceTxnId,
     );
     if (changed) local.accounts.add(accountId);
+  }
+
+  /// T-272 (PO 2026-11-26): a bank-counter exchange sends no SMS, so the
+  /// next balance shows more money than the ledger explains. When that rise
+  /// is large ([unexplainedBalanceRise]) and another currency had income
+  /// lately, ONE review item asks "Did you exchange money?". It is asked per
+  /// jump: the next balance compares with this one, so a "no" is never asked
+  /// again. Nothing is created here.
+  Future<void> _checkBalanceJump(
+    String accountId,
+    int asOfMs,
+    Money balance,
+  ) async {
+    final facts = await _store.balanceJumpFacts(
+      accountId: accountId,
+      currency: balance.currency.code,
+      asOfMs: asOfMs,
+      lookbackMs: balanceJumpForeignCreditLookback.inMilliseconds,
+    );
+    if (facts == null || !facts.foreignCredit) return;
+    final rise = unexplainedBalanceRise(
+      previous: Money(balance.currency, facts.previousMinor),
+      countedEffectMinor: facts.countedEffectMinor,
+      reported: balance,
+    );
+    if (rise == null) return;
+    await _review(
+      kind: ReviewKind.lowConfidence,
+      payload: {
+        'reason': ReviewReason.exchangeBalanceJump,
+        'accountId': accountId,
+        'amount': rise.toJson(),
+        'asOfMs': asOfMs,
+      },
+    );
   }
 
   /// Categorize (§8) with T-075's categorizer. A port failure propagates

@@ -1248,6 +1248,50 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String homeHeroOtherCurrencyIncome(String amount) {
+    return '+ $amount دخل';
+  }
+
+  @override
+  String get exchangeEntryTitle => 'حولت فلوس';
+
+  @override
+  String get exchangeEntryIntro =>
+      'التحويل مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.';
+
+  @override
+  String get exchangeEntrySent => 'دفعت';
+
+  @override
+  String get exchangeEntryReceived => 'وصلني';
+
+  @override
+  String get exchangeEntryAccount => 'الحساب';
+
+  @override
+  String get exchangeEntryCurrency => 'العملة';
+
+  @override
+  String get exchangeEntryDate => 'التاريخ';
+
+  @override
+  String exchangeEntryRate(String from, String rate, String to) {
+    return 'السعر: ١ $from = $rate $to';
+  }
+
+  @override
+  String get exchangeEntrySameCurrency => 'اختار عملتين مختلفتين';
+
+  @override
+  String get exchangeEntrySave => 'احفظ التحويل';
+
+  @override
+  String get exchangeEntrySaved => 'اتسجل التحويل';
+
+  @override
+  String get exchangeEntryFailed => 'معرفناش نحفظ التحويل. جرب تاني.';
+
+  @override
   String homeHeroApproxTitle(String currency) {
     return 'كله تقريباً بالـ $currency';
   }
@@ -2050,6 +2094,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ingestionReviewOldDueKept => 'تمام، هيفضل زي ما هو';
+
+  @override
+  String ingestionReviewExchangeJumpQuestion(String currency, String amount) {
+    return 'حولت فلوس؟ رصيدك بالـ$currency زاد حوالي $amount ومشفناش فلوس داخلة.';
+  }
+
+  @override
+  String get ingestionReviewExchangeJumpYes => 'أيوه، سجلها';
+
+  @override
+  String get ingestionReviewExchangeJumpNo => 'لأ';
 
   @override
   String get ingestionReviewEmptyTitle => 'كله تمام! مفيش حاجة مستنية رأيك ✨';
@@ -4397,6 +4452,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recurringBillEditSaved => 'الفاتورة اتحفظت ✓';
+
+  @override
+  String get homeQuickAddExchange => 'حولت فلوس';
+
+  @override
+  String get homeQuickAddExchangeHint => 'من عملة لعملة، زي دولار لجنيه';
+
+  @override
+  String get homeQuickAddExchangeA11y => 'سجل تحويل عملة';
 
   @override
   String homeQuickAddVoiceLeft(String remaining, String max) {

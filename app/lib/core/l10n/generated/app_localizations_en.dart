@@ -1211,6 +1211,50 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String homeHeroOtherCurrencyIncome(String amount) {
+    return '+ $amount income';
+  }
+
+  @override
+  String get exchangeEntryTitle => 'I exchanged money';
+
+  @override
+  String get exchangeEntryIntro =>
+      'An exchange isn\'t spending or income. Each side counts in its own currency.';
+
+  @override
+  String get exchangeEntrySent => 'You gave';
+
+  @override
+  String get exchangeEntryReceived => 'You got';
+
+  @override
+  String get exchangeEntryAccount => 'Account';
+
+  @override
+  String get exchangeEntryCurrency => 'Currency';
+
+  @override
+  String get exchangeEntryDate => 'Date';
+
+  @override
+  String exchangeEntryRate(String from, String rate, String to) {
+    return 'Rate: 1 $from = $rate $to';
+  }
+
+  @override
+  String get exchangeEntrySameCurrency => 'Pick two different currencies';
+
+  @override
+  String get exchangeEntrySave => 'Save exchange';
+
+  @override
+  String get exchangeEntrySaved => 'Exchange saved';
+
+  @override
+  String get exchangeEntryFailed => 'Couldn\'t save the exchange. Try again.';
+
+  @override
   String homeHeroApproxTitle(String currency) {
     return 'Everything, roughly in $currency';
   }
@@ -1997,6 +2041,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ingestionReviewOldDueKept => 'OK, it stays as it is';
+
+  @override
+  String ingestionReviewExchangeJumpQuestion(String currency, String amount) {
+    return 'Did you exchange money? Your $currency balance rose by about $amount and no money in was seen.';
+  }
+
+  @override
+  String get ingestionReviewExchangeJumpYes => 'Yes, record it';
+
+  @override
+  String get ingestionReviewExchangeJumpNo => 'No';
 
   @override
   String get ingestionReviewEmptyTitle => 'All clear! Nothing to review ✨';
@@ -4297,6 +4352,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recurringBillEditSaved => 'Bill saved ✓';
+
+  @override
+  String get homeQuickAddExchange => 'I exchanged money';
+
+  @override
+  String get homeQuickAddExchangeHint => 'From one currency to another';
+
+  @override
+  String get homeQuickAddExchangeA11y => 'Record a currency exchange';
 
   @override
   String homeQuickAddVoiceLeft(String remaining, String max) {

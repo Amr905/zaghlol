@@ -306,6 +306,83 @@ final class DriftIngestStore implements IngestStorePort {
   }
 
   @override
+  Future<BalanceJumpFacts?> balanceJumpFacts({
+    required String accountId,
+    required String currency,
+    required int asOfMs,
+    required int lookbackMs,
+  }) => guardRead(() async {
+    final acc = await _db
+        .customSelect(
+          'SELECT kind, linked_account_id FROM accounts '
+          'WHERE id = ?1 AND merged_into_id IS NULL',
+          variables: [Variable.withString(accountId)],
+          readsFrom: {_db.accounts},
+        )
+        .getSingleOrNull();
+    if (acc == null) return null;
+    final kind = acc.read<String>('kind');
+    if (kind == 'credit' || kind == 'bnpl') return null;
+    final prev = await _db
+        .customSelect(
+          'SELECT balance_minor, as_of FROM account_balances '
+          'WHERE account_id = ?1 AND currency = ?2',
+          variables: [
+            Variable.withString(accountId),
+            Variable.withString(currency),
+          ],
+          readsFrom: {_db.accountBalances},
+        )
+        .getSingleOrNull();
+    final prevMinor = prev?.readNullable<int>('balance_minor');
+    final prevAt = prev?.read<int>('as_of');
+    if (prevMinor == null || prevAt == null || prevAt >= asOfMs) return null;
+    // The ledger: the account, the account it is linked to, and every
+    // live card linked to either (T-266: one ledger, counted once).
+    final root = acc.readNullable<String>('linked_account_id') ?? accountId;
+    final eff = await _db
+        .customSelect(
+          'SELECT COALESCE(SUM(CASE '
+          "WHEN direction IN ('income','refund','transfer_in') "
+          'THEN amount_minor '
+          "WHEN direction IN ('expense','fee','transfer_out') "
+          'THEN -amount_minor ELSE 0 END), 0) AS eff '
+          'FROM transactions WHERE currency = ?1 '
+          "AND deleted_at IS NULL AND status = 'posted' "
+          'AND occurred_at > ?2 AND occurred_at <= ?3 '
+          'AND account_id IN (SELECT id FROM accounts WHERE id = ?4 '
+          'OR (linked_account_id = ?4 AND merged_into_id IS NULL))',
+          variables: [
+            Variable.withString(currency),
+            Variable.withInt(prevAt),
+            Variable.withInt(asOfMs),
+            Variable.withString(root),
+          ],
+          readsFrom: {_db.transactions, _db.accounts},
+        )
+        .getSingle();
+    final foreign = await _db
+        .customSelect(
+          'SELECT EXISTS (SELECT 1 FROM transactions WHERE currency <> ?1 '
+          "AND direction IN ('income','transfer_in') AND is_internal = 0 "
+          "AND deleted_at IS NULL AND status = 'posted' "
+          'AND occurred_at > ?2 AND occurred_at <= ?3) AS f',
+          variables: [
+            Variable.withString(currency),
+            Variable.withInt(asOfMs - lookbackMs),
+            Variable.withInt(asOfMs),
+          ],
+          readsFrom: {_db.transactions},
+        )
+        .getSingle();
+    return BalanceJumpFacts(
+      previousMinor: prevMinor,
+      countedEffectMinor: eff.read<int>('eff'),
+      foreignCredit: foreign.read<int>('f') != 0,
+    );
+  });
+
+  @override
   Future<int> updateTxn(String txnId, TxnPatch p, {required int atMs}) {
     Value<T> v<T extends Object>(T? x) =>
         x == null ? Value<T>.absent() : Value<T>(x);

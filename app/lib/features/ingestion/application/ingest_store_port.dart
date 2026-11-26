@@ -64,6 +64,18 @@ abstract interface class IngestStorePort {
   });
 
   /// Applies [patch] to [txnId] and sets `updated_at`. Returns rows changed.
+  /// T-272: the facts for the unexplained-rise check of [accountId] in
+  /// [currency] before a balance dated [asOfMs] is recorded; null when the
+  /// account is not a live asset account or has no older reported balance
+  /// in that currency (nothing to compare with). [lookbackMs]: how far back
+  /// another currency's income counts.
+  Future<BalanceJumpFacts?> balanceJumpFacts({
+    required String accountId,
+    required String currency,
+    required int asOfMs,
+    required int lookbackMs,
+  });
+
   Future<int> updateTxn(String txnId, TxnPatch patch, {required int atMs});
 
   Future<void> insertReview({

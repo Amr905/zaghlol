@@ -179,6 +179,20 @@ final class FaultyStore implements IngestStorePort {
   @override
   Future<void> insertTxn(TxnInsert row) => _step(() => _inner.insertTxn(row));
   @override
+  Future<BalanceJumpFacts?> balanceJumpFacts({
+    required String accountId,
+    required String currency,
+    required int asOfMs,
+    required int lookbackMs,
+  }) => _step(
+    () => _inner.balanceJumpFacts(
+      accountId: accountId,
+      currency: currency,
+      asOfMs: asOfMs,
+      lookbackMs: lookbackMs,
+    ),
+  );
+  @override
   Future<void> insertExchangePair({
     required String id,
     required String outTxnId,

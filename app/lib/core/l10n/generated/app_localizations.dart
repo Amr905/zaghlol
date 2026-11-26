@@ -2010,6 +2010,84 @@ abstract class AppLocalizations {
   /// **'وحولت {amount}'**
   String homeHeroKpiExchangedOut(String amount);
 
+  /// C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.
+  ///
+  /// In ar, this message translates to:
+  /// **'+ {amount} دخل'**
+  String homeHeroOtherCurrencyIncome(String amount);
+
+  /// C · T-272 manual exchange screen title
+  ///
+  /// In ar, this message translates to:
+  /// **'حولت فلوس'**
+  String get exchangeEntryTitle;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'التحويل مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.'**
+  String get exchangeEntryIntro;
+
+  /// C · T-272 the amount given
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعت'**
+  String get exchangeEntrySent;
+
+  /// C · T-272 the amount received
+  ///
+  /// In ar, this message translates to:
+  /// **'وصلني'**
+  String get exchangeEntryReceived;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'الحساب'**
+  String get exchangeEntryAccount;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'العملة'**
+  String get exchangeEntryCurrency;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'التاريخ'**
+  String get exchangeEntryDate;
+
+  /// C · T-272 the rate from the two amounts
+  ///
+  /// In ar, this message translates to:
+  /// **'السعر: ١ {from} = {rate} {to}'**
+  String exchangeEntryRate(String from, String rate, String to);
+
+  /// C · T-272 validation
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار عملتين مختلفتين'**
+  String get exchangeEntrySameCurrency;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ التحويل'**
+  String get exchangeEntrySave;
+
+  /// C · T-272 snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجل التحويل'**
+  String get exchangeEntrySaved;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفناش نحفظ التحويل. جرب تاني.'**
+  String get exchangeEntryFailed;
+
   /// L · last pager page, only when the ≈ view is on (FR-CUR-04)
   ///
   /// In ar, this message translates to:
@@ -3123,6 +3201,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تمام، هيفضل زي ما هو'**
   String get ingestionReviewOldDueKept;
+
+  /// C · T-272: unexplained balance rise on an account while another currency had income lately. Opens the exchange entry prefilled.
+  ///
+  /// In ar, this message translates to:
+  /// **'حولت فلوس؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.'**
+  String ingestionReviewExchangeJumpQuestion(String currency, String amount);
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه، سجلها'**
+  String get ingestionReviewExchangeJumpYes;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'لأ'**
+  String get ingestionReviewExchangeJumpNo;
 
   /// T · C-28, Rive proud
   ///
@@ -6269,6 +6365,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الفاتورة اتحفظت ✓'**
   String get recurringBillEditSaved;
+
+  /// C · T-272: Add sheet row for a manual currency exchange (D-86)
+  ///
+  /// In ar, this message translates to:
+  /// **'حولت فلوس'**
+  String get homeQuickAddExchange;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'من عملة لعملة، زي دولار لجنيه'**
+  String get homeQuickAddExchangeHint;
+
+  /// A · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'سجل تحويل عملة'**
+  String get homeQuickAddExchangeA11y;
 
   /// S · Free only (FR-VOI-04)
   ///

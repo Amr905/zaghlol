@@ -31,6 +31,13 @@ abstract final class ReviewReason {
   /// message re-parse now reads as a card due notice (D-83). The user picks
   /// Remove or Keep; nothing is removed without that tap.
   static const String oldDueNotice = 'oldDueNotice';
+
+  /// T-272: a `low_confidence` item with no transaction: an asset
+  /// account's reported balance rose by more than the ledger explains while
+  /// another currency had income lately. The user may record the exchange
+  /// (prefilled) or say no; nothing is created without that tap. Payload:
+  /// `accountId`, `amount` (the rise, `Money.toJson`), `asOfMs`.
+  static const String exchangeBalanceJump = 'exchangeBalanceJump';
 }
 
 class ReviewItemsDao {

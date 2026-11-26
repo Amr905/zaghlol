@@ -37,7 +37,7 @@ HomeMascotMessage? pickHomeMascot({
     final lastNet = previous.income - previous.spend;
     // T-272: "saved" stays income minus spend. An exchange moves money
     // between currencies; it is not saving, so it never triggers this.
-    final net = figures.income - figures.spend;
+    final net = figures.net - figures.exchangedIn + figures.exchangedOut;
     if (hadActivity && net.minor > 0 && net > lastNet) {
       return MascotSavedMore(net - lastNet);
     }

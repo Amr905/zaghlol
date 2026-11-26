@@ -698,7 +698,7 @@ void main() {
     test('recordExchange in one account is fx_conversion; it resolves the '
         'suggestion item it came from', () async {
       await db.customStatement(
-        "INSERT INTO review_items (id, kind, payload, created_at) VALUES "
+        'INSERT INTO review_items (id, kind, payload, created_at) VALUES '
         "('jump', 'low_confidence', '{\"reason\":\"exchangeBalanceJump\"}', 1)",
       );
       final r = await uc.recordExchange(

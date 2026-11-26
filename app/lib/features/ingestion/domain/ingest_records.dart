@@ -350,3 +350,29 @@ final class ReparseTarget {
   final TxnCandidate candidate;
   final bool linked;
 }
+
+/// T-272: what the "did you exchange money?" check needs about an asset
+/// account's balance in one currency, read before a newer balance is
+/// recorded. Minor units of that currency.
+final class BalanceJumpFacts {
+  const BalanceJumpFacts({
+    required this.previousMinor,
+    required this.countedEffectMinor,
+    required this.foreignCredit,
+  });
+
+  /// The last reported balance (older than the new one).
+  final int previousMinor;
+
+  /// The signed cash effect of the posted, live transactions of the
+  /// account's ledger in that currency after the last report, up to the
+  /// new one (internal legs included: they move real money).
+  final int countedEffectMinor;
+
+  /// True when another currency had income or an incoming transfer (not
+  /// internal) within the lookback.
+  final bool foreignCredit;
+
+  @override
+  String toString() => 'BalanceJumpFacts(..)';
+}
