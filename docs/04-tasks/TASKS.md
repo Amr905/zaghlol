@@ -377,10 +377,10 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-293](tasks/T-293.md) | Haptic patterns synced with animations (Android + iOS) | D-87 | Medium (C3) | Sonnet | native-platform-engineer | — | N | 83 | DONE (batch 83) |
 | [T-294](tasks/T-294.md) | Payday celebration sheet (option B), once per salary, cash salary switch | D-87 | Medium (C3) | Sonnet | flutter-ui-engineer | T-293 API | U | 83 | DONE (batch 83) |
 | [T-295](tasks/T-295.md) | "Saved!" toast with the bird after saving (place 1) | D-87 | Standard (C2) | Sonnet | flutter-ui-engineer | T-293 API | U2 | 83 | DONE (batch 83) |
-| [T-296](tasks/T-296.md) | Bird place 2: sleeping bird on empty lists, detective on the review list | D-87 | Standard (C2) | Sonnet | flutter-ui-engineer | — | U | 84 | TODO |
-| [T-297](tasks/T-297.md) | Bird place 4: bird while the app works (scan, Ask, import/backup) | D-87 | Standard (C2) | Sonnet | flutter-ui-engineer | — | U2 | 84 | TODO |
-| [T-298](tasks/T-298.md) | Haptics follow app settings; toast margin follows real bar height (FU-397/402) | follow-ups | Standard (C2) | Sonnet | flutter-core-engineer | — | A | 84 | TODO |
-| [T-299](tasks/T-299.md) | Android OCR small amounts + cancel vibration on background (FU-395/397) | follow-ups | Standard (C2) | Sonnet | native-platform-engineer | — | N | 84 | TODO |
+| [T-296](tasks/T-296.md) | Bird place 2: sleeping bird on empty lists, detective on the review list | D-87 | Standard (C2) | Sonnet | flutter-ui-engineer | — | U | 84 | DONE (batch 84) |
+| [T-297](tasks/T-297.md) | Bird place 4: bird while the app works (scan, Ask, import/backup) | D-87 | Standard (C2) | Sonnet | flutter-ui-engineer | — | U2 | 84 | DONE (batch 84) |
+| [T-298](tasks/T-298.md) | Haptics follow app settings; toast margin follows real bar height (FU-397/402) | follow-ups | Standard (C2) | Sonnet | flutter-core-engineer | — | A | 84 | DONE (batch 84) |
+| [T-299](tasks/T-299.md) | Android OCR small amounts + cancel vibration on background (FU-395/397) | follow-ups | Standard (C2) | Sonnet | native-platform-engineer | — | N | 84 | DONE (batch 84) |
 | [T-263](tasks/T-263.md) | Sharing an image to Zaghlol opens the scan, never "not implemented" | US-P02 | High | Sonnet | native-platform-engineer | — | — | 77 | DONE (batch 76) |
 | [T-266](tasks/T-266.md) | Link a debit card to its bank account (one balance, set by the user) | US-P05 | High | Sonnet | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 | [T-268](tasks/T-268.md) | Mascot animation matches the approved art; left hand not cut | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | — | 77 | SUPERSEDED by T-274 (not merged) |
