@@ -38,6 +38,8 @@ import '../../../voice/presentation/voice_logger_screen.dart';
 import 'txn_edit_providers.dart';
 import 'txn_form.dart';
 import '../../../../core/ui/z_haptics.dart';
+import '../../../../core/ui/z_saved_toast.dart';
+import '../saved_toast_budget.dart';
 import '../../../../core/settings/settings_providers.dart';
 
 const int _msPerDay = 86400000;
@@ -264,6 +266,15 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     );
   }
 
+  static Future<void> _undoAdd(ProviderContainer c, List<String> ids) async {
+    try {
+      final repo = await c.read(transactionRepositoryProvider.future);
+      await repo.softDelete(ids);
+    } on Object {
+      // Already gone; nothing to undo.
+    }
+  }
+
   Future<void> _save() async {
     _submitted = true;
     _revalidate();
@@ -271,6 +282,8 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final container = ProviderScope.containerOf(context);
+    final lang = Localizations.localeOf(context).languageCode;
     setState(() {
       _saving = true;
       _failed = false;
@@ -284,6 +297,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
       final merchant = _merchant.text.trim();
       final note = _note.text.trim();
       var removed = const <String>[];
+      var addedIds = const <String>[];
       if (_isEdit) {
         final e = _existing!;
         final dateChanged = _date != null;
@@ -363,7 +377,7 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
             return;
           }
         } else {
-          await editor.add(legs);
+          addedIds = await editor.add(legs);
         }
       }
       ref.invalidate(txnListProvider);
@@ -374,6 +388,25 @@ class _EditState extends ConsumerState<TransactionEditScreen> {
           ..showSnackBar(
             SnackBar(content: Text(l.transfersAssignErrorExceedsExpense)),
           );
+      }
+      // T-295: Saved! toast for a new manual/typed transaction (not edits,
+      // not transfers, not the salary path which has its own banner).
+      if (!_isEdit && addedIds.isNotEmpty && _type != TxnEditType.transfer) {
+        final line = _type == TxnEditType.expense
+            ? await savedToastBudgetLine(
+                container,
+                categoryId: _categoryId,
+                currency: amount.currency,
+                languageCode: lang,
+                l10n: l,
+              )
+            : null;
+        showSavedToast(
+          messenger,
+          l,
+          budgetLine: line,
+          onUndo: () => unawaited(_undoAdd(container, addedIds)),
+        );
       }
       navigator.pop(true);
     } on SafeException {

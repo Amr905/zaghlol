@@ -4597,6 +4597,18 @@ abstract class AppLocalizations {
   /// **'اتحفظ ✓'**
   String get accountsEditSaved;
 
+  /// T · toast after saving a transaction (T-295)
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجلت!'**
+  String get savedToastTitle;
+
+  /// T · category:String, amount:String (own currency)
+  ///
+  /// In ar, this message translates to:
+  /// **'فاضلك في {category} {amount}'**
+  String savedToastBudgetLeft(Object amount, Object category);
+
   /// T
   ///
   /// In ar, this message translates to:

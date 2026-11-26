@@ -928,6 +928,8 @@
   "accountsEditErrorLimit": "The limit can't be negative",
   "accountsEditErrorDueDay": "Pick a day from {min} to {max}",
   "accountsEditSaved": "Saved ✓",
+  "savedToastTitle": "Saved!",
+  "savedToastBudgetLeft": "{amount} left in {category}",
   "accountsMergePickTitle": "Merge into which card?",
   "accountsMergeConfirmTitle": "{count, plural, =0{Merge {fromCard} into {toCard}?} =1{Move 1 transaction from {fromCard} into {toCard}?} other{Move {n} transactions from {fromCard} into {toCard}?}}",
   "accountsMergeConfirmBody": "The two cards will become one.",

@@ -3062,6 +3062,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountsEditSaved => 'اتحفظ ✓';
 
   @override
+  String get savedToastTitle => 'اتسجلت!';
+
+  @override
+  String savedToastBudgetLeft(Object amount, Object category) {
+    return 'فاضلك في $category $amount';
+  }
+
+  @override
   String get accountsMergePickTitle => 'تدمجه مع أنهي كارت؟';
 
   @override
