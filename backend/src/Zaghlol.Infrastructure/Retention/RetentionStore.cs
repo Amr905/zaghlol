@@ -56,6 +56,9 @@ internal sealed class RetentionStore(IZaghlolDbContextFactory contexts) : IReten
 
         // T-335: only the current and the previous Cairo month are kept; the cut-off key is computed by CairoMonth (one definition).
         [RetentionRules.LlmQuotaMonths] = Delete("llm_quota_counters", "month_key < @llmcutoff"),
+
+        // T-339: the spend ledger keeps 13 months (FR-LLM-62): a UTC day older than today minus 13 calendar months goes. The alert marker rows share the table and age out with it.
+        [RetentionRules.LlmSpendDaily] = Delete("llm_spend_daily", "day < ((@now AT TIME ZONE 'UTC')::date - interval '13 months')"),
     };
 
     public async Task<int> PurgeBatchAsync(string rule, DateTimeOffset now, int batchSize, CancellationToken cancellationToken)

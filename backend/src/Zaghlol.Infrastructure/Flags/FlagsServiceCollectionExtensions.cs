@@ -19,9 +19,11 @@ public static class FlagsServiceCollectionExtensions
 
         services.AddZaghlolAudit();
         services.TryAddSingleton<IFlagAdminStore, FlagAdminStore>();
-        services.TryAddSingleton<IOpsNotifier>(provider => new WebhookOpsNotifier(
+        services.TryAddSingleton(provider => new WebhookOpsNotifier(
             provider.GetRequiredService<IConfiguration>(),
             provider.GetRequiredService<ILogger<WebhookOpsNotifier>>()));
+        services.TryAddSingleton<IOpsNotifier>(provider => provider.GetRequiredService<WebhookOpsNotifier>());
+        services.TryAddSingleton<IOpsAlertSink>(provider => provider.GetRequiredService<WebhookOpsNotifier>());
         return services;
     }
 
