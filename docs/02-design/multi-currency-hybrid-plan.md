@@ -52,7 +52,7 @@ Ahmed's payday is the 24th. His three latest salaries came in USD on the 24th, s
 |---|---|
 | **Which rate "≈" uses** | (1) For money you already exchanged: **the bank's own rate**, taken from the two amounts in the SMS. (2) For money still in its own currency: the **daily rate** from the Zaghlol server (FR-BE-04). It is marked "old rate" after 24 h. (3) If any currency on screen has **no rate at all, the ≈ line is hidden**. We never show a partial total. |
 | **Budgets** | By default the budget is **in EGP** and counts only EGP. A currency with **real activity this month** can get its own budget, offered once and never created automatically. Foreign spending on an Egyptian card counts in EGP, the billed amount (BR-FX-03). |
-| **Exchange** | An exchange is a **transfer pair**, never income and never spending. The EGP received adds to the EGP month. The foreign amount sent leaves that currency's card. Same-bank exchanges (Wise, Revolut, a bank "converted" SMS) are paired automatically (FR-PAR-12). Exchanges between two banks, or cash at an exchange office, are **suggested** and confirmed with one tap, or entered with "حولت فلوس". |
+| **Exchange** | An exchange is a **transfer pair**, never income and never spending. The EGP received adds to the EGP month. The foreign amount sent leaves that currency's card. Same-bank exchanges (Wise, Revolut, a bank "converted" SMS) are paired automatically (FR-PAR-12). Exchanges between two banks, or cash at an exchange office, are **suggested** and confirmed with one tap, or entered with "غيّرت عملة". |
 | **Payday (D-81, D-85)** | A salary in any currency is salary income. The first salary of the calendar month sets the payday rule. A month that starts on day 21–28 is named after the next month (D-82). In Arabic the period is always **شهر**. |
 | **What never happens** | No amount is converted when it is saved. No screen adds two currencies unless it shows "≈" and "تقريبي". The ≈ line never appears without a rate. A salary is never counted again when it is exchanged. Zaghlol never creates a foreign-currency budget by itself. |
 
@@ -104,7 +104,7 @@ Packages 1–4 and 7 ship as **slice 1 without the server rate feed**: cards, th
 | `budget.offer.raise` | زوّد ميزانية الشهر بـ {amount}؟ | Add {amount} to this month's budget? | 40 |
 | `txn.exchange.title` | حولت {from} ← {to} | Exchanged {from} → {to} | 32 |
 | `txn.exchange.rate` | سعر البنك {rate} · مش مصروف | Bank rate {rate} · not spending | 32 |
-| `add.exchange.entry` | حولت فلوس | I exchanged money | 16 |
+| `add.exchange.entry` | غيّرت عملة | I exchanged currency | 16 |
 | `add.exchange.sent` / `.received` | دفعت / وصلني | You gave / You got | 12 |
 | `pair.exchange.prompt` | دول الدولارات اللي حولتها؟ | Is this your exchanged USD? | 32 |
 | `pair.exchange.yes` / `.no` | أيوه / لأ | Yes / No | 6 |

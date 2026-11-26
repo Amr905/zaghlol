@@ -3,6 +3,8 @@
 // one when no alert-type or celebration line is up. Counters only are
 // stored, nothing personal. Nothing here logs.
 
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
@@ -27,11 +29,14 @@ enum MascotTipTarget {
 }
 
 class MascotTip {
-  MascotTip(this.group, this.target, this.text);
+  MascotTip(this.group, this.target, this.text, {this.androidOnly = false});
 
   final MascotTipGroup group;
   final MascotTipTarget target;
   final String Function(AppLocalizations l) text;
+
+  /// Shown only on Android (the feature does not exist on iOS).
+  final bool androidOnly;
 }
 
 /// First two weeks after install: usage tips lead (PO 2026-11-26).
@@ -123,6 +128,7 @@ final List<MascotTip> mascotTips = [
     MascotTipGroup.smart,
     MascotTipTarget.none,
     (l) => l.mascotTipSmartSms,
+    androidOnly: true,
   ),
   MascotTip(
     MascotTipGroup.smart,
@@ -201,9 +207,9 @@ final List<MascotTip> mascotTips = [
   ),
 ];
 
-List<MascotTip> tipsOf(MascotTipGroup g) => [
+List<MascotTip> tipsOf(MascotTipGroup g, {bool android = true}) => [
   for (final t in mascotTips)
-    if (t.group == g) t,
+    if (t.group == g && (android || !t.androidOnly)) t,
 ];
 
 /// Counters: the next index to show in each group, and tips shown so far.
@@ -265,12 +271,13 @@ const _steadyOrder = [
 ({MascotTip tip, TipRotation next}) pickTip({
   required TipRotation rotation,
   required int daysSinceInstall,
+  bool android = true,
 }) {
   final order = daysSinceInstall < kTipNewcomerDays
       ? _newcomerOrder
       : _steadyOrder;
   final group = order[rotation.shown % order.length];
-  final list = tipsOf(group);
+  final list = tipsOf(group, android: android);
   return (
     tip: list[rotation.of(group) % list.length],
     next: rotation.advanced(group),
@@ -286,6 +293,7 @@ final homeTipProvider = FutureProvider<MascotTip?>((ref) async {
   final pick = pickTip(
     rotation: rotation,
     daysSinceInstall: today.difference(installed),
+    android: defaultTargetPlatform == TargetPlatform.android,
   );
   await repo.set(Settings.mascotTipState, pick.next.encode());
   return pick.tip;

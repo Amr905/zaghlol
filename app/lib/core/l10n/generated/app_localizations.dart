@@ -2001,13 +2001,13 @@ abstract class AppLocalizations {
   /// C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.
   ///
   /// In ar, this message translates to:
-  /// **'منهم {amount} من تحويل عملة'**
+  /// **'منهم {amount} من تغيير عملة'**
   String homeHeroKpiIncomeFromExchange(String amount);
 
   /// C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.
   ///
   /// In ar, this message translates to:
-  /// **'وحولت {amount}'**
+  /// **'وغيّرت {amount}'**
   String homeHeroKpiExchangedOut(String amount);
 
   /// C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.
@@ -2019,13 +2019,13 @@ abstract class AppLocalizations {
   /// C · T-272 manual exchange screen title
   ///
   /// In ar, this message translates to:
-  /// **'حولت فلوس'**
+  /// **'تغيير عملة'**
   String get exchangeEntryTitle;
 
   /// C · T-272
   ///
   /// In ar, this message translates to:
-  /// **'التحويل مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.'**
+  /// **'تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.'**
   String get exchangeEntryIntro;
 
   /// C · T-272 the amount given
@@ -2073,19 +2073,19 @@ abstract class AppLocalizations {
   /// C · T-272
   ///
   /// In ar, this message translates to:
-  /// **'احفظ التحويل'**
+  /// **'احفظ التغيير'**
   String get exchangeEntrySave;
 
   /// C · T-272 snackbar
   ///
   /// In ar, this message translates to:
-  /// **'اتسجل التحويل'**
+  /// **'اتسجل التغيير'**
   String get exchangeEntrySaved;
 
   /// C · T-272
   ///
   /// In ar, this message translates to:
-  /// **'معرفناش نحفظ التحويل. جرب تاني.'**
+  /// **'معرفناش نحفظ التغيير. جرب تاني.'**
   String get exchangeEntryFailed;
 
   /// L · last pager page, only when the ≈ view is on (FR-CUR-04)
@@ -3205,7 +3205,7 @@ abstract class AppLocalizations {
   /// C · T-272: unexplained balance rise on an account while another currency had income lately. Opens the exchange entry prefilled.
   ///
   /// In ar, this message translates to:
-  /// **'حولت فلوس؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.'**
+  /// **'غيّرت عملة؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.'**
   String ingestionReviewExchangeJumpQuestion(String currency, String amount);
 
   /// C · T-272
@@ -5004,7 +5004,7 @@ abstract class AppLocalizations {
   /// No description provided for @mascotTipSmartVoice.
   ///
   /// In ar, this message translates to:
-  /// **'بفهم المصري! قول «دفعت ١٥٠ خضار و٤٥ قهوة» وأسجّلهم اتنين 🎤'**
+  /// **'بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤'**
   String get mascotTipSmartVoice;
 
   /// No description provided for @mascotTipSmartSms.
@@ -5052,7 +5052,7 @@ abstract class AppLocalizations {
   /// No description provided for @mascotTipSmartTransfer.
   ///
   /// In ar, this message translates to:
-  /// **'لو حولت من كارت لحسابك، ببقى عارف إنه إنت بتدفع لنفسك وماببقاش صرف 👌'**
+  /// **'لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌'**
   String get mascotTipSmartTransfer;
 
   /// No description provided for @mascotTipHabitCoffee.
@@ -5088,7 +5088,7 @@ abstract class AppLocalizations {
   /// No description provided for @mascotTipHabitWait.
   ///
   /// In ar, this message translates to:
-  /// **'استنى ٢٤ ساعة قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️'**
+  /// **'استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️'**
   String get mascotTipHabitWait;
 
   /// No description provided for @mascotTipHabitTreat.
@@ -6567,7 +6567,7 @@ abstract class AppLocalizations {
   /// C · T-272: Add sheet row for a manual currency exchange (D-86)
   ///
   /// In ar, this message translates to:
-  /// **'حولت فلوس'**
+  /// **'غيّرت عملة'**
   String get homeQuickAddExchange;
 
   /// C · T-272
@@ -6579,7 +6579,7 @@ abstract class AppLocalizations {
   /// A · T-272
   ///
   /// In ar, this message translates to:
-  /// **'سجل تحويل عملة'**
+  /// **'سجّل تغيير عملة'**
   String get homeQuickAddExchangeA11y;
 
   /// S · Free only (FR-VOI-04)

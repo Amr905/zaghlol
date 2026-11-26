@@ -26,7 +26,7 @@ class OcrMergerTest {
     @Test
     fun arabicLineReplacesOverlappingLatinGarbage() {
         val out = OcrMerger.merge(
-            latin = listOf(line("Jl J", 100, 10, 300, 40, 0.3)),
+            latin = listOf(line("Jlaa Jlj", 100, 10, 300, 40, 0.3)),
             arabic = listOf(line("تم تحويل المبلغ", 98, 8, 302, 42)),
         )
         assertEquals(listOf("تم تحويل المبلغ"), out.map { it.text })
@@ -111,6 +111,33 @@ class OcrMergerTest {
     }
 
     @Test
+    fun arabicLineAtMidConfidenceWithoutOverlapIsKept() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Ref 5555", 0, 100, 200, 130)),
+            arabic = listOf(line("الإجمالي ٨٥٫٥٠", 0, 0, 200, 30, 0.52)),
+        )
+        assertEquals(listOf("الإجمالي ٨٥٫٥٠", "Ref 5555"), out.map { it.text })
+    }
+
+    @Test
+    fun arabicLineOverWeakGarbageIsKeptWithItsAmount() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Jlaa Jlj", 0, 0, 200, 30, 0.3)),
+            arabic = listOf(line("الإجمالي ٨٥٫٥٠", 0, 0, 200, 30, 0.52)),
+        )
+        assertEquals(listOf("الإجمالي ٨٥٫٥٠"), out.map { it.text })
+    }
+
+    @Test
+    fun arabicAmountIsAppendedWhenStrongMlKitLineHasNoDigits() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Total Amount", 0, 0, 200, 30)),
+            arabic = listOf(line("الإجمالي ٨٥٫٥٠", 0, 0, 200, 30, 0.85)),
+        )
+        assertEquals(listOf("Total Amount الإجمالي 85.50"), out.map { it.text })
+    }
+
+    @Test
     fun nonOverlappingLinesFromBothEnginesAreKept() {
         val out = OcrMerger.merge(
             latin = listOf(line("Ref 5555", 0, 100, 200, 130)),
@@ -145,6 +172,12 @@ class OcrMergerTest {
         assertTrue(OcrMerger.strongLatin("Visa 436.00"))
         assertTrue(OcrMerger.strongLatin("436.00"))
         assertFalse(OcrMerger.strongLatin("Jl J"))
+        assertFalse(OcrMerger.strongLatin("Jlaa Jlj"))
+        assertFalse(OcrMerger.strongLatin("lall"))
+        assertFalse(OcrMerger.strongLatin("JI plw"))
+        assertTrue(OcrMerger.strongLatin("Amount Due"))
+        assertTrue(OcrMerger.strongLatin("VAT 53.54"))
+        assertTrue(OcrMerger.strongLatin("Name: عميل"))
         assertFalse(OcrMerger.hasArabicLetter("123 ٠١٢ abc"))
     }
 

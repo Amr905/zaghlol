@@ -1216,7 +1216,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get exchangeEntryTitle => 'I exchanged money';
+  String get exchangeEntryTitle => 'Currency exchange';
 
   @override
   String get exchangeEntryIntro =>
@@ -2044,7 +2044,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String ingestionReviewExchangeJumpQuestion(String currency, String amount) {
-    return 'Did you exchange money? Your $currency balance rose by about $amount and no money in was seen.';
+    return 'Did you exchange currency? Your $currency balance rose by about $amount and no money in was seen.';
   }
 
   @override
@@ -3272,7 +3272,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mascotTipSmartTransfer =>
-      'Move money from one of your cards to another and I know it\'s you paying you, not spending 👌';
+      'When you move money between your own accounts, I know it\'s not spending 👌';
 
   @override
   String get mascotTipHabitCoffee =>
@@ -4485,7 +4485,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringBillEditSaved => 'Bill saved ✓';
 
   @override
-  String get homeQuickAddExchange => 'I exchanged money';
+  String get homeQuickAddExchange => 'I exchanged currency';
 
   @override
   String get homeQuickAddExchangeHint => 'From one currency to another';

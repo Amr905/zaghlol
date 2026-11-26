@@ -61,6 +61,25 @@ void main() {
     }
   });
 
+  test('the SMS-reading tip is skipped on iOS and shown on Android', () {
+    final l = lookupAppLocalizations(const Locale('en'));
+    final sms = l.mascotTipSmartSms;
+    for (final android in const [true, false]) {
+      var r = TipRotation.start;
+      final texts = <String>{};
+      for (var i = 0; i < 400; i++) {
+        final p = pickTip(rotation: r, daysSinceInstall: 30, android: android);
+        texts.add(p.tip.text(l));
+        r = p.next;
+      }
+      expect(texts.contains(sms), android);
+    }
+    expect(
+      tipsOf(MascotTipGroup.smart, android: false).length,
+      tipsOf(MascotTipGroup.smart).length - 1,
+    );
+  });
+
   test('usage tips lead in the first two weeks', () {
     int usageShare(int days) {
       var r = TipRotation.start;

@@ -111,7 +111,7 @@ void main() {
   testWidgets('PO story: USD wallet -> NBE EGP, rate shown, exact amounts '
       'saved', (t) async {
     final fake = await _pump(t);
-    expect(find.text('I exchanged money'), findsWidgets);
+    expect(find.text('Currency exchange'), findsWidgets);
     await t.enterText(_amountIn('sent'), '600');
     await t.enterText(_amountIn('received'), '29,700');
     await t.pump();
