@@ -424,7 +424,7 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-350](tasks/T-350.md) | Evaluation harness: 40 questions, recorded CI run, live workflow | ASK-LLM / D-91 | High | Sonnet | backend-engineer | T-349, T-338 | B | 96 | DONE (batch 96) |
 | [T-351](tasks/T-351.md) | Live provider evaluation run and provider choice | ASK-LLM / D-91 | Medium | Sonnet | backend-engineer (Lead triggers) | T-350, T-333 | B | — | BLOCKED (PO: provider accounts + keys) |
 | [T-352](tasks/T-352.md) | `POST /v1/categorise` with answer cache | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-349, T-323 | B | 96 | DONE (batch 96) |
-| [T-353](tasks/T-353.md) | Feedback intake through sync, corrections review table, retention | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-352, T-334 | B | 97 | TODO |
+| [T-353](tasks/T-353.md) | Feedback intake through sync, corrections review table, retention | LLM-CAT | High (C4) | Sonnet | backend-engineer | T-352, T-334 | B | 97 | DONE (batch 97) |
 | [T-354](tasks/T-354.md) | Operator review admin endpoints and `zaghlol-ops llmcat` | LLM-CAT | Medium | Sonnet | backend-engineer | T-353 | B | 98 | TODO |
 | [T-355](tasks/T-355.md) | Categorise eligibility rule (pure) | LLM-CAT | High (C4) | Sonnet | parsing-engine-engineer | T-325 | P | 94 | DONE (batch 94) |
 | [T-356](tasks/T-356.md) | Drift migration: AI suggestions, queue, outbox kinds, `CategorySource.ai`, export | LLM-CAT | High (C4) | Opus | flutter-core-engineer | — | A | 91 | DONE (batch 91) |
@@ -432,8 +432,8 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-358](tasks/T-358.md) | Categorise queue and sender with outgoing-body proofs | LLM-CAT | High (C4) | Sonnet | flutter-core-engineer | T-355, T-356, T-340 | A | 96 | DONE (batch 96) |
 | [T-359](tasks/T-359.md) | Right/Wrong actions, Undo, `llmCatFeedback` through sync | LLM-CAT | High | Sonnet | flutter-core-engineer | T-356, T-357, T-322 | A | 96 | DONE (batch 96) |
 | [T-360](tasks/T-360.md) | ARB strings: automatic category (§4.12) | LLM-CAT | Low | Haiku | boilerplate-engineer | T-329 | U | 95 | DONE (batch 95) |
-| [T-361](tasks/T-361.md) | UI: AI chip, ✓/✗ controls, picker, Undo | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-359, T-360 | U | 97 | TODO |
-| [T-362](tasks/T-362.md) | UI: discovery card, consent sheet, Settings row, counter | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-358, T-360 | U | 97 | TODO |
+| [T-361](tasks/T-361.md) | UI: AI chip, ✓/✗ controls, picker, Undo | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-359, T-360 | U | 97 | DONE (batch 97) |
+| [T-362](tasks/T-362.md) | UI: discovery card, consent sheet, Settings row, counter | LLM-CAT | Medium | Sonnet | flutter-ui-engineer | T-358, T-360 | U | 97 | DONE (batch 97) |
 | [T-363](tasks/T-363.md) | Device E2E: automatic category with a fake backend | LLM-CAT | Medium | Sonnet | flutter-core-engineer | T-361, T-362 | A | 98 | TODO |
 | [T-364](tasks/T-364.md) | Docs: API/schema, BR-SYNC-03, ADR-027 amendment, privacy policy, store drafts | ASK-LLM / LLM-CAT | Docs | Sonnet | solution-architect | T-349, T-352, T-353 | Doc | 98 | TODO |
 | [T-365](tasks/T-365.md) | Launch checklist for the three LLM flags | ASK-LLM / LLM-CAT | Docs/ops | — | Lead | T-348, T-351, T-354, T-363, T-364 | — | — | BLOCKED (PO: legal, provider, store accounts) |
@@ -443,6 +443,9 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 |---|---|---|
 | [T-351](tasks/T-351.md) | Live LLM provider evaluation and choice | PO: provider accounts (OpenAI EU, Vertex AI EU, Anthropic) and keys as `llm-eval` environment secrets |
 | [T-365](tasks/T-365.md) | LLM launch checklist (flags on in production) | PO/legal: OQ-ASK-01, OQ-ASK-03, OQ-LCAT-08, zero-retention grant, provider key in production KMS, Play Console + Integrity quota, App Store Connect |
+| [T-366](tasks/T-366.md) | Provider id and display names in the signed sync `config` block (spec gap FU-425, 1a) | ASK-LLM / LLM-CAT | Medium | Sonnet | backend-engineer | T-334 | B | 97 | DONE (batch 97) |
+| [T-367](tasks/T-367.md) | App: one terms provider from the synced config; 409 handling (spec gap FU-425/FU-431, 1b) | ASK-LLM / LLM-CAT | High | Sonnet | flutter-core-engineer | T-366 | A | 97 | DONE (batch 97) |
+| [T-368](tasks/T-368.md) | Plan validators: strip placeholders before amounts; refuse `\p{N}` in mentions (spec gap FU-409, 2.0) | ASK-LLM | High | Sonnet | backend-engineer / parsing-engine-engineer | T-330, T-331 | B/P | 97 | DONE (batch 97) |
 | [T-031](tasks/T-031.md) | Convert real SMS/notification/statement samples into synthetic fixtures (OQ-04/18) | Waiting for samples from product owner (OQ-04/OQ-18) |
 | [T-127](tasks/T-127.md) | Price service: local Egyptian gold-market adapter, FX adapter, worker, override | Provider contract for local gold feed (D-41) needed before go-live; build continues with fakes |
 | [T-140](tasks/T-140.md) | Infrastructure as code and deployment pipeline (staging, prod) | CR-03 / OQ-16: hosting provider & region + PDPL licence decision |
