@@ -1,0 +1,139 @@
+{
+  "$comment": "Shared binding vectors for POST /v1/categorise (docs/03-technical/llm-categorise.md section 3, ask-llm.md section 5). Same construction as ask-binding-v1.json with the prefixes below; clientDataPrefix zaghlol-cat-attest-v1 follows the ask pattern (the spec names only the body prefix). All values are synthetic.",
+  "prefix": "zaghlol-cat-v1",
+  "clientDataPrefix": "zaghlol-cat-attest-v1",
+  "valid": [
+    {
+      "name": "android-two-merchants",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "v": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4A",
+        "lang": "ar",
+        "merchants": [
+          "zawya coffee",
+          "مكتبة النور"
+        ],
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "play_integrity",
+          "token": "synthetic-play-integrity-token-0001"
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"ar\",\"merchants\":[\"zawya coffee\",\"مكتبة النور\"],\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4A\",\"v\":1}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a226172222c226d65726368616e7473223a5b227a6177796120636f66666565222c22d985d983d8aad8a8d8a920d8a7d984d986d988d8b1225d2c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3441222c2276223a317d",
+      "bodyHashHex": "4c40dbe034b7fd8efda43decfdcbe9f791fcd85f470d56e2f3d7c5f9406305b6",
+      "requestHashB64u": "TEDb4DS3_Y79pD3s_cvp95H82F9HDVbi89fF-UBjBbY",
+      "clientDataHashHex": "5b55da3ad0283be779e67622f9d2f4458b8a32922bceca152faecfccd4163f4a"
+    },
+    {
+      "name": "ios-english-first-use-with-attestation-object",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "v": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4B",
+        "lang": "en",
+        "merchants": [
+          "green leaf pharmacy"
+        ],
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "app_attest",
+          "keyId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+          "assertion": "QUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ==",
+          "attestationObject": "QkJCQkJCQkJCQkJCQkJCQkJCQkJCQg=="
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"en\",\"merchants\":[\"green leaf pharmacy\"],\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4B\",\"v\":1}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a22656e222c226d65726368616e7473223a5b22677265656e206c65616620706861726d616379225d2c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3442222c2276223a317d",
+      "bodyHashHex": "41a18592199790bd45c9f074517e480cef9f16867fdf4987e25230cee0a72ee5",
+      "requestHashB64u": "QaGFkhmXkL1FyfB0UX5IDO-fFoZ_30mH4lIwzuCnLuU",
+      "clientDataHashHex": "e32b2469291e9245314a424cbdf8c3500191a582530c3691056fe0af02870c13"
+    },
+    {
+      "name": "ios-order-of-merchants-is-significant",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e79",
+      "body": {
+        "v": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4C",
+        "lang": "en",
+        "merchants": [
+          "b shop",
+          "a shop"
+        ],
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "app_attest",
+          "keyId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+          "assertion": "QUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ=="
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"en\",\"merchants\":[\"b shop\",\"a shop\"],\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4C\",\"v\":1}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a22656e222c226d65726368616e7473223a5b22622073686f70222c22612073686f70225d2c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3443222c2276223a317d",
+      "bodyHashHex": "6e1094e3be4a1094425713890be5e14164838af4f7a9714aa3ed8895be206074",
+      "requestHashB64u": "bhCU475KEJRCVxOJC-XhQWSDivT3qXFKo-2Ilb4gYHQ",
+      "clientDataHashHex": "9d62964f53d8605f448f0000429ed960095d860259bc8c41383c5914deebc062"
+    },
+    {
+      "name": "escapes-quote-backslash-control",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "v": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4D",
+        "lang": "en",
+        "merchants": [
+          "\"quoted\" shop",
+          "back\\slash",
+          "tab\tshop"
+        ],
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "play_integrity",
+          "token": "synthetic-play-integrity-token-0001"
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"en\",\"merchants\":[\"\\\"quoted\\\" shop\",\"back\\\\slash\",\"tab\\tshop\"],\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4D\",\"v\":1}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a22656e222c226d65726368616e7473223a5b225c2271756f7465645c222073686f70222c226261636b5c5c736c617368222c227461625c7473686f70225d2c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3444222c2276223a317d",
+      "bodyHashHex": "11867ff4a47173917bdefe2fc22928c3d70602b69a8a917d3055b4d4d7550701",
+      "requestHashB64u": "EYZ_9KRxc5F73v4vwikow9cGAraaipF9MFW01NdVBwE",
+      "clientDataHashHex": "0b0dad7d82bc61b6fd64f2d4df1072a906f7376ec270eda954ae63d31bd4fa05"
+    },
+    {
+      "name": "debug-dev-attestation",
+      "installId": "0193f2c4-7a10-4c52-9d3e-5b1f8a2c6e78",
+      "body": {
+        "v": 1,
+        "requestId": "01JD8Z3Q4F6R7T9V0W1X2Y3Z4E",
+        "lang": "ar",
+        "merchants": [
+          "كافيه الشمس"
+        ],
+        "consent": {
+          "provider": "openai-luna",
+          "v": 1
+        },
+        "attestation": {
+          "type": "dev",
+          "proof": "synthetic-dev-proof-0001"
+        }
+      },
+      "jcs": "{\"consent\":{\"provider\":\"openai-luna\",\"v\":1},\"lang\":\"ar\",\"merchants\":[\"كافيه الشمس\"],\"requestId\":\"01JD8Z3Q4F6R7T9V0W1X2Y3Z4E\",\"v\":1}",
+      "jcsHex": "7b22636f6e73656e74223a7b2270726f7669646572223a226f70656e61692d6c756e61222c2276223a317d2c226c616e67223a226172222c226d65726368616e7473223a5b22d983d8a7d981d98ad98720d8a7d984d8b4d985d8b3225d2c22726571756573744964223a2230314a44385a33513446365237543956305731583259335a3445222c2276223a317d",
+      "bodyHashHex": "dc35ced0d257e96bedd642a94daa5ee2bac504f51f41676b730bb1f8d7079a03",
+      "requestHashB64u": "3DXO0NJX6Wvt1kKpTape4rrFBPUfQWdrcwux-NcHmgM",
+      "clientDataHashHex": "e4855bc2c53d960774c7e727988059fddc01441898c15cdd7596e55fdf921607"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 /// Public API of the `zaghlol_domain` package.
 library;
 
+export 'ask/savings_suggest.dart';
+export 'ask/what_if.dart';
 export 'budget/cash_pool.dart';
 export 'budget/civil_date.dart';
 export 'budget/cycle_label.dart';

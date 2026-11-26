@@ -168,6 +168,9 @@ final class _Session {
   }
 }
 
+/// Operations in the OpenAPI spec (T-322) with no client call yet.
+const _plannedNotInClient = {'POST /v1/ask/plan', 'POST /v1/categorise'};
+
 void main() {
   for (final platform in ClientPlatform.values) {
     final name = platform.name;
@@ -184,8 +187,14 @@ void main() {
         seen.add(c.op);
         classes.addAll(c.classes);
       }
-      // Every operation in the generated table was exercised.
-      expect(seen, hasLength(ApiOperations.all.length));
+      // Every operation in the generated table was exercised, except the
+      // spec-first M9 operations the client can't call yet. Each M9 client
+      // task (docs/04-tasks/m9-llm-plan.md) removes its entry here and adds
+      // the call to `everything()`; an entry the client does send fails.
+      final all = {for (final o in ApiOperations.all) '${o.method} ${o.path}'};
+      expect(all, containsAll(_plannedNotInClient));
+      expect(seen.intersection(_plannedNotInClient), isEmpty);
+      expect(seen, all.difference(_plannedNotInClient));
       // The six anchoring requests carried a time nonce (checked per
       // request above); seat keys travelled on iOS only.
       expect(classes.contains(WireClass.seatKeys), platform.name == 'ios');

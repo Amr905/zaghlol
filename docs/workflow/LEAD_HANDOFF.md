@@ -4,6 +4,8 @@ _Last updated: 2026-11-26 (Cairo) by the Lead session (PO-phone-feedback lane): 
 
 
 > **Two Lead sessions run in parallel (2026-11-26).** The M9 "LLM helper" lane (Ask Zaghlol + auto-category, `docs/04-tasks/m9-llm-plan.md`) uses task ids **T-322…T-365** and batches **90…98**. The PO-phone-feedback lane keeps T-272… and batch 78…. Each lane merges its own batches; take new task ids and FU numbers from `main` right before use, and expect add/add conflicts in `TASKS.md` / `implementation-status.md` to be unions.
+>
+> **M9 lane state (2026-11-26 14:30):** batch 90 (T-322, T-323, T-324, T-326, T-328) reviewed and APPROVED after two fix rounds on the T-328 masker (report `docs/05-reviews/batch-90.md`; FU-395…FU-403). Batch 91: `task/T-330`, `task/T-332`, `task/T-331`, `task/T-327` are built on top of batch 90; T-356 (Drift v7) is half-built in `task/T-356`. When assembling batch 91: regenerate the embedded plan schema (`tool/gen_plan_schema.dart`, backend embedded contract) because batch 90 widened the placeholder pattern to `_[1-9][0-9]?`.
 
 **All state is in the repo.** Agents from earlier sessions can't be messaged; start new ones from their branches. Where this file and the repo disagree, the repo wins.
 

@@ -385,13 +385,13 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 
 | ID | Title | Story | Cx | Model | Agent | Depends on | Lane | Wave | Status |
 |---|---|---|---|---|---|---|---|---|---|
-| [T-322](tasks/T-322.md) | LLM contracts: plan schema, categorise result schema, shared vectors, API contract, fake fixtures | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | — | B | 90 | TODO |
-| [T-323](tasks/T-323.md) | Backend migration: LLM quota, spend, remote config, categorise tables | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | — | B | 90 | TODO |
-| [T-324](tasks/T-324.md) | ARB strings: copy-deck Part 4 (105 keys) | ASK-LLM | Low | Haiku | boilerplate-engineer | — | U | 90 | TODO |
+| [T-322](tasks/T-322.md) | LLM contracts: plan schema, categorise result schema, shared vectors, API contract, fake fixtures | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | — | B | 90 | DONE (batch 90) |
+| [T-323](tasks/T-323.md) | Backend migration: LLM quota, spend, remote config, categorise tables | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | — | B | 90 | DONE (batch 90) |
+| [T-324](tasks/T-324.md) | ARB strings: copy-deck Part 4 (105 keys) | ASK-LLM | Low | Haiku | boilerplate-engineer | — | U | 90 | DONE (batch 90) |
 | [T-325](tasks/T-325.md) | Given-name, honorific and business-word lists (assets) | LLM-CAT | Low | Haiku | boilerplate-engineer | — | P | 92 | TODO |
-| [T-326](tasks/T-326.md) | What-if and saving-suggestion calculators (pure) | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | — | Q | 90 | TODO |
+| [T-326](tasks/T-326.md) | What-if and saving-suggestion calculators (pure) | ASK-LLM | High (C4) | Sonnet | flutter-core-engineer | — | Q | 90 | DONE (batch 90) |
 | [T-327](tasks/T-327.md) | Investment illustrations and D-93 bands (pure) | ASK-LLM / D-93 | High (C4) | Sonnet | flutter-core-engineer | — | Q | 91 | TODO |
-| [T-328](tasks/T-328.md) | Client scrub and reference masker (pure) | ASK-LLM / D-92 | High (C4) | Sonnet | parsing-engine-engineer | — | P | 90 | TODO |
+| [T-328](tasks/T-328.md) | Client scrub and reference masker (pure) | ASK-LLM / D-92 | High (C4) | Sonnet | parsing-engine-engineer | — | P | 90 | DONE (batch 90) |
 | [T-329](tasks/T-329.md) | Copy deck §4.12: automatic-category strings | LLM-CAT | Docs | Sonnet | ux-designer | — | Doc | 93 | TODO |
 | [T-330](tasks/T-330.md) | Backend plan validator and template grammar | ASK-LLM | High | Sonnet | backend-engineer | T-322 | B | 91 | TODO |
 | [T-331](tasks/T-331.md) | Dart plan types, phone validator, template grammar, number words | ASK-LLM | High | Sonnet | parsing-engine-engineer | T-322 | P | 91 | TODO |

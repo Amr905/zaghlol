@@ -23,7 +23,7 @@
 import 'package:yaml/yaml.dart';
 
 /// Bump on any change to the emitted code.
-const String apiCodegenVersion = '1.0.0';
+const String apiCodegenVersion = '1.1.0';
 
 /// The operations the app calls (backend-api §2). The health check, the
 /// store notifications, the Apple callback and the admin API are not app
@@ -39,6 +39,8 @@ const List<String> appOperationIds = [
   'signIn',
   'signOut',
   'deleteAccount',
+  'askPlan',
+  'categorise',
 ];
 
 /// Response schemas that are not a 2xx body but are decoded by the app.
@@ -97,6 +99,10 @@ final class _Map extends _T {
   final _T value;
   final String? keyPattern;
 }
+
+/// A response member the app parses itself (for example the Ask plan `p`,
+/// whose shape is the JSON Schema file): `additionalProperties: true`.
+final class _Raw extends _T {}
 
 final class _Resolved {
   _Resolved(this.type, {this.nullable = false});
@@ -525,6 +531,7 @@ final class _Gen {
         throw ApiCodegenError('$ctx: inline objects are not supported');
       }
       final ap = node['additionalProperties'];
+      if (ap == true) return _Resolved(_Raw());
       if (ap is! YamlMap) throw ApiCodegenError('$ctx: free-form object');
       final v = _resolve(ap, ctx, dir);
       if (v.nullable) throw ApiCodegenError('$ctx: nullable map values');
@@ -634,8 +641,12 @@ final class _Gen {
     b.writeln('enum $name {');
     final seen = <String>{};
     for (final v in values) {
-      final id = _camel(v);
-      if (!seen.add(id) || id == 'unknown') {
+      var id = _camel(v);
+      // A wire value `unknown` (the categorise result status) would clash
+      // with the not-known-by-this-version fallback below; it is emitted as
+      // `unknownValue`.
+      if (id == 'unknown') id = 'unknownValue';
+      if (!seen.add(id)) {
         throw ApiCodegenError('$name: enum identifier clash $id');
       }
       b.writeln('  $id(${_lit(v)}),');
@@ -817,6 +828,7 @@ final class _Gen {
     _Obj(:final name) => name,
     _List(:final item) => 'List<${_dartType(item)}>',
     _Map(:final value) => 'Map<String, ${_dartType(value)}>',
+    _Raw() => 'Map<String, Object?>',
   };
 
   String _strArgs(_Str t) => [
@@ -845,6 +857,7 @@ final class _Gen {
       'apiCheckList($v${_listArgs(t)}).map((e) => ${_enc(item, 'e')})'
           '.toList()',
     _Map() => throw ApiCodegenError('maps are not sendable'),
+    _Raw() => throw ApiCodegenError('raw objects are not sendable'),
   };
 
   String _dec(_T t, String v) => switch (t) {
@@ -856,6 +869,7 @@ final class _Gen {
     _List(:final item) =>
       'List<${_dartType(item)}>.unmodifiable(apiList($v${_listArgs(t)})'
           '.map((e) => ${_dec(item, 'e')}))',
+    _Raw() => 'Map<String, Object?>.unmodifiable(apiObject($v))',
     _Map(:final value, :final keyPattern) =>
       'Map<String, ${_dartType(value)}>.unmodifiable({'
           'for (final e in apiObject($v).entries) '
