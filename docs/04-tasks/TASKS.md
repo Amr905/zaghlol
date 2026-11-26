@@ -354,6 +354,8 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-273](tasks/T-273.md) | Android OCR: Arabic-model noise must not replace good Latin lines (receipt read as 1,558) | US-P06 | High | Sonnet | native-platform-engineer | — | N | 78 | TODO |
 | [T-274](tasks/T-274.md) | Mascot: stray patch at the thumbs-up arm; bigger bird on Home | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | U | 78 | TODO |
 | [T-275](tasks/T-275.md) | Voice: first recording stops at once with "didn't hear anything" | PO report 2026-11-26 | Medium | Sonnet | flutter-core-engineer | — | A | 78 | TODO |
+| [T-276](tasks/T-276.md) | Mascot: tap switches animation smoothly | US-P07 | Medium | Sonnet | flutter-ui-engineer | T-274 | U | 78 | TODO |
+| [T-277](tasks/T-277.md) | More Zaghlol tips (how-to, smart features, funny) | PO 2026-11-26 | Low | Sonnet | flutter-ui-engineer | — | U | 78 | TODO |
 | [T-263](tasks/T-263.md) | Sharing an image to Zaghlol opens the scan, never "not implemented" | US-P02 | High | Sonnet | native-platform-engineer | — | — | 77 | DONE (batch 76) |
 | [T-266](tasks/T-266.md) | Link a debit card to its bank account (one balance, set by the user) | US-P05 | High | Sonnet | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 | [T-268](tasks/T-268.md) | Mascot animation matches the approved art; left hand not cut | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | — | 77 | SUPERSEDED by T-274 (not merged) |
