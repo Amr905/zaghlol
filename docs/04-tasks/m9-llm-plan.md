@@ -7,7 +7,7 @@
 | Inputs | `docs/01-requirements/ask-llm.md` v0.2, `llm-categorise.md`; `docs/02-design/ask-llm-ux.md` + copy deck Part 4; `docs/03-technical/ask-llm.md`, `llm-categorise.md`, ADR-027 (approved 2026-11-26 03:21); PO_DECISIONS rows ASK-LLM, LLM-CATEGORISE |
 | Tasks | T-322…T-365 (44): C1 3 · C2 12 · C3 9 · C4 17 · docs/ops 3. Opus builders: T-333, T-336, T-340, T-356, T-357 |
 
-Batch numbers start at **78** (batch 77 is already used on the board). Each batch is ≤ 5 tasks, one builder per task, on different lanes or disjoint files; every batch except 86 holds a C4 task, so its reviewer runs on Opus.
+Batch numbers start at **90** and M9 task ids at **T-322**: another Lead session works in parallel on PO phone feedback and uses T-272… and batch 78… (renumbered by the Lead 2026-11-26, +50 on task ids, +12 on batches). Each batch is ≤ 5 tasks, one builder per task, on different lanes or disjoint files; every batch except 86 holds a C4 task, so its reviewer runs on Opus.
 
 ## Lanes
 | Lane | Area | Tasks |
@@ -25,15 +25,15 @@ Batch numbers start at **78** (batch 77 is already used on the board). Each batc
 ## Batches
 | Batch | Tasks (lane) | Why together |
 |---|---|---|
-| 78 | T-322 (B contracts) · T-323 (B migration) · T-326 (Q) · T-328 (P) · T-324 (U, C1) | No dependencies; contract + schema roots; pure calculators and masker start at once |
-| 79 | T-330 (B validator) · T-332 (B gateway core) · T-331 (P) · T-327 (Q) · T-356 (A, Opus) | Everything that needs only T-322, plus the independent Drift migration |
-| 80 | T-334 (B config/flags) · T-335 (B quota) · T-337 (A) · T-341 (N) · T-325 (P, C1) | Backend gate pieces; app config; native attestation seam |
-| 81 | T-333 (B keys, Opus) · T-336 (B attestation, Opus) · T-340 (A core/llm, Opus) · T-342 (A executor) · T-329 (Doc) | Security-heavy batch; executor in a separate feature folder from core/llm |
-| 82 | T-338 (B adapters) · T-339 (B spend) · T-343 (A orchestrator) · T-345 (U consent) · T-355 (P) | — |
-| 83 | T-349 (B ask endpoint) · T-344 (A filler) · T-346 (U S-50) · T-357 (A categorizer, Opus) · T-360 (U, C1) | Ask endpoint closes the backend Ask path |
-| 84 | T-350 (B eval) · T-352 (B categorise) · T-347 (U answers) · T-358 (A sender) · T-359 (A feedback) | T-358/T-359 touch different files (sender vs feedback + sync builder) |
-| 85 | T-353 (B feedback intake) · T-348 (A device E2E ask) · T-361 (U) · T-362 (U) | Ask feature complete on device behind flags |
-| 86 | T-354 (B operator review) · T-363 (A device E2E categorise) · T-364 (Doc) | Categorise complete; docs as built |
+| 90 | T-322 (B contracts) · T-323 (B migration) · T-326 (Q) · T-328 (P) · T-324 (U, C1) | No dependencies; contract + schema roots; pure calculators and masker start at once |
+| 91 | T-330 (B validator) · T-332 (B gateway core) · T-331 (P) · T-327 (Q) · T-356 (A, Opus) | Everything that needs only T-322, plus the independent Drift migration |
+| 92 | T-334 (B config/flags) · T-335 (B quota) · T-337 (A) · T-341 (N) · T-325 (P, C1) | Backend gate pieces; app config; native attestation seam |
+| 93 | T-333 (B keys, Opus) · T-336 (B attestation, Opus) · T-340 (A core/llm, Opus) · T-342 (A executor) · T-329 (Doc) | Security-heavy batch; executor in a separate feature folder from core/llm |
+| 94 | T-338 (B adapters) · T-339 (B spend) · T-343 (A orchestrator) · T-345 (U consent) · T-355 (P) | — |
+| 95 | T-349 (B ask endpoint) · T-344 (A filler) · T-346 (U S-50) · T-357 (A categorizer, Opus) · T-360 (U, C1) | Ask endpoint closes the backend Ask path |
+| 96 | T-350 (B eval) · T-352 (B categorise) · T-347 (U answers) · T-358 (A sender) · T-359 (A feedback) | T-358/T-359 touch different files (sender vs feedback + sync builder) |
+| 97 | T-353 (B feedback intake) · T-348 (A device E2E ask) · T-361 (U) · T-362 (U) | Ask feature complete on device behind flags |
+| 98 | T-354 (B operator review) · T-363 (A device E2E categorise) · T-364 (Doc) | Categorise complete; docs as built |
 | PO-blocked | T-351 (live eval) when keys arrive · T-365 (launch checklist) | Nothing goes on in production before T-365 |
 
 ## Dependency table
@@ -84,7 +84,7 @@ Batch numbers start at **78** (batch 77 is already used on the board). Each batc
 | T-365 | T-348, T-351, T-354, T-363, T-364, **PO** | flags on |
 
 ## Critical path
-**T-322 → T-334 → T-339 → T-349 → T-352 → T-353 → T-354 / T-364 → T-365** (backend; 7 build steps, batches 90 → 86). The app path T-322 → T-337 → T-340 → T-343 → T-346 → T-348 is one step shorter and finishes in batch 97. Production launch is gated by the PO items, not by code.
+**T-322 → T-334 → T-339 → T-349 → T-352 → T-353 → T-354 / T-364 → T-365** (backend; 7 build steps, batches 90 → 98). The app path T-322 → T-337 → T-340 → T-343 → T-346 → T-348 is one step shorter and finishes in batch 97. Production launch is gated by the PO items, not by code.
 
 ## PO-blocked
 | Item | Blocks | Needed from the PO |
