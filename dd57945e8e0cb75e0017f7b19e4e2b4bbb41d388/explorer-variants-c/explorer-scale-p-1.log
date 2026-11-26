@@ -1,0 +1,455 @@
+Resolving dependencies in `/home/runner/work/zaghlol/zaghlol`...
+Downloading packages...
+  _fe_analyzer_shared 91.0.0 (111.0.0 available)
+  analyzer 8.4.0 (14.7.0 available)
+  android_file_picker 2.1.6 (2.2.1 available)
+  built_collection 5.1.2 (6.0.0 available)
+  coverage 1.15.1 (1.16.2 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_ui 1.1.6 (1.1.7 available)
+  dart_style 3.1.3 (3.1.14 available)
+  dbus 0.8.0 (0.8.1 available)
+  drift 2.35.3 (2.35.4 available)
+  file_picker 13.3.3 (13.4.1 available)
+  file_picker_darwin 2.5.1 (2.5.2 available)
+  file_picker_linux 2.0.4 (2.0.5 available)
+  file_picker_platform_interface 4.2.0 (4.3.0 available)
+  file_picker_web 4.2.1 (4.2.2 available)
+  hashlib 2.4.2 (2.4.4 available)
+  image_picker_ios 0.8.13+15 (0.8.13+16 available)
+  jni 1.1.2 (1.2.1 available)
+  jni_flutter 1.0.4+1 (1.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.11.0 (1.11.1 available)
+  objective_c 9.6.3 (9.6.4 available)
+  package_config 2.2.0 (3.0.0 available)
+  pdfium_dart 0.4.3 (0.4.4 available)
+  pdfium_flutter 0.4.3 (0.4.4 available)
+  pdfrx 3.0.0 (3.1.0 available)
+  pdfrx_engine 0.9.3 (0.9.6 available)
+  pigeon 26.3.2 (30.0.4 available)
+  sqlite3 3.9.1 (3.9.2 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  url_launcher_android 6.3.33 (6.3.35 available)
+Got dependencies in `/home/runner/work/zaghlol/zaghlol`!
+33 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /home/runner/work/zaghlol/zaghlol/app/integration_test/app_explorer_test.dart
+Running Gradle task 'assembleDevSmsDebug'...                    
+WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): cryptography_flutter, rive_native
+Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+
+Please check the changelogs of these plugins and upgrade to a version that supports Built-in Kotlin.
+If no such version exists, report the issue to the plugin. If necessary, here is a guide on filing
+an issue against a plugin: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors
+
+If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors
+Running Gradle task 'assembleDevSmsDebug'...                       34.7s
+✓ Built build/app/outputs/flutter-apk/app-devsms-debug.apk
+Installing build/app/outputs/flutter-apk/app-devsms-debug.apk...      1,944ms
+00:00 +0: explorer[scale]: taps every control of every screen
+EXPLORER_STAGE catalog ready
+EXPLORER_SEEDED accounts=5 txns=30 reviews=2
+EXPLORER_STAGE seeded; closing the seed database
+EXPLORER_STAGE starting the app
+EXPLORER_STAGE main() returned
+NOTIF_PROBE launch route=false
+EXPLORER_STAGE mode=scale textScale=1.3 shell shown: true
+EXPLORER_SCREEN 1 الرئيسية (Scaffold, depth 0) rssMB=570
+EXPLORER_TAP 1 الرئيسية / inkwell "كل الكروت"
+EXPLORER_SCREEN 2 تشوف أنهي كروت؟ (BottomSheet, depth 1) rssMB=586
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "كل الكروت"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Debit ••1234 ⁦•••• 1234⁩ / ديبت"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Credit card ••4455 ⁦•••• 4455⁩ / كريدت"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Wallet / محفظة"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Cash / كاش"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / listtile "Dollar account ⁦•••• 9876⁩ / حساب بنك"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / checkbox "Checkbox"
+EXPLORER_TAP 2 تشوف أنهي كروت؟ / inkwell "تمام"
+EXPLORER_TAP 1 الرئيسية / inkwell "icon U+e34d"
+EXPLORER_SCREEN 3 شارك إنجازك (Scaffold, depth 1) rssMB=593
+EXPLORER_TAP 3 شارك إنجازك / inkwell "EGP"
+EXPLORER_TAP 3 شارك إنجازك / inkwell "USD"
+EXPLORER_TAP 3 شارك إنجازك / inkwell "icon U+e16a"
+EXPLORER_TAP 1 الرئيسية / iconbutton "الإعدادات"
+EXPLORER_SCREEN 4 الإعدادات (Scaffold, depth 1) rssMB=598
+EXPLORER_TAP 4 الإعدادات / inkwell "زغلول جولد / إنت على الباقة المجانية"
+EXPLORER_TAP 4 الإعدادات / inkwell "التفضيلات"
+EXPLORER_TAP 4 الإعدادات / inkwell "جولد وحسابك"
+EXPLORER_TAP 4 الإعدادات / inkwell "التنبيهات"
+EXPLORER_TAP 4 الإعدادات / inkwell "زغلول بيقرا منين / كله شغال"
+EXPLORER_TAP 4 الإعدادات / inkwell "التصنيفات"
+EXPLORER_TAP 4 الإعدادات / inkwell "نسخة احتياطية / لسه مفيش نسخة"
+EXPLORER_TAP 4 الإعدادات / inkwell "إكسيل وكشوف البنوك"
+EXPLORER_TAP 4 الإعدادات / inkwell "خصوصيتك"
+EXPLORER_TAP 4 الإعدادات / inkwell "عن زغلول"
+EXPLORER_TAP 1 الرئيسية / inkwell "EGP"
+EXPLORER_TAP 1 الرئيسية / inkwell "USD"
+EXPLORER_TAP 1 الرئيسية / inkwell "صرفت الشهر ده / ⁨⁨١٥٨٫٤٠⁩⁩ USD / لحد ما تقولي ميعاد قبضك"
+EXPLORER_SCREEN 5 الميزانية (Scaffold, depth 1) rssMB=614
+EXPLORER_TAP 5 الميزانية / inkwell "EGP"
+EXPLORER_TAP 5 الميزانية / inkwell "USD"
+EXPLORER_TAP 5 الميزانية / inkwell "حط ميزانية"
+EXPLORER_TAP 5 الميزانية / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 5 الميزانية / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 1 الرئيسية / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 1 الرئيسية / inkwell "صرفت الشهر ده / ⁨⁨****⁩⁩ USD / لحد ما تقولي ميعاد قبضك"
+EXPLORER_TAP 1 الرئيسية / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 1 الرئيسية / inkwell "حط ميزانية"
+EXPLORER_TAP 1 الرئيسية / inkwell "صرفت / ⁨١٥٨٫٤٠⁩"
+EXPLORER_SCREEN 6 الحركات (Scaffold, depth 1) rssMB=647
+EXPLORER_TAP 6 الحركات / inkwell "كل الكروت"
+EXPLORER_TAP 6 الحركات / inkwell "شهر المرتب ده"
+EXPLORER_TAP 6 الحركات / inkwell "icon U+e16a"
+EXPLORER_TAP 6 الحركات / inkwell "المدة"
+EXPLORER_TAP 6 الحركات / inkwell "التصنيف"
+EXPLORER_TAP 6 الحركات / inkwell "EGP"
+EXPLORER_TAP 6 الحركات / inkwell "USD"
+EXPLORER_TAP 6 الحركات / inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · ١٠:١٣ م · بإيدك"
+EXPLORER_TAP 6 الحركات / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 6 الحركات / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 6 الحركات / button "اختار"
+EXPLORER_TAP 6 الحركات / inkwell "Spinneys / WISE ⁦•••• 9876⁩ · ١٠:١٣ م · بإيدك / ⁨⁨-١٧٫٩٨ USD⁩⁩"
+EXPLORER_TAP 6 الحركات / iconbutton "إلغاء"
+EXPLORER_TAP 6 الحركات / inkwell "💵 / Spinneys / WISE ⁦•••• 9876⁩ · ٢:١٣ ص · بإيدك"
+EXPLORER_TAP 6 الحركات / inkwell "💊 / Spinneys / WISE ⁦•••• 9876⁩ · ١١:١٣ م · بإيدك"
+EXPLORER_TAP 6 الحركات / inkwell "💼 / Metro Market / WISE ⁦•••• 9876⁩ · ١:١٣ ص · بإيدك"
+EXPLORER_TAP 1 الرئيسية / inkwell "عاش يا وحش! صارف أقل من خطتك لحد دلوقتي 👏"
+EXPLORER_TAP 1 الرئيسية / inkwell "إيه يا عم، بتزغزغني؟ 😄"
+EXPLORER_TAP 1 الرئيسية / inkwell "أنا هنا يا كبير، وفلوسك في عينيّا"
+EXPLORER_TAP 1 الرئيسية / inkwell "كل قرش بتحوشه بيطلّعلي ريشة جديدة 🪶"
+EXPLORER_TAP 1 الرئيسية / inkwell "الكابتن جاهز، وإنت القائد"
+EXPLORER_TAP 1 الرئيسية / inkwell "اللي يحوش النهارده يتفسح بكره"
+EXPLORER_TAP 1 الرئيسية / inkwell "أنا بقرا رسايل البنوك بس، الباقي مش شغلي"
+EXPLORER_TAP 1 الرئيسية / inkwell "حمامة ولا محاسب؟ الاتنين!"
+EXPLORER_TAP 1 الرئيسية / inkwell "جناحي سريع وحساباتي مظبوطة"
+EXPLORER_TAP 1 الرئيسية / inkwell "عايز تعرف فلوسك راحت فين؟ افتح الحسبة"
+EXPLORER_TAP 1 الرئيسية / inkwell "أنا بحسب والدهب بيلمع، وإنت بتحوّش"
+EXPLORER_TAP 1 الرئيسية / switch "Switch"
+EXPLORER_TAP 1 الرئيسية / inkwell "حركتين مستنيين رأيك 👀"
+EXPLORER_SCREEN 7 مستني رأيك 👀 (Scaffold, depth 1) rssMB=662
+EXPLORER_TAP 7 مستني رأيك 👀 / inkwell "الكل ٢"
+EXPLORER_TAP 7 مستني رأيك 👀 / inkwell "تصنيف"
+EXPLORER_TAP 7 مستني رأيك 👀 / inkwell "رسايل جديدة"
+EXPLORER_TAP 7 مستني رأيك 👀 / listtile "شوف الرسالة الأصلية"
+EXPLORER_TAP 7 مستني رأيك 👀 / listtile "اخفي الرسالة الأصلية"
+EXPLORER_TAP 7 مستني رأيك 👀 / inkwell "اكتب التفاصيل"
+EXPLORER_TAP 7 مستني رأيك 👀 / inkwell "سيبها"
+EXPLORER_TAP 7 مستني رأيك 👀 / button "تراجع"
+EXPLORER_TAP 7 مستني رأيك 👀 / inkwell "اطلب دعم البنك ده"
+EXPLORER_TAP 1 الرئيسية / button "شوف الكل"
+EXPLORER_TAP 1 الرئيسية / inkwell "🛒 / Carrefour Maadi / CIB ⁦•••• 1234⁩ · ٢:١٣ ص"
+EXPLORER_SCREEN 8 🛒 (Scaffold, depth 1) rssMB=674
+EXPLORER_TAP 8 🛒 / inkwell "خزين البيت والسوبرماركت"
+EXPLORER_TAP 8 🛒 / inkwell "ملاحظة / synthetic note"
+EXPLORER_TAP 8 🛒 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 8 🛒 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 8 🛒 / iconbutton "عدّل"
+EXPLORER_TAP 8 🛒 / inkwell "icon U+e402"
+EXPLORER_TAP 8 🛒 / inkwell "امسح"
+EXPLORER_TAP 8 🛒 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 8 🛒 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 8 🛒 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "🍔 / Uber / NBE ⁦•••• 4455⁩ · ٢٥ نوفمبر"
+EXPLORER_SCREEN 9 🍔 (Scaffold, depth 1) rssMB=680
+EXPLORER_TAP 9 🍔 / inkwell "أكل بره وكافيهات ودليفري"
+EXPLORER_TAP 9 🍔 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 9 🍔 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 9 🍔 / iconbutton "عدّل"
+EXPLORER_TAP 9 🍔 / inkwell "icon U+e402"
+EXPLORER_TAP 9 🍔 / inkwell "امسح"
+EXPLORER_TAP 9 🍔 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 9 🍔 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 9 🍔 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 9 🍔 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "🚗 / Vodafone / Wallet · ٢٤ نوفمبر"
+EXPLORER_SCREEN 10 🚗 (Scaffold, depth 1) rssMB=712
+EXPLORER_TAP 10 🚗 / inkwell "مواصلات وبنزين وعربية"
+EXPLORER_TAP 10 🚗 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 10 🚗 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 10 🚗 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 10 🚗 / iconbutton "عدّل"
+EXPLORER_TAP 10 🚗 / inkwell "icon U+e402"
+EXPLORER_TAP 10 🚗 / inkwell "امسح"
+EXPLORER_TAP 10 🚗 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 10 🚗 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 10 🚗 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "🧾 / Talabat / Cash · ٢٢ نوفمبر"
+EXPLORER_SCREEN 11 • (Scaffold, depth 1) rssMB=695
+EXPLORER_TAP 11 • / inkwell "اختار"
+EXPLORER_TAP 11 • / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 11 • / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 11 • / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 11 • / iconbutton "عدّل"
+EXPLORER_TAP 11 • / inkwell "icon U+e402"
+EXPLORER_TAP 11 • / inkwell "امسح"
+EXPLORER_TAP 11 • / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 11 • / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 11 • / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · ٢١ نوفمبر"
+EXPLORER_SCREEN 12 🏠 (Scaffold, depth 1) rssMB=697
+EXPLORER_TAP 12 🏠 / inkwell "إيجار ومصاريف البيت"
+EXPLORER_TAP 12 🏠 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 12 🏠 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 12 🏠 / iconbutton "عدّل"
+EXPLORER_TAP 12 🏠 / inkwell "icon U+e402"
+EXPLORER_TAP 12 🏠 / inkwell "امسح"
+EXPLORER_TAP 12 🏠 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 12 🏠 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 12 🏠 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 12 🏠 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "🛍️ / Careem / NBE ⁦•••• 4455⁩ · ٢٠ نوفمبر"
+EXPLORER_SCREEN 13 🛍️ (Scaffold, depth 1) rssMB=690
+EXPLORER_TAP 13 🛍️ / inkwell "لبس وشوبينج وإلكترونيات"
+EXPLORER_TAP 13 🛍️ / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 13 🛍️ / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 13 🛍️ / iconbutton "عدّل"
+EXPLORER_TAP 13 🛍️ / inkwell "icon U+e402"
+EXPLORER_TAP 13 🛍️ / inkwell "امسح"
+EXPLORER_TAP 13 🛍️ / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 13 🛍️ / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 13 🛍️ / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 13 🛍️ / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "💳 / Breadfast / Wallet · ١٩ نوفمبر"
+EXPLORER_SCREEN 14 💳 (Scaffold, depth 1) rssMB=691
+EXPLORER_TAP 14 💳 / inkwell "أقساط وجمعيات وكريدت"
+EXPLORER_TAP 14 💳 / inkwell "ملاحظة / synthetic note"
+EXPLORER_TAP 14 💳 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 14 💳 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 14 💳 / iconbutton "عدّل"
+EXPLORER_TAP 14 💳 / inkwell "icon U+e402"
+EXPLORER_TAP 14 💳 / inkwell "امسح"
+EXPLORER_TAP 14 💳 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 14 💳 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 14 💳 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "📺 / Cilantro / Cash · ١٩ نوفمبر"
+EXPLORER_SCREEN 15 📺 (Scaffold, depth 1) rssMB=695
+EXPLORER_TAP 15 📺 / inkwell "اشتراكات وتطبيقات"
+EXPLORER_TAP 15 📺 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 15 📺 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 15 📺 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 15 📺 / iconbutton "عدّل"
+EXPLORER_TAP 15 📺 / inkwell "icon U+e402"
+EXPLORER_TAP 15 📺 / inkwell "امسح"
+EXPLORER_TAP 15 📺 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 15 📺 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 15 📺 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "💊 / Fawry / CIB ⁦•••• 1234⁩ · ١٨ نوفمبر"
+EXPLORER_SCREEN 16 💊 (Scaffold, depth 1) rssMB=700
+EXPLORER_TAP 16 💊 / inkwell "صحة وأدوية وجيم"
+EXPLORER_TAP 16 💊 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 16 💊 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 16 💊 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 16 💊 / iconbutton "عدّل"
+EXPLORER_TAP 16 💊 / inkwell "icon U+e402"
+EXPLORER_TAP 16 💊 / inkwell "امسح"
+EXPLORER_TAP 16 💊 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 16 💊 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 16 💊 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_TAP 1 الرئيسية / inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · ١٧ نوفمبر"
+EXPLORER_SCREEN 17 🎓 (Scaffold, depth 1) rssMB=715
+EXPLORER_TAP 17 🎓 / inkwell "تعليم ومدارس وكورسات"
+EXPLORER_TAP 17 🎓 / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 17 🎓 / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 17 🎓 / iconbutton "عدّل"
+EXPLORER_TAP 17 🎓 / inkwell "icon U+e402"
+EXPLORER_TAP 17 🎓 / inkwell "امسح"
+EXPLORER_TAP 17 🎓 / inkwell "ملاحظة / ضيف ملاحظة"
+EXPLORER_TAP 17 🎓 / inkwell "تقسيم / فلوس راجعة من صحابك"
+EXPLORER_TAP 17 🎓 / inkwell "دي تحويلة لنفسي"
+EXPLORER_TAP 17 🎓 / listtile "إزاي زغلول قرا الرسالة"
+EXPLORER_SCREEN 18 الحسبة (Scaffold, depth 0) rssMB=720
+EXPLORER_TAP 18 الحسبة / inkwell "كل الكروت"
+EXPLORER_TAP 18 الحسبة / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 18 الحسبة / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 18 الحسبة / inkwell "الشارتات"
+EXPLORER_TAP 18 الحسبة / inkwell "الميزانية"
+EXPLORER_TAP 18 الحسبة / inkwell "الفواتير"
+EXPLORER_TAP 18 الحسبة / inkwell "ضيف"
+EXPLORER_SCREEN 19 ضيف فاتورة أو قسط (Scaffold, depth 1) rssMB=720
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "اشتراك"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "قسط"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "كريدت كارد"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "جمعية"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "EGP / USD / EUR"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "EGP"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "كل شهر"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "كل تلات شهور"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "icon U+e16a"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "كل ستة شهور"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "كل أسبوع"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "كل سنة"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "الدفعة الجاية"
+EXPLORER_TAP 19 ضيف فاتورة أو قسط / inkwell "احفظ"
+EXPLORER_TAP 18 الحسبة / inkwell "١٢ / ديسمبر / Home internet"
+EXPLORER_SCREEN 20 عدّل الفاتورة (Scaffold, depth 1) rssMB=747
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "اشتراك"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "قسط"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "كريدت كارد"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "جمعية"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "EGP / USD / EUR"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "EGP"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "كل شهر"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "كل تلات شهور"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "icon U+e16a"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "كل ستة شهور"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "كل أسبوع"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "كل سنة"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "١٢ ديسمبر ٢٠٢٦"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "احفظ"
+EXPLORER_TAP 20 عدّل الفاتورة / inkwell "امسح"
+EXPLORER_TAP 18 الحسبة / inkwell "اتدفع"
+EXPLORER_TAP 18 الحسبة / inkwell "٢٥ / ديسمبر / Credit card ••4455"
+EXPLORER_SCREEN 21 فلوسي (Scaffold, depth 0) rssMB=739
+EXPLORER_TAP 21 فلوسي / inkwell "ضيف"
+EXPLORER_SCREEN 22 تضيف إيه؟ (BottomSheet, depth 1) rssMB=734
+EXPLORER_TAP 22 تضيف إيه؟ / inkwell "كريدت كارد / الليميت وميعاد السداد"
+EXPLORER_TAP 22 تضيف إيه؟ / inkwell "كارت ديبت / حساب بنك / مرتب ومصاريف"
+EXPLORER_TAP 22 تضيف إيه؟ / inkwell "محفظة / فودافون كاش، أورانج كاش، إي آند كاش"
+EXPLORER_TAP 22 تضيف إيه؟ / inkwell "حساب بأكتر من عملة / Wise، Revolut، Payoneer"
+EXPLORER_TAP 22 تضيف إيه؟ / inkwell "تقسيط / فاليو، سيمبل، كونتكت"
+EXPLORER_TAP 21 فلوسي / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 21 فلوسي / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 21 فلوسي / inkwell "اللي حيلتك كله / ⁨⁨٣٬٥٤٠٫٥٠⁩⁩ ج.م / ⁨⁨١٬٢٥٠ USD⁩⁩"
+EXPLORER_SCREEN 23 صافي ثروتك جه منين؟ (Scaffold, depth 1) rssMB=744
+EXPLORER_TAP 23 صافي ثروتك جه منين؟ / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 23 صافي ثروتك جه منين؟ / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 23 صافي ثروتك جه منين؟ / inkwell "CIB ⁦•••• 1234⁩ / من رسالة البنك · ٢٦ نوفمبر ٢٠٢٦ / ديبت"
+EXPLORER_TAP 23 صافي ثروتك جه منين؟ / inkwell "NBE ⁦•••• 4455⁩ / محسوب من الحد والمتاح · ٢٦ نوفمبر ٢٠٢٦ / كريدت"
+EXPLORER_TAP 23 صافي ثروتك جه منين؟ / button "حط الرصيد"
+EXPLORER_TAP 23 صافي ثروتك جه منين؟ / button "حط الرصيد"
+EXPLORER_TAP 23 صافي ثروتك جه منين؟ / inkwell "WISE ⁦•••• 9876⁩ / من رسالة البنك · ٢٦ نوفمبر ٢٠٢٦ / حساب بنك"
+EXPLORER_TAP 21 فلوسي / button "قارن"
+EXPLORER_SCREEN 24 مقارنة الكروت (Scaffold, depth 1) rssMB=760
+EXPLORER_TAP 24 مقارنة الكروت / inkwell "EGP"
+EXPLORER_TAP 24 مقارنة الكروت / inkwell "USD"
+EXPLORER_TAP 21 فلوسي / inkwell "رتّب حسب النوع"
+EXPLORER_TAP 21 فلوسي / inkwell "CIB / CIB ⁦•••• 1234⁩ / من رسالة البنك · ٢٦ نوفمبر ٢٠٢٦"
+EXPLORER_SCREEN 25 CIB (Scaffold, depth 1) rssMB=771
+EXPLORER_TAP 25 CIB / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 25 CIB / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 25 CIB / iconbutton "عرض القائمة"
+EXPLORER_TAP 25 CIB / inkwell "زغلول يقرا إيه من الكارت"
+EXPLORER_TAP 25 CIB / iconbutton "تفاصيل الكارت"
+EXPLORER_TAP 25 CIB / button "اربطه بحساب"
+EXPLORER_TAP 25 CIB / inkwell "إيجار ومصاريف البيت / ⁨⁨٥٩٦٫٩٨⁩⁩ / ٣٤%"
+EXPLORER_TAP 25 CIB / inkwell "خزين البيت والسوبرماركت / ⁨⁨٥٣٠٫٩٩⁩⁩ / ٣٠%"
+EXPLORER_TAP 25 CIB / inkwell "تحويش ودهب واستثمار / ⁨⁨٣٧٥⁩⁩ / ٢١%"
+EXPLORER_TAP 25 CIB / inkwell "صحة وأدوية وجيم / ⁨⁨٢٦٦٫٩٨⁩⁩ / ١٥%"
+EXPLORER_TAP 25 CIB / inkwell "🛒 / Carrefour Maadi / CIB ⁦•••• 1234⁩ · ٢:١٣ ص · بإيدك"
+EXPLORER_TAP 25 CIB / inkwell "💊 / Fawry / CIB ⁦•••• 1234⁩ · ١:١٣ ص · بإيدك"
+EXPLORER_TAP 25 CIB / inkwell "🐷 / Vodafone / CIB ⁦•••• 1234⁩ · ٩:١٣ م · بإيدك"
+EXPLORER_TAP 25 CIB / inkwell "🛒 / Breadfast / CIB ⁦•••• 1234⁩ · ١٢:١٣ ص · بإيدك"
+EXPLORER_TAP 25 CIB / inkwell "🏠 / Carrefour Maadi / CIB ⁦•••• 1234⁩ · ٨:١٣ م · بإيدك"
+EXPLORER_TAP 25 CIB / inkwell "زغلول بيقرا إيه / الرسايل ✓ · الإشعارات ✓"
+EXPLORER_TAP 25 CIB / inkwell "كل حركات الكارت"
+EXPLORER_TAP 21 فلوسي / inkwell "NBE / NBE ⁦•••• 4455⁩ / محسوب من الحد والمتاح · ٢٦ نوفمبر ٢٠٢٦"
+EXPLORER_SCREEN 26 NBE (Scaffold, depth 1) rssMB=761
+EXPLORER_TAP 26 NBE / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 26 NBE / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 26 NBE / iconbutton "عرض القائمة"
+EXPLORER_TAP 26 NBE / inkwell "زغلول يقرا إيه من الكارت"
+EXPLORER_TAP 26 NBE / iconbutton "تفاصيل الكارت"
+EXPLORER_TAP 26 NBE / inkwell "تعليم ومدارس وكورسات / ⁨⁨٧٣٣٫٤٩⁩⁩ / ٣٨%"
+EXPLORER_TAP 26 NBE / inkwell "أكل بره وكافيهات ودليفري / ⁨⁨٥٨٧٫٩٧⁩⁩ / ٣١%"
+EXPLORER_TAP 26 NBE / inkwell "مرتب ودخل وكاش باك / ⁨⁨٤٠٣٫٤٩⁩⁩ / ٢١%"
+EXPLORER_TAP 26 NBE / inkwell "لبس وشوبينج وإلكترونيات / ⁨⁨١٨٤٫٤٨⁩⁩ / ١٠%"
+EXPLORER_TAP 26 NBE / inkwell "🍔 / Uber / NBE ⁦•••• 4455⁩ · ١:١٣ ص · بإيدك"
+EXPLORER_TAP 26 NBE / inkwell "🛍️ / Careem / NBE ⁦•••• 4455⁩ · ٩:١٣ م · بإيدك"
+EXPLORER_TAP 26 NBE / inkwell "💼 / Talabat / NBE ⁦•••• 4455⁩ · ٨:١٣ م · بإيدك"
+EXPLORER_TAP 26 NBE / inkwell "🍔 / Cilantro / NBE ⁦•••• 4455⁩ · ١١:١٣ م · بإيدك"
+EXPLORER_TAP 26 NBE / inkwell "🛍️ / Salary / NBE ⁦•••• 4455⁩ · ٢:١٣ ص · بإيدك"
+EXPLORER_TAP 26 NBE / inkwell "زغلول بيقرا إيه / الرسايل ✓ · الإشعارات ✓"
+EXPLORER_TAP 26 NBE / inkwell "كل حركات الكارت"
+EXPLORER_TAP 21 فلوسي / inkwell "VFC / Wallet / مش معروف — حط الرصيد"
+EXPLORER_SCREEN 27 VFC (Scaffold, depth 1) rssMB=781
+EXPLORER_TAP 27 VFC / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 27 VFC / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 27 VFC / iconbutton "عرض القائمة"
+EXPLORER_TAP 27 VFC / inkwell "زغلول يقرا إيه من الكارت"
+EXPLORER_TAP 27 VFC / iconbutton "تفاصيل الكارت"
+EXPLORER_TAP 27 VFC / button "حط الرصيد"
+EXPLORER_TAP 27 VFC / button "حط المبلغ اللي في الحساب دلوقتي"
+EXPLORER_TAP 27 VFC / inkwell "أقساط وجمعيات وكريدت / ⁨⁨٨٦٠٫٩٩⁩⁩ / ٥٧%"
+EXPLORER_TAP 27 VFC / inkwell "مواصلات وبنزين وعربية / ⁨⁨٦٤١٫٩٨⁩⁩ / ٤٣%"
+EXPLORER_TAP 27 VFC / inkwell "🚗 / Vodafone / VF CASH · ١٢:١٣ ص · بإيدك"
+EXPLORER_TAP 27 VFC / inkwell "💳 / Breadfast / Wallet · ٨:١٣ م · بإيدك"
+EXPLORER_TAP 27 VFC / inkwell "🎬 / Salary / VF CASH · ١١:١٣ م · بإيدك"
+EXPLORER_TAP 27 VFC / inkwell "🚗 / Fawry / VF CASH · ١٠:١٣ م · بإيدك"
+EXPLORER_TAP 27 VFC / inkwell "💳 / Vodafone / VF CASH · ١:١٣ ص · بإيدك"
+EXPLORER_TAP 27 VFC / inkwell "زغلول بيقرا إيه / الرسايل ✓ · الإشعارات ✓"
+EXPLORER_TAP 27 VFC / inkwell "كل حركات الكارت"
+EXPLORER_TAP 21 فلوسي / inkwell "Cash / بإيدك وبصوتك / مش معروف — حط الرصيد"
+EXPLORER_SCREEN 28 Cash (Scaffold, depth 1) rssMB=808
+EXPLORER_TAP 28 Cash / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 28 Cash / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 28 Cash / iconbutton "عرض القائمة"
+EXPLORER_TAP 28 Cash / inkwell "ادمجه مع كارت تاني"
+EXPLORER_TAP 28 Cash / iconbutton "تفاصيل الكارت"
+EXPLORER_TAP 28 Cash / button "حط الرصيد"
+EXPLORER_TAP 28 Cash / inkwell "اشتراكات وتطبيقات / ⁨⁨٩١٧٫٩٧⁩⁩ / ٥٠%"
+EXPLORER_TAP 28 Cash / inkwell "إنستاباي / ⁨⁨٤٥٧٫٥٠⁩⁩ / ٢٥%"
+EXPLORER_TAP 28 Cash / inkwell "عيلة وهدايا وصدقات / ⁨⁨٣٤٩٫٤٨⁩⁩ / ١٩%"
+EXPLORER_TAP 28 Cash / inkwell "تانية / ⁨⁨١٢٧٫٥٠⁩⁩ / ٧%"
+EXPLORER_TAP 28 Cash / inkwell "• / Talabat / Cash · ١١:١٣ م · بإيدك"
+EXPLORER_TAP 28 Cash / inkwell "📺 / Cilantro / Cash · ٢:١٣ ص · بإيدك"
+EXPLORER_TAP 28 Cash / inkwell "🎁 / Uber / Cash · ١٠:١٣ م · بإيدك"
+EXPLORER_TAP 28 Cash / inkwell "🔁 / Careem / Cash · ١:١٣ ص · بإيدك"
+EXPLORER_TAP 28 Cash / inkwell "📺 / Talabat / Cash · ١٢:١٣ ص · بإيدك"
+EXPLORER_TAP 21 فلوسي / inkwell "WISE / WISE ⁦•••• 9876⁩ / من رسالة البنك · ٢٦ نوفمبر ٢٠٢٦"
+EXPLORER_SCREEN 29 WISE (Scaffold, depth 1) rssMB=805
+EXPLORER_TAP 29 WISE / iconbutton "إخفاء المبالغ"
+EXPLORER_TAP 29 WISE / iconbutton "إظهار المبالغ"
+EXPLORER_TAP 29 WISE / iconbutton "عرض القائمة"
+EXPLORER_TAP 29 WISE / inkwell "زغلول يقرا إيه من الكارت"
+EXPLORER_TAP 29 WISE / iconbutton "تفاصيل الكارت"
+EXPLORER_TAP 29 WISE / button "حط المبلغ اللي في الحساب دلوقتي"
+EXPLORER_TAP 29 WISE / inkwell "صحة وأدوية وجيم / ⁨⁨٤٥٫٣٨ ⁩⁩ / ٢٩%"
+EXPLORER_TAP 29 WISE / inkwell "فواتير وشحن ومرافق / ⁨⁨٣٨٫٥٣ ⁩⁩ / ٢٤%"
+EXPLORER_TAP 29 WISE / inkwell "كاش / ⁨⁨٣١٫٦٨ ⁩⁩ / ٢٠%"
+EXPLORER_TAP 29 WISE / inkwell "تعليم ومدارس وكورسات / ⁨⁨٢٤٫٨٣ ⁩⁩ / ١٦%"
+EXPLORER_TAP 29 WISE / inkwell "إيجار ومصاريف البيت / ⁨⁨١٧٫٩٨ ⁩⁩ / ١١%"
+EXPLORER_TAP 29 WISE / inkwell "🏠 / Spinneys / WISE ⁦•••• 9876⁩ · ١٠:١٣ م · بإيدك"
+EXPLORER_TAP 29 WISE / inkwell "🎓 / Metro Market / WISE ⁦•••• 9876⁩ · ١٢:١٣ ص · بإيدك"
+EXPLORER_TAP 29 WISE / inkwell "💵 / Spinneys / WISE ⁦•••• 9876⁩ · ٢:١٣ ص · بإيدك"
+EXPLORER_TAP 29 WISE / inkwell "⚡ / Metro Market / WISE ⁦•••• 9876⁩ · ٩:١٣ م · بإيدك"
+EXPLORER_TAP 29 WISE / inkwell "💊 / Spinneys / WISE ⁦•••• 9876⁩ · ١١:١٣ م · بإيدك"
+EXPLORER_TAP 29 WISE / inkwell "زغلول بيقرا إيه / الرسايل ✓ · الإشعارات ✓"
+EXPLORER_TAP 29 WISE / inkwell "كل حركات الكارت"
+EXPLORER_TAP 21 فلوسي / inkwell "تابع دهبك وشهاداتك وكل أصولك في مكان واحد"
+EXPLORER_SCREEN 30 استرجع مشترياتي (Scaffold, depth 1) rssMB=805
+EXPLORER_TAP 30 استرجع مشترياتي / inkwell "icon U+e16a"
+EXPLORER_TAP 30 استرجع مشترياتي / button "استرجع مشترياتي"
+EXPLORER_SCREEN 31 زغلول (Scaffold, depth 0) rssMB=817
+EXPLORER_TAP 31 زغلول / inkwell "icon U+e402"
+EXPLORER_TAP 31 زغلول / inkwell "امسح المحادثة"
+EXPLORER_TAP 31 زغلول / chip "الإجمالي الشهر ده"
+EXPLORER_TAP 31 زغلول / chip "قارن الشهر ده باللي فات"
+EXPLORER_TAP 31 زغلول / chip "أكتر أماكن بصرف فيها"
+EXPLORER_TAP 31 زغلول / inkwell "icon U+e392"
+EXPLORER_SCREEN 32 سجّل بسرعة (BottomSheet, depth 0) rssMB=826
+EXPLORER_TAP 32 سجّل بسرعة / inkwell "قولها / بصوتك في ثانيتين"
+EXPLORER_SCREEN 33 نستخدم التعرف على الصوت أونلاين؟ (BottomSheet, depth 1) rssMB=831
+EXPLORER_TAP 33 نستخدم التعرف على الصوت أونلاين؟ / inkwell "وافق"
+EXPLORER_STUCK نستخدم التعرف على الصوت أونلاين؟ want=3 have=1 extra=[]
+EXPLORER_TAP 32 سجّل بسرعة / inkwell "اكتبها / مصروف أو دخل"
+EXPLORER_SCREEN 34 مصروف جديد (Scaffold, depth 1) rssMB=851
+EXPLORER_TAP 34 مصروف جديد / inkwell "مصروف"
+EXPLORER_TAP 34 مصروف جديد / inkwell "دخل"
+EXPLORER_TAP 34 مصروف جديد / inkwell "تحويل"
+EXPLORER_TAP 34 مصروف جديد / inkwell "EGP"
+EXPLORER_TAP 34 مصروف جديد / inkwell "من حساب / Debit ••1234 ⁦•••• 1234⁩"
+EXPLORER_TAP 34 مصروف جديد / inkwell "لحساب / اختار"
+EXPLORER_TAP 34 مصروف جديد / inkwell "إمتى / النهارده"
+EXPLORER_TAP 34 مصروف جديد / inkwell "icon U+e16a"
+EXPLORER_TAP 34 مصروف جديد / inkwell "احفظ"
+EXPLORER_TAP 32 سجّل بسرعة / inkwell "صوّرها / سكرين شوت أو إيصال"
+EXPLORER_SCREEN 35 اقرا سكرين شوت (Scaffold, depth 1) rssMB=833
+EXPLORER_TAP 35 اقرا سكرين شوت / inkwell "صوّر بالكاميرا"
