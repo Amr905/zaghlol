@@ -4291,6 +4291,8 @@
       }
     }
   },
+  "workingBirdA11y": "زغلول شغال على الموضوع",
+  "workingBirdFailedA11y": "زغلول بيقولك حصلت مشكلة",
   "captureRescanDone": "{count, plural, =0{ملقيتش حركات جديدة ✓} =1{ضفت حركة جديدة ✓} =2{ضفت حركتين جداد ✓} few{ضفت {n} حركات جديدة ✓} many{ضفت {n} حركة جديدة ✓} other{ضفت {n} حركة جديدة ✓}}",
   "@captureRescanDone": {
     "description": "N · count:int, n",

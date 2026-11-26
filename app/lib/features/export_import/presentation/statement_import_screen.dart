@@ -14,6 +14,9 @@
 // Privacy: the file is read into memory, parsed on the phone and dropped (the
 // use case zeroes the bytes); the PDF password lives in a local variable only.
 
+import '../../mascot/presentation/working_bird.dart';
+import '../../mascot/presentation/zaghlol_avatar.dart';
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -535,7 +538,13 @@ class _State extends ConsumerState<StatementImportScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const CircularProgressIndicator(),
+                          WorkingBird(
+                            busy: true,
+                            moment: _phase == _Phase.saving
+                                ? ZaghlolMoment.counting
+                                : ZaghlolMoment.scanning,
+                            size: 72,
+                          ),
                           const SizedBox(height: ZSpacing.md),
                           Text(
                             _phase == _Phase.saving

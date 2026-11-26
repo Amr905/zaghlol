@@ -3146,6 +3146,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get workingBirdA11y => 'Zaghlol is working on it';
+
+  @override
+  String get workingBirdFailedA11y => 'Zaghlol says something went wrong';
+
+  @override
   String captureRescanDone(int count, String n) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

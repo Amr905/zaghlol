@@ -11,6 +11,8 @@
 // consent line and "scan the last 3 months" opt-in for user-added
 // phone-number senders (FU-109), and the Settings key for it.
 
+import '../../mascot/presentation/working_bird.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -871,6 +873,8 @@ class _RescanPanelState extends ConsumerState<RescanPanel> {
             onPressed: _start,
           ),
         ] else if (_ui == _ScanUi.running) ...[
+          const Center(child: WorkingBird(busy: true)),
+          const SizedBox(height: ZSpacing.sm),
           const LinearProgressIndicator(),
           const SizedBox(height: ZSpacing.md),
           Text(
@@ -891,6 +895,7 @@ class _RescanPanelState extends ConsumerState<RescanPanel> {
             onPressed: () => Navigator.of(context).maybePop(),
           ),
         ] else ...[
+          const Center(child: WorkingBird(busy: false, failed: true)),
           ZBanner(
             key: const Key('rescan-failed'),
             message: l10n.commonErrorLoadFailed,
