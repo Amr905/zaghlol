@@ -353,7 +353,6 @@
   "currencyViewEmptyTitle": "Nothing in this currency this month",
   "currencyViewEmptyBody": "Once you earn or spend in it, it shows up here.",
   "currencyViewBudgetOffer": "Want a {currency} budget?",
-  "homeHeroOtherCurrencyIncome": "+ {amount} income",
   "homeCurrencyCardsTitle": "Other currencies",
   "homeCurrencyCardLeft": "{amount} left",
   "homeCurrencyCardInOut": "In {income} · Out {out}",
@@ -488,11 +487,7 @@
       }
     }
   },
-  "homeApproxSheetClose": "Got it",
-  "@homeApproxSheetClose": {
-    "description": "C"
-  },
-  "homeMascotFirstForeign": "Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.",
+  "homeMascotFirstForeign": "You've got money in another currency! It stays on its own card. When you exchange it, your EGP month grows by exactly what you got.",
   "@homeMascotFirstForeign": {
     "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
   },
@@ -574,6 +569,7 @@
   "transactionsListSelectedTitle": "{n} selected",
   "transactionsListBulkCategory": "Category",
   "transactionsListBulkAccount": "Card",
+  "transactionsListBulkExchangeLocked": "An exchange has no category and can't move to another card on its own. You can still delete it.",
   "transactionsListBulkRule": "Always use this for these merchants",
   "transactionsListBulkChanged": "{count, plural, =1{1 transaction updated} other{{n} transactions updated}}",
   "transactionsListBulkDeleteTitle": "{count, plural, =1{Delete 1 transaction?} other{Delete {n} transactions?}}",
@@ -9291,6 +9287,19 @@
       "list": {
         "type": "String"
       }
+    }
+  },
+  "insightsV2TrendsLegendExchangeIn": "Exchanged in",
+  "@insightsV2TrendsLegendExchangeIn": {"description": "T-283 legend"},
+  "insightsV2TrendsLegendExchangeOut": "Exchanged out",
+  "@insightsV2TrendsLegendExchangeOut": {"description": "T-283 legend"},
+  "insightsV2TrendsInOutExchangeA11y": "{month}, currency exchange: in {inAmount}, out {outAmount}",
+  "@insightsV2TrendsInOutExchangeA11y": {
+    "description": "T-283",
+    "placeholders": {
+      "month": {"type": "String"},
+      "inAmount": {"type": "String"},
+      "outAmount": {"type": "String"}
     }
   },
   "insightsV2TrendsInOutBarA11y": "{month}: income {income}, spent {spend}",

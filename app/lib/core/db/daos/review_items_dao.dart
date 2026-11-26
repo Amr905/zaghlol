@@ -38,6 +38,18 @@ abstract final class ReviewReason {
   /// (prefilled) or say no; nothing is created without that tap. Payload:
   /// `accountId`, `amount` (the rise, `Money.toJson`), `asOfMs`.
   static const String exchangeBalanceJump = 'exchangeBalanceJump';
+
+  /// T-286 (FU-383): not a card. A `low_confidence` item written already
+  /// resolved (resolution [crossChannelCopyResolution]) when ingest
+  /// merges a message into a stored transaction from another channel: it
+  /// links the merged raw message to that transaction (the out leg for an
+  /// exchange). Payload: `source` (the merged message's
+  /// `transactions.source` code). Ingest reads it so a second message from
+  /// the same source is never merged into the same transaction.
+  static const String crossChannelCopy = 'crossChannelCopy';
+
+  /// The `resolution` of a [crossChannelCopy] item.
+  static const String crossChannelCopyResolution = 'cross_channel_copy';
 }
 
 class ReviewItemsDao {

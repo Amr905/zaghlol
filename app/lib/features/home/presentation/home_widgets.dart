@@ -297,38 +297,6 @@ class _Kpi extends StatelessWidget {
   }
 }
 
-/// Pager dots for the currency pages.
-class HomePagerDots extends StatelessWidget {
-  const HomePagerDots({super.key, required this.count, required this.index});
-
-  final int count;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = ZColors.of(context);
-    return ExcludeSemantics(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (var i = 0; i < count; i++)
-            Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsetsDirectional.symmetric(
-                horizontal: ZSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: i == index ? c.primary : c.outline,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Review card: shown only when something needs review (mockup 03).
 class HomeReviewPill extends StatelessWidget {
   const HomeReviewPill({

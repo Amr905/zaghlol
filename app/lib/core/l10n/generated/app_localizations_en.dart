@@ -1228,11 +1228,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String homeHeroOtherCurrencyIncome(String amount) {
-    return '+ $amount income';
-  }
-
-  @override
   String get homeCurrencyCardsTitle => 'Other currencies';
 
   @override
@@ -1444,11 +1439,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeApproxSheetClose => 'Got it';
-
-  @override
   String get homeMascotFirstForeign =>
-      'Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.';
+      'You\'ve got money in another currency! It stays on its own card. When you exchange it, your EGP month grows by exactly what you got.';
 
   @override
   String get homeApproxNoticeOff => 'Turn it off';
@@ -1761,6 +1753,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsListBulkAccount => 'Card';
+
+  @override
+  String get transactionsListBulkExchangeLocked =>
+      'An exchange has no category and can\'t move to another card on its own. You can still delete it.';
 
   @override
   String get transactionsListBulkRule => 'Always use this for these merchants';
@@ -9207,6 +9203,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String insightsV2TrendsInOutA11y(String list) {
     return 'In and out chart. $list';
+  }
+
+  @override
+  String get insightsV2TrendsLegendExchangeIn => 'Exchanged in';
+
+  @override
+  String get insightsV2TrendsLegendExchangeOut => 'Exchanged out';
+
+  @override
+  String insightsV2TrendsInOutExchangeA11y(
+    String month,
+    String inAmount,
+    String outAmount,
+  ) {
+    return '$month, currency exchange: in $inAmount, out $outAmount';
   }
 
   @override

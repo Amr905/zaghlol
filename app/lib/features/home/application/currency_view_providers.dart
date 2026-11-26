@@ -89,13 +89,29 @@ final currencyViewProvider = FutureProvider.autoDispose
         );
       }
       final txns = await ref.watch(transactionRepositoryProvider.future);
+      // The query window is the cycle padded by the largest UTC offset; the
+      // exact day test then uses each row's stored offset, like cycle totals.
+      const dayMs = 86400000;
+      const padMs = 14 * 3600000;
       final rows = await txns.query(
-        filter: TransactionFilter(currencies: {currency}),
-        page: const PageRequest(limit: 50),
+        filter: TransactionFilter(
+          currencies: {currency},
+          from: DateTime.fromMillisecondsSinceEpoch(
+            home.cycle.start.epochDay * dayMs - padMs,
+            isUtc: true,
+          ),
+          to: DateTime.fromMillisecondsSinceEpoch(
+            (home.cycle.end.epochDay + 1) * dayMs + padMs,
+            isUtc: true,
+          ),
+        ),
+        page: const PageRequest(limit: 500),
       );
       bool inCycle(TransactionRecord r) {
-        final t = r.occurredAt.toLocal();
-        final day = CivilDate(t.year, t.month, t.day).epochDay;
+        final day = CivilDate.fromLocalMs(
+          r.occurredAt.millisecondsSinceEpoch,
+          r.occurredTzOffsetMin,
+        ).epochDay;
         return day >= home.cycle.start.epochDay &&
             day <= home.cycle.end.epochDay;
       }

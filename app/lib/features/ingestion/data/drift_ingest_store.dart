@@ -4,6 +4,8 @@
 // continues (design note §2, §10). Every value is bound as a parameter;
 // failures are code-only (guardRead / guardWrite). Nothing here logs.
 
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -320,6 +322,65 @@ final class DriftIngestStore implements IngestStorePort {
         )
         .getSingleOrNull();
     return row?.read<String>('in_id');
+  });
+
+  @override
+  Future<void> recordCrossChannelCopy({
+    required String id,
+    required String rawMessageId,
+    required String txnId,
+    required String source,
+    required int atMs,
+    String? statusClass,
+  }) => guardWrite(
+    () => _db
+        .into(_db.reviewItems)
+        .insert(
+          ReviewItemsCompanion.insert(
+            id: id,
+            kind: ReviewKind.lowConfidence,
+            rawMessageId: Value(rawMessageId),
+            txnId: Value(txnId),
+            payload: Value(
+              jsonEncode({
+                'reason': ReviewReason.crossChannelCopy,
+                'source': source,
+                'statusClass': ?statusClass,
+              }),
+            ),
+            createdAt: atMs,
+            resolvedAt: Value(atMs),
+            resolution: const Value(ReviewReason.crossChannelCopyResolution),
+          ),
+        ),
+  );
+
+  @override
+  Future<bool> hasCrossChannelCopy(
+    String txnId,
+    String source, {
+    String? statusClass,
+  }) => guardRead(() async {
+    final row = await _db
+        .customSelect(
+          'SELECT 1 AS x FROM review_items WHERE txn_id = ?1 '
+          'AND kind = ?2 AND resolution = ?3 AND json_valid(payload) '
+          "AND json_extract(payload, '\$.reason') = ?4 "
+          "AND json_extract(payload, '\$.source') = ?5 "
+          "AND (?6 IS NULL OR json_extract(payload, '\$.statusClass') IS NULL "
+          "OR json_extract(payload, '\$.statusClass') = ?6) LIMIT 1",
+          variables: [
+            Variable.withString(txnId),
+            Variable.withString(ReviewKind.lowConfidence),
+            Variable.withString(ReviewReason.crossChannelCopyResolution),
+            Variable.withString(ReviewReason.crossChannelCopy),
+            Variable.withString(source),
+            Variable<String>(statusClass),
+          ],
+          readsFrom: {_db.reviewItems},
+        )
+        .getSingleOrNull();
+    return row != null;
   });
 
   @override

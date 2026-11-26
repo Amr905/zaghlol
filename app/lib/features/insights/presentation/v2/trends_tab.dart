@@ -152,7 +152,17 @@ class _InOutBody extends ConsumerWidget {
             money(b.incomeMinor),
             money(b.spendMinor),
           ),
+      for (final b in bars)
+        if (b.hasData && (b.exchangedInMinor > 0 || b.exchangedOutMinor > 0))
+          l.insightsV2TrendsInOutExchangeA11y(
+            month(b),
+            money(b.exchangedInMinor),
+            money(b.exchangedOutMinor),
+          ),
     ];
+    final hasExchange = bars.any(
+      (b) => b.hasData && (b.exchangedInMinor > 0 || b.exchangedOutMinor > 0),
+    );
     Widget key(Widget swatch, String text) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -211,6 +221,30 @@ class _InOutBody extends ConsumerWidget {
                 ),
                 l.insightsV2TrendsLegendProjected,
               ),
+              if (hasExchange) ...[
+                key(
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: ZChartColors.exchangeIn,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  l.insightsV2TrendsLegendExchangeIn,
+                ),
+                key(
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: ZChartColors.exchangeOut,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                  l.insightsV2TrendsLegendExchangeOut,
+                ),
+              ],
             ],
           ),
         ),

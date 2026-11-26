@@ -654,7 +654,7 @@ Specified in the addendum **`docs/01-requirements/ask-llm.md`** (FR-LLM, BR-LLM,
 - **BR-MON-01** Amounts are stored exactly (integer minor units), never as floating point.
 - **BR-MON-02** Every amount carries its currency. EGP is the reporting currency.
 - **BR-MON-03** Minor units follow each currency's ISO 4217 exponent: most currencies 2 decimals; **KWD, BHD, OMR, JOD, TND, LYD, IQD = 3**; JPY, KRW and others = 0; funds codes CLF and UYW = 4 (D-51). Parsing, storage, display, CSV and backup must respect the exponent.
-- **BR-FX-01** ~~Store an EGP equivalent per transaction.~~ Superseded (D-28): amounts are stored only in their original currency (plus billed amount/currency when the message states one). Conversion happens **only at display time** in the optional ≈ view, using the latest backend rate (A-62).
+- **BR-FX-01** ~~Store an EGP equivalent per transaction.~~ Superseded (D-28): amounts are stored only in their original currency (plus billed amount/currency when the message states one). Conversion happens **only at display time** in the optional ≈ view, using the latest backend rate (A-62). For money the user actually exchanged, the bank's own rate (implied by the two exchange legs) is used first and the backend rate only for the rest.
 - **BR-FX-02** Totals, budgets, averages, charts and alerts are always computed **within one currency**. Mixing currencies is allowed only in the ≈ view and must be labelled approximate.
 - **BR-FX-03** A transaction counts toward the card it was charged to in the **billed currency** (e.g. a USD purchase on an EGP card counts as EGP for that card and its EGP budgets; the original USD amount is kept for display).
 

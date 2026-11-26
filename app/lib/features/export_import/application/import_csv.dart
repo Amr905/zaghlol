@@ -222,11 +222,17 @@ class ImportCsvUseCase {
   Future<ImportSummary> run(Uint8List bytes, {bool dryRun = false}) async {
     final table = parseCsv(bytes);
     final header = table.first;
-    if (header.length != exportHeader.length) {
+    // T-285: old exports (14 columns) and new ones (with `pair` and `kind`)
+    // are both read. The two extra columns are ignored: pairs are rebuilt by
+    // the post-import pairing hooks, never taken from the file.
+    final expected = header.length == legacyExportHeader.length
+        ? legacyExportHeader
+        : exportHeader;
+    if (header.length != expected.length) {
       throw ImportCsvException(ImportCsvException.badHeader);
     }
     for (var i = 0; i < header.length; i++) {
-      if (header[i] != exportHeader[i]) {
+      if (header[i] != expected[i]) {
         throw ImportCsvException(ImportCsvException.badHeader);
       }
     }
@@ -269,7 +275,7 @@ class ImportCsvUseCase {
       var invalid = 0;
       for (var i = 1; i < table.length; i++) {
         final r = table[i];
-        final p = r.length != exportHeader.length
+        final p = r.length != table.first.length
             ? (ImportRowProblem.columnCount, null)
             : _validate(r, accounts, categories);
         if (p.$2 != null) {

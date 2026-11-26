@@ -18,6 +18,21 @@ const widgetAmountMask = '•••';
 /// How many days of "days to payday" lines one snapshot carries.
 const widgetMaxRollDays = 62;
 
+/// T-284 (D-86): the most ISO codes the hint names before "+N".
+const widgetMaxHintCodes = 2;
+
+/// The hint line for other currencies that have a Home card: "+ USD",
+/// "+ USD, EUR", "+ USD, EUR +1". Codes only, never an amount or a sum.
+/// Wrapped in left-to-right isolates so it reads the same in RTL. Empty when
+/// there are none.
+String widgetCurrencyHint(List<String> codes, DigitsMode digits) {
+  if (codes.isEmpty) return '';
+  final shown = codes.take(widgetMaxHintCodes).join(', ');
+  final more = codes.length - widgetMaxHintCodes;
+  final tail = more > 0 ? ' +${digits.render('$more')}' : '';
+  return '\u2066+ $shown$tail\u2069';
+}
+
 /// Localized copy, supplied by the composition root from the ARB strings
 /// (no copy lives in this file). Each function returns the finished text.
 class WidgetCopy {
@@ -53,7 +68,12 @@ class WidgetSnapshotInput {
     required this.digits,
     required this.copy,
     required this.nowMs,
+    this.otherCurrencies = const [],
   });
+
+  /// T-284: ISO codes of the non-primary currencies that have a Home card
+  /// (T-278 rule), in card order. Codes only; left out while locked.
+  final List<String> otherCurrencies;
 
   /// Null while there is no data (no cycle read yet).
   final CycleOverview? overview;
@@ -82,13 +102,19 @@ WidgetSnapshot buildWidgetSnapshot(WidgetSnapshotInput i) {
       updatedAtMs: i.nowMs,
     );
   }
+  // The codes alone stay visible when amounts are hidden (no amount in
+  // them); a locked app shows none, since which currencies are held is
+  // financial information.
+  final hint = i.appLocked
+      ? ''
+      : widgetCurrencyHint(i.otherCurrencies, i.digits);
   final safe = overview.byCurrency[i.primaryCurrency]?.safeToSpend;
   if (safe == null) {
     // EC-24: no budget in the primary currency.
     return WidgetSnapshot(
       state: WidgetDisplayState.noBudget,
       primaryText: i.copy.setBudget,
-      secondaryText: '',
+      secondaryText: hint,
       currency: code,
       updatedAtMs: i.nowMs,
     );
@@ -104,7 +130,11 @@ WidgetSnapshot buildWidgetSnapshot(WidgetSnapshotInput i) {
   );
   final amount = masked ? widgetAmountMask : formatted;
   final days = overview.daysRemaining;
-  String line(int n) => i.copy.daysToPayday(n, i.digits.render('$n'));
+  String line(int n) {
+    final text = i.copy.daysToPayday(n, i.digits.render('$n'));
+    return hint.isEmpty ? text : '$text \u00b7 $hint';
+  }
+
   // FU-206b: one finished line per coming day so the widget rolls the count
   // at local midnight by itself (no amount in any of them).
   final perDay = <String>[

@@ -1516,15 +1516,6 @@
       }
     }
   },
-  "homeHeroOtherCurrencyIncome": "+ {amount} دخل",
-  "@homeHeroOtherCurrencyIncome": {
-    "description": "C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "homeCurrencyCardsTitle": "فلوسك بعملات تانية",
   "@homeCurrencyCardsTitle": {
     "description": "C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24."
@@ -1889,11 +1880,7 @@
       }
     }
   },
-  "homeApproxSheetClose": "تمام",
-  "@homeApproxSheetClose": {
-    "description": "C"
-  },
-  "homeMascotFirstForeign": "قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.",
+  "homeMascotFirstForeign": "عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.",
   "@homeMascotFirstForeign": {
     "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
   },
@@ -2346,6 +2333,10 @@
   "transactionsListBulkAccount": "الكارت",
   "@transactionsListBulkAccount": {
     "description": "C · the bar's other actions are common_action_delete and common_action_cancel (§0.10 reuse rule)"
+  },
+  "transactionsListBulkExchangeLocked": "تغيير العملة ملوش تصنيف ومينفعش يتنقل لكارت تاني لوحده. تقدر تمسحه عادي.",
+  "@transactionsListBulkExchangeLocked": {
+    "description": "C · T-286: note above the selection bar when an exchange row is selected; Category and Card are off, Delete still works"
   },
   "transactionsListBulkRule": "استخدم ده دايماً للتجار دول",
   "@transactionsListBulkRule": {
@@ -12766,6 +12757,19 @@
       "list": {
         "type": "String"
       }
+    }
+  },
+  "insightsV2TrendsLegendExchangeIn": "غيّرت عملة: دخل",
+  "@insightsV2TrendsLegendExchangeIn": {"description": "T-283 legend"},
+  "insightsV2TrendsLegendExchangeOut": "غيّرت عملة: خرج",
+  "@insightsV2TrendsLegendExchangeOut": {"description": "T-283 legend"},
+  "insightsV2TrendsInOutExchangeA11y": "{month}، غيّرت عملة: دخل {inAmount}، خرج {outAmount}",
+  "@insightsV2TrendsInOutExchangeA11y": {
+    "description": "T-283",
+    "placeholders": {
+      "month": {"type": "String"},
+      "inAmount": {"type": "String"},
+      "outAmount": {"type": "String"}
     }
   },
   "insightsV2TrendsInOutBarA11y": "{month}: دخلك {income}، صرفت {spend}",

@@ -1086,10 +1086,18 @@ final class IngestRawMessages {
       // §11: never auto-merge user input; the screen asks.
       return IngestPossibleDuplicate([for (final c in matches) c.id]);
     }
-    if (matches.length == 1) {
+    // T-286 (FU-383): a match that already took a copy from this message's
+    // source is another real payment with the same amounts, not this one's
+    // copy: it is stored below with a possibleDuplicate item.
+    if (matches.length == 1 &&
+        !await _store.hasCrossChannelCopy(
+          matches.single.id,
+          p.txnSource!.code,
+          statusClass: _markClass(status),
+        )) {
       final target = matches.single;
-      // Raw first (CR-6 backstop), then the attach.
-      await _insertRaw(
+      // Raw first (CR-6 backstop), then the attach and its mark.
+      final rawId = await _insertRaw(
         p,
         status: RawStatus.parsed,
         institution: inst,
@@ -1097,6 +1105,7 @@ final class IngestRawMessages {
         templateVersion: r.templateVersion,
       );
       await _attach(local, b, target, r, occurredMs);
+      await _markCopy(p, rawId, target.id, statusClass: _markClass(status));
       local.diag(IngestDiag.mergeCrossChannel);
       return IngestMergedCrossChannel(target.id);
     }
@@ -1313,8 +1322,15 @@ final class IngestRawMessages {
     // rules as dedupe 2), the message joins the stored exchange: no second
     // pair, the stored legs stay exactly as they are (no field fill: a
     // patch could move one leg to another account or give the out leg the
-    // received amount as its original amount).
-    if (matches.length == 1 && !matches.single.isDeleted) {
+    // received amount as its original amount). T-286 (FU-383): an exchange
+    // that already took a copy from this message's source is not merged
+    // again; the message is a second, real conversion.
+    if (matches.length == 1 &&
+        !matches.single.isDeleted &&
+        !await _store.hasCrossChannelCopy(
+          matches.single.id,
+          p.txnSource!.code,
+        )) {
       final target = matches.single;
       final inLeg = await _store.exchangeInLegOf(target.id);
       if (inLeg != null) {
@@ -1335,13 +1351,14 @@ final class IngestRawMessages {
         if (inMatches.length == 1 &&
             inMatches.single.id == inLeg &&
             inMatches.single.accountId == target.accountId) {
-          await _insertRaw(
+          final rawId = await _insertRaw(
             p,
             status: RawStatus.parsed,
             institution: inst,
             templateId: r.templateId,
             templateVersion: r.templateVersion,
           );
+          await _markCopy(p, rawId, target.id);
           final balance = f.balance;
           await _recordBalance(
             local,
@@ -1910,6 +1927,28 @@ final class IngestRawMessages {
     if (!inserted) throw const _RaceLost();
     return id;
   }
+
+  /// T-286 (FU-383): remembers that [rawId] was merged into [txnId], in
+  /// the message's savepoint, so the same source never merges into it again.
+  /// FU-389: a mark blocks a merge only for the same status class, so a
+  /// pending→posted settle in place does not turn a true copy into a
+  /// second expense.
+  static String _markClass(TxnStatus s) =>
+      s == TxnStatus.pending ? 'pending' : 'posted';
+
+  Future<void> _markCopy(
+    _Prepared p,
+    String rawId,
+    String txnId, {
+    String? statusClass,
+  }) => _store.recordCrossChannelCopy(
+    id: _newId(),
+    rawMessageId: rawId,
+    txnId: txnId,
+    source: p.txnSource!.code,
+    atMs: _nowMs(),
+    statusClass: statusClass,
+  );
 
   Future<void> _review({
     required String kind,

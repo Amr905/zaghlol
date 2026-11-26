@@ -150,6 +150,27 @@ void main() {
     );
   });
 
+  testWidgets('month with an exchange: legend and a11y show it', (
+    tester,
+  ) async {
+    await _pump(tester, overrides: trendsOverrides(exchange: true));
+    final l = _l(tester);
+    expect(find.text(l.insightsV2TrendsLegendExchangeIn), findsOneWidget);
+    expect(find.text(l.insightsV2TrendsLegendExchangeOut), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'currency exchange: in')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('no exchange: no exchange legend or a11y', (tester) async {
+    await _pump(tester);
+    final l = _l(tester);
+    expect(find.text(l.insightsV2TrendsLegendExchangeIn), findsNothing);
+    expect(find.text(l.insightsV2TrendsLegendExchangeOut), findsNothing);
+    expect(find.bySemanticsLabel(RegExp(r'currency exchange')), findsNothing);
+  });
+
   testWidgets('loading state shows skeletons', (tester) async {
     await initDateFormatting();
     await tester.binding.setSurfaceSize(const Size(390, 2100));
