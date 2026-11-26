@@ -94,7 +94,9 @@ internal sealed class RetentionStore(IZaghlolDbContextFactory contexts) : IReten
           WHERE ctid IN (SELECT ctid FROM zaghlol.installs WHERE ({condition}) LIMIT @batch)
           RETURNING id),
         idem AS (
-          DELETE FROM zaghlol.idempotency_records WHERE install_id IN (SELECT id FROM gone) RETURNING 1)
+          DELETE FROM zaghlol.idempotency_records WHERE install_id IN (SELECT id FROM gone) RETURNING 1),
+        quota AS (
+          DELETE FROM zaghlol.llm_quota_counters WHERE subject_kind = 'install' AND subject_id IN (SELECT id FROM gone) RETURNING 1)
         SELECT count(*)::int FROM gone
         """;
 }

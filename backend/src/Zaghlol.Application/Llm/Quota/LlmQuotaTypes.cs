@@ -53,8 +53,8 @@ public enum LlmQuotaSubjectKind
     Account,
 }
 
-/// <summary>One counter row as read: <c>LastRequestHash</c> is SHA-256 of the last request id that counted.</summary>
-public sealed record LlmQuotaRow(int Used, byte[]? LastRequestHash);
+/// <summary>One counter row as read: <c>LastRequestHash</c> is SHA-256 of the last request id that counted, <c>UpdatedAt</c> when it counted.</summary>
+public sealed record LlmQuotaRow(int Used, byte[]? LastRequestHash, DateTimeOffset UpdatedAt);
 
 /// <summary>The counters table on the App login. Raw SQL; no row can hold question text.</summary>
 public interface ILlmQuotaRepository
@@ -63,9 +63,9 @@ public interface ILlmQuotaRepository
 
     /// <summary>
     /// The single commit statement (insert-on-conflict-update). Returns true when it changed the row; false when the subject is at its
-    /// limit or this request hash already counted.
+    /// limit or this request hash already counted at or after <paramref name="retryCutoff"/> (an older match is a replay and counts again).
     /// </summary>
-    Task<bool> CommitAsync(LlmFeature feature, LlmQuotaSubjectKind kind, Guid subject, int monthKey, int n, int limit, byte[] requestHash, DateTimeOffset now, CancellationToken cancellationToken);
+    Task<bool> CommitAsync(LlmFeature feature, LlmQuotaSubjectKind kind, Guid subject, int monthKey, int n, int limit, byte[] requestHash, DateTimeOffset now, DateTimeOffset retryCutoff, CancellationToken cancellationToken);
 }
 
 public static class LlmQuotaDefaults

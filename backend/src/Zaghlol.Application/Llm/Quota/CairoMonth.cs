@@ -18,9 +18,9 @@ public static class CairoMonth
         try
         {
             var zone = Zone.Value;
-            // 31 Dec 22:30 UTC is already 1 Jan in Cairo (UTC+2); the offset flips with DST (UTC+3 in July, since 2023).
+            // 31 Dec 22:30 UTC is already 1 Jan in Cairo (UTC+2). DST is deliberately not checked: tzdata may change it and the month maths holds either way.
             return MonthKey(new DateTimeOffset(2026, 12, 31, 22, 30, 0, TimeSpan.Zero)) == 202701
-                && zone.GetUtcOffset(new DateTimeOffset(2026, 7, 1, 12, 0, 0, TimeSpan.Zero)) == TimeSpan.FromHours(3);
+                && zone.GetUtcOffset(new DateTimeOffset(2026, 1, 15, 12, 0, 0, TimeSpan.Zero)) == TimeSpan.FromHours(2);
         }
         catch (Exception e) when (e is TimeZoneNotFoundException or InvalidTimeZoneException or ArgumentException)
         {

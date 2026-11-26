@@ -113,6 +113,10 @@ public class RetentionStoreTests(RetentionFixture fixture) : IClassFixture<Reten
         var purchaseId = (Guid)purchase["id"]!;
         await SeedAsync("purchase_seats", new() { ["purchase_id"] = purchaseId, ["install_id"] = oldId, ["device_key_hash"] = deviceKey });
         await SeedAsync("idempotency_records", new() { ["install_id"] = oldId });
+        await Db.ExecuteAsync(
+            fixture.Database.Superuser,
+            "INSERT INTO zaghlol.llm_quota_counters (feature, subject_kind, subject_id, month_key, used, updated_at) VALUES ('ask', 'install', $1, 202611, 1, now())",
+            oldId);
 
         var result = await RunAsync();
 
@@ -128,6 +132,7 @@ public class RetentionStoreTests(RetentionFixture fixture) : IClassFixture<Reten
         Assert.Equal(deviceKey, (byte[])seat[2]!);
         Assert.Null(await Db.ScalarAsync(fixture.Database.Superuser, "SELECT install_id FROM zaghlol.purchases WHERE id = $1", purchaseId));
         Assert.False(await ExistsAsync("idempotency_records", "install_id", oldId));
+        Assert.False(await ExistsAsync("llm_quota_counters", "subject_id", oldId));
     }
 
     [Fact]

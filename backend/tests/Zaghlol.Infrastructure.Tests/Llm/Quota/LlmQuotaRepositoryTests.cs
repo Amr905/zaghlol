@@ -73,13 +73,13 @@ public class LlmQuotaRepositoryTests(LlmQuotaFixture fixture) : IClassFixture<Ll
         {
             var subject = Guid.NewGuid();
             var results = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
-                repository.CommitAsync(LlmFeature.Categorise, LlmQuotaSubjectKind.Install, subject, 202611, 4, 15, Hash("batch-" + round), Now, CancellationToken.None)));
+                repository.CommitAsync(LlmFeature.Categorise, LlmQuotaSubjectKind.Install, subject, 202611, 4, 15, Hash("batch-" + round), Now, Now.AddMinutes(-2), CancellationToken.None)));
             Assert.Equal(1, results.Count(r => r));
             Assert.Equal(4, await UsedAsync("cat", subject));
 
             // An existing row (a previous request counted) behaves the same.
             var second = await Task.WhenAll(Enumerable.Range(0, 8).Select(_ =>
-                repository.CommitAsync(LlmFeature.Categorise, LlmQuotaSubjectKind.Install, subject, 202611, 4, 15, Hash("next-" + round), Now, CancellationToken.None)));
+                repository.CommitAsync(LlmFeature.Categorise, LlmQuotaSubjectKind.Install, subject, 202611, 4, 15, Hash("next-" + round), Now, Now.AddMinutes(-2), CancellationToken.None)));
             Assert.Equal(1, second.Count(r => r));
             Assert.Equal(8, await UsedAsync("cat", subject));
         }
@@ -90,19 +90,36 @@ public class LlmQuotaRepositoryTests(LlmQuotaFixture fixture) : IClassFixture<Ll
     {
         var subject = Guid.NewGuid();
         var repository = Repository;
-        Assert.True(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 4, 5, Hash("a"), Now, CancellationToken.None));
-        Assert.True(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 4, 5, Hash("b"), Now, CancellationToken.None));
-        Assert.False(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 1, 5, Hash("c"), Now, CancellationToken.None));
+        Assert.True(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 4, 5, Hash("a"), Now, Now.AddMinutes(-2), CancellationToken.None));
+        Assert.True(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 4, 5, Hash("b"), Now, Now.AddMinutes(-2), CancellationToken.None));
+        Assert.False(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 1, 5, Hash("c"), Now, Now.AddMinutes(-2), CancellationToken.None));
         Assert.Equal(5, await UsedAsync("ask", subject));
         var row = await ReadBack(subject);
         Assert.Equal(5, row?.Used);
         Assert.Equal(Hash("b"), row?.LastRequestHash);
     }
 
+    /// <summary>B92-M1: the same hash counts again once it is older than the cutoff, and not inside it.</summary>
+    [Fact]
+    public async Task AReplayedRequestIdCountsAgainAfterTheRetryWindowButNotInsideIt()
+    {
+        var subject = Guid.NewGuid();
+        var repository = Repository;
+        var window = LlmQuotaStore.RetryWindow;
+        Assert.True(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 1, 5, Hash("a"), Now, Now - window, CancellationToken.None));
+        var later = Now + window - TimeSpan.FromSeconds(1);
+        Assert.False(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 1, 5, Hash("a"), later, later - window, CancellationToken.None));
+        Assert.Equal(1, await UsedAsync("ask", subject));
+        later = Now + window + TimeSpan.FromSeconds(1);
+        Assert.True(await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, 1, 5, Hash("a"), later, later - window, CancellationToken.None));
+        Assert.Equal(2, await UsedAsync("ask", subject));
+        Assert.Equal(later, (await ReadBack(subject))?.UpdatedAt);
+    }
+
     private async Task<LlmQuotaRow?> ReadBack(Guid subject)
     {
         var row = await Repository.ReadAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, subject, 202611, CancellationToken.None);
-        return row is null ? null : new LlmQuotaRow(row.Used, row.LastRequestHash);
+        return row is null ? null : new LlmQuotaRow(row.Used, row.LastRequestHash, row.UpdatedAt);
     }
 
     [Fact]
@@ -129,9 +146,9 @@ public class LlmQuotaRepositoryTests(LlmQuotaFixture fixture) : IClassFixture<Ll
         var bystander = Guid.NewGuid();
         foreach (var feature in new[] { LlmFeature.Ask, LlmFeature.Categorise })
         {
-            await repository.CommitAsync(feature, LlmQuotaSubjectKind.Install, install, 202611, 1, 50, Hash("x"), Now, CancellationToken.None);
-            await repository.CommitAsync(feature, LlmQuotaSubjectKind.Account, account, 202611, 1, 50, Hash("x"), Now, CancellationToken.None);
-            await repository.CommitAsync(feature, LlmQuotaSubjectKind.Install, bystander, 202611, 1, 50, Hash("x"), Now, CancellationToken.None);
+            await repository.CommitAsync(feature, LlmQuotaSubjectKind.Install, install, 202611, 1, 50, Hash("x"), Now, Now.AddMinutes(-2), CancellationToken.None);
+            await repository.CommitAsync(feature, LlmQuotaSubjectKind.Account, account, 202611, 1, 50, Hash("x"), Now, Now.AddMinutes(-2), CancellationToken.None);
+            await repository.CommitAsync(feature, LlmQuotaSubjectKind.Install, bystander, 202611, 1, 50, Hash("x"), Now, Now.AddMinutes(-2), CancellationToken.None);
         }
 
         await new NpgsqlAccountStore(fixture.Services).DeleteAccountAsync(account, null, Now, CancellationToken.None);
@@ -146,7 +163,7 @@ public class LlmQuotaRepositoryTests(LlmQuotaFixture fixture) : IClassFixture<Ll
         var old = Guid.NewGuid();
         foreach (var month in new[] { 202609, 202610, 202611 })
         {
-            await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, old, month, 1, 5, Hash("m"), Now, CancellationToken.None);
+            await repository.CommitAsync(LlmFeature.Ask, LlmQuotaSubjectKind.Install, old, month, 1, 5, Hash("m"), Now, Now.AddMinutes(-2), CancellationToken.None);
         }
 
         var store = new RetentionStore(fixture.Services.GetRequiredService<IZaghlolDbContextFactory>());

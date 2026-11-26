@@ -11,17 +11,17 @@ namespace Zaghlol.Infrastructure.Llm.Quota;
 internal sealed class LlmQuotaRepository([FromKeyedServices(DatabaseRole.App)] NpgsqlDataSource source) : ILlmQuotaRepository
 {
     private const string ReadSql = """
-        SELECT used, last_request_hash FROM zaghlol.llm_quota_counters
+        SELECT used, last_request_hash, updated_at FROM zaghlol.llm_quota_counters
         WHERE feature = @f AND subject_kind = @k AND subject_id = @s AND month_key = @m
         """;
 
-    // One statement per subject. LEAST caps the row at the limit; the WHERE makes a same-request-id replay (or a parallel twin) a no-op.
+    // One statement per subject. LEAST caps the row at the limit; the WHERE makes a same-request-id twin inside the retry window a no-op; an older match is a replay and counts (B92-M1).
     internal const string CommitSql = """
         INSERT INTO zaghlol.llm_quota_counters AS c (feature, subject_kind, subject_id, month_key, used, last_request_hash, updated_at)
         VALUES (@f, @k, @s, @m, LEAST(@n, @limit), @h, @now)
         ON CONFLICT (feature, subject_kind, subject_id, month_key) DO UPDATE
           SET used = c.used + LEAST(@n, @limit - c.used), last_request_hash = @h, updated_at = @now
-          WHERE c.used < @limit AND c.last_request_hash IS DISTINCT FROM @h
+          WHERE c.used < @limit AND (c.last_request_hash IS DISTINCT FROM @h OR c.updated_at <= @cutoff)
         """;
 
     public async Task<LlmQuotaRow?> ReadAsync(LlmFeature feature, LlmQuotaSubjectKind kind, Guid subject, int monthKey, CancellationToken cancellationToken)
@@ -30,11 +30,11 @@ internal sealed class LlmQuotaRepository([FromKeyedServices(DatabaseRole.App)] N
         AddKey(command, feature, kind, subject, monthKey);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
         return await reader.ReadAsync(cancellationToken).ConfigureAwait(false)
-            ? new LlmQuotaRow(reader.GetInt32(0), reader.IsDBNull(1) ? null : (byte[])reader[1])
+            ? new LlmQuotaRow(reader.GetInt32(0), reader.IsDBNull(1) ? null : (byte[])reader[1], reader.GetFieldValue<DateTimeOffset>(2))
             : null;
     }
 
-    public async Task<bool> CommitAsync(LlmFeature feature, LlmQuotaSubjectKind kind, Guid subject, int monthKey, int n, int limit, byte[] requestHash, DateTimeOffset now, CancellationToken cancellationToken)
+    public async Task<bool> CommitAsync(LlmFeature feature, LlmQuotaSubjectKind kind, Guid subject, int monthKey, int n, int limit, byte[] requestHash, DateTimeOffset now, DateTimeOffset retryCutoff, CancellationToken cancellationToken)
     {
         await using var command = source.CreateCommand(CommitSql);
         AddKey(command, feature, kind, subject, monthKey);
@@ -42,6 +42,7 @@ internal sealed class LlmQuotaRepository([FromKeyedServices(DatabaseRole.App)] N
         command.Parameters.Add(new("limit", NpgsqlDbType.Integer) { Value = limit });
         command.Parameters.Add(new("h", NpgsqlDbType.Bytea) { Value = requestHash });
         command.Parameters.Add(new("now", NpgsqlDbType.TimestampTz) { Value = now.ToUniversalTime() });
+        command.Parameters.Add(new("cutoff", NpgsqlDbType.TimestampTz) { Value = retryCutoff.ToUniversalTime() });
         return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false) > 0;
     }
 
