@@ -10,7 +10,7 @@ namespace Zaghlol.Api.RateLimiting;
 /// <summary>
 /// The LLM buckets of ask-llm §4.3, in process memory (with N API instances the effective limit is up to N times higher, as for
 /// <see cref="ZaghlolRateLimiters"/>): per install and per account a token bucket (burst, per minute) and a sliding day, per client network a token bucket, and
-/// one global per-minute bucket. Checked cheapest-owner first (install, account, network, global) so a refused call drains the shared buckets least.
+/// one global per-minute bucket. The owner buckets (install, account) are drawn before attestation and the shared ones (/24, global) only after it passed (FU-432), so an unattested caller can't drain them.
 /// The keys (install ids, accounts, networks) are memory only and are never logged or tagged; only the fixed bucket name leaves.
 /// </summary>
 internal sealed class LlmRateLimiter : ILlmRateLimiter, IDisposable
@@ -58,10 +58,15 @@ internal sealed class LlmRateLimiter : ILlmRateLimiter, IDisposable
         });
     }
 
-    public LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey)
+    public LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey, LlmRateStage stage)
     {
         ArgumentNullException.ThrowIfNull(networkKey);
         var prefix = feature == LlmFeature.Ask ? "ask:" : "cat:";
+        if (stage == LlmRateStage.Shared)
+        {
+            return Refused(network.AttemptAcquire(prefix + networkKey), NetworkBucket) ?? Refused(global.AttemptAcquire(), GlobalBucket) ?? LlmRateDecision.Ok;
+        }
+
         var installKey = prefix + install;
 
         if (Refused(installMinute.AttemptAcquire(installKey), InstallBucket) is { } a1)
@@ -88,12 +93,7 @@ internal sealed class LlmRateLimiter : ILlmRateLimiter, IDisposable
             }
         }
 
-        if (Refused(network.AttemptAcquire(prefix + networkKey), NetworkBucket) is { } c)
-        {
-            return c;
-        }
-
-        return Refused(global.AttemptAcquire(), GlobalBucket) ?? LlmRateDecision.Ok;
+        return LlmRateDecision.Ok;
     }
 
     public void Dispose()

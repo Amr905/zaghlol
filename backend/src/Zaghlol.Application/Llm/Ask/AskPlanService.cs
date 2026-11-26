@@ -160,7 +160,7 @@ public sealed partial class AskPlanService(
         }
 
         var name = validated.Plan.GetProperty("plan").GetString() ?? string.Empty;
-        if (name == "PL-INVEST" && !await flags.IsOnAsync(LlmGateFeature.AskInvest, gate.Install, gate.Platform, gate.AppVersion, cancellationToken).ConfigureAwait(false))
+        if (name == "PL-INVEST" && !await flags.IsOnAsync(LlmGateFeature.AskInvest, gate.Install, gate.Platform, gate.AppVersion, CancellationToken.None).ConfigureAwait(false))
         {
             metrics.Fallback(LlmFeature.Ask);
             return NotCounted(admitted);

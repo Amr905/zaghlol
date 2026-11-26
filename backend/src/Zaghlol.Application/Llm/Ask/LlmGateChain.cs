@@ -21,7 +21,17 @@ public sealed record LlmRateDecision(bool Allowed, string Bucket, int RetryAfter
 /// <summary>The in-process buckets of ask-llm §4.3 (install 3/min and 20/day, the same per account, /24 30/min, global per minute). The key is memory only.</summary>
 public interface ILlmRateLimiter
 {
-    LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey);
+    /// <summary>
+    /// <see cref="LlmRateStage.Owner"/> draws the install and account buckets (the cheap pre-check before attestation, FU-432);
+    /// <see cref="LlmRateStage.Shared"/> draws the /24 and global buckets and runs only after attestation passed, so an unattested caller can't drain them.
+    /// </summary>
+    LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey, LlmRateStage stage);
+}
+
+public enum LlmRateStage
+{
+    Owner,
+    Shared,
 }
 
 public enum LlmGateOutcome
@@ -128,7 +138,7 @@ public sealed class LlmGateChain(
         var now = clock.GetUtcNow();
         var validated = await accounts.ValidateAsync(request.AccountToken, request.Install, now, cancellationToken).ConfigureAwait(false);
         Guid? account = validated?.AccountId;
-        var rate = limiter.TryAcquire(feature, request.Install, account, request.NetworkKey);
+        var rate = limiter.TryAcquire(feature, request.Install, account, request.NetworkKey, LlmRateStage.Owner);
         if (!rate.Allowed)
         {
             metrics.RateLimited(feature, rate.Bucket);
@@ -148,6 +158,14 @@ public sealed class LlmGateChain(
             return new LlmGateResult(LlmGateOutcome.AttestationUnavailable, providerId, account);
         }
 
+        // 6b. The shared /24 and global buckets, only for a caller that passed attestation (FU-432).
+        rate = limiter.TryAcquire(feature, request.Install, account, request.NetworkKey, LlmRateStage.Shared);
+        if (!rate.Allowed)
+        {
+            metrics.RateLimited(feature, rate.Bucket);
+            return new LlmGateResult(LlmGateOutcome.RateLimited, providerId, account, Bucket: rate.Bucket, RetryAfterSeconds: Math.Max(1, rate.RetryAfterSeconds));
+        }
+
         // 7. Tier and quota pre-check (read only; commit happens after a valid reply).
         var check = await quota.PreCheckAsync(feature, request.Install, account, request.RequestId, cancellationToken).ConfigureAwait(false);
         switch (check.Kind)
@@ -155,6 +173,9 @@ public sealed class LlmGateChain(
             case LlmQuotaCheckKind.Unavailable:
                 metrics.Paused(feature, "quota_unavailable");
                 return new LlmGateResult(LlmGateOutcome.Paused, providerId, account);
+            case LlmQuotaCheckKind.Exhausted when feature == LlmFeature.Categorise:
+                // Categorise reports quota per merchant, never as 403: catalog and cache hits still arrive at 0 left (llm-categorise §3).
+                return new LlmGateResult(LlmGateOutcome.Admitted, providerId, account, check);
             case LlmQuotaCheckKind.Exhausted:
                 metrics.QuotaHit(feature);
                 return new LlmGateResult(LlmGateOutcome.QuotaExhausted, providerId, account, check);

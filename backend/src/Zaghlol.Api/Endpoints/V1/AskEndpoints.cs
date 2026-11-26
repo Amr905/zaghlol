@@ -104,7 +104,7 @@ internal static class AskEndpoints
         }
     }
 
-    private static ProblemHttpResult Refused(HttpContext context, LlmGateResult gate) => gate.Outcome switch
+    internal static ProblemHttpResult Refused(HttpContext context, LlmGateResult gate) => gate.Outcome switch
     {
         LlmGateOutcome.Paused => Paused(),
         LlmGateOutcome.ConsentRequired => TypedResults.Problem(
@@ -119,7 +119,7 @@ internal static class AskEndpoints
         _ => ApiProblems.Of(StatusCodes.Status500InternalServerError, ErrorCodes.Internal),
     };
 
-    private static ProblemHttpResult Paused() => TypedResults.Problem(
+    internal static ProblemHttpResult Paused() => TypedResults.Problem(
         statusCode: StatusCodes.Status503ServiceUnavailable,
         type: "https://zaghlol.app/problems/llm-service-paused",
         title: "The helper is paused.",
@@ -131,7 +131,7 @@ internal static class AskEndpoints
         title: "Monthly question limit reached.",
         extensions: new Dictionary<string, object?> { ["code"] = ErrorCodes.LlmQuotaExhausted, ["quota"] = QuotaObject(quota) });
 
-    private static ProblemHttpResult Unavailable(HttpContext context, int status, string code)
+    internal static ProblemHttpResult Unavailable(HttpContext context, int status, string code)
     {
         context.Response.Headers.RetryAfter = RetryAfterSeconds.ToString(CultureInfo.InvariantCulture);
         return TypedResults.Problem(
@@ -139,7 +139,7 @@ internal static class AskEndpoints
             extensions: new Dictionary<string, object?> { ["code"] = code, ["retryAfterSeconds"] = RetryAfterSeconds });
     }
 
-    private static Dictionary<string, object?> QuotaObject(LlmQuotaView quota) => new()
+    internal static Dictionary<string, object?> QuotaObject(LlmQuotaView quota) => new()
     {
         ["limit"] = quota.Limit,
         ["used"] = quota.Used,
@@ -147,7 +147,7 @@ internal static class AskEndpoints
         ["resetsAt"] = Utc(quota.ResetsAt),
     };
 
-    private static string Utc(DateTimeOffset value) => value.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
+    internal static string Utc(DateTimeOffset value) => value.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
 
     /// <summary>{ serverTime, plan, counted, quota }. The plan bytes are revealed only here, to be written to the caller who sent the question.</summary>
     private static byte[] Response(DateTimeOffset now, AskPlanAnswer answer)

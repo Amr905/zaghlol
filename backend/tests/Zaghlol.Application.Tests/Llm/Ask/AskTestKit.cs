@@ -158,6 +158,7 @@ internal sealed class ScriptedFlags : ILlmFeatureGate
     public Task<bool> IsOnAsync(LlmGateFeature feature, InstallId installId, string platform, string appVersion, CancellationToken cancellationToken)
     {
         Order?.Add("flag:" + feature);
+        cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult(On.Contains(feature));
     }
 }
@@ -215,13 +216,16 @@ internal sealed class ScriptedLimiter(List<string> order) : ILlmRateLimiter
 {
     public LlmRateDecision Next { get; set; } = LlmRateDecision.Ok;
 
+    /// <summary>The stage <see cref="Next"/> applies to; the other stage always allows.</summary>
+    public LlmRateStage RefuseAt { get; set; } = LlmRateStage.Owner;
+
     public Guid? LastAccount { get; private set; }
 
-    public LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey)
+    public LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey, LlmRateStage stage)
     {
-        order.Add("limiter");
+        order.Add("limiter:" + stage);
         LastAccount = account;
-        return Next;
+        return stage == RefuseAt ? Next : LlmRateDecision.Ok;
     }
 }
 
