@@ -193,7 +193,7 @@ Skim only. 105 keys, `arb_parity_test` and the l10n tests are green. Lead spot-c
 
 ## Proposed follow-ups
 
-Next free number from `LEAD_HANDOFF.md`: FU-364 (taken by the other lane before merge; these rows are FU-391…FU-399 in `implementation-status.md`).
+Next free number from `LEAD_HANDOFF.md`: FU-364 (taken by the other lane before merge; these rows are FU-395…FU-403 in `implementation-status.md`).
 
 | FU | Item | Owner |
 |----|------|-------|

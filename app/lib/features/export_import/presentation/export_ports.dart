@@ -38,14 +38,7 @@ final exportServiceProvider = FutureProvider<ExportService>((ref) async {
   final repo = await ref.watch(transactionRepositoryProvider.future);
   final db = await ref.watch(appDatabaseProvider.future);
   final pairs = TransferPairsDao(db);
-  return ExportService(
-    repo,
-    pairKinds: (ids) async => {
-      for (final id in ids) ...{
-        if (await pairs.byId(id) case final p?) id: p.kind,
-      },
-    },
-  );
+  return ExportService(repo, pairKinds: pairs.kindsByIds);
 }, name: 'exportServiceProvider');
 
 /// Device tests only (T-238): lets an integration test that runs the real app

@@ -359,7 +359,12 @@ final class BalanceJumpFacts {
     required this.previousMinor,
     required this.countedEffectMinor,
     required this.foreignCredit,
+    this.egpPerUnitE9,
   });
+
+  /// FU-366: the last known rate, 1 unit of the currency = value / 1e9 EGP,
+  /// or null when none is stored. Sizes the threshold only.
+  final int? egpPerUnitE9;
 
   /// The last reported balance (older than the new one).
   final int previousMinor;

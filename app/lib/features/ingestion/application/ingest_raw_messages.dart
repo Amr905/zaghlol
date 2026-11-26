@@ -2026,6 +2026,8 @@ final class IngestRawMessages {
     int asOfMs,
     Money balance,
   ) async {
+    // FU-366: a jump older than 14 days (inbox catch-up) is not asked about.
+    if (asOfMs < _nowMs() - balanceJumpMaxAge.inMilliseconds) return;
     final facts = await _store.balanceJumpFacts(
       accountId: accountId,
       currency: balance.currency.code,
@@ -2037,6 +2039,7 @@ final class IngestRawMessages {
       previous: Money(balance.currency, facts.previousMinor),
       countedEffectMinor: facts.countedEffectMinor,
       reported: balance,
+      egpPerUnitE9: facts.egpPerUnitE9,
     );
     if (rise == null) return;
     await _review(

@@ -138,6 +138,62 @@ class OcrMergerTest {
     }
 
     @Test
+    fun arabicLineOverStrongAndWeakLinesDoesNotRepeatTheStrongLinesWords() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Total الكلي", 0, 0, 200, 30), line("Jl", 0, 30, 200, 60, 0.3)),
+            arabic = listOf(line("الكلي المجموع", 0, 0, 200, 60, 0.85)),
+        )
+        val all = out.joinToString(" ") { it.text }
+        assertEquals(1, Regex("الكلي").findAll(all).count())
+        assertTrue(all.contains("المجموع"))
+        assertTrue(all.contains("Total"))
+    }
+
+    @Test
+    fun deDuplicationDropsOnlyWholeTokensSoASubstringAmountSurvives() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Ref 1436", 0, 0, 200, 30), line("Jl 436", 0, 30, 200, 60, 0.3)),
+            arabic = listOf(line("الإجمالي ٤٣٦", 0, 0, 200, 60, 0.85)),
+        )
+        assertEquals(listOf("Ref 1436", "الإجمالي 436"), out.map { it.text })
+    }
+
+    @Test
+    fun arabicNoiseDigitsDoNotDisagreeWithAStrongMlKitAmountOnTheSameBox() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Net Sales", 0, 300, 300, 340), line("382.46", 310, 300, 500, 340)),
+            arabic = listOf(line("321146 535 أول١ا", 0, 302, 500, 338, 0.62)),
+        )
+        assertEquals(listOf("Net Sales", "382.46"), out.map { it.text })
+    }
+
+    @Test
+    fun noiseDriftedVerticallyOverAStrongLineIsDroppedButARealRowBelowIsKept() {
+        val out = OcrMerger.merge(
+            latin = listOf(line("Net Sales 382.46", 0, 0, 500, 40)),
+            arabic = listOf(
+                line("أول١ا ممم", 0, 25, 500, 65, 0.5), // 0.375 of the height, 0.375 of the area: below 0.5
+                line("الإجمالي", 0, 80, 500, 120, 0.5),
+            ),
+        )
+        assertEquals(listOf("Net Sales 382.46", "الإجمالي"), out.map { it.text })
+    }
+
+    @Test
+    fun confidenceBarsAreInclusiveAtExactly045AndExactly060() {
+        val kept = OcrMerger.merge(
+            latin = listOf(line("Ref 5555", 0, 100, 200, 130)),
+            arabic = listOf(line("الإجمالي", 0, 0, 200, 30, 0.45)),
+        )
+        assertEquals(listOf("الإجمالي", "Ref 5555"), kept.map { it.text })
+        val gate = OcrMerger.merge(
+            latin = listOf(line("Total Amount", 0, 0, 200, 30)),
+            arabic = listOf(line("الإجمالي كامل", 0, 0, 200, 30, 0.60)),
+        )
+        assertEquals(listOf("Total Amount الإجمالي كامل"), gate.map { it.text })
+    }
+
+    @Test
     fun nonOverlappingLinesFromBothEnginesAreKept() {
         val out = OcrMerger.merge(
             latin = listOf(line("Ref 5555", 0, 100, 200, 130)),

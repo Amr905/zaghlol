@@ -73,7 +73,8 @@ Future<void> main() async {
   // T-047: the UI engine's capture module (drain, Guard config, health) runs
   // in every build; it starts once the database opens.
   // T-276: warm the mascot (native runtime, file decode, asset manifest) so the
-  // first mascot and the first tap never hitch.
+  // first mascot and the first tap never hitch. FU-374: skipped when the
+  // platform disables animations (reduce motion never mounts Rive).
   unawaited(preloadRiveMascot());
   // The ProviderScope is built inside the AppRestartScope builder below.
   // ignore: riverpod_lint/missing_provider_scope
