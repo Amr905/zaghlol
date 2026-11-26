@@ -201,7 +201,11 @@ class ChartRepository {
       final ids = accountIds.toList()..sort();
       final rows = await _select(
         'SELECT DISTINCT t.currency AS c FROM transactions t '
-        'WHERE t.deleted_at IS NULL AND t.is_internal = 0 '
+        'WHERE t.deleted_at IS NULL '
+        // T-282: a currency only reached by an exchange still gets a chip.
+        'AND (t.is_internal = 0 OR EXISTS (SELECT 1 FROM transfer_pairs tp '
+        'WHERE tp.id = t.transfer_pair_id AND tp.in_txn_id IS NOT NULL '
+        "AND tp.kind IN ('fx_conversion', 'cross_currency'))) "
         "AND t.status IN ('posted', 'pending') "
         'AND t.occurred_at >= ? AND t.occurred_at < ? '
         'AND $_localDay BETWEEN ? AND ?'
@@ -318,6 +322,81 @@ class ChartRepository {
     return out;
   }
 
+  /// T-282 (D-86): per local day, the money exchanged in and out in the
+  /// filter's currency: the internal legs of complete exchange pairs
+  /// (`fx_conversion` / `cross_currency`), the same rule as the Home cycle
+  /// totals. Never part of income or spend.
+  Future<Map<int, ({int inMinor, int outMinor, int count})>> _exchangeDaily(
+    ChartPeriod p,
+    ChartFilter f,
+  ) async {
+    final b = _base(p, f);
+    final rows = await _select(
+      'SELECT $_localDay AS d, '
+      "sum(CASE WHEN t.direction = 'transfer_in' THEN t.amount_minor ELSE 0 END) AS i, "
+      "sum(CASE WHEN t.direction = 'transfer_out' THEN t.amount_minor ELSE 0 END) AS o, "
+      'count(*) AS c FROM transactions t '
+      "WHERE ${b.where} AND t.is_internal = 1 AND t.status IN ('posted', 'pending') "
+      "AND t.direction IN ('transfer_in', 'transfer_out') "
+      'AND EXISTS (SELECT 1 FROM transfer_pairs tp '
+      'WHERE tp.id = t.transfer_pair_id AND tp.in_txn_id IS NOT NULL '
+      "AND tp.kind IN ('fx_conversion', 'cross_currency')) "
+      'GROUP BY d',
+      b.args,
+      reads: {_db.transactions, _db.transferPairs},
+    );
+    return {
+      for (final r in rows)
+        r.read<int>('d'): (
+          inMinor: r.read<int>('i'),
+          outMinor: r.read<int>('o'),
+          count: r.read<int>('c'),
+        ),
+    };
+  }
+
+  /// T-282 (D-86): the complete exchange pairs whose out leg falls in [p]:
+  /// (given, received) per pair, live legs only. The rate is implied by the
+  /// two legs (what the bank applied). [accountIds] filters on the out leg.
+  Future<List<({Money given, Money received})>> exchangePairs(
+    ChartPeriod p, {
+    Set<String> accountIds = const {},
+  }) async {
+    final ids = accountIds.toList()..sort();
+    final rows = await _select(
+      'SELECT o.currency AS oc, o.amount_minor AS om, '
+      'i.currency AS ic, i.amount_minor AS im '
+      'FROM transfer_pairs tp '
+      'JOIN transactions o ON o.id = tp.out_txn_id '
+      'JOIN transactions i ON i.id = tp.in_txn_id '
+      "WHERE tp.kind IN ('fx_conversion', 'cross_currency') "
+      'AND o.deleted_at IS NULL AND i.deleted_at IS NULL '
+      "AND o.status IN ('posted', 'pending') "
+      "AND i.status IN ('posted', 'pending') "
+      'AND o.currency <> i.currency '
+      'AND o.occurred_at >= ? AND o.occurred_at < ? '
+      'AND (o.occurred_at + o.occurred_tz_offset_min * 60000) / 86400000 '
+      'BETWEEN ? AND ?'
+      '${ids.isEmpty ? '' : ' AND o.account_id IN (${List.filled(ids.length, '?').join(',')})'} '
+      'ORDER BY o.occurred_at',
+      [
+        Variable.withInt(p.from.epochDay * _dayMs - _maxOffsetMs),
+        Variable.withInt((p.to.epochDay + 1) * _dayMs + _maxOffsetMs),
+        Variable.withInt(p.from.epochDay),
+        Variable.withInt(p.to.epochDay),
+        for (final id in ids) Variable.withString(id),
+      ],
+      reads: {_db.transactions, _db.transferPairs},
+    );
+    return [
+      for (final r in rows)
+        (
+          given: Money.fromStorage(r.read<int>('om'), r.read<String>('oc')),
+          received: Money.fromStorage(r.read<int>('im'), r.read<String>('ic')),
+        ),
+    ];
+  }
+
   // ---------------------------------------------------------- 1 cash flow
 
   /// Income and spend per bucket (cycles or months). The buckets may be
@@ -335,24 +414,36 @@ class ChartRepository {
       _key('cashFlow', span, f, buckets.map((b) => b.key).join(';')),
       () async {
         final daily = await _daily(span, f);
+        final xdaily = await _exchangeDaily(span, f);
         final first = await firstDataDay();
         var rows = 0;
         final points = <CashFlowPoint>[];
         for (final b in buckets) {
           var income = 0;
           var spend = 0;
+          var xIn = 0;
+          var xOut = 0;
           for (var d = b.from.epochDay; d <= b.to.epochDay; d++) {
             final v = daily[d];
-            if (v == null) continue;
-            income += v.income;
-            spend += v.spend;
-            rows += v.count;
+            if (v != null) {
+              income += v.income;
+              spend += v.spend;
+              rows += v.count;
+            }
+            final x = xdaily[d];
+            if (x != null) {
+              xIn += x.inMinor;
+              xOut += x.outMinor;
+              rows += x.count;
+            }
           }
           points.add(
             CashFlowPoint(
               period: b,
               income: _m(income, f),
               spend: _m(spend, f),
+              exchangedIn: _m(xIn, f),
+              exchangedOut: _m(xOut, f),
               isPartial: first != null && first > b.from,
             ),
           );

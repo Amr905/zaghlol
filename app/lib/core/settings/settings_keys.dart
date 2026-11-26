@@ -109,6 +109,20 @@ abstract final class Settings {
     byDefault: Currency.of('EGP'),
   );
 
+  /// T-280 (Q2): the ≈ view was turned on by itself once, the first time a
+  /// second currency had activity. Never reset, so it never turns on again
+  /// after the user turns it off.
+  static final approxAutoOnDone = SettingKey.boolean(
+    'approx_view.auto_on_done',
+    byDefault: false,
+  );
+
+  /// T-280: Captain Zaghlol's "first foreign currency" notice is waiting.
+  static final approxFirstForeignNotice = SettingKey.boolean(
+    'approx_view.first_foreign_notice',
+    byDefault: false,
+  );
+
   // FR-NTF-01: every type can be switched off; all on by default.
   static final notifBudgetThreshold = SettingKey.boolean(
     'notif.budget_threshold',
@@ -153,6 +167,16 @@ abstract final class Settings {
     'notif.weekly_summary_last_run',
     min: 0,
     max: 999999999999999,
+  );
+
+  /// T-277: where Captain Zaghlol's tip rotation stands (counters only, no
+  /// personal data), as `usage.smart.habit.shown`. Unreadable text reads as
+  /// the start.
+  static final mascotTipState = SettingKey.custom<String>(
+    'mascot.tip_state',
+    byDefault: '',
+    decode: (s) => RegExp(r'^\d{1,6}(\.\d{1,6}){3}$').hasMatch(s) ? s : null,
+    encode: (v) => v,
   );
 
   /// T-215: epoch day of the last payday Captain Zaghlol celebrated; null:
@@ -274,6 +298,12 @@ abstract final class Settings {
   /// dismissed. Each one is offered once and never again.
   static final setupSuggestionsHandled = SettingKey.slugSet(
     'setup_suggestions_handled',
+  );
+
+  /// T-279 (D-86): foreign-currency budget offers already shown or dismissed,
+  /// one slug per currency per month (`usd_<cycle start epoch day>`).
+  static final budgetOffersHandled = SettingKey.slugSet(
+    'budget_offers_handled',
   );
 
   /// When the paywall was last shown: epoch milliseconds UTC; null: never.

@@ -410,6 +410,26 @@ Future<ReviewCardModel?> _toCard(
         occurredAt: txn.occurredAt,
         merchant: txn.merchantRaw,
       );
+    case ReviewKind.lowConfidence
+        when payload['reason'] == ReviewReason.exchangeBalanceJump:
+      // T-272: shown only while the payload is readable.
+      final accountId = payload['accountId'];
+      final at = payload['asOfMs'];
+      final raw = payload['amount'];
+      if (accountId is! String || at is! int || raw is! Map) return null;
+      final Money amount;
+      try {
+        amount = Money.fromJson(raw.cast<String, Object?>());
+      } on Object {
+        return null;
+      }
+      if (!amount.isPositive) return null;
+      return ExchangeJumpCardModel(
+        itemId: item.id,
+        accountId: accountId,
+        amount: amount,
+        asOf: DateTime.fromMillisecondsSinceEpoch(at, isUtc: true),
+      );
     case ReviewKind.lowConfidence:
     case ReviewKind.newSender:
     case ReviewKind.unrecognized:

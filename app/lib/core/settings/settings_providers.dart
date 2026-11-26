@@ -36,6 +36,10 @@ final incomeTargetProvider = settingProvider<Money?>(Settings.incomeTarget);
 final primaryCurrencyProvider = settingProvider(Settings.primaryCurrency);
 final approxViewEnabledProvider = settingProvider(Settings.approxViewEnabled);
 final approxViewTargetProvider = settingProvider(Settings.approxViewTarget);
+final approxAutoOnDoneProvider = settingProvider(Settings.approxAutoOnDone);
+final approxFirstForeignNoticeProvider = settingProvider(
+  Settings.approxFirstForeignNotice,
+);
 final quietHoursEnabledProvider = settingProvider(Settings.quietHoursEnabled);
 final appLockEnabledProvider = settingProvider(Settings.appLockEnabled);
 final appLockTimeoutSProvider = settingProvider(Settings.appLockTimeoutS);

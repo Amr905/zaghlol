@@ -4,7 +4,7 @@
 
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol_parsing/zaghlol_parsing.dart'
-    show GenericEvent, TemplateDirection, TemplateEvent, foldKey;
+    show GenericEvent, ParsedFields, TemplateDirection, TemplateEvent, foldKey;
 
 import '../../transactions/domain/transaction.dart';
 import 'ingest_policy.dart';
@@ -47,15 +47,36 @@ final class DeferredEvent extends EventDisposition {
   const DeferredEvent();
 }
 
+/// T-272 (FR-PAR-12, D-86): a currency conversion inside one institution.
+/// `amount` is the money sent (the out leg), `originalAmount` the money
+/// received (the in leg); both legs go to one account and are paired as
+/// `fx_conversion` (both internal: never spending, never income).
+final class ExchangeEvent extends EventDisposition {
+  const ExchangeEvent();
+}
+
 /// A transfer-like event whose template declares no direction: the
 /// template is wrong, so the raw message goes to review (`unrecognized`).
 final class UndirectedEvent extends EventDisposition {
   const UndirectedEvent();
 }
 
-/// Events stored as `reparse_pending` until their handler lands
-/// (`fx_conversion`: T-089).
-const Set<TemplateEvent> kEventsWithoutHandler = {TemplateEvent.fxConversion};
+/// T-272: a conversion message is stored only with both amounts positive
+/// and in different currencies (sent = `amount`, received =
+/// `originalAmount`); anything else goes to review.
+bool isValidExchange(ParsedFields f) {
+  final sent = f.amount;
+  final received = f.originalAmount;
+  return sent != null &&
+      received != null &&
+      sent.isPositive &&
+      received.isPositive &&
+      sent.currency != received.currency;
+}
+
+/// Events stored as `reparse_pending` until their handler lands. Empty
+/// since T-272 gave `fx_conversion` its handler; kept for future events.
+const Set<TemplateEvent> kEventsWithoutHandler = {};
 
 EventDisposition dispositionOf(
   TemplateEvent event,
@@ -101,7 +122,7 @@ EventDisposition dispositionOf(
     case TemplateEvent.balanceOnly:
       return const BalanceOnlyEvent();
     case TemplateEvent.fxConversion:
-      return const DeferredEvent();
+      return const ExchangeEvent();
     case TemplateEvent.ccDue:
     case TemplateEvent.ccStatement:
       // T-241: the pipeline returns a `ParseNotice` for these, never a

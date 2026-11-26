@@ -27,6 +27,7 @@ import '../instapay_title.dart';
 import '../edit/transaction_edit_screen.dart';
 import '../list/txn_list_providers.dart';
 import '../list/txn_row.dart';
+import 'exchange_detail_body.dart';
 import 'txn_detail_providers.dart';
 import '../../../../core/ui/z_haptics.dart';
 import '../../../../core/settings/settings_providers.dart';
@@ -129,26 +130,30 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
         actions: [
           const ZHideAmountsButton(),
           if (d != null) ...[
-            IconButton(
-              tooltip: l.commonActionEdit,
-              icon: const Icon(Icons.edit_outlined),
-              style: IconButton.styleFrom(
-                fixedSize: const Size(40, 40),
-                minimumSize: const Size(40, 40),
-                padding: EdgeInsetsDirectional.zero,
-                tapTargetSize: MaterialTapTargetSize.padded,
-                backgroundColor: c.surface,
-                foregroundColor: c.text,
-                elevation: 3,
-                shadowColor: c.shadow,
+            // T-281: an exchange is edited as one unit by deleting and
+            // recording it again; editing one leg could break the pair.
+            if (d.exchange == null)
+              IconButton(
+                tooltip: l.commonActionEdit,
+                icon: const Icon(Icons.edit_outlined),
+                style: IconButton.styleFrom(
+                  fixedSize: const Size(40, 40),
+                  minimumSize: const Size(40, 40),
+                  padding: EdgeInsetsDirectional.zero,
+                  tapTargetSize: MaterialTapTargetSize.padded,
+                  backgroundColor: c.surface,
+                  foregroundColor: c.text,
+                  elevation: 3,
+                  shadowColor: c.shadow,
+                ),
+                onPressed: () =>
+                    showTransactionEditor(context, existing: d.record),
               ),
-              onPressed: () =>
-                  showTransactionEditor(context, existing: d.record),
-            ),
-            const SizedBox(width: ZSpacing.sm),
+            if (d.exchange == null) const SizedBox(width: ZSpacing.sm),
             PopupMenuButton<_Menu>(
               tooltip: l.commonActionMoreA11y,
-              onSelected: (_) => _delete(d.record),
+              onSelected: (_) =>
+                  _delete(d.record, exchange: d.exchange != null),
               itemBuilder: (_) => [
                 PopupMenuItem<_Menu>(
                   value: _Menu.delete,
@@ -186,6 +191,17 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
           }
           final lk = lookups.value;
           if (lk == null) return const _Skeleton();
+          final x = data.exchange;
+          if (x != null) {
+            return ExchangeDetailBody(
+              exchange: x,
+              lookups: lk,
+              fmt: fmt,
+              referenceNo: data.referenceNo,
+              onUnlink: () => _unlink(data.record),
+              footer: _HowRead(detail: data, fmt: fmt),
+            );
+          }
           return _Body(
             detail: data,
             lookups: lk,
@@ -334,7 +350,9 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
     });
   }
 
-  Future<void> _delete(TransactionRecord t) async {
+  /// [exchange]: [t] is a leg of an exchange; both legs and the pair are
+  /// deleted together and Undo restores all of it (T-281).
+  Future<void> _delete(TransactionRecord t, {bool exchange = false}) async {
     final l = AppLocalizations.of(context);
     final auto = t.source != TxnSource.manual;
     final platform = defaultTargetPlatform == TargetPlatform.iOS
@@ -343,11 +361,18 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l.transactionsDetailDeleteTitle),
+        title: Text(
+          exchange
+              ? l.transactionsExchangeDeleteTitle
+              : l.transactionsDetailDeleteTitle,
+        ),
         content: Text(
-          auto
-              ? l.transactionsDetailDeleteBodyAuto(platform)
-              : l.transactionsDetailDeleteBodyManual,
+          [
+            if (exchange) l.transactionsExchangeDeleteBody,
+            auto
+                ? l.transactionsDetailDeleteBodyAuto(platform)
+                : l.transactionsDetailDeleteBodyManual,
+          ].join('\n'),
         ),
         actions: [
           TextButton(
@@ -377,7 +402,11 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
         ..clearSnackBars()
         ..showSnackBar(
           SnackBar(
-            content: Text(l.transactionsDetailDeleted),
+            content: Text(
+              exchange
+                  ? l.transactionsExchangeDeleted
+                  : l.transactionsDetailDeleted,
+            ),
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: l.commonActionUndo,

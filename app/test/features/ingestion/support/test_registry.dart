@@ -90,10 +90,13 @@ final String _zbank =
     ${_t('fee.sms', 'fee', 'expense', '^zbank: fee egp $_amt$_card\$')},
     ${_t('balance.sms', 'balance_only', 'neutral', r'^zbank: balance egp (?<balance>-?[\\d,.]+)'
         '$_acct\$')},
-    ${_t('convert.sms', 'fx_conversion', 'neutral', r'^zbank: converted (?<ocur>usd) (?<oamount>[\\d,.]+) to egp '
-        '$_amt$_acct\$')},
+    ${_t('convert.sms', 'fx_conversion', 'neutral', r'^zbank: converted (?<cur>usd) (?<amount>[\\d,.]+) to (?<ocur>egp) '
+        r'(?<oamount>[\\d,.]+)'
+        '$_acct\$')},
     ${_t('move.sms', 'transfer_out', 'neutral', '^zbank: move egp $_amt$_acct\$')},
-    ${_t('purchase.notif', 'card_purchase', 'expense', '^purchase egp $_amt$_merchant\$', channel: '"notification"')}
+    ${_t('purchase.notif', 'card_purchase', 'expense', '^purchase egp $_amt$_merchant\$', channel: '"notification"')},
+    ${_t('convert.notif', 'fx_conversion', 'neutral', r'^converted (?<cur>usd) (?<amount>[\\d,.]+) to (?<ocur>egp) (?<oamount>[\\d,.]+)'
+        '\$', channel: '"notification"')}
   ]
 }
 ''';

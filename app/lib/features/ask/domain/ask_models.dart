@@ -179,13 +179,77 @@ final class AskSavingsFigure {
     required this.income,
     required this.spend,
     required this.isPartial,
+    this.exchangedIn,
+    this.exchangedOut,
   });
   final Money income;
   final Money spend;
   final bool isPartial;
 
-  /// Negative when the user spent more than they earned.
-  Money get net => income - spend;
+  /// T-282: exchanged money (own series, never income or spend). Null reads
+  /// as zero.
+  final Money? exchangedIn;
+  final Money? exchangedOut;
+
+  /// Same rule as Home "left": income + exchanged in - spend - exchanged
+  /// out. Negative when the user spent more than they had.
+  Money get net =>
+      income +
+      (exchangedIn ?? Money.zero(income.currency)) -
+      spend -
+      (exchangedOut ?? Money.zero(income.currency));
+}
+
+/// One currency pair exchanged in a period: [given] (out leg total) for
+/// [received] (in leg total). The bank rate is what the bank actually
+/// applied, read from the two legs, never a market rate.
+final class AskExchangeFigure {
+  const AskExchangeFigure({required this.given, required this.received});
+  final Money given;
+  final Money received;
+
+  /// The pair's rate times 1000 and the currency it is quoted in: the
+  /// currency with the bigger major amount, per one unit of the other
+  /// (so "1 USD = 48.5 EGP"). Null when either side is zero.
+  ({int milli, Currency perUnitOf, Currency quotedIn})? get rate {
+    if (given.minor <= 0 || received.minor <= 0) return null;
+    final g = given.minor * _pow10(received.currency.exponent);
+    final r = received.minor * _pow10(given.currency.exponent);
+    // g/r = given major per received major.
+    if (g >= r) {
+      return (
+        milli: (g * 1000 + r ~/ 2) ~/ r,
+        perUnitOf: received.currency,
+        quotedIn: given.currency,
+      );
+    }
+    return (
+      milli: (r * 1000 + g ~/ 2) ~/ g,
+      perUnitOf: given.currency,
+      quotedIn: received.currency,
+    );
+  }
+
+  static int _pow10(int e) {
+    var v = 1;
+    for (var i = 0; i < e; i++) {
+      v *= 10;
+    }
+    return v;
+  }
+}
+
+/// "How much did I exchange": one figure per currency pair (never summed
+/// across pairs or currencies).
+final class AskExchangeAnswer extends AskAnswer {
+  const AskExchangeAnswer({
+    required this.period,
+    required this.periodDefaulted,
+    required this.figures,
+  });
+  final ChartPeriod period;
+  final bool periodDefaulted;
+  final List<AskExchangeFigure> figures;
 }
 
 final class AskSavingsAnswer extends AskAnswer {
@@ -303,4 +367,5 @@ List<AskChip> followUpChips(AskIntent intent) => switch (intent) {
   AskIntent.biggestExpense => const [AskChip.topMerchants, AskChip.roast],
   AskIntent.savings => const [AskChip.spendThisMonth, AskChip.compareMonths],
   AskIntent.roast => const [AskChip.savings, AskChip.topMerchants],
+  AskIntent.exchange => const [AskChip.spendThisMonth, AskChip.savings],
 };

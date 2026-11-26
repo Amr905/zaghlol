@@ -12,7 +12,9 @@ import '../../theme/z_tokens.dart';
 import '../z_haptics.dart';
 import '../z_sheet.dart';
 
-enum AddAction { say, type, scan, asset }
+/// T-272: [exchange] is "I exchanged money" (D-86), a full-width row under
+/// the grid.
+enum AddAction { say, type, scan, asset, exchange }
 
 /// Closes the Quick add sheet that owns [sheetContext], then calls [open]
 /// with the root navigator's context once the sheet is gone.
@@ -174,6 +176,15 @@ class AddSheet extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: ZSpacing.md),
+          _AddRow(
+            key: const ValueKey('add-exchange'),
+            icon: Icons.currency_exchange_rounded,
+            label: l10n.homeQuickAddExchange,
+            hint: l10n.homeQuickAddExchangeHint,
+            semanticLabel: l10n.homeQuickAddExchangeA11y,
+            onTap: () => _select(context, AddAction.exchange),
+          ),
           if (voiceLeft != null) ...[
             const SizedBox(height: ZSpacing.lg),
             Row(
@@ -298,6 +309,88 @@ class _AddOption extends StatelessWidget {
                   ),
                 ),
                 Text(hint, style: ZType.bodySmall.copyWith(color: c.textMuted)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// T-272: a slim full-width entry under the grid (the exchange entry).
+class _AddRow extends StatelessWidget {
+  const _AddRow({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.hint,
+    required this.semanticLabel,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String hint;
+  final String semanticLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ZColors.of(context);
+    final radius = BorderRadius.circular(ZRadius.card);
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      excludeSemantics: true,
+      child: Material(
+        color: c.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: c.outline),
+        ),
+        child: InkWell(
+          borderRadius: radius,
+          onTap: () {
+            ZHaptics.light();
+            onTap();
+          },
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: ZSpacing.lg,
+              vertical: ZSpacing.md,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: c.primaryContainer,
+                  ),
+                  child: Icon(icon, color: c.primary),
+                ),
+                const SizedBox(width: ZSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        label,
+                        style: ZType.title.copyWith(
+                          color: c.text,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        hint,
+                        style: ZType.bodySmall.copyWith(color: c.textMuted),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

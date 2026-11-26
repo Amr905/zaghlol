@@ -24,14 +24,6 @@ final Registry oldReg = loadTestRegistry(
   transformBank: (j) => j.replaceAll('^zbank: purchase egp', '^zbank: buy egp'),
 );
 
-// Old build: the purchase template was filed under an event with no handler.
-final Registry pendingReg = loadTestRegistry(
-  transformBank: (j) => j.replaceFirstMapped(
-    RegExp(r'("zbank\.purchase\.sms".*?"event": ")card_purchase', dotAll: true),
-    (m) => '${m[1]}fx_conversion',
-  ),
-);
-
 // New build: the registry version is the highest template version, so a
 // bump is a template that went to version 2.
 final Registry newReg = loadTestRegistry(
@@ -150,27 +142,45 @@ void main() {
       },
     );
 
-    test('reparse_pending row with a handler now becomes a transaction; one '
-        'without stays pending and is retried every run', () async {
-      await ingestOld('a', purchase, reg: pendingReg);
-      await w.useCase(registry: pendingReg)([
-        sms('b', 'ZBANK: Converted USD 10.00 to EGP 500.00 acct *5555'),
-      ]);
-      expect(
-        await w.count('raw_messages', "parse_status = 'reparse_pending'"),
-        2,
-      );
-      final s = await job().run();
-      expect(s.converted, 1);
-      expect(s.unchanged, 1);
-      expect(await w.count('transactions'), 1);
-      expect(
-        await w.count('raw_messages', "parse_status = 'reparse_pending'"),
-        1,
-      );
-      expect((await job().run()).examined, 1);
-      expect(await w.count('review_items'), 0);
-    });
+    test(
+      'reparse_pending rows become transactions once their handler '
+      'exists (T-272: a stored conversion becomes an exchange pair)',
+      () async {
+        // An older build stored this conversion as `reparse_pending`.
+        const fx = 'ZBANK: Converted USD 10.00 to EGP 500.00 acct *5555';
+        await DriftIngestStore(w.db).insertRaw(
+          RawInsert(
+            id: 'rawfx',
+            channel: 'sms',
+            sender: zbankSms,
+            institutionCode: zbankCode,
+            body: fx,
+            bodyHash: bodyHashV1(
+              senderKey: senderKeyOf('sms', zbankSms),
+              body: fx,
+            ),
+            receivedAtMs: t0,
+            parseStatus: RawStatus.reparsePending,
+            registryVersion: 1,
+            createdAtMs: t0,
+          ),
+        );
+        expect(
+          await w.count('raw_messages', "parse_status = 'reparse_pending'"),
+          1,
+        );
+        final s = await job().run();
+        expect(s.converted, 1);
+        expect(await w.count('transactions'), 2);
+        expect(await w.count('transfer_pairs', "kind = 'fx_conversion'"), 1);
+        expect(
+          await w.count('raw_messages', "parse_status = 'reparse_pending'"),
+          0,
+        );
+        expect((await job().run()).examined, 0);
+        expect(await w.count('review_items'), 0);
+      },
+    );
 
     test(
       'dedupe 2 still applies: merges into the notification payment',

@@ -39,6 +39,14 @@ class HomeFormat {
     dropZeroFraction: true,
   );
 
+  /// Like [money] but keeps the fraction (a currency card shows `400.00`).
+  String moneyExact(Money m) => MoneyFormat.format(
+    m,
+    languageCode: languageCode,
+    digits: digits,
+    hidden: hidden,
+  );
+
   /// Number only, bidi-isolated; pair with [currency].
   String number(Money m) => MoneyFormat.format(
     m,

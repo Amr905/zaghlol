@@ -17,6 +17,7 @@ import 'package:zaghlol/features/home/application/home_read_model.dart';
 import 'package:zaghlol/features/ingestion/data/device_local_zone.dart';
 import 'package:zaghlol/features/ingestion/data/review_repository.dart'
     show reviewOpenCountProvider;
+import 'package:zaghlol/features/transactions/application/transfer_pairing.dart';
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -98,6 +99,127 @@ void main() {
       expect(m.hero!.income.minor, 5000);
       expect(m.hero!.net.minor, 4000);
       expect(m.reviewCount, 3);
+    });
+
+    test('T-272 PO story: USD salary, USD 600 exchanged to EGP 29,700: EGP '
+        'money in 29,700, USD left 400, spending/income unchanged', () async {
+      await db
+          .into(db.accounts)
+          .insert(account('usd', last4: '9945', currency: 'USD'));
+      await add(
+        'salary',
+        amount: 100000,
+        direction: 'income',
+        currency: 'USD',
+        account: 'usd',
+      );
+      await add('food', amount: 50000);
+      final uc = TransferPairingUseCase(
+        db,
+        loadSchedule: () async => PaydaySchedule.single(1),
+        clock: () => now,
+      );
+      await uc.recordExchange(
+        fromAccountId: 'usd',
+        sent: Money(Currency.of('USD'), 60000),
+        toAccountId: 'acc1',
+        received: Money(egp, 2970000),
+        occurredAt: DateTime.utc(2026, 11, 5, 10),
+        tzOffsetMin: 120,
+      );
+      container.invalidate(homeModelProvider);
+      final m = await model();
+      final e = m.currencies.firstWhere((f) => f.currency == egp);
+      final u = m.currencies.firstWhere((f) => f.currency.code == 'USD');
+      expect(e.income.minor, 0);
+      expect(e.exchangedIn.minor, 2970000);
+      expect(e.moneyIn.minor, 2970000);
+      expect(e.spend.minor, 50000);
+      expect(e.net.minor, 2920000);
+      expect(u.income.minor, 100000);
+      expect(u.spend.minor, 0);
+      expect(u.exchangedOut.minor, 60000);
+      expect(u.net.minor, 40000);
+    });
+
+    test('T-278 PO story: the USD card says left 400; no EGP card', () async {
+      await db
+          .into(db.accounts)
+          .insert(account('usd', last4: '9945', currency: 'USD'));
+      await add(
+        'salary',
+        amount: 100000,
+        direction: 'income',
+        currency: 'USD',
+        account: 'usd',
+      );
+      final uc = TransferPairingUseCase(
+        db,
+        loadSchedule: () async => PaydaySchedule.single(1),
+        clock: () => now,
+      );
+      await uc.recordExchange(
+        fromAccountId: 'usd',
+        sent: Money(Currency.of('USD'), 60000),
+        toAccountId: 'acc1',
+        received: Money(egp, 2970000),
+        occurredAt: DateTime.utc(2026, 11, 5, 10),
+        tzOffsetMin: 120,
+      );
+      container.invalidate(homeModelProvider);
+      final m = await model();
+      expect(m.hero!.currency, egp);
+      expect(m.hero!.moneyIn.minor, 2970000);
+      expect([for (final c in m.currencyCards) c.currency.code], ['USD']);
+      final usd = m.currencyCards.single;
+      expect(usd.left.minor, 40000);
+      expect(usd.moneyIn.minor, 100000);
+      expect(usd.out.minor, 60000);
+    });
+
+    test('T-278 card rule: activity-only and balance-only currencies get a '
+        'card, a currency with neither does not; ordered by last activity; '
+        'EGP never', () async {
+      await db
+          .into(db.accounts)
+          .insert(account('usd', last4: '9945', currency: 'USD'));
+      await db
+          .into(db.accounts)
+          .insert(account('eur', last4: '1111', currency: 'EUR'));
+      await db
+          .into(db.accounts)
+          .insert(account('chf', last4: '2222', currency: 'CHF'));
+      await add('e', amount: 100);
+      // GBP: activity only (no balance row).
+      await add('g', amount: 4000, currency: 'GBP', when: at(2026, 11, 8));
+      // USD: activity, older than GBP.
+      await add(
+        'u',
+        amount: 500,
+        currency: 'USD',
+        account: 'usd',
+        when: at(2026, 11, 2),
+      );
+      // EUR: balance only (no activity this month).
+      await db.customStatement(
+        'INSERT INTO account_balances (account_id, currency, balance_minor, '
+        'as_of) VALUES (?, ?, ?, ?)',
+        ['eur', 'EUR', 25000, 0],
+      );
+      // CHF: a zero balance and nothing else: no card.
+      await db.customStatement(
+        'INSERT INTO account_balances (account_id, currency, balance_minor, '
+        'as_of) VALUES (?, ?, ?, ?)',
+        ['chf', 'CHF', 0, 0],
+      );
+      container.invalidate(homeModelProvider);
+      final m = await model();
+      expect(
+        [for (final c in m.currencyCards) c.currency.code],
+        ['GBP', 'USD', 'EUR'],
+      );
+      expect(m.currencyCards.last.lastActivity, isNull);
+      expect(m.currencyCards.last.left.minor, 0);
     });
 
     test('no activity: no hero, no currency UI', () async {

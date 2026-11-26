@@ -52,7 +52,35 @@ abstract interface class IngestStorePort {
 
   Future<void> insertTxn(TxnInsert row);
 
+  /// T-272: pairs the two legs of one conversion message as an
+  /// `fx_conversion` transfer pair and marks both internal. Both legs must
+  /// be live and unpaired (they were inserted in this savepoint); otherwise
+  /// it throws and the message's savepoint rolls back.
+  Future<void> insertExchangePair({
+    required String id,
+    required String outTxnId,
+    required String inTxnId,
+    required int createdAtMs,
+  });
+
+  /// T-281 (FU-364): the in leg of the complete exchange pair
+  /// (`fx_conversion` / `cross_currency`) whose out leg is [outTxnId], when
+  /// both legs are live; null otherwise.
+  Future<String?> exchangeInLegOf(String outTxnId);
+
   /// Applies [patch] to [txnId] and sets `updated_at`. Returns rows changed.
+  /// T-272: the facts for the unexplained-rise check of [accountId] in
+  /// [currency] before a balance dated [asOfMs] is recorded; null when the
+  /// account is not a live asset account or has no older reported balance
+  /// in that currency (nothing to compare with). [lookbackMs]: how far back
+  /// another currency's income counts.
+  Future<BalanceJumpFacts?> balanceJumpFacts({
+    required String accountId,
+    required String currency,
+    required int asOfMs,
+    required int lookbackMs,
+  });
+
   Future<int> updateTxn(String txnId, TxnPatch patch, {required int atMs});
 
   Future<void> insertReview({

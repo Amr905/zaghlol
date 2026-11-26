@@ -58,7 +58,12 @@ ChartChange percentChange(int current, int previous) {
 
 /// Income and spend of one period in one currency.
 final class PeriodTotals {
-  const PeriodTotals({required this.income, required this.spend});
+  const PeriodTotals({
+    required this.income,
+    required this.spend,
+    this.exchangedIn,
+    this.exchangedOut,
+  });
 
   /// Reads the whole period out of a cash flow result (one point or more);
   /// a period without rows is zero.
@@ -68,7 +73,12 @@ final class PeriodTotals {
   ) => switch (result) {
     ChartReady<List<CashFlowPoint>>(:final data) when data.isNotEmpty => () {
       final t = CashFlowPoint.total(data);
-      return PeriodTotals(income: t.income, spend: t.spend);
+      return PeriodTotals(
+        income: t.income,
+        spend: t.spend,
+        exchangedIn: t.exchangedIn,
+        exchangedOut: t.exchangedOut,
+      );
     }(),
     _ => PeriodTotals(income: Money(currency, 0), spend: Money(currency, 0)),
   };
@@ -76,14 +86,27 @@ final class PeriodTotals {
   final Money income;
   final Money spend;
 
-  Money get saved => income - spend;
+  /// T-282 (D-86): exchanged money, separate from income and spend.
+  final Money? exchangedIn;
+  final Money? exchangedOut;
+
+  /// Same rule as Home "left": income + exchanged in - spend - exchanged out.
+  Money get saved =>
+      income +
+      (exchangedIn ?? Money.zero(income.currency)) -
+      spend -
+      (exchangedOut ?? Money.zero(income.currency));
 
   /// Saved over income as a whole percent (half away from zero); null when
   /// there was no income.
   int? get ratePct =>
       income.minor > 0 ? mulDivRound(saved.minor, 100, income.minor) : null;
 
-  bool get isEmpty => income.minor == 0 && spend.minor == 0;
+  bool get isEmpty =>
+      income.minor == 0 &&
+      spend.minor == 0 &&
+      (exchangedIn?.minor ?? 0) == 0 &&
+      (exchangedOut?.minor ?? 0) == 0;
 }
 
 /// The summary strip: the four figures and their change vs the previous

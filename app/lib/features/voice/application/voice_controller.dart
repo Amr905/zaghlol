@@ -29,6 +29,10 @@ import 'voice_providers.dart';
 const Duration voicePauseFor = Duration(seconds: 2);
 const Duration voiceListenFor = Duration(seconds: 30);
 
+/// T-275: a first attempt that ends with nothing heard sooner than this is the
+/// cold recognizer, not the user's silence: listening restarts once, quietly.
+const Duration voiceQuickEnd = Duration(seconds: 2);
+
 const int _msPerDay = 86400000;
 
 final class VoiceState {
@@ -108,6 +112,12 @@ class VoiceController extends Notifier<VoiceState> {
   /// (counted on the first row written, so a partial save can't bypass it).
   bool _counted = false;
 
+  /// T-275: the one silent restart of this screen visit was used, or the user
+  /// pressed stop (no retry after that).
+  bool _retried = false;
+  bool _userStopped = false;
+  Duration _listenStartedAt = Duration.zero;
+
   @override
   VoiceState build() {
     final port = ref.read(speechPortProvider);
@@ -126,6 +136,8 @@ class VoiceController extends Notifier<VoiceState> {
   Future<void> begin({required String languageCode}) async {
     _localeId = languageCode == 'ar' ? 'ar_EG' : 'en_US';
     _set(const VoiceState());
+    _retried = false;
+    _userStopped = false;
     if (!ref.read(entitlementStateProvider).isGold) {
       final usage = await ref.read(voiceUsageProvider.future);
       final used = await usage.countThisMonth();
@@ -173,6 +185,7 @@ class VoiceController extends Notifier<VoiceState> {
 
   Future<void> _listen({required bool onDevice}) async {
     final id = ++_session;
+    _listenStartedAt = ref.read(voiceMonotonicProvider)();
     _set(
       state.copyWith(
         phase: VoicePhase.listening,
@@ -201,14 +214,42 @@ class VoiceController extends Notifier<VoiceState> {
               }
             },
             onEnded: () {
-              if (id == _session) unawaited(_finish());
+              if (id == _session && !_quickRetry(onDevice)) {
+                unawaited(_finish());
+              }
             },
             onError: (e) {
-              if (id == _session) unawaited(_failed(e));
+              if (id == _session) {
+                if (e == SpeechError.noSpeech && _quickRetry(onDevice)) return;
+                unawaited(_failed(e));
+              }
             },
           ),
         );
     if (err != null && id == _session) await _failed(err);
+  }
+
+  /// T-275: restarts listening once, silently, when the first attempt of this
+  /// visit ended almost at once with no text (cold recognizer). Never after the
+  /// user's stop; nothing is saved from it. True when it restarted.
+  bool _quickRetry(bool onDevice) {
+    if (_retried || _userStopped || _disposed) return false;
+    if (state.phase != VoicePhase.listening ||
+        state.transcript.trim().isNotEmpty) {
+      return false;
+    }
+    final took = ref.read(voiceMonotonicProvider)() - _listenStartedAt;
+    if (took >= voiceQuickEnd) return false;
+    _retried = true;
+    unawaited(_restart(onDevice));
+    return true;
+  }
+
+  Future<void> _restart(bool onDevice) async {
+    _session++;
+    await ref.read(speechPortProvider).cancel();
+    if (_disposed || _userStopped) return;
+    await _listen(onDevice: onDevice);
   }
 
   Future<void> _failed(SpeechError e) async {
@@ -243,6 +284,7 @@ class VoiceController extends Notifier<VoiceState> {
 
   /// The "Done" button.
   Future<void> stopListening() async {
+    _userStopped = true;
     await ref.read(speechPortProvider).stop();
     await _finish();
   }
@@ -262,6 +304,7 @@ class VoiceController extends Notifier<VoiceState> {
   /// "Try again": discards everything, nothing counted.
   Future<void> tryAgain() async {
     _session++;
+    _userStopped = false;
     await ref.read(speechPortProvider).cancel();
     _savedKeys.clear();
     _counted = false;

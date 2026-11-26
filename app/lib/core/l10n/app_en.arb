@@ -45,6 +45,9 @@
   "homeQuickAddTypeHint": "An expense or income",
   "homeQuickAddScanHint": "A screenshot or receipt",
   "homeQuickAddAssetHint": "Gold, certificate, currency",
+  "homeQuickAddExchange": "I exchanged currency",
+  "homeQuickAddExchangeHint": "From one currency to another",
+  "homeQuickAddExchangeA11y": "Record a currency exchange",
   "ingestionReviewTitle": "Needs your review 👀",
   "notificationsChannelName": "Alerts",
   "@notificationsChannelName": {
@@ -344,6 +347,31 @@
   "homeHeroKpiIncome": "Income",
   "homeHeroKpiSpent": "Spent",
   "homeHeroKpiLeft": "Left",
+  "homeHeroKpiIncomeFromExchange": "incl. {amount} exchanged in",
+  "homeHeroKpiExchangedOut": "+ {amount} exchanged",
+  "currencyViewTitle": "This month in {currency}",
+  "currencyViewEmptyTitle": "Nothing in this currency this month",
+  "currencyViewEmptyBody": "Once you earn or spend in it, it shows up here.",
+  "currencyViewBudgetOffer": "Want a {currency} budget?",
+  "homeHeroOtherCurrencyIncome": "+ {amount} income",
+  "homeCurrencyCardsTitle": "Other currencies",
+  "homeCurrencyCardLeft": "{amount} left",
+  "homeCurrencyCardInOut": "In {income} · Out {out}",
+  "homeCurrencyCardMore": "+{count}",
+  "homeCurrencyCardMoreA11y": "{count, plural, =1{1 more currency} other{{n} more currencies}}",
+  "homeCurrencyCardA11y": "{currency}: {left} left. In {income}, out {out}. Tap to open this month in that currency",
+  "exchangeEntryTitle": "Currency exchange",
+  "exchangeEntryIntro": "An exchange isn't spending or income. Each side counts in its own currency.",
+  "exchangeEntrySent": "You gave",
+  "exchangeEntryReceived": "You got",
+  "exchangeEntryAccount": "Account",
+  "exchangeEntryCurrency": "Currency",
+  "exchangeEntryDate": "Date",
+  "exchangeEntryRate": "Rate: 1 {from} = {rate} {to}",
+  "exchangeEntrySameCurrency": "Pick two different currencies",
+  "exchangeEntrySave": "Save exchange",
+  "exchangeEntrySaved": "Exchange saved",
+  "exchangeEntryFailed": "Couldn't save the exchange. Try again.",
   "homeHeroApproxTitle": "Everything, roughly in {currency}",
   "homeHeroSummaryA11y": "Safe to spend today: {amount}. {payday}. Income {income}, spent {spent}, left {left}.",
   "homeMascotShockedCategory": "Heads up! {category} is at {percent} of its budget and the month's still young.",
@@ -359,6 +387,123 @@
   "homeMascotProudSavedMore": "Look at you! {amount} more saved than last month 👏",
   "homeMascotProudGoal": "Goal hit this month! 🎯 You've got this",
   "homeMascotPayday": "Payday! {amount} just landed 🎉 Let's plan it from day one",
+  "homeApproxLine": "≈ {amount} in, all currencies",
+  "@homeApproxLine": {
+    "description": "L · T-280, home.approx.line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxLineA11y": "Approximate: {amount} in, all currencies",
+  "@homeApproxLineA11y": {
+    "description": "A · read before the amount; tap opens the sheet",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBoth": "Bank rate + rate of {date}",
+  "@homeApproxRateNoteBoth": {
+    "description": "S · bank rate for the exchanged part, daily rate for the rest",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteDaily": "Rate of {date}",
+  "@homeApproxRateNoteDaily": {
+    "description": "S · only the daily rate was used",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBank": "Bank rate",
+  "@homeApproxRateNoteBank": {
+    "description": "S · everything foreign was already exchanged"
+  },
+  "homeApproxStale": "Old rate",
+  "@homeApproxStale": {
+    "description": "S · a daily rate older than 24 h"
+  },
+  "homeApproxSheetTitle": "This total is approximate",
+  "@homeApproxSheetTitle": {
+    "description": "T"
+  },
+  "homeApproxSheetBody": "We use your bank's rate for what you exchanged and today's rate for the rest. Your money stays saved in its own currency.",
+  "@homeApproxSheetBody": {
+    "description": "B"
+  },
+  "homeApproxSheetOwn": "Already in this currency (incl. what you exchanged)",
+  "@homeApproxSheetOwn": {
+    "description": "L · the target currency's own money in"
+  },
+  "homeApproxSheetHeld": "{amount} still held",
+  "@homeApproxSheetHeld": {
+    "description": "L · the part of a foreign currency not exchanged",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchanged": "{amount} exchanged, already counted once",
+  "@homeApproxSheetExchanged": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchangedBank": "{amount} exchanged at the bank rate {rate}, already counted once",
+  "@homeApproxSheetExchangedBank": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetDailyRate": "Rate of {date}: 1 {from} = {rate}",
+  "@homeApproxSheetDailyRate": {
+    "description": "S",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetClose": "Got it",
+  "@homeApproxSheetClose": {
+    "description": "C"
+  },
+  "homeMascotFirstForeign": "Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.",
+  "@homeMascotFirstForeign": {
+    "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
+  },
+  "homeApproxNoticeOff": "Turn it off",
+  "@homeApproxNoticeOff": {
+    "description": "C · turns the ≈ line off"
+  },
+  "homeApproxNoticeOk": "Got it",
+  "@homeApproxNoticeOk": {
+    "description": "C · dismisses the notice"
+  },
   "homeMascotDismissA11y": "Dismiss message",
   "homePromptPayday": "I spotted a salary of {amount} landing on day {day} each month. Is that your payday?",
   "homePromptPaydayYes": "Yes, day {day}",
@@ -390,6 +535,10 @@
   "homeEmptyFilter": "No transactions for {cards} this month",
   "transactionsRowSubtitle": "{card} · {time} · {source}",
   "transactionsRowInternalTitle": "To yourself",
+  "transactionsExchangeTitle": "Exchanged {from} → {to}",
+  "transactionsExchangeRate": "Bank rate {rate} · not spending",
+  "transactionsExchangeNotSpending": "Not spending",
+  "transactionsExchangeRowA11y": "Currency exchange: you gave {from} and got {to}, {rate}, {time}",
   "transactionsInstapayTitle": "InstaPay",
   "transactionsInstapayTo": "To {name}",
   "transactionsInstapayFrom": "From {name}",
@@ -467,6 +616,16 @@
   "transactionsDetailDeleteBodyManual": "You won't be able to get it back.",
   "transactionsDetailDeleted": "Deleted",
   "transactionsDetailGone": "This transaction no longer exists",
+  "transactionsExchangeBanner": "Currency exchange — not counted as spending or income",
+  "transactionsExchangeFieldSent": "You gave",
+  "transactionsExchangeFieldReceived": "You got",
+  "transactionsExchangeFieldFrom": "From",
+  "transactionsExchangeFieldTo": "Into",
+  "transactionsExchangeFieldRate": "Bank rate",
+  "transactionsExchangeRateValue": "{one} {from} = {rate} {to}",
+  "transactionsExchangeDeleteTitle": "Delete this exchange?",
+  "transactionsExchangeDeleteBody": "Both sides are deleted together.",
+  "transactionsExchangeDeleted": "Exchange deleted",
   "categorizationRuleTitle": "Always use {category} for {merchant}?",
   "categorizationRuleAlways": "Always",
   "categorizationRuleOnce": "Just this once",
@@ -529,6 +688,9 @@
   "ingestionReviewOldDueKeep": "Keep",
   "ingestionReviewOldDueRemoved": "Removed from your spending",
   "ingestionReviewOldDueKept": "OK, it stays as it is",
+  "ingestionReviewExchangeJumpQuestion": "Did you exchange currency? Your {currency} balance rose by about {amount} and no money in was seen.",
+  "ingestionReviewExchangeJumpYes": "Yes, record it",
+  "ingestionReviewExchangeJumpNo": "No",
   "ingestionReviewOldDueAlreadyHandled": "Already handled, nothing to do here",
   "ingestionReviewEmptyTitle": "All clear! Nothing to review ✨",
   "ingestionAlwaysSenderTitle": "Always capture messages from {sender}?",
@@ -974,6 +1136,39 @@
   "@mascotPaydayLine": {
     "description": "M · Rive payday · Home bubble when a salary lands (once per payday)"
   },
+  "mascotTipUseScan": "Got a paper receipt? Snap it from the Add button and I'll read the amount and the shop 📸",
+  "mascotTipUseShare": "Spotted a receipt or screenshot? Share it to Zaghlol from the share menu and I'll take it from there",
+  "mascotTipUseSay": "Tired of typing? Tap Add, pick Say, and just tell me what you spent 🎤",
+  "mascotTipUseLinkCard": "Link your debit card to its account and card purchases come out of that balance, counted once",
+  "mascotTipUsePayday": "Not paid on the 1st? Set your payday and I'll line the month up with your salary",
+  "mascotTipUseStatement": "Have a bank statement? Add it and I'll read it and bring back past months (CIB, NBE, Banque Misr, QNB)",
+  "mascotTipUseReview": "Some items waiting on you? In Review you can Keep, Edit or Ignore each one 👀",
+  "mascotTipUseSearchPerson": "Looking for an InstaPay transfer? Type the person's name in search and it shows up",
+  "mascotTipUseHide": "Someone peeking? Tap the eye at the top and the amounts disappear 🙈",
+  "mascotTipUseBudget": "Set a budget for each category and I'll show you how much is left of each",
+  "mascotTipUseSalary": "Tell me your salary once and I'll spot when it lands and count your month from payday",
+  "mascotTipUseAsk": "Ask me in the Zaghlol tab: \"How much did I spend on food this month?\" and I'll answer",
+  "mascotTipUseDue": "Got a credit card? Tell me the limit and due date and I'll remind you a few days before",
+  "mascotTipUseInsights": "Wondering where your money goes? Open Insights for the charts 📊",
+  "mascotTipSmartAsk": "Ask me in plain words: \"How much did I spend on food this month?\" I answer from the data on your phone",
+  "mascotTipSmartVoice": "I understand Egyptian! Say \"paid 150 for veggies and 45 for coffee\" and I log both 🎤",
+  "mascotTipSmartSms": "When a bank message reaches me I read it and log the item myself, and your data stays on your phone",
+  "mascotTipSmartCategory": "Change a shop's category once and I remember it for next time",
+  "mascotTipSmartDue": "If a card message has a due date, I'll remind you before it, no typing needed",
+  "mascotTipSmartPayday": "When your salary lands I spot it, line your month up with it, and cheer 🎉",
+  "mascotTipSmartDuplicate": "If the same charge shows up twice within minutes, I'll flag it before it counts double",
+  "mascotTipSmartReceipt": "I read a photographed receipt: shop, amount and date. You just confirm 👌",
+  "mascotTipSmartInstapay": "InstaPay transfers show the person's name, so you can see who paid whom at a glance",
+  "mascotTipSmartTransfer": "When you move money between your own accounts, I know it's not spending 👌",
+  "mascotTipHabitCoffee": "Small coffees add up by month end. I'm not saying anything, just counting ☕",
+  "mascotTipHabitPigeon": "I'm a pigeon who loves seeds, you love delivery. Everyone's got a weakness 😄",
+  "mascotTipHabitCheck": "One minute a day looking at your spending beats an hour at month end",
+  "mascotTipHabitSale": "A big discount isn't a saving if you never planned to buy it 😉",
+  "mascotTipHabitSmall": "Every pound saved grows Zaghlol a new feather 🪶",
+  "mascotTipHabitWait": "Wait a day before a big want. If you still want it, enjoy it 🛍️",
+  "mascotTipHabitTreat": "Treating yourself is allowed. Just keep count and nobody gets upset 😄",
+  "mascotTipHabitSubs": "Lots of subscriptions? Look them over now and then, one might be forgotten 👀",
+  "mascotTipShowMe": "Show me",
   "insightsTabsCharts": "Charts",
   "@insightsTabsCharts": {
     "description": "C · C-35 segment 1"
@@ -4141,6 +4336,17 @@
       "percent": {
         "type": "String"
       }
+    }
+  },
+  "chatAnswerExchange": "{span} you exchanged {given} for {received}. Bank rate: 1 {unit} = {rate}.",
+  "@chatAnswerExchange": {
+    "description": "E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).",
+    "placeholders": {
+      "span": {"type": "String"},
+      "given": {"type": "String"},
+      "received": {"type": "String"},
+      "unit": {"type": "String"},
+      "rate": {"type": "String"}
     }
   },
   "chatAnswerSpendCard": "You spent {amount} on {card} {span}.",

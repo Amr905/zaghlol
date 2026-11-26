@@ -62,17 +62,33 @@ class ZaghlolAvatar extends ConsumerWidget {
     super.key,
     this.moment = ZaghlolMoment.tourGuide,
     this.talk = false,
+    this.replay = 0,
     this.size = 96,
     this.semanticLabel,
+    this.trimHeadroom = false,
   });
 
   final ZaghlolMoment moment;
   final bool talk;
   final double size;
 
+  /// T-276: bump to play the same [moment] again on the same widget (never
+  /// change the key for that: it reloads the artboard).
+  final int replay;
+
   /// Localised description from the caller (AppLocalizations). Null makes the
   /// bird decorative, e.g. when the bubble beside it already says everything.
   final String? semanticLabel;
+
+  /// T-274: the Rive artboard keeps the top quarter free for props (hat,
+  /// magnifier, falling coins); the bird itself spans 26% to 99% of the height
+  /// (measured on the rendered file). With [trimHeadroom] the avatar box is only
+  /// [riveBirdHeightFactor] as tall and the empty top is clipped, so a card can
+  /// show a bigger bird without empty space above its head. Only applies to the
+  /// Rive artboard; the still and the interim art have no such margin.
+  final bool trimHeadroom;
+
+  static const riveBirdHeightFactor = 0.76;
 
   static const stillAsset = 'assets/mascot/zaghlol_still.png';
 
@@ -98,18 +114,38 @@ class ZaghlolAvatar extends ConsumerWidget {
         : artboard != null
         ? artboard(context, moment, talk, size)
         : hasRive
-        ? RiveMascot(moment: moment, talk: talk, size: size)
-        : InterimMascot(moment: moment, talk: talk, size: size);
+        ? RiveMascot(
+            moment: moment,
+            talk: talk,
+            replay: replay,
+            size: size,
+            loader: ref.read(riveMascotLoaderProvider),
+          )
+        : InterimMascot(moment: moment, talk: talk, replay: replay, size: size);
 
+    final trim = trimHeadroom && !reduce && artboard == null && hasRive;
+    final height = trim ? size * riveBirdHeightFactor : size;
     return IgnorePointer(
       child: Semantics(
         image: true,
         label: semanticLabel,
         excludeSemantics: true,
-        child: SizedBox.square(
+        child: SizedBox(
           key: const ValueKey('zaghlol-avatar'),
-          dimension: size,
-          child: ExcludeSemantics(child: body),
+          width: size,
+          height: height,
+          child: ExcludeSemantics(
+            child: trim
+                ? ClipRect(
+                    child: OverflowBox(
+                      alignment: AlignmentDirectional.bottomCenter,
+                      minHeight: size,
+                      maxHeight: size,
+                      child: body,
+                    ),
+                  )
+                : body,
+          ),
         ),
       ),
     );

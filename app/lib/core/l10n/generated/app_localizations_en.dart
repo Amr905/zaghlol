@@ -1201,6 +1201,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeHeroKpiLeft => 'Left';
 
   @override
+  String homeHeroKpiIncomeFromExchange(String amount) {
+    return 'incl. $amount exchanged in';
+  }
+
+  @override
+  String homeHeroKpiExchangedOut(String amount) {
+    return '+ $amount exchanged';
+  }
+
+  @override
+  String currencyViewTitle(String currency) {
+    return 'This month in $currency';
+  }
+
+  @override
+  String get currencyViewEmptyTitle => 'Nothing in this currency this month';
+
+  @override
+  String get currencyViewEmptyBody =>
+      'Once you earn or spend in it, it shows up here.';
+
+  @override
+  String currencyViewBudgetOffer(String currency) {
+    return 'Want a $currency budget?';
+  }
+
+  @override
+  String homeHeroOtherCurrencyIncome(String amount) {
+    return '+ $amount income';
+  }
+
+  @override
+  String get homeCurrencyCardsTitle => 'Other currencies';
+
+  @override
+  String homeCurrencyCardLeft(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String homeCurrencyCardInOut(String income, String out) {
+    return 'In $income · Out $out';
+  }
+
+  @override
+  String homeCurrencyCardMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String homeCurrencyCardMoreA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n more currencies',
+      one: '1 more currency',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  ) {
+    return '$currency: $left left. In $income, out $out. Tap to open this month in that currency';
+  }
+
+  @override
+  String get exchangeEntryTitle => 'Currency exchange';
+
+  @override
+  String get exchangeEntryIntro =>
+      'An exchange isn\'t spending or income. Each side counts in its own currency.';
+
+  @override
+  String get exchangeEntrySent => 'You gave';
+
+  @override
+  String get exchangeEntryReceived => 'You got';
+
+  @override
+  String get exchangeEntryAccount => 'Account';
+
+  @override
+  String get exchangeEntryCurrency => 'Currency';
+
+  @override
+  String get exchangeEntryDate => 'Date';
+
+  @override
+  String exchangeEntryRate(String from, String rate, String to) {
+    return 'Rate: 1 $from = $rate $to';
+  }
+
+  @override
+  String get exchangeEntrySameCurrency => 'Pick two different currencies';
+
+  @override
+  String get exchangeEntrySave => 'Save exchange';
+
+  @override
+  String get exchangeEntrySaved => 'Exchange saved';
+
+  @override
+  String get exchangeEntryFailed => 'Couldn\'t save the exchange. Try again.';
+
+  @override
   String homeHeroApproxTitle(String currency) {
     return 'Everything, roughly in $currency';
   }
@@ -1275,6 +1385,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String homeMascotPayday(String amount) {
     return 'Payday! $amount just landed 🎉 Let\'s plan it from day one';
   }
+
+  @override
+  String homeApproxLine(String amount) {
+    return '≈ $amount in, all currencies';
+  }
+
+  @override
+  String homeApproxLineA11y(String amount) {
+    return 'Approximate: $amount in, all currencies';
+  }
+
+  @override
+  String homeApproxRateNoteBoth(String date) {
+    return 'Bank rate + rate of $date';
+  }
+
+  @override
+  String homeApproxRateNoteDaily(String date) {
+    return 'Rate of $date';
+  }
+
+  @override
+  String get homeApproxRateNoteBank => 'Bank rate';
+
+  @override
+  String get homeApproxStale => 'Old rate';
+
+  @override
+  String get homeApproxSheetTitle => 'This total is approximate';
+
+  @override
+  String get homeApproxSheetBody =>
+      'We use your bank\'s rate for what you exchanged and today\'s rate for the rest. Your money stays saved in its own currency.';
+
+  @override
+  String get homeApproxSheetOwn =>
+      'Already in this currency (incl. what you exchanged)';
+
+  @override
+  String homeApproxSheetHeld(String amount) {
+    return '$amount still held';
+  }
+
+  @override
+  String homeApproxSheetExchanged(String amount) {
+    return '$amount exchanged, already counted once';
+  }
+
+  @override
+  String homeApproxSheetExchangedBank(String amount, String rate) {
+    return '$amount exchanged at the bank rate $rate, already counted once';
+  }
+
+  @override
+  String homeApproxSheetDailyRate(String date, String from, String rate) {
+    return 'Rate of $date: 1 $from = $rate';
+  }
+
+  @override
+  String get homeApproxSheetClose => 'Got it';
+
+  @override
+  String get homeMascotFirstForeign =>
+      'Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.';
+
+  @override
+  String get homeApproxNoticeOff => 'Turn it off';
+
+  @override
+  String get homeApproxNoticeOk => 'Got it';
 
   @override
   String get homeMascotDismissA11y => 'Dismiss message';
@@ -1433,6 +1613,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsRowInternalTitle => 'To yourself';
+
+  @override
+  String transactionsExchangeTitle(String from, String to) {
+    return 'Exchanged $from → $to';
+  }
+
+  @override
+  String transactionsExchangeRate(String rate) {
+    return 'Bank rate $rate · not spending';
+  }
+
+  @override
+  String get transactionsExchangeNotSpending => 'Not spending';
+
+  @override
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  ) {
+    return 'Currency exchange: you gave $from and got $to, $rate, $time';
+  }
 
   @override
   String get transactionsInstapayTitle => 'InstaPay';
@@ -1750,6 +1953,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transactionsDetailGone => 'This transaction no longer exists';
 
   @override
+  String get transactionsExchangeBanner =>
+      'Currency exchange — not counted as spending or income';
+
+  @override
+  String get transactionsExchangeFieldSent => 'You gave';
+
+  @override
+  String get transactionsExchangeFieldReceived => 'You got';
+
+  @override
+  String get transactionsExchangeFieldFrom => 'From';
+
+  @override
+  String get transactionsExchangeFieldTo => 'Into';
+
+  @override
+  String get transactionsExchangeFieldRate => 'Bank rate';
+
+  @override
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  ) {
+    return '$one $from = $rate $to';
+  }
+
+  @override
+  String get transactionsExchangeDeleteTitle => 'Delete this exchange?';
+
+  @override
+  String get transactionsExchangeDeleteBody =>
+      'Both sides are deleted together.';
+
+  @override
+  String get transactionsExchangeDeleted => 'Exchange deleted';
+
+  @override
   String categorizationRuleTitle(String category, String merchant) {
     return 'Always use $category for $merchant?';
   }
@@ -1987,6 +2229,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ingestionReviewOldDueKept => 'OK, it stays as it is';
+
+  @override
+  String ingestionReviewExchangeJumpQuestion(String currency, String amount) {
+    return 'Did you exchange currency? Your $currency balance rose by about $amount and no money in was seen.';
+  }
+
+  @override
+  String get ingestionReviewExchangeJumpYes => 'Yes, record it';
+
+  @override
+  String get ingestionReviewExchangeJumpNo => 'No';
 
   @override
   String get ingestionReviewEmptyTitle => 'All clear! Nothing to review ✨';
@@ -3112,6 +3365,137 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mascotPaydayLine => 'Payday landed! 🎉';
+
+  @override
+  String get mascotTipUseScan =>
+      'Got a paper receipt? Snap it from the Add button and I\'ll read the amount and the shop 📸';
+
+  @override
+  String get mascotTipUseShare =>
+      'Spotted a receipt or screenshot? Share it to Zaghlol from the share menu and I\'ll take it from there';
+
+  @override
+  String get mascotTipUseSay =>
+      'Tired of typing? Tap Add, pick Say, and just tell me what you spent 🎤';
+
+  @override
+  String get mascotTipUseLinkCard =>
+      'Link your debit card to its account and card purchases come out of that balance, counted once';
+
+  @override
+  String get mascotTipUsePayday =>
+      'Not paid on the 1st? Set your payday and I\'ll line the month up with your salary';
+
+  @override
+  String get mascotTipUseStatement =>
+      'Have a bank statement? Add it and I\'ll read it and bring back past months (CIB, NBE, Banque Misr, QNB)';
+
+  @override
+  String get mascotTipUseReview =>
+      'Some items waiting on you? In Review you can Keep, Edit or Ignore each one 👀';
+
+  @override
+  String get mascotTipUseSearchPerson =>
+      'Looking for an InstaPay transfer? Type the person\'s name in search and it shows up';
+
+  @override
+  String get mascotTipUseHide =>
+      'Someone peeking? Tap the eye at the top and the amounts disappear 🙈';
+
+  @override
+  String get mascotTipUseBudget =>
+      'Set a budget for each category and I\'ll show you how much is left of each';
+
+  @override
+  String get mascotTipUseSalary =>
+      'Tell me your salary once and I\'ll spot when it lands and count your month from payday';
+
+  @override
+  String get mascotTipUseAsk =>
+      'Ask me in the Zaghlol tab: \"How much did I spend on food this month?\" and I\'ll answer';
+
+  @override
+  String get mascotTipUseDue =>
+      'Got a credit card? Tell me the limit and due date and I\'ll remind you a few days before';
+
+  @override
+  String get mascotTipUseInsights =>
+      'Wondering where your money goes? Open Insights for the charts 📊';
+
+  @override
+  String get mascotTipSmartAsk =>
+      'Ask me in plain words: \"How much did I spend on food this month?\" I answer from the data on your phone';
+
+  @override
+  String get mascotTipSmartVoice =>
+      'I understand Egyptian! Say \"paid 150 for veggies and 45 for coffee\" and I log both 🎤';
+
+  @override
+  String get mascotTipSmartSms =>
+      'When a bank message reaches me I read it and log the item myself, and your data stays on your phone';
+
+  @override
+  String get mascotTipSmartCategory =>
+      'Change a shop\'s category once and I remember it for next time';
+
+  @override
+  String get mascotTipSmartDue =>
+      'If a card message has a due date, I\'ll remind you before it, no typing needed';
+
+  @override
+  String get mascotTipSmartPayday =>
+      'When your salary lands I spot it, line your month up with it, and cheer 🎉';
+
+  @override
+  String get mascotTipSmartDuplicate =>
+      'If the same charge shows up twice within minutes, I\'ll flag it before it counts double';
+
+  @override
+  String get mascotTipSmartReceipt =>
+      'I read a photographed receipt: shop, amount and date. You just confirm 👌';
+
+  @override
+  String get mascotTipSmartInstapay =>
+      'InstaPay transfers show the person\'s name, so you can see who paid whom at a glance';
+
+  @override
+  String get mascotTipSmartTransfer =>
+      'When you move money between your own accounts, I know it\'s not spending 👌';
+
+  @override
+  String get mascotTipHabitCoffee =>
+      'Small coffees add up by month end. I\'m not saying anything, just counting ☕';
+
+  @override
+  String get mascotTipHabitPigeon =>
+      'I\'m a pigeon who loves seeds, you love delivery. Everyone\'s got a weakness 😄';
+
+  @override
+  String get mascotTipHabitCheck =>
+      'One minute a day looking at your spending beats an hour at month end';
+
+  @override
+  String get mascotTipHabitSale =>
+      'A big discount isn\'t a saving if you never planned to buy it 😉';
+
+  @override
+  String get mascotTipHabitSmall =>
+      'Every pound saved grows Zaghlol a new feather 🪶';
+
+  @override
+  String get mascotTipHabitWait =>
+      'Wait a day before a big want. If you still want it, enjoy it 🛍️';
+
+  @override
+  String get mascotTipHabitTreat =>
+      'Treating yourself is allowed. Just keep count and nobody gets upset 😄';
+
+  @override
+  String get mascotTipHabitSubs =>
+      'Lots of subscriptions? Look them over now and then, one might be forgotten 👀';
+
+  @override
+  String get mascotTipShowMe => 'Show me';
 
   @override
   String get insightsTabsCharts => 'Charts';
@@ -4289,6 +4673,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringBillEditSaved => 'Bill saved ✓';
 
   @override
+  String get homeQuickAddExchange => 'I exchanged currency';
+
+  @override
+  String get homeQuickAddExchangeHint => 'From one currency to another';
+
+  @override
+  String get homeQuickAddExchangeA11y => 'Record a currency exchange';
+
+  @override
   String homeQuickAddVoiceLeft(String remaining, String max) {
     return '$remaining of $max voice logs left this month';
   }
@@ -5219,6 +5612,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'other': '$span you saved $saved, that\'s $percent of your income.',
     });
     return '$_temp0';
+  }
+
+  @override
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
+  ) {
+    return '$span you exchanged $given for $received. Bank rate: 1 $unit = $rate.';
   }
 
   @override

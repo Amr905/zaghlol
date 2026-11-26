@@ -27,6 +27,7 @@ export 'salary/payday_detection.dart';
 export 'salary/salary_rules.dart';
 export 'roi/roi_rules.dart';
 export 'transfers/offsets.dart';
+export 'transfers/exchange_hints.dart';
 export 'transfers/splits.dart';
 export 'transfers/transfer_matching.dart';
 export 'wealth/balance_rules.dart';
