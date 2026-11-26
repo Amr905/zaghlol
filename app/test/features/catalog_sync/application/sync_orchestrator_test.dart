@@ -711,4 +711,176 @@ void main() {
     backend.script.add(effective(serverAt: clock));
     expect((await o.run(force: true)).kind, isNot(SyncOutcomeKind.paused));
   });
+
+  group('T-359 llmCatFeedback (FU-412)', () {
+    var consent = true;
+
+    SyncOrchestrator makeFb({bool send = true, bool withConsent = true}) =>
+        SyncOrchestrator(
+          db: db,
+          backend: backend,
+          anchor: anchor,
+          store: store,
+          flags: flags,
+          prices: PricesRepository(
+            db: db,
+            clock: () =>
+                DateTime.fromMillisecondsSinceEpoch(clock, isUtc: true),
+          ),
+          settings: settings,
+          now: () => clock,
+          llmCatFeedbackConsent: withConsent ? () async => consent : null,
+          sendLlmCatFeedback: send,
+        );
+
+    Future<void> flagOn(bool on) =>
+        flags.apply(RemoteFlags(version: 9, values: {'llm_categorise': on}));
+
+    Future<void> fb(
+      String id,
+      int at, {
+      String merchant = 'zawya cinema',
+      String verdict = 'right',
+      String user = 'food',
+      String kind = 'llm_cat_confirmation',
+    }) => OutboxDao(db).enqueue(
+      id: id,
+      kind: kind,
+      payload: {
+        'merchantNorm': merchant,
+        'verdict': verdict,
+        'aiCategory': 'food',
+        'userCategory': user,
+        'source': 'llm',
+      },
+      createdAt: at,
+    );
+
+    setUp(() => consent = true);
+
+    test('the shipped switch is off: nothing leaves, rows stay', () async {
+      expect(kSendLlmCatFeedback, isFalse);
+      await flagOn(true);
+      await fb('f1', base);
+      backend.script.add(effective(serverAt: clock));
+      // Default switch, consent on, flag on.
+      final o = SyncOrchestrator(
+        db: db,
+        backend: backend,
+        anchor: anchor,
+        store: store,
+        flags: flags,
+        prices: PricesRepository(
+          db: db,
+          clock: () => DateTime.fromMillisecondsSinceEpoch(clock, isUtc: true),
+        ),
+        settings: settings,
+        now: () => clock,
+        llmCatFeedbackConsent: () async => true,
+      );
+      await o.run(force: true);
+      expect(backend.requests.single.llmCatFeedback, isNull);
+      expect(
+        backend.requests.single.toJson().containsKey('llmCatFeedback'),
+        isFalse,
+      );
+      expect(await outboxCount(), 1);
+    });
+
+    test('AC1/5: switch, flag and consent on: carried once with the five '
+        'closed fields, then removed', () async {
+      await flagOn(true);
+      await fb('f1', base);
+      backend.script.add(effective(serverAt: clock));
+      await makeFb().run(force: true);
+      final item = backend.requests.single.llmCatFeedback!.single;
+      expect(item.toJson(), {
+        'merchantNorm': 'zawya cinema',
+        'verdict': 'right',
+        'aiCategory': 'food',
+        'userCategory': 'food',
+        'source': 'llm',
+      });
+      expect(await outboxCount(), 0);
+      clock += 25 * hr;
+      backend.script.add(effective(serverAt: clock));
+      await makeFb().run(force: true);
+      expect(backend.requests.last.llmCatFeedback, isNull);
+    });
+
+    test(
+      'AC2: a custom category is sent as custom and its name nowhere',
+      () async {
+        await flagOn(true);
+        await fb(
+          'f1',
+          base,
+          verdict: 'wrong',
+          user: 'custom',
+          kind: 'llm_cat_correction',
+        );
+        backend.script.add(effective(serverAt: clock));
+        await makeFb().run(force: true);
+        final body = backend.requests.single.toJson().toString();
+        expect(body, contains('custom'));
+        expect(body, isNot(contains('كتب')));
+      },
+    );
+
+    test(
+      'AC4: flag off, consent cleared or no consent hook: stays local',
+      () async {
+        await fb('f1', base);
+        for (final c in [
+          (flag: false, consent: true, hook: true),
+          (flag: true, consent: false, hook: true),
+          (flag: true, consent: true, hook: false),
+        ]) {
+          await flagOn(c.flag);
+          consent = c.consent;
+          clock += 25 * hr;
+          backend.script.add(effective(serverAt: clock));
+          await makeFb(withConsent: c.hook).run(force: true);
+          expect(backend.requests.last.llmCatFeedback, isNull);
+          expect(await outboxCount(), 1);
+        }
+      },
+    );
+
+    test('AC4: more than 50 items go out across calls, oldest first', () async {
+      await flagOn(true);
+      for (var i = 0; i < 120; i++) {
+        await fb(
+          'f${i.toString().padLeft(3, '0')}',
+          base + i,
+          merchant: 'shop ${String.fromCharCode(97 + i % 26)}x$i',
+        );
+      }
+      for (var n = 0; n < 3; n++) {
+        clock += 25 * hr;
+        backend.script.add(effective(serverAt: clock));
+        await makeFb().run(force: true);
+      }
+      expect(
+        [for (final r in backend.requests) r.llmCatFeedback?.length],
+        [50, 50, 20],
+      );
+      expect(await outboxCount(), 0);
+    });
+
+    test('a malformed queued row is dropped, not sent', () async {
+      await flagOn(true);
+      await OutboxDao(db).enqueue(
+        id: 'bad',
+        kind: 'llm_cat_correction',
+        payload: {'merchantNorm': 'x', 'verdict': 'maybe'},
+        createdAt: base,
+      );
+      await fb('ok', base + 1);
+      backend.script.add(effective(serverAt: clock));
+      await makeFb().run(force: true);
+      expect(backend.requests.single.llmCatFeedback!.length, 1);
+      expect(await outboxCount(), 0);
+    });
+  });
 }

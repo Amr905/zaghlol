@@ -24,7 +24,11 @@ import '../../../core/db/daos/settings_dao.dart';
 import '../../../core/config/remote_config_providers.dart';
 import '../../../core/flags/flags_providers.dart';
 import '../../../core/settings/settings_providers.dart';
+import '../../../core/llm/llm_feature.dart';
 import '../../categorization/data/categorizer_ports.dart';
+import '../../categorization/data/llm_cat_providers.dart'
+    show llmCatTermsProvider;
+import '../../../core/llm/llm_gateway_client.dart' show llmConsentStoreProvider;
 import '../../categorization/data/recategorizer.dart';
 import '../../categorization/data/rules_providers.dart';
 import '../../gold/application/entitlement.dart';
@@ -171,6 +175,15 @@ final syncOrchestratorProvider = FutureProvider<SyncOrchestrator>((ref) async {
     prices: PricesRepository(db: db, clock: clock),
     settings: settings,
     pauseGate: ref.watch(syncPauseGateProvider),
+    // T-359: the same consent as the auto-category names; sending itself
+    // stays off behind kSendLlmCatFeedback (FU-412).
+    llmCatFeedbackConsent: () async {
+      final t = ref.read(llmCatTermsProvider);
+      if (t == null) return false;
+      final consent = await ref.read(llmConsentStoreProvider.future);
+      return await consent.grantFor(LlmFeature.categorise, t.provider, t.v) !=
+          null;
+    },
     // A fresh memoizing categorizer per run: the catalog just changed.
     recategorize: () async {
       final c = Categorizer(driftCategorizerPorts(db, rules), memoize: true);
