@@ -180,3 +180,14 @@ No hard-coded strings. Every text comes from `AppLocalizations`, and the keys ma
 
 ## Follow-ups (minors; not blocking)
 B94-m1 (T-338/T-351), B94-m2 (FU-411 admin host), B94-m3, B94-m4–m6 (T-339 owner), B94-m7 (T-348), B94-m8 (T-348/T-346), B94-m9 (T-358), and the nickname/Coptic additions to `eg_given_names.txt` (T-325 list owner).
+
+## Fix round — T-355
+B94-M3, B94-M4 and B94-m9 fixed in `llm_eligibility.dart` and `app/assets/data/eg_honorifics.txt` (12 -> 60 entries, sorted, folded, deduped). Changes:
+- Any given-name token makes the text person-like unless a business word is present. With a business word, a non-business token right after an honorific is still refused (`صيدلية د. أحمد` and `Dr Hany Clinic` are now refused; the design note did not keep them). The 4-token ceiling is gone.
+- Compounds fold before lookup: `abd/abdel/abdul/عبد` (alone or glued), `abou/ابو/ام/ibn/bin + X` count as names; `el/al` prefixes as before.
+- Single letters, `A.`, `*`/`•`/`#` and x-masking are refused whatever else is in the text.
+- Transfer words (`to from transfer الى من تحويل ...`) and wallet brands (`vodafone cash`, `فودافون كاش`, orange/etisalat cash, `we pay`) refuse any later token that is not a business word.
+- Honorifics: asset list extended (hag/haj/hajj, شيخ, captain/كابتن, madam/مدام, ostaz, مهندس, doctor variants, miss/mister, bey/pasha ...) plus a built-in fallback set merged in the lexicon (an empty asset still fails closed). Built-in nicknames (mido, bebo, zizo, hamada ...) and compound second halves added.
+- m9: with `counterpartyKind == null` and no business word the result is `notBusinessPayment`. Existing positive tests now state `counterpartyKind: merchant`.
+Tests: all reviewer probes (33) as table rows, 47 adversarial strings, 20 new positives, 2 m9 tests; 253 categorize tests pass, 1,000 merchants < 100 ms.
+Known gaps: unlisted nicknames and Coptic spellings, chat alphabet (`A7med`), glued tokens (`mohamedahmed`), digits spelled as words, a person's name containing a business word (`Mohamed Ahmed Store`), single-token unknown names (`Basant`) when the caller gives `merchant`. Callers must derive `kind` and `counterpartyKind` from typed fields (T-358).
