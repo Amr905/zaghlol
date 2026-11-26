@@ -125,7 +125,7 @@ public class LlmSpendRepositoryTests(LlmQuotaFixture fixture) : IClassFixture<Ll
         var store = new RetentionStore(fixture.Services.GetRequiredService<IZaghlolDbContextFactory>());
         Assert.True(await store.PurgeBatchAsync(RetentionRules.LlmSpendDaily, Now, 100, CancellationToken.None) >= 1);
         var left = await Db.QueryAsync(fixture.Database.Superuser, "SELECT day FROM zaghlol.llm_spend_daily WHERE provider_id = 'purge' ORDER BY 1");
-        Assert.Equal(days.Skip(1), left.Select(r => DateOnly.FromDateTime((DateTime)r[0]!)));
+        Assert.Equal(days.Skip(1), left.Select(r => (DateOnly)r[0]!));
     }
 
     [Fact]
