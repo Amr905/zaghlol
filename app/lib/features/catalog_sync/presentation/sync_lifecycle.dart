@@ -10,7 +10,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/locale_providers.dart';
 import '../../../core/llm/llm_gateway_client.dart' show LlmLang;
+import '../../ask/data/llm_ask_providers.dart' show askInvestPricesProvider;
 import '../../categorization/data/llm_cat_sender_providers.dart';
 import '../../gold/application/entitlement.dart';
 import '../../gold/application/gold_providers.dart';
@@ -76,6 +78,7 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle>
       await ref.read(entitlementServiceProvider).onResume();
       final o = await ref.read(syncOrchestratorProvider.future);
       await o.run();
+      ref.invalidate(askInvestPricesProvider); // follow the price feed
     } on Object {
       // Typed failures are recorded by the orchestrator; a database that is
       // not open yet simply means no sync this time.
@@ -88,7 +91,7 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle>
   Future<void> _sendCategories() async {
     try {
       final s = await ref.read(llmCatSenderProvider.future);
-      final ar = Localizations.maybeLocaleOf(context)?.languageCode != 'en';
+      final ar = !_isEnglish();
       await s.run(
         now: DateTime.now().toUtc(),
         lang: ar ? LlmLang.ar : LlmLang.en,
@@ -96,6 +99,16 @@ class _SyncLifecycleState extends ConsumerState<SyncLifecycle>
     } on Object {
       // Nothing is surfaced or logged (merchant names are sensitive).
     }
+  }
+
+  /// The chosen app language (setting), or the device's when it follows the
+  /// system; read through `ref`, since this widget sits above the
+  /// localizations.
+  bool _isEnglish() {
+    final code =
+        ref.read(appLocaleProvider)?.languageCode ??
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    return code == 'en';
   }
 
   @override

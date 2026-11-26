@@ -173,3 +173,11 @@ No findings.
 | B96-m6 | minor | T-359 → FU-412 | FU |
 
 Before merge, also regenerate and spot-check the 36 T-347 golden PNGs.
+
+## Fix round — app
+
+- **B96-B1 fixed:** `llm_consent.dart` uses a private named initializing formal (`this._onCleared`); the hook no longer touches `BuildContext`. `dart analyze --fatal-infos` on the whole app: "No issues found!".
+- **B96-m4 fixed:** `SyncLifecycle` reads the language from `appLocaleProvider` through `ref` (device language when the setting is "system"). Tests for `en` and `ar`.
+- **B96-m5 added:** `test/features/catalog_sync/presentation/sync_lifecycle_test.dart` (flag off → zero calls; start + resume burst → one send; swallowed error, nothing logged) and `llm_stores_test.dart` now uses the real `llmConsentStoreProvider` `onCleared` closure. Note: the "no consent" case stays covered at sender level (the gateway checks consent, not the hook).
+- **B96-m3 fixed:** `askInvestPricesProvider` is `autoDispose` and `SyncLifecycle` invalidates it after each sync run; test `test/features/ask/data/ask_invest_prices_follow_feed_test.dart`. Quotes keep their own as-of (stale pill unchanged).
+- Checks: format clean; targeted suites 618 tests passed; app lints run.

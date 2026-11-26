@@ -3,7 +3,11 @@
 // `resetsAt` and on bad text; "Delete everything" (the DB goes) leaves none.
 // Synthetic data.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/app_database_providers.dart';
+import 'package:zaghlol/core/llm/llm_gateway_client.dart'
+    show llmConsentStoreProvider;
 import 'package:zaghlol/core/backend/backend_client.dart' show LlmQuota;
 import 'package:zaghlol/core/db/daos/llm_cat_queue_dao.dart';
 import 'package:zaghlol/core/db/daos/settings_dao.dart';
@@ -41,23 +45,20 @@ void main() {
   });
 
   group('consent', () {
-    test(
-      'clearing categorise consent empties the queue; ask leaves it',
-      () async {
-        final q = LlmCatQueueDao(edb.db);
-        final c = LlmConsentStore(
-          repo,
-          onCleared: (LlmFeature f) async {
-            if (f == LlmFeature.categorise) await q.clear();
-          },
-        );
-        await q.enqueue('synthetic merchant', at: 1);
-        await c.clear(LlmFeature.ask);
-        expect(await q.count(), 1);
-        await c.clear(LlmFeature.categorise);
-        expect(await q.count(), 0);
-      },
-    );
+    test('the real provider: clearing categorise consent empties the queue; '
+        'ask leaves it', () async {
+      final q = LlmCatQueueDao(edb.db);
+      final container = ProviderContainer(
+        overrides: [appDatabaseProvider.overrideWith((ref) async => edb.db)],
+      );
+      addTearDown(container.dispose);
+      final c = await container.read(llmConsentStoreProvider.future);
+      await q.enqueue('synthetic merchant', at: 1);
+      await c.clear(LlmFeature.ask);
+      expect(await q.count(), 1);
+      await c.clear(LlmFeature.categorise);
+      expect(await q.count(), 0);
+    });
 
     test('none stored → needsConsent; grant → covered; provider or v change '
         '→ needsConsent again', () async {

@@ -89,12 +89,8 @@ abstract final class LlmConsentSettings {
 }
 
 final class LlmConsentStore {
-  LlmConsentStore(
-    this._settings, {
-    int Function()? nowMs,
-    Future<void> Function(LlmFeature feature)? onCleared,
-  }) : _nowMs = nowMs ?? _utcNowMs,
-       _onCleared = onCleared;
+  LlmConsentStore(this._settings, {int Function()? nowMs, this._onCleared})
+    : _nowMs = nowMs ?? _utcNowMs;
 
   final SettingsRepository _settings;
   final int Function() _nowMs;

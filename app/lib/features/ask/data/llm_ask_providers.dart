@@ -62,7 +62,9 @@ final askQuotaSnapshotProvider = FutureProvider<LlmQuotaSnapshot?>((ref) async {
 /// investment illustrations. A price the feed doesn't have is simply left out:
 /// the band that needs it is not shown (never guessed). A failed read gives no
 /// quotes at all.
-final askInvestPricesProvider = FutureProvider<InvestPrices>((ref) async {
+final askInvestPricesProvider = FutureProvider.autoDispose<InvestPrices>((
+  ref,
+) async {
   final rate = ref.watch(remoteConfigProvider).value?.cdExampleRateBp ?? 2000;
   final egp = Currency.of('EGP');
   try {
