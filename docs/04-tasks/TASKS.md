@@ -398,7 +398,7 @@ Batch order, lanes, PO-blocked items and the critical path: [`m9-llm-plan.md`](m
 | [T-332](tasks/T-332.md) | LLM gateway core, `Sensitive<T>`, OpenAI adapter, fake provider, resilience | ASK-LLM / LLM-CAT | High | Sonnet | backend-engineer | T-322 | B | 91 | DONE (batch 91) |
 | [T-333](tasks/T-333.md) | Provider API keys from KMS secret stores | ASK-LLM | High (C4) | Opus | backend-engineer | T-332 | B | 93 | TODO |
 | [T-334](tasks/T-334.md) | LLM flags, remote config, admin endpoint, ops CLI, sync `config` block (backend) | ASK-LLM / LLM-CAT | Medium | Sonnet | backend-engineer | T-322, T-323 | B | 92 | TODO |
-| [T-335](tasks/T-335.md) | LLM quota store: Cairo month, tiers, account, idempotent commit, purge | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | T-323 | B | 92 | TODO |
+| [T-335](tasks/T-335.md) | LLM quota store: Cairo month, tiers, account, idempotent commit, purge | ASK-LLM / LLM-CAT | High (C4) | Sonnet | backend-engineer | T-323 | B | 92 | BUILT |
 | [T-336](tasks/T-336.md) | Attestation for LLM endpoints: binding, staged modes, production guard | ASK-LLM / LLM-CAT | High (C4) | Opus | backend-engineer | T-322 | B | 93 | TODO |
 | [T-337](tasks/T-337.md) | App: LLM flags and remote config store | ASK-LLM / LLM-CAT | Medium | Sonnet | flutter-core-engineer | T-322 | A | 92 | TODO |
 | [T-338](tasks/T-338.md) | Vertex Gemini and Anthropic adapters | ASK-LLM | High | Sonnet | backend-engineer | T-332 | B | 94 | TODO |
