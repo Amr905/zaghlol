@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Zaghlol.Application.Llm;
 using Zaghlol.Infrastructure.Llm;
+using Zaghlol.Testing;
 
 namespace Zaghlol.Infrastructure.Tests.Llm;
 
@@ -82,22 +83,16 @@ public sealed class LlmGatewayConfigurationTests
 
     // AC5
     [Fact]
-    public async Task TheFakeProviderRefusesToStartOutsideDevelopmentAndTesting()
+    public async Task AFakeProviderKindCannotBeSelectedInAnyEnvironment()
     {
         var values = new[] { ("Llm:Providers:fake:Kind", (string?)"Fake"), ("Llm:Providers:fake:Model", "m"), ("Llm:Providers:fake:PriceInPerMTok", "0"), ("Llm:Providers:fake:PriceCachedPerMTok", "0"), ("Llm:Providers:fake:PriceOutPerMTok", "0"), ("Llm:ActiveProvider", "fake") };
 
-        foreach (var env in new[] { "Production", "Staging" })
+        foreach (var env in new[] { "Production", "Staging", "Development", "Testing" })
         {
-            await using var refused = Build(env, values);
-            await Assert.ThrowsAsync<LlmConfigurationException>(() => Start(refused));
+            Assert.Throws<LlmConfigurationException>(() => Build(env, values));
         }
 
-        foreach (var env in new[] { "Development", "Testing" })
-        {
-            await using var allowed = Build(env, values);
-            await Start(allowed);
-            Assert.IsType<FakeLlmProvider>(allowed.GetRequiredService<ILlmProviderRegistry>().Active);
-        }
+        await Task.CompletedTask;
     }
 
     [Fact]

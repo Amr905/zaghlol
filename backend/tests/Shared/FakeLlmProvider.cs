@@ -3,10 +3,12 @@ using System.Text.Json;
 using Zaghlol.Application.Llm;
 using Zaghlol.Domain;
 
-namespace Zaghlol.Infrastructure.Llm;
+using Zaghlol.Infrastructure.Llm;
+
+namespace Zaghlol.Testing;
 
 /// <summary>
-/// Replays recorded replies (Development and Testing only; <see cref="LlmStartupCheck"/> refuses it elsewhere). A fixture file is a
+/// Replays recorded replies (test support only; no production assembly references it and the production registry cannot select it). A fixture file is a
 /// JSON array of <c>{ "contains": "&lt;substring of the question or null&gt;", "outcome": "Ok", "json": { ... }, "usage": { "inputTokens": 0, "cachedTokens": 0, "outputTokens": 0 } }</c>;
 /// the first entry whose <c>contains</c> is null or occurs in the question wins, and none matching is <see cref="LlmOutcome.Invalid"/>.
 /// <see cref="Calls"/> counts calls, so tests can prove a request never reached the provider.
