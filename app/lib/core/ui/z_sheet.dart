@@ -15,6 +15,8 @@ Future<T?> showZSheet<T>({
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    // BUG-018: above the shell's bottom bar and Add button, not under them.
+    useRootNavigator: true,
     sheetAnimationStyle: const AnimationStyle(
       duration: ZMotion.sheet,
       curve: ZMotion.curve,

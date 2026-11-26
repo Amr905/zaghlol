@@ -5446,7 +5446,7 @@ abstract class AppLocalizations {
   /// E · visits = common_unit_visits
   ///
   /// In ar, this message translates to:
-  /// **'{merchant} في المركز الأول بـ {amount} ({visits})، وبعده {merchant2} بـ {amount2}.'**
+  /// **'{merchant} في المركز الأول بـ {amount} (عدد المرات: {visits})، وبعده {merchant2} بـ {amount2}.'**
   String insightsExplainMerchantsBasic(
     String merchant,
     String amount,
@@ -10551,11 +10551,17 @@ abstract class AppLocalizations {
   /// **'الأسعار اتحدّثت {date}'**
   String aboutMainPrices(String date);
 
-  /// S
+  /// S · FR-SYNC-06 · BUG-017
   ///
   /// In ar, this message translates to:
-  /// **'لسه ما اتحدّثتش (شغال من غير نت)'**
-  String get aboutMainNeverSynced;
+  /// **'قايمة التجار: لسه ما اتحدّثتش (شغال من غير نت)'**
+  String get aboutMainCatalogNever;
+
+  /// S · BUG-017
+  ///
+  /// In ar, this message translates to:
+  /// **'الأسعار: لسه ما اتحدّثتش'**
+  String get aboutMainPricesNever;
 
   /// L
   ///

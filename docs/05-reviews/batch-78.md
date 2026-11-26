@@ -1,0 +1,16 @@
+# Batch 78 review (2026-11-26): QA catalogue and fixes BUG-015…BUG-019
+
+Scope: `git diff main...batch/2026-11-26-78`. QA documents (docs-only) plus five small fixes written by the QA session itself at the PO's request, each with a test that fails without it.
+
+| Bug | Class | Production change | Test that fails without it |
+|---|---|---|---|
+| BUG-015 paywall stuck loading | C2 (billing UI, no entitlement logic touched) | `gold_ui_ports.dart`: `retry: (_, _) => null` on `goldOffersProvider` | `store_timeout_test.dart` "BUG-015: with the default container…" |
+| BUG-016 template app icon | C1 | 5 Android mipmaps, 15 iOS icon files generated from the brand PNG | `app/test/app/app_icon_test.dart` |
+| BUG-017 About lines | C2 | two new ARB keys (ar/en), `about_screen.dart`, copy deck row | `settings_screens_test.dart` (About, both states) |
+| BUG-018 sheet under the tab bar | C2 | `z_sheet.dart`: `useRootNavigator: true` | none on host (needs the shell on a device); full app suite re-run for regressions |
+| BUG-019 pairing contract | C2 (transfer matching is money logic; the change only removes the leg from its own pool) | `transfer_matching.dart` | `transfer_matching_test.dart` and `test/qa` TC-XFR-003b |
+| BUG-021 unlabelled visit count | C1 (copy) | ARB ar/en `insightsExplainMerchantsBasic`, copy deck | `test/qa/chart_explanations_reflect_data_test.dart` (merchants) |
+
+Goldens: `settings_goldens_test.dart` shows the About screen, so the `app-regen` workflow must run on the task branch.
+
+Review: see the section added below by the batch reviewer.

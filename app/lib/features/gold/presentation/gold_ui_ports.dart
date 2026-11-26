@@ -71,24 +71,29 @@ final goldProductQueryProvider =
     );
 
 /// The offers from the store. Throws when the store has none (prices failed).
-final goldOffersProvider = FutureProvider.autoDispose<List<GoldPlanOffer>>((
-  ref,
-) async {
-  final r = await withStoreTimeout(
-    ref.read(goldProductQueryProvider)(GoldProducts.all),
-  );
-  if (r.error != null) throw StateError('store');
-  final out = <GoldPlanOffer>[];
-  for (final p in GoldPlan.values) {
-    for (final d in r.productDetails) {
-      if (d.id == p.productId) {
-        out.add(GoldPlanOffer(plan: p, storePrice: d.price));
+final goldOffersProvider = FutureProvider.autoDispose<List<GoldPlanOffer>>(
+  (ref) async {
+    final r = await withStoreTimeout(
+      ref.read(goldProductQueryProvider)(GoldProducts.all),
+    );
+    if (r.error != null) throw StateError('store');
+    final out = <GoldPlanOffer>[];
+    for (final p in GoldPlan.values) {
+      for (final d in r.productDetails) {
+        if (d.id == p.productId) {
+          out.add(GoldPlanOffer(plan: p, storePrice: d.price));
+        }
       }
     }
-  }
-  if (out.isEmpty) throw StateError('no products');
-  return out;
-}, name: 'goldOffersProvider');
+    if (out.isEmpty) throw StateError('no products');
+    return out;
+  },
+  // BUG-015: no automatic retry. Riverpod's default retry put the paywall back
+  // on "Loading prices…" after every failure, so "prices failed" and its Try
+  // again button never stayed on screen.
+  retry: (_, _) => null,
+  name: 'goldOffersProvider',
+);
 
 /// What the screens do. The default wires T-145 and T-144.
 abstract interface class GoldActions {
