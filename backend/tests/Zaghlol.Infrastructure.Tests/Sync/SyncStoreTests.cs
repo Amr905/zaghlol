@@ -177,6 +177,8 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
 
     // ---- T-353 ----
 
+    private static readonly string[] ForbiddenColumnWords = ["install", "account", "ip", "version", "token"];
+
     private static string Marker() => "fb" + string.Concat(RandomNumberGenerator.GetBytes(10).Select(b => (char)('a' + (b % 26))));
 
     private static PreparedFeedback Feedback(IEnumerable<PreparedConfirmation>? right = null, IEnumerable<PreparedCorrection>? wrong = null) =>
@@ -312,7 +314,7 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         var columns = await Db.QueryAsync(
             fixture.Database.Superuser,
             "SELECT column_name FROM information_schema.columns WHERE table_schema = 'zaghlol' AND table_name IN ('llm_cat_confirmations', 'llm_cat_corrections')");
-        Assert.DoesNotContain(columns, c => new[] { "install", "account", "ip", "version", "token" }.Any(word => ((string)c[0]!).Contains(word, StringComparison.Ordinal) && (string)c[0]! != "install_hash"));
+        Assert.DoesNotContain(columns, c => ForbiddenColumnWords.Any(word => ((string)c[0]!).Contains(word, StringComparison.Ordinal) && (string)c[0]! != "install_hash"));
     }
 
     [Fact]
