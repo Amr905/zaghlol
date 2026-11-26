@@ -43,7 +43,7 @@ DayHourPattern _pattern() => DayHourPattern(
   },
 );
 
-List<InOutBar> sampleInOut({bool emptyFirst = false}) {
+List<InOutBar> sampleInOut({bool emptyFirst = false, bool exchange = false}) {
   final income = [30000, 30000, 31000, 32000, 32000, 32000];
   final spent = [24800, 26900, 32400, 25200, 25600, 21200];
   return [
@@ -55,6 +55,8 @@ List<InOutBar> sampleInOut({bool emptyFirst = false}) {
         spendMinor: (emptyFirst && i == 0 ? 0 : spent[i]) * 100,
         hasData: !(emptyFirst && i == 0),
         projected: i == 5,
+        exchangedInMinor: exchange && i == 2 ? 8000 * 100 : 0,
+        exchangedOutMinor: exchange && i == 3 ? 5000 * 100 : 0,
       ),
   ];
 }
@@ -65,6 +67,7 @@ List<Override> trendsOverrides({
   bool loading = false,
   bool error = false,
   bool noSpend = false,
+  bool exchange = false,
 }) {
   final now = today ?? CivilDate(2026, 11, 10);
   final period = ChartPeriod(CivilDate(2026, 10, 25), CivilDate(2026, 11, 24));
@@ -77,7 +80,9 @@ List<Override> trendsOverrides({
         );
       }
       if (error) throw StateError('boom');
-      return ChartReady(sampleInOut(emptyFirst: emptyFirstMonth));
+      return ChartReady(
+        sampleInOut(emptyFirst: emptyFirstMonth, exchange: exchange),
+      );
     }),
     heatDailyProvider.overrideWith((ref, code) async {
       if (loading) {

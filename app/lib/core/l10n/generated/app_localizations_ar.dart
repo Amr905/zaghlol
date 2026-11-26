@@ -9367,6 +9367,21 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get insightsV2TrendsLegendExchangeIn => 'غيّرت عملة: دخل';
+
+  @override
+  String get insightsV2TrendsLegendExchangeOut => 'غيّرت عملة: خرج';
+
+  @override
+  String insightsV2TrendsInOutExchangeA11y(
+    String month,
+    String inAmount,
+    String outAmount,
+  ) {
+    return '$month، غيّرت عملة: دخل $inAmount، خرج $outAmount';
+  }
+
+  @override
   String insightsV2TrendsInOutBarA11y(
     String month,
     String income,

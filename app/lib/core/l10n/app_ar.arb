@@ -12768,6 +12768,19 @@
       }
     }
   },
+  "insightsV2TrendsLegendExchangeIn": "غيّرت عملة: دخل",
+  "@insightsV2TrendsLegendExchangeIn": {"description": "T-283 legend"},
+  "insightsV2TrendsLegendExchangeOut": "غيّرت عملة: خرج",
+  "@insightsV2TrendsLegendExchangeOut": {"description": "T-283 legend"},
+  "insightsV2TrendsInOutExchangeA11y": "{month}، غيّرت عملة: دخل {inAmount}، خرج {outAmount}",
+  "@insightsV2TrendsInOutExchangeA11y": {
+    "description": "T-283",
+    "placeholders": {
+      "month": {"type": "String"},
+      "inAmount": {"type": "String"},
+      "outAmount": {"type": "String"}
+    }
+  },
   "insightsV2TrendsInOutBarA11y": "{month}: دخلك {income}، صرفت {spend}",
   "@insightsV2TrendsInOutBarA11y": {
     "description": "T-211 Charts v2 · one month",

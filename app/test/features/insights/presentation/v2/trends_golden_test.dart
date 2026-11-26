@@ -18,6 +18,7 @@ Future<void> _pump(
   required Locale locale,
   required bool dark,
   bool hidden = false,
+  bool exchange = false,
 }) async {
   await initDateFormatting();
   await tester.binding.setSurfaceSize(const Size(390, 1500));
@@ -28,7 +29,7 @@ Future<void> _pump(
       locale: locale,
       dark: dark,
       hideAmounts: hidden ? HideAmountsHarness(hidden: true) : null,
-      overrides: trendsOverrides(),
+      overrides: trendsOverrides(exchange: exchange),
     ),
   );
   await tester.pumpAndSettle();
@@ -43,6 +44,18 @@ void main() {
         await expectLater(
           find.byKey(const ValueKey('golden-root')),
           matchesGoldenFile('../../../../goldens/insights_v2_trends_$name.png'),
+        );
+      });
+    }
+    for (final dark in [false, true]) {
+      final xn = '${locale.languageCode}_${dark ? 'dark' : 'light'}';
+      testWidgets('insights v2 trends exchange golden $xn', (tester) async {
+        await _pump(tester, locale: locale, dark: dark, exchange: true);
+        await expectLater(
+          find.byKey(const ValueKey('golden-root')),
+          matchesGoldenFile(
+            '../../../../goldens/insights_v2_trends_exchange_$xn.png',
+          ),
         );
       });
     }

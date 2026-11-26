@@ -13517,6 +13517,28 @@ abstract class AppLocalizations {
   /// **'رسم الداخل والخارج. {list}'**
   String insightsV2TrendsInOutA11y(String list);
 
+  /// T-283 legend
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت عملة: دخل'**
+  String get insightsV2TrendsLegendExchangeIn;
+
+  /// T-283 legend
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت عملة: خرج'**
+  String get insightsV2TrendsLegendExchangeOut;
+
+  /// T-283
+  ///
+  /// In ar, this message translates to:
+  /// **'{month}، غيّرت عملة: دخل {inAmount}، خرج {outAmount}'**
+  String insightsV2TrendsInOutExchangeA11y(
+    String month,
+    String inAmount,
+    String outAmount,
+  );
+
   /// T-211 Charts v2 · one month
   ///
   /// In ar, this message translates to:
