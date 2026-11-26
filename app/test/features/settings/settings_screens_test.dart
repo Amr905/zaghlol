@@ -620,7 +620,8 @@ void main() {
       );
       await settle(tester);
       final t = _t(tester, AboutScreen);
-      expect(find.text(t.aboutMainNeverSynced), findsNWidgets(2));
+      expect(find.text(t.aboutMainCatalogNever), findsOneWidget);
+      expect(find.text(t.aboutMainPricesNever), findsOneWidget);
       expect(find.text(t.commonSupportCodeValue('abc-123')), findsOneWidget);
       await tester.tap(find.text(t.commonSupportCodeLabel));
       await tester.pump();
@@ -708,7 +709,8 @@ void main() {
       await settle(tester);
       final t = _t(tester, AboutScreen);
       expect(find.textContaining('2026'), findsWidgets);
-      expect(find.text(t.aboutMainNeverSynced), findsOneWidget);
+      expect(find.text(t.aboutMainCatalogNever), findsNothing);
+      expect(find.text(t.aboutMainPricesNever), findsOneWidget);
       expect(find.text(t.aboutDiagShare), findsNothing);
     });
 

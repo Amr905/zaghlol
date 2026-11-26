@@ -4953,7 +4953,7 @@
       }
     }
   },
-  "insightsExplainMerchantsBasic": "{merchant} في المركز الأول بـ {amount} ({visits})، وبعده {merchant2} بـ {amount2}.",
+  "insightsExplainMerchantsBasic": "{merchant} في المركز الأول بـ {amount} (عدد المرات: {visits})، وبعده {merchant2} بـ {amount2}.",
   "@insightsExplainMerchantsBasic": {
     "description": "E · visits = common_unit_visits",
     "placeholders": {
@@ -9953,9 +9953,13 @@
       }
     }
   },
-  "aboutMainNeverSynced": "لسه ما اتحدّثتش (شغال من غير نت)",
-  "@aboutMainNeverSynced": {
-    "description": "S"
+  "aboutMainCatalogNever": "قايمة التجار: لسه ما اتحدّثتش (شغال من غير نت)",
+  "@aboutMainCatalogNever": {
+    "description": "S · FR-SYNC-06 · BUG-017"
+  },
+  "aboutMainPricesNever": "الأسعار: لسه ما اتحدّثتش",
+  "@aboutMainPricesNever": {
+    "description": "S · BUG-017"
   },
   "aboutMainTerms": "الشروط",
   "@aboutMainTerms": {

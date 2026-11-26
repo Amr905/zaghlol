@@ -16,12 +16,14 @@ Every bug below was reproduced or read directly in the code during this audit. N
 | BUG-007 | LOW | `flutter analyze` fails on a clean checkout of `main` | CLAUDE.md §7 (Definition of Done) |
 | BUG-008 | LOW | Status documents contradict each other; README says "zero-backend" | CLAUDE.md §9, docs/workflow |
 | BUG-009 | LOW | `installs.catalog_version` accepts negative values at database level | backend-schema.md |
-| BUG-015 | MEDIUM | Gold paywall never leaves "Loading prices…" when the store has no offers | FR-GOLD-01, explorer finding 16 |
-| BUG-016 | MEDIUM | App icon is Flutter's default logo on Android and iOS, not Captain Zaghlol | CLAUDE.md §8, docs/02-design/brand |
-| BUG-017 | LOW | About screen shows two identical unlabelled "Not updated yet" lines | FR-SYNC-06 |
-| BUG-018 | LOW | Card-filter sheet opens under the tab bar; the Add button covers its "Done" button | FR-HOME-05, FR-CARD-01 |
-| BUG-019 | LOW | Transfer pairing returns "ambiguous" when the pool contains the leg itself, against its documented contract | BR-XFR-01 |
+| BUG-015 | MEDIUM (FIXED, batch 78) | Gold paywall never leaves "Loading prices…" when the store has no offers | FR-GOLD-01, explorer finding 16 |
+| BUG-016 | MEDIUM (FIXED, batch 78) | App icon is Flutter's default logo on Android and iOS, not Captain Zaghlol | CLAUDE.md §8, docs/02-design/brand |
+| BUG-017 | LOW (FIXED, batch 78) | About screen shows two identical unlabelled "Not updated yet" lines | FR-SYNC-06 |
+| BUG-018 | LOW (FIXED, batch 78) | Card-filter sheet opens under the tab bar; the Add button covers its "Done" button | FR-HOME-05, FR-CARD-01 |
+| BUG-019 | LOW (FIXED, batch 78) | Transfer pairing returns "ambiguous" when the pool contains the leg itself, against its documented contract | BR-XFR-01 |
 | BUG-020 | LOW | Decision IDs D-67…D-70 each name two different decisions in the SRS | requirements.md §2 |
+| BUG-021 | LOW (FIXED, batch 78) | Top-merchants explanation shows the visit count as a bare "(6)" | FR-CHT-03 |
+| BUG-022 | LOW | Top-merchants tip always says "one visit a week", whatever the merchant or the number of visits | FR-CHT-03 |
 
 BUG-015…018 were found on the emulator in a second session (19 Nov, evening). No CRITICAL bug was found. That statement covers only what was tested: see `release-readiness.md` for what was not.
 
@@ -129,7 +131,8 @@ BUG-015…018 were found on the emulator in a second session (19 Nov, evening). 
 - **Expected:** after 8 seconds (`goldStoreTimeout`), "prices failed" with a retry button, as the paywall code and `store_timeout_test.dart` describe.
 - **Actual:** three empty plan placeholders and "Loading prices…" for more than 30 seconds; reproduced after closing and reopening (20 s more). "Restore purchases" on the same screen did fail cleanly ("The store reported a problem. Try again in a bit."), so the store connection itself answers.
 - **Evidence:** screenshots taken during the session (described in `test-results.md` §5).
-- **Suspected root cause:** not established; no device logs were available. The 8-second timeout wraps only `queryProductDetails`; something that runs before it, or the provider being rebuilt without settling, may keep it in loading. The host test fakes the store, so it cannot catch this.
+- **Root cause (found 26 Nov):** Riverpod 3 retries a failing provider automatically. `goldOffersProvider` failed after 8 s, showed the error for a fraction of a second, then went back to loading, again and again. The host test passed because it built its container with `retry: null`. Fixed in batch 78 by turning the retry off for this provider; not yet re-checked on a device.
+- **Earlier note:** not established; no device logs were available. The 8-second timeout wraps only `queryProductDetails`; something that runs before it, or the provider being rebuilt without settling, may keep it in loading. The host test fakes the store, so it cannot catch this.
 - **Recommended fix:** reproduce with `adb logcat` on an emulator without Play billing; add a device or integration test for the "store unavailable" path.
 
 ## BUG-016 — App icon is the Flutter default
@@ -174,6 +177,19 @@ BUG-015…018 were found on the emulator in a second session (19 Nov, evening). 
 - **Actual:** D-67 is both "XAD hidden" and "Hide amounts in the app"; D-68 is both "Late-month salary" and "Chart periods"; D-69 is both "Hidden accounts still count" and "App size budget"; D-70 is both "Dark-mode quip" and "Lost database key".
 - **Impact:** code comments, tests and task files that cite one of these IDs cannot be traced to one decision. The test catalogue cannot attribute tests that cite them.
 - **Recommended fix:** renumber the later four and update the references.
+
+## BUG-021 — Top-merchants explanation: unlabelled visit count
+
+- **Severity:** LOW (readability). Found 26 Nov by `app/test/qa/chart_explanations_reflect_data_test.dart`.
+- **Actual:** "Carrefour is first with EGP 3,200.00 (6), then Talabat with EGP 2,100.00." Nothing says the 6 is the number of visits. Same in Arabic.
+- **Fix (batch 78):** "(visits: 6)" / "(عدد المرات: 6)", a form that needs no plural rules. Copy deck updated. The wording is QA's; the PO or the copy reviewer may prefer another.
+
+## BUG-022 — Top-merchants tip ignores the data
+
+- **Severity:** LOW. Open.
+- **Actual:** the tip "Group your {merchant} shopping into one visit a week" is shown for the top merchant whenever it is not on the protected list. It does not look at the number of visits or the length of the period, so a merchant visited twice in a month, a ride app or a subscription gets the same advice.
+- **Expected (FR-CHT-03):** a tip computed from the user's data.
+- **Recommended fix:** show it only when visits per week in the period are above one (and for shop-type categories), otherwise fall back to an amount-based tip or none. Needs a product decision, so it is not changed here.
 
 ---
 
