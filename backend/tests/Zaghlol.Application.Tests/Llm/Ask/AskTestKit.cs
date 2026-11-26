@@ -260,10 +260,24 @@ internal sealed class ScriptedQuota(List<string> order) : ILlmQuotaStore
 
     public int Commits { get; private set; }
 
+    /// <summary>When set, behaves like the real store's contract: a counter of <c>Limit</c>, and a key that already counted (inside the window) is a retry.</summary>
+    public (int Limit, int Used)? Counter { get; set; }
+
+    public HashSet<string> CountedKeys { get; } = [];
+
+    public List<string> Keys { get; } = [];
+
     public Task<LlmQuotaCheck> PreCheckAsync(LlmFeature feature, InstallId install, Guid? account, string requestId, CancellationToken cancellationToken)
     {
         order.Add("quota-precheck");
         PreChecks++;
+        Keys.Add(requestId);
+        if (Counter is { } c)
+        {
+            var left = Math.Max(0, c.Limit - c.Used);
+            return Task.FromResult(new LlmQuotaCheck(left > 0 || CountedKeys.Contains(requestId) ? LlmQuotaCheckKind.Allowed : LlmQuotaCheckKind.Exhausted, c.Limit, c.Used, left, Resets, IsRetry: CountedKeys.Contains(requestId)));
+        }
+
         return Task.FromResult(Check);
     }
 
@@ -271,6 +285,19 @@ internal sealed class ScriptedQuota(List<string> order) : ILlmQuotaStore
     {
         order.Add("quota-commit");
         Commits++;
+        Keys.Add(requestId);
+        if (Counter is { } c)
+        {
+            if (!CountedKeys.Add(requestId))
+            {
+                return Task.FromResult(new LlmQuotaCommit(LlmQuotaCheckKind.Allowed, 0, Math.Max(0, c.Limit - c.Used), true));
+            }
+
+            var applied = Math.Min(n, Math.Max(0, c.Limit - c.Used));
+            Counter = (c.Limit, c.Used + applied);
+            return Task.FromResult(new LlmQuotaCommit(applied > 0 ? LlmQuotaCheckKind.Allowed : LlmQuotaCheckKind.Exhausted, applied, Math.Max(0, c.Limit - c.Used - applied), false));
+        }
+
         return Task.FromResult(Commit);
     }
 }

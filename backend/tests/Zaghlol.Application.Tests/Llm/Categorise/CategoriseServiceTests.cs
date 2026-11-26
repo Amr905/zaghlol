@@ -92,6 +92,47 @@ public sealed class CategoriseServiceTests
         Assert.Equal(1, kit.Ask.Provider.Calls);
     }
 
+    private static LlmGateRequest GateWithBody(byte body) => CategoriseTestKit.Gate() with { BodyHash = Enumerable.Repeat(body, 32).ToArray() };
+
+    [Fact]
+    public async Task ARetriedRequestIdWithOtherMerchantsIsTrimmedAndCounted()
+    {
+        var kit = new CategoriseTestKit();
+        kit.Ask.Quota.Counter = (15, 14);
+        kit.ProviderReplies(CategoriseTestKit.Reply((0, "dining", 70)));
+        var first = await kit.RunAsync(["alpha cafe"], GateWithBody(1));
+        Assert.Equal(["ok/llm"], CategoriseTestKit.Statuses(first));
+        var calls = kit.Ask.Provider.Calls;
+
+        // Same request id, other merchants (another body hash): a new request with 0 left, so nothing is answered.
+        var replay = await kit.RunAsync(["new one", "new two", "new three"], GateWithBody(2));
+
+        Assert.Equal(["quota", "quota", "quota"], CategoriseTestKit.Statuses(replay));
+        Assert.Equal(calls, kit.Ask.Provider.Calls);
+        Assert.Equal(0, replay.Answer!.Counted);
+    }
+
+    [Fact]
+    public async Task AnIdenticalRetryInsideTheWindowIsNotCountedTwice()
+    {
+        var kit = new CategoriseTestKit();
+        kit.Ask.Quota.Counter = (15, 14);
+        kit.ProviderReplies(CategoriseTestKit.Reply((0, "dining", 70)));
+        await kit.RunAsync(["alpha cafe"], GateWithBody(1));
+
+        var retry = await kit.RunAsync(["alpha cafe"], GateWithBody(1));
+
+        Assert.Equal(["ok/llm"], CategoriseTestKit.Statuses(retry));
+        Assert.Equal(15, kit.Ask.Quota.Counter!.Value.Used);
+    }
+
+    [Fact]
+    public void TheRetryKeyBindsTheRequestIdToTheBody()
+    {
+        Assert.Equal(GateWithBody(1).RetryKey, GateWithBody(1).RetryKey);
+        Assert.NotEqual(GateWithBody(1).RetryKey, GateWithBody(2).RetryKey);
+    }
+
     [Fact]
     public async Task ACommitThatAppliesLessTurnsTheSurplusIntoQuotaAndDoesNotCacheIt()
     {

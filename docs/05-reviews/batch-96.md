@@ -181,3 +181,10 @@ Before merge, also regenerate and spot-check the 36 T-347 golden PNGs.
 - **B96-m5 added:** `test/features/catalog_sync/presentation/sync_lifecycle_test.dart` (flag off → zero calls; start + resume burst → one send; swallowed error, nothing logged) and `llm_stores_test.dart` now uses the real `llmConsentStoreProvider` `onCleared` closure. Note: the "no consent" case stays covered at sender level (the gateway checks consent, not the hook).
 - **B96-m3 fixed:** `askInvestPricesProvider` is `autoDispose` and `SyncLifecycle` invalidates it after each sync run; test `test/features/ask/data/ask_invest_prices_follow_feed_test.dart`. Quotes keep their own as-of (stale pill unchanged).
 - Checks: format clean; targeted suites 618 tests passed; app lints run.
+
+## Fix round — backend
+
+- **B96-M1 fixed (Categorise and Ask).** `LlmGateRequest.RetryKey` = `requestId ‖ hex(BodyHash)`. The gate pre-check and the Categorise and Ask commits now pass it to the quota store instead of the bare id. The store hashes it into `last_request_hash` (`bytea`, any length): no schema change. The same id with another body is a new request (trimmed, counted); a real resend has the same canonical body and still matches. This also closes FU-413 (Ask retry not bound to the body).
+- Tests: `ARetriedRequestIdWithOtherMerchantsIsTrimmedAndCounted`, `AnIdenticalRetryInsideTheWindowIsNotCountedTwice`, `TheRetryKeyBindsTheRequestIdToTheBody` (the quota fake `ScriptedQuota` gained a stateful counter mode). An identical retry after the window counting again is the existing store test `AnOldRequestIdBelowTheLimitCountsAgain`. No Postgres test added (the store/repository API is unchanged).
+- **B96-m2 fixed.** Owner stage now draws a per-/24 pre-attestation bucket (`RateLimits:LlmAttemptNetwork`, default 300/min, both features). Test `TheOwnerStageCapsAttemptsPerNetworkBeforeAttestation`.
+- Local: build -warnaserror, format, Application tests (400) and LlmRateLimiter tests pass. Docs `llm-categorise.md` §3 / T-352 note not updated.
