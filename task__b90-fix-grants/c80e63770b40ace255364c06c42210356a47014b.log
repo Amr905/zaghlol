@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=c80e63770b40ace255364c06c42210356a47014b
+SKIP sha=c80e63770b40ace255364c06c42210356a47014b no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/b90-fix-grants c80e63770b40ace255364c06c42210356a47014b 2026-11-26T18:08:19.7305804+02:00
+
+
+
