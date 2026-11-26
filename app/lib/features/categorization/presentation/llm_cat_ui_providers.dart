@@ -49,9 +49,19 @@ abstract final class CatCardSettings {
     max: 1 << 40,
   );
 
+  /// The day (UTC days since epoch) the user last pressed "Not now".
+  static final dismissedDay = SettingKey.optionalInteger(
+    'cat.card_dismissed_day',
+    min: 0,
+    max: 1 << 40,
+  );
+
   /// "Don't ask again".
   static final never = SettingKey.boolean('cat.card_never', byDefault: false);
 }
+
+int _utcDay(DateTime t) =>
+    t.toUtc().millisecondsSinceEpoch ~/ Duration.millisecondsPerDay;
 
 /// The card's frequency rule (pure): enough merchants, not "never", fewer
 /// than [catCardMaxShown] showings, [catCardCoolDown] since the last one.
@@ -122,13 +132,19 @@ final catCardVisibleProvider = FutureProvider.autoDispose<bool>((ref) async {
   final never = await repo.get(CatCardSettings.never);
   final shown = await repo.get(CatCardSettings.shown);
   final last = await repo.get(CatCardSettings.lastShown);
+  // FR-LCAT-43 (FU-450): a counted showing starts the 30-day pause, but the
+  // card stays up for the rest of that day unless the user pressed "Not now".
+  final today = _utcDay(DateTime.now());
+  final stayingUp =
+      await repo.get(CatCardSettings.lastCounted) == today &&
+      await repo.get(CatCardSettings.dismissedDay) != today;
   if (never || shown >= catCardMaxShown) return false;
   if (await ref.watch(catConsentGrantedProvider.future)) return false;
   final eligible = await ref.watch(catEligibleCountProvider.future);
   return catCardDue(
     eligible: eligible,
     shown: shown,
-    lastShownMs: last,
+    lastShownMs: stayingUp ? null : last,
     never: never,
     now: DateTime.now(),
   );
@@ -137,15 +153,18 @@ final catCardVisibleProvider = FutureProvider.autoDispose<bool>((ref) async {
 /// The card's showings, "Not now" and "Don't ask again".
 abstract final class LlmCatCardActions {
   /// Counts a showing, at most once per (UTC) day, when the card is on
-  /// screen; an ignored card then runs out after [catCardMaxShown] days.
+  /// screen, and records its time: the card then waits [catCardCoolDown]
+  /// (FR-LCAT-43) and runs out after [catCardMaxShown] showings.
   /// Does not invalidate the visibility provider (the card stays up today).
   static Future<void> countShowing(WidgetRef ref, {DateTime? now}) async {
     final repo = await ref.read(settingsRepositoryProvider.future);
     final t = (now ?? DateTime.now()).toUtc();
     final last = await repo.get(CatCardSettings.lastCounted);
-    final day = t.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay;
+    final day = _utcDay(t);
     if (last == day) return;
     await repo.set(CatCardSettings.lastCounted, day);
+    // FR-LCAT-43 (FU-450): at most one showing per 30 days.
+    await repo.set(CatCardSettings.lastShown, t.millisecondsSinceEpoch);
     final shown = await repo.get(CatCardSettings.shown);
     await repo.set(CatCardSettings.shown, shown + 1);
   }
@@ -153,10 +172,9 @@ abstract final class LlmCatCardActions {
   static Future<void> notNow(WidgetRef ref, {DateTime? now}) async {
     final repo = await ref.read(settingsRepositoryProvider.future);
     await countShowing(ref, now: now); // no double count on the same day
-    await repo.set(
-      CatCardSettings.lastShown,
-      (now ?? DateTime.now()).toUtc().millisecondsSinceEpoch,
-    );
+    final t = (now ?? DateTime.now()).toUtc();
+    await repo.set(CatCardSettings.lastShown, t.millisecondsSinceEpoch);
+    await repo.set(CatCardSettings.dismissedDay, _utcDay(t));
     ref.invalidate(catCardVisibleProvider);
   }
 
