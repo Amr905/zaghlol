@@ -1499,6 +1499,70 @@
       }
     }
   },
+  "homeCurrencyCardsTitle": "فلوسك بعملات تانية",
+  "@homeCurrencyCardsTitle": {
+    "description": "C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24."
+  },
+  "homeCurrencyCardLeft": "فاضل {amount}",
+  "@homeCurrencyCardLeft": {
+    "description": "C · T-278: what is left in that currency this month, on a currency card. Max 18.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardInOut": "دخل {income} · خرج {out}",
+  "@homeCurrencyCardInOut": {
+    "description": "C · T-278: second line of a currency card: this month's money in and out (spending plus exchanged away), same currency.",
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "out": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardMore": "+{count}",
+  "@homeCurrencyCardMore": {
+    "description": "C · T-278: chip after the third currency card; opens a sheet with the rest. Max 4.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardMoreA11y": "{count, plural, =1{عملة كمان} =2{عملتين كمان} few{{n} عملات كمان} other{{n} عملة كمان}}",
+  "@homeCurrencyCardMoreA11y": {
+    "description": "C · T-278: screen-reader label of the +N chip.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardA11y": "{currency}: فاضل {left}. دخل {income}، وخرج {out}. اضغط تفتح الشهر بالعملة دي",
+  "@homeCurrencyCardA11y": {
+    "description": "C · T-278: screen-reader label of one currency card.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "out": {
+        "type": "String"
+      }
+    }
+  },
   "exchangeEntryTitle": "تغيير عملة",
   "@exchangeEntryTitle": {
     "description": "C · T-272 manual exchange screen title"

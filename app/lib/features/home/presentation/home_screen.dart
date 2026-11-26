@@ -1,9 +1,8 @@
 // T-054: Home (S-10). Reads [homeModelProvider] only. iOS gets a large inline
 // title; Android a Material 3 collapsing app bar. Contextual cards (T-104)
-// are in the banner slot (T-104); the currency switcher (T-116) is not here.
+// are in the banner slot (T-104); one hero page (the primary currency) plus small currency cards (T-278).
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,7 +12,6 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_banner.dart';
 import '../../../core/ui/z_button.dart';
 import '../../../core/ui/z_card.dart';
-import '../../../core/ui/z_currency_switcher.dart';
 import '../../accounts/domain/account.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../capture/application/capture_providers.dart';
@@ -24,6 +22,7 @@ import '../application/home_read_model.dart';
 import '../../mascot/presentation/mascot_moments.dart';
 import '../../salary/presentation/expected_salary_row.dart';
 import 'cards/home_cards_view.dart';
+import 'currency_cards.dart';
 import 'home_format.dart';
 import 'home_widgets.dart';
 
@@ -193,63 +192,25 @@ class _FilterRow extends StatelessWidget {
   );
 }
 
-/// Tallest measured page among the first [pageCount] pages; heights of pages
-/// that no longer exist (currency count dropped) are ignored. [fallback] is
-/// used until a live page has reported.
-@visibleForTesting
-double pagerHeight(Map<int, double> heights, int pageCount, double fallback) {
-  var tallest = 0.0;
-  for (final e in heights.entries) {
-    if (e.key < pageCount && e.value > tallest) tallest = e.value;
-  }
-  return tallest == 0 ? fallback : tallest;
-}
-
-class _HomeBody extends ConsumerStatefulWidget {
+class _HomeBody extends ConsumerWidget {
   const _HomeBody({required this.model, required this.actions});
 
   final HomeModel model;
   final HomeActions actions;
 
   @override
-  ConsumerState<_HomeBody> createState() => _HomeBodyState();
-}
-
-class _HomeBodyState extends ConsumerState<_HomeBody> {
-  int _page = 0;
-  final _pager = PageController();
-
-  /// Content height of each pager page, reported after layout.
-  final _pageHeights = <int, double>{};
-
-  /// Used for the first frame only, until a page reports its height.
-  static const _firstFrameHeight = 330.0;
-
-  void _setHeight(int index, double h) {
-    if (_pageHeights[index] == h || !mounted) return;
-    setState(() => _pageHeights[index] = h);
-  }
-
-  @override
-  void dispose() {
-    _pager.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final m = widget.model;
-    final a = widget.actions;
+    final m = model;
+    final a = actions;
     final format = HomeFormat.of(context, ref);
     final paydaySet = ref.watch(homePaydaySetProvider);
     final smsOn = ref.watch(captureSmsEnabledProvider).value ?? false;
     final supported = ref.watch(captureSupportedProvider);
     final isEmpty = m.recent.isEmpty;
-    final figures = m.currencies;
-    final page = figures.isEmpty ? 0 : _page.clamp(0, figures.length - 1);
-    final scale = MediaQuery.textScalerOf(context);
-    _pageHeights.removeWhere((i, _) => i >= figures.length);
+    // T-278 (D-86): the primary currency is the only hero page; the other
+    // currencies are small cards under it.
+    final hero = m.hero;
     final accounts = <String, Account>{
       for (final acc
           in ref.watch(homeAccountsProvider).value ?? const <Account>[])
@@ -264,90 +225,17 @@ class _HomeBodyState extends ConsumerState<_HomeBody> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: ZSpacing.sm),
-          if (figures.isEmpty)
+          if (hero == null)
             _EmptyHero(key: const ValueKey('home-hero-empty'))
-          else if (figures.length == 1)
+          else
             _Page(
-              figures: figures.first,
+              figures: hero,
               model: m,
               format: format,
               paydaySet: paydaySet,
               actions: a,
-            )
-          else ...[
-            ZCurrencySwitcher(
-              codes: [for (final f in figures) f.currency.code],
-              selected: figures[page].currency.code,
-              onSelected: (code) {
-                final i = figures.indexWhere((f) => f.currency.code == code);
-                if (i < 0) return;
-                _pager.animateToPage(
-                  i,
-                  duration: ZMotion.standard,
-                  curve: ZMotion.curve,
-                );
-              },
             ),
-            const SizedBox(height: ZSpacing.sm),
-            SizedBox(
-              key: const ValueKey('home-pager'),
-              // Sized to the tallest measured page (batch-29 minor): a page
-              // without a budget also shows the hint and its button.
-              height: pagerHeight(
-                _pageHeights,
-                figures.length,
-                scale.scale(_firstFrameHeight),
-              ),
-              child: PageView(
-                controller: _pager,
-                allowImplicitScrolling: true,
-                onPageChanged: (i) => setState(() => _page = i),
-                children: [
-                  for (var i = 0; i < figures.length; i++)
-                    OverflowBox(
-                      alignment: AlignmentDirectional.topStart,
-                      minHeight: 0,
-                      maxHeight: double.infinity,
-                      child: _MeasureHeight(
-                        onHeight: (h) => _setHeight(i, h),
-                        child: _Page(
-                          figures: figures[i],
-                          model: m,
-                          format: format,
-                          paydaySet: paydaySet,
-                          actions: a,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            // T-272 (PO 2026-11-26): income in another currency is never
-            // hidden behind the pager: one line per currency under the main
-            // page, each opening that currency's page. Never converted.
-            if (page == 0)
-              for (var i = 1; i < figures.length; i++)
-                if (figures[i].income.isPositive)
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton(
-                      key: ValueKey(
-                        'home-other-income-${figures[i].currency.code}',
-                      ),
-                      onPressed: () => _pager.animateToPage(
-                        i,
-                        duration: ZMotion.standard,
-                        curve: ZMotion.curve,
-                      ),
-                      child: Text(
-                        l.homeHeroOtherCurrencyIncome(
-                          format.money(figures[i].income),
-                        ),
-                      ),
-                    ),
-                  ),
-            HomePagerDots(count: figures.length, index: page),
-          ],
+          HomeCurrencyCards(cards: m.currencyCards, format: format),
           if (m.scanInProgress) ...[
             const SizedBox(height: ZSpacing.md),
             ZBanner(
@@ -581,36 +469,5 @@ class _HomeSkeleton extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Reports the height its child lays out at (after the frame).
-class _MeasureHeight extends SingleChildRenderObjectWidget {
-  const _MeasureHeight({required this.onHeight, required super.child});
-
-  final ValueChanged<double> onHeight;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderMeasureHeight(onHeight);
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderMeasureHeight r) =>
-      r.onHeight = onHeight;
-}
-
-class _RenderMeasureHeight extends RenderProxyBox {
-  _RenderMeasureHeight(this.onHeight);
-
-  ValueChanged<double> onHeight;
-  double? _last;
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    final h = size.height;
-    if (h == _last) return;
-    _last = h;
-    WidgetsBinding.instance.addPostFrameCallback((_) => onHeight(h));
   }
 }

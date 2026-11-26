@@ -2016,6 +2016,47 @@ abstract class AppLocalizations {
   /// **'+ {amount} دخل'**
   String homeHeroOtherCurrencyIncome(String amount);
 
+  /// C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24.
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوسك بعملات تانية'**
+  String get homeCurrencyCardsTitle;
+
+  /// C · T-278: what is left in that currency this month, on a currency card. Max 18.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاضل {amount}'**
+  String homeCurrencyCardLeft(String amount);
+
+  /// C · T-278: second line of a currency card: this month's money in and out (spending plus exchanged away), same currency.
+  ///
+  /// In ar, this message translates to:
+  /// **'دخل {income} · خرج {out}'**
+  String homeCurrencyCardInOut(String income, String out);
+
+  /// C · T-278: chip after the third currency card; opens a sheet with the rest. Max 4.
+  ///
+  /// In ar, this message translates to:
+  /// **'+{count}'**
+  String homeCurrencyCardMore(String count);
+
+  /// C · T-278: screen-reader label of the +N chip.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{عملة كمان} =2{عملتين كمان} few{{n} عملات كمان} other{{n} عملة كمان}}'**
+  String homeCurrencyCardMoreA11y(int count, String n);
+
+  /// C · T-278: screen-reader label of one currency card.
+  ///
+  /// In ar, this message translates to:
+  /// **'{currency}: فاضل {left}. دخل {income}، وخرج {out}. اضغط تفتح الشهر بالعملة دي'**
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  );
+
   /// C · T-272 manual exchange screen title
   ///
   /// In ar, this message translates to:

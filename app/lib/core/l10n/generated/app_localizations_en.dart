@@ -1216,6 +1216,45 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get homeCurrencyCardsTitle => 'Other currencies';
+
+  @override
+  String homeCurrencyCardLeft(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String homeCurrencyCardInOut(String income, String out) {
+    return 'In $income · Out $out';
+  }
+
+  @override
+  String homeCurrencyCardMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String homeCurrencyCardMoreA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n more currencies',
+      one: '1 more currency',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  ) {
+    return '$currency: $left left. In $income, out $out. Tap to open this month in that currency';
+  }
+
+  @override
   String get exchangeEntryTitle => 'Currency exchange';
 
   @override

@@ -1253,6 +1253,47 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get homeCurrencyCardsTitle => 'فلوسك بعملات تانية';
+
+  @override
+  String homeCurrencyCardLeft(String amount) {
+    return 'فاضل $amount';
+  }
+
+  @override
+  String homeCurrencyCardInOut(String income, String out) {
+    return 'دخل $income · خرج $out';
+  }
+
+  @override
+  String homeCurrencyCardMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String homeCurrencyCardMoreA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n عملة كمان',
+      few: '$n عملات كمان',
+      two: 'عملتين كمان',
+      one: 'عملة كمان',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  ) {
+    return '$currency: فاضل $left. دخل $income، وخرج $out. اضغط تفتح الشهر بالعملة دي';
+  }
+
+  @override
   String get exchangeEntryTitle => 'تغيير عملة';
 
   @override

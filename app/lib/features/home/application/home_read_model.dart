@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/settings/settings_providers.dart';
+import '../../accounts/data/accounts_providers.dart';
 import '../../budget/application/budget_providers.dart';
 import '../../budget/application/cycle_app_wiring.dart';
 import '../../budget/application/cycle_overview.dart';
@@ -55,6 +56,49 @@ final class HomeCurrencyFigures {
   final Money net;
 }
 
+/// T-278 (D-86): one small currency card under the Home hero. A non-primary
+/// currency appears when it had activity this month (spending, income or an
+/// exchange) or holds a non-zero balance on an account. Never converted.
+final class HomeCurrencyCard {
+  const HomeCurrencyCard({required this.figures, this.lastActivity});
+
+  /// This month in that currency (zeros when only a balance qualifies).
+  final HomeCurrencyFigures figures;
+
+  /// The latest civil date of a transaction of this currency in the month;
+  /// null when the card exists only because of a balance.
+  final CivilDate? lastActivity;
+
+  Currency get currency => figures.currency;
+
+  /// What is left, exact in the currency's own exponent.
+  Money get left => figures.net;
+
+  Money get moneyIn => figures.moneyIn;
+
+  /// Spending plus what was exchanged away (so in - out = left).
+  Money get out => figures.spend + figures.exchangedOut;
+}
+
+/// The cards, most recent activity first (balance-only last, then by code).
+List<HomeCurrencyCard> orderCurrencyCards(Iterable<HomeCurrencyCard> cards) {
+  final list = cards.toList();
+  list.sort((a, b) {
+    final x = a.lastActivity;
+    final y = b.lastActivity;
+    if (x != null && y != null) {
+      final c = y.compareTo(x);
+      if (c != 0) return c;
+    } else if (x != null) {
+      return -1;
+    } else if (y != null) {
+      return 1;
+    }
+    return a.currency.code.compareTo(b.currency.code);
+  });
+  return list;
+}
+
 /// A feed row. [excludedFromTotals] is true for internal transfers, which
 /// are shown labelled and never counted (BR-XFR).
 final class HomeFeedItem {
@@ -74,6 +118,8 @@ final class HomeModel {
     required this.reviewCount,
     required this.scanInProgress,
     required this.cardFilter,
+    this.currencyCards = const [],
+    this.primary,
   });
 
   final Cycle cycle;
@@ -90,10 +136,47 @@ final class HomeModel {
   final Set<String> cardFilter;
 
   /// EC-55: with one currency (or none) no currency UI is shown.
-  bool get showCurrencyUi => currencies.length > 1;
+  bool get showCurrencyUi => currencyCards.isNotEmpty;
 
-  HomeCurrencyFigures? get hero => currencies.isEmpty ? null : currencies.first;
+  /// T-278: the small cards of the other currencies, in display order. The
+  /// primary currency never has one (it is the hero).
+  final List<HomeCurrencyCard> currencyCards;
+
+  /// The primary currency (the hero); null means "the first of
+  /// [currencies]" (tests and legacy callers).
+  final Currency? primary;
+
+  /// The hero is always the primary currency's page (T-278). When only
+  /// other currencies have data it shows zeros; null when there is no data.
+  HomeCurrencyFigures? get hero {
+    if (currencies.isEmpty && currencyCards.isEmpty) return null;
+    final p =
+        primary ?? (currencies.isEmpty ? null : currencies.first.currency);
+    if (p == null) return null;
+    for (final f in currencies) {
+      if (f.currency == p) return f;
+    }
+    return zeroFigures(p);
+  }
 }
+
+/// Figures with every amount zero (a currency with nothing this month).
+HomeCurrencyFigures zeroFigures(Currency c) => HomeCurrencyFigures(
+  overview: CurrencyOverview(
+    currency: c,
+    totals: CycleTotals(
+      currency: c,
+      income: Money.zero(c),
+      spend: Money.zero(c),
+      pendingSpend: Money.zero(c),
+      byCategoryMinor: const {},
+    ),
+    budget: null,
+    safeToSpend: null,
+    underIdealLine: null,
+  ),
+  net: Money.zero(c),
+);
 
 /// Primary currency first, then the others by code.
 List<Currency> orderCurrencies(Iterable<Currency> all, Currency primary) {
@@ -143,6 +226,55 @@ final homeModelProvider = FutureProvider<HomeModel>((ref) async {
           budgets: budgets,
           incomeTarget: target,
         );
+  // T-278: cards for the other currencies (activity this month or a balance).
+  final (rows, _) = await repo.loadRows(cycle, accounts: filter);
+  final lastActivity = <Currency, CivilDate>{};
+  for (final r in rows) {
+    if (r.status == CycleStatus.declined || r.status == CycleStatus.reversed) {
+      continue;
+    }
+    final cur = lastActivity[r.amount.currency];
+    if (cur == null || r.date > cur) lastActivity[r.amount.currency] = r.date;
+  }
+  final accountsRepo = await ref.watch(accountsRepositoryProvider.future);
+  final held = <Currency>{};
+  for (final a in await accountsRepo.listWithBalances(includeHidden: true)) {
+    if (filter.isNotEmpty && !filter.contains(a.account.id)) continue;
+    for (final b in a.balances) {
+      final m = b.balance;
+      if (m != null && m.minor != 0) held.add(m.currency);
+    }
+  }
+  final cards = <HomeCurrencyCard>[];
+  for (final c in {
+    ...overview.byCurrency.keys,
+    ...lastActivity.keys,
+    ...held,
+  }) {
+    if (c == primary) continue;
+    final f = overview.byCurrency[c];
+    final t = f?.totals;
+    final active =
+        lastActivity.containsKey(c) ||
+        (t != null &&
+            (t.income.minor != 0 ||
+                t.spend.minor != 0 ||
+                t.exchangedIn.minor != 0 ||
+                t.exchangedOut.minor != 0));
+    if (!active && !held.contains(c)) continue;
+    cards.add(
+      HomeCurrencyCard(
+        figures: f == null
+            ? zeroFigures(c)
+            : HomeCurrencyFigures(
+                overview: f,
+                safeToSpend: all.byCurrency[c]?.safeToSpend,
+                net: f.totals.left,
+              ),
+        lastActivity: lastActivity[c],
+      ),
+    );
+  }
   final feed = await txns.query(
     filter: TransactionFilter(accountIds: filter),
     page: const PageRequest(limit: homeFeedLimit),
@@ -166,5 +298,7 @@ final homeModelProvider = FutureProvider<HomeModel>((ref) async {
     reviewCount: reviewCount,
     scanInProgress: scanning,
     cardFilter: filter,
+    currencyCards: orderCurrencyCards(cards),
+    primary: primary,
   );
 }, name: 'homeModelProvider');
