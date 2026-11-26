@@ -1,5 +1,14 @@
 ﻿== SUMMARY ==
-RUNNING sha=ceae2328c897b5640a3e46c77768e2ba211624a1
+FAIL sha=ceae2328c897b5640a3e46c77768e2ba211624a1 pipeline=quick docker-not-running=1
+docker-not-running           FAIL  exit=1  0s
+
+== ERRORS: docker-not-running ==
+Docker is not running. Start Docker Desktop (Linux containers) and re-push or queue a job.
 
 == FULL LOG (last 1500 lines) ==
 auto task/b92-rereview ceae2328c897b5640a3e46c77768e2ba211624a1 2026-11-27T01:45:01.1197765+02:00
+
+
+
+[01:45:09] Docker is not running. Start Docker Desktop (Linux containers) and re-push or queue a job.
+[01:45:09] SUMMARY FAIL sha=ceae2328c897b5640a3e46c77768e2ba211624a1 pipeline=quick docker-not-running=1
