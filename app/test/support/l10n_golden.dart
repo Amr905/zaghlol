@@ -4,10 +4,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/theme/app_theme.dart';
 
+import 'package:zaghlol/features/mascot/presentation/zaghlol_avatar.dart';
+
 import 'golden_matrix.dart';
+
+class _StillMascot extends ReduceMotionNotifier {
+  @override
+  bool build() => true;
+}
 
 /// Localized, themed host with a golden root for one variant.
 Widget l10nGoldenHost(GoldenVariant v, Widget child) => ProviderScope(
+  // Still pose: no Rive runtime in CI and no looping animation in goldens.
+  overrides: [reduceMotionProvider.overrideWith(_StillMascot.new)],
   child: MaterialApp(
     debugShowCheckedModeBanner: false,
     locale: v.locale,
