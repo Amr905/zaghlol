@@ -14489,6 +14489,288 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر'**
   String get privacyServerItemAskLlm;
+
+  /// C · icon + text, never colour alone (FR-LCAT-21)
+  ///
+  /// In ar, this message translates to:
+  /// **'اقتراح زغلول'**
+  String get categorizationAiChipLabel;
+
+  /// A · verbatim from the a11y row (§8)
+  ///
+  /// In ar, this message translates to:
+  /// **'اقتراح من زغلول، لسه متأكدتش'**
+  String get categorizationAiChipLabelA11y;
+
+  /// S · text of the chip's info tooltip or sheet on tap
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول خمّن التصنيف ده من اسم المحل. قولّه لو صح.'**
+  String get categorizationAiChipHint;
+
+  /// B · ✓ button, 48 dp, separate target ≥ 8 dp from Wrong
+  ///
+  /// In ar, this message translates to:
+  /// **'صح'**
+  String get categorizationAiChipRightLabel;
+
+  /// B · ✗ button
+  ///
+  /// In ar, this message translates to:
+  /// **'مش صح'**
+  String get categorizationAiChipWrongLabel;
+
+  /// A · verbatim from §8
+  ///
+  /// In ar, this message translates to:
+  /// **'التصنيف ده صح'**
+  String get categorizationAiChipRightA11y;
+
+  /// A · verbatim from §8
+  ///
+  /// In ar, this message translates to:
+  /// **'التصنيف ده غلط'**
+  String get categorizationAiChipWrongA11y;
+
+  /// N · merchant, category · snackbar and polite live-region announcement after Right; both buttons disappear for that shop
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام، هفتكر إن {merchant} يعني {category}.'**
+  String categorizationAiChipRightDone(String merchant, String category);
+
+  /// N · merchant, category · after a pick in the picker; announced
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام، {merchant} بقى {category} في كل حركاته.'**
+  String categorizationAiChipWrongDone(String merchant, String category);
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'التصنيف الصح إيه؟'**
+  String get categorizationAiPickerTitle;
+
+  /// S · merchant
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار تصنيف {merchant}، وهيتطبق على كل حركاته.'**
+  String categorizationAiPickerHint(String merchant);
+
+  /// N · category · snackbar, 5 s
+  ///
+  /// In ar, this message translates to:
+  /// **'اتغيّر لـ {category}.'**
+  String categorizationAiUndoMessage(String category);
+
+  /// B · snackbar action, 48 dp
+  ///
+  /// In ar, this message translates to:
+  /// **'تراجع'**
+  String get categorizationAiUndoAction;
+
+  /// T · count:int, n · shown from 3, so no zero
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{عندك محل واحد مش عارف أصنفه} =2{عندك محلين مش عارف أصنفهم} few{عندك {n} محلات مش عارف أصنفهم} many{عندك {n} محل مش عارف أصنفهم} other{عندك {n} محل مش عارف أصنفهم}}'**
+  String categorizationAiCardTitle(int count, String n);
+
+  /// E
+  ///
+  /// In ar, this message translates to:
+  /// **'تحب زغلول يخمّن تصنيفهم من اسم المحل؟ بيتبعت اسم المحل بس، والكلمة الأخيرة ليك.'**
+  String get categorizationAiCardBody;
+
+  /// B · opens the consent sheet (§4.12.4), sends nothing yet
+  ///
+  /// In ar, this message translates to:
+  /// **'يلا يخمّن'**
+  String get categorizationAiCardAllow;
+
+  /// B · same words as `common_action_notNow`; kept apart so the card can be restyled
+  ///
+  /// In ar, this message translates to:
+  /// **'مش دلوقتي'**
+  String get categorizationAiCardNotNow;
+
+  /// B · text button; stops the card for good
+  ///
+  /// In ar, this message translates to:
+  /// **'بلاش تسألني تاني'**
+  String get categorizationAiCardNever;
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'تحب زغلول يخمّن التصنيفات؟'**
+  String get categorizationAiConsentTitle;
+
+  /// E · aiProvider · names the server and the provider; never "no server"
+  ///
+  /// In ar, this message translates to:
+  /// **'للمحلات اللي مش عارفها، هبعت اسم المحل لسيرفر زغلول ولـ {aiProvider} علشان يخمّنوا تصنيفه. وأنت اللي بتقرر لو التخمين صح.'**
+  String categorizationAiConsentIntro(String aiProvider);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'بيتبعت'**
+  String get categorizationAiConsentSendsTitle;
+
+  /// S · FR-LCAT-02/44
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم المحل بس، ولغة التطبيق.'**
+  String get categorizationAiConsentSends;
+
+  /// E · aiProvider · FR-LCAT-02, technical fields for the monthly count
+  ///
+  /// In ar, this message translates to:
+  /// **'ومعاه: إصدار التطبيق ونوع الموبايل، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. {aiProvider} بيوصله اسم المحل واللغة بس.'**
+  String categorizationAiConsentSendsMore(String aiProvider);
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'عمره ما بيتبعت'**
+  String get categorizationAiConsentNeverTitle;
+
+  /// S · FR-LCAT-02/05; the PO's rule: amounts, balances and messages are not sent
+  ///
+  /// In ar, this message translates to:
+  /// **'المبلغ ولا الرصيد ولا التاريخ ولا البنك ولا الكارت ولا نص الرسالة. والتحويلات وأسامي الناس مش بتتبعت خالص.'**
+  String get categorizationAiConsentNever;
+
+  /// S · FR-LCAT-12/31; wording to legal with the policy section
+  ///
+  /// In ar, this message translates to:
+  /// **'سيرفر زغلول بيحتفظ باسم المحل وتصنيفه علشان نحسّن قايمة المحلات، من غير أي حاجة تدل عليك.'**
+  String get categorizationAiConsentStorage;
+
+  /// E · FR-LCAT-24/30/31; custom names never leave (sent as "custom")
+  ///
+  /// In ar, this message translates to:
+  /// **'لما تقول «صح» أو «مش صح»، بنبعت اسم المحل والتصنيف بس، وحد من فريقنا بيراجع الغلط. لو اخترت تصنيف من عندك، مبنبعتش اسمه.'**
+  String get categorizationAiConsentFeedback;
+
+  /// S · count:int = the tier quota (15 Free, 150 Gold, remote), n
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{عندك تخمين واحد في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} =2{عندك تخمينين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} few{عندك {n} تخمينات في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} many{عندك {n} تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.} other{عندك {n} تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.}}'**
+  String categorizationAiConsentQuota(int count, String n);
+
+  /// B · stores `cat.llm_consent`; from Settings it keeps this label
+  ///
+  /// In ar, this message translates to:
+  /// **'موافق، خمّن'**
+  String get categorizationAiConsentAllow;
+
+  /// B · stores nothing; drag or back = Not now
+  ///
+  /// In ar, this message translates to:
+  /// **'مش دلوقتي'**
+  String get categorizationAiConsentNotNow;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'تقدر تقفله في أي وقت من «خصوصيتك».'**
+  String get categorizationAiConsentSettingsHint;
+
+  /// N · snackbar after Not now
+  ///
+  /// In ar, this message translates to:
+  /// **'ولا يهمك، مبعتّش حاجة.'**
+  String get categorizationAiConsentDeclined;
+
+  /// L · always available while off; opens the consent sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّي زغلول يخمّن التصنيفات'**
+  String get categorizationAiQueuePassiveRow;
+
+  /// L · count:int, n, max · last backend reply (FR-LCAT-41)
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{خلصت تخمينات الشهر} =1{فاضل تخمين واحد من {max}} =2{فاضل تخمينين من {max}} few{فاضل {n} تخمينات من {max}} many{فاضل {n} تخمين من {max}} other{فاضل {n} تخمين من {max}}}'**
+  String categorizationAiQueueCounter(int count, String max, String n);
+
+  /// C · before the first backend reply
+  ///
+  /// In ar, this message translates to:
+  /// **'—'**
+  String get categorizationAiQueueCounterUnknown;
+
+  /// A · count:int, n
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{خلصت تخمينات التصنيف الشهر ده} =1{فاضل تخمين تصنيف واحد الشهر ده} =2{فاضل تخمينين تصنيف الشهر ده} few{فاضل {n} تخمينات تصنيف الشهر ده} many{فاضل {n} تخمين تصنيف الشهر ده} other{فاضل {n} تخمين تصنيف الشهر ده}}'**
+  String categorizationAiQueueCounterA11y(int count, String n);
+
+  /// N · at 0, the 1st of next month (Cairo), locale date
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول هيخمّن تاني يوم {date}.'**
+  String categorizationAiQueueResetOn(String date);
+
+  /// S · count:int = `cat.quota_gold`, n · Free at 0 only, one text line plus `chat_quota_seeGold`, never a modal
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{مع جولد بيبقى عندك تخمين واحد في الشهر.} =2{مع جولد بيبقى عندك تخمينين في الشهر.} few{مع جولد بيبقى عندك {n} تخمينات في الشهر.} many{مع جولد بيبقى عندك {n} تخمين في الشهر.} other{مع جولد بيبقى عندك {n} تخمين في الشهر.}}'**
+  String categorizationAiQueueGoldHint(int count, String n);
+
+  /// S · offline or paused (FR-LCAT-04)
+  ///
+  /// In ar, this message translates to:
+  /// **'المحلات دي مستنية النت، وهتتخمّن أول ما يرجع.'**
+  String get categorizationAiQueueOffline;
+
+  /// S · low confidence or `unknown` (FR-LCAT-13); not counted
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول مقدرش يخمّن ده. اختار التصنيف بإيدك.'**
+  String get categorizationAiQueueNoGuess;
+
+  /// L · switch; on = consent stored
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول يخمّن التصنيف'**
+  String get privacyLlmCatLabel;
+
+  /// S · aiProvider
+  ///
+  /// In ar, this message translates to:
+  /// **'بيبعت اسم المحل بس لسيرفر زغلول ولـ {aiProvider}، من غير المبلغ ولا الرصيد ولا الرسايل.'**
+  String privacyLlmCatSentence(String aiProvider);
+
+  /// S · count:int, n, date · under the switch while on
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{خلصت تخمينات الشهر، وبترجع يوم {date}.} =1{فاضل تخمين واحد الشهر ده، والعداد بيرجع يوم {date}.} =2{فاضل تخمينين الشهر ده، والعداد بيرجع يوم {date}.} few{فاضل {n} تخمينات الشهر ده، والعداد بيرجع يوم {date}.} many{فاضل {n} تخمين الشهر ده، والعداد بيرجع يوم {date}.} other{فاضل {n} تخمين الشهر ده، والعداد بيرجع يوم {date}.}}'**
+  String privacyLlmCatQuota(int count, String date, String n);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'عدد التخمينات هيظهر بعد أول مرة زغلول يخمّن.'**
+  String get privacyLlmCatQuotaUnknown;
+
+  /// L · text button, opens the consent sheet read-only (Close only)
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي بيتبعت؟'**
+  String get privacyLlmCatDetails;
+
+  /// N · snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'اتقفل. مش هبعت أي اسم محل غير لما توافق تاني، والتصنيفات اللي اتحطت قبل كده فاضلة.'**
+  String get privacyLlmCatTurnedOff;
+
+  /// S · BR-SYNC-03 amendment (D-96); added to the §3.10 list while `llm_categorise` is on
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم المحل لتخمين التصنيف لو وافقت، وإجابتك «صح» أو «مش صح» على التخمين، من غير أي حاجة تدل عليك، وعدّاد التخمينات في الشهر'**
+  String get privacyServerItemLlmCat;
 }
 
 class _AppLocalizationsDelegate

@@ -10301,5 +10301,293 @@
   "privacyServerItemAskLlm": "Your question text for the online helper, only if you allow it and never stored, plus your monthly question count",
   "@privacyServerItemAskLlm": {
     "description": "S · BR-SYNC-03 amendment (D-90); added to the §3.10 list while ask_llm is on"
-  }
+  },
+    "categorizationAiChipLabel": "Zaghlol's guess",
+    "@categorizationAiChipLabel": {
+      "description": "C · icon + text, never colour alone (FR-LCAT-21)"
+    },
+    "categorizationAiChipLabelA11y": "Zaghlol's guess, not confirmed",
+    "@categorizationAiChipLabelA11y": {
+      "description": "A · verbatim from the a11y row (§8)"
+    },
+    "categorizationAiChipHint": "Zaghlol guessed this category from the shop name. Tell him if it's right.",
+    "@categorizationAiChipHint": {
+      "description": "S · text of the chip's info tooltip or sheet on tap"
+    },
+    "categorizationAiChipRightLabel": "Right",
+    "@categorizationAiChipRightLabel": {
+      "description": "B · ✓ button, 48 dp, separate target ≥ 8 dp from Wrong"
+    },
+    "categorizationAiChipWrongLabel": "Wrong",
+    "@categorizationAiChipWrongLabel": {
+      "description": "B · ✗ button"
+    },
+    "categorizationAiChipRightA11y": "This category is right",
+    "@categorizationAiChipRightA11y": {
+      "description": "A · verbatim from §8"
+    },
+    "categorizationAiChipWrongA11y": "This category is wrong",
+    "@categorizationAiChipWrongA11y": {
+      "description": "A · verbatim from §8"
+    },
+    "categorizationAiChipRightDone": "Got it, I'll remember {merchant} as {category}.",
+    "@categorizationAiChipRightDone": {
+      "description": "N · merchant, category · snackbar and polite live-region announcement after Right; both buttons disappear for that shop",
+      "placeholders": {
+        "merchant": {
+          "type": "String"
+        },
+        "category": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiChipWrongDone": "Done, {merchant} is now {category} everywhere.",
+    "@categorizationAiChipWrongDone": {
+      "description": "N · merchant, category · after a pick in the picker; announced",
+      "placeholders": {
+        "merchant": {
+          "type": "String"
+        },
+        "category": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiPickerTitle": "What's the right category?",
+    "@categorizationAiPickerTitle": {
+      "description": "T"
+    },
+    "categorizationAiPickerHint": "Pick a category for {merchant}. It applies to all its transactions.",
+    "@categorizationAiPickerHint": {
+      "description": "S · merchant",
+      "placeholders": {
+        "merchant": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiUndoMessage": "Changed to {category}.",
+    "@categorizationAiUndoMessage": {
+      "description": "N · category · snackbar, 5 s",
+      "placeholders": {
+        "category": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiUndoAction": "Undo",
+    "@categorizationAiUndoAction": {
+      "description": "B · snackbar action, 48 dp"
+    },
+    "categorizationAiCardTitle": "{count, plural, =1{You have 1 shop I couldn't sort} other{You have {n} shops I couldn't sort}}",
+    "@categorizationAiCardTitle": {
+      "description": "T · count:int, n · shown from 3, so no zero",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiCardBody": "Want Zaghlol to guess their categories from the shop name? Only the shop name is sent, and you have the last word.",
+    "@categorizationAiCardBody": {
+      "description": "E"
+    },
+    "categorizationAiCardAllow": "Let him guess",
+    "@categorizationAiCardAllow": {
+      "description": "B · opens the consent sheet (§4.12.4), sends nothing yet"
+    },
+    "categorizationAiCardNotNow": "Not now",
+    "@categorizationAiCardNotNow": {
+      "description": "B · same words as `common_action_notNow`; kept apart so the card can be restyled"
+    },
+    "categorizationAiCardNever": "Don't ask again",
+    "@categorizationAiCardNever": {
+      "description": "B · text button; stops the card for good"
+    },
+    "categorizationAiConsentTitle": "Want Zaghlol to guess categories?",
+    "@categorizationAiConsentTitle": {
+      "description": "T"
+    },
+    "categorizationAiConsentIntro": "For shops I don't know, I'll send the shop name to Zaghlol's server and {aiProvider} so they can guess its category. You decide whether the guess is right.",
+    "@categorizationAiConsentIntro": {
+      "description": "E · aiProvider · names the server and the provider; never \"no server\"",
+      "placeholders": {
+        "aiProvider": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiConsentSendsTitle": "What's sent",
+    "@categorizationAiConsentSendsTitle": {
+      "description": "L"
+    },
+    "categorizationAiConsentSends": "Only the shop name, and the app language.",
+    "@categorizationAiConsentSends": {
+      "description": "S · FR-LCAT-02/44"
+    },
+    "categorizationAiConsentSendsMore": "Also sent: the app version and phone type, a random app ID and a proof the phone is genuine. {aiProvider} gets only the shop name and the language.",
+    "@categorizationAiConsentSendsMore": {
+      "description": "E · aiProvider · FR-LCAT-02, technical fields for the monthly count",
+      "placeholders": {
+        "aiProvider": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiConsentNeverTitle": "Never sent",
+    "@categorizationAiConsentNeverTitle": {
+      "description": "L"
+    },
+    "categorizationAiConsentNever": "Amounts, balances, dates, banks, cards or message text. Transfers and people's names are never sent either.",
+    "@categorizationAiConsentNever": {
+      "description": "S · FR-LCAT-02/05; the PO's rule: amounts, balances and messages are not sent"
+    },
+    "categorizationAiConsentStorage": "Zaghlol's server keeps the shop name and its category to improve the shop list, without anything that identifies you.",
+    "@categorizationAiConsentStorage": {
+      "description": "S · FR-LCAT-12/31; wording to legal with the policy section"
+    },
+    "categorizationAiConsentFeedback": "When you tap Right or Wrong, we send only the shop name and the category, and someone on our team reviews the wrong ones. If you pick one of your own categories, its name isn't sent.",
+    "@categorizationAiConsentFeedback": {
+      "description": "E · FR-LCAT-24/30/31; custom names never leave (sent as \"custom\")"
+    },
+    "categorizationAiConsentQuota": "{count, plural, =1{You get 1 guess a month. Shops Zaghlol already knows don't count.} other{You get {n} guesses a month. Shops Zaghlol already knows don't count.}}",
+    "@categorizationAiConsentQuota": {
+      "description": "S · count:int = the tier quota (15 Free, 150 Gold, remote), n",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiConsentAllow": "Allow",
+    "@categorizationAiConsentAllow": {
+      "description": "B · stores `cat.llm_consent`; from Settings it keeps this label"
+    },
+    "categorizationAiConsentNotNow": "Not now",
+    "@categorizationAiConsentNotNow": {
+      "description": "B · stores nothing; drag or back = Not now"
+    },
+    "categorizationAiConsentSettingsHint": "You can turn it off any time in Privacy & data.",
+    "@categorizationAiConsentSettingsHint": {
+      "description": "S"
+    },
+    "categorizationAiConsentDeclined": "No problem, nothing was sent.",
+    "@categorizationAiConsentDeclined": {
+      "description": "N · snackbar after Not now"
+    },
+    "categorizationAiQueuePassiveRow": "Let Zaghlol guess categories",
+    "@categorizationAiQueuePassiveRow": {
+      "description": "L · always available while off; opens the consent sheet"
+    },
+    "categorizationAiQueueCounter": "{count, plural, =0{No guesses left this month} =1{1 of {max} guesses left} other{{n} of {max} guesses left}}",
+    "@categorizationAiQueueCounter": {
+      "description": "L · count:int, n, max · last backend reply (FR-LCAT-41)",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "max": {
+          "type": "String"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueCounterUnknown": "—",
+    "@categorizationAiQueueCounterUnknown": {
+      "description": "C · before the first backend reply"
+    },
+    "categorizationAiQueueCounterA11y": "{count, plural, =0{No category guesses left this month} =1{1 category guess left this month} other{{n} category guesses left this month}}",
+    "@categorizationAiQueueCounterA11y": {
+      "description": "A · count:int, n",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueResetOn": "Zaghlol will guess again on {date}.",
+    "@categorizationAiQueueResetOn": {
+      "description": "N · at 0, the 1st of next month (Cairo), locale date",
+      "placeholders": {
+        "date": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueGoldHint": "{count, plural, =1{Gold gives you 1 guess a month.} other{Gold gives you {n} guesses a month.}}",
+    "@categorizationAiQueueGoldHint": {
+      "description": "S · count:int = `cat.quota_gold`, n · Free at 0 only, one text line plus `chat_quota_seeGold`, never a modal",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "categorizationAiQueueOffline": "These shops are waiting for the internet and will be guessed once it's back.",
+    "@categorizationAiQueueOffline": {
+      "description": "S · offline or paused (FR-LCAT-04)"
+    },
+    "categorizationAiQueueNoGuess": "Zaghlol couldn't guess this one. Pick the category yourself.",
+    "@categorizationAiQueueNoGuess": {
+      "description": "S · low confidence or `unknown` (FR-LCAT-13); not counted"
+    },
+    "privacyLlmCatLabel": "Let Zaghlol guess categories",
+    "@privacyLlmCatLabel": {
+      "description": "L · switch; on = consent stored"
+    },
+    "privacyLlmCatSentence": "Sends only the shop name to Zaghlol's server and {aiProvider}, never amounts, balances or messages.",
+    "@privacyLlmCatSentence": {
+      "description": "S · aiProvider",
+      "placeholders": {
+        "aiProvider": {
+          "type": "String"
+        }
+      }
+    },
+    "privacyLlmCatQuota": "{count, plural, =0{No guesses left this month. They reset on {date}.} =1{1 guess left this month. Resets on {date}.} other{{n} guesses left this month. Resets on {date}.}}",
+    "@privacyLlmCatQuota": {
+      "description": "S · count:int, n, date · under the switch while on",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        },
+        "date": {
+          "type": "String"
+        },
+        "n": {
+          "type": "String"
+        }
+      }
+    },
+    "privacyLlmCatQuotaUnknown": "The count shows after Zaghlol's first guess.",
+    "@privacyLlmCatQuotaUnknown": {
+      "description": "S"
+    },
+    "privacyLlmCatDetails": "What's sent?",
+    "@privacyLlmCatDetails": {
+      "description": "L · text button, opens the consent sheet read-only (Close only)"
+    },
+    "privacyLlmCatTurnedOff": "Turned off. No shop name is sent until you allow it again, and the categories already set stay.",
+    "@privacyLlmCatTurnedOff": {
+      "description": "N · snackbar"
+    },
+    "privacyServerItemLlmCat": "The shop name for a category guess, only if you allow it, your Right or Wrong answers on guesses without anything that identifies you, and your monthly guess count",
+    "@privacyServerItemLlmCat": {
+      "description": "S · BR-SYNC-03 amendment (D-96); added to the §3.10 list while `llm_categorise` is on"
+    }
 }

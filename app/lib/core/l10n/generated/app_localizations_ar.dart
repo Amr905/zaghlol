@@ -10127,4 +10127,244 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get privacyServerItemAskLlm =>
       'نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر';
+
+  @override
+  String get categorizationAiChipLabel => 'اقتراح زغلول';
+
+  @override
+  String get categorizationAiChipLabelA11y => 'اقتراح من زغلول، لسه متأكدتش';
+
+  @override
+  String get categorizationAiChipHint =>
+      'زغلول خمّن التصنيف ده من اسم المحل. قولّه لو صح.';
+
+  @override
+  String get categorizationAiChipRightLabel => 'صح';
+
+  @override
+  String get categorizationAiChipWrongLabel => 'مش صح';
+
+  @override
+  String get categorizationAiChipRightA11y => 'التصنيف ده صح';
+
+  @override
+  String get categorizationAiChipWrongA11y => 'التصنيف ده غلط';
+
+  @override
+  String categorizationAiChipRightDone(String merchant, String category) {
+    return 'تمام، هفتكر إن $merchant يعني $category.';
+  }
+
+  @override
+  String categorizationAiChipWrongDone(String merchant, String category) {
+    return 'تمام، $merchant بقى $category في كل حركاته.';
+  }
+
+  @override
+  String get categorizationAiPickerTitle => 'التصنيف الصح إيه؟';
+
+  @override
+  String categorizationAiPickerHint(String merchant) {
+    return 'اختار تصنيف $merchant، وهيتطبق على كل حركاته.';
+  }
+
+  @override
+  String categorizationAiUndoMessage(String category) {
+    return 'اتغيّر لـ $category.';
+  }
+
+  @override
+  String get categorizationAiUndoAction => 'تراجع';
+
+  @override
+  String categorizationAiCardTitle(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'عندك $n محل مش عارف أصنفهم',
+      many: 'عندك $n محل مش عارف أصنفهم',
+      few: 'عندك $n محلات مش عارف أصنفهم',
+      two: 'عندك محلين مش عارف أصنفهم',
+      one: 'عندك محل واحد مش عارف أصنفه',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiCardBody =>
+      'تحب زغلول يخمّن تصنيفهم من اسم المحل؟ بيتبعت اسم المحل بس، والكلمة الأخيرة ليك.';
+
+  @override
+  String get categorizationAiCardAllow => 'يلا يخمّن';
+
+  @override
+  String get categorizationAiCardNotNow => 'مش دلوقتي';
+
+  @override
+  String get categorizationAiCardNever => 'بلاش تسألني تاني';
+
+  @override
+  String get categorizationAiConsentTitle => 'تحب زغلول يخمّن التصنيفات؟';
+
+  @override
+  String categorizationAiConsentIntro(String aiProvider) {
+    return 'للمحلات اللي مش عارفها، هبعت اسم المحل لسيرفر زغلول ولـ $aiProvider علشان يخمّنوا تصنيفه. وأنت اللي بتقرر لو التخمين صح.';
+  }
+
+  @override
+  String get categorizationAiConsentSendsTitle => 'بيتبعت';
+
+  @override
+  String get categorizationAiConsentSends => 'اسم المحل بس، ولغة التطبيق.';
+
+  @override
+  String categorizationAiConsentSendsMore(String aiProvider) {
+    return 'ومعاه: إصدار التطبيق ونوع الموبايل، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. $aiProvider بيوصله اسم المحل واللغة بس.';
+  }
+
+  @override
+  String get categorizationAiConsentNeverTitle => 'عمره ما بيتبعت';
+
+  @override
+  String get categorizationAiConsentNever =>
+      'المبلغ ولا الرصيد ولا التاريخ ولا البنك ولا الكارت ولا نص الرسالة. والتحويلات وأسامي الناس مش بتتبعت خالص.';
+
+  @override
+  String get categorizationAiConsentStorage =>
+      'سيرفر زغلول بيحتفظ باسم المحل وتصنيفه علشان نحسّن قايمة المحلات، من غير أي حاجة تدل عليك.';
+
+  @override
+  String get categorizationAiConsentFeedback =>
+      'لما تقول «صح» أو «مش صح»، بنبعت اسم المحل والتصنيف بس، وحد من فريقنا بيراجع الغلط. لو اخترت تصنيف من عندك، مبنبعتش اسمه.';
+
+  @override
+  String categorizationAiConsentQuota(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'عندك $n تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.',
+      many:
+          'عندك $n تخمين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.',
+      few:
+          'عندك $n تخمينات في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.',
+      two: 'عندك تخمينين في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.',
+      one: 'عندك تخمين واحد في الشهر. المحلات اللي زغلول يعرفها أصلًا مش محسوبة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiConsentAllow => 'موافق، خمّن';
+
+  @override
+  String get categorizationAiConsentNotNow => 'مش دلوقتي';
+
+  @override
+  String get categorizationAiConsentSettingsHint =>
+      'تقدر تقفله في أي وقت من «خصوصيتك».';
+
+  @override
+  String get categorizationAiConsentDeclined => 'ولا يهمك، مبعتّش حاجة.';
+
+  @override
+  String get categorizationAiQueuePassiveRow => 'خلّي زغلول يخمّن التصنيفات';
+
+  @override
+  String categorizationAiQueueCounter(int count, String max, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n تخمين من $max',
+      many: 'فاضل $n تخمين من $max',
+      few: 'فاضل $n تخمينات من $max',
+      two: 'فاضل تخمينين من $max',
+      one: 'فاضل تخمين واحد من $max',
+      zero: 'خلصت تخمينات الشهر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiQueueCounterUnknown => '—';
+
+  @override
+  String categorizationAiQueueCounterA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n تخمين تصنيف الشهر ده',
+      many: 'فاضل $n تخمين تصنيف الشهر ده',
+      few: 'فاضل $n تخمينات تصنيف الشهر ده',
+      two: 'فاضل تخمينين تصنيف الشهر ده',
+      one: 'فاضل تخمين تصنيف واحد الشهر ده',
+      zero: 'خلصت تخمينات التصنيف الشهر ده',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String categorizationAiQueueResetOn(String date) {
+    return 'زغلول هيخمّن تاني يوم $date.';
+  }
+
+  @override
+  String categorizationAiQueueGoldHint(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'مع جولد بيبقى عندك $n تخمين في الشهر.',
+      many: 'مع جولد بيبقى عندك $n تخمين في الشهر.',
+      few: 'مع جولد بيبقى عندك $n تخمينات في الشهر.',
+      two: 'مع جولد بيبقى عندك تخمينين في الشهر.',
+      one: 'مع جولد بيبقى عندك تخمين واحد في الشهر.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get categorizationAiQueueOffline =>
+      'المحلات دي مستنية النت، وهتتخمّن أول ما يرجع.';
+
+  @override
+  String get categorizationAiQueueNoGuess =>
+      'زغلول مقدرش يخمّن ده. اختار التصنيف بإيدك.';
+
+  @override
+  String get privacyLlmCatLabel => 'زغلول يخمّن التصنيف';
+
+  @override
+  String privacyLlmCatSentence(String aiProvider) {
+    return 'بيبعت اسم المحل بس لسيرفر زغلول ولـ $aiProvider، من غير المبلغ ولا الرصيد ولا الرسايل.';
+  }
+
+  @override
+  String privacyLlmCatQuota(int count, String date, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n تخمين الشهر ده، والعداد بيرجع يوم $date.',
+      many: 'فاضل $n تخمين الشهر ده، والعداد بيرجع يوم $date.',
+      few: 'فاضل $n تخمينات الشهر ده، والعداد بيرجع يوم $date.',
+      two: 'فاضل تخمينين الشهر ده، والعداد بيرجع يوم $date.',
+      one: 'فاضل تخمين واحد الشهر ده، والعداد بيرجع يوم $date.',
+      zero: 'خلصت تخمينات الشهر، وبترجع يوم $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get privacyLlmCatQuotaUnknown =>
+      'عدد التخمينات هيظهر بعد أول مرة زغلول يخمّن.';
+
+  @override
+  String get privacyLlmCatDetails => 'إيه اللي بيتبعت؟';
+
+  @override
+  String get privacyLlmCatTurnedOff =>
+      'اتقفل. مش هبعت أي اسم محل غير لما توافق تاني، والتصنيفات اللي اتحطت قبل كده فاضلة.';
+
+  @override
+  String get privacyServerItemLlmCat =>
+      'اسم المحل لتخمين التصنيف لو وافقت، وإجابتك «صح» أو «مش صح» على التخمين، من غير أي حاجة تدل عليك، وعدّاد التخمينات في الشهر';
 }
