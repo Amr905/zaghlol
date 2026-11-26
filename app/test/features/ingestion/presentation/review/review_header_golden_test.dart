@@ -10,10 +10,13 @@ import '../../../../support/l10n_golden.dart';
 void main() {
   l10nGoldenMatrix(
     'review_header',
-    (l) => const Padding(
-      padding: EdgeInsets.all(16),
-      child: ReviewHeader(count: 3, countText: '3'),
+    (l) => const Align(
+      alignment: AlignmentDirectional.topStart,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: ReviewHeader(count: 3, countText: '3'),
+      ),
     ),
-    size: const Size(390, 160),
+    size: const Size(390, 200),
   );
 }
