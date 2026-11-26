@@ -77,6 +77,21 @@ void main() {
     expect(ed.added.single.single.direction, TxnDirection.income);
   });
 
+  // T-294: cash salary switch, off by default, only for new income.
+  testWidgets('income shows the salary question, off by default', (
+    tester,
+  ) async {
+    await pumpEditor(tester, FakeEditor());
+    expect(find.byKey(const ValueKey('txn-salary-switch')), findsNothing);
+    await tester.tap(find.text('Income'));
+    await tester.pumpAndSettle();
+    expect(find.text('Is this a salary?'), findsOneWidget);
+    final sw = tester.widget<SwitchListTile>(
+      find.byKey(const ValueKey('txn-salary-switch')),
+    );
+    expect(sw.value, isFalse);
+  });
+
   testWidgets('empty form shows amount and category errors, saves nothing', (
     tester,
   ) async {

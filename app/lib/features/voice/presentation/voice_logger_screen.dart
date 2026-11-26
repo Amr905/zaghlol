@@ -28,7 +28,8 @@ import '../../transactions/presentation/list/txn_row.dart';
 import '../application/voice_controller.dart';
 import '../application/voice_models.dart';
 import '../application/voice_providers.dart';
-import '../../../core/ui/z_haptics.dart';
+import '../../../core/ui/z_saved_toast.dart';
+import '../../transactions/presentation/saved_toast_budget.dart';
 import '../../../core/settings/settings_providers.dart';
 
 /// Opens S-31 full screen over the current route.
@@ -79,22 +80,39 @@ class _VoiceLoggerState extends ConsumerState<VoiceLoggerScreen> {
   Future<void> _onSaved(VoiceState s) async {
     final l = AppLocalizations.of(context);
     final lang = Localizations.localeOf(context).languageCode;
-    final n = ref.read(digitsModeProvider(lang)).render('${s.drafts.length}');
     final messenger = ScaffoldMessenger.of(context);
     final container = ProviderScope.containerOf(context);
     final ids = s.savedIds;
+    final d = s.drafts.length == 1 ? s.drafts.first : null;
+    final amt = d?.amount;
+    final count = ids.length;
+    final title = count > 1
+        ? l.voiceLoggerSaved(
+            count,
+            TxnFmt(
+              lang,
+              container.read(digitsModeProvider(lang)),
+              hidden: false,
+            ).count(count),
+          )
+        : null;
+    // Pop first; the budget line is looked up while the toast is not yet up.
     Navigator.of(context).pop();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(l.voiceLoggerSaved(s.drafts.length, n)),
-        action: SnackBarAction(
-          label: l.commonActionUndo,
-          onPressed: () {
-            ZHaptics.light();
-            unawaited(_undo(container, ids));
-          },
-        ),
-      ),
+    final line = d == null || amt == null
+        ? null
+        : await savedToastBudgetLine(
+            container,
+            categoryId: d.categoryId,
+            currency: amt.currency,
+            languageCode: lang,
+            l10n: l,
+          );
+    showSavedToast(
+      messenger,
+      l,
+      title: title,
+      budgetLine: line,
+      onUndo: () => unawaited(_undo(container, ids)),
     );
   }
 

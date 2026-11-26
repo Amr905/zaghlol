@@ -4597,6 +4597,18 @@ abstract class AppLocalizations {
   /// **'اتحفظ ✓'**
   String get accountsEditSaved;
 
+  /// T · toast after saving a transaction (T-295)
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجلت!'**
+  String get savedToastTitle;
+
+  /// T · category:String, amount:String (own currency)
+  ///
+  /// In ar, this message translates to:
+  /// **'فاضلك في {category} {amount}'**
+  String savedToastBudgetLeft(String category, String amount);
+
   /// T
   ///
   /// In ar, this message translates to:
@@ -5160,11 +5172,41 @@ abstract class AppLocalizations {
   /// **'أنا بحسب والدهب بيلمع، وإنت بتحوّش'**
   String get mascotTapLine10;
 
-  /// M · Rive payday · Home bubble when a salary lands (once per payday)
+  /// Payday sheet title (T-294)
   ///
   /// In ar, this message translates to:
-  /// **'القبض نزل يا كبير! 🎉'**
-  String get mascotPaydayLine;
+  /// **'وصل المرتب!'**
+  String get paydaySheetTitle;
+
+  /// Payday sheet amount, in the salary's own currency
+  ///
+  /// In ar, this message translates to:
+  /// **'+{amount}'**
+  String paydaySheetAmount(String amount);
+
+  /// Payday sheet line, shown only with an EGP cycle and a per-day figure
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول حسبها: تقدر تصرف حوالي {perDay} في اليوم لحد المرتب الجاي.'**
+  String paydaySheetPerDay(String perDay);
+
+  /// Payday sheet button, opens the budget
+  ///
+  /// In ar, this message translates to:
+  /// **'خطّط الشهر'**
+  String get paydaySheetPlan;
+
+  /// Payday sheet button, closes
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام'**
+  String get paydaySheetDone;
+
+  /// Screen-reader label of the payday sheet header
+  ///
+  /// In ar, this message translates to:
+  /// **'وصل المرتب، {amount}'**
+  String paydaySheetA11y(String amount);
 
   /// No description provided for @mascotTipUseScan.
   ///
@@ -12283,7 +12325,7 @@ abstract class AppLocalizations {
   /// Add-income switch
   ///
   /// In ar, this message translates to:
-  /// **'ده مرتب'**
+  /// **'ده مرتب؟'**
   String get salaryAddSwitch;
 
   /// Add-income switch hint
