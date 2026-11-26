@@ -46,9 +46,9 @@ final class V7Rebuild {
 
 /// Dropped by name before the rebuilds, as (`VIEW` or `TRIGGER`, name).
 const List<(String, String)> v7DroppedDependents = [
-  ('VIEW', 'transactions_fts_row'),
   ('TRIGGER', 'trg_offset_links_bi'),
   ('TRIGGER', 'trg_offset_links_bu'),
+  ('VIEW', 'transactions_fts_row'),
 ];
 
 /// The rebuilds, in order.

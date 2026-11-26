@@ -8,6 +8,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zaghlol/core/db/daos/ai_merchant_suggestions_dao.dart';
+import 'package:zaghlol/core/db/daos/llm_cat_queue_dao.dart';
 import 'package:zaghlol/app/app_restart.dart';
 import 'package:zaghlol/core/platform/widget_bridge_api.g.dart';
 import 'package:zaghlol/features/security/application/delete_everything_providers.dart';
@@ -164,6 +166,38 @@ void main() {
         .customSelect('SELECT count(*) AS n FROM secure_state')
         .getSingle();
     expect(rows.read<int>('n'), 0);
+  });
+
+  test('T-356 AC5: "Delete everything" empties the AI suggestions and the '
+      'auto-category queue', () async {
+    final w = await _World.open();
+    addTearDown(w.dispose);
+    await w.seedSecrets();
+    await w.db.customStatement(
+      'INSERT INTO categories (id, system_code, name_ar, name_en, icon, '
+      "color, bucket, sort) VALUES ('sys:dining', 'dining', 'x', 'x', 'i', "
+      "'#000000', 'wants', 1)",
+    );
+    await AiMerchantSuggestionsDao(w.db).putAnswer(
+      merchantNorm: 'zawya coffee',
+      categoryId: 'sys:dining',
+      confidence: 88,
+      source: AiSuggestionSourceCode.llm,
+      at: 1,
+    );
+    await LlmCatQueueDao(w.db).enqueue('fresh bakery', at: 1);
+
+    final report = await w.wipe().run();
+    expect(report.complete, isTrue, reason: '$report');
+
+    final fresh = openedDb(await w.world.open(seed: 62));
+    addTearDown(fresh.close);
+    for (final t in ['ai_merchant_suggestions', 'llm_cat_queue']) {
+      final n = await fresh
+          .customSelect('SELECT count(*) AS n FROM "$t"')
+          .getSingle();
+      expect(n.read<int>('n'), 0, reason: t);
+    }
   });
 
   test(

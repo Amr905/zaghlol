@@ -3,7 +3,10 @@
 // Reads exactly the file T-154's `encodeCsv` writes and stores its rows as
 // transactions (source `csv`). Rules:
 //  * Untrusted input: byte, row and cell caps; strict UTF-8; the header must
-//    equal [exportHeader]; every field is validated; nothing a row contains
+//    equal [exportHeader] or the pre-T-356 header (the same without the last
+//    `category_source` column; T-356 keeps older exports importable); every
+//    field is validated (`category_source` is informational: capped like
+//    every cell, never stored or trusted); nothing a row contains
 //    is ever echoed in an error or summary (only row numbers and reasons).
 //  * Amounts are parsed exactly with [Money.parse] after digit
 //    normalisation (never through a double) and are never converted.
@@ -222,7 +225,8 @@ class ImportCsvUseCase {
   Future<ImportSummary> run(Uint8List bytes, {bool dryRun = false}) async {
     final table = parseCsv(bytes);
     final header = table.first;
-    if (header.length != exportHeader.length) {
+    if (header.length != exportHeader.length &&
+        header.length != exportHeader.length - 1) {
       throw ImportCsvException(ImportCsvException.badHeader);
     }
     for (var i = 0; i < header.length; i++) {
@@ -260,6 +264,7 @@ class ImportCsvUseCase {
     bool dryRun,
     List<String> newIds,
   ) {
+    final width = table.first.length;
     return _store.inWriteTransaction(() async {
       final accounts = await _store.accountIds();
       final categories = await _store.categoryIds();
@@ -269,7 +274,7 @@ class ImportCsvUseCase {
       var invalid = 0;
       for (var i = 1; i < table.length; i++) {
         final r = table[i];
-        final p = r.length != exportHeader.length
+        final p = r.length != width
             ? (ImportRowProblem.columnCount, null)
             : _validate(r, accounts, categories);
         if (p.$2 != null) {

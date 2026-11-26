@@ -12,6 +12,7 @@ import 'dart:typed_data';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/app_database.dart';
+import 'package:zaghlol/core/db/encrypted_open.dart';
 import 'package:zaghlol/core/db/key_bootstrap.dart' show DbKeyMaterial;
 import 'package:zaghlol/features/backup/application/backup_contents.dart';
 import 'package:zaghlol/features/backup/application/backup_snapshot_exception.dart';
@@ -25,6 +26,7 @@ import '../../../core/db/db_open_harness.dart';
 import '../../../core/db/schema_v3_database.dart';
 import '../../../core/db/schema_v4_database.dart';
 import '../../../core/db/schema_v5_database.dart';
+import '../../../core/db/schema_v6_database.dart';
 import 'snapshot_test_support.dart';
 
 Matcher snapCode(BackupSnapshotErrorCode c) => throwsA(
@@ -103,6 +105,23 @@ void main() {
         )
         .getSingle();
     expect(link.read<String?>('l'), 'accBank');
+    // T-356: an AI category and its unconfirmed suggestion round-trip as
+    // stored (FR-LCAT-25 exports read them after a restore).
+    final ai = await b.db
+        .customSelect(
+          'SELECT t.category_id AS c, t.category_source AS s, a.state AS st '
+          'FROM transactions t JOIN ai_merchant_suggestions a '
+          "ON a.merchant_norm = t.merchant_norm WHERE t.id = 'ai1'",
+        )
+        .getSingle();
+    expect(ai.data, {'c': 'sys:food', 's': 'ai', 'st': 'unconfirmed'});
+    // ... while A's auto-category feedback stays on A (outbox is device).
+    expect(
+      await b.db
+          .customSelect("SELECT 1 FROM outbox WHERE kind LIKE 'llm_cat_%'")
+          .get(),
+      isEmpty,
+    );
     // Search works on the restored data (FTS pages travelled with it).
     final hits = await b.db
         .customSelect(
@@ -370,6 +389,61 @@ void main() {
     expect(r.read<int>('n'), v5Accounts);
     expect(v5Accounts, greaterThan(0));
     expect(r.read<int>('l'), 0);
+  });
+
+  test('AC3 (T-356): a backup made before v7 (schema v6) restores through '
+      'the v6 → v7 step and loses nothing: every backed-up table equal row '
+      'for row, the new tables empty', () async {
+    Future<void> makeV6(File f) => makeV6File(f, seed: 99);
+    final file = await craftBackup(
+      a,
+      keysA,
+      headerSchema: 6,
+      prepareSnapshot: (snap, kSnap) async {
+        final v6 = File('${snap.parent.path}/v6.db');
+        await makeV6(v6);
+        final src = openRaw(v6, keyOf(99));
+        final dst = openRaw(snap, kSnap);
+        dst.execute('PRAGMA journal_mode = DELETE');
+        await src.backup(dst, nPage: -1).drain<void>();
+        src.close();
+        for (final t in deviceTables.reversed) {
+          dst.execute('DELETE FROM "$t"');
+        }
+        dst.close();
+      },
+    );
+    const newTables = ['ai_merchant_suggestions', 'llm_cat_queue'];
+    final carried = [
+      for (final t in backedUpTables)
+        if (!newTables.contains(t)) t,
+    ];
+    final dir = await Directory.systemTemp.createTemp('zaghlol_t356_v6_');
+    addTearDown(() => dir.delete(recursive: true));
+    await makeV6(File('${dir.path}/x.db'));
+    final raw = V6Database(
+      openEncryptedExecutor(
+        File('${dir.path}/x.db'),
+        keyOf(99),
+        inBackground: false,
+      ),
+    );
+    final Map<String, List<String>> v6Rows;
+    try {
+      v6Rows = await dump(raw, carried);
+    } finally {
+      await raw.close();
+    }
+    expect(v6Rows['transactions'], hasLength(greaterThan(8)));
+    expect(v6Rows['merchant_rules'], isNotEmpty);
+
+    final outcome = await b.service().restore(bytesStream(file), passphrase);
+    expect(outcome.schemaVersion, 6);
+    expect(await userVersionOf(b.db), appSchemaVersion);
+    expect(await dump(b.db, carried), v6Rows);
+    for (final t in newTables) {
+      expect((await dump(b.db, [t]))[t], isEmpty, reason: t);
+    }
   });
 
   group('refusals leave the live database untouched', () {
