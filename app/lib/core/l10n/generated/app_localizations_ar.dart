@@ -1799,6 +1799,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsListBulkAccount => 'الكارت';
 
   @override
+  String get transactionsListBulkExchangeLocked =>
+      'تغيير العملة ملوش تصنيف ومينفعش يتنقل لكارت تاني لوحده. تقدر تمسحه عادي.';
+
+  @override
   String get transactionsListBulkRule => 'استخدم ده دايماً للتجار دول';
 
   @override

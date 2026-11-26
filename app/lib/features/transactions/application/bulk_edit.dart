@@ -49,6 +49,11 @@ final class BulkEditException extends SafeException {
   static const String categoryUnavailable = 'BULK_CATEGORY_UNAVAILABLE';
   static const String accountNotFound = 'BULK_ACCOUNT_NOT_FOUND';
   static const String paired = 'BULK_PAIRED';
+
+  /// T-286 (FU-384): a category was asked for an exchange leg. An exchange
+  /// is not spending and has no category; setting one on a leg would edit
+  /// one half of it.
+  static const String exchange = 'BULK_EXCHANGE';
   static const String undoNotFound = 'BULK_UNDO_NOT_FOUND';
   static const String undoExpired = 'BULK_UNDO_EXPIRED';
   static const String undoCorrupt = 'BULK_UNDO_CORRUPT';
@@ -62,7 +67,8 @@ sealed class BulkChange {
 /// Sets the category (the rows become user-verified, source `user`). With
 /// [alwaysUseForMerchants], also saves one merchant rule per distinct
 /// merchant among the rows (catalog merchant, else normalised name; rows
-/// with neither get no rule).
+/// with neither get no rule). A batch holding an exchange leg is refused
+/// (`BULK_EXCHANGE`, T-286).
 final class SetCategory extends BulkChange {
   const SetCategory(this.categoryId, {this.alwaysUseForMerchants = false});
   final String categoryId;
@@ -230,6 +236,16 @@ class BulkEditUseCase {
           final c = await _categories.byId(categoryId);
           if (c == null || c.isArchived != 0) {
             throw BulkEditException(BulkEditException.categoryUnavailable);
+          }
+          // T-286: refuse the whole batch (nothing changed yet) rather than
+          // give one leg of an exchange a category.
+          for (final r in rows) {
+            final pairId = r.transferPairId;
+            if (pairId == null) continue;
+            final pair = await _pairs.byId(pairId);
+            if (pair != null && isExchangePairKind(pair.kind)) {
+              throw BulkEditException(BulkEditException.exchange);
+            }
           }
           image['kind'] = 'category';
           image['to'] = categoryId;

@@ -68,6 +68,22 @@ abstract interface class IngestStorePort {
   /// both legs are live; null otherwise.
   Future<String?> exchangeInLegOf(String outTxnId);
 
+  /// T-286 (FU-383): records that the raw message [rawMessageId], whose
+  /// transaction source is [source], was merged into [txnId] (the out leg
+  /// for an exchange): an already-resolved `crossChannelCopy` review item,
+  /// never shown to the user.
+  Future<void> recordCrossChannelCopy({
+    required String id,
+    required String rawMessageId,
+    required String txnId,
+    required String source,
+    required int atMs,
+  });
+
+  /// T-286: whether [txnId] already has a merged copy from a message of
+  /// transaction source [source] (see [recordCrossChannelCopy]).
+  Future<bool> hasCrossChannelCopy(String txnId, String source);
+
   /// Applies [patch] to [txnId] and sets `updated_at`. Returns rows changed.
   /// T-272: the facts for the unexplained-rise check of [accountId] in
   /// [currency] before a balance dated [asOfMs] is recorded; null when the

@@ -2756,6 +2756,12 @@ abstract class AppLocalizations {
   /// **'الكارت'**
   String get transactionsListBulkAccount;
 
+  /// C · T-286: note above the selection bar when an exchange row is selected; Category and Card are off, Delete still works
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير العملة ملوش تصنيف ومينفعش يتنقل لكارت تاني لوحده. تقدر تمسحه عادي.'**
+  String get transactionsListBulkExchangeLocked;
+
   /// S · switch after a category change; creates rules (FR-CAT)
   ///
   /// In ar, this message translates to:

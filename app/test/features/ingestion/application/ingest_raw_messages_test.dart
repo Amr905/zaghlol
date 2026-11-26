@@ -105,6 +105,46 @@ void main() {
       expect(b.changedAccountIds, hasLength(2), reason: 'old and new account');
     });
 
+    test('T-286 FU-383: a second, real payment with the same amount on the '
+        'channel that already gave its copy → stored and flagged '
+        'possibleDuplicate, not merged', () async {
+      final a = await w.run([sms('s', purchase)]);
+      final first = (a.outcomes['s']! as IngestInserted).txnId;
+      final copy = await w.run([notif('n1', purchaseNotif, rx: t0 + 40000)]);
+      expect(copy.outcomes['n1'], isA<IngestMergedCrossChannel>());
+      final b = await w.run([
+        notif('n2', '$purchaseNotif ref 2', rx: t0 + 80000),
+      ]);
+      final second = (b.outcomes['n2']! as IngestInserted).txnId;
+      expect(await txnCount(), 2);
+      final open = await w.rows(
+        'SELECT * FROM review_items WHERE resolved_at IS NULL',
+      );
+      expect(open.single['txn_id'], second);
+      final payload = jsonDecode(open.single['payload']! as String) as Map;
+      expect(payload['reason'], 'possibleDuplicate');
+      expect(payload['candidateTxnIds'], [first]);
+    });
+
+    test('T-286: a copy from a third channel still merges', () async {
+      await w.run([sms('s', purchase)]);
+      await w.run([notif('n1', purchaseNotif, rx: t0 + 40000)]);
+      final r = await w.run([
+        IncomingMessage(
+          deliveryId: 'x',
+          channel: 'shortcut_message',
+          source: zbankSms,
+          body:
+              'ZBANK: Purchase EGP 120.50 at Synth Shop card *4321 '
+              'bal egp 990.00',
+          receivedAtMs: t0 + 50000,
+          origin: MessageOrigin.spool,
+        ),
+      ]);
+      expect(r.outcomes['x'], isA<IngestMergedCrossChannel>());
+      expect(await txnCount(), 1);
+    });
+
     test('both in one batch, either order', () async {
       final r = await w.run([
         sms('s1', purchase),
@@ -502,9 +542,49 @@ void main() {
           expect((b.outcomes['n']! as IngestMergedCrossChannel).txnId, outId);
           expect(await txnCount(), 2);
           expect(await w.count('transfer_pairs'), 1);
-          expect(await w.count('review_items'), 0);
+          expect(await w.count('review_items', 'resolved_at IS NULL'), 0);
           expect(await w.count('raw_messages', "parse_status = 'parsed'"), 2);
           expect(await w.txns(), before, reason: 'nothing patched');
+          // T-286: the merge is remembered on the out leg, out of sight.
+          final mark = (await w.reviews()).single;
+          expect(mark['txn_id'], outId);
+          expect(mark['resolution'], 'cross_channel_copy');
+          expect(mark['resolved_at'], isNotNull);
+          expect(jsonDecode(mark['payload']! as String), {
+            'reason': 'crossChannelCopy',
+            'source': 'notification',
+          });
+        });
+
+        test('T-286 FU-383: a second, real conversion with the same amounts '
+            'on the channel that already gave its copy → two exchanges and '
+            'a possibleDuplicate item, never a merge', () async {
+          final a = await w.run([sms('s', convert)]);
+          final outA = (a.outcomes['s']! as IngestInserted).txnId;
+          final copy = await w.run([notif('n1', convertNotif, rx: t0 + 40000)]);
+          expect(copy.outcomes['n1'], isA<IngestMergedCrossChannel>());
+          final before = await w.txns();
+          final b = await w.run([
+            notif('n2', '$convertNotif ref 2', rx: t0 + 80000),
+          ]);
+          expect(b.outcomes['n2'], isA<IngestInserted>());
+          expect(await txnCount(), 4);
+          expect(await w.count('transfer_pairs'), 2);
+          final open = await w.rows(
+            'SELECT * FROM review_items WHERE resolved_at IS NULL',
+          );
+          final payload = jsonDecode(open.single['payload']! as String) as Map;
+          expect(payload['reason'], 'possibleDuplicate');
+          expect(payload['candidateTxnIds'], [outA]);
+          expect(
+            open.single['txn_id'],
+            (b.outcomes['n2']! as IngestInserted).txnId,
+          );
+          // Exchange A is exactly as it was.
+          final after = {for (final t in await w.txns()) t['id']: t};
+          for (final t in before) {
+            expect(after[t['id']], t);
+          }
         });
 
         test('only the sent leg matches → a second pair and a '
