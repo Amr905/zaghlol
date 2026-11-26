@@ -177,7 +177,7 @@ public sealed partial class AskPlanService(
         }
 
         // Commit after the validated reply, never cancelled by a Stop that arrives now (FR-LLM-10).
-        var commit = await quota.CommitAsync(LlmFeature.Ask, gate.Install, admitted.Account, gate.RequestId, 1, CancellationToken.None).ConfigureAwait(false);
+        var commit = await quota.CommitAsync(LlmFeature.Ask, gate.Install, admitted.Account, gate.RetryKey, 1, CancellationToken.None).ConfigureAwait(false);
         var pre = admitted.Quota!;
         switch (commit.Kind)
         {

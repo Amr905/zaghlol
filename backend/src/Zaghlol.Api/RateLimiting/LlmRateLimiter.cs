@@ -25,6 +25,7 @@ internal sealed class LlmRateLimiter : ILlmRateLimiter, IDisposable
     private readonly PartitionedRateLimiter<string> accountMinute;
     private readonly PartitionedRateLimiter<string> accountDay;
     private readonly PartitionedRateLimiter<string> network;
+    private readonly PartitionedRateLimiter<string> attempts;
     private readonly RateLimiter global;
 
     public LlmRateLimiter(IOptions<RateLimitSettings> options, IConfiguration configuration)
@@ -41,6 +42,8 @@ internal sealed class LlmRateLimiter : ILlmRateLimiter, IDisposable
         installDay = PartitionedRateLimiter.Create<string, string>(key => RateLimitPartition.GetSlidingWindowLimiter(key, _ => DayWindow(Day(FeatureOf(key), false))));
         accountDay = PartitionedRateLimiter.Create<string, string>(key => RateLimitPartition.GetSlidingWindowLimiter(key, _ => DayWindow(Day(FeatureOf(key), true))));
         network = PartitionedRateLimiter.Create<string, string>(key => RateLimitPartition.GetTokenBucketLimiter(key, _ => s.AskNetwork.ToOptions()));
+
+        attempts = PartitionedRateLimiter.Create<string, string>(key => RateLimitPartition.GetTokenBucketLimiter(key, _ => s.LlmAttemptNetwork.ToOptions()));
 
         // ask-llm §4.3 names the global key Llm:GlobalPerMinute; RateLimits:LlmGlobalPerMinute overrides it when both are set.
         var perMinute = int.TryParse(configuration["Llm:GlobalPerMinute"], out var configured) && configured > 0 ? configured : s.LlmGlobalPerMinute;
@@ -65,6 +68,12 @@ internal sealed class LlmRateLimiter : ILlmRateLimiter, IDisposable
         if (stage == LlmRateStage.Shared)
         {
             return Refused(network.AttemptAcquire(prefix + networkKey), NetworkBucket) ?? Refused(global.AttemptAcquire(), GlobalBucket) ?? LlmRateDecision.Ok;
+        }
+
+        // B96-m2: a generous per-/24 cap on attempts before attestation, so junk proofs can't spend the attestation provider's quota.
+        if (Refused(attempts.AttemptAcquire(networkKey), NetworkBucket) is { } a0)
+        {
+            return a0;
         }
 
         var installKey = prefix + install;
@@ -103,6 +112,7 @@ internal sealed class LlmRateLimiter : ILlmRateLimiter, IDisposable
         accountMinute.Dispose();
         accountDay.Dispose();
         network.Dispose();
+        attempts.Dispose();
         global.Dispose();
     }
 

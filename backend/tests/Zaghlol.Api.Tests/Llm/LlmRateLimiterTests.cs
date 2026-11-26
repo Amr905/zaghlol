@@ -118,6 +118,22 @@ public class LlmRateLimiterTests
         Assert.Equal("install", limiter.TryAcquire(LlmFeature.Ask, install, null, "10.9.9.0/24", LlmRateStage.Owner).Bucket);
     }
 
+    // B96-m2: before attestation, one /24 has its own generous cap on attempts.
+    [Fact]
+    public void TheOwnerStageCapsAttemptsPerNetworkBeforeAttestation()
+    {
+        using var limiter = Limiter(s => s.LlmAttemptNetwork = new TokenBucketSettings { TokenLimit = 5, TokensPerPeriod = 5, PeriodSeconds = 60 });
+        for (var i = 0; i < 5; i++)
+        {
+            Assert.True(limiter.TryAcquire(LlmFeature.Ask, NewInstall(), null, "10.8.8.0/24", LlmRateStage.Owner).Allowed);
+        }
+
+        var refused = limiter.TryAcquire(LlmFeature.Categorise, NewInstall(), null, "10.8.8.0/24", LlmRateStage.Owner);
+        Assert.False(refused.Allowed);
+        Assert.Equal("network", refused.Bucket);
+        Assert.True(limiter.TryAcquire(LlmFeature.Ask, NewInstall(), null, "10.7.7.0/24", LlmRateStage.Owner).Allowed);
+    }
+
     [Fact]
     public void CategoriseHasItsOwnInstallBucketOfTwoAMinute()
     {

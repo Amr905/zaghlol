@@ -173,3 +173,10 @@ No findings.
 | B96-m6 | minor | T-359 → FU-412 | FU |
 
 Before merge, also regenerate and spot-check the 36 T-347 golden PNGs.
+
+## Fix round — backend
+
+- **B96-M1 fixed (Categorise and Ask).** `LlmGateRequest.RetryKey` = `requestId ‖ hex(BodyHash)`. The gate pre-check and the Categorise and Ask commits now pass it to the quota store instead of the bare id. The store hashes it into `last_request_hash` (`bytea`, any length): no schema change. The same id with another body is a new request (trimmed, counted); a real resend has the same canonical body and still matches. This also closes FU-413 (Ask retry not bound to the body).
+- Tests: `ARetriedRequestIdWithOtherMerchantsIsTrimmedAndCounted`, `AnIdenticalRetryInsideTheWindowIsNotCountedTwice`, `TheRetryKeyBindsTheRequestIdToTheBody` (the quota fake `ScriptedQuota` gained a stateful counter mode). An identical retry after the window counting again is the existing store test `AnOldRequestIdBelowTheLimitCountsAgain`. No Postgres test added (the store/repository API is unchanged).
+- **B96-m2 fixed.** Owner stage now draws a per-/24 pre-attestation bucket (`RateLimits:LlmAttemptNetwork`, default 300/min, both features). Test `TheOwnerStageCapsAttemptsPerNetworkBeforeAttestation`.
+- Local: build -warnaserror, format, Application tests (400) and LlmRateLimiter tests pass. Docs `llm-categorise.md` §3 / T-352 note not updated.

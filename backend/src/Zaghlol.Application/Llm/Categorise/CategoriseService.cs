@@ -299,7 +299,7 @@ public sealed partial class CategoriseService(
 
         // Step 8: commit n after a validated reply, never cancelled by a client that leaves now. A retried request id is a no-op (already counted).
         var pre = admitted.Quota!;
-        var commit = await quota.CommitAsync(LlmFeature.Categorise, gate.Install, admitted.Account, gate.RequestId, candidates.Count, CancellationToken.None).ConfigureAwait(false);
+        var commit = await quota.CommitAsync(LlmFeature.Categorise, gate.Install, admitted.Account, gate.RetryKey, candidates.Count, CancellationToken.None).ConfigureAwait(false);
         if (commit.Kind == LlmQuotaCheckKind.Unavailable)
         {
             metrics.Paused(LlmFeature.Categorise, "quota_unavailable");

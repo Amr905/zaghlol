@@ -69,7 +69,14 @@ public sealed record LlmGateRequest(
     int ConsentVersion,
     string RequestId,
     ReadOnlyMemory<byte> BodyHash,
-    LlmAttestationProof? Proof);
+    LlmAttestationProof? Proof)
+{
+    /// <summary>
+    /// The key the quota store treats as "the same request" (B96-M1): the request id bound to the attested body hash. The same id with another
+    /// body is a new request (trimmed and counted), never a free retry; a real resend carries the same canonical body and still matches.
+    /// </summary>
+    public string RetryKey => RequestId + ":" + Convert.ToHexString(BodyHash.Span);
+}
 
 public sealed record LlmGateResult(
     LlmGateOutcome Outcome,
@@ -167,7 +174,7 @@ public sealed class LlmGateChain(
         }
 
         // 7. Tier and quota pre-check (read only; commit happens after a valid reply).
-        var check = await quota.PreCheckAsync(feature, request.Install, account, request.RequestId, cancellationToken).ConfigureAwait(false);
+        var check = await quota.PreCheckAsync(feature, request.Install, account, request.RetryKey, cancellationToken).ConfigureAwait(false);
         switch (check.Kind)
         {
             case LlmQuotaCheckKind.Unavailable:

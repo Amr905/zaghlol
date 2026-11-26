@@ -83,6 +83,9 @@ public sealed class RateLimitSettings
     /// <summary>Per client /24 (IPv4) or /56 (IPv6) for the Ask endpoint: 30 a minute.</summary>
     public TokenBucketSettings AskNetwork { get; set; } = new() { TokenLimit = 30, TokensPerPeriod = 30, PeriodSeconds = 60 };
 
+    /// <summary>Per client network, before attestation, for both LLM endpoints (B96-m2): caps attestation verifications per /24. Generous: 300 a minute (<c>RateLimits:LlmAttemptNetwork</c>).</summary>
+    public TokenBucketSettings LlmAttemptNetwork { get; set; } = new() { TokenLimit = 300, TokensPerPeriod = 300, PeriodSeconds = 60 };
+
     /// <summary><c>POST /v1/categorise</c> per install (T-352 uses it through the same limiter): 2 a minute and 30 a day.</summary>
     public TokenBucketSettings CatInstall { get; set; } = new() { TokenLimit = 2, TokensPerPeriod = 2, PeriodSeconds = 60 };
 
