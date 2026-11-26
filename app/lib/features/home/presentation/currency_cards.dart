@@ -8,26 +8,29 @@ import 'package:go_router/go_router.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../../../core/l10n/generated/app_localizations.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/amount_semantics.dart';
 import '../../../core/ui/z_card.dart';
 import '../../../core/ui/z_sheet.dart';
 import '../application/home_read_model.dart';
+import 'home_approx_line.dart';
 import 'home_format.dart';
 
 /// At most this many cards show inline; the rest sit behind a `+N` chip.
 const int homeCurrencyCardsInline = 3;
 
-/// Opens that currency's view (`/currency/:iso`, T-279). A no-op while no
-/// router is above [context] (widget tests, before the route exists).
+/// Opens that currency's view (`/home/currency/:iso`, T-279). A no-op while
+/// no router is above [context] (widget tests).
 void openCurrencyView(BuildContext context, Currency currency) {
-  GoRouter.maybeOf(context)?.push('/currency/${currency.code}');
+  GoRouter.maybeOf(context)?.push(AppRoutes.currencyViewFor(currency.code));
 }
 
-/// The ≈ line slot (T-280 plugs `HomeApproxLine` in at merge): null means
-/// nothing is shown and no space is taken.
+/// The ≈ line slot under the cards (T-280's `HomeApproxLine`); tests may
+/// override it with null so nothing is shown and no space is taken.
 final homeApproxSlotBuilder = Provider<WidgetBuilder?>(
-  (ref) => null,
+  (ref) =>
+      (_) => const HomeApproxLine(),
   name: 'homeApproxSlotBuilder',
 );
 

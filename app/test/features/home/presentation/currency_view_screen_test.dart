@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/features/home/application/currency_view_providers.dart';
 import 'package:zaghlol/features/home/application/home_read_model.dart';
-import 'package:zaghlol/features/home/presentation/currency_view_screen.dart';
 import 'package:zaghlol/features/home/presentation/home_widgets.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
