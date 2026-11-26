@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Zaghlol.Application.Config;
 using Zaghlol.Application.Llm;
 
 namespace Zaghlol.Infrastructure.Llm;
@@ -22,7 +23,13 @@ public static class LlmServiceCollectionExtensions
         var providers = LlmProviderOptions.ReadAll(configuration);
 
         services.TryAddSingleton(TimeProvider.System);
-        services.TryAddSingleton<IActiveLlmProviderId>(new ConfiguredActiveLlmProviderId(configuration));
+        var configured = new ConfiguredActiveLlmProviderId(configuration);
+        services.TryAddSingleton(configured);
+
+        // Remote config llm.provider when the host registered it (AddZaghlolRemoteConfig), else Llm:ActiveProvider.
+        services.TryAddSingleton<IActiveLlmProviderId>(provider => provider.GetService<IRemoteConfigService>() is { } remote
+            ? new RemoteConfigActiveLlmProviderId(remote, configured)
+            : configured);
         services.TryAddSingleton<ILlmProviderRegistry, LlmProviderRegistry>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, LlmStartupCheck>());
         services.AddSingleton(new LlmRegisteredProviders(providers));
@@ -75,7 +82,7 @@ internal sealed record LlmRegisteredProviders(IReadOnlyList<LlmProviderOptions> 
 /// Fails the start when the active provider is not one of the
 /// configured ones, or (outside Development and Testing) when an endpoint isn't https. The fake can never serve users.
 /// </summary>
-internal sealed class LlmStartupCheck(LlmRegisteredProviders registered, IActiveLlmProviderId active, IHostEnvironment environment) : IHostedService
+internal sealed class LlmStartupCheck(LlmRegisteredProviders registered, ConfiguredActiveLlmProviderId active, IHostEnvironment environment) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {

@@ -171,10 +171,20 @@ No text column can hold a question. `remote_config` is a **closed key set** like
 edited by `flags_admin` through `PUT /admin/v1/config/{key}` (audited) and `zaghlol-ops config set`. Grants: `app_rw` R/W on the
 counters and ledger, R on config; `worker_rw` DELETE on counters (purger). Categorise tables: sibling doc §4.
 
+**Key catalogue as built (T-334; code `RemoteConfigKeys`, canonical strings, a missing row means the default).** App-visible: `ask.quota_free` 5, `ask.quota_gold` 50
+(0..100000), `ask.s1_pct` 15 (1..1000), `ask.s4_share_pct` 20, `ask.s4_saving_pct` 25 (1..100), `ask.cd_example_rate_bp` 2000 (0..10000), `ask.invest_min_egp` 100.00
+(decimal, 2 places), `ask.invest_gold_min_cg` 25, `ask.invest_gold_karat` 21 (18, 21, 22 or 24), `cat.batch_max` 20 (1..20), `cat.min_confidence` 60 (0..100), `cat.quota_free` 15,
+`cat.quota_gold` 150, and the display names `llm.provider_name.ar` / `.en` (letters, digits, space, `.`, `_`, `-`; both set before the block carries `providerName`).
+Server-only (never in the `config` block): `llm.provider` (provider id, `^[a-z0-9][a-z0-9-]{0,31}$`; while unset, `Llm:ActiveProvider` applies), `llm.spend_cap_usd` 10.00 (PO row ASK-LLM),
+`cat.cache_min_confidence` 80, `cat.confirm_n` 3. `cd_example_rate_bp` 2000 is the example value of the SRS acceptance row, not a rate decision. Admin reads and writes are
+`GET /admin/v1/config`, `GET|PUT /admin/v1/config/{key}` and `zaghlol-ops config list|get|set`. Nothing is cached server side: the provider id, the flags and the quotas are read
+per request. Flags `ask_llm`, `ask_llm_invest` (needs `ask_llm`) and `llm_categorise` are in `FlagKeys`, OFF until set; `ILlmFeatureGate.IsOnAsync` evaluates them per install.
+
 ### 4.6 Remote config to the app
 `POST /v1/sync` gains a signed `config` block `{version, values}` (sent when `configVersion` differs, like `flags`) carrying the
 app-relevant keys and `llm.providerName` per language for the consent sheet. Missing or stale (> 14 days) → bundled defaults; the
 LLM UI stays governed by the flags (fail closed).
+The block's `version` is the sum of the per-key versions of the app-visible keys (every change adds one; server-only keys never move it; 0 while nothing is set, in which case no block is sent to a client at 0). The whole sync response is signed with the existing sync key, so the block is covered by that signature. A config read failure drops the block (the app keeps its defaults) and is counted as a failed `config` block.
 
 ### 4.7 Hosting
 IIS in-process with embedded workers (ADR-026, deployment §7) and the self-hosted kit run the same code: calls are inline (no queue),

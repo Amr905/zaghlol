@@ -57,6 +57,23 @@ public sealed record FlagUpdateAudit(string Key, bool Value, int Version, string
     }
 }
 
+/// <summary>
+/// <c>config_update</c>: the key, its new canonical value (validated against the closed key set, so no free text and no <c>@</c>)
+/// and the key's new version (T-334).
+/// </summary>
+public sealed record ConfigUpdateAudit(string Key, string Value, long Version) : AuditEntry
+{
+    public override string Action => "config_update";
+
+    public override string Target => "config:" + Key;
+
+    private protected override void WriteDetails(Utf8JsonWriter writer)
+    {
+        writer.WriteString("value", Value);
+        writer.WriteNumber("version", Version);
+    }
+}
+
 /// <summary>The three draft edits of the catalog admin API (T-125).</summary>
 public enum CatalogDraftAction
 {

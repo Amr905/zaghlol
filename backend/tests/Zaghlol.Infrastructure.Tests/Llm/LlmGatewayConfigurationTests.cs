@@ -109,7 +109,7 @@ public sealed class LlmGatewayConfigurationTests
 
         await using var fine = Build("Production", OpenAi().Append(("Llm:ActiveProvider", (string?)"p1")).ToArray());
         await Start(fine);
-        Assert.Equal("p1", fine.GetRequiredService<ILlmProviderRegistry>().Active.Id);
+        Assert.Equal("p1", (await fine.GetRequiredService<ILlmProviderRegistry>().ActiveAsync(CancellationToken.None)).Id);
     }
 
     [Fact]
@@ -120,16 +120,17 @@ public sealed class LlmGatewayConfigurationTests
         var b = new FakeLlmProvider("b", []);
         var registry = new LlmProviderRegistry([a, b], active);
 
-        Assert.Same(a, registry.Active);
+        Assert.Same(a, await registry.ActiveAsync(CancellationToken.None));
         active.Current = "b";
-        Assert.Same(b, registry.Active);
+        Assert.Same(b, await registry.ActiveAsync(CancellationToken.None));
         active.Current = "zzz";
-        Assert.Throws<LlmConfigurationException>(() => registry.Active);
-        await Task.CompletedTask;
+        await Assert.ThrowsAsync<LlmConfigurationException>(async () => await registry.ActiveAsync(CancellationToken.None));
     }
 
     private sealed class MutableActive(string id) : IActiveLlmProviderId
     {
         public string Current { get; set; } = id;
+
+        public ValueTask<string> CurrentAsync(CancellationToken cancellationToken) => ValueTask.FromResult(Current);
     }
 }

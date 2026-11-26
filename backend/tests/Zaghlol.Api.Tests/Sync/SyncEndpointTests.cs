@@ -26,7 +26,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
 
     private static readonly string[] FullKeys =
     [
-        "accepted", "accountToken", "catalog", "entitlement", "flags", "nextSyncNotBefore", "prices", "serverTime", "supportNotice",
+        "accepted", "accountToken", "catalog", "config", "entitlement", "flags", "nextSyncNotBefore", "prices", "serverTime", "supportNotice",
         "timeNonce",
     ];
 
@@ -54,7 +54,7 @@ public class SyncEndpointTests(SyncHostFixture fixture) : IClassFixture<SyncHost
         Assert.True(bytes.Length < 2048, $"{bytes.Length} bytes");
         var body = JsonDocument.Parse(bytes).RootElement;
         Assert.Equal(FullKeys, Keys(body));
-        foreach (var block in new[] { "catalog", "flags", "prices", "entitlement", "accountToken", "supportNotice" })
+        foreach (var block in new[] { "catalog", "config", "flags", "prices", "entitlement", "accountToken", "supportNotice" })
         {
             Assert.Equal(JsonValueKind.Null, body.GetProperty(block).ValueKind);
         }

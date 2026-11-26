@@ -73,18 +73,18 @@ public interface ILlmPromptCatalog
     string GetSystemPrompt(string promptId);
 }
 
-/// <summary>The active provider id (configuration now; remote config <c>llm.provider</c> from T-334).</summary>
+/// <summary>The active provider id: remote config <c>llm.provider</c>, read on every call, else <c>Llm:ActiveProvider</c> (T-334).</summary>
 public interface IActiveLlmProviderId
 {
-    string Current { get; }
+    ValueTask<string> CurrentAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>Resolves the active provider; an unknown id fails closed.</summary>
 public interface ILlmProviderRegistry
 {
-    string ActiveId { get; }
+    ValueTask<string> ActiveIdAsync(CancellationToken cancellationToken);
 
-    ILlmProvider Active { get; }
+    ValueTask<ILlmProvider> ActiveAsync(CancellationToken cancellationToken);
 
     ILlmProvider Resolve(string id);
 }

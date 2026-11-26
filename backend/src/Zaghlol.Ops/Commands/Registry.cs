@@ -10,6 +10,7 @@ internal static class Registry
         .. SessionCommands.Specs,
         .. CatalogCommands.Specs,
         .. FlagCommands.Specs,
+        .. ConfigCommands.Specs,
         .. PriceCommands.Specs,
         .. ContributionCommands.Specs,
         .. SupportCommands.Specs,
