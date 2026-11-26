@@ -344,7 +344,12 @@ public class CategoriseEndpointTests(AskHostFixture fixture) : IClassFixture<Ask
         Assert.Equal(HttpStatusCode.OK, rejectedResponse.StatusCode);
         foreach (var (path, status, text) in bodies.Skip(1))
         {
-            Assert.DoesNotContain(Marker, text, StringComparison.Ordinal);
+            // a 200 answers the phone that sent the name and echoes it (the contract); a problem body never does
+            if (status != HttpStatusCode.OK)
+            {
+                Assert.DoesNotContain(Marker, text, StringComparison.Ordinal);
+            }
+
             Assert.True(status is HttpStatusCode.OK or HttpStatusCode.BadGateway, path);
         }
 
