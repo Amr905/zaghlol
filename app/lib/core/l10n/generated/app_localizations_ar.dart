@@ -3212,6 +3212,137 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mascotPaydayLine => 'القبض نزل يا كبير! 🎉';
 
   @override
+  String get mascotTipUseScan =>
+      'عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸';
+
+  @override
+  String get mascotTipUseShare =>
+      'شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل';
+
+  @override
+  String get mascotTipUseSay =>
+      'زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤';
+
+  @override
+  String get mascotTipUseLinkCard =>
+      'كارتك مربوط بحسابه؟ ربطه بيخليني أفهم الدفع من الحساب وماعدّهوش مرتين';
+
+  @override
+  String get mascotTipUsePayday =>
+      'قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب';
+
+  @override
+  String get mascotTipUseStatement =>
+      'عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB)';
+
+  @override
+  String get mascotTipUseReview =>
+      'فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀';
+
+  @override
+  String get mascotTipUseSearchPerson =>
+      'بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه';
+
+  @override
+  String get mascotTipUseHide =>
+      'فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈';
+
+  @override
+  String get mascotTipUseBudget =>
+      'حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام';
+
+  @override
+  String get mascotTipUseSalary =>
+      'سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض';
+
+  @override
+  String get mascotTipUseAsk =>
+      'اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب';
+
+  @override
+  String get mascotTipUseDue =>
+      'كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم';
+
+  @override
+  String get mascotTipUseInsights =>
+      'عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊';
+
+  @override
+  String get mascotTipSmartAsk =>
+      'اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك';
+
+  @override
+  String get mascotTipSmartVoice =>
+      'بفهم المصري! قول «دفعت ١٥٠ خضار و٤٥ قهوة» وأسجّلهم اتنين 🎤';
+
+  @override
+  String get mascotTipSmartSms =>
+      'لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك';
+
+  @override
+  String get mascotTipSmartCategory =>
+      'كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية';
+
+  @override
+  String get mascotTipSmartDue =>
+      'لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة';
+
+  @override
+  String get mascotTipSmartPayday =>
+      'لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉';
+
+  @override
+  String get mascotTipSmartDuplicate =>
+      'لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين';
+
+  @override
+  String get mascotTipSmartReceipt =>
+      'بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌';
+
+  @override
+  String get mascotTipSmartInstapay =>
+      'تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة';
+
+  @override
+  String get mascotTipSmartTransfer =>
+      'لو حولت من كارت لحسابك، ببقى عارف إنه إنت بتدفع لنفسك وماببقاش صرف 👌';
+
+  @override
+  String get mascotTipHabitCoffee =>
+      'القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕';
+
+  @override
+  String get mascotTipHabitPigeon =>
+      'أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄';
+
+  @override
+  String get mascotTipHabitCheck =>
+      'دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر';
+
+  @override
+  String get mascotTipHabitSale =>
+      'الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉';
+
+  @override
+  String get mascotTipHabitSmall =>
+      'القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶';
+
+  @override
+  String get mascotTipHabitWait =>
+      'استنى ٢٤ ساعة قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️';
+
+  @override
+  String get mascotTipHabitTreat =>
+      'مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄';
+
+  @override
+  String get mascotTipHabitSubs =>
+      'اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀';
+
+  @override
+  String get mascotTipShowMe => 'وريني';
+
+  @override
   String get insightsTabsCharts => 'الشارتات';
 
   @override

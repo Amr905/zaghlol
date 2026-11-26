@@ -126,6 +126,7 @@ allKeys = [
     other: {'egp_cash_idle'},
   ),
   (key: Settings.mascotPaydayCelebrated, byDefault: null, other: 20410),
+  (key: Settings.mascotTipState, byDefault: '', other: '2.1.0.3'),
   (key: Settings.voiceOnlineConsent, byDefault: false, other: true),
 ];
 

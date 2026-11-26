@@ -4803,6 +4803,204 @@ abstract class AppLocalizations {
   /// **'القبض نزل يا كبير! 🎉'**
   String get mascotPaydayLine;
 
+  /// No description provided for @mascotTipUseScan.
+  ///
+  /// In ar, this message translates to:
+  /// **'عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸'**
+  String get mascotTipUseScan;
+
+  /// No description provided for @mascotTipUseShare.
+  ///
+  /// In ar, this message translates to:
+  /// **'شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل'**
+  String get mascotTipUseShare;
+
+  /// No description provided for @mascotTipUseSay.
+  ///
+  /// In ar, this message translates to:
+  /// **'زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤'**
+  String get mascotTipUseSay;
+
+  /// No description provided for @mascotTipUseLinkCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'كارتك مربوط بحسابه؟ ربطه بيخليني أفهم الدفع من الحساب وماعدّهوش مرتين'**
+  String get mascotTipUseLinkCard;
+
+  /// No description provided for @mascotTipUsePayday.
+  ///
+  /// In ar, this message translates to:
+  /// **'قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب'**
+  String get mascotTipUsePayday;
+
+  /// No description provided for @mascotTipUseStatement.
+  ///
+  /// In ar, this message translates to:
+  /// **'عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB)'**
+  String get mascotTipUseStatement;
+
+  /// No description provided for @mascotTipUseReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀'**
+  String get mascotTipUseReview;
+
+  /// No description provided for @mascotTipUseSearchPerson.
+  ///
+  /// In ar, this message translates to:
+  /// **'بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه'**
+  String get mascotTipUseSearchPerson;
+
+  /// No description provided for @mascotTipUseHide.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈'**
+  String get mascotTipUseHide;
+
+  /// No description provided for @mascotTipUseBudget.
+  ///
+  /// In ar, this message translates to:
+  /// **'حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام'**
+  String get mascotTipUseBudget;
+
+  /// No description provided for @mascotTipUseSalary.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض'**
+  String get mascotTipUseSalary;
+
+  /// No description provided for @mascotTipUseAsk.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب'**
+  String get mascotTipUseAsk;
+
+  /// No description provided for @mascotTipUseDue.
+  ///
+  /// In ar, this message translates to:
+  /// **'كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم'**
+  String get mascotTipUseDue;
+
+  /// No description provided for @mascotTipUseInsights.
+  ///
+  /// In ar, this message translates to:
+  /// **'عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊'**
+  String get mascotTipUseInsights;
+
+  /// No description provided for @mascotTipSmartAsk.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك'**
+  String get mascotTipSmartAsk;
+
+  /// No description provided for @mascotTipSmartVoice.
+  ///
+  /// In ar, this message translates to:
+  /// **'بفهم المصري! قول «دفعت ١٥٠ خضار و٤٥ قهوة» وأسجّلهم اتنين 🎤'**
+  String get mascotTipSmartVoice;
+
+  /// No description provided for @mascotTipSmartSms.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك'**
+  String get mascotTipSmartSms;
+
+  /// No description provided for @mascotTipSmartCategory.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية'**
+  String get mascotTipSmartCategory;
+
+  /// No description provided for @mascotTipSmartDue.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة'**
+  String get mascotTipSmartDue;
+
+  /// No description provided for @mascotTipSmartPayday.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉'**
+  String get mascotTipSmartPayday;
+
+  /// No description provided for @mascotTipSmartDuplicate.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين'**
+  String get mascotTipSmartDuplicate;
+
+  /// No description provided for @mascotTipSmartReceipt.
+  ///
+  /// In ar, this message translates to:
+  /// **'بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌'**
+  String get mascotTipSmartReceipt;
+
+  /// No description provided for @mascotTipSmartInstapay.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة'**
+  String get mascotTipSmartInstapay;
+
+  /// No description provided for @mascotTipSmartTransfer.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو حولت من كارت لحسابك، ببقى عارف إنه إنت بتدفع لنفسك وماببقاش صرف 👌'**
+  String get mascotTipSmartTransfer;
+
+  /// No description provided for @mascotTipHabitCoffee.
+  ///
+  /// In ar, this message translates to:
+  /// **'القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕'**
+  String get mascotTipHabitCoffee;
+
+  /// No description provided for @mascotTipHabitPigeon.
+  ///
+  /// In ar, this message translates to:
+  /// **'أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄'**
+  String get mascotTipHabitPigeon;
+
+  /// No description provided for @mascotTipHabitCheck.
+  ///
+  /// In ar, this message translates to:
+  /// **'دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر'**
+  String get mascotTipHabitCheck;
+
+  /// No description provided for @mascotTipHabitSale.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉'**
+  String get mascotTipHabitSale;
+
+  /// No description provided for @mascotTipHabitSmall.
+  ///
+  /// In ar, this message translates to:
+  /// **'القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶'**
+  String get mascotTipHabitSmall;
+
+  /// No description provided for @mascotTipHabitWait.
+  ///
+  /// In ar, this message translates to:
+  /// **'استنى ٢٤ ساعة قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️'**
+  String get mascotTipHabitWait;
+
+  /// No description provided for @mascotTipHabitTreat.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄'**
+  String get mascotTipHabitTreat;
+
+  /// No description provided for @mascotTipHabitSubs.
+  ///
+  /// In ar, this message translates to:
+  /// **'اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀'**
+  String get mascotTipHabitSubs;
+
+  /// No description provided for @mascotTipShowMe.
+  ///
+  /// In ar, this message translates to:
+  /// **'وريني'**
+  String get mascotTipShowMe;
+
   /// C · C-35 segment 1
   ///
   /// In ar, this message translates to:

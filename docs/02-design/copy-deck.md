@@ -491,6 +491,46 @@ Part 2 may append `mascot_tap_line9` onward. The motion states `scanning`, `coun
 
 ---
 
+
+### 1.2a Home tips (T-277) — `mascotTip*`
+
+Shown in the Home bubble (C-14) only when no payday, proud or alert line is up. Rotation: counters in settings (`mascot.tip_state`); no tip repeats until its group has been shown; usage tips lead for the first 14 days after install. A "Show me" button (`mascotTipShowMe`: وريني / Show me) appears when the tip has a target.
+
+| Key | Group | Target | ar | en |
+|---|---|---|---|---|
+| `mascotTipUseScan` | usage | add | عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸 | Got a paper receipt? Snap it from the Add button and I'll read the amount and the shop 📸 |
+| `mascotTipUseShare` | usage | text only | شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل | Spotted a receipt or screenshot? Share it to Zaghlol from the share menu and I'll take it from there |
+| `mascotTipUseSay` | usage | add | زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤 | Tired of typing? Tap Add, pick Say, and just tell me what you spent 🎤 |
+| `mascotTipUseLinkCard` | usage | text only | كارتك مربوط بحسابه؟ ربطه بيخليني أفهم الدفع من الحساب وماعدّهوش مرتين | Link a card to its account and I'll stop counting the repayment as spending twice |
+| `mascotTipUsePayday` | usage | settings | قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب | Not paid on the 1st? Set your payday and I'll line the month up with your salary |
+| `mascotTipUseStatement` | usage | import flow | عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB) | Have a bank statement? Add it and I'll read it and bring back past months (CIB, NBE, Banque Misr, QNB) |
+| `mascotTipUseReview` | usage | review | فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀 | Some items waiting on you? In Review you can Keep, Edit or Ignore each one 👀 |
+| `mascotTipUseSearchPerson` | usage | transactions | بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه | Looking for an InstaPay transfer? Type the person's name in search and it shows up |
+| `mascotTipUseHide` | usage | text only | فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈 | Someone peeking? Tap the eye at the top and the amounts disappear 🙈 |
+| `mascotTipUseBudget` | usage | budget | حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام | Set a budget for each category and I'll show you how much is left of each |
+| `mascotTipUseSalary` | usage | text only | سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض | Tell me your salary once and I'll spot when it lands and count your month from payday |
+| `mascotTipUseAsk` | usage | Zaghlol tab | اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب | Ask me in the Zaghlol tab: "How much did I spend on food this month?" and I'll answer |
+| `mascotTipUseDue` | usage | text only | كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم | Got a credit card? Tell me the limit and due date and I'll remind you a few days before |
+| `mascotTipUseInsights` | usage | Insights | عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊 | Wondering where your money goes? Open Insights for the charts 📊 |
+| `mascotTipSmartAsk` | smart | Zaghlol tab | اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك | Ask me in plain words: "How much did I spend on food this month?" I answer from the data on your phone |
+| `mascotTipSmartVoice` | smart | add | بفهم المصري! قول «دفعت ١٥٠ خضار و٤٥ قهوة» وأسجّلهم اتنين 🎤 | I understand Egyptian! Say "paid 150 for veggies and 45 for coffee" and I log both 🎤 |
+| `mascotTipSmartSms` | smart | text only | لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك | When a bank message reaches me I read it and log the item myself, and your data stays on your phone |
+| `mascotTipSmartCategory` | smart | text only | كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية | Change a shop's category once and I remember it for next time |
+| `mascotTipSmartDue` | smart | text only | لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة | If a card message has a due date, I'll remind you before it, no typing needed |
+| `mascotTipSmartPayday` | smart | text only | لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉 | When your salary lands I spot it, line your month up with it, and cheer 🎉 |
+| `mascotTipSmartDuplicate` | smart | text only | لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين | If the same charge shows up twice within minutes, I'll flag it before it counts double |
+| `mascotTipSmartReceipt` | smart | add | بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌 | I read a photographed receipt: shop, amount and date. You just confirm 👌 |
+| `mascotTipSmartInstapay` | smart | text only | تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة | InstaPay transfers show the person's name, so you can see who paid whom at a glance |
+| `mascotTipSmartTransfer` | smart | text only | لو حولت من كارت لحسابك، ببقى عارف إنه إنت بتدفع لنفسك وماببقاش صرف 👌 | Move money from one of your cards to another and I know it's you paying you, not spending 👌 |
+| `mascotTipHabitCoffee` | habit | text only | القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕ | Small coffees add up by month end. I'm not saying anything, just counting ☕ |
+| `mascotTipHabitPigeon` | habit | text only | أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄 | I'm a pigeon who loves seeds, you love delivery. Everyone's got a weakness 😄 |
+| `mascotTipHabitCheck` | habit | text only | دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر | One minute a day looking at your spending beats an hour at month end |
+| `mascotTipHabitSale` | habit | text only | الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉 | A big discount isn't a saving if you never planned to buy it 😉 |
+| `mascotTipHabitSmall` | habit | text only | القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶 | Every pound saved grows Zaghlol a new feather 🪶 |
+| `mascotTipHabitWait` | habit | text only | استنى ٢٤ ساعة قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️ | Wait a day before a big want. If you still want it, enjoy it 🛍️ |
+| `mascotTipHabitTreat` | habit | text only | مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄 | Treating yourself is allowed. Just keep count and nobody gets upset 😄 |
+| `mascotTipHabitSubs` | habit | text only | اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀 | Lots of subscriptions? Look them over now and then, one might be forgotten 👀 |
+
 ## 1.3 S-01 Welcome & privacy — `onboarding_welcome_*`
 States: static. Language switches immediately (FR-L10N-01). No "no server" claim (R-11).
 
