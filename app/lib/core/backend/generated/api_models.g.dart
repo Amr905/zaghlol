@@ -639,14 +639,14 @@ final class AskPlanRequest {
     required this.q,
     required this.lang,
     required this.consent,
-    required this.attestation,
+    this.attestation,
   });
   final int planVersion;
   final String requestId;
   final String q;
   final AskPlanRequestLang lang;
   final LlmConsent consent;
-  final LlmAttestation attestation;
+  final LlmAttestation? attestation;
 
   /// Declared properties only; throws [ApiModelException]
   /// before anything is built when a constraint fails.
@@ -656,7 +656,7 @@ final class AskPlanRequest {
     'q': apiCheckString(q, minLength: 1, maxLength: 300),
     'lang': apiCheckEnum(lang.wire),
     'consent': consent.toJson(),
-    'attestation': attestation.toJson(),
+    if (attestation != null) 'attestation': attestation!.toJson(),
   };
 
   /// Never prints values (tokens, keys, purchase data).

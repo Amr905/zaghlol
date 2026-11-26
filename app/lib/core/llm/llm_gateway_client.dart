@@ -198,7 +198,7 @@ final class LlmGatewayClient {
       forceNewKey: forceNewKey,
       build: build,
       toJson: (r) => r.toJson(),
-      proofOf: (r) => r.attestation,
+      proofOf: (r) => r.attestation ?? (throw StateError('attestation')),
       call: (r, abort) => _backend.askPlan(r, abort: abort),
       quotaOf: (r) => r.quota,
     );

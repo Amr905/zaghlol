@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/remote_config_providers.dart';
+import '../../../core/llm/llm_provider_terms.dart';
 import '../../../core/l10n/generated/app_localizations.dart';
 import '../../../core/llm/llm_feature.dart';
 import '../../../core/llm/llm_gateway_client.dart';
@@ -41,6 +42,18 @@ final catSenderKickProvider = Provider<Future<void> Function(LlmLang lang)>(
   name: 'catSenderKickProvider',
 );
 
+/// The provider's display name in the UI language (T-367 names from the
+/// signed config); the id only if the names aren't available.
+String catProviderDisplayName(
+  WidgetRef ref,
+  BuildContext context,
+  LlmTerms terms,
+) {
+  final p = ref.read(llmProviderTermsProvider);
+  if (p == null || p.id != terms.provider) return terms.provider;
+  return p.nameFor(Localizations.localeOf(context).languageCode);
+}
+
 abstract final class LlmCatConsentFlow {
   /// Shows the sheet. True only after "Allow" stored the consent. False
   /// (and nothing stored) when the terms are unknown (FU-425).
@@ -54,7 +67,7 @@ abstract final class LlmCatConsentFlow {
       showDragHandle: true,
       isScrollControlled: true,
       builder: (_) => LlmCatConsentSheet(
-        providerName: terms.provider,
+        providerName: catProviderDisplayName(ref, context, terms),
         quotaPerMonth: ref.read(catMonthlyQuotaProvider),
       ),
     );
@@ -77,7 +90,7 @@ abstract final class LlmCatConsentFlow {
       showDragHandle: true,
       isScrollControlled: true,
       builder: (_) => LlmCatConsentSheet(
-        providerName: terms.provider,
+        providerName: catProviderDisplayName(ref, context, terms),
         quotaPerMonth: ref.read(catMonthlyQuotaProvider),
         readOnly: true,
       ),

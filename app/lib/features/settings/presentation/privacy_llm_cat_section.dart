@@ -37,7 +37,9 @@ class PrivacyLlmCatSection extends ConsumerWidget {
         SettingsSwitchRow(
           key: const ValueKey('cat-llm-switch'),
           title: t.privacyLlmCatLabel,
-          subtitle: t.privacyLlmCatSentence(terms?.provider ?? ''),
+          subtitle: t.privacyLlmCatSentence(
+            terms == null ? '' : catProviderDisplayName(ref, context, terms),
+          ),
           value: on,
           onChanged: (v) async {
             if (v) {

@@ -341,7 +341,11 @@ final class BackendClient {
     AskPlanRequest request, {
     AbortSignal? abort,
   }) async {
-    _checkLlmProof(request.attestation);
+    // The contract leaves `attestation` optional (a body without it is a
+    // proof failure on the server); this client never sends one without.
+    final proof = request.attestation;
+    if (proof == null) throw _clientBug();
+    _checkLlmProof(proof);
     final r = await _call(
       ApiOperations.askPlan,
       body: _encode(request.toJson),

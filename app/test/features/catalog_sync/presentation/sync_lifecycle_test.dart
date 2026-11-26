@@ -49,7 +49,7 @@ LlmCatSender _sender(_Probe p, {LlmTerms? terms}) => LlmCatSender(
         p.calls++;
         p.langs.add(lang);
         await p.hold?.future;
-        throw p.error ?? LlmConsentRequired('openai-luna');
+        throw p.error ?? LlmConsentRequired();
       },
   newRequestId: () => '0AAAAAAAAAAAAAAAAAAAAAAAA1',
   terms: () => terms,

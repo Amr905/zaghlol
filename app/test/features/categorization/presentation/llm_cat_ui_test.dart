@@ -12,6 +12,7 @@ import 'package:zaghlol/core/flags/flags_providers.dart';
 import 'package:zaghlol/core/llm/llm_consent.dart';
 import 'package:zaghlol/core/llm/llm_feature.dart';
 import 'package:zaghlol/core/llm/llm_gateway_client.dart';
+import 'package:zaghlol/core/llm/llm_provider_terms.dart';
 import 'package:zaghlol/core/llm/llm_quota_snapshot.dart';
 import 'package:zaghlol/features/categorization/data/llm_cat_providers.dart';
 import 'package:zaghlol/features/categorization/presentation/llm_cat_consent_sheet.dart';
@@ -161,6 +162,37 @@ void main() {
   }
 
   group('consent', () {
+    for (final (lang, name) in [('en', 'Luna AI'), ('ar', 'لونا')]) {
+      testWidgets('sheet names the provider by display name [$lang]', (
+        tester,
+      ) async {
+        const names = LlmProviderTerms(
+          id: 'prov-a',
+          nameAr: 'لونا',
+          nameEn: 'Luna AI',
+        );
+        await pumpCard(
+          tester,
+          lang: lang,
+          overrides: [
+            ...ov(),
+            llmProviderTermsProvider.overrideWithValue(names),
+          ],
+        );
+        await tester.tap(find.byKey(const ValueKey('cat-card-allow')));
+        await tester.pumpAndSettle();
+        final sheet = find.byKey(const ValueKey('cat-consent-sheet'));
+        expect(
+          find.descendant(of: sheet, matching: find.textContaining(name)),
+          findsWidgets,
+        );
+        expect(
+          find.descendant(of: sheet, matching: find.textContaining('prov-a')),
+          findsNothing,
+        );
+      });
+    }
+
     testWidgets('Allow on the sheet stores consent and starts the sender', (
       tester,
     ) async {
