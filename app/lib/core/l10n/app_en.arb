@@ -387,6 +387,123 @@
   "homeMascotProudSavedMore": "Look at you! {amount} more saved than last month 👏",
   "homeMascotProudGoal": "Goal hit this month! 🎯 You've got this",
   "homeMascotPayday": "Payday! {amount} just landed 🎉 Let's plan it from day one",
+  "homeApproxLine": "≈ {amount} in, all currencies",
+  "@homeApproxLine": {
+    "description": "L · T-280, home.approx.line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxLineA11y": "Approximate: {amount} in, all currencies",
+  "@homeApproxLineA11y": {
+    "description": "A · read before the amount; tap opens the sheet",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBoth": "Bank rate + rate of {date}",
+  "@homeApproxRateNoteBoth": {
+    "description": "S · bank rate for the exchanged part, daily rate for the rest",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteDaily": "Rate of {date}",
+  "@homeApproxRateNoteDaily": {
+    "description": "S · only the daily rate was used",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBank": "Bank rate",
+  "@homeApproxRateNoteBank": {
+    "description": "S · everything foreign was already exchanged"
+  },
+  "homeApproxStale": "Old rate",
+  "@homeApproxStale": {
+    "description": "S · a daily rate older than 24 h"
+  },
+  "homeApproxSheetTitle": "This total is approximate",
+  "@homeApproxSheetTitle": {
+    "description": "T"
+  },
+  "homeApproxSheetBody": "We use your bank's rate for what you exchanged and today's rate for the rest. Your money stays saved in its own currency.",
+  "@homeApproxSheetBody": {
+    "description": "B"
+  },
+  "homeApproxSheetOwn": "Already in this currency (incl. what you exchanged)",
+  "@homeApproxSheetOwn": {
+    "description": "L · the target currency's own money in"
+  },
+  "homeApproxSheetHeld": "{amount} still held",
+  "@homeApproxSheetHeld": {
+    "description": "L · the part of a foreign currency not exchanged",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchanged": "{amount} exchanged, already counted once",
+  "@homeApproxSheetExchanged": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchangedBank": "{amount} exchanged at the bank rate {rate}, already counted once",
+  "@homeApproxSheetExchangedBank": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetDailyRate": "Rate of {date}: 1 {from} = {rate}",
+  "@homeApproxSheetDailyRate": {
+    "description": "S",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetClose": "Got it",
+  "@homeApproxSheetClose": {
+    "description": "C"
+  },
+  "homeMascotFirstForeign": "Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.",
+  "@homeMascotFirstForeign": {
+    "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
+  },
+  "homeApproxNoticeOff": "Turn it off",
+  "@homeApproxNoticeOff": {
+    "description": "C · turns the ≈ line off"
+  },
+  "homeApproxNoticeOk": "Got it",
+  "@homeApproxNoticeOk": {
+    "description": "C · dismisses the notice"
+  },
   "homeMascotDismissA11y": "Dismiss message",
   "homePromptPayday": "I spotted a salary of {amount} landing on day {day} each month. Is that your payday?",
   "homePromptPaydayYes": "Yes, day {day}",

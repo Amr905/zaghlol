@@ -1425,6 +1425,75 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String homeApproxLine(String amount) {
+    return '≈ $amount دخلك كله تقريباً';
+  }
+
+  @override
+  String homeApproxLineA11y(String amount) {
+    return 'تقريبي: $amount دخلك كله، بكل العملات';
+  }
+
+  @override
+  String homeApproxRateNoteBoth(String date) {
+    return 'سعر البنك + سعر $date';
+  }
+
+  @override
+  String homeApproxRateNoteDaily(String date) {
+    return 'سعر $date';
+  }
+
+  @override
+  String get homeApproxRateNoteBank => 'سعر البنك';
+
+  @override
+  String get homeApproxStale => 'سعر قديم';
+
+  @override
+  String get homeApproxSheetTitle => 'الحسبة دي تقريبية';
+
+  @override
+  String get homeApproxSheetBody =>
+      'بنحسبها بسعر البنك للي حولته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.';
+
+  @override
+  String get homeApproxSheetOwn => 'اللي دخلك بالعملة دي (بما فيه اللي حولته)';
+
+  @override
+  String homeApproxSheetHeld(String amount) {
+    return '$amount لسه معاك';
+  }
+
+  @override
+  String homeApproxSheetExchanged(String amount) {
+    return '$amount حولتها، واتحسبت مرة واحدة بالفعل';
+  }
+
+  @override
+  String homeApproxSheetExchangedBank(String amount, String rate) {
+    return '$amount حولتها بسعر البنك $rate، واتحسبت مرة واحدة بالفعل';
+  }
+
+  @override
+  String homeApproxSheetDailyRate(String date, String from, String rate) {
+    return 'سعر $date: $from الواحد بـ $rate';
+  }
+
+  @override
+  String get homeApproxSheetClose => 'تمام';
+
+  @override
+  String get homeMascotFirstForeign =>
+      'قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.';
+
+  @override
+  String get homeApproxNoticeOff => 'اقفلها';
+
+  @override
+  String get homeApproxNoticeOk => 'تمام';
+
+  @override
   String get homeMascotDismissA11y => 'اقفل الرسالة';
 
   @override
