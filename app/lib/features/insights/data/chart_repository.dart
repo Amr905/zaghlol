@@ -23,6 +23,7 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' show merchantKey;
 
 import '../../../core/db/app_database.dart';
 import '../../../core/db/cash_cover_sql.dart';
@@ -710,6 +711,38 @@ class ChartRepository {
 
   // --------------------------------------- Ask Zaghlol point reads (T-110)
 
+  /// SQL for "the merchant is one of [norms]" (T-343 fix B94-M2). Rows whose
+  /// `merchant_norm` is NULL (manual entries, edited merchants) match by
+  /// their `merchant_raw`, keyed at read time with [merchantKey], the same
+  /// rule the masker's sources use for their ids.
+  Future<({String sql, List<Variable> args})> _merchantMatch(
+    List<String> norms,
+  ) async {
+    final rows = await _select(
+      'SELECT DISTINCT merchant_raw AS r FROM transactions '
+      'WHERE merchant_norm IS NULL AND merchant_raw IS NOT NULL',
+      const [],
+      reads: {_db.transactions},
+    );
+    final want = norms.toSet();
+    final raws = [
+      for (final r in rows)
+        if (want.contains(merchantKey(r.read<String>('r'))))
+          r.read<String>('r'),
+    ];
+    final marks = List.filled(norms.length, '?').join(',');
+    return (
+      sql: raws.isEmpty
+          ? 't.merchant_norm IN ($marks)'
+          : '(t.merchant_norm IN ($marks) OR (t.merchant_norm IS NULL AND '
+                't.merchant_raw IN (${List.filled(raws.length, '?').join(',')})))',
+      args: [
+        for (final m in norms) Variable.withString(m),
+        for (final r in raws) Variable.withString(r),
+      ],
+    );
+  }
+
   /// Net spend at the merchants [merchantNorms] (at most 20 are used), or
   /// null when it is zero or less. One currency, memoized like the charts.
   Future<({Money amount, int count})?> merchantSpend(
@@ -721,11 +754,11 @@ class ChartRepository {
     if (norms.isEmpty) throw ArgumentError('no merchants');
     return _memoized(_key('merchSpend', p, f, norms.join(',')), () async {
       final s = _spend(p, f);
+      final mm = await _merchantMatch(norms);
       final rows = await _select(
         'SELECT coalesce(sum($_netSpend), 0) AS s, count(*) AS n '
-        'FROM transactions t WHERE ${s.where} '
-        'AND t.merchant_norm IN (${List.filled(norms.length, '?').join(',')})',
-        [...s.args, for (final m in norms) Variable.withString(m)],
+        'FROM transactions t WHERE ${s.where} AND ${mm.sql}',
+        [...s.args, ...mm.args],
       );
       final sum = rows.single.read<int>('s');
       if (sum <= 0) return null;
@@ -746,18 +779,19 @@ class ChartRepository {
       _key('biggest', p, f, '${categoryId ?? ''}|${norms.join(',')}'),
       () async {
         final s = _spend(p, f);
+        final mm = norms.isEmpty ? null : await _merchantMatch(norms);
         final rows = await _select(
           'SELECT t.id AS id, ($_netSpend) AS s, '
           'coalesce(t.merchant_raw, t.merchant_norm) AS m, '
           't.category_id AS cid, $_localDay AS d '
           'FROM transactions t WHERE ${s.where} '
           '${categoryId == null ? '' : 'AND t.category_id = ? '}'
-          '${norms.isEmpty ? '' : 'AND t.merchant_norm IN (${List.filled(norms.length, '?').join(',')}) '}'
+          '${mm == null ? '' : 'AND ${mm.sql} '}'
           'AND ($_netSpend) > 0 ORDER BY s DESC, t.id LIMIT 1',
           [
             ...s.args,
             if (categoryId != null) Variable.withString(categoryId),
-            for (final m in norms) Variable.withString(m),
+            ...?mm?.args,
           ],
         );
         if (rows.isEmpty) return null;

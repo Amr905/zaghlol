@@ -127,8 +127,12 @@ void main() {
         carrefour.names,
         unorderedEquals(['carrefour', 'Carrefour Maadi', 'CARREFOUR*NASR']),
       );
-      expect(s.merchants, hasLength(602));
-      expect(s.merchants.any((m) => m.names.contains('No Norm')), isFalse);
+      // B94-M2: a row without merchant_norm is kept, id = its read-time key.
+      expect(s.merchants, hasLength(603));
+      expect(
+        s.merchants.singleWhere((m) => m.names.contains('No Norm')).id,
+        merchantKey('No Norm'),
+      );
       final a = s.accounts.single;
       expect(
         [a.id, a.last4, a.institutionId, a.type],
@@ -136,6 +140,31 @@ void main() {
       );
       expect(s.institutions.single.id, 'cib');
       expect(s.toString(), isNot(contains('Carrefour')));
+    });
+
+    test('B94-M2: 5,000 transactions over 50 merchants load fast '
+        '(deduped in SQL)', () async {
+      final db = edb.db;
+      await db.into(db.accounts).insert(account('acc1'));
+      await db.batch(
+        (b) => b.insertAll(db.transactions, [
+          for (var i = 0; i < 5000; i++)
+            txn(
+              'p$i',
+              merchant: 'Shop ${i % 50}',
+              merchantNorm: i.isEven ? 'shop ${i % 50}' : null,
+            ),
+        ]),
+      );
+      final sw = Stopwatch()..start();
+      final s = await MaskSourcesDrift.load(
+        db,
+        accounts: () async => const [],
+        registry: const [],
+      );
+      sw.stop();
+      expect(s.merchants, hasLength(50));
+      expect(sw.elapsedMilliseconds, lessThan(200));
     });
   });
 }

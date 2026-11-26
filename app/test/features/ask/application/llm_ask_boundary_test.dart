@@ -155,6 +155,9 @@ const _secretNames = [
   'Zawya Coffee Zamalek',
   'مكتبة النور',
   'مكتبة النور - وسط البلد',
+  // B94-M2: manual entry and edited merchant (merchant_norm is NULL).
+  'Hassan Barber Shop',
+  'Fresh Bakery Nasr City',
   'Ahmed Salary Card',
   'Savings Zenith',
   'Gold Shopping Visa',
@@ -184,6 +187,8 @@ const _questions = [
   'spend on TALABAT*EG last week',
   'how much did i spend on gold shopping visa',
   'how much did i spend on food last month',
+  'how much did I spend at Hassan Barber Shop this month',
+  'compare Fresh Bakery Nasr City this month vs last month',
 ];
 
 class _Rig {
@@ -219,6 +224,15 @@ class _Rig {
     await add('talabat', 'TALABAT*EG', 8750);
     await add('zawya coffee', 'Zawya Coffee Zamalek', 324999);
     await add('مكتبة النور', 'مكتبة النور - وسط البلد', 8750);
+    // Manual entry and an edited merchant: merchant_norm is NULL.
+    for (final (id, raw, minor) in [
+      ('m1', 'Hassan Barber Shop', 4000),
+      ('m2', 'Fresh Bakery Nasr City', 12500),
+    ]) {
+      await r.db
+          .into(r.db.transactions)
+          .insert(txn(id, amountMinor: minor, merchant: raw));
+    }
     r.dao = SettingsDao(r.db);
     final repo = SettingsRepository(r.dao, nowMs: () => 1);
     r.consent = LlmConsentStore(repo, nowMs: () => 2);

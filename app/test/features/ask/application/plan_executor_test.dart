@@ -227,6 +227,39 @@ void main() {
       expect(a.chips.length, lessThanOrEqualTo(llmMaxChips));
     });
 
+    test('B94-M2: a merchant typed by hand (merchant_norm NULL) is answered '
+        'by its read-time key', () async {
+      await db
+          .into(db.transactions)
+          .insert(
+            txn(
+              'man1',
+              amountMinor: 4000,
+              merchant: 'Hassan Barber Shop',
+              occurredAt: at(2026, 11, 7),
+            ),
+          );
+      await db
+          .into(db.transactions)
+          .insert(
+            txn(
+              'man2',
+              amountMinor: 1000,
+              merchant: 'Other Place',
+              occurredAt: at(2026, 11, 8),
+            ),
+          );
+      final id = merchantKey('Hassan Barber Shop');
+      final m = masks({
+        '⟦MERCHANT_1⟧': MaskTarget(kind: MaskKind.merchant, merchantId: id),
+      });
+      final a = await run<LlmDataAnswer>(
+        const PlanSpend(last, PlanFilter(ref: '⟦MERCHANT_1⟧')),
+        m,
+      );
+      expect(a.figures.single, e('40'));
+    });
+
     test('a mention that matches a merchant is resolved', () async {
       final a = await run<LlmDataAnswer>(
         const PlanSpend(last, PlanFilter(mention: 'كارفور')),

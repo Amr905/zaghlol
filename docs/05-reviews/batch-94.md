@@ -180,3 +180,9 @@ No hard-coded strings. Every text comes from `AppLocalizations`, and the keys ma
 
 ## Follow-ups (minors; not blocking)
 B94-m1 (T-338/T-351), B94-m2 (FU-411 admin host), B94-m3, B94-m4–m6 (T-339 owner), B94-m7 (T-348), B94-m8 (T-348/T-346), B94-m9 (T-358), and the nickname/Coptic additions to `eg_given_names.txt` (T-325 list owner).
+
+## Fix round — T-343
+
+**B94-M2 (major, privacy): fixed.** `MaskSourcesDrift.load` now reads every distinct `merchant_raw` and `merchant_norm` (deduped by `GROUP BY` in SQL), including rows with `merchant_norm` NULL (manual entries, edited merchants). Such rows get the mask id `merchantKey(raw)` (the categoriser's normaliser, read-time, no migration, no schema change). `ChartRepository.merchantSpend` and `biggestExpense` (what `PlanExecutor` uses to resolve a merchant mask id) now also match NULL-norm rows whose `merchantKey(merchant_raw)` equals the id (`_merchantMatch`), so a masked question about a hand-typed merchant is still answered correctly. There is no user-alias table (catalog aliases are public). Person/counterparty names are still not masked (open PO decision); the file header notes that adding a counterparty kind is one more query.
+
+Tests: `llm_ask_boundary_test.dart` gains a manual-entry and an edited-merchant fixture (norm NULL), two questions naming them and the names in the never-on-the-wire list; `plan_executor_test.dart` gains 'B94-M2 ... answered by its read-time key'; `mask_sources_drift_test.dart` updated (the old assertion encoded the bug) plus a 5,000-transaction load under 200 ms. With the `lib/` changes stashed, the boundary, executor and sources tests fail; with them, they pass. `consent_sheet_golden_test` goldens fail identically on the unmodified branch (environment); not touched.
