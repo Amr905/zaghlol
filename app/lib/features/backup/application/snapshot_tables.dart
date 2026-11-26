@@ -30,6 +30,8 @@ const List<String> backedUpTables = [
   'offset_links',
   'transactions_fts_src',
   'merchant_rules',
+  'ai_merchant_suggestions', // T-356: AI categories and the user's verdicts
+  'llm_cat_queue', // T-356: merchants waiting for an AI category
   'budgets',
   'fired_alerts',
   'cycle_summaries',

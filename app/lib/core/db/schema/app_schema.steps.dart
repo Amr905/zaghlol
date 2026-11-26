@@ -6133,12 +6133,1073 @@ i1.GeneratedColumn<String> _column_219(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: 'REFERENCES accounts(id) CHECK (linked_account_id IS NULL OR(linked_account_id <> id AND kind = \'debit\'))',
     );
+
+final class Schema7 extends i0.VersionedSchema {
+  Schema7({required super.database}) : super(version: 7);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    categories,
+    aiMerchantSuggestions,
+    llmCatQueue,
+    assets,
+    ixAssetsLive,
+    priceQuotes,
+    fxRates,
+    networthSnapshots,
+    zakahLedger,
+    ixZakahAsset,
+    ixZakahOpen,
+    ignoreRules,
+    uxIgnoreInstitution,
+    captureSenders,
+    customTemplates,
+    ixTemplatesSender,
+    rawMessages,
+    accounts,
+    transferPairs,
+    transactions,
+    reviewItems,
+    ixReviewOpen,
+    ixReviewRaw,
+    ixReviewTxn,
+    settings,
+    secureState,
+    outbox,
+    ixOutboxKind,
+    voiceUsage,
+    undoBatches,
+    ixUndoCreated,
+    diagLog,
+    ixDiagAt,
+    catalogMerchants,
+    catalogAliases,
+    ixAliasMerchant,
+    catalogAliasFts,
+    trgAliasFtsAi,
+    trgAliasFtsAd,
+    trgAliasFtsAu,
+    catalogKeywords,
+    catalogMeta,
+    merchantRules,
+    ixRulesCategory,
+    budgets,
+    uxBudgetsOverall,
+    firedAlerts,
+    cycleSummaries,
+    recurringItems,
+    ixRecurringDue,
+    ixRecurringAccount,
+    recurringDismissals,
+    recurringOccurrences,
+    ixRecurringOccTxn,
+    splitParticipants,
+    offsetLinks,
+    ixOffsetParticipant,
+    trgSplitParticipantMove,
+    uxAccountsInstLast4,
+    uxAccountsDefaultCash,
+    ixAccountsLinked,
+    accountBalances,
+    uxRawBodyHash,
+    ixTxnAccountTime,
+    ixTxnCategoryTime,
+    ixTxnCurrencyTime,
+    ixTxnMerchant,
+    ixTxnDedupe,
+    ixTxnCategorySource,
+    ixOffsetSource,
+    ixSplitExpense,
+    trgOffsetLinksBi,
+    trgOffsetLinksBu,
+    trgTxnOffsetBu,
+    transactionsFts,
+    trgTxnFtsAi,
+    trgTxnFtsAu,
+    trgTxnFtsAd,
+    trgFtsSrcAi,
+    trgFtsSrcAd,
+    trgFtsSrcAu,
+    dbMeta,
+  ];
+  late final Shape0 categories = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'categories',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape39 aiMerchantSuggestions = Shape39(
+    source: i0.VersionedTable(
+      entityName: 'ai_merchant_suggestions',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((state = \'no_answer\')=(category_id IS NULL))',
+        'CHECK(state = \'no_answer\' OR(confidence IS NOT NULL AND source IS NOT NULL))',
+        'CHECK((state IN (\'confirmed\', \'corrected\'))=(decided_at IS NOT NULL))',
+      ],
+      columns: [
+        _column_220,
+        _column_52,
+        _column_221,
+        _column_222,
+        _column_223,
+        _column_148,
+        _column_224,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape40 llmCatQueue = Shape40(
+    source: i0.VersionedTable(
+      entityName: 'llm_cat_queue',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_220,
+        _column_225,
+        _column_226,
+        _column_227,
+        _column_189,
+        _column_190,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape21 assets = Shape21(
+    source: i0.VersionedTable(
+      entityName: 'assets',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK(principal_minor IS NULL OR currency IS NOT NULL)',
+        'CHECK(manual_value_minor IS NULL OR currency IS NOT NULL)',
+        'CHECK((purchase_price_minor IS NULL)=(purchase_currency IS NULL))',
+        'CHECK(karat IS NULL OR type IN (\'gold\', \'gold_coin\'))',
+        'CHECK(type <> \'gold\' OR(quantity_milli IS NOT NULL AND karat IS NOT NULL))',
+        'CHECK(type = \'certificate\' OR(rate_bp IS NULL AND payout IS NULL AND maturity_date IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_133,
+        _column_134,
+        _column_135,
+        _column_136,
+        _column_137,
+        _column_138,
+        _column_139,
+        _column_140,
+        _column_141,
+        _column_142,
+        _column_143,
+        _column_144,
+        _column_145,
+        _column_146,
+        _column_147,
+        _column_148,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixAssetsLive = i1.Index(
+    'ix_assets_live',
+    'CREATE INDEX ix_assets_live ON assets (type) WHERE archived_at IS NULL',
+  );
+  late final Shape22 priceQuotes = Shape22(
+    source: i0.VersionedTable(
+      entityName: 'price_quotes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(symbol, currency, source)'],
+      columns: [
+        _column_149,
+        _column_150,
+        _column_151,
+        _column_152,
+        _column_153,
+        _column_154,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape23 fxRates = Shape23(
+    source: i0.VersionedTable(
+      entityName: 'fx_rates',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(base, quote)', 'CHECK(base <> quote)'],
+      columns: [_column_155, _column_156, _column_157, _column_153],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape24 networthSnapshots = Shape24(
+    source: i0.VersionedTable(
+      entityName: 'networth_snapshots',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(taken_on, unit)'],
+      columns: [_column_158, _column_159, _column_160, _column_161],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape25 zakahLedger = Shape25(
+    source: i0.VersionedTable(
+      entityName: 'zakah_ledger',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK(paid_minor <= amount_minor)',
+        'CHECK(CASE status WHEN \'pending\' THEN paid_minor = 0 WHEN \'partial\' THEN paid_minor > 0 AND paid_minor < amount_minor ELSE paid_minor = amount_minor END)',
+      ],
+      columns: [
+        _column_0,
+        _column_162,
+        _column_163,
+        _column_164,
+        _column_159,
+        _column_41,
+        _column_165,
+        _column_166,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixZakahAsset = i1.Index(
+    'ix_zakah_asset',
+    'CREATE INDEX ix_zakah_asset ON zakah_ledger (asset_id) WHERE asset_id IS NOT NULL',
+  );
+  final i1.Index ixZakahOpen = i1.Index(
+    'ix_zakah_open',
+    'CREATE INDEX ix_zakah_open ON zakah_ledger (due_on) WHERE status <> \'paid\'',
+  );
+  late final Shape26 ignoreRules = Shape26(
+    source: i0.VersionedTable(
+      entityName: 'ignore_rules',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(institution_code, last4, channel)'],
+      columns: [_column_0, _column_167, _column_168, _column_169, _column_148],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index uxIgnoreInstitution = i1.Index(
+    'ux_ignore_institution',
+    'CREATE UNIQUE INDEX ux_ignore_institution ON ignore_rules (institution_code, channel) WHERE last4 IS NULL',
+  );
+  late final Shape27 captureSenders = Shape27(
+    source: i0.VersionedTable(
+      entityName: 'capture_senders',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_170,
+        _column_171,
+        _column_172,
+        _column_173,
+        _column_148,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape28 customTemplates = Shape28(
+    source: i0.VersionedTable(
+      entityName: 'custom_templates',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_174,
+        _column_171,
+        _column_175,
+        _column_176,
+        _column_148,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixTemplatesSender = i1.Index(
+    'ix_templates_sender',
+    'CREATE INDEX ix_templates_sender ON custom_templates (sender, channel)',
+  );
+  late final Shape2 rawMessages = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'raw_messages',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_23,
+        _column_24,
+        _column_11,
+        _column_25,
+        _column_26,
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_21,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape38 accounts = Shape38(
+    source: i0.VersionedTable(
+      entityName: 'accounts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_21,
+        _column_22,
+        _column_219,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 transferPairs = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'transfer_pairs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['CHECK(in_txn_id IS NULL OR in_txn_id <> out_txn_id)'],
+      columns: [_column_0, _column_33, _column_34, _column_35, _column_21],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 transactions = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'transactions',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((original_amount_minor IS NULL)=(original_currency IS NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_36,
+        _column_37,
+        _column_38,
+        _column_39,
+        _column_40,
+        _column_41,
+        _column_42,
+        _column_43,
+        _column_44,
+        _column_45,
+        _column_46,
+        _column_47,
+        _column_48,
+        _column_49,
+        _column_50,
+        _column_51,
+        _column_52,
+        _column_228,
+        _column_54,
+        _column_55,
+        _column_56,
+        _column_57,
+        _column_58,
+        _column_30,
+        _column_59,
+        _column_60,
+        _column_61,
+        _column_62,
+        _column_21,
+        _column_22,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape29 reviewItems = Shape29(
+    source: i0.VersionedTable(
+      entityName: 'review_items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK(resolution IS NULL OR resolved_at IS NOT NULL)',
+      ],
+      columns: [
+        _column_0,
+        _column_177,
+        _column_178,
+        _column_179,
+        _column_180,
+        _column_148,
+        _column_181,
+        _column_182,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixReviewOpen = i1.Index(
+    'ix_review_open',
+    'CREATE INDEX ix_review_open ON review_items (kind, created_at) WHERE resolved_at IS NULL',
+  );
+  final i1.Index ixReviewRaw = i1.Index(
+    'ix_review_raw',
+    'CREATE INDEX ix_review_raw ON review_items (raw_message_id) WHERE raw_message_id IS NOT NULL',
+  );
+  final i1.Index ixReviewTxn = i1.Index(
+    'ix_review_txn',
+    'CREATE INDEX ix_review_txn ON review_items (txn_id) WHERE txn_id IS NOT NULL',
+  );
+  late final Shape30 settings = Shape30(
+    source: i0.VersionedTable(
+      entityName: 'settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_183, _column_184, _column_185],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape31 secureState = Shape31(
+    source: i0.VersionedTable(
+      entityName: 'secure_state',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_183, _column_186, _column_185],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape32 outbox = Shape32(
+    source: i0.VersionedTable(
+      entityName: 'outbox',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_229,
+        _column_188,
+        _column_148,
+        _column_189,
+        _column_190,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixOutboxKind = i1.Index(
+    'ix_outbox_kind',
+    'CREATE INDEX ix_outbox_kind ON outbox (kind, created_at)',
+  );
+  late final Shape33 voiceUsage = Shape33(
+    source: i0.VersionedTable(
+      entityName: 'voice_usage',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_191, _column_192],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape34 undoBatches = Shape34(
+    source: i0.VersionedTable(
+      entityName: 'undo_batches',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_148, _column_193, _column_194],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixUndoCreated = i1.Index(
+    'ix_undo_created',
+    'CREATE INDEX ix_undo_created ON undo_batches (created_at)',
+  );
+  late final Shape35 diagLog = Shape35(
+    source: i0.VersionedTable(
+      entityName: 'diag_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_87, _column_195, _column_196, _column_197, _column_198],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixDiagAt = i1.Index(
+    'ix_diag_at',
+    'CREATE INDEX ix_diag_at ON diag_log (at)',
+  );
+  late final Shape10 catalogMerchants = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'catalog_merchants',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_80,
+        _column_199,
+        _column_200,
+        _column_201,
+        _column_202,
+        _column_203,
+        _column_204,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape11 catalogAliases = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'catalog_aliases',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(alias_norm, merchant_id)'],
+      columns: [_column_87, _column_88, _column_89, _column_90],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixAliasMerchant = i1.Index(
+    'ix_alias_merchant',
+    'CREATE INDEX ix_alias_merchant ON catalog_aliases (merchant_id)',
+  );
+  late final Shape12 catalogAliasFts = Shape12(
+    source: i0.VersionedVirtualTable(
+      entityName: 'catalog_alias_fts',
+      moduleAndArgs: 'fts5(alias_norm, content=\'catalog_aliases\', content_rowid=\'id\', tokenize=\'trigram\')',
+      columns: [_column_91],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger trgAliasFtsAi = i1.Trigger(
+    'CREATE TRIGGER trg_alias_fts_ai AFTER INSERT ON catalog_aliases BEGIN INSERT INTO catalog_alias_fts ("rowid", alias_norm) VALUES (new.id, new.alias_norm);END',
+    'trg_alias_fts_ai',
+  );
+  final i1.Trigger trgAliasFtsAd = i1.Trigger(
+    'CREATE TRIGGER trg_alias_fts_ad AFTER DELETE ON catalog_aliases BEGIN INSERT INTO catalog_alias_fts (catalog_alias_fts, "rowid", alias_norm) VALUES (\'delete\', old.id, old.alias_norm);END',
+    'trg_alias_fts_ad',
+  );
+  final i1.Trigger trgAliasFtsAu = i1.Trigger(
+    'CREATE TRIGGER trg_alias_fts_au AFTER UPDATE OF id, alias_norm ON catalog_aliases BEGIN INSERT INTO catalog_alias_fts (catalog_alias_fts, "rowid", alias_norm) VALUES (\'delete\', old.id, old.alias_norm);INSERT INTO catalog_alias_fts ("rowid", alias_norm) VALUES (new.id, new.alias_norm);END',
+    'trg_alias_fts_au',
+  );
+  late final Shape13 catalogKeywords = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'catalog_keywords',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(keyword_norm, lang)'],
+      columns: [_column_205, _column_206, _column_202, _column_94],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape14 catalogMeta = Shape14(
+    source: i0.VersionedTable(
+      entityName: 'catalog_meta',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_95, _column_86, _column_96, _column_97],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape15 merchantRules = Shape15(
+    source: i0.VersionedTable(
+      entityName: 'merchant_rules',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'UNIQUE(match_kind, match_value)',
+        'CHECK(instr(CAST(match_value AS BLOB), X\'00\') = 0)',
+        'CHECK(match_kind <> \'merchant_norm\' OR(length(match_value) BETWEEN 1 AND 64 AND match_value NOT GLOB \'*[^a-z0-9 ]*\' AND match_value NOT GLOB \' *\' AND match_value NOT GLOB \'* \' AND match_value NOT GLOB \'*  *\'))',
+        'CHECK(match_kind <> \'catalog_merchant\' OR(length(match_value) BETWEEN 1 AND 10 AND match_value GLOB \'[1-9]*\' AND match_value NOT GLOB \'*[^0-9]*\'))',
+        'CHECK(match_kind <> \'counterparty\' OR(length(match_value) BETWEEN 1 AND 128 AND match_value NOT GLOB(\'*[\' || char(1) || \'-\' || char(31) || char(127) || \'-\' || char(159) || \']*\')))',
+      ],
+      columns: [
+        _column_0,
+        _column_98,
+        _column_99,
+        _column_100,
+        _column_148,
+        _column_207,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixRulesCategory = i1.Index(
+    'ix_rules_category',
+    'CREATE INDEX ix_rules_category ON merchant_rules (category_id)',
+  );
+  late final Shape16 budgets = Shape16(
+    source: i0.VersionedTable(
+      entityName: 'budgets',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(category_id, currency, period)'],
+      columns: [
+        _column_0,
+        _column_52,
+        _column_42,
+        _column_102,
+        _column_103,
+        _column_104,
+        _column_105,
+        _column_21,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index uxBudgetsOverall = i1.Index(
+    'ux_budgets_overall',
+    'CREATE UNIQUE INDEX ux_budgets_overall ON budgets (currency, period) WHERE category_id IS NULL',
+  );
+  late final Shape17 firedAlerts = Shape17(
+    source: i0.VersionedTable(
+      entityName: 'fired_alerts',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'PRIMARY KEY(kind, subject_id, period_key, threshold)',
+      ],
+      columns: [
+        _column_106,
+        _column_107,
+        _column_108,
+        _column_109,
+        _column_110,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape18 cycleSummaries = Shape18(
+    source: i0.VersionedTable(
+      entityName: 'cycle_summaries',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(cycle_start, currency, account_filter)'],
+      columns: [
+        _column_111,
+        _column_42,
+        _column_112,
+        _column_113,
+        _column_114,
+        _column_115,
+        _column_116,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape36 recurringItems = Shape36(
+    source: i0.VersionedTable(
+      entityName: 'recurring_items',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'CHECK((cadence = \'custom_days\')=(cadence_days IS NOT NULL))',
+      ],
+      columns: [
+        _column_0,
+        _column_117,
+        _column_118,
+        _column_208,
+        _column_209,
+        _column_121,
+        _column_41,
+        _column_150,
+        _column_215,
+        _column_210,
+        _column_211,
+        _column_125,
+        _column_212,
+        _column_213,
+        _column_214,
+        _column_148,
+        _column_216,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixRecurringDue = i1.Index(
+    'ix_recurring_due',
+    'CREATE INDEX ix_recurring_due ON recurring_items (next_due_date) WHERE status = \'active\'',
+  );
+  final i1.Index ixRecurringAccount = i1.Index(
+    'ix_recurring_account',
+    'CREATE INDEX ix_recurring_account ON recurring_items (account_id) WHERE account_id IS NOT NULL',
+  );
+  late final Shape37 recurringDismissals = Shape37(
+    source: i0.VersionedTable(
+      entityName: 'recurring_dismissals',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_217, _column_218],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape20 recurringOccurrences = Shape20(
+    source: i0.VersionedTable(
+      entityName: 'recurring_occurrences',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(item_id, due_date)'],
+      columns: [_column_129, _column_130, _column_131, _column_132],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixRecurringOccTxn = i1.Index(
+    'ix_recurring_occ_txn',
+    'CREATE INDEX ix_recurring_occ_txn ON recurring_occurrences (txn_id) WHERE txn_id IS NOT NULL',
+  );
+  late final Shape6 splitParticipants = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'split_participants',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_68, _column_69, _column_70, _column_21],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 offsetLinks = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'offset_links',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [
+        'UNIQUE(expense_txn_id, source_txn_id)',
+        'CHECK(expense_txn_id <> source_txn_id)',
+      ],
+      columns: [
+        _column_0,
+        _column_71,
+        _column_68,
+        _column_72,
+        _column_73,
+        _column_74,
+        _column_21,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index ixOffsetParticipant = i1.Index(
+    'ix_offset_participant',
+    'CREATE INDEX ix_offset_participant ON offset_links (participant_id) WHERE participant_id IS NOT NULL',
+  );
+  final i1.Trigger trgSplitParticipantMove = i1.Trigger(
+    'CREATE TRIGGER trg_split_participant_move BEFORE UPDATE OF expense_txn_id ON split_participants WHEN new.expense_txn_id IS NOT old.expense_txn_id BEGIN SELECT RAISE (ABORT, \'OFFSET_PARTICIPANT_MISMATCH\') WHERE EXISTS (SELECT 1 FROM offset_links WHERE participant_id = old.id);END',
+    'trg_split_participant_move',
+  );
+  final i1.Index uxAccountsInstLast4 = i1.Index(
+    'ux_accounts_inst_last4',
+    'CREATE UNIQUE INDEX ux_accounts_inst_last4 ON accounts (institution_code, last4) WHERE last4 IS NOT NULL AND merged_into_id IS NULL',
+  );
+  final i1.Index uxAccountsDefaultCash = i1.Index(
+    'ux_accounts_default_cash',
+    'CREATE UNIQUE INDEX ux_accounts_default_cash ON accounts (is_default_cash) WHERE is_default_cash = 1',
+  );
+  final i1.Index ixAccountsLinked = i1.Index(
+    'ix_accounts_linked',
+    'CREATE INDEX ix_accounts_linked ON accounts (linked_account_id) WHERE linked_account_id IS NOT NULL',
+  );
+  late final Shape5 accountBalances = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'account_balances',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(account_id, currency)'],
+      columns: [
+        _column_63,
+        _column_42,
+        _column_64,
+        _column_65,
+        _column_66,
+        _column_67,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index uxRawBodyHash = i1.Index(
+    'ux_raw_body_hash',
+    'CREATE UNIQUE INDEX ux_raw_body_hash ON raw_messages (body_hash)',
+  );
+  final i1.Index ixTxnAccountTime = i1.Index(
+    'ix_txn_account_time',
+    'CREATE INDEX ix_txn_account_time ON transactions (account_id, occurred_at) WHERE deleted_at IS NULL',
+  );
+  final i1.Index ixTxnCategoryTime = i1.Index(
+    'ix_txn_category_time',
+    'CREATE INDEX ix_txn_category_time ON transactions (category_id, occurred_at) WHERE deleted_at IS NULL',
+  );
+  final i1.Index ixTxnCurrencyTime = i1.Index(
+    'ix_txn_currency_time',
+    'CREATE INDEX ix_txn_currency_time ON transactions (currency, occurred_at, direction) WHERE deleted_at IS NULL',
+  );
+  final i1.Index ixTxnMerchant = i1.Index(
+    'ix_txn_merchant',
+    'CREATE INDEX ix_txn_merchant ON transactions (merchant_norm, occurred_at)',
+  );
+  final i1.Index ixTxnDedupe = i1.Index(
+    'ix_txn_dedupe',
+    'CREATE INDEX ix_txn_dedupe ON transactions (dedupe_key, occurred_at)',
+  );
+  final i1.Index ixTxnCategorySource = i1.Index(
+    'ix_txn_category_source',
+    'CREATE INDEX ix_txn_category_source ON transactions (category_source) WHERE is_user_verified = 0',
+  );
+  final i1.Index ixOffsetSource = i1.Index(
+    'ix_offset_source',
+    'CREATE INDEX ix_offset_source ON offset_links (source_txn_id)',
+  );
+  final i1.Index ixSplitExpense = i1.Index(
+    'ix_split_expense',
+    'CREATE INDEX ix_split_expense ON split_participants (expense_txn_id)',
+  );
+  final i1.Trigger trgOffsetLinksBi = i1.Trigger(
+    'CREATE TRIGGER trg_offset_links_bi BEFORE INSERT ON offset_links BEGIN SELECT RAISE (ABORT, \'OFFSET_CURRENCY_MISMATCH\') WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id) IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);SELECT RAISE (ABORT, \'OFFSET_PARTICIPANT_MISMATCH\') WHERE new.participant_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM split_participants WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);SELECT RAISE (ABORT, \'OFFSET_EXCEEDS_EXPENSE\') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = new.expense_txn_id) > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);SELECT RAISE (ABORT, \'OFFSET_EXCEEDS_SOURCE\') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = new.source_txn_id) > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);END',
+    'trg_offset_links_bi',
+  );
+  final i1.Trigger trgOffsetLinksBu = i1.Trigger(
+    'CREATE TRIGGER trg_offset_links_bu BEFORE UPDATE ON offset_links BEGIN SELECT RAISE (ABORT, \'OFFSET_CURRENCY_MISMATCH\') WHERE (SELECT currency FROM transactions WHERE id = new.expense_txn_id) IS NOT (SELECT currency FROM transactions WHERE id = new.source_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.expense_txn_id) AND EXISTS (SELECT 1 FROM transactions WHERE id = new.source_txn_id);SELECT RAISE (ABORT, \'OFFSET_PARTICIPANT_MISMATCH\') WHERE new.participant_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM split_participants WHERE id = new.participant_id AND expense_txn_id = new.expense_txn_id);SELECT RAISE (ABORT, \'OFFSET_EXCEEDS_EXPENSE\') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = new.expense_txn_id AND id <> old.id) > (SELECT amount_minor FROM transactions WHERE id = new.expense_txn_id);SELECT RAISE (ABORT, \'OFFSET_EXCEEDS_SOURCE\') WHERE new.amount_minor + (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = new.source_txn_id AND id <> old.id) > (SELECT amount_minor FROM transactions WHERE id = new.source_txn_id);END',
+    'trg_offset_links_bu',
+  );
+  final i1.Trigger trgTxnOffsetBu = i1.Trigger(
+    'CREATE TRIGGER trg_txn_offset_bu BEFORE UPDATE OF amount_minor, currency ON transactions BEGIN SELECT RAISE (ABORT, \'OFFSET_CURRENCY_MISMATCH\') WHERE new.currency IS NOT old.currency AND EXISTS (SELECT 1 FROM offset_links WHERE expense_txn_id = old.id OR source_txn_id = old.id);SELECT RAISE (ABORT, \'OFFSET_EXCEEDS_EXPENSE\') WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE expense_txn_id = old.id) > new.amount_minor;SELECT RAISE (ABORT, \'OFFSET_EXCEEDS_SOURCE\') WHERE (SELECT coalesce(sum(amount_minor), 0) FROM offset_links WHERE source_txn_id = old.id) > new.amount_minor;END',
+    'trg_txn_offset_bu',
+  );
+  late final Shape8 transactionsFts = Shape8(
+    source: i0.VersionedVirtualTable(
+      entityName: 'transactions_fts',
+      moduleAndArgs: 'fts5(merchant, counterparty, note, amount_text, content=\'transactions_fts_src\', content_rowid=\'id\', tokenize=\'trigram remove_diacritics 1\')',
+      columns: [_column_75, _column_76, _column_61, _column_77],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Trigger trgTxnFtsAi = i1.Trigger(
+    'CREATE TRIGGER trg_txn_fts_ai AFTER INSERT ON transactions BEGIN INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text) SELECT txn_id, merchant, counterparty, note, amount_text FROM transactions_fts_row WHERE txn_id = new.id;END',
+    'trg_txn_fts_ai',
+  );
+  final i1.Trigger trgTxnFtsAu = i1.Trigger(
+    'CREATE TRIGGER trg_txn_fts_au AFTER UPDATE OF id, merchant_raw, merchant_norm, counterparty_value, note, amount_minor, currency ON transactions BEGIN DELETE FROM transactions_fts_src WHERE txn_id = old.id;INSERT INTO transactions_fts_src (txn_id, merchant, counterparty, note, amount_text) SELECT txn_id, merchant, counterparty, note, amount_text FROM transactions_fts_row WHERE txn_id = new.id;END',
+    'trg_txn_fts_au',
+  );
+  final i1.Trigger trgTxnFtsAd = i1.Trigger(
+    'CREATE TRIGGER trg_txn_fts_ad AFTER DELETE ON transactions BEGIN DELETE FROM transactions_fts_src WHERE txn_id = old.id;END',
+    'trg_txn_fts_ad',
+  );
+  final i1.Trigger trgFtsSrcAi = i1.Trigger(
+    'CREATE TRIGGER trg_fts_src_ai AFTER INSERT ON transactions_fts_src BEGIN INSERT INTO transactions_fts ("rowid", merchant, counterparty, note, amount_text) VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);INSERT INTO transactions_fts_short ("rowid", merchant, counterparty) VALUES (new.id, new.merchant, new.counterparty);END',
+    'trg_fts_src_ai',
+  );
+  final i1.Trigger trgFtsSrcAd = i1.Trigger(
+    'CREATE TRIGGER trg_fts_src_ad AFTER DELETE ON transactions_fts_src BEGIN INSERT INTO transactions_fts (transactions_fts, "rowid", merchant, counterparty, note, amount_text) VALUES (\'delete\', old.id, old.merchant, old.counterparty, old.note, old.amount_text);INSERT INTO transactions_fts_short (transactions_fts_short, "rowid", merchant, counterparty) VALUES (\'delete\', old.id, old.merchant, old.counterparty);END',
+    'trg_fts_src_ad',
+  );
+  final i1.Trigger trgFtsSrcAu = i1.Trigger(
+    'CREATE TRIGGER trg_fts_src_au AFTER UPDATE ON transactions_fts_src BEGIN INSERT INTO transactions_fts (transactions_fts, "rowid", merchant, counterparty, note, amount_text) VALUES (\'delete\', old.id, old.merchant, old.counterparty, old.note, old.amount_text);INSERT INTO transactions_fts_short (transactions_fts_short, "rowid", merchant, counterparty) VALUES (\'delete\', old.id, old.merchant, old.counterparty);INSERT INTO transactions_fts ("rowid", merchant, counterparty, note, amount_text) VALUES (new.id, new.merchant, new.counterparty, new.note, new.amount_text);INSERT INTO transactions_fts_short ("rowid", merchant, counterparty) VALUES (new.id, new.merchant, new.counterparty);END',
+    'trg_fts_src_au',
+  );
+  late final Shape9 dbMeta = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'db_meta',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("key")'],
+      columns: [_column_78, _column_79],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+class Shape39 extends i0.VersionedTable {
+  Shape39({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get merchantNorm =>
+      columnsByName['merchant_norm']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get categoryId =>
+      columnsByName['category_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get confidence =>
+      columnsByName['confidence']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get source =>
+      columnsByName['source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get state =>
+      columnsByName['state']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get decidedAt =>
+      columnsByName['decided_at']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_220(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'merchant_norm',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL PRIMARY KEY CHECK (length(merchant_norm) BETWEEN 2 AND 64 AND merchant_norm NOT GLOB \'*[^a-z0-9 ]*\' AND merchant_norm NOT GLOB \' *\' AND merchant_norm NOT GLOB \'* \' AND merchant_norm NOT GLOB \'*  *\' AND instr(CAST(merchant_norm AS BLOB), X\'00\') = 0)',
+    );
+i1.GeneratedColumn<int> _column_221(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'confidence',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'CHECK (confidence IS NULL OR(typeof(confidence) = \'integer\' AND confidence BETWEEN 0 AND 100))',
+    );
+i1.GeneratedColumn<String> _column_222(
+  String aliasedName,
+) => i1.GeneratedColumn<String>(
+  'source',
+  aliasedName,
+  true,
+  type: i1.DriftSqlType.string,
+  $customConstraints:
+      'CHECK (source IS NULL OR source IN (\'llm\', \'cache\', \'catalog\'))',
+);
+i1.GeneratedColumn<String> _column_223(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'state',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL CHECK (state IN (\'unconfirmed\', \'confirmed\', \'corrected\', \'no_answer\'))',
+    );
+i1.GeneratedColumn<int> _column_224(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'decided_at',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints:
+          'CHECK (decided_at IS NULL OR typeof(decided_at) = \'integer\')',
+    );
+
+class Shape40 extends i0.VersionedTable {
+  Shape40({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get merchantNorm =>
+      columnsByName['merchant_norm']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get txnCount =>
+      columnsByName['txn_count']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get firstQueuedAt =>
+      columnsByName['first_queued_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get lastSeenAt =>
+      columnsByName['last_seen_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get attempts =>
+      columnsByName['attempts']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get nextAttemptAt =>
+      columnsByName['next_attempt_at']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<int> _column_225(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'txn_count',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints:
+          'NOT NULL CHECK (typeof(txn_count) = \'integer\' AND txn_count >= 1)',
+    );
+i1.GeneratedColumn<int> _column_226(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'first_queued_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints:
+          'NOT NULL CHECK (typeof(first_queued_at) = \'integer\')',
+    );
+i1.GeneratedColumn<int> _column_227(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'last_seen_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL CHECK (typeof(last_seen_at) = \'integer\')',
+    );
+i1.GeneratedColumn<String> _column_228(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'category_source',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL CHECK (category_source IN (\'user\', \'user_rule\', \'catalog\', \'heuristic\', \'none\', \'ai\'))',
+    );
+i1.GeneratedColumn<String> _column_229(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'kind',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL CHECK (kind IN (\'contribution\', \'bank_request\', \'purchase_verify\', \'llm_cat_confirmation\', \'llm_cat_correction\'))',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -6167,6 +7228,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from5To6(migrator, schema);
         return 6;
+      case 6:
+        final schema = Schema7(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from6To7(migrator, schema);
+        return 7;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -6179,6 +7245,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
   required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -6186,5 +7253,6 @@ i1.OnUpgrade stepByStep({
     from3To4: from3To4,
     from4To5: from4To5,
     from5To6: from5To6,
+    from6To7: from6To7,
   ),
 );

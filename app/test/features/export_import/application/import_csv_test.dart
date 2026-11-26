@@ -116,7 +116,14 @@ Uint8List csvOf(List<TransactionRecord> rs) =>
 
 Uint8List raw(String s) => Uint8List.fromList(utf8.encode(s));
 
-String hdr() => '${exportHeader.join(',')}\r\n';
+/// The pre-T-356 header (no `category_source`): the hand-built [line]s
+/// below have its 14 cells, so every test using them also proves that an
+/// export made before T-356 still imports.
+String hdr() =>
+    '${exportHeader.sublist(0, exportHeader.length - 1).join(',')}\r\n';
+
+/// The current header (T-356, with `category_source`).
+String hdr15() => '${exportHeader.join(',')}\r\n';
 
 String line({
   String date = '2026-02-01T10:00:00.000Z',
@@ -230,6 +237,39 @@ void main() {
         expect(s.imported, 4);
       },
     );
+  });
+
+  group('T-356 category_source column', () {
+    test('the current 15-column format imports; the column is not stored '
+        'as anything', () async {
+      final s = await uc.run(
+        raw(
+          hdr15() +
+              line(merchant: 'Ai Shop')
+                  .replaceFirst('\r\n', ',ai_unconfirmed\r\n'),
+        ),
+      );
+      expect(s.imported, 1);
+    });
+
+    test('rows must match the file\'s header width; a header with an extra '
+        'or unknown last column is refused', () async {
+      final s = await uc.run(raw(hdr15() + line()));
+      expect(s.imported, 0);
+      expect(s.invalid, 1);
+      expect(
+        await code(uc.run(raw('${exportHeader.join(',')},extra\r\n'))),
+        ImportCsvException.badHeader,
+      );
+      final wrongLast = [
+        ...exportHeader.sublist(0, exportHeader.length - 1),
+        'category_src',
+      ].join(',');
+      expect(
+        await code(uc.run(raw('$wrongLast\r\n'))),
+        ImportCsvException.badHeader,
+      );
+    });
   });
 
   group('exact money and digits', () {
@@ -408,7 +448,8 @@ void main() {
       final s = await uc.run(
         raw(
           '\u{FEFF}${exportHeader.join(',')}\n\n'
-          'x,2026-02-01T10:00:00.000Z,0,a1,expense,posted,1,EGP,,,S,,csv,\n',
+          'x,2026-02-01T10:00:00.000Z,0,a1,expense,posted,1,EGP,,,S,,csv,,'
+          'none\n',
         ),
       );
       expect(s.imported, 1);

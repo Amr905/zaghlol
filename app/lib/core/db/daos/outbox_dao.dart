@@ -1,9 +1,9 @@
 // T-019: the upload outbox (database-schema §2.8, backend-api §4.2). Rows
 // hold only what BR-SYNC-03 allows (contributions, bank requests, purchase
-// verification); the payload is a JSON object. Sent rows are deleted inside
-// the sync apply transaction; turning contribution opt-in off deletes the
-// queued contributions (EC-48). Writes go through guardWrite; nothing here
-// logs.
+// verification; T-356: auto-category feedback, D-96); the payload is a JSON
+// object. Sent rows are deleted inside the sync apply transaction; turning
+// contribution opt-in off deletes the queued contributions (EC-48). Writes
+// go through guardWrite; nothing here logs.
 
 import 'dart:convert';
 
@@ -17,6 +17,12 @@ abstract final class OutboxKind {
   static const String contribution = 'contribution';
   static const String bankRequest = 'bank_request';
   static const String purchaseVerify = 'purchase_verify';
+
+  /// T-356: the user confirmed an AI category (FR-LCAT-23).
+  static const String llmCatConfirmation = 'llm_cat_confirmation';
+
+  /// T-356: the user corrected an AI category (FR-LCAT-24).
+  static const String llmCatCorrection = 'llm_cat_correction';
 }
 
 class OutboxDao {
