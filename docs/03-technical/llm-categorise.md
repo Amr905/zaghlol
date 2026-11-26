@@ -126,6 +126,9 @@ consent covers it (OQ-LCAT-04); the D-16 contributions toggle is not consulted.
 - **Categorizer:** new tier after keyword: `aiSuggestionFor(merchantNorm)` (unconfirmed state only; confirmed/corrected are user
   rules already). The recategorizer applies a new suggestion only to that merchant's `needs classification` rows and to future
   ones; it never touches user-set, rule, catalog or keyword categories. A later catalog hit replaces an unconfirmed suggestion.
+  "Needs classification" = live, not internal, not user-verified, `category_source = 'none'` and no category. Precedence
+  (T-357): a user rule (incl. Right/Wrong), catalog, keyword or event category replaces an `ai` one (FU-408); `ai` replaces
+  only "needs classification". A catalog hit that replaces an `ai` row drops the unconfirmed suggestion.
 - **Queue and sender** (`features/categorization/application/llm_cat_sender.dart`): eligibility before queueing; cap 100 (oldest
   dropped), 60-day expiry; order most transactions then most recent; triggers at app open and ≤ once/10 min while open; back-off
   ≤ 1/h after failure; 0 remaining before `resetsAt` → nothing sent; at reset sent automatically; switch off empties the queue.

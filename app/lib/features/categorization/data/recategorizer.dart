@@ -14,6 +14,10 @@
 //  * A target category that is archived or missing is skipped (the EXISTS
 //    in the same statement).
 //  * A decision without a catalog merchant keeps the row's merchant.
+//  * T-357 (LLM-CATEGORISE): an `ai` decision only fills a "needs
+//    classification" row (`none`, no category); a rule, catalog or keyword
+//    decision replaces an `ai` category (FU-408), and a catalog one drops
+//    the merchant's unconfirmed suggestion.
 // Failures are code-only; nothing here logs or carries merchant text.
 
 import 'package:drift/drift.dart';
@@ -22,6 +26,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart'
 import 'package:zaghlol_parsing/zaghlol_parsing.dart';
 
 import '../../../core/db/app_database.dart';
+import '../../../core/db/daos/ai_merchant_suggestions_dao.dart';
 import '../../../core/db/daos/write_errors.dart';
 import 'categorizer_ports.dart';
 
@@ -45,10 +50,15 @@ class Recategorizer {
   /// better one: heuristic over none/heuristic only.
   static List<String> replaceable(CategorySource source) => switch (source) {
     CategorySource.userRule ||
-    CategorySource.catalog => const ['none', 'catalog', 'heuristic'],
-    CategorySource.heuristic => const ['none', 'heuristic'],
+    CategorySource.catalog => const ['none', 'catalog', 'heuristic', 'ai'],
+    CategorySource.heuristic => const ['none', 'heuristic', 'ai'],
+    // Only "needs classification" (with the old category null, below).
+    CategorySource.ai => const ['none'],
     CategorySource.none => const [],
   };
+
+  /// The sources [run] scans (every pipeline source).
+  static const String _pipelineSources = "('none','catalog','heuristic','ai')";
 
   /// The statement, exposed so a test can assert every guard is in the one
   /// statement (FU-095). `?` order: category, source, merchant, at, id,
@@ -81,6 +91,10 @@ class Recategorizer {
     final target = decision.categoryId;
     final from = replaceable(decision.source);
     if (target == null || from.isEmpty) return 0;
+    // The AI never replaces a category, whatever its source.
+    if (decision.source == CategorySource.ai && oldCategoryId != null) {
+      return 0;
+    }
     // CAT-cash / CAT-INSTAPAY: a catalog or keyword hit never replaces the
     // event category; only a user rule does.
     if (decision.source != CategorySource.userRule &&
@@ -121,49 +135,134 @@ class Recategorizer {
       final rows = await _db
           .customSelect(
             'SELECT id, merchant_raw, merchant_norm, counterparty_kind, '
-            'counterparty_value, category_id, catalog_merchant_id '
+            'counterparty_value, category_id, category_source, '
+            'catalog_merchant_id '
             'FROM transactions '
             'WHERE id > ?1 AND deleted_at IS NULL AND is_internal = 0 '
             'AND is_user_verified = 0 '
-            "AND category_source IN ('none','catalog','heuristic') "
+            'AND category_source IN $_pipelineSources '
             'ORDER BY id LIMIT $recategorizeChunk',
             variables: [Variable.withString(cursor)],
             readsFrom: {_db.transactions},
           )
           .get();
       if (rows.isEmpty) break;
-      final work =
-          <({String id, String? cat, int? merchant, CategoryDecision d})>[];
-      for (final r in rows) {
-        final d = await categorizer.categorize(
-          categorizeInputFor(
-            merchantRaw: r.read<String?>('merchant_raw'),
-            merchantNorm: r.read<String?>('merchant_norm'),
-            counterpartyKind: r.read<String?>('counterparty_kind'),
-            counterpartyValue: r.read<String?>('counterparty_value'),
-          ),
-        );
-        work.add((
-          id: r.read<String>('id'),
-          cat: r.read<String?>('category_id'),
-          merchant: r.read<int?>('catalog_merchant_id'),
-          d: d,
-        ));
-      }
-      await _db.transaction(() async {
-        for (final w in work) {
-          changed += await apply(
-            id: w.id,
-            oldCategoryId: w.cat,
-            oldCatalogMerchantId: w.merchant,
-            decision: w.d,
-            at: at,
-          );
-        }
-      });
+      changed += await _decideAndApply(rows, categorizer, at: at);
       scanned += rows.length;
       cursor = rows.last.read<String>('id');
     }
     return RecategorizeReport(scanned: scanned, changed: changed);
   }
+
+  /// T-357: applies [merchantNorm]'s new AI suggestion. Reads only that
+  /// merchant's "needs classification" rows (live, not internal, not
+  /// user-verified, `none` with no category) and runs the full
+  /// [categorizer] on each, so a row of the same key that is a transfer,
+  /// own-account or event row still gets what the chain says (usually
+  /// nothing). Every other row of the merchant is never read, let alone
+  /// written. Idempotent: a second call changes nothing.
+  Future<RecategorizeReport> applySuggestion(
+    String merchantNorm,
+    Categorizer categorizer, {
+    required int at,
+  }) async {
+    var cursor = '';
+    var scanned = 0;
+    var changed = 0;
+    while (true) {
+      final rows = await guardRead(
+        () => _db
+            .customSelect(
+              'SELECT id, merchant_raw, merchant_norm, counterparty_kind, '
+              'counterparty_value, category_id, category_source, '
+              'catalog_merchant_id '
+              'FROM transactions '
+              'WHERE merchant_norm = ?1 AND id > ?2 '
+              'AND $needsClassificationSql '
+              'ORDER BY id LIMIT $recategorizeChunk',
+              variables: [
+                Variable.withString(merchantNorm),
+                Variable.withString(cursor),
+              ],
+              readsFrom: {_db.transactions},
+            )
+            .get(),
+      );
+      if (rows.isEmpty) break;
+      changed += await _decideAndApply(rows, categorizer, at: at);
+      scanned += rows.length;
+      cursor = rows.last.read<String>('id');
+    }
+    return RecategorizeReport(scanned: scanned, changed: changed);
+  }
+
+  Future<int> _decideAndApply(
+    List<QueryRow> rows,
+    Categorizer categorizer, {
+    required int at,
+  }) async {
+    final work =
+        <
+          ({
+            String id,
+            String? norm,
+            String? cat,
+            String source,
+            int? merchant,
+            CategoryDecision d,
+          })
+        >[];
+    for (final r in rows) {
+      final d = await categorizer.categorize(
+        categorizeInputFor(
+          merchantRaw: r.read<String?>('merchant_raw'),
+          merchantNorm: r.read<String?>('merchant_norm'),
+          counterpartyKind: r.read<String?>('counterparty_kind'),
+          counterpartyValue: r.read<String?>('counterparty_value'),
+        ),
+      );
+      work.add((
+        id: r.read<String>('id'),
+        norm: r.read<String?>('merchant_norm'),
+        cat: r.read<String?>('category_id'),
+        source: r.read<String>('category_source'),
+        merchant: r.read<int?>('catalog_merchant_id'),
+        d: d,
+      ));
+    }
+    var changed = 0;
+    await _db.transaction(() async {
+      final replacedAi = <String>{};
+      for (final w in work) {
+        final n = await apply(
+          id: w.id,
+          oldCategoryId: w.cat,
+          oldCatalogMerchantId: w.merchant,
+          decision: w.d,
+          at: at,
+        );
+        changed += n;
+        if (n > 0 &&
+            w.source == CategorySource.ai.code &&
+            w.d.source == CategorySource.catalog &&
+            w.norm != null) {
+          replacedAi.add(w.norm!);
+        }
+      }
+      // A later catalog hit replaces an unconfirmed suggestion (FR-LCAT-20);
+      // a confirmed or corrected one is the user's and stays.
+      final dao = AiMerchantSuggestionsDao(_db);
+      for (final m in replacedAi) {
+        await dao.deleteUnconfirmed(m);
+      }
+    });
+    return changed;
+  }
 }
+
+/// T-357: the "needs classification" state, the only one an AI suggestion
+/// ever fills: a live, not internal, not user-verified row with no
+/// category from no source.
+const String needsClassificationSql =
+    'deleted_at IS NULL AND is_internal = 0 AND is_user_verified = 0 '
+    "AND category_source = 'none' AND category_id IS NULL";
