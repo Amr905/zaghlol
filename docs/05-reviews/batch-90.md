@@ -332,3 +332,10 @@ All are under 50 ms.
 - m10 fixed in place (migration not shipped): `app_rw` now has DELETE on `llm_quota_counters` and `llm_cat_answer_cache`.
 - Open points decided: `ops_rw` gets SELECT/INSERT/UPDATE on `remote_config` (the admin endpoint and ops CLI must write it; mirrors `feature_flags`); `ops_ro` gets SELECT on `remote_config` and the two review tables (operator review view; rows hold only the peppered install_hash), still nothing on quota counters.
 - `GrantMatrix.LlmTables`, `GrantTests`, backend-schema.md and T-323 updated.
+
+## CI fix — backend
+
+Run 45819498879 failed four Docker-side tests:
+1. `TheRequestTypesCarryExactlyTheBrSync03Members`: T-322 declared `configVersion` and `llmCatFeedback` in the OpenAPI `SyncRequest` ahead of T-334 (the C# type correctly lacks them; BR-SYNC-03 lists the D-96 amendment only as a draft, and T-322's own bounds tests need them in the spec). The spec stays; the live test now has a named `PlannedSyncRequestMembers` list that the C# type must not contain (so the privacy allow-list is not widened) and that the spec must contain exactly. T-334.md says it empties the list, adds the type members and the BR-SYNC-03 row together.
+2. `EveryOperationThatRequiresTheAppHeader...(askPlan|categorise)` and 3. `EverySpecOperationHasAMappedRoute`: spec-first operations with no route yet. New `OpenApiSpec.PlannedUnmapped` (askPlan -> T-349, categorise -> T-352) is skipped by both tests; `EverySpecOperationHasAMappedRoute` fails if a listed operation is mapped or is not in the spec. No stub endpoints.
+4. `EveryModelTableAndTheViewAppearInTheGrantMatrix`: T-323 created the six LLM tables by raw SQL, so the matrix (correctly) grants them but the EF model has no entities yet. The test now allows exactly `GrantMatrix.LlmTables` as migration-only and fails if one of them gains an entity (the allowance must go with it); grants unchanged, GrantTests already cover them.
