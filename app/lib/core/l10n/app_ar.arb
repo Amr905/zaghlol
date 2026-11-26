@@ -1490,11 +1490,101 @@
       }
     }
   },
+  "currencyViewTitle": "الشهر ده بالـ{currency}",
+  "@currencyViewTitle": {
+    "description": "S · T-279: title of the per-currency view (D-86). {currency} is the ISO code.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyViewEmptyTitle": "مفيش حاجة بالعملة دي الشهر ده",
+  "@currencyViewEmptyTitle": {
+    "description": "S · T-279: per-currency view with no activity, or an unknown currency code."
+  },
+  "currencyViewEmptyBody": "أول ما تدخل أو تصرف بيها هتلاقيها هنا.",
+  "@currencyViewEmptyBody": {
+    "description": "S · T-279: hint under the empty title."
+  },
+  "currencyViewBudgetOffer": "تعمل ميزانية بالـ{currency}؟",
+  "@currencyViewBudgetOffer": {
+    "description": "S · T-279 (budget.offer.foreign): offered once per currency per month; never creates a budget by itself.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
   "homeHeroOtherCurrencyIncome": "+ {amount} دخل",
   "@homeHeroOtherCurrencyIncome": {
     "description": "C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.",
     "placeholders": {
       "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardsTitle": "فلوسك بعملات تانية",
+  "@homeCurrencyCardsTitle": {
+    "description": "C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24."
+  },
+  "homeCurrencyCardLeft": "فاضل {amount}",
+  "@homeCurrencyCardLeft": {
+    "description": "C · T-278: what is left in that currency this month, on a currency card. Max 18.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardInOut": "دخل {income} · خرج {out}",
+  "@homeCurrencyCardInOut": {
+    "description": "C · T-278: second line of a currency card: this month's money in and out (spending plus exchanged away), same currency.",
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "out": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardMore": "+{count}",
+  "@homeCurrencyCardMore": {
+    "description": "C · T-278: chip after the third currency card; opens a sheet with the rest. Max 4.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardMoreA11y": "{count, plural, =1{عملة كمان} =2{عملتين كمان} few{{n} عملات كمان} other{{n} عملة كمان}}",
+  "@homeCurrencyCardMoreA11y": {
+    "description": "C · T-278: screen-reader label of the +N chip.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardA11y": "{currency}: فاضل {left}. دخل {income}، وخرج {out}. اضغط تفتح الشهر بالعملة دي",
+  "@homeCurrencyCardA11y": {
+    "description": "C · T-278: screen-reader label of one currency card.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "out": {
         "type": "String"
       }
     }
@@ -1698,6 +1788,123 @@
       }
     }
   },
+  "homeApproxLine": "≈ {amount} دخلك كله تقريباً",
+  "@homeApproxLine": {
+    "description": "L · T-280, home.approx.line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxLineA11y": "تقريبي: {amount} دخلك كله، بكل العملات",
+  "@homeApproxLineA11y": {
+    "description": "A · read before the amount; tap opens the sheet",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBoth": "سعر البنك + سعر {date}",
+  "@homeApproxRateNoteBoth": {
+    "description": "S · bank rate for the exchanged part, daily rate for the rest",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteDaily": "سعر {date}",
+  "@homeApproxRateNoteDaily": {
+    "description": "S · only the daily rate was used",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBank": "سعر البنك",
+  "@homeApproxRateNoteBank": {
+    "description": "S · everything foreign was already exchanged"
+  },
+  "homeApproxStale": "سعر قديم",
+  "@homeApproxStale": {
+    "description": "S · a daily rate older than 24 h"
+  },
+  "homeApproxSheetTitle": "الحسبة دي تقريبية",
+  "@homeApproxSheetTitle": {
+    "description": "T"
+  },
+  "homeApproxSheetBody": "بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.",
+  "@homeApproxSheetBody": {
+    "description": "B"
+  },
+  "homeApproxSheetOwn": "اللي دخلك بالعملة دي (بما فيه اللي غيّرته)",
+  "@homeApproxSheetOwn": {
+    "description": "L · the target currency's own money in"
+  },
+  "homeApproxSheetHeld": "{amount} لسه معاك",
+  "@homeApproxSheetHeld": {
+    "description": "L · the part of a foreign currency not exchanged",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchanged": "{amount} غيّرتها، واتحسبت مرة واحدة بالفعل",
+  "@homeApproxSheetExchanged": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchangedBank": "{amount} غيّرتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل",
+  "@homeApproxSheetExchangedBank": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetDailyRate": "سعر {date}: {from} الواحد بـ {rate}",
+  "@homeApproxSheetDailyRate": {
+    "description": "S",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetClose": "تمام",
+  "@homeApproxSheetClose": {
+    "description": "C"
+  },
+  "homeMascotFirstForeign": "قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.",
+  "@homeMascotFirstForeign": {
+    "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
+  },
+  "homeApproxNoticeOff": "اقفلها",
+  "@homeApproxNoticeOff": {
+    "description": "C · turns the ≈ line off"
+  },
+  "homeApproxNoticeOk": "تمام",
+  "@homeApproxNoticeOk": {
+    "description": "C · dismisses the notice"
+  },
   "homeMascotDismissA11y": "اقفل الرسالة",
   "@homeMascotDismissA11y": {
     "description": "A · × on C-14"
@@ -1897,6 +2104,49 @@
   "transactionsRowInternalTitle": "تحويلة لنفسك",
   "@transactionsRowInternalTitle": {
     "description": "L · ⇄ icon, muted"
+  },
+  "transactionsExchangeTitle": "غيّرت {from} ← {to}",
+  "@transactionsExchangeTitle": {
+    "description": "T-281 list row and detail title; arrow points from what you gave to what you got (mirrors in LTR); amounts are LTR runs",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeRate": "سعر البنك {rate} · مش مصروف",
+  "@transactionsExchangeRate": {
+    "description": "T-281 second line of the exchange row",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeNotSpending": "مش مصروف",
+  "@transactionsExchangeNotSpending": {
+    "description": "T-281 second line when the two amounts give no rate"
+  },
+  "transactionsExchangeRowA11y": "تغيير عملة: دفعت {from} ووصلك {to}، {rate}، {time}",
+  "@transactionsExchangeRowA11y": {
+    "description": "T-281 screen-reader label of the exchange row",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
   },
   "transactionsInstapayTitle": "إنستاباي",
   "@transactionsInstapayTitle": {
@@ -2363,6 +2613,60 @@
   "transactionsDetailGone": "الحركة دي مبقتش موجودة",
   "@transactionsDetailGone": {
     "description": "N · deleted elsewhere; goes back"
+  },
+  "transactionsExchangeBanner": "تغيير عملة، مش محسوب لا مصروف ولا دخل",
+  "@transactionsExchangeBanner": {
+    "description": "T-281 detail banner"
+  },
+  "transactionsExchangeFieldSent": "دفعت",
+  "@transactionsExchangeFieldSent": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeFieldReceived": "وصلني",
+  "@transactionsExchangeFieldReceived": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeFieldFrom": "من حساب",
+  "@transactionsExchangeFieldFrom": {
+    "description": "T-281 detail field: account of the money given"
+  },
+  "transactionsExchangeFieldTo": "لحساب",
+  "@transactionsExchangeFieldTo": {
+    "description": "T-281 detail field: account of the money got"
+  },
+  "transactionsExchangeFieldRate": "سعر البنك",
+  "@transactionsExchangeFieldRate": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeRateValue": "{one} {from} = {rate} {to}",
+  "@transactionsExchangeRateValue": {
+    "description": "T-281 detail rate value; one and rate are rendered in the user's digits",
+    "placeholders": {
+      "one": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeDeleteTitle": "تمسح تغيير العملة ده؟",
+  "@transactionsExchangeDeleteTitle": {
+    "description": "T-281 delete dialog"
+  },
+  "transactionsExchangeDeleteBody": "الناحيتين هيتمسحوا مع بعض.",
+  "@transactionsExchangeDeleteBody": {
+    "description": "T-281 delete dialog body"
+  },
+  "transactionsExchangeDeleted": "اتمسح تغيير العملة",
+  "@transactionsExchangeDeleted": {
+    "description": "T-281 snackbar after delete; with Undo"
   },
   "categorizationRuleTitle": "أستخدم {category} دايماً لـ {merchant}؟",
   "@categorizationRuleTitle": {
@@ -7507,6 +7811,17 @@
       "percent": {
         "type": "String"
       }
+    }
+  },
+  "chatAnswerExchange": "{span} غيّرت {given} وخدت {received}. سعر البنك: {unit} الواحد بـ {rate}.",
+  "@chatAnswerExchange": {
+    "description": "E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).",
+    "placeholders": {
+      "span": {"type": "String"},
+      "given": {"type": "String"},
+      "received": {"type": "String"},
+      "unit": {"type": "String"},
+      "rate": {"type": "String"}
     }
   },
   "chatAnswerSpendCard": "صرفت {amount} بكارت {card} {span}.",

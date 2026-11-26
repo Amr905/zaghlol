@@ -2010,11 +2010,76 @@ abstract class AppLocalizations {
   /// **'وغيّرت {amount}'**
   String homeHeroKpiExchangedOut(String amount);
 
+  /// S · T-279: title of the per-currency view (D-86). {currency} is the ISO code.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده بالـ{currency}'**
+  String currencyViewTitle(String currency);
+
+  /// S · T-279: per-currency view with no activity, or an unknown currency code.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة بالعملة دي الشهر ده'**
+  String get currencyViewEmptyTitle;
+
+  /// S · T-279: hint under the empty title.
+  ///
+  /// In ar, this message translates to:
+  /// **'أول ما تدخل أو تصرف بيها هتلاقيها هنا.'**
+  String get currencyViewEmptyBody;
+
+  /// S · T-279 (budget.offer.foreign): offered once per currency per month; never creates a budget by itself.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعمل ميزانية بالـ{currency}؟'**
+  String currencyViewBudgetOffer(String currency);
+
   /// C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.
   ///
   /// In ar, this message translates to:
   /// **'+ {amount} دخل'**
   String homeHeroOtherCurrencyIncome(String amount);
+
+  /// C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24.
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوسك بعملات تانية'**
+  String get homeCurrencyCardsTitle;
+
+  /// C · T-278: what is left in that currency this month, on a currency card. Max 18.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاضل {amount}'**
+  String homeCurrencyCardLeft(String amount);
+
+  /// C · T-278: second line of a currency card: this month's money in and out (spending plus exchanged away), same currency.
+  ///
+  /// In ar, this message translates to:
+  /// **'دخل {income} · خرج {out}'**
+  String homeCurrencyCardInOut(String income, String out);
+
+  /// C · T-278: chip after the third currency card; opens a sheet with the rest. Max 4.
+  ///
+  /// In ar, this message translates to:
+  /// **'+{count}'**
+  String homeCurrencyCardMore(String count);
+
+  /// C · T-278: screen-reader label of the +N chip.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{عملة كمان} =2{عملتين كمان} few{{n} عملات كمان} other{{n} عملة كمان}}'**
+  String homeCurrencyCardMoreA11y(int count, String n);
+
+  /// C · T-278: screen-reader label of one currency card.
+  ///
+  /// In ar, this message translates to:
+  /// **'{currency}: فاضل {left}. دخل {income}، وخرج {out}. اضغط تفتح الشهر بالعملة دي'**
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  );
 
   /// C · T-272 manual exchange screen title
   ///
@@ -2187,6 +2252,108 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المرتب نزل! {amount} 🎉 يلا نخطط له من أوله'**
   String homeMascotPayday(String amount);
+
+  /// L · T-280, home.approx.line
+  ///
+  /// In ar, this message translates to:
+  /// **'≈ {amount} دخلك كله تقريباً'**
+  String homeApproxLine(String amount);
+
+  /// A · read before the amount; tap opens the sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تقريبي: {amount} دخلك كله، بكل العملات'**
+  String homeApproxLineA11y(String amount);
+
+  /// S · bank rate for the exchanged part, daily rate for the rest
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك + سعر {date}'**
+  String homeApproxRateNoteBoth(String date);
+
+  /// S · only the daily rate was used
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر {date}'**
+  String homeApproxRateNoteDaily(String date);
+
+  /// S · everything foreign was already exchanged
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك'**
+  String get homeApproxRateNoteBank;
+
+  /// S · a daily rate older than 24 h
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر قديم'**
+  String get homeApproxStale;
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'الحسبة دي تقريبية'**
+  String get homeApproxSheetTitle;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.'**
+  String get homeApproxSheetBody;
+
+  /// L · the target currency's own money in
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي دخلك بالعملة دي (بما فيه اللي غيّرته)'**
+  String get homeApproxSheetOwn;
+
+  /// L · the part of a foreign currency not exchanged
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} لسه معاك'**
+  String homeApproxSheetHeld(String amount);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} غيّرتها، واتحسبت مرة واحدة بالفعل'**
+  String homeApproxSheetExchanged(String amount);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} غيّرتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل'**
+  String homeApproxSheetExchangedBank(String amount, String rate);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر {date}: {from} الواحد بـ {rate}'**
+  String homeApproxSheetDailyRate(String date, String from, String rate);
+
+  /// C
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام'**
+  String get homeApproxSheetClose;
+
+  /// M · Captain, Proud coach; mascot.fx.firstForeign
+  ///
+  /// In ar, this message translates to:
+  /// **'قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.'**
+  String get homeMascotFirstForeign;
+
+  /// C · turns the ≈ line off
+  ///
+  /// In ar, this message translates to:
+  /// **'اقفلها'**
+  String get homeApproxNoticeOff;
+
+  /// C · dismisses the notice
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام'**
+  String get homeApproxNoticeOk;
 
   /// A · × on C-14
   ///
@@ -2373,6 +2540,35 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تحويلة لنفسك'**
   String get transactionsRowInternalTitle;
+
+  /// T-281 list row and detail title; arrow points from what you gave to what you got (mirrors in LTR); amounts are LTR runs
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت {from} ← {to}'**
+  String transactionsExchangeTitle(String from, String to);
+
+  /// T-281 second line of the exchange row
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك {rate} · مش مصروف'**
+  String transactionsExchangeRate(String rate);
+
+  /// T-281 second line when the two amounts give no rate
+  ///
+  /// In ar, this message translates to:
+  /// **'مش مصروف'**
+  String get transactionsExchangeNotSpending;
+
+  /// T-281 screen-reader label of the exchange row
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير عملة: دفعت {from} ووصلك {to}، {rate}، {time}'**
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  );
 
   /// L · title of an InstaPay row (US-P04)
   ///
@@ -2823,6 +3019,71 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الحركة دي مبقتش موجودة'**
   String get transactionsDetailGone;
+
+  /// T-281 detail banner
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير عملة، مش محسوب لا مصروف ولا دخل'**
+  String get transactionsExchangeBanner;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعت'**
+  String get transactionsExchangeFieldSent;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'وصلني'**
+  String get transactionsExchangeFieldReceived;
+
+  /// T-281 detail field: account of the money given
+  ///
+  /// In ar, this message translates to:
+  /// **'من حساب'**
+  String get transactionsExchangeFieldFrom;
+
+  /// T-281 detail field: account of the money got
+  ///
+  /// In ar, this message translates to:
+  /// **'لحساب'**
+  String get transactionsExchangeFieldTo;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك'**
+  String get transactionsExchangeFieldRate;
+
+  /// T-281 detail rate value; one and rate are rendered in the user's digits
+  ///
+  /// In ar, this message translates to:
+  /// **'{one} {from} = {rate} {to}'**
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  );
+
+  /// T-281 delete dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'تمسح تغيير العملة ده؟'**
+  String get transactionsExchangeDeleteTitle;
+
+  /// T-281 delete dialog body
+  ///
+  /// In ar, this message translates to:
+  /// **'الناحيتين هيتمسحوا مع بعض.'**
+  String get transactionsExchangeDeleteBody;
+
+  /// T-281 snackbar after delete; with Undo
+  ///
+  /// In ar, this message translates to:
+  /// **'اتمسح تغيير العملة'**
+  String get transactionsExchangeDeleted;
 
   /// T · FR-CAT-05 sheet, owned by the categorization module (F-19)
   ///
@@ -7938,6 +8199,18 @@ abstract class AppLocalizations {
     String gap,
     String saved,
     String percent,
+  );
+
+  /// E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).
+  ///
+  /// In ar, this message translates to:
+  /// **'{span} غيّرت {given} وخدت {received}. سعر البنك: {unit} الواحد بـ {rate}.'**
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
   );
 
   /// E · spend_on_card

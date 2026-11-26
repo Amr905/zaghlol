@@ -18,9 +18,11 @@ import 'package:zaghlol/features/ingestion/domain/ingest_ports.dart'
 import 'package:zaghlol/features/transactions/application/bulk_actions.dart';
 import 'package:zaghlol/features/transactions/application/bulk_edit.dart';
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
+import 'package:zaghlol/features/transactions/domain/exchange.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/features/transactions/domain/transaction_repository.dart';
 import 'package:zaghlol/features/transactions/presentation/list/transactions_list_screen.dart';
+import 'package:zaghlol/features/transactions/presentation/list/txn_exchange_row.dart';
 import 'package:zaghlol/features/transactions/presentation/list/txn_list_providers.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -250,6 +252,9 @@ class Harness {
   Harness(this.repo) : actions = FakeActions(repo);
   final FakeRepo repo;
   final FakeActions actions;
+
+  /// T-281: exchanges by leg id (both legs map to the same exchange).
+  Map<String, TxnExchange> exchanges = const {};
 }
 
 Widget listApp(
@@ -258,11 +263,21 @@ Widget listApp(
   double textScale = 1.0,
   bool dark = false,
   HideAmountsHarness? hideAmounts,
+  ValueChanged<String>? onOpen,
 }) => ProviderScope(
   overrides: [
     ...(hideAmounts ?? HideAmountsHarness()).overrides,
     transactionRepositoryProvider.overrideWith((ref) async => h.repo),
     txnBulkActionsProvider.overrideWith((ref) async => h.actions),
+    txnExchangeLookupProvider.overrideWith(
+      (ref) async =>
+          (Iterable<String> ids) async => {
+            for (final e in h.exchanges.entries)
+              if (ids.contains(e.value.sent.id) ||
+                  ids.contains(e.value.received.id))
+                e.key: e.value,
+          },
+    ),
     txnLookupsProvider.overrideWith((ref) async => lookups),
     paydayScheduleProvider.overrideWith(
       (ref) async => PaydaySchedule.single(1),
@@ -288,7 +303,10 @@ Widget listApp(
           .copyWith(textScaler: TextScaler.linear(textScale)),
       child: child!,
     ),
-    home: TransactionsListScreen(onAddExpense: () {}),
+    home: TransactionsListScreen(
+      onAddExpense: () {},
+      onOpenTransaction: onOpen,
+    ),
   ),
 );
 

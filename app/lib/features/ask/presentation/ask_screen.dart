@@ -495,6 +495,7 @@ List<AskChip> _chipsFor(AskChatState chat) {
     AskBiggestAnswer() => followUpChips(AskIntent.biggestExpense),
     AskSavingsAnswer() => followUpChips(AskIntent.savings),
     AskRoastAnswer() => followUpChips(AskIntent.roast),
+    AskExchangeAnswer() => followUpChips(AskIntent.exchange),
     _ => const [AskChip.spendThisMonth, AskChip.topMerchants, AskChip.roast],
   };
 }

@@ -9,8 +9,10 @@ import 'package:zaghlol_domain/zaghlol_domain.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/db/daos/raw_messages_dao.dart';
 import '../../../core/db/daos/transactions_dao.dart';
+import '../domain/exchange.dart';
 import '../domain/transaction.dart';
 import '../domain/transaction_repository.dart';
+import 'exchange_reader.dart';
 
 /// Everything S-12 needs for one transaction.
 final class TxnDetail {
@@ -22,6 +24,7 @@ final class TxnDetail {
     this.parseConfidence,
     this.rawBody,
     this.counterpart,
+    this.exchange,
   });
 
   final TransactionRecord record;
@@ -37,6 +40,10 @@ final class TxnDetail {
 
   /// The other leg when this row is half of a transfer pair.
   final TransactionRecord? counterpart;
+
+  /// T-281: set when the row is a leg of a complete, live exchange; the
+  /// screen then shows the exchange as one unit.
+  final TxnExchange? exchange;
 }
 
 class TransactionDetailReader {
@@ -69,6 +76,9 @@ class TransactionDetailReader {
         }
       }
     }
+    final exchange = pair == null
+        ? null
+        : (await ExchangeReader(_db, _repo).forTransactions([id]))[id];
     final bal = row.balanceAfterMinor;
     return TxnDetail(
       record: record,
@@ -80,6 +90,7 @@ class TransactionDetailReader {
       parseConfidence: row.parseConfidence,
       rawBody: body,
       counterpart: other,
+      exchange: exchange,
     );
   }
 }

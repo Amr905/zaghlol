@@ -1211,8 +1211,64 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String currencyViewTitle(String currency) {
+    return 'This month in $currency';
+  }
+
+  @override
+  String get currencyViewEmptyTitle => 'Nothing in this currency this month';
+
+  @override
+  String get currencyViewEmptyBody =>
+      'Once you earn or spend in it, it shows up here.';
+
+  @override
+  String currencyViewBudgetOffer(String currency) {
+    return 'Want a $currency budget?';
+  }
+
+  @override
   String homeHeroOtherCurrencyIncome(String amount) {
     return '+ $amount income';
+  }
+
+  @override
+  String get homeCurrencyCardsTitle => 'Other currencies';
+
+  @override
+  String homeCurrencyCardLeft(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String homeCurrencyCardInOut(String income, String out) {
+    return 'In $income · Out $out';
+  }
+
+  @override
+  String homeCurrencyCardMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String homeCurrencyCardMoreA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n more currencies',
+      one: '1 more currency',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  ) {
+    return '$currency: $left left. In $income, out $out. Tap to open this month in that currency';
   }
 
   @override
@@ -1329,6 +1385,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String homeMascotPayday(String amount) {
     return 'Payday! $amount just landed 🎉 Let\'s plan it from day one';
   }
+
+  @override
+  String homeApproxLine(String amount) {
+    return '≈ $amount in, all currencies';
+  }
+
+  @override
+  String homeApproxLineA11y(String amount) {
+    return 'Approximate: $amount in, all currencies';
+  }
+
+  @override
+  String homeApproxRateNoteBoth(String date) {
+    return 'Bank rate + rate of $date';
+  }
+
+  @override
+  String homeApproxRateNoteDaily(String date) {
+    return 'Rate of $date';
+  }
+
+  @override
+  String get homeApproxRateNoteBank => 'Bank rate';
+
+  @override
+  String get homeApproxStale => 'Old rate';
+
+  @override
+  String get homeApproxSheetTitle => 'This total is approximate';
+
+  @override
+  String get homeApproxSheetBody =>
+      'We use your bank\'s rate for what you exchanged and today\'s rate for the rest. Your money stays saved in its own currency.';
+
+  @override
+  String get homeApproxSheetOwn =>
+      'Already in this currency (incl. what you exchanged)';
+
+  @override
+  String homeApproxSheetHeld(String amount) {
+    return '$amount still held';
+  }
+
+  @override
+  String homeApproxSheetExchanged(String amount) {
+    return '$amount exchanged, already counted once';
+  }
+
+  @override
+  String homeApproxSheetExchangedBank(String amount, String rate) {
+    return '$amount exchanged at the bank rate $rate, already counted once';
+  }
+
+  @override
+  String homeApproxSheetDailyRate(String date, String from, String rate) {
+    return 'Rate of $date: 1 $from = $rate';
+  }
+
+  @override
+  String get homeApproxSheetClose => 'Got it';
+
+  @override
+  String get homeMascotFirstForeign =>
+      'Paid in dollars! They stay on their own card. When you exchange, your EGP month grows by exactly what you got.';
+
+  @override
+  String get homeApproxNoticeOff => 'Turn it off';
+
+  @override
+  String get homeApproxNoticeOk => 'Got it';
 
   @override
   String get homeMascotDismissA11y => 'Dismiss message';
@@ -1487,6 +1613,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsRowInternalTitle => 'To yourself';
+
+  @override
+  String transactionsExchangeTitle(String from, String to) {
+    return 'Exchanged $from → $to';
+  }
+
+  @override
+  String transactionsExchangeRate(String rate) {
+    return 'Bank rate $rate · not spending';
+  }
+
+  @override
+  String get transactionsExchangeNotSpending => 'Not spending';
+
+  @override
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  ) {
+    return 'Currency exchange: you gave $from and got $to, $rate, $time';
+  }
 
   @override
   String get transactionsInstapayTitle => 'InstaPay';
@@ -1802,6 +1951,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transactionsDetailGone => 'This transaction no longer exists';
+
+  @override
+  String get transactionsExchangeBanner =>
+      'Currency exchange — not counted as spending or income';
+
+  @override
+  String get transactionsExchangeFieldSent => 'You gave';
+
+  @override
+  String get transactionsExchangeFieldReceived => 'You got';
+
+  @override
+  String get transactionsExchangeFieldFrom => 'From';
+
+  @override
+  String get transactionsExchangeFieldTo => 'Into';
+
+  @override
+  String get transactionsExchangeFieldRate => 'Bank rate';
+
+  @override
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  ) {
+    return '$one $from = $rate $to';
+  }
+
+  @override
+  String get transactionsExchangeDeleteTitle => 'Delete this exchange?';
+
+  @override
+  String get transactionsExchangeDeleteBody =>
+      'Both sides are deleted together.';
+
+  @override
+  String get transactionsExchangeDeleted => 'Exchange deleted';
 
   @override
   String categorizationRuleTitle(String category, String merchant) {
@@ -5424,6 +5612,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'other': '$span you saved $saved, that\'s $percent of your income.',
     });
     return '$_temp0';
+  }
+
+  @override
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
+  ) {
+    return '$span you exchanged $given for $received. Bank rate: 1 $unit = $rate.';
   }
 
   @override

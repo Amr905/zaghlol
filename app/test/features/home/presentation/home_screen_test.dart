@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
+import 'package:zaghlol/core/theme/app_theme.dart';
+import 'package:zaghlol/features/home/presentation/currency_cards.dart';
+import 'package:zaghlol/features/home/presentation/home_format.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 import 'package:zaghlol/core/brand/institution_brand.dart';
@@ -15,6 +20,18 @@ import 'home_harness.dart';
 
 const _ar = Locale('ar', 'EG');
 const _en = Locale('en');
+
+/// All text inside one currency card, bidi isolates removed.
+String cardText(WidgetTester tester, String code) {
+  final texts = find.descendant(
+    of: find.byKey(ValueKey('home-currency-card-$code')),
+    matching: find.byType(Text),
+  );
+  return [
+    for (final t in texts.evaluate())
+      ((t.widget as Text).data ?? '').replaceAll(RegExp('[\u2066-\u2069]'), ''),
+  ].join('|');
+}
 
 void main() {
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
@@ -98,24 +115,21 @@ void main() {
     expect(find.text('Spent in November'), findsOneWidget);
   });
 
-  testWidgets('two currencies: pager with dots, figures never summed', (
-    tester,
-  ) async {
+  testWidgets('two currencies: one EGP hero page, USD is a small card, '
+      'never summed', (tester) async {
     await pumpHome(
       tester,
       locale: _en,
       platform: TargetPlatform.android,
       value: model(
         currencies: [figs(egp), figs(usd, income: 500, spend: 120, safe: 9)],
+        cards: [cardOf(usd)],
       ),
     );
-    expect(find.byKey(const ValueKey('home-pager')), findsOneWidget);
-    await tester.drag(
-      find.byKey(const ValueKey('home-pager')),
-      const Offset(-300, 0),
-    );
-    await tester.pumpAndSettle();
-    expect(find.textContaining('USD'), findsWidgets);
+    expect(find.byKey(const ValueKey('home-pager')), findsNothing);
+    expect(find.byType(HomeHero), findsOneWidget);
+    expect(find.text('Other currencies'), findsOneWidget);
+    expect(cardText(tester, 'USD'), 'USD 380.00 left|In 500 · Out 120');
   });
 
   testWidgets('T-272: income KPI shows money in with the exchanged-in line; '
@@ -157,58 +171,159 @@ void main() {
           withX(egp, income: 0, spend: 50000, xin: 2970000),
           withX(usd, income: 100000, spend: 0, xout: 60000),
         ],
+        cards: [
+          HomeCurrencyCard(
+            figures: withX(usd, income: 100000, spend: 0, xout: 60000),
+            lastActivity: CivilDate(2026, 11, 9),
+          ),
+        ],
       ),
     );
+    // PO story (plan §2): EGP hero shows 29,700 in, USD card shows 400 left.
     expect(find.textContaining('29,700'), findsWidgets);
     expect(find.textContaining('exchanged in'), findsOneWidget);
-    expect(find.textContaining('29,200'), findsOneWidget); // left
-    await tester.drag(
-      find.byKey(const ValueKey('home-pager')),
-      const Offset(-300, 0),
-    );
-    await tester.pumpAndSettle();
-    expect(
-      find.byWidgetPredicate(
-        (w) =>
-            w is Text &&
-            (w.data ?? '').contains('600') &&
-            (w.data ?? '').endsWith(' exchanged'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.textContaining('400'), findsWidgets); // USD left
+    expect(find.textContaining('29,200'), findsOneWidget); // EGP left
+    expect(cardText(tester, 'USD'), 'USD 400.00 left|In 1,000 · Out 600');
   });
 
-  testWidgets('T-272: the main page lists the other currency\'s income, '
-      'unconverted; a tap opens that page; no line without income', (
+  testWidgets('T-278: cards show at most 3, then a +N chip opening the '
+      'rest; most recent activity first; a tap opens that currency', (
     tester,
   ) async {
+    final codes = ['USD', 'GBP', 'EUR', 'SAR', 'AED'];
+    // Activity days: GBP newest, then AED, USD, EUR, SAR oldest.
+    final days = {'GBP': 20, 'AED': 18, 'USD': 15, 'EUR': 12, 'SAR': 5};
+    final cards = orderCurrencyCards([
+      for (final c in codes)
+        cardOf(Currency.of(c), last: CivilDate(2026, 11, days[c]!)),
+    ]);
+    expect(
+      [for (final c in cards) c.currency.code],
+      ['GBP', 'AED', 'USD', 'EUR', 'SAR'],
+    );
     await pumpHome(
       tester,
       locale: _en,
       platform: TargetPlatform.android,
       value: model(
-        currencies: [
-          figs(egp),
-          figs(usd, income: 189, spend: 0, safe: null),
-          figs(Currency.of('GBP'), income: 0, spend: 10, safe: null),
-        ],
+        currencies: [figs(egp), for (final c in cards) figs(c.currency)],
+        cards: cards,
       ),
     );
-    final line = find.byKey(const ValueKey('home-other-income-USD'));
-    expect(line, findsOneWidget);
+    for (final c in ['GBP', 'AED', 'USD']) {
+      expect(
+        find.byKey(ValueKey('home-currency-card-$c')),
+        findsOneWidget,
+        reason: c,
+      );
+    }
+    expect(find.byKey(const ValueKey('home-currency-card-EUR')), findsNothing);
+    expect(find.text('+2'), findsOneWidget);
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('home-currency-more')),
+    );
+    await tester.tap(find.byKey(const ValueKey('home-currency-more')));
+    await tester.pumpAndSettle();
     expect(
-      find.descendant(of: line, matching: find.textContaining('189')),
+      find.byKey(const ValueKey('home-currency-card-EUR')),
       findsOneWidget,
     );
-    expect(find.byKey(const ValueKey('home-other-income-GBP')), findsNothing);
-    await tester.tap(line);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('home-other-income-USD')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('home-currency-card-SAR')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('T-278: a card tap calls the open hook with its currency', (
+    tester,
+  ) async {
+    Currency? opened;
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          locale: _en,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: ZaghlolTheme.light,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => Consumer(
+                builder: (context, ref, _) => HomeCurrencyCards(
+                  cards: [cardOf(usd)],
+                  format: HomeFormat.of(context, ref),
+                  onOpen: (c) => opened = c,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('home-currency-card-USD')));
+    expect(opened, usd);
+  });
+
+  testWidgets('T-278: the ≈ slot builder renders under the cards, nothing '
+      'when null', (tester) async {
+    await pumpHome(
+      tester,
+      locale: _en,
+      platform: TargetPlatform.android,
+      value: model(currencies: [figs(egp)], cards: [cardOf(usd)]),
+      extraOverrides: [
+        homeApproxSlotBuilder.overrideWithValue(
+          (_) => const Text('approx-slot', key: ValueKey('approx-slot')),
+        ),
+      ],
+    );
+    expect(find.byKey(const ValueKey('approx-slot')), findsOneWidget);
+  });
+
+  testWidgets('T-278: Arabic card says فاضل USD with Arabic-Indic digits', (
+    tester,
+  ) async {
+    await pumpHome(
+      tester,
+      locale: const Locale('ar'),
+      platform: TargetPlatform.android,
+      value: model(
+        currencies: [figs(egp)],
+        cards: [cardOf(usd, income: 400, spend: 0)],
+      ),
+    );
+    expect(find.text('فلوسك بعملات تانية'), findsOneWidget);
+    expect(cardText(tester, 'USD'), contains('فاضل'));
+    expect(cardText(tester, 'USD'), contains('٤٠٠٫٠٠'));
+  });
+
+  testWidgets('T-278: EGP only: no currency UI at all', (tester) async {
+    await pumpHome(
+      tester,
+      locale: _en,
+      platform: TargetPlatform.android,
+      value: model(),
+    );
+    expect(find.text('Other currencies'), findsNothing);
+    expect(find.byKey(const ValueKey('home-currency-cards')), findsNothing);
+  });
+
+  testWidgets('T-278: only a foreign currency has data: EGP hero stays '
+      '(zeros), USD card shows', (tester) async {
+    await pumpHome(
+      tester,
+      locale: _en,
+      platform: TargetPlatform.android,
+      value: model(currencies: [figs(usd)], cards: [cardOf(usd)]),
+    );
+    expect(find.byType(HomeHero), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('home-currency-card-USD')),
+      findsOneWidget,
+    );
   });
 
   for (final locale in const [_en, Locale('ar')]) {
-    testWidgets('no-budget second currency fits the pager on a small phone '
+    testWidgets('currency cards fit a small phone '
         '(${locale.languageCode})', (tester) async {
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1;
@@ -222,13 +337,12 @@ void main() {
             figs(egp),
             figs(usd, income: 500, spend: 120, safe: null),
           ],
+          cards: [
+            for (final c in ['USD', 'GBP', 'EUR', 'SAR'])
+              cardOf(Currency.of(c), income: 123456789),
+          ],
         ),
       );
-      await tester.drag(
-        find.byKey(const ValueKey('home-pager')),
-        const Offset(-300, 0),
-      );
-      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
   }
@@ -409,21 +523,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('NBE'), findsWidgets);
     expect(find.textContaining('للتجارة'), findsNothing);
-  });
-
-  testWidgets('pager is sized to its content, not a fixed height', (
-    tester,
-  ) async {
-    await pumpHome(
-      tester,
-      locale: _en,
-      platform: TargetPlatform.android,
-      value: model(currencies: [figs(egp), figs(usd)]),
-    );
-    await tester.pumpAndSettle();
-    final pager = tester.getSize(find.byKey(const ValueKey('home-pager')));
-    final hero = tester.getSize(find.byType(HomeHero).first);
-    expect(pager.height, closeTo(hero.height, 0.5));
   });
 
   group('cycle naming (D-82, T-247)', () {

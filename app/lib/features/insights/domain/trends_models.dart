@@ -18,7 +18,13 @@ final class InOutBar {
     required this.spendMinor,
     required this.hasData,
     required this.projected,
+    this.exchangedInMinor = 0,
+    this.exchangedOutMinor = 0,
   });
+
+  /// T-282: exchanged in / out, their own series (never income or spend).
+  final int exchangedInMinor;
+  final int exchangedOutMinor;
 
   final CivilDate from;
   final CivilDate to;
@@ -55,8 +61,14 @@ List<InOutBar> inOutBars(List<CashFlowPoint> points, CivilDate today) {
         to: to,
         incomeMinor: p.income.minor,
         spendMinor: spend,
-        hasData: p.income.minor != 0 || p.spend.minor != 0,
+        hasData:
+            p.income.minor != 0 ||
+            p.spend.minor != 0 ||
+            p.exchangedInOrZero.minor != 0 ||
+            p.exchangedOutOrZero.minor != 0,
         projected: projected,
+        exchangedInMinor: p.exchangedInOrZero.minor,
+        exchangedOutMinor: p.exchangedOutOrZero.minor,
       ),
     );
   }

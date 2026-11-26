@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
 import 'package:go_router/go_router.dart';
 
 import '../core/routing/app_router.dart';
@@ -37,6 +38,8 @@ import '../features/settings/presentation/settings_ports.dart';
 import '../features/transactions/presentation/edit/transaction_edit_screen.dart';
 import '../features/transactions/presentation/list/txn_list_providers.dart';
 import '../features/transfers/presentation/assign_sheet.dart';
+import '../features/budget/presentation/edit_budgets_screen.dart';
+import '../features/home/presentation/currency_view_screen.dart';
 import '../features/transfers/presentation/exchange_entry_screen.dart';
 import '../features/transfers/presentation/link_transfer_sheet.dart';
 import '../features/transfers/presentation/split_sheet.dart';
@@ -65,6 +68,19 @@ final TabRoots wiredTabRoots = TabRoots(
   transactions: (context) => _screens(context).transactions(
     context,
     onOpenTransaction: (id) => openTransactionDetail(context, id),
+  ),
+  currencyView: (context, iso) => CurrencyViewScreen(
+    iso: iso,
+    onSeeAll: (currency) => unawaited(
+      pushScreen<void>(context, (_) => _CurrencyTransactions(currency)),
+    ),
+    onOpenTransaction: (id) => unawaited(openTransactionDetail(context, id)),
+    onOpenBudgetEditor: (currency) => unawaited(
+      pushScreen<void>(
+        context,
+        (_) => EditBudgetsScreen(initialCurrency: currency),
+      ),
+    ),
   ),
   addSelected: wiredAddSelected,
 );
@@ -201,6 +217,41 @@ class _FilteredTransactionsState extends ConsumerState<_FilteredTransactions> {
               period: TxnPeriod.thisCycle,
               categoryIds: {widget.categoryId},
             ),
+          );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => _screens(context).transactions(
+    context,
+    onOpenTransaction: (id) => openTransactionDetail(context, id),
+  );
+}
+
+/// T-279: the transactions list (S-11) for this cycle, narrowed to one
+/// currency (the view's "see all").
+class _CurrencyTransactions extends ConsumerStatefulWidget {
+  const _CurrencyTransactions(this.currency);
+
+  final Currency currency;
+
+  @override
+  ConsumerState<_CurrencyTransactions> createState() =>
+      _CurrencyTransactionsState();
+}
+
+class _CurrencyTransactionsState extends ConsumerState<_CurrencyTransactions> {
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(txnListFilterProvider, (_, _) {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final f = ref.read(txnListFilterProvider);
+      ref
+          .read(txnListFilterProvider.notifier)
+          .set(
+            f.copyWith(period: TxnPeriod.thisCycle, currency: widget.currency),
           );
     });
   }

@@ -83,6 +83,7 @@ HomeModel model({
   bool scanning = false,
   Set<String> filter = const {},
   Cycle? cycle,
+  List<HomeCurrencyCard> cards = const [],
 }) => HomeModel(
   cycle:
       cycle ??
@@ -109,6 +110,18 @@ HomeModel model({
   reviewCount: review,
   scanInProgress: scanning,
   cardFilter: filter,
+  currencyCards: cards,
+);
+
+/// A currency card for [c] (T-278); [last] is the last activity day.
+HomeCurrencyCard cardOf(
+  Currency c, {
+  int income = 500,
+  int spend = 120,
+  CivilDate? last,
+}) => HomeCurrencyCard(
+  figures: figs(c, income: income, spend: spend, safe: null),
+  lastActivity: last ?? CivilDate(2026, 11, 9),
 );
 
 Account account(String id, String label, String last4) => Account(

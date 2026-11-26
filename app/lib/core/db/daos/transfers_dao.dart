@@ -19,6 +19,12 @@ abstract final class TransferPairKind {
   static const String crossCurrency = 'cross_currency';
 }
 
+/// T-272/T-281 (D-86): the kinds that make a complete pair an exchange (one
+/// user action, never income or spending).
+bool isExchangePairKind(String kind) =>
+    kind == TransferPairKind.fxConversion ||
+    kind == TransferPairKind.crossCurrency;
+
 class TransferPairsDao {
   TransferPairsDao(this._db);
 

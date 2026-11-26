@@ -1248,8 +1248,65 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String currencyViewTitle(String currency) {
+    return 'الشهر ده بالـ$currency';
+  }
+
+  @override
+  String get currencyViewEmptyTitle => 'مفيش حاجة بالعملة دي الشهر ده';
+
+  @override
+  String get currencyViewEmptyBody => 'أول ما تدخل أو تصرف بيها هتلاقيها هنا.';
+
+  @override
+  String currencyViewBudgetOffer(String currency) {
+    return 'تعمل ميزانية بالـ$currency؟';
+  }
+
+  @override
   String homeHeroOtherCurrencyIncome(String amount) {
     return '+ $amount دخل';
+  }
+
+  @override
+  String get homeCurrencyCardsTitle => 'فلوسك بعملات تانية';
+
+  @override
+  String homeCurrencyCardLeft(String amount) {
+    return 'فاضل $amount';
+  }
+
+  @override
+  String homeCurrencyCardInOut(String income, String out) {
+    return 'دخل $income · خرج $out';
+  }
+
+  @override
+  String homeCurrencyCardMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String homeCurrencyCardMoreA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n عملة كمان',
+      few: '$n عملات كمان',
+      two: 'عملتين كمان',
+      one: 'عملة كمان',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  ) {
+    return '$currency: فاضل $left. دخل $income، وخرج $out. اضغط تفتح الشهر بالعملة دي';
   }
 
   @override
@@ -1366,6 +1423,75 @@ class AppLocalizationsAr extends AppLocalizations {
   String homeMascotPayday(String amount) {
     return 'المرتب نزل! $amount 🎉 يلا نخطط له من أوله';
   }
+
+  @override
+  String homeApproxLine(String amount) {
+    return '≈ $amount دخلك كله تقريباً';
+  }
+
+  @override
+  String homeApproxLineA11y(String amount) {
+    return 'تقريبي: $amount دخلك كله، بكل العملات';
+  }
+
+  @override
+  String homeApproxRateNoteBoth(String date) {
+    return 'سعر البنك + سعر $date';
+  }
+
+  @override
+  String homeApproxRateNoteDaily(String date) {
+    return 'سعر $date';
+  }
+
+  @override
+  String get homeApproxRateNoteBank => 'سعر البنك';
+
+  @override
+  String get homeApproxStale => 'سعر قديم';
+
+  @override
+  String get homeApproxSheetTitle => 'الحسبة دي تقريبية';
+
+  @override
+  String get homeApproxSheetBody =>
+      'بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.';
+
+  @override
+  String get homeApproxSheetOwn => 'اللي دخلك بالعملة دي (بما فيه اللي غيّرته)';
+
+  @override
+  String homeApproxSheetHeld(String amount) {
+    return '$amount لسه معاك';
+  }
+
+  @override
+  String homeApproxSheetExchanged(String amount) {
+    return '$amount غيّرتها، واتحسبت مرة واحدة بالفعل';
+  }
+
+  @override
+  String homeApproxSheetExchangedBank(String amount, String rate) {
+    return '$amount غيّرتها بسعر البنك $rate، واتحسبت مرة واحدة بالفعل';
+  }
+
+  @override
+  String homeApproxSheetDailyRate(String date, String from, String rate) {
+    return 'سعر $date: $from الواحد بـ $rate';
+  }
+
+  @override
+  String get homeApproxSheetClose => 'تمام';
+
+  @override
+  String get homeMascotFirstForeign =>
+      'قبضت بالدولار يا معلم! سايبهولك في كارته، ولما تحوّل هزوّد شهر الجنيه باللي وصلك بالظبط.';
+
+  @override
+  String get homeApproxNoticeOff => 'اقفلها';
+
+  @override
+  String get homeApproxNoticeOk => 'تمام';
 
   @override
   String get homeMascotDismissA11y => 'اقفل الرسالة';
@@ -1534,6 +1660,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsRowInternalTitle => 'تحويلة لنفسك';
+
+  @override
+  String transactionsExchangeTitle(String from, String to) {
+    return 'غيّرت $from ← $to';
+  }
+
+  @override
+  String transactionsExchangeRate(String rate) {
+    return 'سعر البنك $rate · مش مصروف';
+  }
+
+  @override
+  String get transactionsExchangeNotSpending => 'مش مصروف';
+
+  @override
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  ) {
+    return 'تغيير عملة: دفعت $from ووصلك $to، $rate، $time';
+  }
 
   @override
   String get transactionsInstapayTitle => 'إنستاباي';
@@ -1852,6 +2001,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsDetailGone => 'الحركة دي مبقتش موجودة';
+
+  @override
+  String get transactionsExchangeBanner =>
+      'تغيير عملة، مش محسوب لا مصروف ولا دخل';
+
+  @override
+  String get transactionsExchangeFieldSent => 'دفعت';
+
+  @override
+  String get transactionsExchangeFieldReceived => 'وصلني';
+
+  @override
+  String get transactionsExchangeFieldFrom => 'من حساب';
+
+  @override
+  String get transactionsExchangeFieldTo => 'لحساب';
+
+  @override
+  String get transactionsExchangeFieldRate => 'سعر البنك';
+
+  @override
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  ) {
+    return '$one $from = $rate $to';
+  }
+
+  @override
+  String get transactionsExchangeDeleteTitle => 'تمسح تغيير العملة ده؟';
+
+  @override
+  String get transactionsExchangeDeleteBody => 'الناحيتين هيتمسحوا مع بعض.';
+
+  @override
+  String get transactionsExchangeDeleted => 'اتمسح تغيير العملة';
 
   @override
   String categorizationRuleTitle(String category, String merchant) {
@@ -5542,6 +5729,17 @@ class AppLocalizationsAr extends AppLocalizations {
       'other': '$span حوشت $saved، يعني $percent من دخلك.',
     });
     return '$_temp0';
+  }
+
+  @override
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
+  ) {
+    return '$span غيّرت $given وخدت $received. سعر البنك: $unit الواحد بـ $rate.';
   }
 
   @override
