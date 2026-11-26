@@ -1,5 +1,8 @@
 ﻿== SUMMARY ==
-RUNNING sha=be52c0931a183bba1c93e2da24596d1a55acdace
+SKIP sha=be52c0931a183bba1c93e2da24596d1a55acdace no app/packages/backend changes
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-299-po2 be52c0931a183bba1c93e2da24596d1a55acdace 2026-11-26T22:50:56.0435444+02:00
+
+
+
