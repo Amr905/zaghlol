@@ -10,6 +10,7 @@ namespace Zaghlol.Application.Llm.Prompts;
 public static class LlmPromptIds
 {
     public const string AskPlanV1 = "ask-plan-v1";
+    public const string CatV1 = "cat-v1";
 }
 
 /// <summary>

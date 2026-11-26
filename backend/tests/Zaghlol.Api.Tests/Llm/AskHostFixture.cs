@@ -43,8 +43,8 @@ internal sealed class SwitchableLimiter(ILlmRateLimiter inner) : ILlmRateLimiter
 {
     public LlmRateDecision? Force { get; set; }
 
-    public LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey) =>
-        Force ?? inner.TryAcquire(feature, install, account, networkKey);
+    public LlmRateDecision TryAcquire(LlmFeature feature, InstallId install, Guid? account, string networkKey, LlmRateStage stage) =>
+        Force ?? inner.TryAcquire(feature, install, account, networkKey, stage);
 }
 
 /// <summary>Delegates to the shared <see cref="FakeLlmProvider"/> (recorded replies) and can throw or stall for the paths the fake can't script.</summary>
@@ -58,16 +58,32 @@ internal sealed class ProbeProvider(FakeLlmProvider inner) : ILlmProvider
 
     public string? ThrowWhenQuestionContains { get; set; }
 
-    public Task<LlmResult> CompleteAsync(LlmCall request, CancellationToken cancellationToken)
+    /// <summary>A call whose text contains this never answers until its token is cancelled (a client that leaves).</summary>
+    public string? StallWhenQuestionContains { get; set; }
+
+    /// <summary>Every call's request, in order (T-352 checks what a batch sent).</summary>
+    public List<LlmCall> All { get; } = [];
+
+    public async Task<LlmResult> CompleteAsync(LlmCall request, CancellationToken cancellationToken)
     {
         Last = request;
+        lock (All)
+        {
+            All.Add(request);
+        }
+
+        if (StallWhenQuestionContains is { } stall && request.UserText.Reveal().Contains(stall, StringComparison.Ordinal))
+        {
+            await Task.Delay(Timeout.Infinite, cancellationToken);
+        }
+
         if (ThrowWhenQuestionContains is { } marker && request.UserText.Reveal().Contains(marker, StringComparison.Ordinal))
         {
             Interlocked.Increment(ref throws);
             throw new InvalidOperationException("provider exploded on: " + request.UserText.Reveal());
         }
 
-        return inner.CompleteAsync(request, cancellationToken);
+        return await inner.CompleteAsync(request, cancellationToken);
     }
 
     private int throws;
@@ -198,6 +214,9 @@ public sealed class AskHostFixture : IAsyncLifetime
             builder.UseSetting("RateLimits:AskAccount:TokenLimit", "1000");
             builder.UseSetting("RateLimits:AskAccount:TokensPerPeriod", "1000");
             builder.UseSetting("RateLimits:AskAccountPerDay", "1000");
+            builder.UseSetting("RateLimits:CatInstall:TokenLimit", "1000");
+            builder.UseSetting("RateLimits:CatInstall:TokensPerPeriod", "1000");
+            builder.UseSetting("RateLimits:CatInstallPerDay", "1000");
             builder.UseSetting("RateLimits:AskNetwork:TokenLimit", "1000");
             builder.UseSetting("RateLimits:AskNetwork:TokensPerPeriod", "1000");
             foreach (var (key, value) in kms.Settings())
@@ -228,6 +247,7 @@ public sealed class AskHostFixture : IAsyncLifetime
         Limiter = (SwitchableLimiter)factory.Services.GetRequiredService<ILlmRateLimiter>();
         await SetFlagAsync("ask_llm", true);
         await SetFlagAsync("ask_llm_invest", true);
+        await SetFlagAsync("llm_categorise", true);
     }
 
     public async Task DisposeAsync()
@@ -253,6 +273,11 @@ public sealed class AskHostFixture : IAsyncLifetime
         Replies.Clear();
         Limiter.Force = null;
         Provider.ThrowWhenQuestionContains = null;
+        Provider.StallWhenQuestionContains = null;
+        lock (Provider.All)
+        {
+            Provider.All.Clear();
+        }
     }
 
     public void SetClock(DateTimeOffset utc) => Clock.Advance(utc - Clock.Now);
@@ -324,6 +349,71 @@ public sealed class AskHostFixture : IAsyncLifetime
         return await Client.SendAsync(request);
     }
 
+    /// <summary>The <c>/v1/categorise</c> body with its dev proof bound to it (<see cref="LlmBinding"/>, categorise prefix), or without any when <paramref name="attest"/> is false.</summary>
+    public static string CatBody(
+        string installId,
+        string[] merchants,
+        string? requestId = null,
+        string lang = Lang,
+        string provider = ProviderId,
+        int consentVersion = 1,
+        bool attest = true,
+        string extra = "")
+    {
+        var core = $"\"v\":1,\"requestId\":\"{requestId ?? NewRequestId()}\",\"lang\":\"{lang}\",\"merchants\":{JsonSerializer.Serialize(merchants)},\"consent\":{{\"provider\":\"{provider}\",\"v\":{consentVersion.ToString(CultureInfo.InvariantCulture)}}}{extra}";
+        if (!attest)
+        {
+            return "{" + core + "}";
+        }
+
+        using var document = JsonDocument.Parse("{" + core + "}");
+        var hash = LlmBinding.BodyHash(LlmFeature.Categorise, InstallId.Parse(installId), document.RootElement)!;
+        var proof = Base64Url(HMACSHA256.HashData(DevKey, hash));
+        return "{" + core + $",\"attestation\":{{\"type\":\"dev\",\"proof\":\"{proof}\"}}}}";
+    }
+
+    public async Task<HttpResponseMessage> PostCatAsync(string token, string body, string? account = null, CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/v1/categorise");
+        request.Headers.TryAddWithoutValidation("Authorization", "Bearer " + token);
+        if (account is not null)
+        {
+            request.Headers.TryAddWithoutValidation("Zaghlol-Account", account);
+        }
+
+        request.Content = new StringContent(body, Encoding.UTF8);
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        return await Client.SendAsync(request, cancellationToken);
+    }
+
+    /// <summary>The names of every table whose rows contain <paramref name="text"/> (a marker's whereabouts).</summary>
+    public async Task<IReadOnlyList<string>> TablesContainingAsync(string text)
+    {
+        var found = new List<string>();
+        await using var connection = new NpgsqlConnection(Database.Superuser);
+        await connection.OpenAsync();
+        var tables = new List<string>();
+        await using (var list = new NpgsqlCommand("SELECT table_name FROM information_schema.tables WHERE table_schema = 'zaghlol' AND table_type = 'BASE TABLE'", connection))
+        await using (var reader = await list.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
+            {
+                tables.Add(reader.GetString(0));
+            }
+        }
+
+        foreach (var table in tables)
+        {
+            await using var command = new NpgsqlCommand($"SELECT coalesce(string_agg(row_to_json(t)::text, E'\\n'), '') FROM zaghlol.\"{table}\" t", connection);
+            if (((string)(await command.ExecuteScalarAsync())!).Contains(text, StringComparison.Ordinal))
+            {
+                found.Add(table);
+            }
+        }
+
+        return found;
+    }
+
     /// <summary>One question end to end: a fresh install unless given.</summary>
     public async Task<(HttpResponseMessage Response, string Text)> AskAsync(string token, string installId, string q, string? requestId = null, string? account = null)
     {
@@ -337,11 +427,11 @@ public sealed class AskHostFixture : IAsyncLifetime
         return new FakeReply(contains, outcome, document.RootElement.Clone(), new LlmUsage(900, 800, 120));
     }
 
-    public async Task<int> UsedAsync(string kind, string subject)
+    public async Task<int> UsedAsync(string kind, string subject, string feature = "ask")
     {
         await using var connection = new NpgsqlConnection(Database.Superuser);
         await connection.OpenAsync();
-        await using var command = new NpgsqlCommand("SELECT coalesce(sum(used), 0)::int FROM zaghlol.llm_quota_counters WHERE feature = 'ask' AND subject_kind = $1 AND subject_id = $2::uuid", connection);
+        await using var command = new NpgsqlCommand("SELECT coalesce(sum(used), 0)::int FROM zaghlol.llm_quota_counters WHERE feature = '" + feature + "' AND subject_kind = $1 AND subject_id = $2::uuid", connection);
         command.Parameters.Add(new NpgsqlParameter { Value = kind });
         command.Parameters.Add(new NpgsqlParameter { Value = subject });
         return (int)(await command.ExecuteScalarAsync())!;

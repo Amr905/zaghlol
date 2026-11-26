@@ -20,6 +20,7 @@ using Zaghlol.Infrastructure.Entitlements;
 using Zaghlol.Infrastructure.Flags;
 using Zaghlol.Infrastructure.Kms;
 using Zaghlol.Infrastructure.Llm;
+using Zaghlol.Infrastructure.Llm.Categorise;
 using Zaghlol.Infrastructure.Llm.Quota;
 using Zaghlol.Infrastructure.Llm.Spend;
 using Zaghlol.Infrastructure.Logging;
@@ -115,6 +116,8 @@ builder.Services.AddZaghlolLlmQuota();
 builder.Services.AddZaghlolLlmSpend();
 builder.Services.AddSingleton<ILlmRateLimiter, LlmRateLimiter>();
 builder.Services.AddZaghlolAskPlan();
+// Automatic categories for unknown merchants (T-352): POST /v1/categorise over the same gate chain, the published catalog and the answer cache.
+builder.Services.AddZaghlolCategorise();
 // App Store Server Notifications V2 ingest (T-134): verify and store only, on the App login; the worker processes.
 builder.Services.AddZaghlolAppleNotificationIngest();
 // Google RTDN push (T-133): Pub/Sub OIDC before the body, store only, on the App login; the worker processes. Production refuses to
@@ -144,6 +147,7 @@ app.MapHealth();
 app.MapInstalls();
 app.MapSync();
 app.MapAsk();
+app.MapCategorise();
 app.MapPurchases();
 app.MapEntitlement();
 app.MapAccounts();

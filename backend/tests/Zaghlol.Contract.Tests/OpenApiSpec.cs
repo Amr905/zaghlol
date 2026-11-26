@@ -46,10 +46,7 @@ internal sealed class OpenApiSpec
     /// task that removes it; <c>EverySpecOperationHasAMappedRoute</c> fails when a planned operation is in fact mapped, so the list
     /// cannot go stale.
     /// </summary>
-    public static readonly IReadOnlyDictionary<string, string> PlannedUnmapped = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["categorise"] = "T-352",
-    };
+    public static readonly IReadOnlyDictionary<string, string> PlannedUnmapped = new Dictionary<string, string>(StringComparer.Ordinal);
 
     public static OpenApiSpec Load()
     {

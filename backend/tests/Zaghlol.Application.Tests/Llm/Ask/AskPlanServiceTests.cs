@@ -19,7 +19,7 @@ public class AskPlanServiceTests
         var result = await kit.RunAsync();
 
         Assert.Equal(AskPlanKind.Answered, result.Kind);
-        Assert.Equal(["flag:Ask", "spend", "limiter", "attestation", "quota-precheck", "quota-commit"], kit.Order);
+        Assert.Equal(["flag:Ask", "spend", "limiter:Owner", "attestation", "limiter:Shared", "quota-precheck", "quota-commit"], kit.Order);
         Assert.Equal(1, kit.Provider.Calls);
         Assert.True(result.Answer!.Counted);
         Assert.Equal(new LlmQuotaView(5, 3, 2, ScriptedQuota.Resets), result.Answer.Quota);
@@ -94,7 +94,7 @@ public class AskPlanServiceTests
             Assert.Equal(LlmGateOutcome.ConsentRequired, result.Gate.Outcome);
             Assert.Equal("p1", result.Gate.ProviderId);
             Assert.Equal(0, kit.Provider.Calls);
-            Assert.DoesNotContain("limiter", kit.Order);
+            Assert.DoesNotContain("limiter:Owner", kit.Order);
         }
     }
 
@@ -102,14 +102,52 @@ public class AskPlanServiceTests
     public async Task ARateLimitedCallDoesNotReachAttestationAndCountsOnTheMetric()
     {
         var kit = new AskTestKit();
-        kit.Limiter.Next = new LlmRateDecision(false, "global", 7);
+        kit.Limiter.Next = new LlmRateDecision(false, "install", 7);
 
         var result = await kit.RunAsync();
 
         Assert.Equal(7, result.Gate.RetryAfterSeconds);
-        Assert.Equal("global", result.Gate.Bucket);
+        Assert.Equal("install", result.Gate.Bucket);
         Assert.Equal(0, kit.Verifier.Calls);
-        Assert.Contains("429:global", kit.Metrics.Events);
+        Assert.Contains("429:install", kit.Metrics.Events);
+    }
+
+    // FU-432: the shared /24 and global buckets are drawn only after attestation passed.
+    [Fact]
+    public async Task TheSharedBucketsAreDrawnOnlyAfterAttestationPassed()
+    {
+        var refused = new AskTestKit();
+        refused.Verifier.Verdict = LlmAttestationVerdict.Refuse;
+        await refused.RunAsync();
+        Assert.DoesNotContain("limiter:Shared", refused.Order);
+
+        var shared = new AskTestKit();
+        shared.Limiter.RefuseAt = LlmRateStage.Shared;
+        shared.Limiter.Next = new LlmRateDecision(false, "global", 7);
+        var result = await shared.RunAsync();
+
+        Assert.Equal(LlmGateOutcome.RateLimited, result.Gate.Outcome);
+        Assert.Equal("global", result.Gate.Bucket);
+        Assert.Equal(1, shared.Verifier.Calls);
+        Assert.Equal(0, shared.Provider.Calls);
+    }
+
+    // FU-432: a Stop that arrives after the provider answered must not leave a validated PL-INVEST reply unflagged or uncounted.
+    [Fact]
+    public async Task AStopWhileTheInvestFlagIsReadDoesNotLoseAValidatedReply()
+    {
+        using var cts = new CancellationTokenSource();
+        var kit = new AskTestKit();
+        kit.Provider.Reply = (_, _) =>
+        {
+            cts.Cancel();
+            return Task.FromResult(ScriptedProvider.Ok(AskTestKit.InvestPlan));
+        };
+
+        var result = await kit.RunAsync(ct: cts.Token);
+
+        Assert.Equal(AskPlanKind.Answered, result.Kind);
+        Assert.Equal(1, kit.Quota.Commits);
     }
 
     // The attestation verifier receives a missing member as null (422 missing, not 400).

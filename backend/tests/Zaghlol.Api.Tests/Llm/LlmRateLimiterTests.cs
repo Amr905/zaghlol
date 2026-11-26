@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Zaghlol.Api.RateLimiting;
 using Zaghlol.Application.Llm;
+using Zaghlol.Application.Llm.Ask;
 using Zaghlol.Domain;
 
 namespace Zaghlol.Api.Tests.Llm;
@@ -27,14 +28,14 @@ public class LlmRateLimiterTests
 
         for (var i = 0; i < 3; i++)
         {
-            Assert.True(limiter.TryAcquire(LlmFeature.Ask, install, null, "10.0.0.0/24").Allowed);
+            Assert.True(Both(limiter, LlmFeature.Ask, install, null, "10.0.0.0/24").Allowed);
         }
 
-        var refused = limiter.TryAcquire(LlmFeature.Ask, install, null, "10.0.0.0/24");
+        var refused = Both(limiter, LlmFeature.Ask, install, null, "10.0.0.0/24");
         Assert.False(refused.Allowed);
         Assert.Equal("install", refused.Bucket);
         Assert.InRange(refused.RetryAfterSeconds, 1, 60);
-        Assert.True(limiter.TryAcquire(LlmFeature.Ask, NewInstall(), null, "10.0.0.0/24").Allowed);
+        Assert.True(Both(limiter, LlmFeature.Ask, NewInstall(), null, "10.0.0.0/24").Allowed);
     }
 
     [Fact]
@@ -45,10 +46,10 @@ public class LlmRateLimiterTests
 
         for (var i = 0; i < 20; i++)
         {
-            Assert.True(limiter.TryAcquire(LlmFeature.Ask, install, null, "n").Allowed);
+            Assert.True(Both(limiter, LlmFeature.Ask, install, null, "n").Allowed);
         }
 
-        var refused = limiter.TryAcquire(LlmFeature.Ask, install, null, "n");
+        var refused = Both(limiter, LlmFeature.Ask, install, null, "n");
         Assert.False(refused.Allowed);
         Assert.Equal("install", refused.Bucket);
     }
@@ -61,10 +62,10 @@ public class LlmRateLimiterTests
 
         for (var i = 0; i < 3; i++)
         {
-            Assert.True(limiter.TryAcquire(LlmFeature.Ask, NewInstall(), account, "n").Allowed);
+            Assert.True(Both(limiter, LlmFeature.Ask, NewInstall(), account, "n").Allowed);
         }
 
-        var refused = limiter.TryAcquire(LlmFeature.Ask, NewInstall(), account, "n");
+        var refused = Both(limiter, LlmFeature.Ask, NewInstall(), account, "n");
         Assert.False(refused.Allowed);
         Assert.Equal("account", refused.Bucket);
     }
@@ -75,21 +76,46 @@ public class LlmRateLimiterTests
         using var network = Limiter();
         for (var i = 0; i < 30; i++)
         {
-            Assert.True(network.TryAcquire(LlmFeature.Ask, NewInstall(), null, "10.1.1.0/24").Allowed);
+            Assert.True(Both(network, LlmFeature.Ask, NewInstall(), null, "10.1.1.0/24").Allowed);
         }
 
-        Assert.Equal("network", network.TryAcquire(LlmFeature.Ask, NewInstall(), null, "10.1.1.0/24").Bucket);
-        Assert.True(network.TryAcquire(LlmFeature.Ask, NewInstall(), null, "10.2.2.0/24").Allowed);
+        Assert.Equal("network", Both(network, LlmFeature.Ask, NewInstall(), null, "10.1.1.0/24").Bucket);
+        Assert.True(Both(network, LlmFeature.Ask, NewInstall(), null, "10.2.2.0/24").Allowed);
 
         using var global = Limiter(config: new Dictionary<string, string?> { ["Llm:GlobalPerMinute"] = "5" });
         for (var i = 0; i < 5; i++)
         {
-            Assert.True(global.TryAcquire(LlmFeature.Ask, NewInstall(), null, "net" + i).Allowed);
+            Assert.True(Both(global, LlmFeature.Ask, NewInstall(), null, "net" + i).Allowed);
         }
 
-        var refused = global.TryAcquire(LlmFeature.Ask, NewInstall(), null, "net-x");
+        var refused = Both(global, LlmFeature.Ask, NewInstall(), null, "net-x");
         Assert.False(refused.Allowed);
         Assert.Equal("global", refused.Bucket);
+    }
+
+    // FU-432: the owner stage touches only the install and account buckets, the shared stage only the /24 and global ones.
+    [Fact]
+    public void TheOwnerStageNeverDrawsTheSharedBucketsAndTheSharedStageNeverTheOwnerOnes()
+    {
+        using var limiter = Limiter();
+        var install = NewInstall();
+        for (var i = 0; i < 100; i++)
+        {
+            limiter.TryAcquire(LlmFeature.Ask, NewInstall(), null, "10.9.9.0/24", LlmRateStage.Owner);
+        }
+
+        for (var i = 0; i < 30; i++)
+        {
+            Assert.True(limiter.TryAcquire(LlmFeature.Ask, install, null, "10.9.9.0/24", LlmRateStage.Shared).Allowed);
+        }
+
+        Assert.Equal("network", limiter.TryAcquire(LlmFeature.Ask, install, null, "10.9.9.0/24", LlmRateStage.Shared).Bucket);
+        for (var i = 0; i < 3; i++)
+        {
+            Assert.True(limiter.TryAcquire(LlmFeature.Ask, install, null, "10.9.9.0/24", LlmRateStage.Owner).Allowed);
+        }
+
+        Assert.Equal("install", limiter.TryAcquire(LlmFeature.Ask, install, null, "10.9.9.0/24", LlmRateStage.Owner).Bucket);
     }
 
     [Fact]
@@ -98,11 +124,17 @@ public class LlmRateLimiterTests
         using var limiter = Limiter();
         var install = NewInstall();
 
-        Assert.True(limiter.TryAcquire(LlmFeature.Categorise, install, null, "n").Allowed);
-        Assert.True(limiter.TryAcquire(LlmFeature.Categorise, install, null, "n").Allowed);
-        Assert.False(limiter.TryAcquire(LlmFeature.Categorise, install, null, "n").Allowed);
+        Assert.True(Both(limiter, LlmFeature.Categorise, install, null, "n").Allowed);
+        Assert.True(Both(limiter, LlmFeature.Categorise, install, null, "n").Allowed);
+        Assert.False(Both(limiter, LlmFeature.Categorise, install, null, "n").Allowed);
 
         // The same install still has its Ask burst.
-        Assert.True(limiter.TryAcquire(LlmFeature.Ask, install, null, "n").Allowed);
+        Assert.True(Both(limiter, LlmFeature.Ask, install, null, "n").Allowed);
     }
+
+    /// <summary>Both stages in the order the gate chain draws them (owner before attestation, shared after).</summary>
+    private static LlmRateDecision Both(LlmRateLimiter limiter, LlmFeature feature, InstallId install, Guid? account, string network) =>
+        limiter.TryAcquire(feature, install, account, network, LlmRateStage.Owner) is { Allowed: false } owner
+            ? owner
+            : limiter.TryAcquire(feature, install, account, network, LlmRateStage.Shared);
 }
