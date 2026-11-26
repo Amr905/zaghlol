@@ -11,6 +11,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/db/app_database_providers.dart';
+import '../../categorization/data/drift_ai_suggestion_states.dart';
 import '../../transactions/data/transactions_providers.dart';
 import '../application/export.dart';
 
@@ -34,7 +36,8 @@ final class SystemExportDestination implements ExportDestination {
 
 final exportServiceProvider = FutureProvider<ExportService>((ref) async {
   final repo = await ref.watch(transactionRepositoryProvider.future);
-  return ExportService(repo);
+  final db = await ref.watch(appDatabaseProvider.future);
+  return ExportService(repo, aiStates: DriftAiSuggestionStates(db));
 }, name: 'exportServiceProvider');
 
 /// Device tests only (T-238): lets an integration test that runs the real app

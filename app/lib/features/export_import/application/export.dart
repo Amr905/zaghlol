@@ -17,6 +17,7 @@ import 'dart:typed_data';
 
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
+import '../../categorization/domain/ai_suggestion.dart';
 import '../../gold/application/gating.dart';
 import '../../transactions/domain/transaction.dart';
 import '../../transactions/domain/transaction_repository.dart';
@@ -44,7 +45,14 @@ const List<String> exportHeader = [
   'category_id',
   'source',
   'note',
+  // T-356 (FR-LCAT-25): appended last so the columns before keep their
+  // positions. See [exportCategorySource].
+  'category_source',
 ];
+
+/// `category_source` of an export row whose stored category was not yet
+/// confirmed by the user (FR-LCAT-25).
+const String exportAiUnconfirmed = 'ai_unconfirmed';
 
 /// Positions in [exportHeader] the preview table reads.
 const int exportColDate = 1;
@@ -61,8 +69,24 @@ String neutralizeFormula(String s) {
   return risky.contains(s.codeUnitAt(0)) ? "'$s" : s;
 }
 
-/// One export row as strings, in [exportHeader] order.
-List<String> exportRow(TransactionRecord t) {
+/// The `category_source` column (FR-LCAT-25): the stored source code,
+/// except an AI category. That one exports as `user_rule` once the user
+/// confirmed the merchant's suggestion (Right made it a user rule), and as
+/// [exportAiUnconfirmed] in every other case (unconfirmed, corrected but not
+/// yet re-categorised, no suggestion row, unknown state): an AI category is
+/// never shown as the user's choice without the user's Right.
+String exportCategorySource(CategorySource source, AiSuggestionState? state) =>
+    switch (source) {
+      CategorySource.ai =>
+        state == AiSuggestionState.confirmed
+            ? CategorySource.userRule.code
+            : exportAiUnconfirmed,
+      _ => source.code,
+    };
+
+/// One export row as strings, in [exportHeader] order. [aiState] is the
+/// state of the row's merchant's AI suggestion (read only for `ai` rows).
+List<String> exportRow(TransactionRecord t, {AiSuggestionState? aiState}) {
   final orig = t.originalAmount;
   // FU-131: ids are free-form text in the database (a restored or imported
   // row may carry any id), so they are neutralised too.
@@ -83,6 +107,7 @@ List<String> exportRow(TransactionRecord t) {
     neutralizeFormula(t.categoryId ?? ''),
     t.source.code,
     neutralizeFormula(t.note ?? ''),
+    exportCategorySource(t.categorySource, aiState),
   ];
 }
 
@@ -316,8 +341,33 @@ final class ExportTooLarge extends ExportOutcome {
 }
 
 class ExportService {
-  ExportService(this._repo);
+  /// [aiStates] reads the AI suggestion states for `category_source`; when
+  /// null every `ai` row exports as [exportAiUnconfirmed].
+  ExportService(this._repo, {AiSuggestionStates? aiStates})
+    : _aiStates = aiStates; // ignore: prefer_initializing_formals - a private named parameter can't be an initializing formal
   final TransactionRepository _repo;
+  final AiSuggestionStates? _aiStates;
+
+  /// The rows as strings, with the AI suggestion states read in one go.
+  Future<List<List<String>>> _rows(List<TransactionRecord> rows) async {
+    final merchants = {
+      for (final r in rows)
+        if (r.categorySource == CategorySource.ai && r.merchantNorm != null)
+          r.merchantNorm!,
+    };
+    final states = merchants.isEmpty || _aiStates == null
+        ? const <String, AiSuggestionState>{}
+        : await _aiStates.statesOf(merchants);
+    return [
+      for (final r in rows)
+        exportRow(
+          r,
+          aiState: r.categorySource == CategorySource.ai
+              ? states[r.merchantNorm]
+              : null,
+        ),
+    ];
+  }
 
   Future<List<TransactionRecord>> _load(
     TransactionFilter filter,
@@ -357,14 +407,14 @@ class ExportService {
       final total = await _repo.count(filter: filter);
       return ExportPreview(
         exportHeader,
-        rows.take(exportPreviewRows).map(exportRow).toList(),
+        await _rows(rows.take(exportPreviewRows).toList()),
         total,
       );
     }
     if (!warningAcknowledged) return const ExportNeedsWarningAck();
     final rows = await _load(filter, exportMaxRows + 1);
     if (rows.length > exportMaxRows) return const ExportTooLarge();
-    final table = [exportHeader, ...rows.map(exportRow)];
+    final table = [exportHeader, ...await _rows(rows)];
     final bytes = format == ExportFormat.csv
         ? encodeCsv(table)
         : encodeXlsx(table);

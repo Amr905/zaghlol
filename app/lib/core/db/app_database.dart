@@ -17,6 +17,7 @@ import 'migrations/v3_financial_b.dart';
 import 'migrations/v4_financial_c.dart';
 import 'migrations/v5_recurring_cadence.dart';
 import 'migrations/v6_linked_account.dart';
+import 'migrations/v7_llm_categorise.dart';
 import 'schema/app_schema.dart';
 import 'schema/app_schema.steps.dart';
 import 'schema_shape.dart';
@@ -54,7 +55,7 @@ class AppDatabase extends AppSchema {
   int? get attemptedUpgradeFrom => _upgradeFrom;
 
   /// The version steps, `from` → `to` (T-017: v1 → v2; T-018: v2 → v3;
-  /// T-019: v3 → v4; T-196: v4 → v5; T-266: v5 → v6).
+  /// T-019: v3 → v4; T-196: v4 → v5; T-266: v5 → v6; T-356: v6 → v7).
   /// Any other pair is refused before anything runs. Runs inside the upgrade
   /// transaction set up by [migration]; tests override this
   /// (FakeNextDatabase).
@@ -72,6 +73,7 @@ class AppDatabase extends AppSchema {
         from3To4: (m, _) => _from3To4(),
         from4To5: (m, _) => _from4To5(),
         from5To6: (m, _) => _from5To6(),
+        from6To7: (m, _) => _from6To7(),
       ),
     );
   }
@@ -165,6 +167,44 @@ class AppDatabase extends AppSchema {
   Future<void> _from5To6() async {
     await customStatement(v6AddLinkedAccountColumn);
     for (final (_, sql) in v6AddedObjects) {
+      await customStatement(sql);
+    }
+  }
+
+  /// v6 → v7 (T-356): the frozen statements of
+  /// migrations/v7_llm_categorise.dart. The view and the two triggers that
+  /// read `transactions` are dropped first (a rename refuses to run while
+  /// they name a missing table); `transactions` and `outbox` are rebuilt
+  /// (wider CHECKs) with the rowid and every column copied by name and the
+  /// same row-count check as [_from3To4]; the dropped view and triggers come
+  /// back unchanged; then the two new tables are created.
+  Future<void> _from6To7() async {
+    for (final (kind, name) in v7DroppedDependents) {
+      await customStatement('DROP $kind "$name"');
+    }
+    for (final r in v7Rebuilds) {
+      final cols = ['rowid', for (final c in r.columns) '"$c"'].join(', ');
+      await customStatement(r.createTemp);
+      await customStatement(
+        'INSERT INTO "${r.temp}" ($cols) SELECT $cols FROM "${r.table}"',
+      );
+      final counts = await customSelect(
+        'SELECT (SELECT count(*) FROM "${r.table}") AS a, '
+        '(SELECT count(*) FROM "${r.temp}") AS b',
+      ).getSingle();
+      if (counts.read<int>('a') != counts.read<int>('b')) {
+        throw DbMigrationException(DbMigrationException.rowCountMismatch);
+      }
+      await customStatement('DROP TABLE "${r.table}"');
+      await customStatement('ALTER TABLE "${r.temp}" RENAME TO "${r.table}"');
+      for (final sql in r.indexes) {
+        await customStatement(sql);
+      }
+    }
+    for (final (_, sql) in v7RestoredObjects) {
+      await customStatement(sql);
+    }
+    for (final (_, sql) in v7AddedObjects) {
       await customStatement(sql);
     }
   }

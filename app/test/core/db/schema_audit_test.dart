@@ -67,6 +67,8 @@ const Map<String, String> daoOf = {
   'catalog_keywords': 'daos/catalog_dao.dart',
   'catalog_meta': 'daos/catalog_dao.dart',
   'merchant_rules': 'daos/merchant_rules_dao.dart',
+  'ai_merchant_suggestions': 'daos/ai_merchant_suggestions_dao.dart',
+  'llm_cat_queue': 'daos/llm_cat_queue_dao.dart',
   'budgets': 'daos/budgets_dao.dart',
   'fired_alerts': 'daos/fired_alerts_dao.dart',
   'cycle_summaries': 'daos/cycle_summaries_dao.dart',
