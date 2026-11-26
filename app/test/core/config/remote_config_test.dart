@@ -166,6 +166,23 @@ void main() {
     expect(s2.current, same(RemoteConfig.defaults));
   });
 
+  test('FU-414: s1 / s4 thresholds are parsed, range-checked, defaulted', () {
+    const d = RemoteConfig.defaults;
+    expect([d.s1Pct, d.s4SharePct, d.s4SavingPct], [15, 20, 25]);
+    final ok = RemoteConfig.fromValues({
+      'ask.s1_pct': '40',
+      'ask.s4_share_pct': '30',
+      'ask.s4_saving_pct': '50',
+    });
+    expect([ok.s1Pct, ok.s4SharePct, ok.s4SavingPct], [40, 30, 50]);
+    final bad = RemoteConfig.fromValues({
+      'ask.s1_pct': '0',
+      'ask.s4_share_pct': '101',
+      'ask.s4_saving_pct': 'x',
+    });
+    expect([bad.s1Pct, bad.s4SharePct, bad.s4SavingPct], [15, 20, 25]);
+  });
+
   test('the three LLM flags exist and are unknown-safe', () {
     expect(FeatureFlag.fromKey('ask_llm'), FeatureFlag.askLlm);
     expect(FeatureFlag.fromKey('ask_llm_invest'), FeatureFlag.askLlmInvest);

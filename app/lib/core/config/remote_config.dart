@@ -30,6 +30,9 @@ final class RemoteConfig {
     this.investGoldMinCentigrams = 25,
     this.investGoldKarat = 21,
     this.cdExampleRateBp = 2000,
+    this.s1Pct = 15,
+    this.s4SharePct = 20,
+    this.s4SavingPct = 25,
     this.llmProvider = '',
     this.providerName = const LlmProviderNames(ar: '', en: ''),
   });
@@ -51,6 +54,12 @@ final class RemoteConfig {
   final int investGoldMinCentigrams;
   final int investGoldKarat;
   final int cdExampleRateBp;
+
+  /// FU-414: the savings-suggestion thresholds (`ask.s1_pct` 1..1000,
+  /// `ask.s4_share_pct` and `ask.s4_saving_pct` 1..100).
+  final int s1Pct;
+  final int s4SharePct;
+  final int s4SavingPct;
   final String llmProvider;
   final LlmProviderNames providerName;
 
@@ -96,6 +105,9 @@ final class RemoteConfig {
         _ => d.investGoldKarat,
       },
       cdExampleRateBp: i('ask.cd_example_rate_bp', d.cdExampleRateBp, 0, 10000),
+      s1Pct: i('ask.s1_pct', d.s1Pct, 1, 1000),
+      s4SharePct: i('ask.s4_share_pct', d.s4SharePct, 1, 100),
+      s4SavingPct: i('ask.s4_saving_pct', d.s4SavingPct, 1, 100),
       llmProvider: prov != null && _idRe.hasMatch(prov) ? prov : d.llmProvider,
       providerName: providerName ?? d.providerName,
     );

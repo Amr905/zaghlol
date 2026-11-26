@@ -1,0 +1,175 @@
+// T-343: the masker's sources, read from the user's own database and the
+// bundled institution registry (ask-llm.md section 6, D-92, FR-LLM-18).
+//
+// - accounts: label, type, institution code, last-4 (ids are account ids,
+//   which is what PlanExecutor reads back from the mask map);
+// - institutions: registry names ar/en, wallet-card names, the code, and
+//   short forms of the names (FU-399: «فودافون» for «فودافون كاش»);
+// - merchants: every distinct merchant name of the user's own transactions.
+//   The id is `merchant_norm`, the key PlanExecutor resolves a merchant mask
+//   with. No cap: a name left out here would be sent in plain text.
+//
+// Nothing here logs or stores. Everything is a value that lives for one
+// question.
+
+import 'package:drift/drift.dart' show Variable;
+import 'package:zaghlol_parsing/zaghlol_parsing.dart';
+
+import '../../../core/db/app_database.dart';
+import '../../accounts/domain/account.dart';
+
+/// What the masker needs of one registry institution.
+final class InstitutionNames {
+  const InstitutionNames({
+    required this.code,
+    required this.nameAr,
+    required this.nameEn,
+    this.extraNames = const [],
+  });
+
+  /// From the loaded registry.
+  factory InstitutionNames.of(Institution i) => InstitutionNames(
+    code: i.code,
+    nameAr: i.nameAr,
+    nameEn: i.nameEn,
+    extraNames: i.walletCardNames,
+  );
+
+  final String code;
+  final String nameAr;
+  final String nameEn;
+  final List<String> extraNames;
+
+  @override
+  String toString() => 'InstitutionNames($code)';
+}
+
+/// Words that start a bank name but name nothing (skipped for short forms).
+const Set<String> _genericLead = {
+  'bank',
+  'banque',
+  'the',
+  'al',
+  'el',
+  'of',
+  'بنك',
+  'ال',
+};
+
+/// Everyday words: a short form that is one of these needs a bank, account
+/// or card word next to it before it is masked (FR-LLM-18).
+const Set<String> _everyday = {
+  'misr',
+  'مصر',
+  'egypt',
+  'national',
+  'arab',
+  'first',
+  'liv',
+  'الاهلي',
+  'الاهلى',
+  'الوطني',
+  'العربي',
+  'الاول',
+  'الاولى',
+};
+
+/// The aliases of [i]: its names as the registry has them (never everyday
+/// words) plus the short form (first word after a generic lead, at least 3
+/// characters) of each name. A name or short form that is an everyday word
+/// is marked so.
+List<MaskAlias> aliasesOfInstitution(InstitutionNames i) {
+  final out = <String, MaskAlias>{};
+  void add(String text, {bool short = false}) {
+    final t = text.trim();
+    if (t.length < 2 || t.runes.length > 40) return;
+    final key = foldKey(t);
+    if (key.isEmpty) return;
+    final ordinary = _everyday.contains(key);
+    final prev = out[key];
+    if (prev == null || (prev.ordinaryWord && !ordinary)) {
+      out[key] = MaskAlias(t, ordinaryWord: ordinary);
+    }
+    if (short) return;
+    final words = key.split(RegExp(r'\s+'));
+    var k = 0;
+    while (k < words.length - 1 && _genericLead.contains(words[k])) {
+      k++;
+    }
+    final lead = words[k];
+    if (words.length > 1 && lead.runes.length >= 3 && !out.containsKey(lead)) {
+      add(lead, short: true);
+    }
+  }
+
+  add(i.nameAr);
+  add(i.nameEn);
+  i.extraNames.forEach(add);
+  add(i.code.replaceAll('_', ' '));
+  return out.values.toList();
+}
+
+MaskAccountType _typeOf(AccountKind k) => switch (k) {
+  AccountKind.debit => MaskAccountType.debitCard,
+  AccountKind.credit => MaskAccountType.creditCard,
+  AccountKind.account => MaskAccountType.current,
+  AccountKind.wallet => MaskAccountType.wallet,
+  AccountKind.cash => MaskAccountType.cash,
+  AccountKind.bnpl || AccountKind.multiCurrency => MaskAccountType.other,
+};
+
+final class MaskSourcesDrift implements MaskSources {
+  const MaskSourcesDrift._(this.accounts, this.institutions, this.merchants);
+
+  /// Reads the user's accounts and merchants once for one question.
+  static Future<MaskSourcesDrift> load(
+    AppDatabase db, {
+    required Future<List<Account>> Function() accounts,
+    required Iterable<InstitutionNames> registry,
+  }) async {
+    final rows = await db
+        .customSelect(
+          'SELECT merchant_norm AS m, merchant_raw AS raw FROM transactions '
+          'WHERE deleted_at IS NULL AND merchant_norm IS NOT NULL '
+          'GROUP BY merchant_norm, merchant_raw',
+          variables: const <Variable>[],
+          readsFrom: {db.transactions},
+        )
+        .get();
+    final names = <String, Set<String>>{};
+    for (final r in rows) {
+      final id = r.read<String>('m');
+      final set = names.putIfAbsent(id, () => {id});
+      final raw = r.readNullable<String>('raw');
+      if (raw != null && raw.trim().isNotEmpty) set.add(raw);
+    }
+    final all = await accounts();
+    return MaskSourcesDrift._(
+      [
+        for (final a in all)
+          MaskAccount(
+            id: a.id,
+            label: a.label,
+            institutionId: a.institutionCode,
+            type: _typeOf(a.kind),
+            last4: a.last4,
+          ),
+      ],
+      [
+        for (final i in registry)
+          MaskInstitution(i.code, aliasesOfInstitution(i)),
+      ],
+      [for (final e in names.entries) MaskMerchant(e.key, e.value.toList())],
+    );
+  }
+
+  @override
+  final List<MaskAccount> accounts;
+  @override
+  final List<MaskInstitution> institutions;
+  @override
+  final List<MaskMerchant> merchants;
+
+  @override
+  String toString() => 'MaskSourcesDrift(<redacted>)';
+}
