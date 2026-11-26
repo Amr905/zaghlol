@@ -127,3 +127,7 @@ Hand trace of the four new tests: all four produce the asserted output (FU-376 t
 | FU-394 | T-291 follow-up (tests) | `kindsByIds`: test > 500 ids and the query count. |
 
 Major for the fix round: **T-290 #1** (token equality in the FU-371 de-dup; add the failing input as a test).
+
+### Lead delta check (fix81)
+
+- T-290 major #1 fixed in `OcrMerger.kt` (about 10 production lines): the FU-371 de-duplication drops an Arabic token only when it equals a kept strong line's token after the same trim and `normalizeDigits`; the substring `contains` check is gone. New test `deDuplicationDropsOnlyWholeTokensSoASubstringAmountSurvives` uses the reviewer's failing input (`Ref 1436` + `Jl 436` + `الإجمالي ٤٣٦` → `["Ref 1436", "الإجمالي 436"]`); it fails on the old substring rule by construction (436 ⊂ 1436). Compiled and run by CI only. **T-290: APPROVED.**
