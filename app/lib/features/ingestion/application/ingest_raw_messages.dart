@@ -381,10 +381,13 @@ final class IngestRawMessages {
       await _persist(p, b, local, result);
       return ReparseOutcome.converted;
     }
+    var exchange = false;
     if (result is ParseParsed && p.txnSource != null) {
       final d = dispositionOf(result.event, result.direction);
       create = d is CreateTxn && result.fields.amount != null ? d : null;
       balanceOnly = d is BalanceOnlyEvent;
+      // T-272: a conversion with both amounts becomes an exchange pair.
+      exchange = d is ExchangeEvent && isValidExchange(result.fields);
     } else {
       create = null;
       balanceOnly = false;
@@ -455,7 +458,7 @@ final class IngestRawMessages {
     }
 
     // review / reparse_pending.
-    if (create == null && !balanceOnly) return stamp();
+    if (create == null && !balanceOnly && !exchange) return stamp();
     final outcome = await _persist(p, b, local, result);
     return switch (outcome) {
       IngestInserted() ||
@@ -901,6 +904,7 @@ final class IngestRawMessages {
           BalanceOnlyEvent() => _balanceOnly(p, b.labels, local, result),
           DeferredEvent() => _deferred(p, result),
           UndirectedEvent() => _undirected(p, result),
+          ExchangeEvent() => _exchange(p, b, local, result),
         };
     }
   }
@@ -1082,10 +1086,18 @@ final class IngestRawMessages {
       // §11: never auto-merge user input; the screen asks.
       return IngestPossibleDuplicate([for (final c in matches) c.id]);
     }
-    if (matches.length == 1) {
+    // T-286 (FU-383): a match that already took a copy from this message's
+    // source is another real payment with the same amounts, not this one's
+    // copy: it is stored below with a possibleDuplicate item.
+    if (matches.length == 1 &&
+        !await _store.hasCrossChannelCopy(
+          matches.single.id,
+          p.txnSource!.code,
+          statusClass: _markClass(status),
+        )) {
       final target = matches.single;
-      // Raw first (CR-6 backstop), then the attach.
-      await _insertRaw(
+      // Raw first (CR-6 backstop), then the attach and its mark.
+      final rawId = await _insertRaw(
         p,
         status: RawStatus.parsed,
         institution: inst,
@@ -1093,6 +1105,7 @@ final class IngestRawMessages {
         templateVersion: r.templateVersion,
       );
       await _attach(local, b, target, r, occurredMs);
+      await _markCopy(p, rawId, target.id, statusClass: _markClass(status));
       local.diag(IngestDiag.mergeCrossChannel);
       return IngestMergedCrossChannel(target.id);
     }
@@ -1250,6 +1263,215 @@ final class IngestRawMessages {
     // (13) Hooks.
     await _runHooks(txnId, account.id, inserted: true);
     return IngestInserted(txnId);
+  }
+
+  /// T-272 (FR-PAR-12, D-86): one conversion message → two legs in one
+  /// account (`transfer_out` of the money sent, `transfer_in` of the money
+  /// received) and one `fx_conversion` pair, all in this message's
+  /// savepoint. Amounts stay exact in their own currencies; the bank's rate
+  /// is the ratio of the two legs. Nothing is merged: a possible duplicate
+  /// is stored with a review item so no leg is ever lost.
+  Future<IngestOutcome> _exchange(
+    _Prepared p,
+    _BatchScope b,
+    _Changes local,
+    ParseParsed r,
+  ) async {
+    final f = r.fields;
+    final sent = f.amount;
+    final received = f.originalAmount;
+    if (sent == null || received == null || !isValidExchange(f)) {
+      return _unrecognized(
+        p,
+        ParseUnrecognized(
+          UnrecognizedReason.invalidAmount,
+          institutionCode: r.institutionCode,
+          templateId: r.templateId,
+        ),
+      );
+    }
+    final userConfirmed = p.m.origin == MessageOrigin.userConfirmed;
+    final inst = r.institutionCode;
+    final (occurredMs, offsetMin) = _occurred(f.occurredAt);
+    final outKey = dedupeKeyOf(inst, TxnDirection.transferOut, sent);
+    final inKey = dedupeKeyOf(inst, TxnDirection.transferIn, received);
+
+    // Dedupe 2 on the sent leg. Merged only when both legs match one stored
+    // exchange (T-281); otherwise a second pair plus a review item.
+    final matches = crossChannelMatches(
+      NewTxnKeys(
+        source: p.txnSource!.code,
+        status: TxnStatus.posted,
+        occurredAtMs: occurredMs,
+        receivedAtMs: p.m.receivedAtMs,
+        last4: f.last4,
+      ),
+      await _store.crossChannelCandidates(
+        dedupeKey: outKey,
+        fromMs: occurredMs - kCrossChannelFetchMs,
+        toMs: occurredMs + kCrossChannelFetchMs,
+      ),
+    );
+    if (userConfirmed && matches.isNotEmpty) {
+      return IngestPossibleDuplicate([for (final c in matches) c.id]);
+    }
+
+    // T-281 (FU-364): the same conversion seen on another channel. When the
+    // sent leg matches exactly one out leg of a live exchange pair and the
+    // received leg matches that pair's in leg (same keys, window and last-4
+    // rules as dedupe 2), the message joins the stored exchange: no second
+    // pair, the stored legs stay exactly as they are (no field fill: a
+    // patch could move one leg to another account or give the out leg the
+    // received amount as its original amount). T-286 (FU-383): an exchange
+    // that already took a copy from this message's source is not merged
+    // again; the message is a second, real conversion.
+    if (matches.length == 1 &&
+        !matches.single.isDeleted &&
+        !await _store.hasCrossChannelCopy(
+          matches.single.id,
+          p.txnSource!.code,
+        )) {
+      final target = matches.single;
+      final inLeg = await _store.exchangeInLegOf(target.id);
+      if (inLeg != null) {
+        final inMatches = crossChannelMatches(
+          NewTxnKeys(
+            source: p.txnSource!.code,
+            status: TxnStatus.posted,
+            occurredAtMs: occurredMs,
+            receivedAtMs: p.m.receivedAtMs,
+            last4: f.last4,
+          ),
+          await _store.crossChannelCandidates(
+            dedupeKey: inKey,
+            fromMs: occurredMs - kCrossChannelFetchMs,
+            toMs: occurredMs + kCrossChannelFetchMs,
+          ),
+        );
+        if (inMatches.length == 1 &&
+            inMatches.single.id == inLeg &&
+            inMatches.single.accountId == target.accountId) {
+          final rawId = await _insertRaw(
+            p,
+            status: RawStatus.parsed,
+            institution: inst,
+            templateId: r.templateId,
+            templateVersion: r.templateVersion,
+          );
+          await _markCopy(p, rawId, target.id);
+          final balance = f.balance;
+          await _recordBalance(
+            local,
+            accountId: target.accountId,
+            occurredAtMs: occurredMs,
+            balance: balance,
+            available: f.available,
+            sourceTxnId:
+                balance != null && balance.currency == received.currency
+                ? inLeg
+                : target.id,
+          );
+          local.diag(IngestDiag.mergeCrossChannel);
+          return IngestMergedCrossChannel(target.id);
+        }
+      }
+    }
+
+    final account = await _resolve(
+      local,
+      institution: inst,
+      last4: f.last4,
+      currency: sent.currency,
+      label: b.labels.institutionLabel(_pipeline.registry, inst),
+      kind: inferAccountKind(
+        event: r.event.wire,
+        balanceIsAvailableLimit: f.balanceIsAvailableLimit,
+        hasLast4: f.last4 != null,
+      ),
+    );
+    final rawId = await _insertRaw(
+      p,
+      status: RawStatus.parsed,
+      institution: inst,
+      templateId: r.templateId,
+      templateVersion: r.templateVersion,
+    );
+    final outId = _newId();
+    final inId = _newId();
+    final now = _nowMs();
+    final balance = f.balance;
+    for (final (id, direction, amount, key) in [
+      (outId, TxnDirection.transferOut, sent, outKey),
+      (inId, TxnDirection.transferIn, received, inKey),
+    ]) {
+      await _store.insertTxn(
+        TxnInsert(
+          id: id,
+          accountId: account.id,
+          rawMessageId: rawId,
+          source: p.txnSource!,
+          direction: direction,
+          status: TxnStatus.posted,
+          amount: amount,
+          occurredAtMs: occurredMs,
+          tzOffsetMin: offsetMin,
+          categorySource: CategorySource.none,
+          isUserVerified: userConfirmed,
+          referenceNo: _nonEmpty(f.ref),
+          balanceAfterMinor:
+              balance != null && balance.currency == amount.currency
+              ? balance.minor
+              : null,
+          templateId: r.templateId,
+          parseConfidencePermille: r.confidencePermille,
+          dedupeKey: key,
+          createdAtMs: now,
+        ),
+      );
+      local.txn(id, account.id, occurredMs, offsetMin);
+    }
+    await _store.insertExchangePair(
+      id: _newId(),
+      outTxnId: outId,
+      inTxnId: inId,
+      createdAtMs: now,
+    );
+    await _recordBalance(
+      local,
+      accountId: account.id,
+      occurredAtMs: occurredMs,
+      balance: f.balance,
+      available: f.available,
+      sourceTxnId: balance != null && balance.currency == received.currency
+          ? inId
+          : outId,
+    );
+    if (matches.isNotEmpty) {
+      await _review(
+        kind: ReviewKind.lowConfidence,
+        rawId: rawId,
+        txnId: outId,
+        payload: {
+          'reason': 'possibleDuplicate',
+          'candidateTxnIds': [for (final c in matches) c.id],
+        },
+      );
+    }
+    if (r.needsReview) {
+      await _review(
+        kind: ReviewKind.lowConfidence,
+        rawId: rawId,
+        txnId: outId,
+        payload: {
+          'reason': 'lowConfidence',
+          'confidencePermille': r.confidencePermille,
+          'reasons': [for (final x in r.reasons) x.name],
+        },
+      );
+    }
+    await _runHooks(outId, account.id, inserted: true);
+    await _runHooks(inId, account.id, inserted: true);
+    return IngestInserted(outId);
   }
 
   /// Cross-channel attach (§5) and the symmetric late-pending attach: only
@@ -1706,6 +1928,28 @@ final class IngestRawMessages {
     return id;
   }
 
+  /// T-286 (FU-383): remembers that [rawId] was merged into [txnId], in
+  /// the message's savepoint, so the same source never merges into it again.
+  /// FU-389: a mark blocks a merge only for the same status class, so a
+  /// pending→posted settle in place does not turn a true copy into a
+  /// second expense.
+  static String _markClass(TxnStatus s) =>
+      s == TxnStatus.pending ? 'pending' : 'posted';
+
+  Future<void> _markCopy(
+    _Prepared p,
+    String rawId,
+    String txnId, {
+    String? statusClass,
+  }) => _store.recordCrossChannelCopy(
+    id: _newId(),
+    rawMessageId: rawId,
+    txnId: txnId,
+    source: p.txnSource!.code,
+    atMs: _nowMs(),
+    statusClass: statusClass,
+  );
+
   Future<void> _review({
     required String kind,
     String? rawId,
@@ -1758,6 +2002,9 @@ final class IngestRawMessages {
             balance.currency != available.currency
         ? null
         : available;
+    if (balance != null) {
+      await _checkBalanceJump(accountId, occurredAtMs, balance);
+    }
     final changed = await _accounts.recordBalance(
       accountId: accountId,
       asOf: DateTime.fromMillisecondsSinceEpoch(occurredAtMs, isUtc: true),
@@ -1766,6 +2013,44 @@ final class IngestRawMessages {
       sourceTxnId: sourceTxnId,
     );
     if (changed) local.accounts.add(accountId);
+  }
+
+  /// T-272 (PO 2026-11-26): a bank-counter exchange sends no SMS, so the
+  /// next balance shows more money than the ledger explains. When that rise
+  /// is large ([unexplainedBalanceRise]) and another currency had income
+  /// lately, ONE review item asks "Did you exchange money?". It is asked per
+  /// jump: the next balance compares with this one, so a "no" is never asked
+  /// again. Nothing is created here.
+  Future<void> _checkBalanceJump(
+    String accountId,
+    int asOfMs,
+    Money balance,
+  ) async {
+    // FU-366: a jump older than 14 days (inbox catch-up) is not asked about.
+    if (asOfMs < _nowMs() - balanceJumpMaxAge.inMilliseconds) return;
+    final facts = await _store.balanceJumpFacts(
+      accountId: accountId,
+      currency: balance.currency.code,
+      asOfMs: asOfMs,
+      lookbackMs: balanceJumpForeignCreditLookback.inMilliseconds,
+    );
+    if (facts == null || !facts.foreignCredit) return;
+    final rise = unexplainedBalanceRise(
+      previous: Money(balance.currency, facts.previousMinor),
+      countedEffectMinor: facts.countedEffectMinor,
+      reported: balance,
+      egpPerUnitE9: facts.egpPerUnitE9,
+    );
+    if (rise == null) return;
+    await _review(
+      kind: ReviewKind.lowConfidence,
+      payload: {
+        'reason': ReviewReason.exchangeBalanceJump,
+        'accountId': accountId,
+        'amount': rise.toJson(),
+        'asOfMs': asOfMs,
+      },
+    );
   }
 
   /// Categorize (§8) with T-075's categorizer. A port failure propagates

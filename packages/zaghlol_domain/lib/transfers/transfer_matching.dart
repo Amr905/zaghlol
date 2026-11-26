@@ -20,6 +20,11 @@ const Duration crossCurrencyWindow = Duration(days: 3);
 /// Cross-currency tolerance in basis points of the converted amount (3%).
 const int crossCurrencyToleranceBp = 300;
 
+/// T-272 (D-86, Q4): the wide band of a cross-bank exchange suggestion
+/// (15% of the converted amount). Banks and exchange offices quote rates
+/// far from the daily reference; the user confirms every suggestion.
+const int exchangeSuggestionToleranceBp = 1500;
+
 /// A transfer leg that is not yet paired: the facts matching needs.
 final class TransferLeg {
   const TransferLeg({
@@ -168,15 +173,43 @@ bool withinTolerance(Money expected, Money actual, int toleranceBp) {
       BigInt.from(expected.minor) * BigInt.from(toleranceBp);
 }
 
+/// The rate implied by an exchange: 1 unit of [sent]'s currency =
+/// result / 1e9 units of [received]'s currency, rounded half up (integer
+/// math; T-272 "bank rate"). Null when either amount is not positive, the
+/// currencies are equal or the result does not fit.
+int? impliedRateE9(Money sent, Money received) {
+  if (sent.minor <= 0 ||
+      received.minor <= 0 ||
+      sent.currency == received.currency) {
+    return null;
+  }
+  final numerator =
+      BigInt.from(received.minor) *
+      BigInt.from(1000000000) *
+      BigInt.from(10).pow(sent.currency.exponent);
+  final denominator =
+      BigInt.from(sent.minor) * BigInt.from(10).pow(received.currency.exponent);
+  final rounded =
+      (numerator * BigInt.two + denominator) ~/ (denominator * BigInt.two);
+  if (rounded <= BigInt.zero || rounded > BigInt.from(Money.maxMinor)) {
+    return null;
+  }
+  return rounded.toInt();
+}
+
 /// Opposite legs of [leg] in another currency and another account, within
 /// [crossCurrencyWindow], whose amount matches [leg]'s converted at the rate
-/// from [rateE9For] within [crossCurrencyToleranceBp]. A pair with no known
-/// rate is not a candidate. Sorted by id. These are suggestions only.
+/// from [rateE9For] within [toleranceBp] (default
+/// [crossCurrencyToleranceBp]). A pair with no known rate is a candidate
+/// only when [anyWhenNoRate] is true. Sorted by id. These are suggestions
+/// only.
 List<TransferLeg> crossCurrencyCandidates(
   TransferLeg leg,
   Iterable<TransferLeg> pool,
-  int? Function(Currency from, Currency to) rateE9For,
-) {
+  int? Function(Currency from, Currency to) rateE9For, {
+  int toleranceBp = crossCurrencyToleranceBp,
+  bool anyWhenNoRate = false,
+}) {
   if (leg.amount.minor <= 0) return const [];
   final result = <TransferLeg>[];
   for (final c in pool) {
@@ -189,10 +222,12 @@ List<TransferLeg> crossCurrencyCandidates(
       continue;
     }
     final rate = rateE9For(leg.amount.currency, c.amount.currency);
-    if (rate == null) continue;
+    if (rate == null) {
+      if (anyWhenNoRate) result.add(c);
+      continue;
+    }
     final expected = convertWithRate(leg.amount, c.amount.currency, rate);
-    if (expected != null &&
-        withinTolerance(expected, c.amount, crossCurrencyToleranceBp)) {
+    if (expected != null && withinTolerance(expected, c.amount, toleranceBp)) {
       result.add(c);
     }
   }

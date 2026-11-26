@@ -39,6 +39,7 @@ import 'features/backup/application/schedule_providers.dart'
     show backupDueRunProvider;
 import 'features/notifications/application/housekeeping_providers.dart';
 import 'features/notifications/application/notification_providers.dart';
+import 'features/mascot/presentation/rive_mascot.dart' show preloadRiveMascot;
 import 'features/security/application/delete_everything_providers.dart';
 import 'features/widgets_bridge/application/widget_bridge.dart'
     show widgetBridgeWiringProvider;
@@ -71,6 +72,10 @@ Future<void> main() async {
   }
   // T-047: the UI engine's capture module (drain, Guard config, health) runs
   // in every build; it starts once the database opens.
+  // T-276: warm the mascot (native runtime, file decode, asset manifest) so the
+  // first mascot and the first tap never hitch. FU-374: skipped when the
+  // platform disables animations (reduce motion never mounts Rive).
+  unawaited(preloadRiveMascot());
   // The ProviderScope is built inside the AppRestartScope builder below.
   // ignore: riverpod_lint/missing_provider_scope
   runApp(

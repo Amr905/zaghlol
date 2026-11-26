@@ -86,9 +86,16 @@ public class AdminRolesLiveContractTests(ContractApiFixture fixture) : IClassFix
         var operations = Spec.Operations();
         Assert.True(operations.Count >= 30, $"only {operations.Count} spec operations were found");
         var missing = operations
-            .Where(o => !mapped.Contains(o.Method.ToUpperInvariant() + " " + o.Path))
+            .Where(o => !mapped.Contains(o.Method.ToUpperInvariant() + " " + o.Path) && !OpenApiSpec.PlannedUnmapped.ContainsKey(o.Id))
             .Select(o => $"{o.Label} ({o.Id})")
             .ToList();
+
+        var stale = operations
+            .Where(o => OpenApiSpec.PlannedUnmapped.ContainsKey(o.Id) && mapped.Contains(o.Method.ToUpperInvariant() + " " + o.Path))
+            .Select(o => $"{o.Id} (remove from OpenApiSpec.PlannedUnmapped, task {OpenApiSpec.PlannedUnmapped[o.Id]})")
+            .ToList();
+        Assert.True(stale.Count == 0, "planned operations are now mapped: " + string.Join("; ", stale));
+        Assert.All(OpenApiSpec.PlannedUnmapped.Keys, id => Assert.Contains(operations, o => o.Id == id));
 
         Assert.True(missing.Count == 0, "declared in the OpenAPI file but not mapped by the API: " + string.Join("; ", missing));
     }

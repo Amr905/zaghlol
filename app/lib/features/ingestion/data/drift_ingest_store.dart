@@ -4,6 +4,8 @@
 // continues (design note §2, §10). Every value is bound as a parameter;
 // failures are code-only (guardRead / guardWrite). Nothing here logs.
 
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -12,7 +14,9 @@ import '../../../core/db/daos/capture_controls_dao.dart';
 import '../../../core/db/daos/raw_messages_dao.dart';
 import '../../../core/db/daos/review_items_dao.dart';
 import '../../../core/db/daos/transactions_dao.dart';
+import '../../../core/db/daos/transfers_dao.dart';
 import '../../../core/db/daos/write_errors.dart';
+import '../../../core/db/db_errors.dart';
 import '../../transactions/domain/transaction.dart';
 import '../application/ingest_store_port.dart';
 import '../domain/ingest_records.dart';
@@ -266,6 +270,221 @@ final class DriftIngestStore implements IngestStorePort {
         updatedAt: t.createdAtMs,
       ),
     );
+  }
+
+  @override
+  Future<void> insertExchangePair({
+    required String id,
+    required String outTxnId,
+    required String inTxnId,
+    required int createdAtMs,
+  }) async {
+    await TransferPairsDao(_db).insert(
+      TransferPairsCompanion.insert(
+        id: id,
+        outTxnId: outTxnId,
+        inTxnId: Value(inTxnId),
+        kind: TransferPairKind.fxConversion,
+        createdAt: createdAtMs,
+      ),
+    );
+    for (final leg in [outTxnId, inTxnId]) {
+      final n = await guardWrite(
+        () => _db.customUpdate(
+          'UPDATE transactions SET is_internal = 1, transfer_pair_id = ?2, '
+          'updated_at = ?3 WHERE id = ?1 AND deleted_at IS NULL '
+          'AND transfer_pair_id IS NULL',
+          variables: [
+            Variable.withString(leg),
+            Variable.withString(id),
+            Variable.withInt(createdAtMs),
+          ],
+          updates: {_db.transactions},
+        ),
+      );
+      // Exactly one row: the leg this savepoint just inserted.
+      if (n != 1) throw DbWriteException(DbWriteException.constraint);
+    }
+  }
+
+  @override
+  Future<String?> exchangeInLegOf(String outTxnId) => guardRead(() async {
+    final row = await _db
+        .customSelect(
+          'SELECT p.in_txn_id AS in_id FROM transfer_pairs p '
+          'JOIN transactions o ON o.id = p.out_txn_id '
+          'JOIN transactions i ON i.id = p.in_txn_id '
+          "WHERE p.out_txn_id = ?1 AND p.kind IN ('fx_conversion', "
+          "'cross_currency') AND o.deleted_at IS NULL "
+          'AND i.deleted_at IS NULL',
+          variables: [Variable.withString(outTxnId)],
+          readsFrom: {_db.transferPairs, _db.transactions},
+        )
+        .getSingleOrNull();
+    return row?.read<String>('in_id');
+  });
+
+  @override
+  Future<void> recordCrossChannelCopy({
+    required String id,
+    required String rawMessageId,
+    required String txnId,
+    required String source,
+    required int atMs,
+    String? statusClass,
+  }) => guardWrite(
+    () => _db
+        .into(_db.reviewItems)
+        .insert(
+          ReviewItemsCompanion.insert(
+            id: id,
+            kind: ReviewKind.lowConfidence,
+            rawMessageId: Value(rawMessageId),
+            txnId: Value(txnId),
+            payload: Value(
+              jsonEncode({
+                'reason': ReviewReason.crossChannelCopy,
+                'source': source,
+                'statusClass': ?statusClass,
+              }),
+            ),
+            createdAt: atMs,
+            resolvedAt: Value(atMs),
+            resolution: const Value(ReviewReason.crossChannelCopyResolution),
+          ),
+        ),
+  );
+
+  @override
+  Future<bool> hasCrossChannelCopy(
+    String txnId,
+    String source, {
+    String? statusClass,
+  }) => guardRead(() async {
+    final row = await _db
+        .customSelect(
+          'SELECT 1 AS x FROM review_items WHERE txn_id = ?1 '
+          'AND kind = ?2 AND resolution = ?3 AND json_valid(payload) '
+          "AND json_extract(payload, '\$.reason') = ?4 "
+          "AND json_extract(payload, '\$.source') = ?5 "
+          "AND (?6 IS NULL OR json_extract(payload, '\$.statusClass') IS NULL "
+          "OR json_extract(payload, '\$.statusClass') = ?6) LIMIT 1",
+          variables: [
+            Variable.withString(txnId),
+            Variable.withString(ReviewKind.lowConfidence),
+            Variable.withString(ReviewReason.crossChannelCopyResolution),
+            Variable.withString(ReviewReason.crossChannelCopy),
+            Variable.withString(source),
+            Variable<String>(statusClass),
+          ],
+          readsFrom: {_db.reviewItems},
+        )
+        .getSingleOrNull();
+    return row != null;
+  });
+
+  @override
+  Future<BalanceJumpFacts?> balanceJumpFacts({
+    required String accountId,
+    required String currency,
+    required int asOfMs,
+    required int lookbackMs,
+  }) => guardRead(() async {
+    final acc = await _db
+        .customSelect(
+          'SELECT kind, linked_account_id FROM accounts '
+          'WHERE id = ?1 AND merged_into_id IS NULL',
+          variables: [Variable.withString(accountId)],
+          readsFrom: {_db.accounts},
+        )
+        .getSingleOrNull();
+    if (acc == null) return null;
+    final kind = acc.read<String>('kind');
+    if (kind == 'credit' || kind == 'bnpl') return null;
+    final prev = await _db
+        .customSelect(
+          'SELECT balance_minor, as_of FROM account_balances '
+          'WHERE account_id = ?1 AND currency = ?2',
+          variables: [
+            Variable.withString(accountId),
+            Variable.withString(currency),
+          ],
+          readsFrom: {_db.accountBalances},
+        )
+        .getSingleOrNull();
+    final prevMinor = prev?.readNullable<int>('balance_minor');
+    final prevAt = prev?.read<int>('as_of');
+    if (prevMinor == null || prevAt == null || prevAt >= asOfMs) return null;
+    // The ledger: the account, the account it is linked to, and every
+    // live card linked to either (T-266: one ledger, counted once).
+    final root = acc.readNullable<String>('linked_account_id') ?? accountId;
+    final eff = await _db
+        .customSelect(
+          'SELECT COALESCE(SUM(CASE '
+          "WHEN direction IN ('income','refund','transfer_in') "
+          'THEN amount_minor '
+          "WHEN direction IN ('expense','fee','transfer_out') "
+          'THEN -amount_minor ELSE 0 END), 0) AS eff '
+          'FROM transactions WHERE currency = ?1 '
+          "AND deleted_at IS NULL AND status = 'posted' "
+          'AND occurred_at > ?2 AND occurred_at <= ?3 '
+          'AND account_id IN (SELECT id FROM accounts WHERE id = ?4 '
+          'OR (linked_account_id = ?4 AND merged_into_id IS NULL))',
+          variables: [
+            Variable.withString(currency),
+            Variable.withInt(prevAt),
+            Variable.withInt(asOfMs),
+            Variable.withString(root),
+          ],
+          readsFrom: {_db.transactions, _db.accounts},
+        )
+        .getSingle();
+    final foreign = await _db
+        .customSelect(
+          'SELECT EXISTS (SELECT 1 FROM transactions WHERE currency <> ?1 '
+          "AND direction IN ('income','transfer_in') AND is_internal = 0 "
+          "AND deleted_at IS NULL AND status = 'posted' "
+          'AND occurred_at > ?2 AND occurred_at <= ?3) AS f',
+          variables: [
+            Variable.withString(currency),
+            Variable.withInt(asOfMs - lookbackMs),
+            Variable.withInt(asOfMs),
+          ],
+          readsFrom: {_db.transactions},
+        )
+        .getSingle();
+    return BalanceJumpFacts(
+      egpPerUnitE9: await _egpPerUnitE9(currency),
+      previousMinor: prevMinor,
+      countedEffectMinor: eff.read<int>('eff'),
+      foreignCredit: foreign.read<int>('f') != 0,
+    );
+  });
+
+  /// FU-366: 1 [currency] in EGP (rate / 1e9), from the direct row or the
+  /// inverse of the EGP row; null when neither is stored.
+  Future<int?> _egpPerUnitE9(String currency) async {
+    if (currency == 'EGP') return null;
+    final r = await _db
+        .customSelect(
+          'SELECT base, quote, rate_e9 FROM fx_rates '
+          "WHERE (base = ?1 AND quote = 'EGP') "
+          "OR (base = 'EGP' AND quote = ?1) "
+          "ORDER BY (base = 'EGP') LIMIT 1",
+          variables: [Variable.withString(currency)],
+          readsFrom: {_db.fxRates},
+        )
+        .getSingleOrNull();
+    if (r == null) return null;
+    final rate = r.read<int>('rate_e9');
+    if (rate <= 0) return null;
+    if (r.read<String>('base') == currency) return rate;
+    final inv =
+        (BigInt.from(1000000000) * BigInt.from(1000000000)) ~/
+        BigInt.from(rate);
+    return inv > BigInt.zero && inv <= BigInt.from(9007199254740991)
+        ? inv.toInt()
+        : null;
   }
 
   @override

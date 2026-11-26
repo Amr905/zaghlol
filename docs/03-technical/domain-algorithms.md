@@ -69,9 +69,19 @@ on transfer_out O (or transfer_in I) persisted:
   |candidates| = 1 → pair (kind=auto), mark both is_internal; emit MascotTrigger(detective, 'self_transfer')
   |candidates| > 1 → review 'transfer_ambiguous' (EC-16)
   |candidates| = 0 → wait; re-run when a matching txn arrives within the window (late SMS)
-cross-currency (FR-CUR-06, A-61): opposite directions, different currencies, within 3 days,
-  |O.amount × rate(day) − I.amount| ≤ 3% → review 'fx_pair_suggestion' (never auto-paired)
-fx_conversion event: two legs in one multi-currency account → pair(kind=fx_conversion), both internal
+cross-currency (FR-CUR-06, A-61, T-272): opposite directions, different currencies, different accounts,
+  within 3 days, |O.amount × rate − I.amount| ≤ 15% (or any amounts when no rate is known)
+  → ONE review 'fx_pair_suggestion' (never auto-paired; a dismissal is remembered)
+fx_conversion event: two legs in one account → pair(kind=fx_conversion), both internal (written by ingest)
+manual exchange ("I exchanged money"): out + in legs + pair in one DB transaction
+  (fx_conversion in one account, else cross_currency)
+month figures per currency (T-272, D-86): exchange leg = internal leg of a complete
+  fx_conversion/cross_currency pair; exchangedIn = Σ in legs, exchangedOut = Σ out legs;
+  moneyIn = income + exchangedIn; left = moneyIn − spend − exchangedOut. Income, spend and
+  category totals never include an exchange. bank rate = impliedRateE9(sent, received).
+unexplained balance rise (T-272): new reported balance − (last reported + counted txns after it)
+  ≥ 500 major units, asset account, another currency had non-internal income in the last 45 days
+  → ONE review item (low_confidence, reason exchangeBalanceJump); nothing is created
 cc_payment: outgoing payment to own credit card → internal transfer; the card-side credit pairs if captured
 ```
 Pairs can be unlinked manually (FR-XFR-02). Unlinking clears `is_internal` on both legs.

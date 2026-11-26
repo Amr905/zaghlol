@@ -68,6 +68,13 @@ allKeys = [
   (key: Settings.primaryCurrency, byDefault: egp, other: kwd),
   (key: Settings.approxViewEnabled, byDefault: false, other: true),
   (key: Settings.approxViewTarget, byDefault: egp, other: Currency.of('USD')),
+  (key: Settings.approxAutoOnDone, byDefault: false, other: true),
+  (key: Settings.approxFirstForeignNotice, byDefault: false, other: true),
+  (
+    key: Settings.budgetOffersHandled,
+    byDefault: <String>{},
+    other: {'usd_20000'},
+  ),
   (key: Settings.notifBudgetThreshold, byDefault: true, other: false),
   (key: Settings.notifSpendingSpike, byDefault: true, other: false),
   (key: Settings.notifUpcomingDue, byDefault: true, other: false),
@@ -126,6 +133,7 @@ allKeys = [
     other: {'egp_cash_idle'},
   ),
   (key: Settings.mascotPaydayCelebrated, byDefault: null, other: 20410),
+  (key: Settings.mascotTipState, byDefault: '', other: '2.1.0.3'),
   (key: Settings.voiceOnlineConsent, byDefault: false, other: true),
 ];
 

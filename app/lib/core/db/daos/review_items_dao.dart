@@ -31,6 +31,25 @@ abstract final class ReviewReason {
   /// message re-parse now reads as a card due notice (D-83). The user picks
   /// Remove or Keep; nothing is removed without that tap.
   static const String oldDueNotice = 'oldDueNotice';
+
+  /// T-272: a `low_confidence` item with no transaction: an asset
+  /// account's reported balance rose by more than the ledger explains while
+  /// another currency had income lately. The user may record the exchange
+  /// (prefilled) or say no; nothing is created without that tap. Payload:
+  /// `accountId`, `amount` (the rise, `Money.toJson`), `asOfMs`.
+  static const String exchangeBalanceJump = 'exchangeBalanceJump';
+
+  /// T-286 (FU-383): not a card. A `low_confidence` item written already
+  /// resolved (resolution [crossChannelCopyResolution]) when ingest
+  /// merges a message into a stored transaction from another channel: it
+  /// links the merged raw message to that transaction (the out leg for an
+  /// exchange). Payload: `source` (the merged message's
+  /// `transactions.source` code). Ingest reads it so a second message from
+  /// the same source is never merged into the same transaction.
+  static const String crossChannelCopy = 'crossChannelCopy';
+
+  /// The `resolution` of a [crossChannelCopy] item.
+  static const String crossChannelCopyResolution = 'cross_channel_copy';
 }
 
 class ReviewItemsDao {

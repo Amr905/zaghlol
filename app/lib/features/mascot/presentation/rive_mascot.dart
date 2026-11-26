@@ -4,9 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rive/rive.dart' as rive;
 
-import 'zaghlol_avatar.dart' show ZaghlolAvatar;
+import 'zaghlol_avatar.dart' show ZaghlolAvatar, ZaghlolMoment;
 import 'zaghlol_mascot.dart';
 
 const kRiveArtboard = 'Zaghlol';
@@ -112,21 +114,142 @@ class _RenderPaintGuard extends RenderProxyBox {
   }
 }
 
+/// T-276: one live artboard + state machine. Behind an interface so widget
+/// tests (where rive_native cannot load) can drive the mascot with a fake.
+abstract class RiveMascotHandle {
+  /// The widget that paints the artboard. Must stay the same object for the
+  /// life of the handle so the render object is never recreated.
+  Widget get widget;
+
+  /// Sets the moment and the talk flag through state machine inputs. With
+  /// [replay] the same moment plays again from its start.
+  void apply(ZaghlolMoment moment, bool talk, {bool replay = false});
+
+  /// Releases the controller (the shared file stays).
+  void dispose();
+}
+
+typedef RiveMascotLoader = Future<RiveMascotHandle> Function();
+
+/// The real loader: shared decoded file, one controller per mascot.
+Future<RiveMascotHandle> loadRiveMascotHandle() async {
+  final file = await _loadSharedFile();
+  final controller = rive.RiveWidgetController(
+    file,
+    artboardSelector: rive.ArtboardSelector.byName(kRiveArtboard),
+    stateMachineSelector: rive.StateMachineSelector.byName(kRiveStateMachine),
+  );
+  return _RealRiveHandle(controller);
+}
+
+/// Overridable in tests.
+final riveMascotLoaderProvider = Provider<RiveMascotLoader>(
+  (ref) => loadRiveMascotHandle,
+  name: 'riveMascotLoaderProvider',
+);
+
+/// T-276: called once at start-up so the first mascot never waits for the
+/// native runtime, the file decode or the asset manifest. Failures are
+/// swallowed; the mascot then shows the still as before.
+Future<void> preloadRiveMascot({
+  bool? animationsDisabled,
+  Future<void> Function()? load,
+}) async {
+  // FU-374: reduce motion never mounts Rive, so it never loads it either.
+  final off =
+      animationsDisabled ??
+      WidgetsBinding
+          .instance
+          .platformDispatcher
+          .accessibilityFeatures
+          .disableAnimations;
+  if (off) return;
+  if (load != null) {
+    await load();
+    return;
+  }
+  try {
+    await AssetManifest.loadFromAssetBundle(rootBundle);
+    await _loadSharedFile();
+  } catch (_) {
+    // The mascot falls back to the still when it mounts.
+  }
+}
+
+// Legacy state machine inputs: stable and enough for one number + two flags.
+// ignore_for_file: deprecated_member_use, invalid_use_of_internal_member
+class _RealRiveHandle implements RiveMascotHandle {
+  _RealRiveHandle(this._controller) {
+    if (RiveMascotProbe.recordStates) {
+      _stateHandle = _controller.stateMachine.onStateChanged(
+        RiveMascotProbe.recordState,
+      );
+    }
+    widget = rive.RiveWidget(controller: _controller, fit: rive.Fit.contain);
+  }
+
+  final rive.RiveWidgetController _controller;
+  rive.CallbackHandler? _stateHandle;
+  bool _disposed = false;
+
+  /// Bumped on every apply: a pending replay of an older tap gives up (the
+  /// last tap wins, nothing queues).
+  int _generation = 0;
+
+  @override
+  late final Widget widget;
+
+  @override
+  void apply(ZaghlolMoment moment, bool talk, {bool replay = false}) {
+    if (_disposed) return;
+    final gen = ++_generation;
+    final sm = _controller.stateMachine;
+    sm.boolean(kRiveInputTalk)?.value = talk;
+    sm.boolean(kRiveInputReduceMotion)?.value = false;
+    final input = sm.number(kRiveInputState);
+    if (input == null) return;
+    final target = moment.index.toDouble();
+    if (replay && input.value == target) {
+      // Setting the same value does not replay: leave it for one frame, then
+      // come back. The machine starts every one-off from its rest pose, so
+      // this shows no other animation.
+      input.value = ((moment.index + 1) % ZaghlolMoment.values.length)
+          .toDouble();
+      WidgetsBinding.instance.endOfFrame.then((_) {
+        if (_disposed || gen != _generation) return;
+        input.value = target;
+      });
+    } else {
+      input.value = target;
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _stateHandle?.dispose();
+    _controller.dispose();
+  }
+}
+
 class RiveMascot extends ZaghlolMascot {
   const RiveMascot({
     super.key,
     required super.moment,
     super.talk = false,
+    super.replay = 0,
     required super.size,
+    this.loader = loadRiveMascotHandle,
   });
+
+  final RiveMascotLoader loader;
 
   @override
   State<RiveMascot> createState() => _RiveMascotState();
 }
 
 class _RiveMascotState extends State<RiveMascot> {
-  rive.RiveWidgetController? _controller;
-  rive.CallbackHandler? _stateHandle;
+  RiveMascotHandle? _handle;
   bool _failed = false;
 
   @override
@@ -137,28 +260,14 @@ class _RiveMascotState extends State<RiveMascot> {
 
   Future<void> _load() async {
     try {
-      final file = await _loadSharedFile();
-      final controller = rive.RiveWidgetController(
-        file,
-        artboardSelector: rive.ArtboardSelector.byName(kRiveArtboard),
-        stateMachineSelector: rive.StateMachineSelector.byName(
-          kRiveStateMachine,
-        ),
-      );
+      final handle = await widget.loader();
       if (!mounted) {
-        controller.dispose();
+        handle.dispose();
         return;
       }
       RiveMascotProbe.loaded++;
-      if (RiveMascotProbe.recordStates) {
-        _stateHandle = controller.stateMachine.onStateChanged(
-          RiveMascotProbe.recordState,
-        );
-      }
-      setState(() {
-        _controller = controller;
-      });
-      _push();
+      handle.apply(widget.moment, widget.talk);
+      setState(() => _handle = handle);
     } catch (_) {
       RiveMascotProbe.failedToLoad++;
       if (mounted) setState(() => _failed = true);
@@ -168,30 +277,29 @@ class _RiveMascotState extends State<RiveMascot> {
   @override
   void didUpdateWidget(RiveMascot old) {
     super.didUpdateWidget(old);
-    _push();
-  }
-
-  // Legacy state machine inputs: stable and enough for one number + two flags.
-  // ignore_for_file: deprecated_member_use, invalid_use_of_internal_member
-  void _push() {
-    final sm = _controller?.stateMachine;
-    if (sm == null) return;
-    sm.number(kRiveInputState)?.value = widget.moment.index.toDouble();
-    sm.boolean(kRiveInputTalk)?.value = widget.talk;
-    sm.boolean(kRiveInputReduceMotion)?.value = false;
+    // T-276: a new moment is an input change on the live state machine; the
+    // artboard, controller and render object stay.
+    if (old.moment != widget.moment ||
+        old.talk != widget.talk ||
+        old.replay != widget.replay) {
+      _handle?.apply(
+        widget.moment,
+        widget.talk,
+        replay: old.replay != widget.replay,
+      );
+    }
   }
 
   @override
   void dispose() {
-    _stateHandle?.dispose();
-    _controller?.dispose();
+    _handle?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final c = _controller;
-    if (_failed || c == null) {
+    final h = _handle;
+    if (_failed || h == null) {
       return Image.asset(
         ZaghlolAvatar.stillAsset,
         width: widget.size,
@@ -205,7 +313,7 @@ class _RiveMascotState extends State<RiveMascot> {
         RiveMascotProbe.paintFailed++;
         if (mounted) setState(() => _failed = true);
       },
-      child: rive.RiveWidget(controller: c, fit: rive.Fit.contain),
+      child: h.widget,
     );
   }
 }

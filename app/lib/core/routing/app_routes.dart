@@ -13,6 +13,14 @@ abstract final class AppRoutes {
   /// S-11 Transactions list, inside the Home tab.
   static const transactions = '/home/transactions';
 
+  /// T-279 (D-86): one currency's view of the month, inside the Home tab.
+  static const currencyView = '/home/currency/:iso';
+
+  /// Location of [currencyView] for [iso] (an ISO 4217 code). Home's
+  /// currency cards link here.
+  static String currencyViewFor(String iso) =>
+      '/home/currency/${Uri.encodeComponent(iso)}';
+
   /// S-30 Quick add sheet pushed over the current tab (FAB / Add button).
   static const add = '/add';
 

@@ -1238,6 +1238,112 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeroKpiLeft => 'فاضلك';
 
   @override
+  String homeHeroKpiIncomeFromExchange(String amount) {
+    return 'منهم $amount من تغيير عملة';
+  }
+
+  @override
+  String homeHeroKpiExchangedOut(String amount) {
+    return 'وغيّرت $amount';
+  }
+
+  @override
+  String currencyViewTitle(String currency) {
+    return 'الشهر ده بالـ$currency';
+  }
+
+  @override
+  String get currencyViewEmptyTitle => 'مفيش حاجة بالعملة دي الشهر ده';
+
+  @override
+  String get currencyViewEmptyBody => 'أول ما تدخل أو تصرف بيها هتلاقيها هنا.';
+
+  @override
+  String currencyViewBudgetOffer(String currency) {
+    return 'تعمل ميزانية بالـ$currency؟';
+  }
+
+  @override
+  String get homeCurrencyCardsTitle => 'فلوسك بعملات تانية';
+
+  @override
+  String homeCurrencyCardLeft(String amount) {
+    return 'فاضل $amount';
+  }
+
+  @override
+  String homeCurrencyCardInOut(String income, String out) {
+    return 'دخل $income · خرج $out';
+  }
+
+  @override
+  String homeCurrencyCardMore(String count) {
+    return '+$count';
+  }
+
+  @override
+  String homeCurrencyCardMoreA11y(int count, String n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n عملة كمان',
+      few: '$n عملات كمان',
+      two: 'عملتين كمان',
+      one: 'عملة كمان',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  ) {
+    return '$currency: فاضل $left. دخل $income، وخرج $out. اضغط تفتح الشهر بالعملة دي';
+  }
+
+  @override
+  String get exchangeEntryTitle => 'تغيير عملة';
+
+  @override
+  String get exchangeEntryIntro =>
+      'تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.';
+
+  @override
+  String get exchangeEntrySent => 'دفعت';
+
+  @override
+  String get exchangeEntryReceived => 'وصلني';
+
+  @override
+  String get exchangeEntryAccount => 'الحساب';
+
+  @override
+  String get exchangeEntryCurrency => 'العملة';
+
+  @override
+  String get exchangeEntryDate => 'التاريخ';
+
+  @override
+  String exchangeEntryRate(String from, String rate, String to) {
+    return 'السعر: ١ $from = $rate $to';
+  }
+
+  @override
+  String get exchangeEntrySameCurrency => 'اختار عملتين مختلفتين';
+
+  @override
+  String get exchangeEntrySave => 'احفظ التغيير';
+
+  @override
+  String get exchangeEntrySaved => 'اتسجل التغيير';
+
+  @override
+  String get exchangeEntryFailed => 'معرفناش نحفظ التغيير. جرب تاني.';
+
+  @override
   String homeHeroApproxTitle(String currency) {
     return 'كله تقريباً بالـ $currency';
   }
@@ -1312,6 +1418,72 @@ class AppLocalizationsAr extends AppLocalizations {
   String homeMascotPayday(String amount) {
     return 'المرتب نزل! $amount 🎉 يلا نخطط له من أوله';
   }
+
+  @override
+  String homeApproxLine(String amount) {
+    return '≈ $amount دخلك كله تقريباً';
+  }
+
+  @override
+  String homeApproxLineA11y(String amount) {
+    return 'تقريبي: $amount دخلك كله، بكل العملات';
+  }
+
+  @override
+  String homeApproxRateNoteBoth(String date) {
+    return 'سعر البنك + سعر $date';
+  }
+
+  @override
+  String homeApproxRateNoteDaily(String date) {
+    return 'سعر $date';
+  }
+
+  @override
+  String get homeApproxRateNoteBank => 'سعر البنك';
+
+  @override
+  String get homeApproxStale => 'سعر قديم';
+
+  @override
+  String get homeApproxSheetTitle => 'الحسبة دي تقريبية';
+
+  @override
+  String get homeApproxSheetBody =>
+      'بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.';
+
+  @override
+  String get homeApproxSheetOwn => 'اللي دخلك بالعملة دي (بما فيه اللي غيّرته)';
+
+  @override
+  String homeApproxSheetHeld(String amount) {
+    return '$amount لسه معاك';
+  }
+
+  @override
+  String homeApproxSheetExchanged(String amount) {
+    return '$amount غيّرتها، واتحسبت مرة واحدة بالفعل';
+  }
+
+  @override
+  String homeApproxSheetExchangedBank(String amount, String rate) {
+    return '$amount غيّرتها بسعر البنك $rate، واتحسبت مرة واحدة بالفعل';
+  }
+
+  @override
+  String homeApproxSheetDailyRate(String date, String from, String rate) {
+    return 'سعر $date: $from الواحد بـ $rate';
+  }
+
+  @override
+  String get homeMascotFirstForeign =>
+      'عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.';
+
+  @override
+  String get homeApproxNoticeOff => 'اقفلها';
+
+  @override
+  String get homeApproxNoticeOk => 'تمام';
 
   @override
   String get homeMascotDismissA11y => 'اقفل الرسالة';
@@ -1482,6 +1654,29 @@ class AppLocalizationsAr extends AppLocalizations {
   String get transactionsRowInternalTitle => 'تحويلة لنفسك';
 
   @override
+  String transactionsExchangeTitle(String from, String to) {
+    return 'غيّرت $from ← $to';
+  }
+
+  @override
+  String transactionsExchangeRate(String rate) {
+    return 'سعر البنك $rate · مش مصروف';
+  }
+
+  @override
+  String get transactionsExchangeNotSpending => 'مش مصروف';
+
+  @override
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  ) {
+    return 'تغيير عملة: دفعت $from ووصلك $to، $rate، $time';
+  }
+
+  @override
   String get transactionsInstapayTitle => 'إنستاباي';
 
   @override
@@ -1602,6 +1797,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsListBulkAccount => 'الكارت';
+
+  @override
+  String get transactionsListBulkExchangeLocked =>
+      'تغيير العملة ملوش تصنيف ومينفعش يتنقل لكارت تاني لوحده. تقدر تمسحه عادي.';
 
   @override
   String get transactionsListBulkRule => 'استخدم ده دايماً للتجار دول';
@@ -1798,6 +1997,44 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get transactionsDetailGone => 'الحركة دي مبقتش موجودة';
+
+  @override
+  String get transactionsExchangeBanner =>
+      'تغيير عملة، مش محسوب لا مصروف ولا دخل';
+
+  @override
+  String get transactionsExchangeFieldSent => 'دفعت';
+
+  @override
+  String get transactionsExchangeFieldReceived => 'وصلني';
+
+  @override
+  String get transactionsExchangeFieldFrom => 'من حساب';
+
+  @override
+  String get transactionsExchangeFieldTo => 'لحساب';
+
+  @override
+  String get transactionsExchangeFieldRate => 'سعر البنك';
+
+  @override
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  ) {
+    return '$one $from = $rate $to';
+  }
+
+  @override
+  String get transactionsExchangeDeleteTitle => 'تمسح تغيير العملة ده؟';
+
+  @override
+  String get transactionsExchangeDeleteBody => 'الناحيتين هيتمسحوا مع بعض.';
+
+  @override
+  String get transactionsExchangeDeleted => 'اتمسح تغيير العملة';
 
   @override
   String categorizationRuleTitle(String category, String merchant) {
@@ -2040,6 +2277,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ingestionReviewOldDueKept => 'تمام، هيفضل زي ما هو';
+
+  @override
+  String ingestionReviewExchangeJumpQuestion(String currency, String amount) {
+    return 'غيّرت عملة؟ رصيدك بالـ$currency زاد حوالي $amount ومشفناش فلوس داخلة.';
+  }
+
+  @override
+  String get ingestionReviewExchangeJumpYes => 'أيوه، سجلها';
+
+  @override
+  String get ingestionReviewExchangeJumpNo => 'لأ';
 
   @override
   String get ingestionReviewEmptyTitle => 'كله تمام! مفيش حاجة مستنية رأيك ✨';
@@ -3210,6 +3458,137 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get mascotPaydayLine => 'القبض نزل يا كبير! 🎉';
+
+  @override
+  String get mascotTipUseScan =>
+      'عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸';
+
+  @override
+  String get mascotTipUseShare =>
+      'شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل';
+
+  @override
+  String get mascotTipUseSay =>
+      'زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤';
+
+  @override
+  String get mascotTipUseLinkCard =>
+      'اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة';
+
+  @override
+  String get mascotTipUsePayday =>
+      'قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب';
+
+  @override
+  String get mascotTipUseStatement =>
+      'عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB)';
+
+  @override
+  String get mascotTipUseReview =>
+      'فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀';
+
+  @override
+  String get mascotTipUseSearchPerson =>
+      'بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه';
+
+  @override
+  String get mascotTipUseHide =>
+      'فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈';
+
+  @override
+  String get mascotTipUseBudget =>
+      'حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام';
+
+  @override
+  String get mascotTipUseSalary =>
+      'سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض';
+
+  @override
+  String get mascotTipUseAsk =>
+      'اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب';
+
+  @override
+  String get mascotTipUseDue =>
+      'كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم';
+
+  @override
+  String get mascotTipUseInsights =>
+      'عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊';
+
+  @override
+  String get mascotTipSmartAsk =>
+      'اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك';
+
+  @override
+  String get mascotTipSmartVoice =>
+      'بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤';
+
+  @override
+  String get mascotTipSmartSms =>
+      'لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك';
+
+  @override
+  String get mascotTipSmartCategory =>
+      'كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية';
+
+  @override
+  String get mascotTipSmartDue =>
+      'لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة';
+
+  @override
+  String get mascotTipSmartPayday =>
+      'لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉';
+
+  @override
+  String get mascotTipSmartDuplicate =>
+      'لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين';
+
+  @override
+  String get mascotTipSmartReceipt =>
+      'بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌';
+
+  @override
+  String get mascotTipSmartInstapay =>
+      'تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة';
+
+  @override
+  String get mascotTipSmartTransfer =>
+      'لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌';
+
+  @override
+  String get mascotTipHabitCoffee =>
+      'القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕';
+
+  @override
+  String get mascotTipHabitPigeon =>
+      'أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄';
+
+  @override
+  String get mascotTipHabitCheck =>
+      'دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر';
+
+  @override
+  String get mascotTipHabitSale =>
+      'الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉';
+
+  @override
+  String get mascotTipHabitSmall =>
+      'القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶';
+
+  @override
+  String get mascotTipHabitWait =>
+      'استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️';
+
+  @override
+  String get mascotTipHabitTreat =>
+      'مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄';
+
+  @override
+  String get mascotTipHabitSubs =>
+      'اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀';
+
+  @override
+  String get mascotTipShowMe => 'وريني';
 
   @override
   String get insightsTabsCharts => 'الشارتات';
@@ -4389,6 +4768,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recurringBillEditSaved => 'الفاتورة اتحفظت ✓';
 
   @override
+  String get homeQuickAddExchange => 'غيّرت عملة';
+
+  @override
+  String get homeQuickAddExchangeHint => 'من عملة لعملة، زي دولار لجنيه';
+
+  @override
+  String get homeQuickAddExchangeA11y => 'سجّل تغيير عملة';
+
+  @override
   String homeQuickAddVoiceLeft(String remaining, String max) {
     return 'فاضلك $remaining من $max تسجيل صوتي الشهر ده';
   }
@@ -5337,6 +5725,17 @@ class AppLocalizationsAr extends AppLocalizations {
       'other': '$span حوشت $saved، يعني $percent من دخلك.',
     });
     return '$_temp0';
+  }
+
+  @override
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
+  ) {
+    return '$span غيّرت $given وخدت $received. سعر البنك: $unit الواحد بـ $rate.';
   }
 
   @override
@@ -8968,6 +9367,21 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get insightsV2TrendsLegendExchangeIn => 'غيّرت عملة: دخل';
+
+  @override
+  String get insightsV2TrendsLegendExchangeOut => 'غيّرت عملة: خرج';
+
+  @override
+  String insightsV2TrendsInOutExchangeA11y(
+    String month,
+    String inAmount,
+    String outAmount,
+  ) {
+    return '$month، غيّرت عملة: دخل $inAmount، خرج $outAmount';
+  }
+
+  @override
   String insightsV2TrendsInOutBarA11y(
     String month,
     String income,
@@ -9127,4 +9541,557 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get accountsDetailDuePaid => 'سددت المطلوب للكشف ده';
+
+  @override
+  String get chatLlmInputHint => 'اسألني بكلامك عن فلوسك…';
+
+  @override
+  String chatLlmInputCounter(int max, int n) {
+    return '$n من $max';
+  }
+
+  @override
+  String get chatLlmInputStop => 'وقّف';
+
+  @override
+  String get chatLlmInputStopA11y => 'وقّف السؤال';
+
+  @override
+  String chatQuotaRemaining(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n سؤال',
+      many: 'فاضل $n سؤال',
+      few: 'فاضل $n أسئلة',
+      two: 'فاضل سؤالين',
+      one: 'فاضل سؤال واحد',
+      zero: 'خلصت أسئلة الشهر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatQuotaRemainingA11y(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n سؤال أونلاين الشهر ده',
+      many: 'فاضل $n سؤال أونلاين الشهر ده',
+      few: 'فاضل $n أسئلة أونلاين الشهر ده',
+      two: 'فاضل سؤالين أونلاين الشهر ده',
+      one: 'فاضل سؤال أونلاين واحد الشهر ده',
+      zero: 'خلصت الأسئلة الأونلاين الشهر ده',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatQuotaUnknown => '—';
+
+  @override
+  String get chatQuotaUnknownA11y => 'عدد الأسئلة هيظهر بعد أول سؤال أونلاين';
+
+  @override
+  String get chatQuotaInfoTitle => 'الأسئلة الأونلاين';
+
+  @override
+  String get chatQuotaInfoBody =>
+      'الأسئلة اللي بجاوبها من موبايلك ببلاش ومن غير حد. الأسئلة اللي محتاجة المساعد الأونلاين ليها عدد في الشهر، وبيرجع أول كل شهر.';
+
+  @override
+  String get chatQuotaLastOne => 'ده آخر سؤال أونلاين الشهر ده';
+
+  @override
+  String chatQuotaFreeOut(String date) {
+    return 'خلّصت أسئلتك الأونلاين ببلاش الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك، والعداد بيرجع يوم $date.';
+  }
+
+  @override
+  String chatQuotaGoldHint(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'مع جولد بيبقى عندك $n سؤال في الشهر.',
+      many: 'مع جولد بيبقى عندك $n سؤال في الشهر.',
+      few: 'مع جولد بيبقى عندك $n أسئلة في الشهر.',
+      two: 'مع جولد بيبقى عندك سؤالين في الشهر.',
+      one: 'مع جولد بيبقى عندك سؤال واحد في الشهر.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatQuotaSeeGold => 'شوف جولد';
+
+  @override
+  String chatQuotaGoldOut(String date) {
+    return 'خلّصت أسئلتك الأونلاين الشهر ده، وبترجع يوم $date. لحد ساعتها بجاوبك على الأسئلة العادية من موبايلك.';
+  }
+
+  @override
+  String get chatConsentTitle => 'السؤال ده محتاج المساعد الأونلاين';
+
+  @override
+  String chatConsentIntro(String aiProvider) {
+    return 'مقدرش أجاوبه من موبايلك لوحدي. لو وافقت، هبعت نص سؤالك لسيرفر زغلول ولـ $aiProvider علشان يفهموه، والحساب كله بيحصل على موبايلك.';
+  }
+
+  @override
+  String get chatConsentPreviewTitle => 'ده اللي هيتبعت بالظبط';
+
+  @override
+  String get chatConsentSendsTitle => 'بيتبعت';
+
+  @override
+  String get chatConsentSends =>
+      'سؤالك بيتبعت من غير أسماء حساباتك وكروتك وبنوكك، ومن غير أسماء الأماكن اللي بتشتري منها واللي زغلول عارفها. أي حاجة تانية تكتبها، زي مبلغ، بتتبعت زي ما هي.';
+
+  @override
+  String get chatConsentNeverTitle => 'عمره ما بيتبعت';
+
+  @override
+  String get chatConsentNever =>
+      'حركاتك وأرصدتك وميزانياتك ورسايل البنوك. ولا حاجة فيهم بتسيب موبايلك.';
+
+  @override
+  String chatConsentStorage(String aiProvider) {
+    return 'سيرفر زغلول مبيحفظش سؤالك، و$aiProvider مبيتعلمش منه. التفاصيل في سياسة الخصوصية.';
+  }
+
+  @override
+  String chatConsentQuota(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'عندك $n سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      many:
+          'عندك $n سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      few:
+          'عندك $n أسئلة أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      two: 'عندك سؤالين أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+      one: 'عندك سؤال أونلاين واحد في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatConsentAllow => 'تمام، ابعت';
+
+  @override
+  String get chatConsentSettingsHint => 'تقدر تقفلها في أي وقت من «خصوصيتك».';
+
+  @override
+  String get chatConsentDeclined =>
+      'ولا يهمك، سؤالك ماتبعتش. جرّب واحد من دول:';
+
+  @override
+  String get chatLlmStatusSending => 'ببعت سؤالك من غير بياناتك…';
+
+  @override
+  String get chatLlmStatusComputing => 'بحسبها على موبايلك…';
+
+  @override
+  String get chatLlmStatusThinkingA11y => 'زغلول بيفكر. سؤالك بس اللي اتبعت';
+
+  @override
+  String get chatLlmStatusStopped => 'وقّفت السؤال.';
+
+  @override
+  String get chatLlmStatusNotQueued => 'سؤالك ماتبعتش، ومش هيتبعت بعدين.';
+
+  @override
+  String get chatLlmStatusOffline =>
+      'السؤال ده محتاج نت. ابعته تاني لما النت يرجع، ولحد ساعتها جرّب دول:';
+
+  @override
+  String get chatLlmStatusTimeout =>
+      'المساعد الأونلاين اتأخر في الرد، ومتحسبش من أسئلتك.';
+
+  @override
+  String get chatLlmStatusError =>
+      'حصلت مشكلة وأنا بفهم سؤالك، ومتحسبش من أسئلتك.';
+
+  @override
+  String get chatLlmStatusSlowDown =>
+      'أسئلة كتير ورا بعض. استنى دقيقة وجرّب تاني.';
+
+  @override
+  String get chatLlmStatusIntegrity =>
+      'مقدرتش أتأكد إن نسخة زغلول دي سليمة. حدّثها من المتجر أو جرّب تاني.';
+
+  @override
+  String get chatLlmStatusPaused =>
+      'المساعد الأونلاين واخد راحة الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك.';
+
+  @override
+  String get chatSentBadge => 'أونلاين';
+
+  @override
+  String get chatSentBadgeA11y => 'الإجابة دي اتفهمت بالمساعد الأونلاين';
+
+  @override
+  String get chatSentToggle => 'اللي بعته';
+
+  @override
+  String get chatSentTitle => 'ده سؤالك زي ما خرج من موبايلك:';
+
+  @override
+  String chatSentChip(int n, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'account': 'حساب $n',
+      'card': 'كارت $n',
+      'bank': 'بنك $n',
+      'merchant': 'مكان $n',
+      'other': 'اسم $n',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatSentChipA11y(int n, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'account': 'حساب رقم $n، اسمه فضل على موبايلك',
+      'card': 'كارت رقم $n، رقمه فضل على موبايلك',
+      'bank': 'بنك رقم $n، اسمه فضل على موبايلك',
+      'merchant': 'مكان رقم $n، اسمه فضل على موبايلك',
+      'other': 'اسم رقم $n، فضل على موبايلك',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatSentHidden(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'phone': 'رقم موبايل',
+      'email': 'إيميل',
+      'instapay': 'عنوان إنستاباي',
+      'number': 'رقم طويل',
+      'other': 'متشال',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get chatSentChipsNote =>
+      'المربعات دي مكان الأسامي. معناها فضل على موبايلك ومتبعتش.';
+
+  @override
+  String chatSentAlsoSent(String aiProvider) {
+    return 'ومعاه بس: لغة التطبيق وإصداره، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. $aiProvider بيوصله السؤال واللغة بس.';
+  }
+
+  @override
+  String chatSentTextA11y(String text) {
+    return 'اللي اتبعت: $text';
+  }
+
+  @override
+  String get chatSentLocal => 'اتجاوب على موبايلك';
+
+  @override
+  String chatClarifyNoCard(String last4) {
+    return 'مش لاقي كارت آخره $last4. تقصد أنهي كارت؟';
+  }
+
+  @override
+  String chatClarifySameLast4(String last4) {
+    return 'عندك أكتر من كارت آخره $last4. تقصد أنهي واحد؟';
+  }
+
+  @override
+  String chatClarifyNoBankAccount(String bank) {
+    return 'مش لاقي حساب ليك في $bank. تقصد أنهي حساب؟';
+  }
+
+  @override
+  String chatClarifyUnknownBank(String bank) {
+    return 'مش عارف بنك اسمه $bank. تقصد أنهي حساب؟';
+  }
+
+  @override
+  String get chatClarifyNoAccount => 'مش لاقي الحساب ده. تقصد أنهي واحد؟';
+
+  @override
+  String get chatClarifyNotSent => 'سؤالك ماتبعتش ومتحسبش من أسئلتك.';
+
+  @override
+  String chatClarifyNotFound(String query) {
+    return 'ملقتش «$query» في حركاتك. تقصد واحد من دول؟';
+  }
+
+  @override
+  String chatLlmAnswerAverage(
+    String average,
+    String span,
+    String state,
+    String subject,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'day': 'في اليوم',
+      'week': 'في الأسبوع',
+      'other': 'في الشهر',
+    });
+    return 'متوسط صرفك على $subject $span: $average $_temp0.';
+  }
+
+  @override
+  String chatLlmAnswerFullUnits(String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'day': 'حسبت الأيام الكاملة بس، من غير النهارده.',
+      'week': 'حسبت الأسابيع الكاملة بس، من غير الأسبوع ده.',
+      'other': 'حسبت الشهور الكاملة بس، من غير الشهر ده.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatLlmAnswerIncome(String income, String span) {
+    return 'دخلك $span: $income.';
+  }
+
+  @override
+  String chatLlmAnswerBreakdown(String list, String span) {
+    return 'فلوسك راحت فين $span: $list.';
+  }
+
+  @override
+  String chatLlmAnswerTopCategories(String list, String span) {
+    return 'أكتر التصنيفات صرفًا $span: $list.';
+  }
+
+  @override
+  String get chatLlmAnswerOtherBucket => 'حاجات تانية';
+
+  @override
+  String chatLlmAnswerChangePct(String percent) {
+    return 'يعني فرق $percent.';
+  }
+
+  @override
+  String chatLlmAnswerSafeSpend(String perDay) {
+    return 'تقدر تصرف $perDay في اليوم لحد القبض.';
+  }
+
+  @override
+  String get chatLlmAnswerSafeSpendNone =>
+      'لسه مفيش ميزانية، فمقدرش أحسب تصرف كام في اليوم. حط ميزانية وأنا أحسبهالك.';
+
+  @override
+  String chatUnitMonths(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$n شهر',
+      many: '$n شهر',
+      few: '$n شهور',
+      two: 'شهرين',
+      one: 'شهر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String chatWhatIfCutPercent(
+    String amount,
+    String monthly,
+    int months,
+    String percent,
+    String subject,
+  ) {
+    return 'لو قللت $subject $percent، هتوفر حوالي $monthly في الشهر، يعني $amount في $months.';
+  }
+
+  @override
+  String chatWhatIfCutAmount(
+    String amount,
+    String monthly,
+    int months,
+    String subject,
+  ) {
+    return 'لو قللت $subject بـ $monthly في الشهر، هتوفر $amount في $months.';
+  }
+
+  @override
+  String chatWhatIfCapped(String average, String subject) {
+    return 'متوسط صرفك على $subject $average بس، فده أقصى توفير في الشهر.';
+  }
+
+  @override
+  String chatWhatIfSave(String amount, String monthly, int months) {
+    return 'لو حوشت $monthly كل شهر، هيبقى معاك $amount بعد $months، من غير أي عائد.';
+  }
+
+  @override
+  String chatWhatIfBasis(int count, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'على أساس متوسط آخر $n شهر كامل',
+      many: 'على أساس متوسط آخر $n شهر كامل',
+      few: 'على أساس متوسط آخر $n شهور كاملة',
+      two: 'على أساس متوسط آخر شهرين كاملين',
+      one: 'على أساس آخر شهر كامل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chatWhatIfNotEnough =>
+      'لسه مفيش شهر كامل أحسب عليه. استناني لآخر الشهر وأنا أحسبهالك.';
+
+  @override
+  String get chatSuggestIntro => 'دي أكتر حاجات ممكن توفر منها الشهر الجاي:';
+
+  @override
+  String chatSuggestAboveAverage(String amount, String category, String gap) {
+    return '$category الشهر اللي فات $amount، يعني $gap فوق متوسطك. لو رجعته للمتوسط هتوفر $gap.';
+  }
+
+  @override
+  String chatSuggestSubscription(String item, String monthly) {
+    return 'اشتراك $item بـ $monthly في الشهر. لو مش بتستخدمه، وقفه ووفر $monthly.';
+  }
+
+  @override
+  String chatSuggestCreep(
+    String category,
+    String endAmount,
+    String gap,
+    String startAmount,
+  ) {
+    return '$category بيزيد كل شهر، من $startAmount لـ $endAmount. لو رجعته لأوله هتوفر $gap.';
+  }
+
+  @override
+  String chatSuggestCash(String amount, String target) {
+    return '$amount كاش سحبته ومش متسجل راح فين. لو سجلته، ممكن توفر حوالي $target.';
+  }
+
+  @override
+  String get chatSuggestCashTip => 'سجّل الكاش وإنت بتصرفه، حتى بصوتك.';
+
+  @override
+  String chatSuggestSaveLabel(String monthly) {
+    return 'توفير متوقع: $monthly في الشهر';
+  }
+
+  @override
+  String get chatSuggestNone =>
+      'مش لاقي حاجة واضحة توفر منها. صرفك ماشي على متوسطه، كمّل كده!';
+
+  @override
+  String get chatSuggestFooter => 'دي اقتراحات بس، ومفيش حاجة اتغيرت.';
+
+  @override
+  String chatInvestLead(String amount, String state) {
+    String _temp0 = intl.Intl.selectLogic(state, {
+      'saved': 'الشهر اللي فات فضل معاك $amount.',
+      'whatIf': 'لو كنت وفرت $amount:',
+      'other': 'لو معاك $amount:',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String chatInvestGold(String date, String grams, String karat, String price) {
+    return 'كان ممكن يجيب حوالي $grams دهب عيار $karat، بسعر $price للجرام يوم $date.';
+  }
+
+  @override
+  String chatInvestUsd(String amount2, String date, String rate) {
+    return 'كان ممكن يساوي ≈ $amount2، بسعر $rate للدولار يوم $date.';
+  }
+
+  @override
+  String chatInvestCertificate(String exampleRate, int months, String payout) {
+    return 'في شهادة بعائد مثال $exampleRate لمدة $months، كان ممكن يطلع عائد حوالي $payout، قبل الضرايب والمصاريف. ده معدل للتوضيح، مش عرض.';
+  }
+
+  @override
+  String get chatInvestStocks =>
+      'مبلغ زي ده ممكن يبقى بداية صغيرة في الأسهم عمومًا. اتعلم الأول، واتعامل مع جهة مرخصة.';
+
+  @override
+  String get chatInvestSmall =>
+      'كل جنيه بيفرق، كمّل كده والشهر الجاي هيبقى أحسن.';
+
+  @override
+  String get chatInvestNothingSaved =>
+      'الشهر اللي فات مفضلش حاجة. تعالى نشوف نوفر منين الشهر الجاي.';
+
+  @override
+  String chatInvestNoPrice(String currency) {
+    return '$currency مش داخل هنا، علشان مفيش سعر ليه.';
+  }
+
+  @override
+  String get chatInvestGramsHiddenA11y => 'الوزن مخفي';
+
+  @override
+  String get chatInvestSuggestChip => 'أوفر منين؟';
+
+  @override
+  String get chatInvestChip => 'لو كنت حوشت؟';
+
+  @override
+  String get chatInvestDisclaimerSummary => 'ده توضيح بس، مش نصيحة استثمار.';
+
+  @override
+  String get chatInvestDisclaimer =>
+      'هذه الأرقام للتوضيح فقط وليست نصيحة استثمارية. الأسعار والعوائد تتغير، والقيم السابقة لا تدل على القيم المستقبلية. القرار النهائي لك.';
+
+  @override
+  String get chatRefuseOffTopic =>
+      'أنا شاطر في الفلوس بس 😄 اسألني عن صرفك أو تحويشك:';
+
+  @override
+  String get chatRefuseUnsafe =>
+      'ده مش حاجة أقدر أساعد فيها. لو عندك سؤال عن فلوسك، أنا موجود.';
+
+  @override
+  String get chatRefuseSupport =>
+      'لو الدنيا تقيلة عليك، كلم حد بتثق فيه. إنت مش لوحدك.';
+
+  @override
+  String get chatRefuseSpecificPick =>
+      'مقدرش أرشحلك سهم أو صندوق بعينه. أقدر أوريك فلوسك كانت ممكن تساوي كام، كتوضيح بس.';
+
+  @override
+  String get privacyAskLlmLabel => 'اسأل المساعد الأونلاين';
+
+  @override
+  String get privacyAskLlmSentence =>
+      'بيبعت نص سؤالك بس، من غير أسماء حساباتك وكروتك وبنوكك. حركاتك وأرصدتك عمرها ما بتسيب موبايلك.';
+
+  @override
+  String privacyAskLlmQuota(int count, String date, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $n سؤال الشهر ده، والعداد بيرجع يوم $date.',
+      many: 'فاضل $n سؤال الشهر ده، والعداد بيرجع يوم $date.',
+      few: 'فاضل $n أسئلة الشهر ده، والعداد بيرجع يوم $date.',
+      two: 'فاضل سؤالين الشهر ده، والعداد بيرجع يوم $date.',
+      one: 'فاضل سؤال واحد الشهر ده، والعداد بيرجع يوم $date.',
+      zero: 'خلصت أسئلة الشهر، وبترجع يوم $date.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get privacyAskLlmQuotaUnknown =>
+      'عدد الأسئلة هيظهر بعد أول سؤال أونلاين.';
+
+  @override
+  String get privacyAskLlmDetails => 'إيه اللي بيتبعت؟';
+
+  @override
+  String get privacyAskLlmTurnedOff =>
+      'اتقفل. مش هبعت أي سؤال غير لما توافق تاني.';
+
+  @override
+  String get privacyServerItemAskLlm =>
+      'نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر';
 }

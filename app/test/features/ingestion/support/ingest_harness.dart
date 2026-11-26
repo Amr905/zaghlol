@@ -179,6 +179,63 @@ final class FaultyStore implements IngestStorePort {
   @override
   Future<void> insertTxn(TxnInsert row) => _step(() => _inner.insertTxn(row));
   @override
+  Future<BalanceJumpFacts?> balanceJumpFacts({
+    required String accountId,
+    required String currency,
+    required int asOfMs,
+    required int lookbackMs,
+  }) => _step(
+    () => _inner.balanceJumpFacts(
+      accountId: accountId,
+      currency: currency,
+      asOfMs: asOfMs,
+      lookbackMs: lookbackMs,
+    ),
+  );
+  @override
+  Future<void> insertExchangePair({
+    required String id,
+    required String outTxnId,
+    required String inTxnId,
+    required int createdAtMs,
+  }) => _step(
+    () => _inner.insertExchangePair(
+      id: id,
+      outTxnId: outTxnId,
+      inTxnId: inTxnId,
+      createdAtMs: createdAtMs,
+    ),
+  );
+  @override
+  Future<String?> exchangeInLegOf(String outTxnId) =>
+      _step(() => _inner.exchangeInLegOf(outTxnId));
+  @override
+  Future<void> recordCrossChannelCopy({
+    required String id,
+    required String rawMessageId,
+    required String txnId,
+    required String source,
+    required int atMs,
+    String? statusClass,
+  }) => _step(
+    () => _inner.recordCrossChannelCopy(
+      id: id,
+      rawMessageId: rawMessageId,
+      txnId: txnId,
+      source: source,
+      atMs: atMs,
+      statusClass: statusClass,
+    ),
+  );
+  @override
+  Future<bool> hasCrossChannelCopy(
+    String txnId,
+    String source, {
+    String? statusClass,
+  }) => _step(
+    () => _inner.hasCrossChannelCopy(txnId, source, statusClass: statusClass),
+  );
+  @override
   Future<int> updateTxn(String txnId, TxnPatch patch, {required int atMs}) =>
       _step(() => _inner.updateTxn(txnId, patch, atMs: atMs));
   @override

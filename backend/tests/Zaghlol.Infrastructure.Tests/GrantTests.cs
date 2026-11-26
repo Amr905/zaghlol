@@ -91,6 +91,27 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "UPDATE zaghlol.pending_apple_revocations SET sealed_blob = NULL WHERE false" },
         { "zaghlol_worker", "INSERT INTO zaghlol.pending_apple_revocations (id) SELECT gen_random_uuid() WHERE false" },
 
+        // T-323 LLM tables: the API never writes remote_config, deletes only counters and cache rows (erasure, FR-LCAT-12; the purger does the rest), never updates a review row; the
+        // worker only deletes; ops_rw moves only the review columns; ops_ro sees no quota counters.
+        { "zaghlol_api", "INSERT INTO zaghlol.remote_config (key, value, version, updated_at) VALUES ('x', 'y', 1, now())" },
+        { "zaghlol_api", "UPDATE zaghlol.remote_config SET value = 'z' WHERE false" },
+        { "zaghlol_api", "DELETE FROM zaghlol.llm_spend_daily WHERE false" },
+        { "zaghlol_api", "UPDATE zaghlol.llm_cat_confirmations SET status = 'promoted' WHERE false" },
+        { "zaghlol_api", "UPDATE zaghlol.llm_cat_corrections SET status = 'promoted' WHERE false" },
+        { "zaghlol_api", "DELETE FROM zaghlol.llm_cat_corrections WHERE false" },
+        { "zaghlol_worker", "INSERT INTO zaghlol.llm_quota_counters (feature, subject_kind, subject_id, month_key, used, updated_at) SELECT 'ask', 'install', gen_random_uuid(), 202611, 1, now() WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.llm_quota_counters SET used = 0 WHERE false" },
+        { "zaghlol_worker", "UPDATE zaghlol.llm_cat_corrections SET status = 'rejected' WHERE false" },
+        { "zaghlol_worker", "SELECT * FROM zaghlol.remote_config" },
+        { "zaghlol_admin", "UPDATE zaghlol.llm_cat_corrections SET merchant_norm = 'x' WHERE false" },
+        { "zaghlol_admin", "UPDATE zaghlol.llm_cat_corrections SET install_hash = NULL WHERE false" },
+        { "zaghlol_admin", "UPDATE zaghlol.llm_cat_confirmations SET category_code = 'x' WHERE false" },
+        { "zaghlol_admin", "DELETE FROM zaghlol.llm_cat_confirmations WHERE false" },
+        { "zaghlol_admin", "SELECT * FROM zaghlol.llm_quota_counters" },
+        { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_quota_counters" },
+        { "zaghlol_ops_ro", "UPDATE zaghlol.remote_config SET value = 'z' WHERE false" },
+        { "zaghlol_admin", "DELETE FROM zaghlol.remote_config WHERE false" },
+
         // T-133: no new grant. The Google worker statement never needs more; the worker still can't touch verify-only columns or
         // seats, or insert purchases.
         { "zaghlol_worker", "UPDATE zaghlol.purchases SET install_id = NULL WHERE false" },
@@ -120,6 +141,30 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'expired', acknowledged = true WHERE false" },
         { "zaghlol_api", "SELECT zaghlol.count_daily_active('ios', '1.0.0')" },
         { "zaghlol_api", "UPDATE zaghlol.installs SET last_sync_at = now() WHERE false" },
+
+        // T-323 LLM tables.
+        { "zaghlol_api", "UPDATE zaghlol.llm_quota_counters SET used = used + 1, last_request_hash = NULL, updated_at = now() WHERE false" },
+        { "zaghlol_api", "UPDATE zaghlol.llm_spend_daily SET calls = calls + 1 WHERE false" },
+        { "zaghlol_api", "UPDATE zaghlol.llm_cat_answer_cache SET hits = hits + 1 WHERE false" },
+        { "zaghlol_api", "SELECT key, value, version FROM zaghlol.remote_config" },
+        { "zaghlol_api", "DELETE FROM zaghlol.llm_quota_counters WHERE subject_id = gen_random_uuid()" },
+        { "zaghlol_api", "DELETE FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = 'x'" },
+        { "zaghlol_admin", "INSERT INTO zaghlol.remote_config (key, value, version, updated_at) SELECT 'x', 'y', 1, now() WHERE false" },
+        { "zaghlol_admin", "UPDATE zaghlol.remote_config SET value = 'z', version = version + 1 WHERE false" },
+        { "zaghlol_ops_ro", "SELECT key, value FROM zaghlol.remote_config" },
+        { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_cat_corrections" },
+        { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_cat_confirmations" },
+        { "zaghlol_api", "SELECT id FROM zaghlol.llm_cat_confirmations WHERE false" },
+        { "zaghlol_api", "SELECT id FROM zaghlol.llm_cat_corrections WHERE false" },
+        { "zaghlol_worker", "DELETE FROM zaghlol.llm_quota_counters WHERE month_key < 202601" },
+        { "zaghlol_worker", "DELETE FROM zaghlol.llm_spend_daily WHERE day < current_date - 400" },
+        { "zaghlol_worker", "DELETE FROM zaghlol.llm_cat_answer_cache WHERE expires_at < now()" },
+        { "zaghlol_worker", "DELETE FROM zaghlol.llm_cat_confirmations WHERE created_at < now() - interval '365 days'" },
+        { "zaghlol_worker", "DELETE FROM zaghlol.llm_cat_corrections WHERE created_at < now() - interval '180 days'" },
+        { "zaghlol_admin", "SELECT id, status FROM zaghlol.llm_cat_confirmations" },
+        { "zaghlol_admin", "UPDATE zaghlol.llm_cat_confirmations SET status = 'promoted' WHERE false" },
+        { "zaghlol_admin", "SELECT * FROM zaghlol.llm_cat_corrections" },
+        { "zaghlol_admin", "UPDATE zaghlol.llm_cat_corrections SET status = 'promoted', operator_id = gen_random_uuid(), resolved_at = now() WHERE false" },
 
         // T-134: the worker statement and the history job's insert.
         { "zaghlol_worker", "UPDATE zaghlol.purchases SET state = 'refunded', expires_at = expires_at, product_id = product_id, plan = plan, last_verified_at = now() WHERE false" },

@@ -169,6 +169,9 @@ class AskAnswerTextBuilder {
       ]),
     ),
     AskRoastAnswer() => AskBubbleContent([_roast(a)]),
+    AskExchangeAnswer() => AskBubbleContent([
+      for (final f in a.figures) _exchange(a.period, f),
+    ]),
     AskNoDataAnswer(:final reason) => AskBubbleContent([
       reason == AskNoDataReason.noDues
           ? l.chatAnswerDues(0, l.chatPeriodUntilPayday, '', '', _n(0))
@@ -290,6 +293,27 @@ class AskAnswerTextBuilder {
       _money(net.abs()),
       _money(net),
       '${_n(pct)}%',
+    );
+  }
+
+  String _exchange(ChartPeriod p, AskExchangeFigure f) {
+    final r = f.rate;
+    var unit = '';
+    var rate = '';
+    if (r != null) {
+      var pow = 1;
+      for (var i = 0; i < r.quotedIn.exponent; i++) {
+        pow *= 10;
+      }
+      unit = r.perUnitOf.code;
+      rate = _money(Money(r.quotedIn, (r.milli * pow + 500) ~/ 1000));
+    }
+    return l.chatAnswerExchange(
+      _span(p),
+      _money(f.given),
+      _money(f.received),
+      unit,
+      rate,
     );
   }
 

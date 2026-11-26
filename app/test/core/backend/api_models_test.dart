@@ -57,6 +57,52 @@ final Map<String, Map<String, Object?> Function()> _samples = {
         channel: BankRequestInputChannel.sms,
       ),
     ],
+    configVersion: 3,
+    llmCatFeedback: [
+      LlmCatFeedbackItem(
+        merchantNorm: 'zawya coffee',
+        verdict: LlmCatFeedbackItemVerdict.right,
+        aiCategory: 'dining',
+        userCategory: 'dining',
+        source: LlmCatFeedbackItemSource.llm,
+      ),
+    ],
+  ).toJson(),
+  'LlmCatFeedbackItem': () => const LlmCatFeedbackItem(
+    merchantNorm: 'zawya coffee',
+    verdict: LlmCatFeedbackItemVerdict.wrong,
+    aiCategory: 'dining',
+    userCategory: 'custom',
+    source: LlmCatFeedbackItemSource.cache,
+  ).toJson(),
+  'LlmConsent': () => const LlmConsent(provider: 'openai-luna', v: 1).toJson(),
+  'LlmPlayIntegrityProof': () =>
+      const LlmPlayIntegrityProof(token: 'synthetic-play-integrity-token-0001')
+          .toJson(),
+  'LlmAppAttestProof': () => LlmAppAttestProof(
+    keyId: '${'A' * 43}=',
+    assertion: 'QUJDREVGR0hJSktMTU5PUA==',
+    attestationObject: 'QUJDREVGR0hJSktMTU5PUA==',
+  ).toJson(),
+  'LlmDevProof': () =>
+      const LlmDevProof(proof: 'synthetic-dev-proof-0001').toJson(),
+  'AskPlanRequest': () => const AskPlanRequest(
+    planVersion: 1,
+    requestId: '01JD8Z3Q4F6R7T9V0W1X2Y3Z4A',
+    q: 'How much did I spend on dining last month?',
+    lang: AskPlanRequestLang.en,
+    consent: LlmConsent(provider: 'openai-luna', v: 1),
+    attestation: LlmPlayIntegrityProof(
+      token: 'synthetic-play-integrity-token-0001',
+    ),
+  ).toJson(),
+  'CategoriseRequest': () => const CategoriseRequest(
+    v: 1,
+    requestId: '01JD8Z3Q4F6R7T9V0W1X2Y3Z4B',
+    lang: CategoriseRequestLang.ar,
+    merchants: ['zawya coffee', 'مكتبة النور'],
+    consent: LlmConsent(provider: 'openai-luna', v: 1),
+    attestation: LlmDevProof(proof: 'synthetic-dev-proof-0001'),
   ).toJson(),
   'ContributionInput': () => const ContributionInput(
     merchantNorm: 'cafe x',

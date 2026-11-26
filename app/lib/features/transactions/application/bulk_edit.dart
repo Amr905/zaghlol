@@ -20,6 +20,7 @@ import '../../../core/db/daos/categories_dao.dart';
 import '../../../core/db/daos/merchant_rules_dao.dart';
 import '../../../core/db/daos/misc_daos.dart';
 import '../../../core/db/daos/transactions_dao.dart';
+import '../../../core/db/daos/transfers_dao.dart';
 import '../../../core/db/daos/write_errors.dart' show guardWrite;
 import 'transactions_changed_event.dart';
 import '../data/drift_transaction_repository.dart'
@@ -48,6 +49,11 @@ final class BulkEditException extends SafeException {
   static const String categoryUnavailable = 'BULK_CATEGORY_UNAVAILABLE';
   static const String accountNotFound = 'BULK_ACCOUNT_NOT_FOUND';
   static const String paired = 'BULK_PAIRED';
+
+  /// T-286 (FU-384): a category was asked for an exchange leg. An exchange
+  /// is not spending and has no category; setting one on a leg would edit
+  /// one half of it.
+  static const String exchange = 'BULK_EXCHANGE';
   static const String undoNotFound = 'BULK_UNDO_NOT_FOUND';
   static const String undoExpired = 'BULK_UNDO_EXPIRED';
   static const String undoCorrupt = 'BULK_UNDO_CORRUPT';
@@ -61,7 +67,8 @@ sealed class BulkChange {
 /// Sets the category (the rows become user-verified, source `user`). With
 /// [alwaysUseForMerchants], also saves one merchant rule per distinct
 /// merchant among the rows (catalog merchant, else normalised name; rows
-/// with neither get no rule).
+/// with neither get no rule). A batch holding an exchange leg is refused
+/// (`BULK_EXCHANGE`, T-286).
 final class SetCategory extends BulkChange {
   const SetCategory(this.categoryId, {this.alwaysUseForMerchants = false});
   final String categoryId;
@@ -76,8 +83,16 @@ final class SetAccount extends BulkChange {
 }
 
 /// Soft-deletes the rows (restorable for 30 days; Undo restores at once).
+///
+/// T-281: with [wholeExchanges], a row that is a leg of a complete exchange
+/// pair (`fx_conversion` / `cross_currency`, both legs live) takes its other
+/// leg with it, and the pair row is deleted in the same transaction and kept
+/// in the Undo image, so Undo puts back both legs and the pair. Without it
+/// (rule-driven deletes) only the named rows go and the removal hook keeps
+/// the other leg internal.
 final class DeleteTransactions extends BulkChange {
-  const DeleteTransactions();
+  const DeleteTransactions({this.wholeExchanges = false});
+  final bool wholeExchanges;
 }
 
 final class BulkEditResult {
@@ -86,11 +101,16 @@ final class BulkEditResult {
     required this.changed,
     required this.rulesCreated,
     required this.event,
+    this.ids = const {},
   });
 
   /// The id to pass to [BulkEditUseCase.undo].
   final String batchId;
   final int changed;
+
+  /// Every row the batch changed: the selection plus, for a delete with
+  /// `wholeExchanges`, the other leg of each exchange (T-281).
+  final Set<String> ids;
 
   /// Rules newly created or re-pointed by this batch.
   final int rulesCreated;
@@ -136,7 +156,8 @@ class BulkEditUseCase {
        _rules = MerchantRulesDao(_db),
        _undo = UndoBatchesDao(_db),
        _categories = CategoriesDao(_db),
-       _accounts = AccountsDao(_db);
+       _accounts = AccountsDao(_db),
+       _pairs = TransferPairsDao(_db);
 
   final AppDatabase _db;
   final Clock _now;
@@ -146,6 +167,7 @@ class BulkEditUseCase {
   final UndoBatchesDao _undo;
   final CategoriesDao _categories;
   final AccountsDao _accounts;
+  final TransferPairsDao _pairs;
   final Future<PaydaySchedule> Function()? _loadSchedule;
   final DomainEventBus? _events;
 
@@ -215,6 +237,16 @@ class BulkEditUseCase {
           if (c == null || c.isArchived != 0) {
             throw BulkEditException(BulkEditException.categoryUnavailable);
           }
+          // T-286: refuse the whole batch (nothing changed yet) rather than
+          // give one leg of an exchange a category.
+          for (final r in rows) {
+            final pairId = r.transferPairId;
+            if (pairId == null) continue;
+            final pair = await _pairs.byId(pairId);
+            if (pair != null && isExchangePairKind(pair.kind)) {
+              throw BulkEditException(BulkEditException.exchange);
+            }
+          }
           image['kind'] = 'category';
           image['to'] = categoryId;
           for (final r in rows) {
@@ -261,8 +293,11 @@ class BulkEditUseCase {
               ),
             );
           }
-        case DeleteTransactions():
+        case DeleteTransactions(:final wholeExchanges):
           image['kind'] = 'delete';
+          if (wholeExchanges) {
+            image['pairs'] = await _takeExchanges(rows);
+          }
           for (final r in rows) {
             imageRows.add({'id': r.id, 'upd': r.updatedAt});
             if (await _txns.softDelete(r.id, at: now) != 1) {
@@ -284,6 +319,7 @@ class BulkEditUseCase {
       return BulkEditResult(
         batchId: batchId,
         changed: rows.length,
+        ids: {for (final r in rows) r.id},
         rulesCreated: rulesTouched,
         event: await _eventFor(
           schedule,
@@ -330,6 +366,9 @@ class BulkEditUseCase {
         } else {
           skipped++;
         }
+      }
+      for (final p in image.pairs) {
+        if (!await _restorePair(p, restoredIds.toSet(), now)) skipped++;
       }
       final restoredRows = <TransactionRow>[
         for (final id in restoredIds) ?await _txns.byId(id),
@@ -378,6 +417,77 @@ class BulkEditUseCase {
   /// Deletes expired batches. Returns how many were removed.
   Future<int> purgeExpired() =>
       _undo.purgeOlderThan(_nowMs() - undoWindow.inMilliseconds + 1);
+
+  /// T-281: adds the live other leg of every complete exchange pair among
+  /// [rows] to [rows], deletes those pair rows (the legs' `transfer_pair_id`
+  /// becomes NULL by the FK) and returns them for the Undo image. Runs inside
+  /// the delete's transaction, before the soft deletes.
+  Future<List<Object?>> _takeExchanges(List<TransactionRow> rows) async {
+    final out = <Object?>[];
+    final seen = <String>{};
+    final ids = {for (final r in rows) r.id};
+    for (final r in [...rows]) {
+      final pairId = r.transferPairId;
+      if (pairId == null || !seen.add(pairId)) continue;
+      final p = await _pairs.byId(pairId);
+      final inId = p?.inTxnId;
+      if (p == null || inId == null || !isExchangePairKind(p.kind)) continue;
+      final otherId = p.outTxnId == r.id ? inId : p.outTxnId;
+      final other = await _txns.byId(otherId);
+      // Only a complete live exchange is one unit; anything else is left to
+      // the removal hook as before.
+      if (other == null || other.deletedAt != null) continue;
+      if (ids.add(otherId)) rows.add(other);
+      if (await _pairs.deleteById(p.id) != 1) {
+        throw BulkEditException(BulkEditException.notFound);
+      }
+      out.add({
+        'id': p.id,
+        'out': p.outTxnId,
+        'in': inId,
+        'kind': p.kind,
+        'created': p.createdAt,
+      });
+    }
+    return out;
+  }
+
+  /// T-281 Undo: puts exchange pair [p] back with its id and kind, only when
+  /// both legs were restored by this Undo and neither was paired since.
+  /// Returns false when it was skipped (the legs then stay internal, counted
+  /// nowhere, and the user can unlink or delete them).
+  Future<bool> _restorePair(_ImagePair p, Set<String> restored, int now) async {
+    if (!restored.contains(p.outId) || !restored.contains(p.inId)) {
+      return false;
+    }
+    for (final id in [p.outId, p.inId]) {
+      final row = await _txns.byId(id);
+      if (row == null || row.deletedAt != null || row.transferPairId != null) {
+        return false;
+      }
+    }
+    if (await _pairs.byId(p.id) != null) return false;
+    await _pairs.insert(
+      TransferPairsCompanion.insert(
+        id: p.id,
+        outTxnId: p.outId,
+        inTxnId: Value(p.inId),
+        kind: p.kind,
+        createdAt: p.createdAt,
+      ),
+    );
+    for (final id in [p.outId, p.inId]) {
+      await _write(
+        id,
+        TransactionsCompanion(
+          isInternal: const Value(1),
+          transferPairId: Value(p.id),
+          updatedAt: Value(now),
+        ),
+      );
+    }
+    return true;
+  }
 
   Future<void> _write(String id, TransactionsCompanion patch) async {
     if (await _txns.updateById(id, patch) != 1) {
@@ -534,6 +644,18 @@ class BulkEditUseCase {
                   .cast<Map<String, Object?>>())
             (id: p['id'] as String, from: p['from'] as String),
         ],
+        pairs: [
+          for (final p
+              in ((m['pairs'] as List<Object?>?) ?? const <Object?>[])
+                  .cast<Map<String, Object?>>())
+            _ImagePair(
+              id: p['id']! as String,
+              outId: p['out']! as String,
+              inId: p['in']! as String,
+              kind: p['kind']! as String,
+              createdAt: p['created']! as int,
+            ),
+        ],
       );
     } on Object {
       // Unreadable before-image: keep the batch, change nothing.
@@ -552,6 +674,7 @@ final class _Image {
     required this.rows,
     required this.rulesCreated,
     required this.rulesRepointed,
+    this.pairs = const [],
   }) {
     // A category/account batch without its target, or a row missing the
     // fields its kind needs, is corrupt, not "restore to null".
@@ -562,7 +685,9 @@ final class _Image {
           (r) =>
               (kind == 'category' && (r.src == null || r.ver == null)) ||
               (kind == 'account' && r.acc == null),
-        );
+        ) ||
+        (pairs.isNotEmpty && kind != 'delete') ||
+        pairs.any((p) => !isExchangePairKind(p.kind));
     if (bad) throw const FormatException();
   }
 
@@ -572,6 +697,23 @@ final class _Image {
   final List<_ImageRow> rows;
   final List<String> rulesCreated;
   final List<({String id, String from})> rulesRepointed;
+  final List<_ImagePair> pairs;
+}
+
+/// An exchange pair a delete batch removed (T-281).
+final class _ImagePair {
+  _ImagePair({
+    required this.id,
+    required this.outId,
+    required this.inId,
+    required this.kind,
+    required this.createdAt,
+  });
+  final String id;
+  final String outId;
+  final String inId;
+  final String kind;
+  final int createdAt;
 }
 
 final class _ImageRow {

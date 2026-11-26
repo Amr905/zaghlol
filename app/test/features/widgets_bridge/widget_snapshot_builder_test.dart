@@ -59,6 +59,7 @@ WidgetSnapshotInput input({
   String lang = 'en',
   DigitsMode digits = DigitsMode.western,
   WidgetCopy copy = _en,
+  List<String> others = const [],
 }) => WidgetSnapshotInput(
   overview: ov,
   primaryCurrency: egp,
@@ -68,6 +69,7 @@ WidgetSnapshotInput input({
   digits: digits,
   copy: copy,
   nowMs: 1000,
+  otherCurrencies: others,
 );
 
 void main() {
@@ -178,5 +180,76 @@ void main() {
     );
     expect(s.primaryText, contains('1.250'));
     expect(s.currency, 'KWD');
+  });
+
+  group('T-284 other-currency hint', () {
+    final ov = overview(egpSafe: Money(egp, 31428));
+    String hint(List<String> codes, {bool hide = false, String lang = 'en'}) =>
+        buildWidgetSnapshot(
+          input(ov: ov, others: codes, hide: hide, lang: lang),
+        ).secondaryText;
+
+    test('no cards: no hint', () {
+      expect(hint(const []), '7 days to payday');
+    });
+
+    test('1, 2 and 3 currencies; at most two codes then +N', () {
+      expect(hint(['USD']), '7 days to payday \u00b7 \u2066+ USD\u2069');
+      expect(
+        hint(['USD', 'EUR']),
+        '7 days to payday \u00b7 \u2066+ USD, EUR\u2069',
+      );
+      expect(
+        hint(['USD', 'EUR', 'KWD']),
+        '7 days to payday \u00b7 \u2066+ USD, EUR +1\u2069',
+      );
+    });
+
+    test('codes stay when amounts are hidden; none while locked', () {
+      expect(hint(['USD'], hide: true), contains('+ USD'));
+      final locked = buildWidgetSnapshot(
+        input(ov: ov, others: ['USD'], locked: true),
+      );
+      expect(locked.secondaryText, '7 days to payday');
+    });
+
+    test('FU-387: a line over the native max drops the hint, keeps payday', () {
+      final long = WidgetCopy(
+        setBudget: 'b',
+        perDay: (a) => '$a/day',
+        daysToPayday: (n, f) => '$f ${'x' * 110}',
+        openApp: 'o',
+      );
+      final s = buildWidgetSnapshot(input(ov: ov, others: ['USD'], copy: long));
+      expect(s.secondaryText, '7 ${'x' * 110}');
+      expect(s.secondaryTextByDay, everyElement(isNot(contains('USD'))));
+    });
+
+    test('every rolled day line carries the hint, no amount in it', () {
+      final s = buildWidgetSnapshot(input(ov: ov, others: ['USD', 'EUR']));
+      expect(s.secondaryTextByDay, everyElement(contains('+ USD, EUR')));
+      expect(s.secondaryText, contains('+ USD, EUR'));
+    });
+
+    test('no budget keeps the hint on line two; no data has none', () {
+      final nb = buildWidgetSnapshot(input(ov: overview(), others: ['USD']));
+      expect(nb.state, WidgetDisplayState.noBudget);
+      expect(nb.secondaryText, contains('+ USD'));
+      final nd = buildWidgetSnapshot(input(others: ['USD']));
+      expect(nd.secondaryText, '');
+    });
+
+    test('Arabic digits for the +N count', () {
+      final s = buildWidgetSnapshot(
+        input(
+          ov: ov,
+          lang: 'ar',
+          digits: DigitsMode.arabicIndic,
+          copy: _ar,
+          others: ['USD', 'EUR', 'KWD', 'GBP'],
+        ),
+      );
+      expect(s.secondaryText, contains('+٢'));
+    });
   });
 }

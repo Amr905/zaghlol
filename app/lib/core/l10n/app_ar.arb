@@ -1472,6 +1472,173 @@
   "@homeHeroKpiLeft": {
     "description": "C"
   },
+  "homeHeroKpiIncomeFromExchange": "منهم {amount} من تغيير عملة",
+  "@homeHeroKpiIncomeFromExchange": {
+    "description": "C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroKpiExchangedOut": "وغيّرت {amount}",
+  "@homeHeroKpiExchangedOut": {
+    "description": "C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyViewTitle": "الشهر ده بالـ{currency}",
+  "@currencyViewTitle": {
+    "description": "S · T-279: title of the per-currency view (D-86). {currency} is the ISO code.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyViewEmptyTitle": "مفيش حاجة بالعملة دي الشهر ده",
+  "@currencyViewEmptyTitle": {
+    "description": "S · T-279: per-currency view with no activity, or an unknown currency code."
+  },
+  "currencyViewEmptyBody": "أول ما تدخل أو تصرف بيها هتلاقيها هنا.",
+  "@currencyViewEmptyBody": {
+    "description": "S · T-279: hint under the empty title."
+  },
+  "currencyViewBudgetOffer": "تعمل ميزانية بالـ{currency}؟",
+  "@currencyViewBudgetOffer": {
+    "description": "S · T-279 (budget.offer.foreign): offered once per currency per month; never creates a budget by itself.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardsTitle": "فلوسك بعملات تانية",
+  "@homeCurrencyCardsTitle": {
+    "description": "C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24."
+  },
+  "homeCurrencyCardLeft": "فاضل {amount}",
+  "@homeCurrencyCardLeft": {
+    "description": "C · T-278: what is left in that currency this month, on a currency card. Max 18.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardInOut": "دخل {income} · خرج {out}",
+  "@homeCurrencyCardInOut": {
+    "description": "C · T-278: second line of a currency card: this month's money in and out (spending plus exchanged away), same currency.",
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "out": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardMore": "+{count}",
+  "@homeCurrencyCardMore": {
+    "description": "C · T-278: chip after the third currency card; opens a sheet with the rest. Max 4.",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardMoreA11y": "{count, plural, =1{عملة كمان} =2{عملتين كمان} few{{n} عملات كمان} other{{n} عملة كمان}}",
+  "@homeCurrencyCardMoreA11y": {
+    "description": "C · T-278: screen-reader label of the +N chip.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCurrencyCardA11y": "{currency}: فاضل {left}. دخل {income}، وخرج {out}. اضغط تفتح الشهر بالعملة دي",
+  "@homeCurrencyCardA11y": {
+    "description": "C · T-278: screen-reader label of one currency card.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "out": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeEntryTitle": "تغيير عملة",
+  "@exchangeEntryTitle": {
+    "description": "C · T-272 manual exchange screen title"
+  },
+  "exchangeEntryIntro": "تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.",
+  "@exchangeEntryIntro": {
+    "description": "C · T-272"
+  },
+  "exchangeEntrySent": "دفعت",
+  "@exchangeEntrySent": {
+    "description": "C · T-272 the amount given"
+  },
+  "exchangeEntryReceived": "وصلني",
+  "@exchangeEntryReceived": {
+    "description": "C · T-272 the amount received"
+  },
+  "exchangeEntryAccount": "الحساب",
+  "@exchangeEntryAccount": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryCurrency": "العملة",
+  "@exchangeEntryCurrency": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryDate": "التاريخ",
+  "@exchangeEntryDate": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryRate": "السعر: ١ {from} = {rate} {to}",
+  "@exchangeEntryRate": {
+    "description": "C · T-272 the rate from the two amounts",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeEntrySameCurrency": "اختار عملتين مختلفتين",
+  "@exchangeEntrySameCurrency": {
+    "description": "C · T-272 validation"
+  },
+  "exchangeEntrySave": "احفظ التغيير",
+  "@exchangeEntrySave": {
+    "description": "C · T-272"
+  },
+  "exchangeEntrySaved": "اتسجل التغيير",
+  "@exchangeEntrySaved": {
+    "description": "C · T-272 snackbar"
+  },
+  "exchangeEntryFailed": "معرفناش نحفظ التغيير. جرب تاني.",
+  "@exchangeEntryFailed": {
+    "description": "C · T-272"
+  },
   "homeHeroApproxTitle": "كله تقريباً بالـ {currency}",
   "@homeHeroApproxTitle": {
     "description": "L · last pager page, only when the ≈ view is on (FR-CUR-04)",
@@ -1611,6 +1778,119 @@
         "type": "String"
       }
     }
+  },
+  "homeApproxLine": "≈ {amount} دخلك كله تقريباً",
+  "@homeApproxLine": {
+    "description": "L · T-280, home.approx.line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxLineA11y": "تقريبي: {amount} دخلك كله، بكل العملات",
+  "@homeApproxLineA11y": {
+    "description": "A · read before the amount; tap opens the sheet",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBoth": "سعر البنك + سعر {date}",
+  "@homeApproxRateNoteBoth": {
+    "description": "S · bank rate for the exchanged part, daily rate for the rest",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteDaily": "سعر {date}",
+  "@homeApproxRateNoteDaily": {
+    "description": "S · only the daily rate was used",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBank": "سعر البنك",
+  "@homeApproxRateNoteBank": {
+    "description": "S · everything foreign was already exchanged"
+  },
+  "homeApproxStale": "سعر قديم",
+  "@homeApproxStale": {
+    "description": "S · a daily rate older than 24 h"
+  },
+  "homeApproxSheetTitle": "الحسبة دي تقريبية",
+  "@homeApproxSheetTitle": {
+    "description": "T"
+  },
+  "homeApproxSheetBody": "بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.",
+  "@homeApproxSheetBody": {
+    "description": "B"
+  },
+  "homeApproxSheetOwn": "اللي دخلك بالعملة دي (بما فيه اللي غيّرته)",
+  "@homeApproxSheetOwn": {
+    "description": "L · the target currency's own money in"
+  },
+  "homeApproxSheetHeld": "{amount} لسه معاك",
+  "@homeApproxSheetHeld": {
+    "description": "L · the part of a foreign currency not exchanged",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchanged": "{amount} غيّرتها، واتحسبت مرة واحدة بالفعل",
+  "@homeApproxSheetExchanged": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchangedBank": "{amount} غيّرتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل",
+  "@homeApproxSheetExchangedBank": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetDailyRate": "سعر {date}: {from} الواحد بـ {rate}",
+  "@homeApproxSheetDailyRate": {
+    "description": "S",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotFirstForeign": "عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.",
+  "@homeMascotFirstForeign": {
+    "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
+  },
+  "homeApproxNoticeOff": "اقفلها",
+  "@homeApproxNoticeOff": {
+    "description": "C · turns the ≈ line off"
+  },
+  "homeApproxNoticeOk": "تمام",
+  "@homeApproxNoticeOk": {
+    "description": "C · dismisses the notice"
   },
   "homeMascotDismissA11y": "اقفل الرسالة",
   "@homeMascotDismissA11y": {
@@ -1812,6 +2092,49 @@
   "@transactionsRowInternalTitle": {
     "description": "L · ⇄ icon, muted"
   },
+  "transactionsExchangeTitle": "غيّرت {from} ← {to}",
+  "@transactionsExchangeTitle": {
+    "description": "T-281 list row and detail title; arrow points from what you gave to what you got (mirrors in LTR); amounts are LTR runs",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeRate": "سعر البنك {rate} · مش مصروف",
+  "@transactionsExchangeRate": {
+    "description": "T-281 second line of the exchange row",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeNotSpending": "مش مصروف",
+  "@transactionsExchangeNotSpending": {
+    "description": "T-281 second line when the two amounts give no rate"
+  },
+  "transactionsExchangeRowA11y": "تغيير عملة: دفعت {from} ووصلك {to}، {rate}، {time}",
+  "@transactionsExchangeRowA11y": {
+    "description": "T-281 screen-reader label of the exchange row",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "transactionsInstapayTitle": "إنستاباي",
   "@transactionsInstapayTitle": {
     "description": "L · title of an InstaPay row (US-P04)"
@@ -2010,6 +2333,10 @@
   "transactionsListBulkAccount": "الكارت",
   "@transactionsListBulkAccount": {
     "description": "C · the bar's other actions are common_action_delete and common_action_cancel (§0.10 reuse rule)"
+  },
+  "transactionsListBulkExchangeLocked": "تغيير العملة ملوش تصنيف ومينفعش يتنقل لكارت تاني لوحده. تقدر تمسحه عادي.",
+  "@transactionsListBulkExchangeLocked": {
+    "description": "C · T-286: note above the selection bar when an exchange row is selected; Category and Card are off, Delete still works"
   },
   "transactionsListBulkRule": "استخدم ده دايماً للتجار دول",
   "@transactionsListBulkRule": {
@@ -2277,6 +2604,60 @@
   "transactionsDetailGone": "الحركة دي مبقتش موجودة",
   "@transactionsDetailGone": {
     "description": "N · deleted elsewhere; goes back"
+  },
+  "transactionsExchangeBanner": "تغيير عملة، مش محسوب لا مصروف ولا دخل",
+  "@transactionsExchangeBanner": {
+    "description": "T-281 detail banner"
+  },
+  "transactionsExchangeFieldSent": "دفعت",
+  "@transactionsExchangeFieldSent": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeFieldReceived": "وصلني",
+  "@transactionsExchangeFieldReceived": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeFieldFrom": "من حساب",
+  "@transactionsExchangeFieldFrom": {
+    "description": "T-281 detail field: account of the money given"
+  },
+  "transactionsExchangeFieldTo": "لحساب",
+  "@transactionsExchangeFieldTo": {
+    "description": "T-281 detail field: account of the money got"
+  },
+  "transactionsExchangeFieldRate": "سعر البنك",
+  "@transactionsExchangeFieldRate": {
+    "description": "T-281 detail field"
+  },
+  "transactionsExchangeRateValue": "{one} {from} = {rate} {to}",
+  "@transactionsExchangeRateValue": {
+    "description": "T-281 detail rate value; one and rate are rendered in the user's digits",
+    "placeholders": {
+      "one": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionsExchangeDeleteTitle": "تمسح تغيير العملة ده؟",
+  "@transactionsExchangeDeleteTitle": {
+    "description": "T-281 delete dialog"
+  },
+  "transactionsExchangeDeleteBody": "الناحيتين هيتمسحوا مع بعض.",
+  "@transactionsExchangeDeleteBody": {
+    "description": "T-281 delete dialog body"
+  },
+  "transactionsExchangeDeleted": "اتمسح تغيير العملة",
+  "@transactionsExchangeDeleted": {
+    "description": "T-281 snackbar after delete; with Undo"
   },
   "categorizationRuleTitle": "أستخدم {category} دايماً لـ {merchant}؟",
   "@categorizationRuleTitle": {
@@ -2641,6 +3022,26 @@
   "ingestionReviewOldDueKept": "تمام، هيفضل زي ما هو",
   "@ingestionReviewOldDueKept": {
     "description": "T-250: snackbar after Keep"
+  },
+  "ingestionReviewExchangeJumpQuestion": "غيّرت عملة؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.",
+  "@ingestionReviewExchangeJumpQuestion": {
+    "description": "C · T-272: unexplained balance rise on an account while another currency had income lately. Opens the exchange entry prefilled.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewExchangeJumpYes": "أيوه، سجلها",
+  "@ingestionReviewExchangeJumpYes": {
+    "description": "C · T-272"
+  },
+  "ingestionReviewExchangeJumpNo": "لأ",
+  "@ingestionReviewExchangeJumpNo": {
+    "description": "C · T-272"
   },
   "ingestionReviewEmptyTitle": "كله تمام! مفيش حاجة مستنية رأيك ✨",
   "@ingestionReviewEmptyTitle": {
@@ -4177,6 +4578,39 @@
   "@mascotPaydayLine": {
     "description": "M · Rive payday · Home bubble when a salary lands (once per payday)"
   },
+  "mascotTipUseScan": "عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸",
+  "mascotTipUseShare": "شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل",
+  "mascotTipUseSay": "زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤",
+  "mascotTipUseLinkCard": "اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة",
+  "mascotTipUsePayday": "قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب",
+  "mascotTipUseStatement": "عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB)",
+  "mascotTipUseReview": "فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀",
+  "mascotTipUseSearchPerson": "بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه",
+  "mascotTipUseHide": "فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈",
+  "mascotTipUseBudget": "حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام",
+  "mascotTipUseSalary": "سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض",
+  "mascotTipUseAsk": "اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب",
+  "mascotTipUseDue": "كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم",
+  "mascotTipUseInsights": "عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊",
+  "mascotTipSmartAsk": "اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك",
+  "mascotTipSmartVoice": "بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤",
+  "mascotTipSmartSms": "لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك",
+  "mascotTipSmartCategory": "كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية",
+  "mascotTipSmartDue": "لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة",
+  "mascotTipSmartPayday": "لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉",
+  "mascotTipSmartDuplicate": "لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين",
+  "mascotTipSmartReceipt": "بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌",
+  "mascotTipSmartInstapay": "تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة",
+  "mascotTipSmartTransfer": "لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌",
+  "mascotTipHabitCoffee": "القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕",
+  "mascotTipHabitPigeon": "أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄",
+  "mascotTipHabitCheck": "دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر",
+  "mascotTipHabitSale": "الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉",
+  "mascotTipHabitSmall": "القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶",
+  "mascotTipHabitWait": "استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️",
+  "mascotTipHabitTreat": "مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄",
+  "mascotTipHabitSubs": "اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀",
+  "mascotTipShowMe": "وريني",
   "insightsTabsCharts": "الشارتات",
   "@insightsTabsCharts": {
     "description": "C · C-35 segment 1"
@@ -5958,6 +6392,18 @@
   "@homeQuickAddAssetHint": {
     "description": "S · quick add card subtitle"
   },
+  "homeQuickAddExchange": "غيّرت عملة",
+  "@homeQuickAddExchange": {
+    "description": "C · T-272: Add sheet row for a manual currency exchange (D-86)"
+  },
+  "homeQuickAddExchangeHint": "من عملة لعملة، زي دولار لجنيه",
+  "@homeQuickAddExchangeHint": {
+    "description": "C · T-272"
+  },
+  "homeQuickAddExchangeA11y": "سجّل تغيير عملة",
+  "@homeQuickAddExchangeA11y": {
+    "description": "A · T-272"
+  },
   "@homeQuickAddAsset": {
     "description": "L · with common_gold_badge; Free opens S-68"
   },
@@ -7356,6 +7802,17 @@
       "percent": {
         "type": "String"
       }
+    }
+  },
+  "chatAnswerExchange": "{span} غيّرت {given} وخدت {received}. سعر البنك: {unit} الواحد بـ {rate}.",
+  "@chatAnswerExchange": {
+    "description": "E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).",
+    "placeholders": {
+      "span": {"type": "String"},
+      "given": {"type": "String"},
+      "received": {"type": "String"},
+      "unit": {"type": "String"},
+      "rate": {"type": "String"}
     }
   },
   "chatAnswerSpendCard": "صرفت {amount} بكارت {card} {span}.",
@@ -12306,6 +12763,19 @@
       }
     }
   },
+  "insightsV2TrendsLegendExchangeIn": "غيّرت عملة: دخل",
+  "@insightsV2TrendsLegendExchangeIn": {"description": "T-283 legend"},
+  "insightsV2TrendsLegendExchangeOut": "غيّرت عملة: خرج",
+  "@insightsV2TrendsLegendExchangeOut": {"description": "T-283 legend"},
+  "insightsV2TrendsInOutExchangeA11y": "{month}، غيّرت عملة: دخل {inAmount}، خرج {outAmount}",
+  "@insightsV2TrendsInOutExchangeA11y": {
+    "description": "T-283",
+    "placeholders": {
+      "month": {"type": "String"},
+      "inAmount": {"type": "String"},
+      "outAmount": {"type": "String"}
+    }
+  },
   "insightsV2TrendsInOutBarA11y": "{month}: دخلك {income}، صرفت {spend}",
   "@insightsV2TrendsInOutBarA11y": {
     "description": "T-211 Charts v2 · one month",
@@ -12563,5 +13033,766 @@
   "accountsDetailDuePaid": "سددت المطلوب للكشف ده",
   "@accountsDetailDuePaid": {
     "description": "L"
+  },
+  "chatLlmInputHint": "اسألني بكلامك عن فلوسك…",
+  "@chatLlmInputHint": {
+    "description": "L · replaces chat_main_inputHint while ask_llm is on"
+  },
+  "chatLlmInputCounter": "{n} من {max}",
+  "@chatLlmInputCounter": {
+    "description": "C · shown from 250 typed characters; max = 300 (FR-LLM-17)",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatLlmInputStop": "وقّف",
+  "@chatLlmInputStop": {
+    "description": "B · replaces Send while a question is out (FR-LLM-52)"
+  },
+  "chatLlmInputStopA11y": "وقّف السؤال",
+  "@chatLlmInputStopA11y": {
+    "description": "A"
+  },
+  "chatQuotaRemaining": "{count, plural, =0{خلصت أسئلة الشهر} =1{فاضل سؤال واحد} =2{فاضل سؤالين} few{فاضل {n} أسئلة} many{فاضل {n} سؤال} other{فاضل {n} سؤال}}",
+  "@chatQuotaRemaining": {
+    "description": "L · count:int, n · beside the input, value from the last backend reply (FR-LLM-12); hidden when paused",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatQuotaRemainingA11y": "{count, plural, =0{خلصت الأسئلة الأونلاين الشهر ده} =1{فاضل سؤال أونلاين واحد الشهر ده} =2{فاضل سؤالين أونلاين الشهر ده} few{فاضل {n} أسئلة أونلاين الشهر ده} many{فاضل {n} سؤال أونلاين الشهر ده} other{فاضل {n} سؤال أونلاين الشهر ده}}",
+  "@chatQuotaRemainingA11y": {
+    "description": "A · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatQuotaUnknown": "—",
+  "@chatQuotaUnknown": {
+    "description": "C · before the first backend reply (FR-LLM-12)"
+  },
+  "chatQuotaUnknownA11y": "عدد الأسئلة هيظهر بعد أول سؤال أونلاين",
+  "@chatQuotaUnknownA11y": {
+    "description": "A"
+  },
+  "chatQuotaInfoTitle": "الأسئلة الأونلاين",
+  "@chatQuotaInfoTitle": {
+    "description": "T · sheet opened by tapping the counter"
+  },
+  "chatQuotaInfoBody": "الأسئلة اللي بجاوبها من موبايلك ببلاش ومن غير حد. الأسئلة اللي محتاجة المساعد الأونلاين ليها عدد في الشهر، وبيرجع أول كل شهر.",
+  "@chatQuotaInfoBody": {
+    "description": "E"
+  },
+  "chatQuotaLastOne": "ده آخر سؤال أونلاين الشهر ده",
+  "@chatQuotaLastOne": {
+    "description": "N · under the input when 1 is left"
+  },
+  "chatQuotaFreeOut": "خلّصت أسئلتك الأونلاين ببلاش الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك، والعداد بيرجع يوم {date}.",
+  "@chatQuotaFreeOut": {
+    "description": "E · Free at the limit (FR-LLM-13), Rive tourGuide still; followed by chat_quota_goldHint and chat_llmStatus_notQueued",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chatQuotaGoldHint": "{count, plural, =1{مع جولد بيبقى عندك سؤال واحد في الشهر.} =2{مع جولد بيبقى عندك سؤالين في الشهر.} few{مع جولد بيبقى عندك {n} أسئلة في الشهر.} many{مع جولد بيبقى عندك {n} سؤال في الشهر.} other{مع جولد بيبقى عندك {n} سؤال في الشهر.}}",
+  "@chatQuotaGoldHint": {
+    "description": "S · count:int = ask.quota_gold, n · Free only, plus chat_quota_seeGold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatQuotaSeeGold": "شوف جولد",
+  "@chatQuotaSeeGold": {
+    "description": "L · text button, opens S-68 (counts toward FR-GOLD-05 only when the paywall opens)"
+  },
+  "chatQuotaGoldOut": "خلّصت أسئلتك الأونلاين الشهر ده، وبترجع يوم {date}. لحد ساعتها بجاوبك على الأسئلة العادية من موبايلك.",
+  "@chatQuotaGoldOut": {
+    "description": "E · Gold at the limit; date = 1st of next month, locale format",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chatConsentTitle": "السؤال ده محتاج المساعد الأونلاين",
+  "@chatConsentTitle": {
+    "description": "T"
+  },
+  "chatConsentIntro": "مقدرش أجاوبه من موبايلك لوحدي. لو وافقت، هبعت نص سؤالك لسيرفر زغلول ولـ {aiProvider} علشان يفهموه، والحساب كله بيحصل على موبايلك.",
+  "@chatConsentIntro": {
+    "description": "E · never says \"no server\" (tone gate 4)",
+    "placeholders": {
+      "aiProvider": {
+        "type": "String"
+      }
+    }
+  },
+  "chatConsentPreviewTitle": "ده اللي هيتبعت بالظبط",
+  "@chatConsentPreviewTitle": {
+    "description": "L · above the masked preview (same rendering as §4.4)"
+  },
+  "chatConsentSendsTitle": "بيتبعت",
+  "@chatConsentSendsTitle": {
+    "description": "L"
+  },
+  "chatConsentSends": "سؤالك بيتبعت من غير أسماء حساباتك وكروتك وبنوكك، ومن غير أسماء الأماكن اللي بتشتري منها واللي زغلول عارفها. أي حاجة تانية تكتبها، زي مبلغ، بتتبعت زي ما هي.",
+  "@chatConsentSends": {
+    "description": "E · FR-LLM-09 wording"
+  },
+  "chatConsentNeverTitle": "عمره ما بيتبعت",
+  "@chatConsentNeverTitle": {
+    "description": "L"
+  },
+  "chatConsentNever": "حركاتك وأرصدتك وميزانياتك ورسايل البنوك. ولا حاجة فيهم بتسيب موبايلك.",
+  "@chatConsentNever": {
+    "description": "S"
+  },
+  "chatConsentStorage": "سيرفر زغلول مبيحفظش سؤالك، و{aiProvider} مبيتعلمش منه. التفاصيل في سياسة الخصوصية.",
+  "@chatConsentStorage": {
+    "description": "S · FR-LLM-32/33; wording to legal with the policy section",
+    "placeholders": {
+      "aiProvider": {
+        "type": "String"
+      }
+    }
+  },
+  "chatConsentQuota": "{count, plural, =1{عندك سؤال أونلاين واحد في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} =2{عندك سؤالين أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} few{عندك {n} أسئلة أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} many{عندك {n} سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} other{عندك {n} سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.}}",
+  "@chatConsentQuota": {
+    "description": "S · count:int = the tier quota (5 Free, 50 Gold), n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatConsentAllow": "تمام، ابعت",
+  "@chatConsentAllow": {
+    "description": "B · stores ask.llm_consent, then sends"
+  },
+  "chatConsentSettingsHint": "تقدر تقفلها في أي وقت من «خصوصيتك».",
+  "@chatConsentSettingsHint": {
+    "description": "S"
+  },
+  "chatConsentDeclined": "ولا يهمك، سؤالك ماتبعتش. جرّب واحد من دول:",
+  "@chatConsentDeclined": {
+    "description": "M · Rive tourGuide; three chips follow (FR-CHAT-05)"
+  },
+  "chatLlmStatusSending": "ببعت سؤالك من غير بياناتك…",
+  "@chatLlmStatusSending": {
+    "description": "L · Rive thinking (D-35), from 300 ms"
+  },
+  "chatLlmStatusComputing": "بحسبها على موبايلك…",
+  "@chatLlmStatusComputing": {
+    "description": "L · after the plan arrives, while the phone computes"
+  },
+  "chatLlmStatusThinkingA11y": "زغلول بيفكر. سؤالك بس اللي اتبعت",
+  "@chatLlmStatusThinkingA11y": {
+    "description": "A · live region"
+  },
+  "chatLlmStatusStopped": "وقّفت السؤال.",
+  "@chatLlmStatusStopped": {
+    "description": "N"
+  },
+  "chatLlmStatusNotQueued": "سؤالك ماتبعتش، ومش هيتبعت بعدين.",
+  "@chatLlmStatusNotQueued": {
+    "description": "S · caption under offline and at-limit bubbles (FR-LLM-13/50)"
+  },
+  "chatLlmStatusOffline": "السؤال ده محتاج نت. ابعته تاني لما النت يرجع، ولحد ساعتها جرّب دول:",
+  "@chatLlmStatusOffline": {
+    "description": "M · Rive oops still; three chips (FR-LLM-50)"
+  },
+  "chatLlmStatusTimeout": "المساعد الأونلاين اتأخر في الرد، ومتحسبش من أسئلتك.",
+  "@chatLlmStatusTimeout": {
+    "description": "S · 12 s or 5xx, plus common_action_tryAgain once (FR-LLM-51)"
+  },
+  "chatLlmStatusError": "حصلت مشكلة وأنا بفهم سؤالك، ومتحسبش من أسئلتك.",
+  "@chatLlmStatusError": {
+    "description": "S · plus common_action_tryAgain"
+  },
+  "chatLlmStatusSlowDown": "أسئلة كتير ورا بعض. استنى دقيقة وجرّب تاني.",
+  "@chatLlmStatusSlowDown": {
+    "description": "S · HTTP 429, not counted (FR-LLM-15)"
+  },
+  "chatLlmStatusIntegrity": "مقدرتش أتأكد إن نسخة زغلول دي سليمة. حدّثها من المتجر أو جرّب تاني.",
+  "@chatLlmStatusIntegrity": {
+    "description": "S · attestation failed, not counted (FR-LLM-14)"
+  },
+  "chatLlmStatusPaused": "المساعد الأونلاين واخد راحة الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك.",
+  "@chatLlmStatusPaused": {
+    "description": "M · Rive sleep; service_paused, counter hidden (FR-LLM-16/61)"
+  },
+  "chatSentBadge": "أونلاين",
+  "@chatSentBadge": {
+    "description": "C · small label on every answer that used the LLM"
+  },
+  "chatSentBadgeA11y": "الإجابة دي اتفهمت بالمساعد الأونلاين",
+  "@chatSentBadgeA11y": {
+    "description": "A"
+  },
+  "chatSentToggle": "اللي بعته",
+  "@chatSentToggle": {
+    "description": "L · disclosure row, collapsed by default (D-92)"
+  },
+  "chatSentTitle": "ده سؤالك زي ما خرج من موبايلك:",
+  "@chatSentTitle": {
+    "description": "S"
+  },
+  "chatSentChip": "{state, select, account{حساب {n}} card{كارت {n}} bank{بنك {n}} merchant{مكان {n}} other{اسم {n}}}",
+  "@chatSentChip": {
+    "description": "C · state:select(account/card/bank/merchant/other); n = placeholder number, digits per locale",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentChipA11y": "{state, select, account{حساب رقم {n}، اسمه فضل على موبايلك} card{كارت رقم {n}، رقمه فضل على موبايلك} bank{بنك رقم {n}، اسمه فضل على موبايلك} merchant{مكان رقم {n}، اسمه فضل على موبايلك} other{اسم رقم {n}، فضل على موبايلك}}",
+  "@chatSentChipA11y": {
+    "description": "A",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentHidden": "{state, select, phone{رقم موبايل} email{إيميل} instapay{عنوان إنستاباي} number{رقم طويل} other{متشال}}",
+  "@chatSentHidden": {
+    "description": "C · FR-LLM-03 scrub chips · state:select(phone/email/instapay/number/other)",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentChipsNote": "المربعات دي مكان الأسامي. معناها فضل على موبايلك ومتبعتش.",
+  "@chatSentChipsNote": {
+    "description": "S"
+  },
+  "chatSentAlsoSent": "ومعاه بس: لغة التطبيق وإصداره، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. {aiProvider} بيوصله السؤال واللغة بس.",
+  "@chatSentAlsoSent": {
+    "description": "E · FR-LLM-02/34",
+    "placeholders": {
+      "aiProvider": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentTextA11y": "اللي اتبعت: {text}",
+  "@chatSentTextA11y": {
+    "description": "A · text = the sent question with chips read via chat_sent_chipA11y",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentLocal": "اتجاوب على موبايلك",
+  "@chatSentLocal": {
+    "description": "L · optional caption on local answers (open question UX-ASK-03)"
+  },
+  "chatClarifyNoCard": "مش لاقي كارت آخره {last4}. تقصد أنهي كارت؟",
+  "@chatClarifyNoCard": {
+    "description": "M · Rive detective still",
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifySameLast4": "عندك أكتر من كارت آخره {last4}. تقصد أنهي واحد؟",
+  "@chatClarifySameLast4": {
+    "description": "M",
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifyNoBankAccount": "مش لاقي حساب ليك في {bank}. تقصد أنهي حساب؟",
+  "@chatClarifyNoBankAccount": {
+    "description": "M · registry bank, no account",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifyUnknownBank": "مش عارف بنك اسمه {bank}. تقصد أنهي حساب؟",
+  "@chatClarifyUnknownBank": {
+    "description": "M · bank = the user's typed word",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifyNoAccount": "مش لاقي الحساب ده. تقصد أنهي واحد؟",
+  "@chatClarifyNoAccount": {
+    "description": "M"
+  },
+  "chatClarifyNotSent": "سؤالك ماتبعتش ومتحسبش من أسئلتك.",
+  "@chatClarifyNotSent": {
+    "description": "S · caption under every clarification"
+  },
+  "chatClarifyNotFound": "ملقتش «{query}» في حركاتك. تقصد واحد من دول؟",
+  "@chatClarifyNotFound": {
+    "description": "M · FR-LLM-07 mention with no match (after a reply, so counted)",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerAverage": "متوسط صرفك على {subject} {span}: {average} {state, select, day{في اليوم} week{في الأسبوع} other{في الشهر}}.",
+  "@chatLlmAnswerAverage": {
+    "description": "E · PL-AVERAGE · state:select(day/week/other)",
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerFullUnits": "{state, select, day{حسبت الأيام الكاملة بس، من غير النهارده.} week{حسبت الأسابيع الكاملة بس، من غير الأسبوع ده.} other{حسبت الشهور الكاملة بس، من غير الشهر ده.}}",
+  "@chatLlmAnswerFullUnits": {
+    "description": "S · state:select(day/week/other)",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerIncome": "دخلك {span}: {income}.",
+  "@chatLlmAnswerIncome": {
+    "description": "E · PL-INCOME",
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerBreakdown": "فلوسك راحت فين {span}: {list}.",
+  "@chatLlmAnswerBreakdown": {
+    "description": "E · PL-BREAKDOWN; list = top N plus chat_llmAnswer_otherBucket",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerTopCategories": "أكتر التصنيفات صرفًا {span}: {list}.",
+  "@chatLlmAnswerTopCategories": {
+    "description": "E · PL-TOPN of category",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerOtherBucket": "حاجات تانية",
+  "@chatLlmAnswerOtherBucket": {
+    "description": "C"
+  },
+  "chatLlmAnswerChangePct": "يعني فرق {percent}.",
+  "@chatLlmAnswerChangePct": {
+    "description": "S · after chat_answer_compare (PL-COMPARE)",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerSafeSpend": "تقدر تصرف {perDay} في اليوم لحد القبض.",
+  "@chatLlmAnswerSafeSpend": {
+    "description": "E · PL-SAFE-SPEND",
+    "placeholders": {
+      "perDay": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerSafeSpendNone": "لسه مفيش ميزانية، فمقدرش أحسب تصرف كام في اليوم. حط ميزانية وأنا أحسبهالك.",
+  "@chatLlmAnswerSafeSpendNone": {
+    "description": "E · EC-24, plus budget_overview_emptyAction"
+  },
+  "chatUnitMonths": "{count, plural, =1{شهر} =2{شهرين} few{{n} شهور} many{{n} شهر} other{{n} شهر}}",
+  "@chatUnitMonths": {
+    "description": "C · count:int, n · 1–60, inserted as {months}",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatWhatIfCutPercent": "لو قللت {subject} {percent}، هتوفر حوالي {monthly} في الشهر، يعني {amount} في {months}.",
+  "@chatWhatIfCutPercent": {
+    "description": "E · PL-WHATIF-CUT percent",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWhatIfCutAmount": "لو قللت {subject} بـ {monthly} في الشهر، هتوفر {amount} في {months}.",
+  "@chatWhatIfCutAmount": {
+    "description": "E · PL-WHATIF-CUT amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWhatIfCapped": "متوسط صرفك على {subject} {average} بس، فده أقصى توفير في الشهر.",
+  "@chatWhatIfCapped": {
+    "description": "S · amount > B",
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWhatIfSave": "لو حوشت {monthly} كل شهر، هيبقى معاك {amount} بعد {months}، من غير أي عائد.",
+  "@chatWhatIfSave": {
+    "description": "E · PL-WHATIF-SAVE",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "chatWhatIfBasis": "{count, plural, =1{على أساس آخر شهر كامل} =2{على أساس متوسط آخر شهرين كاملين} few{على أساس متوسط آخر {n} شهور كاملة} many{على أساس متوسط آخر {n} شهر كامل} other{على أساس متوسط آخر {n} شهر كامل}}",
+  "@chatWhatIfBasis": {
+    "description": "S · count:int, n · 1–3 full periods; caption under what-if and suggestions",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatWhatIfNotEnough": "لسه مفيش شهر كامل أحسب عليه. استناني لآخر الشهر وأنا أحسبهالك.",
+  "@chatWhatIfNotEnough": {
+    "description": "M · Rive sleep, EC-23, no figure"
+  },
+  "chatSuggestIntro": "دي أكتر حاجات ممكن توفر منها الشهر الجاي:",
+  "@chatSuggestIntro": {
+    "description": "M · Rive tourGuide; top 3 rows follow, then chat_whatIf_basis"
+  },
+  "chatSuggestAboveAverage": "{category} الشهر اللي فات {amount}، يعني {gap} فوق متوسطك. لو رجعته للمتوسط هتوفر {gap}.",
+  "@chatSuggestAboveAverage": {
+    "description": "E · S1",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestSubscription": "اشتراك {item} بـ {monthly} في الشهر. لو مش بتستخدمه، وقفه ووفر {monthly}.",
+  "@chatSuggestSubscription": {
+    "description": "E · S2; the user cancels, Zaghlol never does",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestCreep": "{category} بيزيد كل شهر، من {startAmount} لـ {endAmount}. لو رجعته لأوله هتوفر {gap}.",
+  "@chatSuggestCreep": {
+    "description": "E · S3",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      },
+      "gap": {
+        "type": "String"
+      },
+      "startAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestCash": "{amount} كاش سحبته ومش متسجل راح فين. لو سجلته، ممكن توفر حوالي {target}.",
+  "@chatSuggestCash": {
+    "description": "E · S4, plus chat_suggest_cashTip",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestCashTip": "سجّل الكاش وإنت بتصرفه، حتى بصوتك.",
+  "@chatSuggestCashTip": {
+    "description": "S"
+  },
+  "chatSuggestSaveLabel": "توفير متوقع: {monthly} في الشهر",
+  "@chatSuggestSaveLabel": {
+    "description": "L · trailing line of each row",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestNone": "مش لاقي حاجة واضحة توفر منها. صرفك ماشي على متوسطه، كمّل كده!",
+  "@chatSuggestNone": {
+    "description": "M · Rive proud"
+  },
+  "chatSuggestFooter": "دي اقتراحات بس، ومفيش حاجة اتغيرت.",
+  "@chatSuggestFooter": {
+    "description": "S · OOS-04"
+  },
+  "chatInvestLead": "{state, select, saved{الشهر اللي فات فضل معاك {amount}.} whatIf{لو كنت وفرت {amount}:} other{لو معاك {amount}:}}",
+  "@chatInvestLead": {
+    "description": "E · state:select(saved/whatIf/other) = source",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestGold": "كان ممكن يجيب حوالي {grams} دهب عيار {karat}، بسعر {price} للجرام يوم {date}.",
+  "@chatInvestGold": {
+    "description": "E · S ≥ G; stale adds common_badge_stale",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "grams": {
+        "type": "String"
+      },
+      "karat": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestUsd": "كان ممكن يساوي ≈ {amount2}، بسعر {rate} للدولار يوم {date}.",
+  "@chatInvestUsd": {
+    "description": "E · EGP source only, plus common_currency_approxCaption",
+    "placeholders": {
+      "amount2": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestCertificate": "في شهادة بعائد مثال {exampleRate} لمدة {months}، كان ممكن يطلع عائد حوالي {payout}، قبل الضرايب والمصاريف. ده معدل للتوضيح، مش عرض.",
+  "@chatInvestCertificate": {
+    "description": "E · EGP only; rate from ask.cd_example_rate_bp",
+    "placeholders": {
+      "exampleRate": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "payout": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestStocks": "مبلغ زي ده ممكن يبقى بداية صغيرة في الأسهم عمومًا. اتعلم الأول، واتعامل مع جهة مرخصة.",
+  "@chatInvestStocks": {
+    "description": "E · D-93 band 100 < S < G; nothing named"
+  },
+  "chatInvestSmall": "كل جنيه بيفرق، كمّل كده والشهر الجاي هيبقى أحسن.",
+  "@chatInvestSmall": {
+    "description": "M · Rive proud; band 0 < S ≤ 100, plus chat_invest_suggestChip; no disclaimer needed (no instrument)"
+  },
+  "chatInvestNothingSaved": "الشهر اللي فات مفضلش حاجة. تعالى نشوف نوفر منين الشهر الجاي.",
+  "@chatInvestNothingSaved": {
+    "description": "M · S ≤ 0, plus chat_invest_suggestChip; no emoji"
+  },
+  "chatInvestNoPrice": "{currency} مش داخل هنا، علشان مفيش سعر ليه.",
+  "@chatInvestNoPrice": {
+    "description": "S · never converted",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestGramsHiddenA11y": "الوزن مخفي",
+  "@chatInvestGramsHiddenA11y": {
+    "description": "A · hide-amounts on (FR-LLM-54)"
+  },
+  "chatInvestSuggestChip": "أوفر منين؟",
+  "@chatInvestSuggestChip": {
+    "description": "C · runs PL-SUGGEST on the phone directly: no request, no quota"
+  },
+  "chatInvestChip": "لو كنت حوشت؟",
+  "@chatInvestChip": {
+    "description": "C · after chat_refuse_specificPick; runs PL-INVEST{savedLastPeriod} on the phone directly: no request, no quota"
+  },
+  "chatInvestDisclaimerSummary": "ده توضيح بس، مش نصيحة استثمار.",
+  "@chatInvestDisclaimerSummary": {
+    "description": "S · Egyptian summary, above the disclaimer"
+  },
+  "chatInvestDisclaimer": "هذه الأرقام للتوضيح فقط وليست نصيحة استثمارية. الأسعار والعوائد تتغير، والقيم السابقة لا تدل على القيم المستقبلية. القرار النهائي لك.",
+  "@chatInvestDisclaimer": {
+    "description": "E · **simple standard Arabic** (BR-LLM-03). Legal sign-off: OQ-ASK-01"
+  },
+  "chatRefuseOffTopic": "أنا شاطر في الفلوس بس 😄 اسألني عن صرفك أو تحويشك:",
+  "@chatRefuseOffTopic": {
+    "description": "M · Rive tourGuide; three chips"
+  },
+  "chatRefuseUnsafe": "ده مش حاجة أقدر أساعد فيها. لو عندك سؤال عن فلوسك، أنا موجود.",
+  "@chatRefuseUnsafe": {
+    "description": "M · calm, still pose, no emoji"
+  },
+  "chatRefuseSupport": "لو الدنيا تقيلة عليك، كلم حد بتثق فيه. إنت مش لوحدك.",
+  "@chatRefuseSupport": {
+    "description": "S · self-harm cues only; no number until legal supplies one (OQ-ASK-08)"
+  },
+  "chatRefuseSpecificPick": "مقدرش أرشحلك سهم أو صندوق بعينه. أقدر أوريك فلوسك كانت ممكن تساوي كام، كتوضيح بس.",
+  "@chatRefuseSpecificPick": {
+    "description": "M · plus chat_invest_chip (hidden when ask_llm_invest is off)"
+  },
+  "privacyAskLlmLabel": "اسأل المساعد الأونلاين",
+  "@privacyAskLlmLabel": {
+    "description": "L · switch (FR-LLM-31); on = consent stored"
+  },
+  "privacyAskLlmSentence": "بيبعت نص سؤالك بس، من غير أسماء حساباتك وكروتك وبنوكك. حركاتك وأرصدتك عمرها ما بتسيب موبايلك.",
+  "@privacyAskLlmSentence": {
+    "description": "S"
+  },
+  "privacyAskLlmQuota": "{count, plural, =0{خلصت أسئلة الشهر، وبترجع يوم {date}.} =1{فاضل سؤال واحد الشهر ده، والعداد بيرجع يوم {date}.} =2{فاضل سؤالين الشهر ده، والعداد بيرجع يوم {date}.} few{فاضل {n} أسئلة الشهر ده، والعداد بيرجع يوم {date}.} many{فاضل {n} سؤال الشهر ده، والعداد بيرجع يوم {date}.} other{فاضل {n} سؤال الشهر ده، والعداد بيرجع يوم {date}.}}",
+  "@privacyAskLlmQuota": {
+    "description": "S · count:int, n, date · under the switch while on",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "privacyAskLlmQuotaUnknown": "عدد الأسئلة هيظهر بعد أول سؤال أونلاين.",
+  "@privacyAskLlmQuotaUnknown": {
+    "description": "S"
+  },
+  "privacyAskLlmDetails": "إيه اللي بيتبعت؟",
+  "@privacyAskLlmDetails": {
+    "description": "L · text button, opens the consent sheet read-only"
+  },
+  "privacyAskLlmTurnedOff": "اتقفل. مش هبعت أي سؤال غير لما توافق تاني.",
+  "@privacyAskLlmTurnedOff": {
+    "description": "N"
+  },
+  "privacyServerItemAskLlm": "نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر",
+  "@privacyServerItemAskLlm": {
+    "description": "S · BR-SYNC-03 amendment (D-90); added to the §3.10 list while ask_llm is on"
   }
 }

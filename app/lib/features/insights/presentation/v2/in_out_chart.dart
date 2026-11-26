@@ -73,7 +73,13 @@ class _InOutPainter extends CustomPainter {
     var hi = 1;
     for (final b in bars) {
       if (!b.hasData) continue;
-      hi = math.max(hi, math.max(b.incomeMinor, b.spendMinor));
+      hi = math.max(
+        hi,
+        math.max(
+          math.max(b.incomeMinor, b.spendMinor),
+          math.max(b.exchangedInMinor, b.exchangedOutMinor),
+        ),
+      );
     }
     // Headroom so the tallest value does not touch the top.
     hi = hi + hi ~/ 8;
@@ -151,6 +157,35 @@ class _InOutPainter extends CustomPainter {
         canvas.restore();
       } else {
         canvas.drawRRect(rect, Paint()..color = ink.withValues(alpha: .88));
+      }
+      // T-283: exchanged in / out, thin bars beside spending (never stacked).
+      final ew = math.max(
+        1.0,
+        math.min(7.0, math.min(slot * .12, (slot / 2 - bw / 2 - 3.5) / 2)),
+      );
+      final dirSign = rtl ? -1.0 : 1.0;
+      var ex = cx + dirSign * (bw / 2 + 2);
+      for (final e in [
+        (b.exchangedInMinor, ZChartColors.exchangeIn),
+        (b.exchangedOutMinor, ZChartColors.exchangeOut),
+      ]) {
+        if (e.$1 <= 0) continue;
+        final x2 = ex + dirSign * ew;
+        final ey = y(e.$1);
+        canvas.drawRRect(
+          RRect.fromRectAndCorners(
+            Rect.fromLTRB(
+              math.min(ex, x2),
+              ey,
+              math.max(ex, x2),
+              math.max(bottom, ey + 2),
+            ),
+            topLeft: const Radius.circular(3),
+            topRight: const Radius.circular(3),
+          ),
+          Paint()..color = e.$2,
+        );
+        ex = x2 + dirSign * 1.5;
       }
       dots.add(Offset(cx, y(b.incomeMinor)));
     }

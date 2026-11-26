@@ -1998,6 +1998,155 @@ abstract class AppLocalizations {
   /// **'فاضلك'**
   String get homeHeroKpiLeft;
 
+  /// C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.
+  ///
+  /// In ar, this message translates to:
+  /// **'منهم {amount} من تغيير عملة'**
+  String homeHeroKpiIncomeFromExchange(String amount);
+
+  /// C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.
+  ///
+  /// In ar, this message translates to:
+  /// **'وغيّرت {amount}'**
+  String homeHeroKpiExchangedOut(String amount);
+
+  /// S · T-279: title of the per-currency view (D-86). {currency} is the ISO code.
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر ده بالـ{currency}'**
+  String currencyViewTitle(String currency);
+
+  /// S · T-279: per-currency view with no activity, or an unknown currency code.
+  ///
+  /// In ar, this message translates to:
+  /// **'مفيش حاجة بالعملة دي الشهر ده'**
+  String get currencyViewEmptyTitle;
+
+  /// S · T-279: hint under the empty title.
+  ///
+  /// In ar, this message translates to:
+  /// **'أول ما تدخل أو تصرف بيها هتلاقيها هنا.'**
+  String get currencyViewEmptyBody;
+
+  /// S · T-279 (budget.offer.foreign): offered once per currency per month; never creates a budget by itself.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعمل ميزانية بالـ{currency}؟'**
+  String currencyViewBudgetOffer(String currency);
+
+  /// C · T-278 (D-86): title of the row of small currency cards under the Home hero. Max 24.
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوسك بعملات تانية'**
+  String get homeCurrencyCardsTitle;
+
+  /// C · T-278: what is left in that currency this month, on a currency card. Max 18.
+  ///
+  /// In ar, this message translates to:
+  /// **'فاضل {amount}'**
+  String homeCurrencyCardLeft(String amount);
+
+  /// C · T-278: second line of a currency card: this month's money in and out (spending plus exchanged away), same currency.
+  ///
+  /// In ar, this message translates to:
+  /// **'دخل {income} · خرج {out}'**
+  String homeCurrencyCardInOut(String income, String out);
+
+  /// C · T-278: chip after the third currency card; opens a sheet with the rest. Max 4.
+  ///
+  /// In ar, this message translates to:
+  /// **'+{count}'**
+  String homeCurrencyCardMore(String count);
+
+  /// C · T-278: screen-reader label of the +N chip.
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{عملة كمان} =2{عملتين كمان} few{{n} عملات كمان} other{{n} عملة كمان}}'**
+  String homeCurrencyCardMoreA11y(int count, String n);
+
+  /// C · T-278: screen-reader label of one currency card.
+  ///
+  /// In ar, this message translates to:
+  /// **'{currency}: فاضل {left}. دخل {income}، وخرج {out}. اضغط تفتح الشهر بالعملة دي'**
+  String homeCurrencyCardA11y(
+    String currency,
+    String left,
+    String income,
+    String out,
+  );
+
+  /// C · T-272 manual exchange screen title
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير عملة'**
+  String get exchangeEntryTitle;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير العملة مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.'**
+  String get exchangeEntryIntro;
+
+  /// C · T-272 the amount given
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعت'**
+  String get exchangeEntrySent;
+
+  /// C · T-272 the amount received
+  ///
+  /// In ar, this message translates to:
+  /// **'وصلني'**
+  String get exchangeEntryReceived;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'الحساب'**
+  String get exchangeEntryAccount;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'العملة'**
+  String get exchangeEntryCurrency;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'التاريخ'**
+  String get exchangeEntryDate;
+
+  /// C · T-272 the rate from the two amounts
+  ///
+  /// In ar, this message translates to:
+  /// **'السعر: ١ {from} = {rate} {to}'**
+  String exchangeEntryRate(String from, String rate, String to);
+
+  /// C · T-272 validation
+  ///
+  /// In ar, this message translates to:
+  /// **'اختار عملتين مختلفتين'**
+  String get exchangeEntrySameCurrency;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ التغيير'**
+  String get exchangeEntrySave;
+
+  /// C · T-272 snackbar
+  ///
+  /// In ar, this message translates to:
+  /// **'اتسجل التغيير'**
+  String get exchangeEntrySaved;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'معرفناش نحفظ التغيير. جرب تاني.'**
+  String get exchangeEntryFailed;
+
   /// L · last pager page, only when the ≈ view is on (FR-CUR-04)
   ///
   /// In ar, this message translates to:
@@ -2097,6 +2246,102 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'المرتب نزل! {amount} 🎉 يلا نخطط له من أوله'**
   String homeMascotPayday(String amount);
+
+  /// L · T-280, home.approx.line
+  ///
+  /// In ar, this message translates to:
+  /// **'≈ {amount} دخلك كله تقريباً'**
+  String homeApproxLine(String amount);
+
+  /// A · read before the amount; tap opens the sheet
+  ///
+  /// In ar, this message translates to:
+  /// **'تقريبي: {amount} دخلك كله، بكل العملات'**
+  String homeApproxLineA11y(String amount);
+
+  /// S · bank rate for the exchanged part, daily rate for the rest
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك + سعر {date}'**
+  String homeApproxRateNoteBoth(String date);
+
+  /// S · only the daily rate was used
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر {date}'**
+  String homeApproxRateNoteDaily(String date);
+
+  /// S · everything foreign was already exchanged
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك'**
+  String get homeApproxRateNoteBank;
+
+  /// S · a daily rate older than 24 h
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر قديم'**
+  String get homeApproxStale;
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'الحسبة دي تقريبية'**
+  String get homeApproxSheetTitle;
+
+  /// B
+  ///
+  /// In ar, this message translates to:
+  /// **'بنحسبها بسعر البنك للي غيّرته، وبسعر النهارده للباقي. فلوسك متسجلة بعملتها زي ما هي.'**
+  String get homeApproxSheetBody;
+
+  /// L · the target currency's own money in
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي دخلك بالعملة دي (بما فيه اللي غيّرته)'**
+  String get homeApproxSheetOwn;
+
+  /// L · the part of a foreign currency not exchanged
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} لسه معاك'**
+  String homeApproxSheetHeld(String amount);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} غيّرتها، واتحسبت مرة واحدة بالفعل'**
+  String homeApproxSheetExchanged(String amount);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} غيّرتها بسعر البنك {rate}، واتحسبت مرة واحدة بالفعل'**
+  String homeApproxSheetExchangedBank(String amount, String rate);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر {date}: {from} الواحد بـ {rate}'**
+  String homeApproxSheetDailyRate(String date, String from, String rate);
+
+  /// M · Captain, Proud coach; mascot.fx.firstForeign
+  ///
+  /// In ar, this message translates to:
+  /// **'عندك فلوس بعملة تانية! سايبهالك في كارت لوحدها، ولما تغيّرها هزوّد شهر الجنيه باللي وصلك بالظبط.'**
+  String get homeMascotFirstForeign;
+
+  /// C · turns the ≈ line off
+  ///
+  /// In ar, this message translates to:
+  /// **'اقفلها'**
+  String get homeApproxNoticeOff;
+
+  /// C · dismisses the notice
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام'**
+  String get homeApproxNoticeOk;
 
   /// A · × on C-14
   ///
@@ -2283,6 +2528,35 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تحويلة لنفسك'**
   String get transactionsRowInternalTitle;
+
+  /// T-281 list row and detail title; arrow points from what you gave to what you got (mirrors in LTR); amounts are LTR runs
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت {from} ← {to}'**
+  String transactionsExchangeTitle(String from, String to);
+
+  /// T-281 second line of the exchange row
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك {rate} · مش مصروف'**
+  String transactionsExchangeRate(String rate);
+
+  /// T-281 second line when the two amounts give no rate
+  ///
+  /// In ar, this message translates to:
+  /// **'مش مصروف'**
+  String get transactionsExchangeNotSpending;
+
+  /// T-281 screen-reader label of the exchange row
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير عملة: دفعت {from} ووصلك {to}، {rate}، {time}'**
+  String transactionsExchangeRowA11y(
+    String from,
+    String to,
+    String rate,
+    String time,
+  );
 
   /// L · title of an InstaPay row (US-P04)
   ///
@@ -2481,6 +2755,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الكارت'**
   String get transactionsListBulkAccount;
+
+  /// C · T-286: note above the selection bar when an exchange row is selected; Category and Card are off, Delete still works
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير العملة ملوش تصنيف ومينفعش يتنقل لكارت تاني لوحده. تقدر تمسحه عادي.'**
+  String get transactionsListBulkExchangeLocked;
 
   /// S · switch after a category change; creates rules (FR-CAT)
   ///
@@ -2733,6 +3013,71 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الحركة دي مبقتش موجودة'**
   String get transactionsDetailGone;
+
+  /// T-281 detail banner
+  ///
+  /// In ar, this message translates to:
+  /// **'تغيير عملة، مش محسوب لا مصروف ولا دخل'**
+  String get transactionsExchangeBanner;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'دفعت'**
+  String get transactionsExchangeFieldSent;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'وصلني'**
+  String get transactionsExchangeFieldReceived;
+
+  /// T-281 detail field: account of the money given
+  ///
+  /// In ar, this message translates to:
+  /// **'من حساب'**
+  String get transactionsExchangeFieldFrom;
+
+  /// T-281 detail field: account of the money got
+  ///
+  /// In ar, this message translates to:
+  /// **'لحساب'**
+  String get transactionsExchangeFieldTo;
+
+  /// T-281 detail field
+  ///
+  /// In ar, this message translates to:
+  /// **'سعر البنك'**
+  String get transactionsExchangeFieldRate;
+
+  /// T-281 detail rate value; one and rate are rendered in the user's digits
+  ///
+  /// In ar, this message translates to:
+  /// **'{one} {from} = {rate} {to}'**
+  String transactionsExchangeRateValue(
+    String one,
+    String from,
+    String rate,
+    String to,
+  );
+
+  /// T-281 delete dialog
+  ///
+  /// In ar, this message translates to:
+  /// **'تمسح تغيير العملة ده؟'**
+  String get transactionsExchangeDeleteTitle;
+
+  /// T-281 delete dialog body
+  ///
+  /// In ar, this message translates to:
+  /// **'الناحيتين هيتمسحوا مع بعض.'**
+  String get transactionsExchangeDeleteBody;
+
+  /// T-281 snackbar after delete; with Undo
+  ///
+  /// In ar, this message translates to:
+  /// **'اتمسح تغيير العملة'**
+  String get transactionsExchangeDeleted;
 
   /// T · FR-CAT-05 sheet, owned by the categorization module (F-19)
   ///
@@ -3111,6 +3456,24 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تمام، هيفضل زي ما هو'**
   String get ingestionReviewOldDueKept;
+
+  /// C · T-272: unexplained balance rise on an account while another currency had income lately. Opens the exchange entry prefilled.
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت عملة؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.'**
+  String ingestionReviewExchangeJumpQuestion(String currency, String amount);
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'أيوه، سجلها'**
+  String get ingestionReviewExchangeJumpYes;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'لأ'**
+  String get ingestionReviewExchangeJumpNo;
 
   /// T · C-28, Rive proud
   ///
@@ -4803,6 +5166,204 @@ abstract class AppLocalizations {
   /// **'القبض نزل يا كبير! 🎉'**
   String get mascotPaydayLine;
 
+  /// No description provided for @mascotTipUseScan.
+  ///
+  /// In ar, this message translates to:
+  /// **'عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أقرا المبلغ والمحل 📸'**
+  String get mascotTipUseScan;
+
+  /// No description provided for @mascotTipUseShare.
+  ///
+  /// In ar, this message translates to:
+  /// **'شفت إيصال أو سكرين شوت؟ شاركه لزغلول من قايمة المشاركة وأنا أكمّل'**
+  String get mascotTipUseShare;
+
+  /// No description provided for @mascotTipUseSay.
+  ///
+  /// In ar, this message translates to:
+  /// **'زهقت من الكتابة؟ دوس إضافة واختار «قول» واحكيلي صرفت إيه 🎤'**
+  String get mascotTipUseSay;
+
+  /// No description provided for @mascotTipUseLinkCard.
+  ///
+  /// In ar, this message translates to:
+  /// **'اربط كارت الخصم بحسابه، ومشترياتك بالكارت تتخصم من رصيد الحساب مرة واحدة'**
+  String get mascotTipUseLinkCard;
+
+  /// No description provided for @mascotTipUsePayday.
+  ///
+  /// In ar, this message translates to:
+  /// **'قبضك مش أول الشهر؟ حدد يوم القبض وأنا أظبطلك الشهر على المرتب'**
+  String get mascotTipUsePayday;
+
+  /// No description provided for @mascotTipUseStatement.
+  ///
+  /// In ar, this message translates to:
+  /// **'عندك كشف حساب من البنك؟ ضيفه وأنا أقراه وأرجّع الشهور اللي فاتت (CIB وNBE ومصر وQNB)'**
+  String get mascotTipUseStatement;
+
+  /// No description provided for @mascotTipUseReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيه حركات مستنية رأيك؟ في المراجعة تختار: سيبها، عدّل، أو تجاهل 👀'**
+  String get mascotTipUseReview;
+
+  /// No description provided for @mascotTipUseSearchPerson.
+  ///
+  /// In ar, this message translates to:
+  /// **'بتدوّر على تحويل إنستاباي؟ اكتب اسم الشخص في البحث وهتلاقيه'**
+  String get mascotTipUseSearchPerson;
+
+  /// No description provided for @mascotTipUseHide.
+  ///
+  /// In ar, this message translates to:
+  /// **'فيه حد جنبك؟ دوس على العين فوق وأخبّي الأرقام في ثانية 🙈'**
+  String get mascotTipUseHide;
+
+  /// No description provided for @mascotTipUseBudget.
+  ///
+  /// In ar, this message translates to:
+  /// **'حط ميزانية لكل تصنيف، وأنا أقولك فاضل منها كام'**
+  String get mascotTipUseBudget;
+
+  /// No description provided for @mascotTipUseSalary.
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل مرتبك مرة، وأنا أعرف إمتى نزل وأحسب الشهر من يوم القبض'**
+  String get mascotTipUseSalary;
+
+  /// No description provided for @mascotTipUseAsk.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسألني من تبويب زغلول: «صرفت كام على الأكل الشهر ده؟» وأنا أجاوب'**
+  String get mascotTipUseAsk;
+
+  /// No description provided for @mascotTipUseDue.
+  ///
+  /// In ar, this message translates to:
+  /// **'كارت ائتمان؟ قولي الحد وميعاد السداد وأنا أفكّرك قبلها بكام يوم'**
+  String get mascotTipUseDue;
+
+  /// No description provided for @mascotTipUseInsights.
+  ///
+  /// In ar, this message translates to:
+  /// **'عايز تعرف فلوسك بتروح فين؟ افتح «الحسبة» وشوف الشارتات 📊'**
+  String get mascotTipUseInsights;
+
+  /// No description provided for @mascotTipSmartAsk.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسألني بالمصري: «صرفت كام على الأكل الشهر ده؟» وهجاوبك من حركاتك على موبايلك'**
+  String get mascotTipSmartAsk;
+
+  /// No description provided for @mascotTipSmartVoice.
+  ///
+  /// In ar, this message translates to:
+  /// **'بفهم المصري! قول «دفعت مية وخمسين خضار وخمسة وأربعين قهوة» وأسجّلهم اتنين 🎤'**
+  String get mascotTipSmartVoice;
+
+  /// No description provided for @mascotTipSmartSms.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما رسالة البنك توصلني بقراها وأسجل الحركة لوحدي، وبياناتك مابتطلعش من موبايلك'**
+  String get mascotTipSmartSms;
+
+  /// No description provided for @mascotTipSmartCategory.
+  ///
+  /// In ar, this message translates to:
+  /// **'كل مرة بتغيّر تصنيف محل، أحفظها وأعملها لوحدي المرة الجاية'**
+  String get mascotTipSmartCategory;
+
+  /// No description provided for @mascotTipSmartDue.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو رسالة الكارت فيها ميعاد سداد، أفكّرك قبله من غير ما تكتب حاجة'**
+  String get mascotTipSmartDue;
+
+  /// No description provided for @mascotTipSmartPayday.
+  ///
+  /// In ar, this message translates to:
+  /// **'لما المرتب ينزل أعرفه وأظبط شهرك عليه، وأقولك مبروك 🎉'**
+  String get mascotTipSmartPayday;
+
+  /// No description provided for @mascotTipSmartDuplicate.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو نفس الخصم جه مرتين في دقايق، أنبهك قبل ما يتحسب مرتين'**
+  String get mascotTipSmartDuplicate;
+
+  /// No description provided for @mascotTipSmartReceipt.
+  ///
+  /// In ar, this message translates to:
+  /// **'بقرا الفاتورة المصورة: المحل والمبلغ والتاريخ، وانت بس تتأكد 👌'**
+  String get mascotTipSmartReceipt;
+
+  /// No description provided for @mascotTipSmartInstapay.
+  ///
+  /// In ar, this message translates to:
+  /// **'تحويلات إنستاباي بتظهر باسم الشخص، فتعرف مين خد وجاب من مين بسهولة'**
+  String get mascotTipSmartInstapay;
+
+  /// No description provided for @mascotTipSmartTransfer.
+  ///
+  /// In ar, this message translates to:
+  /// **'لو نقلت فلوس من حساب لحساب تاني بتوعك، ببقى عارف إنها مش صرف 👌'**
+  String get mascotTipSmartTransfer;
+
+  /// No description provided for @mascotTipHabitCoffee.
+  ///
+  /// In ar, this message translates to:
+  /// **'القهوة الصغيرة بتكبر في آخر الشهر. مش بقول حاجة، بس بحسب ☕'**
+  String get mascotTipHabitCoffee;
+
+  /// No description provided for @mascotTipHabitPigeon.
+  ///
+  /// In ar, this message translates to:
+  /// **'أنا حمامة بحب الحبوب، وإنت بتحب الدليفري. كل واحد فينا له نقطة ضعف 😄'**
+  String get mascotTipHabitPigeon;
+
+  /// No description provided for @mascotTipHabitCheck.
+  ///
+  /// In ar, this message translates to:
+  /// **'دقيقة في اليوم تبص فيها على صرفك، أحسن من ساعة في آخر الشهر'**
+  String get mascotTipHabitCheck;
+
+  /// No description provided for @mascotTipHabitSale.
+  ///
+  /// In ar, this message translates to:
+  /// **'الخصم الكبير مش توفير لو ماكنتش ناوي تشتري أصلاً 😉'**
+  String get mascotTipHabitSale;
+
+  /// No description provided for @mascotTipHabitSmall.
+  ///
+  /// In ar, this message translates to:
+  /// **'القرش بيجيب القرش، والجنيه بيجيب ريشة جديدة لزغلول 🪶'**
+  String get mascotTipHabitSmall;
+
+  /// No description provided for @mascotTipHabitWait.
+  ///
+  /// In ar, this message translates to:
+  /// **'استنى يوم قبل أي حاجة نفسك فيها. لو لسه عايزها، ألف هنا 🛍️'**
+  String get mascotTipHabitWait;
+
+  /// No description provided for @mascotTipHabitTreat.
+  ///
+  /// In ar, this message translates to:
+  /// **'مسموح تدلع نفسك، المهم يبقى بحساب وماحدش يزعل 😄'**
+  String get mascotTipHabitTreat;
+
+  /// No description provided for @mascotTipHabitSubs.
+  ///
+  /// In ar, this message translates to:
+  /// **'اشتراكات كتير في الشهر؟ بص عليها كل فترة، يمكن فيه واحد نسيته 👀'**
+  String get mascotTipHabitSubs;
+
+  /// No description provided for @mascotTipShowMe.
+  ///
+  /// In ar, this message translates to:
+  /// **'وريني'**
+  String get mascotTipShowMe;
+
   /// C · C-35 segment 1
   ///
   /// In ar, this message translates to:
@@ -6258,6 +6819,24 @@ abstract class AppLocalizations {
   /// **'الفاتورة اتحفظت ✓'**
   String get recurringBillEditSaved;
 
+  /// C · T-272: Add sheet row for a manual currency exchange (D-86)
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت عملة'**
+  String get homeQuickAddExchange;
+
+  /// C · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'من عملة لعملة، زي دولار لجنيه'**
+  String get homeQuickAddExchangeHint;
+
+  /// A · T-272
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل تغيير عملة'**
+  String get homeQuickAddExchangeA11y;
+
   /// S · Free only (FR-VOI-04)
   ///
   /// In ar, this message translates to:
@@ -7614,6 +8193,18 @@ abstract class AppLocalizations {
     String gap,
     String saved,
     String percent,
+  );
+
+  /// E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).
+  ///
+  /// In ar, this message translates to:
+  /// **'{span} غيّرت {given} وخدت {received}. سعر البنك: {unit} الواحد بـ {rate}.'**
+  String chatAnswerExchange(
+    String span,
+    String given,
+    String received,
+    String unit,
+    String rate,
   );
 
   /// E · spend_on_card
@@ -12926,6 +13517,28 @@ abstract class AppLocalizations {
   /// **'رسم الداخل والخارج. {list}'**
   String insightsV2TrendsInOutA11y(String list);
 
+  /// T-283 legend
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت عملة: دخل'**
+  String get insightsV2TrendsLegendExchangeIn;
+
+  /// T-283 legend
+  ///
+  /// In ar, this message translates to:
+  /// **'غيّرت عملة: خرج'**
+  String get insightsV2TrendsLegendExchangeOut;
+
+  /// T-283
+  ///
+  /// In ar, this message translates to:
+  /// **'{month}، غيّرت عملة: دخل {inAmount}، خرج {outAmount}'**
+  String insightsV2TrendsInOutExchangeA11y(
+    String month,
+    String inAmount,
+    String outAmount,
+  );
+
   /// T-211 Charts v2 · one month
   ///
   /// In ar, this message translates to:
@@ -13179,6 +13792,657 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'سددت المطلوب للكشف ده'**
   String get accountsDetailDuePaid;
+
+  /// L · replaces chat_main_inputHint while ask_llm is on
+  ///
+  /// In ar, this message translates to:
+  /// **'اسألني بكلامك عن فلوسك…'**
+  String get chatLlmInputHint;
+
+  /// C · shown from 250 typed characters; max = 300 (FR-LLM-17)
+  ///
+  /// In ar, this message translates to:
+  /// **'{n} من {max}'**
+  String chatLlmInputCounter(int max, int n);
+
+  /// B · replaces Send while a question is out (FR-LLM-52)
+  ///
+  /// In ar, this message translates to:
+  /// **'وقّف'**
+  String get chatLlmInputStop;
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'وقّف السؤال'**
+  String get chatLlmInputStopA11y;
+
+  /// L · count:int, n · beside the input, value from the last backend reply (FR-LLM-12); hidden when paused
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{خلصت أسئلة الشهر} =1{فاضل سؤال واحد} =2{فاضل سؤالين} few{فاضل {n} أسئلة} many{فاضل {n} سؤال} other{فاضل {n} سؤال}}'**
+  String chatQuotaRemaining(int count, int n);
+
+  /// A · count:int, n
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{خلصت الأسئلة الأونلاين الشهر ده} =1{فاضل سؤال أونلاين واحد الشهر ده} =2{فاضل سؤالين أونلاين الشهر ده} few{فاضل {n} أسئلة أونلاين الشهر ده} many{فاضل {n} سؤال أونلاين الشهر ده} other{فاضل {n} سؤال أونلاين الشهر ده}}'**
+  String chatQuotaRemainingA11y(int count, int n);
+
+  /// C · before the first backend reply (FR-LLM-12)
+  ///
+  /// In ar, this message translates to:
+  /// **'—'**
+  String get chatQuotaUnknown;
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'عدد الأسئلة هيظهر بعد أول سؤال أونلاين'**
+  String get chatQuotaUnknownA11y;
+
+  /// T · sheet opened by tapping the counter
+  ///
+  /// In ar, this message translates to:
+  /// **'الأسئلة الأونلاين'**
+  String get chatQuotaInfoTitle;
+
+  /// E
+  ///
+  /// In ar, this message translates to:
+  /// **'الأسئلة اللي بجاوبها من موبايلك ببلاش ومن غير حد. الأسئلة اللي محتاجة المساعد الأونلاين ليها عدد في الشهر، وبيرجع أول كل شهر.'**
+  String get chatQuotaInfoBody;
+
+  /// N · under the input when 1 is left
+  ///
+  /// In ar, this message translates to:
+  /// **'ده آخر سؤال أونلاين الشهر ده'**
+  String get chatQuotaLastOne;
+
+  /// E · Free at the limit (FR-LLM-13), Rive tourGuide still; followed by chat_quota_goldHint and chat_llmStatus_notQueued
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّصت أسئلتك الأونلاين ببلاش الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك، والعداد بيرجع يوم {date}.'**
+  String chatQuotaFreeOut(String date);
+
+  /// S · count:int = ask.quota_gold, n · Free only, plus chat_quota_seeGold
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{مع جولد بيبقى عندك سؤال واحد في الشهر.} =2{مع جولد بيبقى عندك سؤالين في الشهر.} few{مع جولد بيبقى عندك {n} أسئلة في الشهر.} many{مع جولد بيبقى عندك {n} سؤال في الشهر.} other{مع جولد بيبقى عندك {n} سؤال في الشهر.}}'**
+  String chatQuotaGoldHint(int count, int n);
+
+  /// L · text button, opens S-68 (counts toward FR-GOLD-05 only when the paywall opens)
+  ///
+  /// In ar, this message translates to:
+  /// **'شوف جولد'**
+  String get chatQuotaSeeGold;
+
+  /// E · Gold at the limit; date = 1st of next month, locale format
+  ///
+  /// In ar, this message translates to:
+  /// **'خلّصت أسئلتك الأونلاين الشهر ده، وبترجع يوم {date}. لحد ساعتها بجاوبك على الأسئلة العادية من موبايلك.'**
+  String chatQuotaGoldOut(String date);
+
+  /// T
+  ///
+  /// In ar, this message translates to:
+  /// **'السؤال ده محتاج المساعد الأونلاين'**
+  String get chatConsentTitle;
+
+  /// E · never says "no server" (tone gate 4)
+  ///
+  /// In ar, this message translates to:
+  /// **'مقدرش أجاوبه من موبايلك لوحدي. لو وافقت، هبعت نص سؤالك لسيرفر زغلول ولـ {aiProvider} علشان يفهموه، والحساب كله بيحصل على موبايلك.'**
+  String chatConsentIntro(String aiProvider);
+
+  /// L · above the masked preview (same rendering as §4.4)
+  ///
+  /// In ar, this message translates to:
+  /// **'ده اللي هيتبعت بالظبط'**
+  String get chatConsentPreviewTitle;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'بيتبعت'**
+  String get chatConsentSendsTitle;
+
+  /// E · FR-LLM-09 wording
+  ///
+  /// In ar, this message translates to:
+  /// **'سؤالك بيتبعت من غير أسماء حساباتك وكروتك وبنوكك، ومن غير أسماء الأماكن اللي بتشتري منها واللي زغلول عارفها. أي حاجة تانية تكتبها، زي مبلغ، بتتبعت زي ما هي.'**
+  String get chatConsentSends;
+
+  /// L
+  ///
+  /// In ar, this message translates to:
+  /// **'عمره ما بيتبعت'**
+  String get chatConsentNeverTitle;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'حركاتك وأرصدتك وميزانياتك ورسايل البنوك. ولا حاجة فيهم بتسيب موبايلك.'**
+  String get chatConsentNever;
+
+  /// S · FR-LLM-32/33; wording to legal with the policy section
+  ///
+  /// In ar, this message translates to:
+  /// **'سيرفر زغلول مبيحفظش سؤالك، و{aiProvider} مبيتعلمش منه. التفاصيل في سياسة الخصوصية.'**
+  String chatConsentStorage(String aiProvider);
+
+  /// S · count:int = the tier quota (5 Free, 50 Gold), n
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{عندك سؤال أونلاين واحد في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} =2{عندك سؤالين أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} few{عندك {n} أسئلة أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} many{عندك {n} سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.} other{عندك {n} سؤال أونلاين في الشهر. الأسئلة اللي بجاوبها من موبايلك مش محسوبة.}}'**
+  String chatConsentQuota(int count, int n);
+
+  /// B · stores ask.llm_consent, then sends
+  ///
+  /// In ar, this message translates to:
+  /// **'تمام، ابعت'**
+  String get chatConsentAllow;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'تقدر تقفلها في أي وقت من «خصوصيتك».'**
+  String get chatConsentSettingsHint;
+
+  /// M · Rive tourGuide; three chips follow (FR-CHAT-05)
+  ///
+  /// In ar, this message translates to:
+  /// **'ولا يهمك، سؤالك ماتبعتش. جرّب واحد من دول:'**
+  String get chatConsentDeclined;
+
+  /// L · Rive thinking (D-35), from 300 ms
+  ///
+  /// In ar, this message translates to:
+  /// **'ببعت سؤالك من غير بياناتك…'**
+  String get chatLlmStatusSending;
+
+  /// L · after the plan arrives, while the phone computes
+  ///
+  /// In ar, this message translates to:
+  /// **'بحسبها على موبايلك…'**
+  String get chatLlmStatusComputing;
+
+  /// A · live region
+  ///
+  /// In ar, this message translates to:
+  /// **'زغلول بيفكر. سؤالك بس اللي اتبعت'**
+  String get chatLlmStatusThinkingA11y;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'وقّفت السؤال.'**
+  String get chatLlmStatusStopped;
+
+  /// S · caption under offline and at-limit bubbles (FR-LLM-13/50)
+  ///
+  /// In ar, this message translates to:
+  /// **'سؤالك ماتبعتش، ومش هيتبعت بعدين.'**
+  String get chatLlmStatusNotQueued;
+
+  /// M · Rive oops still; three chips (FR-LLM-50)
+  ///
+  /// In ar, this message translates to:
+  /// **'السؤال ده محتاج نت. ابعته تاني لما النت يرجع، ولحد ساعتها جرّب دول:'**
+  String get chatLlmStatusOffline;
+
+  /// S · 12 s or 5xx, plus common_action_tryAgain once (FR-LLM-51)
+  ///
+  /// In ar, this message translates to:
+  /// **'المساعد الأونلاين اتأخر في الرد، ومتحسبش من أسئلتك.'**
+  String get chatLlmStatusTimeout;
+
+  /// S · plus common_action_tryAgain
+  ///
+  /// In ar, this message translates to:
+  /// **'حصلت مشكلة وأنا بفهم سؤالك، ومتحسبش من أسئلتك.'**
+  String get chatLlmStatusError;
+
+  /// S · HTTP 429, not counted (FR-LLM-15)
+  ///
+  /// In ar, this message translates to:
+  /// **'أسئلة كتير ورا بعض. استنى دقيقة وجرّب تاني.'**
+  String get chatLlmStatusSlowDown;
+
+  /// S · attestation failed, not counted (FR-LLM-14)
+  ///
+  /// In ar, this message translates to:
+  /// **'مقدرتش أتأكد إن نسخة زغلول دي سليمة. حدّثها من المتجر أو جرّب تاني.'**
+  String get chatLlmStatusIntegrity;
+
+  /// M · Rive sleep; service_paused, counter hidden (FR-LLM-16/61)
+  ///
+  /// In ar, this message translates to:
+  /// **'المساعد الأونلاين واخد راحة الشهر ده. لسه بجاوبك على الأسئلة العادية من موبايلك.'**
+  String get chatLlmStatusPaused;
+
+  /// C · small label on every answer that used the LLM
+  ///
+  /// In ar, this message translates to:
+  /// **'أونلاين'**
+  String get chatSentBadge;
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'الإجابة دي اتفهمت بالمساعد الأونلاين'**
+  String get chatSentBadgeA11y;
+
+  /// L · disclosure row, collapsed by default (D-92)
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي بعته'**
+  String get chatSentToggle;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'ده سؤالك زي ما خرج من موبايلك:'**
+  String get chatSentTitle;
+
+  /// C · state:select(account/card/bank/merchant/other); n = placeholder number, digits per locale
+  ///
+  /// In ar, this message translates to:
+  /// **'{state, select, account{حساب {n}} card{كارت {n}} bank{بنك {n}} merchant{مكان {n}} other{اسم {n}}}'**
+  String chatSentChip(int n, String state);
+
+  /// A
+  ///
+  /// In ar, this message translates to:
+  /// **'{state, select, account{حساب رقم {n}، اسمه فضل على موبايلك} card{كارت رقم {n}، رقمه فضل على موبايلك} bank{بنك رقم {n}، اسمه فضل على موبايلك} merchant{مكان رقم {n}، اسمه فضل على موبايلك} other{اسم رقم {n}، فضل على موبايلك}}'**
+  String chatSentChipA11y(int n, String state);
+
+  /// C · FR-LLM-03 scrub chips · state:select(phone/email/instapay/number/other)
+  ///
+  /// In ar, this message translates to:
+  /// **'{state, select, phone{رقم موبايل} email{إيميل} instapay{عنوان إنستاباي} number{رقم طويل} other{متشال}}'**
+  String chatSentHidden(String state);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'المربعات دي مكان الأسامي. معناها فضل على موبايلك ومتبعتش.'**
+  String get chatSentChipsNote;
+
+  /// E · FR-LLM-02/34
+  ///
+  /// In ar, this message translates to:
+  /// **'ومعاه بس: لغة التطبيق وإصداره، ورقم عشوائي للتطبيق، وإثبات إن الموبايل حقيقي. {aiProvider} بيوصله السؤال واللغة بس.'**
+  String chatSentAlsoSent(String aiProvider);
+
+  /// A · text = the sent question with chips read via chat_sent_chipA11y
+  ///
+  /// In ar, this message translates to:
+  /// **'اللي اتبعت: {text}'**
+  String chatSentTextA11y(String text);
+
+  /// L · optional caption on local answers (open question UX-ASK-03)
+  ///
+  /// In ar, this message translates to:
+  /// **'اتجاوب على موبايلك'**
+  String get chatSentLocal;
+
+  /// M · Rive detective still
+  ///
+  /// In ar, this message translates to:
+  /// **'مش لاقي كارت آخره {last4}. تقصد أنهي كارت؟'**
+  String chatClarifyNoCard(String last4);
+
+  /// M
+  ///
+  /// In ar, this message translates to:
+  /// **'عندك أكتر من كارت آخره {last4}. تقصد أنهي واحد؟'**
+  String chatClarifySameLast4(String last4);
+
+  /// M · registry bank, no account
+  ///
+  /// In ar, this message translates to:
+  /// **'مش لاقي حساب ليك في {bank}. تقصد أنهي حساب؟'**
+  String chatClarifyNoBankAccount(String bank);
+
+  /// M · bank = the user's typed word
+  ///
+  /// In ar, this message translates to:
+  /// **'مش عارف بنك اسمه {bank}. تقصد أنهي حساب؟'**
+  String chatClarifyUnknownBank(String bank);
+
+  /// M
+  ///
+  /// In ar, this message translates to:
+  /// **'مش لاقي الحساب ده. تقصد أنهي واحد؟'**
+  String get chatClarifyNoAccount;
+
+  /// S · caption under every clarification
+  ///
+  /// In ar, this message translates to:
+  /// **'سؤالك ماتبعتش ومتحسبش من أسئلتك.'**
+  String get chatClarifyNotSent;
+
+  /// M · FR-LLM-07 mention with no match (after a reply, so counted)
+  ///
+  /// In ar, this message translates to:
+  /// **'ملقتش «{query}» في حركاتك. تقصد واحد من دول؟'**
+  String chatClarifyNotFound(String query);
+
+  /// E · PL-AVERAGE · state:select(day/week/other)
+  ///
+  /// In ar, this message translates to:
+  /// **'متوسط صرفك على {subject} {span}: {average} {state, select, day{في اليوم} week{في الأسبوع} other{في الشهر}}.'**
+  String chatLlmAnswerAverage(
+    String average,
+    String span,
+    String state,
+    String subject,
+  );
+
+  /// S · state:select(day/week/other)
+  ///
+  /// In ar, this message translates to:
+  /// **'{state, select, day{حسبت الأيام الكاملة بس، من غير النهارده.} week{حسبت الأسابيع الكاملة بس، من غير الأسبوع ده.} other{حسبت الشهور الكاملة بس، من غير الشهر ده.}}'**
+  String chatLlmAnswerFullUnits(String state);
+
+  /// E · PL-INCOME
+  ///
+  /// In ar, this message translates to:
+  /// **'دخلك {span}: {income}.'**
+  String chatLlmAnswerIncome(String income, String span);
+
+  /// E · PL-BREAKDOWN; list = top N plus chat_llmAnswer_otherBucket
+  ///
+  /// In ar, this message translates to:
+  /// **'فلوسك راحت فين {span}: {list}.'**
+  String chatLlmAnswerBreakdown(String list, String span);
+
+  /// E · PL-TOPN of category
+  ///
+  /// In ar, this message translates to:
+  /// **'أكتر التصنيفات صرفًا {span}: {list}.'**
+  String chatLlmAnswerTopCategories(String list, String span);
+
+  /// C
+  ///
+  /// In ar, this message translates to:
+  /// **'حاجات تانية'**
+  String get chatLlmAnswerOtherBucket;
+
+  /// S · after chat_answer_compare (PL-COMPARE)
+  ///
+  /// In ar, this message translates to:
+  /// **'يعني فرق {percent}.'**
+  String chatLlmAnswerChangePct(String percent);
+
+  /// E · PL-SAFE-SPEND
+  ///
+  /// In ar, this message translates to:
+  /// **'تقدر تصرف {perDay} في اليوم لحد القبض.'**
+  String chatLlmAnswerSafeSpend(String perDay);
+
+  /// E · EC-24, plus budget_overview_emptyAction
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش ميزانية، فمقدرش أحسب تصرف كام في اليوم. حط ميزانية وأنا أحسبهالك.'**
+  String get chatLlmAnswerSafeSpendNone;
+
+  /// C · count:int, n · 1–60, inserted as {months}
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{شهر} =2{شهرين} few{{n} شهور} many{{n} شهر} other{{n} شهر}}'**
+  String chatUnitMonths(int count, int n);
+
+  /// E · PL-WHATIF-CUT percent
+  ///
+  /// In ar, this message translates to:
+  /// **'لو قللت {subject} {percent}، هتوفر حوالي {monthly} في الشهر، يعني {amount} في {months}.'**
+  String chatWhatIfCutPercent(
+    String amount,
+    String monthly,
+    int months,
+    String percent,
+    String subject,
+  );
+
+  /// E · PL-WHATIF-CUT amount
+  ///
+  /// In ar, this message translates to:
+  /// **'لو قللت {subject} بـ {monthly} في الشهر، هتوفر {amount} في {months}.'**
+  String chatWhatIfCutAmount(
+    String amount,
+    String monthly,
+    int months,
+    String subject,
+  );
+
+  /// S · amount > B
+  ///
+  /// In ar, this message translates to:
+  /// **'متوسط صرفك على {subject} {average} بس، فده أقصى توفير في الشهر.'**
+  String chatWhatIfCapped(String average, String subject);
+
+  /// E · PL-WHATIF-SAVE
+  ///
+  /// In ar, this message translates to:
+  /// **'لو حوشت {monthly} كل شهر، هيبقى معاك {amount} بعد {months}، من غير أي عائد.'**
+  String chatWhatIfSave(String amount, String monthly, int months);
+
+  /// S · count:int, n · 1–3 full periods; caption under what-if and suggestions
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =1{على أساس آخر شهر كامل} =2{على أساس متوسط آخر شهرين كاملين} few{على أساس متوسط آخر {n} شهور كاملة} many{على أساس متوسط آخر {n} شهر كامل} other{على أساس متوسط آخر {n} شهر كامل}}'**
+  String chatWhatIfBasis(int count, int n);
+
+  /// M · Rive sleep, EC-23, no figure
+  ///
+  /// In ar, this message translates to:
+  /// **'لسه مفيش شهر كامل أحسب عليه. استناني لآخر الشهر وأنا أحسبهالك.'**
+  String get chatWhatIfNotEnough;
+
+  /// M · Rive tourGuide; top 3 rows follow, then chat_whatIf_basis
+  ///
+  /// In ar, this message translates to:
+  /// **'دي أكتر حاجات ممكن توفر منها الشهر الجاي:'**
+  String get chatSuggestIntro;
+
+  /// E · S1
+  ///
+  /// In ar, this message translates to:
+  /// **'{category} الشهر اللي فات {amount}، يعني {gap} فوق متوسطك. لو رجعته للمتوسط هتوفر {gap}.'**
+  String chatSuggestAboveAverage(String amount, String category, String gap);
+
+  /// E · S2; the user cancels, Zaghlol never does
+  ///
+  /// In ar, this message translates to:
+  /// **'اشتراك {item} بـ {monthly} في الشهر. لو مش بتستخدمه، وقفه ووفر {monthly}.'**
+  String chatSuggestSubscription(String item, String monthly);
+
+  /// E · S3
+  ///
+  /// In ar, this message translates to:
+  /// **'{category} بيزيد كل شهر، من {startAmount} لـ {endAmount}. لو رجعته لأوله هتوفر {gap}.'**
+  String chatSuggestCreep(
+    String category,
+    String endAmount,
+    String gap,
+    String startAmount,
+  );
+
+  /// E · S4, plus chat_suggest_cashTip
+  ///
+  /// In ar, this message translates to:
+  /// **'{amount} كاش سحبته ومش متسجل راح فين. لو سجلته، ممكن توفر حوالي {target}.'**
+  String chatSuggestCash(String amount, String target);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'سجّل الكاش وإنت بتصرفه، حتى بصوتك.'**
+  String get chatSuggestCashTip;
+
+  /// L · trailing line of each row
+  ///
+  /// In ar, this message translates to:
+  /// **'توفير متوقع: {monthly} في الشهر'**
+  String chatSuggestSaveLabel(String monthly);
+
+  /// M · Rive proud
+  ///
+  /// In ar, this message translates to:
+  /// **'مش لاقي حاجة واضحة توفر منها. صرفك ماشي على متوسطه، كمّل كده!'**
+  String get chatSuggestNone;
+
+  /// S · OOS-04
+  ///
+  /// In ar, this message translates to:
+  /// **'دي اقتراحات بس، ومفيش حاجة اتغيرت.'**
+  String get chatSuggestFooter;
+
+  /// E · state:select(saved/whatIf/other) = source
+  ///
+  /// In ar, this message translates to:
+  /// **'{state, select, saved{الشهر اللي فات فضل معاك {amount}.} whatIf{لو كنت وفرت {amount}:} other{لو معاك {amount}:}}'**
+  String chatInvestLead(String amount, String state);
+
+  /// E · S ≥ G; stale adds common_badge_stale
+  ///
+  /// In ar, this message translates to:
+  /// **'كان ممكن يجيب حوالي {grams} دهب عيار {karat}، بسعر {price} للجرام يوم {date}.'**
+  String chatInvestGold(String date, String grams, String karat, String price);
+
+  /// E · EGP source only, plus common_currency_approxCaption
+  ///
+  /// In ar, this message translates to:
+  /// **'كان ممكن يساوي ≈ {amount2}، بسعر {rate} للدولار يوم {date}.'**
+  String chatInvestUsd(String amount2, String date, String rate);
+
+  /// E · EGP only; rate from ask.cd_example_rate_bp
+  ///
+  /// In ar, this message translates to:
+  /// **'في شهادة بعائد مثال {exampleRate} لمدة {months}، كان ممكن يطلع عائد حوالي {payout}، قبل الضرايب والمصاريف. ده معدل للتوضيح، مش عرض.'**
+  String chatInvestCertificate(String exampleRate, int months, String payout);
+
+  /// E · D-93 band 100 < S < G; nothing named
+  ///
+  /// In ar, this message translates to:
+  /// **'مبلغ زي ده ممكن يبقى بداية صغيرة في الأسهم عمومًا. اتعلم الأول، واتعامل مع جهة مرخصة.'**
+  String get chatInvestStocks;
+
+  /// M · Rive proud; band 0 < S ≤ 100, plus chat_invest_suggestChip; no disclaimer needed (no instrument)
+  ///
+  /// In ar, this message translates to:
+  /// **'كل جنيه بيفرق، كمّل كده والشهر الجاي هيبقى أحسن.'**
+  String get chatInvestSmall;
+
+  /// M · S ≤ 0, plus chat_invest_suggestChip; no emoji
+  ///
+  /// In ar, this message translates to:
+  /// **'الشهر اللي فات مفضلش حاجة. تعالى نشوف نوفر منين الشهر الجاي.'**
+  String get chatInvestNothingSaved;
+
+  /// S · never converted
+  ///
+  /// In ar, this message translates to:
+  /// **'{currency} مش داخل هنا، علشان مفيش سعر ليه.'**
+  String chatInvestNoPrice(String currency);
+
+  /// A · hide-amounts on (FR-LLM-54)
+  ///
+  /// In ar, this message translates to:
+  /// **'الوزن مخفي'**
+  String get chatInvestGramsHiddenA11y;
+
+  /// C · runs PL-SUGGEST on the phone directly: no request, no quota
+  ///
+  /// In ar, this message translates to:
+  /// **'أوفر منين؟'**
+  String get chatInvestSuggestChip;
+
+  /// C · after chat_refuse_specificPick; runs PL-INVEST{savedLastPeriod} on the phone directly: no request, no quota
+  ///
+  /// In ar, this message translates to:
+  /// **'لو كنت حوشت؟'**
+  String get chatInvestChip;
+
+  /// S · Egyptian summary, above the disclaimer
+  ///
+  /// In ar, this message translates to:
+  /// **'ده توضيح بس، مش نصيحة استثمار.'**
+  String get chatInvestDisclaimerSummary;
+
+  /// E · **simple standard Arabic** (BR-LLM-03). Legal sign-off: OQ-ASK-01
+  ///
+  /// In ar, this message translates to:
+  /// **'هذه الأرقام للتوضيح فقط وليست نصيحة استثمارية. الأسعار والعوائد تتغير، والقيم السابقة لا تدل على القيم المستقبلية. القرار النهائي لك.'**
+  String get chatInvestDisclaimer;
+
+  /// M · Rive tourGuide; three chips
+  ///
+  /// In ar, this message translates to:
+  /// **'أنا شاطر في الفلوس بس 😄 اسألني عن صرفك أو تحويشك:'**
+  String get chatRefuseOffTopic;
+
+  /// M · calm, still pose, no emoji
+  ///
+  /// In ar, this message translates to:
+  /// **'ده مش حاجة أقدر أساعد فيها. لو عندك سؤال عن فلوسك، أنا موجود.'**
+  String get chatRefuseUnsafe;
+
+  /// S · self-harm cues only; no number until legal supplies one (OQ-ASK-08)
+  ///
+  /// In ar, this message translates to:
+  /// **'لو الدنيا تقيلة عليك، كلم حد بتثق فيه. إنت مش لوحدك.'**
+  String get chatRefuseSupport;
+
+  /// M · plus chat_invest_chip (hidden when ask_llm_invest is off)
+  ///
+  /// In ar, this message translates to:
+  /// **'مقدرش أرشحلك سهم أو صندوق بعينه. أقدر أوريك فلوسك كانت ممكن تساوي كام، كتوضيح بس.'**
+  String get chatRefuseSpecificPick;
+
+  /// L · switch (FR-LLM-31); on = consent stored
+  ///
+  /// In ar, this message translates to:
+  /// **'اسأل المساعد الأونلاين'**
+  String get privacyAskLlmLabel;
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'بيبعت نص سؤالك بس، من غير أسماء حساباتك وكروتك وبنوكك. حركاتك وأرصدتك عمرها ما بتسيب موبايلك.'**
+  String get privacyAskLlmSentence;
+
+  /// S · count:int, n, date · under the switch while on
+  ///
+  /// In ar, this message translates to:
+  /// **'{count, plural, =0{خلصت أسئلة الشهر، وبترجع يوم {date}.} =1{فاضل سؤال واحد الشهر ده، والعداد بيرجع يوم {date}.} =2{فاضل سؤالين الشهر ده، والعداد بيرجع يوم {date}.} few{فاضل {n} أسئلة الشهر ده، والعداد بيرجع يوم {date}.} many{فاضل {n} سؤال الشهر ده، والعداد بيرجع يوم {date}.} other{فاضل {n} سؤال الشهر ده، والعداد بيرجع يوم {date}.}}'**
+  String privacyAskLlmQuota(int count, String date, int n);
+
+  /// S
+  ///
+  /// In ar, this message translates to:
+  /// **'عدد الأسئلة هيظهر بعد أول سؤال أونلاين.'**
+  String get privacyAskLlmQuotaUnknown;
+
+  /// L · text button, opens the consent sheet read-only
+  ///
+  /// In ar, this message translates to:
+  /// **'إيه اللي بيتبعت؟'**
+  String get privacyAskLlmDetails;
+
+  /// N
+  ///
+  /// In ar, this message translates to:
+  /// **'اتقفل. مش هبعت أي سؤال غير لما توافق تاني.'**
+  String get privacyAskLlmTurnedOff;
+
+  /// S · BR-SYNC-03 amendment (D-90); added to the §3.10 list while ask_llm is on
+  ///
+  /// In ar, this message translates to:
+  /// **'نص سؤالك للمساعد الأونلاين لو وافقت، من غير ما يتحفظ، وعدّاد أسئلتك في الشهر'**
+  String get privacyServerItemAskLlm;
 }
 
 class _AppLocalizationsDelegate

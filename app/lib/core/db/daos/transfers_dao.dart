@@ -19,6 +19,12 @@ abstract final class TransferPairKind {
   static const String crossCurrency = 'cross_currency';
 }
 
+/// T-272/T-281 (D-86): the kinds that make a complete pair an exchange (one
+/// user action, never income or spending).
+bool isExchangePairKind(String kind) =>
+    kind == TransferPairKind.fxConversion ||
+    kind == TransferPairKind.crossCurrency;
+
 class TransferPairsDao {
   TransferPairsDao(this._db);
 
@@ -30,6 +36,23 @@ class TransferPairsDao {
   Future<TransferPairRow?> byId(String id) => (_db.select(
     _db.transferPairs,
   )..where((p) => p.id.equals(id))).getSingleOrNull();
+
+  /// FU-388: `id -> kind` for all [ids] in chunked `IN` queries (never one
+  /// query per pair). Unknown ids are absent from the result.
+  Future<Map<String, String>> kindsByIds(Iterable<String> ids) async {
+    final all = ids.toSet().toList();
+    final out = <String, String>{};
+    for (var i = 0; i < all.length; i += 500) {
+      final chunk = all.sublist(i, i + 500 > all.length ? all.length : i + 500);
+      final rows = await (_db.select(
+        _db.transferPairs,
+      )..where((p) => p.id.isIn(chunk))).get();
+      for (final r in rows) {
+        out[r.id] = r.kind;
+      }
+    }
+    return out;
+  }
 
   /// The pair that [txnId] is either side of, or null.
   Future<TransferPairRow?> forTransaction(String txnId) =>

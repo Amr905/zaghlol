@@ -153,6 +153,7 @@ class AskEngine {
       AskIntent.upcomingDues => _dues(s, now),
       AskIntent.biggestExpense => _biggest(s, period, ents),
       AskIntent.savings => _savings(s, period),
+      AskIntent.exchange => _exchange(s, period),
       AskIntent.roast => _roast(s, period, seed, recent),
     };
   }
@@ -466,7 +467,9 @@ class AskEngine {
       final r = await charts.cashFlow([p], _filter(c, s));
       if (r is! ChartReady<List<CashFlowPoint>>) continue;
       final pt = r.data.single;
-      if (pt.income.isZero) {
+      if (pt.income.isZero &&
+          pt.exchangedInOrZero.isZero &&
+          pt.exchangedOutOrZero.isZero) {
         sawSpendOnly = true;
         continue;
       }
@@ -475,6 +478,8 @@ class AskEngine {
           income: pt.income,
           spend: pt.spend,
           isPartial: pt.isPartial,
+          exchangedIn: pt.exchangedIn,
+          exchangedOut: pt.exchangedOut,
         ),
       );
     }
@@ -490,6 +495,37 @@ class AskEngine {
       period: p,
       periodDefaulted: s.periodDefaulted,
       figures: figures,
+    );
+  }
+
+  // ----------------------------------------------------------- exchange
+
+  /// One figure per currency pair, in both currencies; never summed across
+  /// pairs. The bank rate comes from the legs.
+  Future<AskAnswer> _exchange(AskSlots s, ChartPeriod p) async {
+    final pairs = await charts.exchangePairs(p, accountIds: s.accountIds);
+    final given = <String, Money>{};
+    final received = <String, Money>{};
+    for (final x in pairs) {
+      final k = '${x.given.currency.code}>${x.received.currency.code}';
+      given[k] = (given[k] ?? Money.zero(x.given.currency)) + x.given;
+      received[k] =
+          (received[k] ?? Money.zero(x.received.currency)) + x.received;
+    }
+    if (given.isEmpty) {
+      return const AskNoDataAnswer(
+        AskIntent.exchange,
+        AskNoDataReason.noTransactions,
+      );
+    }
+    final keys = given.keys.toList()..sort();
+    return AskExchangeAnswer(
+      period: p,
+      periodDefaulted: s.periodDefaulted,
+      figures: [
+        for (final k in keys)
+          AskExchangeFigure(given: given[k]!, received: received[k]!),
+      ],
     );
   }
 

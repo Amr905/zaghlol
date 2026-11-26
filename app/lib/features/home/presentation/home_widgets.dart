@@ -154,7 +154,7 @@ class HomeHero extends StatelessWidget {
 
   /// Share of the budget (or, without one, of the income) already spent.
   static double _progress(HomeCurrencyFigures f) {
-    final base = f.overview.budget ?? f.income;
+    final base = f.overview.budget ?? f.moneyIn;
     if (!base.isPositive) return 0;
     final spent = f.spend.minor;
     return (spent / base.minor).clamp(0.0, 1.0).toDouble();
@@ -198,13 +198,24 @@ class HomeKpis extends StatelessWidget {
               Expanded(
                 child: _Kpi(
                   label: l.homeHeroKpiIncome,
-                  text: format.number(figures.income),
+                  // T-272 (D-86): money in = income + exchanged in.
+                  text: format.number(figures.moneyIn),
+                  note: figures.exchangedIn.isPositive
+                      ? l.homeHeroKpiIncomeFromExchange(
+                          format.number(figures.exchangedIn),
+                        )
+                      : null,
                 ),
               ),
               Expanded(
                 child: _Kpi(
                   label: l.homeHeroKpiSpent,
                   text: format.number(figures.spend),
+                  note: figures.exchangedOut.isPositive
+                      ? l.homeHeroKpiExchangedOut(
+                          format.number(figures.exchangedOut),
+                        )
+                      : null,
                   onTap: onSpentTap,
                 ),
               ),
@@ -223,10 +234,14 @@ class HomeKpis extends StatelessWidget {
 }
 
 class _Kpi extends StatelessWidget {
-  const _Kpi({required this.label, required this.text, this.onTap});
+  const _Kpi({required this.label, required this.text, this.note, this.onTap});
 
   final String label;
   final String text;
+
+  /// A muted line under the figure (T-272: the exchanged part); none when
+  /// null, so the layout without exchanges is unchanged.
+  final String? note;
   final VoidCallback? onTap;
 
   @override
@@ -237,7 +252,10 @@ class _Kpi extends StatelessWidget {
       borderRadius: BorderRadius.circular(ZRadius.md),
       child: Semantics(
         container: true,
-        label: a11yAmounts(AppLocalizations.of(context), '$label, $text'),
+        label: a11yAmounts(
+          AppLocalizations.of(context),
+          note == null ? '$label, $text' : '$label, $text, $note',
+        ),
         excludeSemantics: true,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,40 +283,15 @@ class _Kpi extends StatelessWidget {
                 ),
               ),
             ),
+            if (note case final n?)
+              Text(
+                n,
+                style: ZType.bodySmall.copyWith(color: c.textMuted),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Pager dots for the currency pages.
-class HomePagerDots extends StatelessWidget {
-  const HomePagerDots({super.key, required this.count, required this.index});
-
-  final int count;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = ZColors.of(context);
-    return ExcludeSemantics(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (var i = 0; i < count; i++)
-            Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsetsDirectional.symmetric(
-                horizontal: ZSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: i == index ? c.primary : c.outline,
-              ),
-            ),
-        ],
       ),
     );
   }

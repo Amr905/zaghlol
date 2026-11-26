@@ -26,7 +26,9 @@ import '../../../transfers/presentation/split_sheet.dart';
 import '../detail/transaction_detail_screen.dart';
 import '../edit/transaction_edit_screen.dart';
 import '../../../accounts/presentation/account_type.dart';
+import '../../domain/exchange.dart';
 import '../../domain/transaction.dart';
+import 'txn_exchange_row.dart';
 import 'txn_filter_sheets.dart';
 import 'txn_list_providers.dart';
 import 'txn_row.dart';
@@ -140,7 +142,9 @@ class _State extends ConsumerState<TransactionsListScreen> {
               : null,
           title: Text(
             sel.active
-                ? l.transactionsListSelectedTitle(fmt.count(sel.ids.length))
+                ? l.transactionsListSelectedTitle(
+                    fmt.count(_selectedRowCount(sel.ids)),
+                  )
                 : l.transactionsListTitle,
           ),
           actions: [
@@ -172,6 +176,9 @@ class _State extends ConsumerState<TransactionsListScreen> {
         bottomNavigationBar: sel.active
             ? _ActionBar(
                 enabled: sel.ids.isNotEmpty,
+                // T-286 (FU-384): an exchange has no category, and moving
+                // one leg to another card would split it.
+                exchangeSelected: _hasLoadedExchange(sel.ids),
                 onCategory: () => _bulkCategory(fmt),
                 onAccount: () => _bulkAccount(fmt),
                 onDelete: () => _bulkDelete(fmt),
@@ -239,8 +246,11 @@ class _State extends ConsumerState<TransactionsListScreen> {
     CivilDate today,
   ) {
     final l = AppLocalizations.of(context);
+    // T-281: an exchange is one row, where its first loaded leg is.
+    final exchanges =
+        ref.watch(txnExchangesProvider).value ?? const <String, TxnExchange>{};
     final groups = <(CivilDate, List<TransactionRecord>)>[];
-    for (final t in state.items) {
+    for (final t in collapseExchangeLegs(state.items, exchanges)) {
       final d = CivilDate.fromLocalMs(
         t.occurredAt.millisecondsSinceEpoch,
         t.occurredTzOffsetMin,
@@ -283,23 +293,42 @@ class _State extends ConsumerState<TransactionsListScreen> {
                 child: Column(
                   children: [
                     for (var j = 0; j < rows.length; j++)
-                      TxnRow(
-                        key: ValueKey(rows[j].id),
-                        txn: rows[j],
-                        lookups: lookups,
-                        fmt: fmt,
-                        divider: j > 0,
-                        selecting: sel.active,
-                        selected: sel.ids.contains(rows[j].id),
-                        onTap: () => sel.active
-                            ? notifier.toggle(rows[j].id)
-                            : (widget.onOpenTransaction ?? _openDetail)(
-                                rows[j].id,
-                              ),
-                        onLongPress: () => sel.active
-                            ? notifier.toggle(rows[j].id)
-                            : notifier.enter(rows[j].id),
-                      ),
+                      if (exchanges[rows[j].id] case final x?)
+                        TxnExchangeRow(
+                          key: ValueKey(rows[j].id),
+                          exchange: x,
+                          fmt: fmt,
+                          divider: j > 0,
+                          selecting: sel.active,
+                          selected: sel.ids.contains(rows[j].id),
+                          // T-286 (FU-384): the row selects both legs.
+                          onTap: () => sel.active
+                              ? notifier.toggleAll(_legs(x))
+                              : (widget.onOpenTransaction ?? _openDetail)(
+                                  rows[j].id,
+                                ),
+                          onLongPress: () => sel.active
+                              ? notifier.toggleAll(_legs(x))
+                              : notifier.setAll(_legs(x)),
+                        )
+                      else
+                        TxnRow(
+                          key: ValueKey(rows[j].id),
+                          txn: rows[j],
+                          lookups: lookups,
+                          fmt: fmt,
+                          divider: j > 0,
+                          selecting: sel.active,
+                          selected: sel.ids.contains(rows[j].id),
+                          onTap: () => sel.active
+                              ? notifier.toggle(rows[j].id)
+                              : (widget.onOpenTransaction ?? _openDetail)(
+                                  rows[j].id,
+                                ),
+                          onLongPress: () => sel.active
+                              ? notifier.toggle(rows[j].id)
+                              : notifier.enter(rows[j].id),
+                        ),
                   ],
                 ),
               ),
@@ -326,12 +355,68 @@ class _State extends ConsumerState<TransactionsListScreen> {
 
   Future<void> _selectAll() async {
     final ids = await ref.read(txnListProvider.notifier).allMatchingIds();
-    ref.read(txnSelectionProvider.notifier).setAll(ids);
+    // T-286 (FU-384): under a currency filter only one leg of an exchange
+    // matches; select its other leg too so the row stays one unit.
+    final exchanges = await _exchangesOf(ids);
+    ref.read(txnSelectionProvider.notifier).setAll({
+      ...ids,
+      for (final x in exchanges.values) ..._legs(x),
+    });
+  }
+
+  static Set<String> _legs(TxnExchange x) => {x.sent.id, x.received.id};
+
+  /// FU-390: selected rows for the title; both legs of an exchange are one row.
+  int _selectedRowCount(Set<String> ids) {
+    final loaded = ref.watch(txnExchangesProvider).value;
+    if (loaded == null) return ids.length;
+    final pairs = <TxnExchange>{
+      for (final id in ids)
+        if (loaded[id] case final x?
+            when ids.contains(x.sent.id) && ids.contains(x.received.id))
+          x,
+    };
+    return ids.length - pairs.length;
+  }
+
+  /// Whether a loaded exchange leg is selected (drives the action bar).
+  bool _hasLoadedExchange(Set<String> ids) {
+    final loaded = ref.watch(txnExchangesProvider).value;
+    return loaded != null && ids.any(loaded.containsKey);
+  }
+
+  /// The exchanges touching [ids], including legs not loaded in the list.
+  Future<Map<String, TxnExchange>> _exchangesOf(Set<String> ids) async {
+    if (ids.isEmpty) return const {};
+    final lookup = await ref.read(txnExchangeLookupProvider.future);
+    return lookup(ids);
+  }
+
+  /// T-286: re-checked when Category or Card is tapped, for selected rows
+  /// that are not loaded. Shows the reason and returns true when the
+  /// selection holds an exchange.
+  Future<bool> _refuseExchange() async {
+    final l = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final found = await _exchangesOf({...ref.read(txnSelectionProvider).ids});
+      if (found.isEmpty) return false;
+    } on SafeException {
+      messenger.showSnackBar(SnackBar(content: Text(l.commonErrorLoadFailed)));
+      return true;
+    }
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(content: Text(l.transactionsListBulkExchangeLocked)),
+      );
+    return true;
   }
 
   // Bulk actions -----------------------------------------------------------
 
   Future<void> _bulkCategory(TxnFmt fmt) async {
+    if (await _refuseExchange() || !mounted) return;
     final lookups = await ref.read(txnLookupsProvider.future);
     if (!mounted) return;
     final pick = await showBulkCategorySheet(
@@ -349,6 +434,7 @@ class _State extends ConsumerState<TransactionsListScreen> {
   }
 
   Future<void> _bulkAccount(TxnFmt fmt) async {
+    if (await _refuseExchange() || !mounted) return;
     final lookups = await ref.read(txnLookupsProvider.future);
     if (!mounted) return;
     final id = await showBulkAccountSheet(
@@ -691,12 +777,16 @@ class _FilterBar extends ConsumerWidget {
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.enabled,
+    required this.exchangeSelected,
     required this.onCategory,
     required this.onAccount,
     required this.onDelete,
     required this.onCancel,
   });
   final bool enabled;
+
+  /// T-286: Category and Card are off, with the reason shown above.
+  final bool exchangeSelected;
   final VoidCallback onCategory;
   final VoidCallback onAccount;
   final VoidCallback onDelete;
@@ -738,31 +828,57 @@ class _ActionBar extends StatelessWidget {
             ),
           ),
         );
+    final edits = enabled && !exchangeSelected;
     return Material(
       color: c.surface,
       elevation: 8,
       child: SafeArea(
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            item(
-              'bulk-category',
-              Icons.category_outlined,
-              l.transactionsListBulkCategory,
-              enabled ? onCategory : null,
+            if (exchangeSelected)
+              Padding(
+                key: const ValueKey('bulk-exchange-reason'),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  ZSpacing.lg,
+                  ZSpacing.sm,
+                  ZSpacing.lg,
+                  0,
+                ),
+                child: Text(
+                  l.transactionsListBulkExchangeLocked,
+                  style: ZType.caption.copyWith(color: c.textMuted),
+                ),
+              ),
+            Row(
+              children: [
+                item(
+                  'bulk-category',
+                  Icons.category_outlined,
+                  l.transactionsListBulkCategory,
+                  edits ? onCategory : null,
+                ),
+                item(
+                  'bulk-account',
+                  Icons.credit_card,
+                  l.transactionsListBulkAccount,
+                  edits ? onAccount : null,
+                ),
+                item(
+                  'bulk-delete',
+                  Icons.delete_outline,
+                  l.commonActionDelete,
+                  enabled ? onDelete : null,
+                ),
+                item(
+                  'bulk-cancel',
+                  Icons.close,
+                  l.commonActionCancel,
+                  onCancel,
+                ),
+              ],
             ),
-            item(
-              'bulk-account',
-              Icons.credit_card,
-              l.transactionsListBulkAccount,
-              enabled ? onAccount : null,
-            ),
-            item(
-              'bulk-delete',
-              Icons.delete_outline,
-              l.commonActionDelete,
-              enabled ? onDelete : null,
-            ),
-            item('bulk-cancel', Icons.close, l.commonActionCancel, onCancel),
           ],
         ),
       ),

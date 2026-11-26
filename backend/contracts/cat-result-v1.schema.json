@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zaghlol.app/contracts/cat-result-v1.schema.json",
+  "$comment": "cat-result/1. Structured output of POST /v1/categorise (docs/03-technical/llm-categorise.md section 3): index-based, so no merchant name is echoed and no free text exists. RUNTIME INJECTION: $defs/CategoryCode.enum is a default only. The backend rebuilds it per catalog version from the live system top-level category codes plus 'unknown' (custom categories are never sent) and caches the result; the list here is the 16 seeded codes. i is the zero-based index of the merchant in the request, at most 20 per call (cat.batch_max, which may be lowered by remote config but never raised above 20 without a new schema); the backend checks range and uniqueness itself (step 6 of the server order) because uniqueItems is not used. p is the model's confidence 0..100. PROVIDER KEYWORD SUBSET: type, properties, required, additionalProperties:false, enum, $defs/$ref, minimum, maximum, minItems, maxItems only; no oneOf, allOf, not, const, uniqueItems, minLength, maxLength, pattern, format. Exceptions: $schema, $id and this $comment are stripped before sending. Anthropic ignores minimum/maximum/maxItems (an adapter moves them into descriptions; the backend validation is authoritative). max_output_tokens = 25 * n + 20 for a batch of n names.",
+  "title": "cat-result/1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "r"
+  ],
+  "properties": {
+    "r": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/Result"
+      }
+    }
+  },
+  "$defs": {
+    "CategoryCode": {
+      "type": "string",
+      "enum": [
+        "groceries",
+        "dining",
+        "transport",
+        "bills",
+        "housing",
+        "shopping",
+        "debt",
+        "subscriptions",
+        "health",
+        "education",
+        "entertainment",
+        "family_giving",
+        "savings",
+        "income",
+        "cash",
+        "instapay",
+        "unknown"
+      ]
+    },
+    "Result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "i",
+        "c",
+        "p"
+      ],
+      "properties": {
+        "i": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 19
+        },
+        "c": {
+          "$ref": "#/$defs/CategoryCode"
+        },
+        "p": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    }
+  }
+}

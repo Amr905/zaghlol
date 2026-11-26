@@ -33,6 +33,12 @@ class SpeechToTextPort implements SpeechPort {
   SpeechSink? _sink;
   bool _ended = false;
 
+  /// The recognizer has said "listening" for the session in [_sink]. The
+  /// plugin is a singleton and Android reports the previous session's
+  /// "notListening"/"done" (from the cancel when the screen closed) late, so
+  /// without this the new recording ended at once with an empty transcript.
+  bool _heard = false;
+
   Future<bool> _ensureInit() => _stt.initialize(
     onError: _onError,
     onStatus: _onStatus,
@@ -49,6 +55,7 @@ class SpeechToTextPort implements SpeechPort {
   }) async {
     _sink = sink;
     _ended = false;
+    _heard = false;
     try {
       if (!await _ensureInit()) {
         return await _stt.hasPermission
@@ -84,6 +91,11 @@ class SpeechToTextPort implements SpeechPort {
   }
 
   void _onStatus(String status) {
+    if (status == 'listening') {
+      _heard = true;
+      return;
+    }
+    if (!_heard) return; // stale event from an earlier session
     if ((status == 'done' || status == 'notListening') && !_ended) {
       _ended = true;
       _sink?.onEnded();
@@ -91,6 +103,18 @@ class SpeechToTextPort implements SpeechPort {
   }
 
   void _onError(SpeechRecognitionError e) {
+    // A "nothing heard" / timeout error before this session started listening
+    // belongs to the cancelled one.
+    // Covers only the window between start() and the plugin's first
+    // 'listening' status (on Android that arrives at once, so the window is
+    // short); a stale error after that is left to the quick retry.
+    if (!_heard &&
+        (e.errorMsg == 'error_no_match' ||
+            e.errorMsg == 'error_speech_timeout' ||
+            e.errorMsg == 'error_client' ||
+            e.errorMsg == 'error_busy')) {
+      return;
+    }
     final err = switch (e.errorMsg) {
       'error_language_unavailable' ||
       'error_language_not_supported' ||

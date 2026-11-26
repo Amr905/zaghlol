@@ -45,6 +45,9 @@
   "homeQuickAddTypeHint": "An expense or income",
   "homeQuickAddScanHint": "A screenshot or receipt",
   "homeQuickAddAssetHint": "Gold, certificate, currency",
+  "homeQuickAddExchange": "I exchanged currency",
+  "homeQuickAddExchangeHint": "From one currency to another",
+  "homeQuickAddExchangeA11y": "Record a currency exchange",
   "ingestionReviewTitle": "Needs your review 👀",
   "notificationsChannelName": "Alerts",
   "@notificationsChannelName": {
@@ -344,6 +347,30 @@
   "homeHeroKpiIncome": "Income",
   "homeHeroKpiSpent": "Spent",
   "homeHeroKpiLeft": "Left",
+  "homeHeroKpiIncomeFromExchange": "incl. {amount} exchanged in",
+  "homeHeroKpiExchangedOut": "+ {amount} exchanged",
+  "currencyViewTitle": "This month in {currency}",
+  "currencyViewEmptyTitle": "Nothing in this currency this month",
+  "currencyViewEmptyBody": "Once you earn or spend in it, it shows up here.",
+  "currencyViewBudgetOffer": "Want a {currency} budget?",
+  "homeCurrencyCardsTitle": "Other currencies",
+  "homeCurrencyCardLeft": "{amount} left",
+  "homeCurrencyCardInOut": "In {income} · Out {out}",
+  "homeCurrencyCardMore": "+{count}",
+  "homeCurrencyCardMoreA11y": "{count, plural, =1{1 more currency} other{{n} more currencies}}",
+  "homeCurrencyCardA11y": "{currency}: {left} left. In {income}, out {out}. Tap to open this month in that currency",
+  "exchangeEntryTitle": "Currency exchange",
+  "exchangeEntryIntro": "An exchange isn't spending or income. Each side counts in its own currency.",
+  "exchangeEntrySent": "You gave",
+  "exchangeEntryReceived": "You got",
+  "exchangeEntryAccount": "Account",
+  "exchangeEntryCurrency": "Currency",
+  "exchangeEntryDate": "Date",
+  "exchangeEntryRate": "Rate: 1 {from} = {rate} {to}",
+  "exchangeEntrySameCurrency": "Pick two different currencies",
+  "exchangeEntrySave": "Save exchange",
+  "exchangeEntrySaved": "Exchange saved",
+  "exchangeEntryFailed": "Couldn't save the exchange. Try again.",
   "homeHeroApproxTitle": "Everything, roughly in {currency}",
   "homeHeroSummaryA11y": "Safe to spend today: {amount}. {payday}. Income {income}, spent {spent}, left {left}.",
   "homeMascotShockedCategory": "Heads up! {category} is at {percent} of its budget and the month's still young.",
@@ -359,6 +386,119 @@
   "homeMascotProudSavedMore": "Look at you! {amount} more saved than last month 👏",
   "homeMascotProudGoal": "Goal hit this month! 🎯 You've got this",
   "homeMascotPayday": "Payday! {amount} just landed 🎉 Let's plan it from day one",
+  "homeApproxLine": "≈ {amount} in, all currencies",
+  "@homeApproxLine": {
+    "description": "L · T-280, home.approx.line",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxLineA11y": "Approximate: {amount} in, all currencies",
+  "@homeApproxLineA11y": {
+    "description": "A · read before the amount; tap opens the sheet",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBoth": "Bank rate + rate of {date}",
+  "@homeApproxRateNoteBoth": {
+    "description": "S · bank rate for the exchanged part, daily rate for the rest",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteDaily": "Rate of {date}",
+  "@homeApproxRateNoteDaily": {
+    "description": "S · only the daily rate was used",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxRateNoteBank": "Bank rate",
+  "@homeApproxRateNoteBank": {
+    "description": "S · everything foreign was already exchanged"
+  },
+  "homeApproxStale": "Old rate",
+  "@homeApproxStale": {
+    "description": "S · a daily rate older than 24 h"
+  },
+  "homeApproxSheetTitle": "This total is approximate",
+  "@homeApproxSheetTitle": {
+    "description": "T"
+  },
+  "homeApproxSheetBody": "We use your bank's rate for what you exchanged and today's rate for the rest. Your money stays saved in its own currency.",
+  "@homeApproxSheetBody": {
+    "description": "B"
+  },
+  "homeApproxSheetOwn": "Already in this currency (incl. what you exchanged)",
+  "@homeApproxSheetOwn": {
+    "description": "L · the target currency's own money in"
+  },
+  "homeApproxSheetHeld": "{amount} still held",
+  "@homeApproxSheetHeld": {
+    "description": "L · the part of a foreign currency not exchanged",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchanged": "{amount} exchanged, already counted once",
+  "@homeApproxSheetExchanged": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetExchangedBank": "{amount} exchanged at the bank rate {rate}, already counted once",
+  "@homeApproxSheetExchangedBank": {
+    "description": "S",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeApproxSheetDailyRate": "Rate of {date}: 1 {from} = {rate}",
+  "@homeApproxSheetDailyRate": {
+    "description": "S",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMascotFirstForeign": "You've got money in another currency! It stays on its own card. When you exchange it, your EGP month grows by exactly what you got.",
+  "@homeMascotFirstForeign": {
+    "description": "M · Captain, Proud coach; mascot.fx.firstForeign"
+  },
+  "homeApproxNoticeOff": "Turn it off",
+  "@homeApproxNoticeOff": {
+    "description": "C · turns the ≈ line off"
+  },
+  "homeApproxNoticeOk": "Got it",
+  "@homeApproxNoticeOk": {
+    "description": "C · dismisses the notice"
+  },
   "homeMascotDismissA11y": "Dismiss message",
   "homePromptPayday": "I spotted a salary of {amount} landing on day {day} each month. Is that your payday?",
   "homePromptPaydayYes": "Yes, day {day}",
@@ -390,6 +530,10 @@
   "homeEmptyFilter": "No transactions for {cards} this month",
   "transactionsRowSubtitle": "{card} · {time} · {source}",
   "transactionsRowInternalTitle": "To yourself",
+  "transactionsExchangeTitle": "Exchanged {from} → {to}",
+  "transactionsExchangeRate": "Bank rate {rate} · not spending",
+  "transactionsExchangeNotSpending": "Not spending",
+  "transactionsExchangeRowA11y": "Currency exchange: you gave {from} and got {to}, {rate}, {time}",
   "transactionsInstapayTitle": "InstaPay",
   "transactionsInstapayTo": "To {name}",
   "transactionsInstapayFrom": "From {name}",
@@ -425,6 +569,7 @@
   "transactionsListSelectedTitle": "{n} selected",
   "transactionsListBulkCategory": "Category",
   "transactionsListBulkAccount": "Card",
+  "transactionsListBulkExchangeLocked": "An exchange has no category and can't move to another card on its own. You can still delete it.",
   "transactionsListBulkRule": "Always use this for these merchants",
   "transactionsListBulkChanged": "{count, plural, =1{1 transaction updated} other{{n} transactions updated}}",
   "transactionsListBulkDeleteTitle": "{count, plural, =1{Delete 1 transaction?} other{Delete {n} transactions?}}",
@@ -467,6 +612,16 @@
   "transactionsDetailDeleteBodyManual": "You won't be able to get it back.",
   "transactionsDetailDeleted": "Deleted",
   "transactionsDetailGone": "This transaction no longer exists",
+  "transactionsExchangeBanner": "Currency exchange — not counted as spending or income",
+  "transactionsExchangeFieldSent": "You gave",
+  "transactionsExchangeFieldReceived": "You got",
+  "transactionsExchangeFieldFrom": "From",
+  "transactionsExchangeFieldTo": "Into",
+  "transactionsExchangeFieldRate": "Bank rate",
+  "transactionsExchangeRateValue": "{one} {from} = {rate} {to}",
+  "transactionsExchangeDeleteTitle": "Delete this exchange?",
+  "transactionsExchangeDeleteBody": "Both sides are deleted together.",
+  "transactionsExchangeDeleted": "Exchange deleted",
   "categorizationRuleTitle": "Always use {category} for {merchant}?",
   "categorizationRuleAlways": "Always",
   "categorizationRuleOnce": "Just this once",
@@ -529,6 +684,9 @@
   "ingestionReviewOldDueKeep": "Keep",
   "ingestionReviewOldDueRemoved": "Removed from your spending",
   "ingestionReviewOldDueKept": "OK, it stays as it is",
+  "ingestionReviewExchangeJumpQuestion": "Did you exchange currency? Your {currency} balance rose by about {amount} and no money in was seen.",
+  "ingestionReviewExchangeJumpYes": "Yes, record it",
+  "ingestionReviewExchangeJumpNo": "No",
   "ingestionReviewOldDueAlreadyHandled": "Already handled, nothing to do here",
   "ingestionReviewEmptyTitle": "All clear! Nothing to review ✨",
   "ingestionAlwaysSenderTitle": "Always capture messages from {sender}?",
@@ -974,6 +1132,39 @@
   "@mascotPaydayLine": {
     "description": "M · Rive payday · Home bubble when a salary lands (once per payday)"
   },
+  "mascotTipUseScan": "Got a paper receipt? Snap it from the Add button and I'll read the amount and the shop 📸",
+  "mascotTipUseShare": "Spotted a receipt or screenshot? Share it to Zaghlol from the share menu and I'll take it from there",
+  "mascotTipUseSay": "Tired of typing? Tap Add, pick Say, and just tell me what you spent 🎤",
+  "mascotTipUseLinkCard": "Link your debit card to its account and card purchases come out of that balance, counted once",
+  "mascotTipUsePayday": "Not paid on the 1st? Set your payday and I'll line the month up with your salary",
+  "mascotTipUseStatement": "Have a bank statement? Add it and I'll read it and bring back past months (CIB, NBE, Banque Misr, QNB)",
+  "mascotTipUseReview": "Some items waiting on you? In Review you can Keep, Edit or Ignore each one 👀",
+  "mascotTipUseSearchPerson": "Looking for an InstaPay transfer? Type the person's name in search and it shows up",
+  "mascotTipUseHide": "Someone peeking? Tap the eye at the top and the amounts disappear 🙈",
+  "mascotTipUseBudget": "Set a budget for each category and I'll show you how much is left of each",
+  "mascotTipUseSalary": "Tell me your salary once and I'll spot when it lands and count your month from payday",
+  "mascotTipUseAsk": "Ask me in the Zaghlol tab: \"How much did I spend on food this month?\" and I'll answer",
+  "mascotTipUseDue": "Got a credit card? Tell me the limit and due date and I'll remind you a few days before",
+  "mascotTipUseInsights": "Wondering where your money goes? Open Insights for the charts 📊",
+  "mascotTipSmartAsk": "Ask me in plain words: \"How much did I spend on food this month?\" I answer from the data on your phone",
+  "mascotTipSmartVoice": "I understand Egyptian! Say \"paid 150 for veggies and 45 for coffee\" and I log both 🎤",
+  "mascotTipSmartSms": "When a bank message reaches me I read it and log the item myself, and your data stays on your phone",
+  "mascotTipSmartCategory": "Change a shop's category once and I remember it for next time",
+  "mascotTipSmartDue": "If a card message has a due date, I'll remind you before it, no typing needed",
+  "mascotTipSmartPayday": "When your salary lands I spot it, line your month up with it, and cheer 🎉",
+  "mascotTipSmartDuplicate": "If the same charge shows up twice within minutes, I'll flag it before it counts double",
+  "mascotTipSmartReceipt": "I read a photographed receipt: shop, amount and date. You just confirm 👌",
+  "mascotTipSmartInstapay": "InstaPay transfers show the person's name, so you can see who paid whom at a glance",
+  "mascotTipSmartTransfer": "When you move money between your own accounts, I know it's not spending 👌",
+  "mascotTipHabitCoffee": "Small coffees add up by month end. I'm not saying anything, just counting ☕",
+  "mascotTipHabitPigeon": "I'm a pigeon who loves seeds, you love delivery. Everyone's got a weakness 😄",
+  "mascotTipHabitCheck": "One minute a day looking at your spending beats an hour at month end",
+  "mascotTipHabitSale": "A big discount isn't a saving if you never planned to buy it 😉",
+  "mascotTipHabitSmall": "Every pound saved grows Zaghlol a new feather 🪶",
+  "mascotTipHabitWait": "Wait a day before a big want. If you still want it, enjoy it 🛍️",
+  "mascotTipHabitTreat": "Treating yourself is allowed. Just keep count and nobody gets upset 😄",
+  "mascotTipHabitSubs": "Lots of subscriptions? Look them over now and then, one might be forgotten 👀",
+  "mascotTipShowMe": "Show me",
   "insightsTabsCharts": "Charts",
   "@insightsTabsCharts": {
     "description": "C · C-35 segment 1"
@@ -4141,6 +4332,17 @@
       "percent": {
         "type": "String"
       }
+    }
+  },
+  "chatAnswerExchange": "{span} you exchanged {given} for {received}. Bank rate: 1 {unit} = {rate}.",
+  "@chatAnswerExchange": {
+    "description": "E · how much the user exchanged (T-282): span, given, received, unit (currency code), rate (a money amount).",
+    "placeholders": {
+      "span": {"type": "String"},
+      "given": {"type": "String"},
+      "received": {"type": "String"},
+      "unit": {"type": "String"},
+      "rate": {"type": "String"}
     }
   },
   "chatAnswerSpendCard": "You spent {amount} on {card} {span}.",
@@ -9091,6 +9293,19 @@
       }
     }
   },
+  "insightsV2TrendsLegendExchangeIn": "Exchanged in",
+  "@insightsV2TrendsLegendExchangeIn": {"description": "T-283 legend"},
+  "insightsV2TrendsLegendExchangeOut": "Exchanged out",
+  "@insightsV2TrendsLegendExchangeOut": {"description": "T-283 legend"},
+  "insightsV2TrendsInOutExchangeA11y": "{month}, currency exchange: in {inAmount}, out {outAmount}",
+  "@insightsV2TrendsInOutExchangeA11y": {
+    "description": "T-283",
+    "placeholders": {
+      "month": {"type": "String"},
+      "inAmount": {"type": "String"},
+      "outAmount": {"type": "String"}
+    }
+  },
   "insightsV2TrendsInOutBarA11y": "{month}: income {income}, spent {spend}",
   "@insightsV2TrendsInOutBarA11y": {
     "description": "T-211 Charts v2 · one month",
@@ -9294,5 +9509,766 @@
   "accountsDetailDueAmount": "Due {amount} by {date}",
   "accountsDetailDueMin": "Minimum {min} due by {date}",
   "accountsDetailDueRemaining": "Still to pay on the minimum: {amount}",
-  "accountsDetailDuePaid": "This statement is paid"
+  "accountsDetailDuePaid": "This statement is paid",
+  "chatLlmInputHint": "Ask in your own words…",
+  "@chatLlmInputHint": {
+    "description": "L · replaces chat_main_inputHint while ask_llm is on"
+  },
+  "chatLlmInputCounter": "{n}/{max}",
+  "@chatLlmInputCounter": {
+    "description": "C · shown from 250 typed characters; max = 300 (FR-LLM-17)",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatLlmInputStop": "Stop",
+  "@chatLlmInputStop": {
+    "description": "B · replaces Send while a question is out (FR-LLM-52)"
+  },
+  "chatLlmInputStopA11y": "Stop the question",
+  "@chatLlmInputStopA11y": {
+    "description": "A"
+  },
+  "chatQuotaRemaining": "{count, plural, =0{No questions left} =1{1 question left} other{{n} questions left}}",
+  "@chatQuotaRemaining": {
+    "description": "L · count:int, n · beside the input, value from the last backend reply (FR-LLM-12); hidden when paused",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatQuotaRemainingA11y": "{count, plural, =0{No online questions left this month} =1{1 online question left this month} other{{n} online questions left this month}}",
+  "@chatQuotaRemainingA11y": {
+    "description": "A · count:int, n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatQuotaUnknown": "—",
+  "@chatQuotaUnknown": {
+    "description": "C · before the first backend reply (FR-LLM-12)"
+  },
+  "chatQuotaUnknownA11y": "The count shows after your first online question",
+  "@chatQuotaUnknownA11y": {
+    "description": "A"
+  },
+  "chatQuotaInfoTitle": "Online questions",
+  "@chatQuotaInfoTitle": {
+    "description": "T · sheet opened by tapping the counter"
+  },
+  "chatQuotaInfoBody": "Questions I answer on your phone are free and unlimited. Questions that need the online helper have a monthly count that resets on the 1st.",
+  "@chatQuotaInfoBody": {
+    "description": "E"
+  },
+  "chatQuotaLastOne": "This is your last online question this month",
+  "@chatQuotaLastOne": {
+    "description": "N · under the input when 1 is left"
+  },
+  "chatQuotaFreeOut": "You've used this month's free online questions. I can still answer the usual ones from your phone, and the count resets on {date}.",
+  "@chatQuotaFreeOut": {
+    "description": "E · Free at the limit (FR-LLM-13), Rive tourGuide still; followed by chat_quota_goldHint and chat_llmStatus_notQueued",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chatQuotaGoldHint": "{count, plural, =1{Gold gives you 1 question a month.} other{Gold gives you {n} questions a month.}}",
+  "@chatQuotaGoldHint": {
+    "description": "S · count:int = ask.quota_gold, n · Free only, plus chat_quota_seeGold",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatQuotaSeeGold": "See Gold",
+  "@chatQuotaSeeGold": {
+    "description": "L · text button, opens S-68 (counts toward FR-GOLD-05 only when the paywall opens)"
+  },
+  "chatQuotaGoldOut": "You've used this month's online questions. They reset on {date}. Until then I'll answer the usual ones from your phone.",
+  "@chatQuotaGoldOut": {
+    "description": "E · Gold at the limit; date = 1st of next month, locale format",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "chatConsentTitle": "This one needs the online helper",
+  "@chatConsentTitle": {
+    "description": "T"
+  },
+  "chatConsentIntro": "I can't answer it on your phone alone. If you allow it, I'll send the question text to Zaghlol's server and {aiProvider} so they can understand it. All the maths happens on your phone.",
+  "@chatConsentIntro": {
+    "description": "E · never says \"no server\" (tone gate 4)",
+    "placeholders": {
+      "aiProvider": {
+        "type": "String"
+      }
+    }
+  },
+  "chatConsentPreviewTitle": "Exactly what will be sent",
+  "@chatConsentPreviewTitle": {
+    "description": "L · above the masked preview (same rendering as §4.4)"
+  },
+  "chatConsentSendsTitle": "What's sent",
+  "@chatConsentSendsTitle": {
+    "description": "L"
+  },
+  "chatConsentSends": "Your question goes without your account, card and bank names, and without the names of places you shop that Zaghlol recognises. Anything else you type, like an amount, goes as typed.",
+  "@chatConsentSends": {
+    "description": "E · FR-LLM-09 wording"
+  },
+  "chatConsentNeverTitle": "Never sent",
+  "@chatConsentNeverTitle": {
+    "description": "L"
+  },
+  "chatConsentNever": "Your transactions, balances, budgets and bank messages. None of it leaves your phone.",
+  "@chatConsentNever": {
+    "description": "S"
+  },
+  "chatConsentStorage": "Zaghlol's server doesn't keep your question, and {aiProvider} doesn't learn from it. Details are in the privacy policy.",
+  "@chatConsentStorage": {
+    "description": "S · FR-LLM-32/33; wording to legal with the policy section",
+    "placeholders": {
+      "aiProvider": {
+        "type": "String"
+      }
+    }
+  },
+  "chatConsentQuota": "{count, plural, =1{You get 1 online question a month. Questions I answer on your phone don't count.} other{You get {n} online questions a month. Questions I answer on your phone don't count.}}",
+  "@chatConsentQuota": {
+    "description": "S · count:int = the tier quota (5 Free, 50 Gold), n",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatConsentAllow": "Allow and send",
+  "@chatConsentAllow": {
+    "description": "B · stores ask.llm_consent, then sends"
+  },
+  "chatConsentSettingsHint": "You can turn it off any time in Privacy & data.",
+  "@chatConsentSettingsHint": {
+    "description": "S"
+  },
+  "chatConsentDeclined": "No problem, your question wasn't sent. Try one of these:",
+  "@chatConsentDeclined": {
+    "description": "M · Rive tourGuide; three chips follow (FR-CHAT-05)"
+  },
+  "chatLlmStatusSending": "Sending just your question…",
+  "@chatLlmStatusSending": {
+    "description": "L · Rive thinking (D-35), from 300 ms"
+  },
+  "chatLlmStatusComputing": "Working it out on your phone…",
+  "@chatLlmStatusComputing": {
+    "description": "L · after the plan arrives, while the phone computes"
+  },
+  "chatLlmStatusThinkingA11y": "Zaghlol is thinking. Only your question was sent",
+  "@chatLlmStatusThinkingA11y": {
+    "description": "A · live region"
+  },
+  "chatLlmStatusStopped": "Question stopped.",
+  "@chatLlmStatusStopped": {
+    "description": "N"
+  },
+  "chatLlmStatusNotQueued": "Your question wasn't sent and won't be sent later.",
+  "@chatLlmStatusNotQueued": {
+    "description": "S · caption under offline and at-limit bubbles (FR-LLM-13/50)"
+  },
+  "chatLlmStatusOffline": "This one needs the internet. Ask again once you're online. Meanwhile, try these:",
+  "@chatLlmStatusOffline": {
+    "description": "M · Rive oops still; three chips (FR-LLM-50)"
+  },
+  "chatLlmStatusTimeout": "The online helper took too long. It didn't count toward your questions.",
+  "@chatLlmStatusTimeout": {
+    "description": "S · 12 s or 5xx, plus common_action_tryAgain once (FR-LLM-51)"
+  },
+  "chatLlmStatusError": "Something went wrong understanding your question. It didn't count.",
+  "@chatLlmStatusError": {
+    "description": "S · plus common_action_tryAgain"
+  },
+  "chatLlmStatusSlowDown": "That's a lot of questions in a row. Wait a minute and try again.",
+  "@chatLlmStatusSlowDown": {
+    "description": "S · HTTP 429, not counted (FR-LLM-15)"
+  },
+  "chatLlmStatusIntegrity": "I couldn't verify this copy of Zaghlol. Update it from the store or try again.",
+  "@chatLlmStatusIntegrity": {
+    "description": "S · attestation failed, not counted (FR-LLM-14)"
+  },
+  "chatLlmStatusPaused": "The online helper is resting this month. I can still answer the usual questions from your phone.",
+  "@chatLlmStatusPaused": {
+    "description": "M · Rive sleep; service_paused, counter hidden (FR-LLM-16/61)"
+  },
+  "chatSentBadge": "Online helper",
+  "@chatSentBadge": {
+    "description": "C · small label on every answer that used the LLM"
+  },
+  "chatSentBadgeA11y": "This answer used the online helper",
+  "@chatSentBadgeA11y": {
+    "description": "A"
+  },
+  "chatSentToggle": "What I sent",
+  "@chatSentToggle": {
+    "description": "L · disclosure row, collapsed by default (D-92)"
+  },
+  "chatSentTitle": "Your question exactly as it left your phone:",
+  "@chatSentTitle": {
+    "description": "S"
+  },
+  "chatSentChip": "{state, select, account{Account {n}} card{Card {n}} bank{Bank {n}} merchant{Place {n}} other{Name {n}}}",
+  "@chatSentChip": {
+    "description": "C · state:select(account/card/bank/merchant/other); n = placeholder number, digits per locale",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentChipA11y": "{state, select, account{Account {n}, its name stayed on your phone} card{Card {n}, its number stayed on your phone} bank{Bank {n}, its name stayed on your phone} merchant{Place {n}, its name stayed on your phone} other{Name {n}, it stayed on your phone}}",
+  "@chatSentChipA11y": {
+    "description": "A",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentHidden": "{state, select, phone{Phone number} email{Email} instapay{InstaPay address} number{Long number} other{Removed}}",
+  "@chatSentHidden": {
+    "description": "C · FR-LLM-03 scrub chips · state:select(phone/email/instapay/number/other)",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentChipsNote": "The boxes stand in for names. What they mean stayed on your phone.",
+  "@chatSentChipsNote": {
+    "description": "S"
+  },
+  "chatSentAlsoSent": "Also sent: the app language and version, a random app ID and a proof the phone is genuine. {aiProvider} gets only the question and the language.",
+  "@chatSentAlsoSent": {
+    "description": "E · FR-LLM-02/34",
+    "placeholders": {
+      "aiProvider": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentTextA11y": "Sent: {text}",
+  "@chatSentTextA11y": {
+    "description": "A · text = the sent question with chips read via chat_sent_chipA11y",
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSentLocal": "Answered on your phone",
+  "@chatSentLocal": {
+    "description": "L · optional caption on local answers (open question UX-ASK-03)"
+  },
+  "chatClarifyNoCard": "I can't find a card ending {last4}. Which card do you mean?",
+  "@chatClarifyNoCard": {
+    "description": "M · Rive detective still",
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifySameLast4": "You have more than one card ending {last4}. Which one?",
+  "@chatClarifySameLast4": {
+    "description": "M",
+    "placeholders": {
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifyNoBankAccount": "I can't find an account of yours at {bank}. Which account do you mean?",
+  "@chatClarifyNoBankAccount": {
+    "description": "M · registry bank, no account",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifyUnknownBank": "I don't know a bank called {bank}. Which account do you mean?",
+  "@chatClarifyUnknownBank": {
+    "description": "M · bank = the user's typed word",
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      }
+    }
+  },
+  "chatClarifyNoAccount": "I can't find that account. Which one do you mean?",
+  "@chatClarifyNoAccount": {
+    "description": "M"
+  },
+  "chatClarifyNotSent": "Your question wasn't sent and didn't count.",
+  "@chatClarifyNotSent": {
+    "description": "S · caption under every clarification"
+  },
+  "chatClarifyNotFound": "I couldn't find \"{query}\" in your transactions. Did you mean one of these?",
+  "@chatClarifyNotFound": {
+    "description": "M · FR-LLM-07 mention with no match (after a reply, so counted)",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerAverage": "Your average spend on {subject} {span}: {average} {state, select, day{a day} week{a week} other{a month}}.",
+  "@chatLlmAnswerAverage": {
+    "description": "E · PL-AVERAGE · state:select(day/week/other)",
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerFullUnits": "{state, select, day{I counted full days only, leaving out today.} week{I counted full weeks only, leaving out this week.} other{I counted full months only, leaving out this month.}}",
+  "@chatLlmAnswerFullUnits": {
+    "description": "S · state:select(day/week/other)",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerIncome": "Your income {span}: {income}.",
+  "@chatLlmAnswerIncome": {
+    "description": "E · PL-INCOME",
+    "placeholders": {
+      "income": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerBreakdown": "Where your money went {span}: {list}.",
+  "@chatLlmAnswerBreakdown": {
+    "description": "E · PL-BREAKDOWN; list = top N plus chat_llmAnswer_otherBucket",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerTopCategories": "Your top categories {span}: {list}.",
+  "@chatLlmAnswerTopCategories": {
+    "description": "E · PL-TOPN of category",
+    "placeholders": {
+      "list": {
+        "type": "String"
+      },
+      "span": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerOtherBucket": "Other",
+  "@chatLlmAnswerOtherBucket": {
+    "description": "C"
+  },
+  "chatLlmAnswerChangePct": "That's a {percent} change.",
+  "@chatLlmAnswerChangePct": {
+    "description": "S · after chat_answer_compare (PL-COMPARE)",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerSafeSpend": "You can spend {perDay} a day until payday.",
+  "@chatLlmAnswerSafeSpend": {
+    "description": "E · PL-SAFE-SPEND",
+    "placeholders": {
+      "perDay": {
+        "type": "String"
+      }
+    }
+  },
+  "chatLlmAnswerSafeSpendNone": "There's no budget yet, so I can't work out a daily amount. Set one and I'll do the maths.",
+  "@chatLlmAnswerSafeSpendNone": {
+    "description": "E · EC-24, plus budget_overview_emptyAction"
+  },
+  "chatUnitMonths": "{count, plural, =1{1 month} other{{n} months}}",
+  "@chatUnitMonths": {
+    "description": "C · count:int, n · 1–60, inserted as {months}",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatWhatIfCutPercent": "Cut {subject} by {percent} and you'd save about {monthly} a month, {amount} over {months}.",
+  "@chatWhatIfCutPercent": {
+    "description": "E · PL-WHATIF-CUT percent",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWhatIfCutAmount": "Cut {subject} by {monthly} a month and you'd save {amount} over {months}.",
+  "@chatWhatIfCutAmount": {
+    "description": "E · PL-WHATIF-CUT amount",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWhatIfCapped": "You average only {average} a month on {subject}, so that's the most you can save monthly.",
+  "@chatWhatIfCapped": {
+    "description": "S · amount > B",
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "subject": {
+        "type": "String"
+      }
+    }
+  },
+  "chatWhatIfSave": "Put aside {monthly} every month and you'll have {amount} after {months}, before any returns.",
+  "@chatWhatIfSave": {
+    "description": "E · PL-WHATIF-SAVE",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "chatWhatIfBasis": "{count, plural, =1{Based on your last full month} other{Based on the average of your last {n} full months}}",
+  "@chatWhatIfBasis": {
+    "description": "S · count:int, n · 1–3 full periods; caption under what-if and suggestions",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatWhatIfNotEnough": "There isn't a full month to work from yet. Check back at the end of the month.",
+  "@chatWhatIfNotEnough": {
+    "description": "M · Rive sleep, EC-23, no figure"
+  },
+  "chatSuggestIntro": "Here's where you could save most next month:",
+  "@chatSuggestIntro": {
+    "description": "M · Rive tourGuide; top 3 rows follow, then chat_whatIf_basis"
+  },
+  "chatSuggestAboveAverage": "{category} came to {amount} last month, {gap} above your average. Bring it back and save {gap}.",
+  "@chatSuggestAboveAverage": {
+    "description": "E · S1",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "gap": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestSubscription": "{item} costs {monthly} a month. If you don't use it, cancel it and save {monthly}.",
+  "@chatSuggestSubscription": {
+    "description": "E · S2; the user cancels, Zaghlol never does",
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "monthly": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestCreep": "{category} has gone up every month, from {startAmount} to {endAmount}. Bring it back down and save {gap}.",
+  "@chatSuggestCreep": {
+    "description": "E · S3",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "endAmount": {
+        "type": "String"
+      },
+      "gap": {
+        "type": "String"
+      },
+      "startAmount": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestCash": "{amount} of withdrawn cash isn't logged anywhere. Log it and you could save about {target}.",
+  "@chatSuggestCash": {
+    "description": "E · S4, plus chat_suggest_cashTip",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestCashTip": "Log cash as you spend it, even by voice.",
+  "@chatSuggestCashTip": {
+    "description": "S"
+  },
+  "chatSuggestSaveLabel": "Possible saving: {monthly} a month",
+  "@chatSuggestSaveLabel": {
+    "description": "L · trailing line of each row",
+    "placeholders": {
+      "monthly": {
+        "type": "String"
+      }
+    }
+  },
+  "chatSuggestNone": "Nothing obvious to trim. Your spending is on its usual track. Keep it up!",
+  "@chatSuggestNone": {
+    "description": "M · Rive proud"
+  },
+  "chatSuggestFooter": "Just suggestions. Nothing has been changed.",
+  "@chatSuggestFooter": {
+    "description": "S · OOS-04"
+  },
+  "chatInvestLead": "{state, select, saved{Last month you had {amount} left over.} whatIf{If you had saved {amount}:} other{If you had {amount}:}}",
+  "@chatInvestLead": {
+    "description": "E · state:select(saved/whatIf/other) = source",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestGold": "It could have bought about {grams} of {karat}K gold, at {price} per gram on {date}.",
+  "@chatInvestGold": {
+    "description": "E · S ≥ G; stale adds common_badge_stale",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "grams": {
+        "type": "String"
+      },
+      "karat": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestUsd": "It could have been worth ≈ {amount2}, at {rate} per dollar on {date}.",
+  "@chatInvestUsd": {
+    "description": "E · EGP source only, plus common_currency_approxCaption",
+    "placeholders": {
+      "amount2": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestCertificate": "In a savings certificate at an example rate of {exampleRate} for {months}, it could have earned about {payout} before tax and fees. The rate is an illustration, not an offer.",
+  "@chatInvestCertificate": {
+    "description": "E · EGP only; rate from ask.cd_example_rate_bp",
+    "placeholders": {
+      "exampleRate": {
+        "type": "String"
+      },
+      "months": {
+        "type": "int"
+      },
+      "payout": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestStocks": "An amount like this could be a small start in stocks in general. Learn first, and use a licensed provider.",
+  "@chatInvestStocks": {
+    "description": "E · D-93 band 100 < S < G; nothing named"
+  },
+  "chatInvestSmall": "Every pound counts. Keep going and next month will be better.",
+  "@chatInvestSmall": {
+    "description": "M · Rive proud; band 0 < S ≤ 100, plus chat_invest_suggestChip; no disclaimer needed (no instrument)"
+  },
+  "chatInvestNothingSaved": "Nothing was left over last month. Let's see where you can save next month.",
+  "@chatInvestNothingSaved": {
+    "description": "M · S ≤ 0, plus chat_invest_suggestChip; no emoji"
+  },
+  "chatInvestNoPrice": "{currency} isn't included because there's no price for it.",
+  "@chatInvestNoPrice": {
+    "description": "S · never converted",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "chatInvestGramsHiddenA11y": "Weight hidden",
+  "@chatInvestGramsHiddenA11y": {
+    "description": "A · hide-amounts on (FR-LLM-54)"
+  },
+  "chatInvestSuggestChip": "Help me save",
+  "@chatInvestSuggestChip": {
+    "description": "C · runs PL-SUGGEST on the phone directly: no request, no quota"
+  },
+  "chatInvestChip": "If I had saved?",
+  "@chatInvestChip": {
+    "description": "C · after chat_refuse_specificPick; runs PL-INVEST{savedLastPeriod} on the phone directly: no request, no quota"
+  },
+  "chatInvestDisclaimerSummary": "This is an illustration, not investment advice.",
+  "@chatInvestDisclaimerSummary": {
+    "description": "S · Egyptian summary, above the disclaimer"
+  },
+  "chatInvestDisclaimer": "These figures are an illustration only, not investment advice. Prices and returns change, and past values don't predict future ones. The final decision is yours.",
+  "@chatInvestDisclaimer": {
+    "description": "E · **simple standard Arabic** (BR-LLM-03). Legal sign-off: OQ-ASK-01"
+  },
+  "chatRefuseOffTopic": "Money is my thing 😄 Ask me about your spending or saving:",
+  "@chatRefuseOffTopic": {
+    "description": "M · Rive tourGuide; three chips"
+  },
+  "chatRefuseUnsafe": "That's not something I can help with. If you have a question about your money, I'm here.",
+  "@chatRefuseUnsafe": {
+    "description": "M · calm, still pose, no emoji"
+  },
+  "chatRefuseSupport": "If things feel heavy, talk to someone you trust. You're not alone.",
+  "@chatRefuseSupport": {
+    "description": "S · self-harm cues only; no number until legal supplies one (OQ-ASK-08)"
+  },
+  "chatRefuseSpecificPick": "I can't pick a stock or fund for you. I can show what your money could have been worth, as an illustration only.",
+  "@chatRefuseSpecificPick": {
+    "description": "M · plus chat_invest_chip (hidden when ask_llm_invest is off)"
+  },
+  "privacyAskLlmLabel": "Ask the online helper",
+  "@privacyAskLlmLabel": {
+    "description": "L · switch (FR-LLM-31); on = consent stored"
+  },
+  "privacyAskLlmSentence": "Sends only your question text, without your account, card and bank names. Your transactions and balances never leave your phone.",
+  "@privacyAskLlmSentence": {
+    "description": "S"
+  },
+  "privacyAskLlmQuota": "{count, plural, =0{No questions left this month. They reset on {date}.} =1{1 question left this month. Resets on {date}.} other{{n} questions left this month. Resets on {date}.}}",
+  "@privacyAskLlmQuota": {
+    "description": "S · count:int, n, date · under the switch while on",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "privacyAskLlmQuotaUnknown": "The count shows after your first online question.",
+  "@privacyAskLlmQuotaUnknown": {
+    "description": "S"
+  },
+  "privacyAskLlmDetails": "What's sent?",
+  "@privacyAskLlmDetails": {
+    "description": "L · text button, opens the consent sheet read-only"
+  },
+  "privacyAskLlmTurnedOff": "Turned off. No question is sent until you allow it again.",
+  "@privacyAskLlmTurnedOff": {
+    "description": "N"
+  },
+  "privacyServerItemAskLlm": "Your question text for the online helper, only if you allow it and never stored, plus your monthly question count",
+  "@privacyServerItemAskLlm": {
+    "description": "S · BR-SYNC-03 amendment (D-90); added to the §3.10 list while ask_llm is on"
+  }
 }

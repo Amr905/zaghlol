@@ -226,5 +226,51 @@ void main() {
         isEmpty,
       );
     });
+    test('T-272: wide band (15%) and any amount when no rate is known', () {
+      final o = leg('o', 'a', out: true, cur: usd, minor: 10000);
+      // 48.50 known; 44.00 is 9.3% off: outside 3%, inside 15%.
+      final near = leg('j', 'b', out: false, minor: 440000);
+      final far = leg('k', 'b', out: false, minor: 300000);
+      expect(crossCurrencyCandidates(o, [near], rate), isEmpty);
+      expect(
+        crossCurrencyCandidates(
+          o,
+          [near, far],
+          rate,
+          toleranceBp: exchangeSuggestionToleranceBp,
+        ).map((c) => c.id),
+        ['j'],
+      );
+      expect(
+        crossCurrencyCandidates(
+          o,
+          [far],
+          (_, _) => null,
+          toleranceBp: exchangeSuggestionToleranceBp,
+          anyWhenNoRate: true,
+        ).map((c) => c.id),
+        ['k'],
+      );
+      // Still never the same account, same currency or outside 3 days.
+      expect(
+        crossCurrencyCandidates(
+          o,
+          [
+            leg('s', 'a', out: false, minor: 485000),
+            leg('u', 'b', out: false, cur: usd, minor: 10000),
+            leg(
+              'w',
+              'b',
+              out: false,
+              minor: 485000,
+              at: const Duration(days: 4),
+            ),
+          ],
+          (_, _) => null,
+          anyWhenNoRate: true,
+        ),
+        isEmpty,
+      );
+    });
   });
 }

@@ -45,10 +45,16 @@ class ZaghlolTapBubble extends StatefulWidget {
     super.key,
     required this.message,
     this.moment = ZaghlolMoment.proud,
+    this.avatarSize = 64,
+    this.trimHeadroom = false,
   });
 
   final String message;
   final ZaghlolMoment moment;
+
+  /// T-274: Home shows a bigger bird without the empty top of the artboard.
+  final double avatarSize;
+  final bool trimHeadroom;
 
   @override
   State<ZaghlolTapBubble> createState() => _ZaghlolTapBubbleState();
@@ -82,7 +88,9 @@ class _ZaghlolTapBubbleState extends State<ZaghlolTapBubble> {
     return ZMascotBubble(
       message: _line ?? widget.message,
       moment: _back != null ? ZaghlolMoment.tap : widget.moment,
-      avatarKey: ValueKey('tap-$_taps'),
+      avatarSize: widget.avatarSize,
+      trimHeadroom: widget.trimHeadroom,
+      replay: _taps,
       onTap: _tap,
     );
   }

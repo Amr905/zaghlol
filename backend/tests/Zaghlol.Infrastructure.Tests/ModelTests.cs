@@ -112,8 +112,14 @@ public partial class ModelTests
         var objects = Model.GetEntityTypes().Select(e => e.GetTableName() ?? e.GetViewName()!).ToHashSet(StringComparer.Ordinal);
         var readable = GrantMatrix.Current.Where(g => g.Role == GrantMatrix.OpsRo).Select(g => g.Table).ToHashSet(StringComparer.Ordinal);
 
+        // T-323 created the LLM tables by raw SQL ahead of the tasks (T-334, T-349, T-352) that add their EF entities; they are
+        // granted and tested through GrantMatrix.LlmTables / LlmTablesTests. A table that gets an entity must leave this allowance
+        // (the first assertion fails otherwise); ops_ro reads all of them except the quota counters (subject_id), asserted in GrantTests.
+        var migrationOnly = GrantMatrix.LlmTables.Select(g => g.Table).ToHashSet(StringComparer.Ordinal);
+        Assert.Empty(objects.Intersect(migrationOnly));
+
         Assert.Empty(objects.Except(readable));
-        Assert.Empty(readable.Except(objects));
+        Assert.Empty(readable.Except(objects).Except(migrationOnly));
     }
 
     [Fact]
@@ -245,7 +251,7 @@ public partial class ModelTests
         Assert.Null(worker.SelectColumns);
         Assert.Equal(["state", "acknowledged", "ack_next_attempt_at"], worker.UpdateColumns);
         Assert.Equal(
-            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt).Concat(GrantMatrix.PurchaseLastPaymentAt).Concat(GrantMatrix.AppleNotifications).Concat(GrantMatrix.PendingAppleRevocations)),
+            GrantMatrix.Flatten(GrantMatrix.InitialCreate.Concat(GrantMatrix.CatalogDrafts).Concat(GrantMatrix.PurchaseAckNextAttempt).Concat(GrantMatrix.PurchaseLastPaymentAt).Concat(GrantMatrix.AppleNotifications).Concat(GrantMatrix.PendingAppleRevocations).Concat(GrantMatrix.LlmTables)),
             GrantMatrix.Flatten(GrantMatrix.Current));
         Assert.Equal(GrantMatrix.Current.Count, GrantMatrix.Current.Select(g => (g.Role, g.Table)).Distinct().Count());
     }

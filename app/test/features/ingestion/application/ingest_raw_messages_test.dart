@@ -10,7 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/db/daos/capture_controls_dao.dart';
 import 'package:zaghlol/core/db/daos/transactions_dao.dart';
 import 'package:zaghlol/core/db/db_errors.dart';
+import 'package:zaghlol/features/budget/data/cycle_repository.dart';
+import 'package:zaghlol/features/ingestion/data/device_local_zone.dart';
 import 'package:zaghlol/features/ingestion/domain/ingest_types.dart';
+import 'package:zaghlol/features/transactions/application/bulk_actions.dart';
+import 'package:zaghlol/features/transactions/application/bulk_edit.dart';
+import 'package:zaghlol/features/transactions/application/refund_matching.dart';
+import 'package:zaghlol/features/transactions/application/transfer_pairing.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
 import '../support/ingest_harness.dart';
@@ -97,6 +103,71 @@ void main() {
       expect(t['acc_last4'], '4321');
       expect(t['source'], 'notification');
       expect(b.changedAccountIds, hasLength(2), reason: 'old and new account');
+    });
+
+    test('T-286 FU-383: a second, real payment with the same amount on the '
+        'channel that already gave its copy → stored and flagged '
+        'possibleDuplicate, not merged', () async {
+      final a = await w.run([sms('s', purchase)]);
+      final first = (a.outcomes['s']! as IngestInserted).txnId;
+      final copy = await w.run([notif('n1', purchaseNotif, rx: t0 + 40000)]);
+      expect(copy.outcomes['n1'], isA<IngestMergedCrossChannel>());
+      final b = await w.run([
+        notif('n2', '$purchaseNotif ref 2', rx: t0 + 80000),
+      ]);
+      final second = (b.outcomes['n2']! as IngestInserted).txnId;
+      expect(await txnCount(), 2);
+      final open = await w.rows(
+        'SELECT * FROM review_items WHERE resolved_at IS NULL',
+      );
+      expect(open.single['txn_id'], second);
+      final payload = jsonDecode(open.single['payload']! as String) as Map;
+      expect(payload['reason'], 'possibleDuplicate');
+      expect(payload['candidateTxnIds'], [first]);
+    });
+
+    test('FU-389: SMS pending, notification pending (merged), SMS posted '
+        'settles in place, notification posted → still one expense', () async {
+      await w.run([
+        sms('s1', 'ZBANK: Hold EGP 120.50 at Synth Shop card *4321'),
+      ]);
+      final n1 = await w.run([
+        notif('n1', 'Hold EGP 120.50 at Synth Shop', rx: t0 + 10000),
+      ]);
+      expect(n1.outcomes['n1'], isA<IngestMergedCrossChannel>());
+      final s2 = await w.run([
+        sms(
+          's2',
+          'ZBANK: Settled EGP 120.50 at Synth Shop card *4321',
+          rx: t0 + 30000,
+        ),
+      ]);
+      expect(s2.outcomes['s2'], isA<IngestMergedPending>());
+      final n2 = await w.run([
+        notif('n2', 'Settled EGP 120.50 at Synth Shop', rx: t0 + 60000),
+      ]);
+      expect(n2.outcomes['n2'], isA<IngestMergedCrossChannel>());
+      expect(await txnCount(), 1);
+      expect(await w.count('review_items', 'resolved_at IS NULL'), 0);
+    });
+
+    test('T-286: a copy from a third channel still merges', () async {
+      await w.run([sms('s', purchase)]);
+      await w.run([notif('n1', purchaseNotif, rx: t0 + 40000)]);
+      final r = await w.run([
+        IncomingMessage(
+          deliveryId: 'x',
+          channel: 'shortcut_message',
+          source: zbankSms,
+          body:
+              'ZBANK: Purchase EGP 120.50 at Synth Shop card *4321 '
+              'bal egp 990.00',
+          receivedAtMs: t0 + 50000,
+          origin: MessageOrigin.spool,
+        ),
+      ]);
+      expect(r.outcomes['x'], isA<IngestMergedCrossChannel>());
+      expect(await txnCount(), 1);
     });
 
     test('both in one batch, either order', () async {
@@ -414,16 +485,195 @@ void main() {
       expect(r.event, isNotNull, reason: 'a balance changed');
     });
 
-    test('fx_conversion (no handler until T-089) → raw reparse_pending, '
-        'outcome deferred, nothing else', () async {
-      final r = await w.run([
-        sms('m', 'ZBANK: Converted USD 10.00 to EGP 500.00 acct *5555'),
-      ]);
-      expect(r.outcomes['m'], isA<IngestDeferred>());
-      expect((await w.raws()).single['parse_status'], 'reparse_pending');
-      expect(await txnCount(), 0);
-      expect(await w.count('review_items'), 0);
-      expect(r.ackable, ['m']);
+    group('T-272 fx_conversion → one exchange pair (FR-PAR-12)', () {
+      const convert = 'ZBANK: Converted USD 600.00 to EGP 29,700.00 acct *5555';
+
+      test('two legs in one account, paired fx_conversion, both internal; '
+          'amounts exact in their own currency', () async {
+        final r = await w.run([sms('m', convert)]);
+        expect(r.outcomes['m'], isA<IngestInserted>());
+        expect((await w.raws()).single['parse_status'], 'parsed');
+        final legs = await w.txns();
+        expect(legs, hasLength(2));
+        final out = legs.singleWhere((t) => t['direction'] == 'transfer_out');
+        final inn = legs.singleWhere((t) => t['direction'] == 'transfer_in');
+        expect((out['amount_minor'], out['currency']), (60000, 'USD'));
+        expect((inn['amount_minor'], inn['currency']), (2970000, 'EGP'));
+        expect(out['account_id'], inn['account_id']);
+        expect(out['is_internal'], 1);
+        expect(inn['is_internal'], 1);
+        expect(out['transfer_pair_id'], isNotNull);
+        expect(out['transfer_pair_id'], inn['transfer_pair_id']);
+        final pair = (await w.rows('SELECT * FROM transfer_pairs')).single;
+        expect(pair['kind'], 'fx_conversion');
+        expect(pair['out_txn_id'], out['id']);
+        expect(pair['in_txn_id'], inn['id']);
+        final acc = (await w.rows('SELECT kind FROM accounts')).single;
+        expect(acc['kind'], 'multi_currency');
+        expect(await w.count('review_items'), 0);
+        // The bank's rate is the ratio of the two legs.
+        expect(
+          impliedRateE9(
+            Money(Currency.of('USD'), out['amount_minor']! as int),
+            Money(Currency.of('EGP'), inn['amount_minor']! as int),
+          ),
+          49500000000,
+        );
+        expect(r.changedTxnIds, containsAll([out['id'], inn['id']]));
+      });
+
+      test(
+        'the month sees exchanged in/out, never income or spending',
+        () async {
+          {
+            await w.run([sms('m', convert)]);
+            final repo = CycleRepository(
+              w.db,
+              nowUtcMs: () => t0,
+              zone: const FixedLocalZone(zoneOffsetMin),
+            );
+            final day = CivilDate.fromLocalMs(t0, zoneOffsetMin);
+            final cycle = Cycle(start: day.plusDays(-5), end: day.plusDays(5));
+            final totals = await repo.computeLive(cycle);
+            final usd = totals[Currency.of('USD')]!;
+            final egp = totals[Currency.of('EGP')]!;
+            expect(usd.income.minor + usd.spend.minor, 0);
+            expect(egp.income.minor + egp.spend.minor, 0);
+            expect(usd.exchangedOut.minor, 60000);
+            expect(egp.exchangedIn.minor, 2970000);
+            expect(egp.moneyIn.minor, 2970000);
+          }
+        },
+      );
+
+      test('the same message twice: one pair (dedupe 1)', () async {
+        await w.run([sms('a', convert)]);
+        final r = await w.run([sms('b', convert, rx: t0 + 60000)]);
+        expect(r.outcomes['b'], isA<IngestDuplicate>());
+        expect(await txnCount(), 2);
+        expect(await w.count('transfer_pairs'), 1);
+      });
+
+      group('T-281 FU-364: the same conversion on another channel', () {
+        const convertNotif = 'Converted USD 600.00 to EGP 29,700.00';
+
+        test('both legs match one stored exchange → merged, no second pair, '
+            'legs untouched', () async {
+          final a = await w.run([sms('s', convert)]);
+          final outId = (a.outcomes['s']! as IngestInserted).txnId;
+          final before = await w.txns();
+          final b = await w.run([notif('n', convertNotif, rx: t0 + 40000)]);
+          expect(b.outcomes['n'], isA<IngestMergedCrossChannel>());
+          expect((b.outcomes['n']! as IngestMergedCrossChannel).txnId, outId);
+          expect(await txnCount(), 2);
+          expect(await w.count('transfer_pairs'), 1);
+          expect(await w.count('review_items', 'resolved_at IS NULL'), 0);
+          expect(await w.count('raw_messages', "parse_status = 'parsed'"), 2);
+          expect(await w.txns(), before, reason: 'nothing patched');
+          // T-286: the merge is remembered on the out leg, out of sight.
+          final mark = (await w.reviews()).single;
+          expect(mark['txn_id'], outId);
+          expect(mark['resolution'], 'cross_channel_copy');
+          expect(mark['resolved_at'], isNotNull);
+          expect(jsonDecode(mark['payload']! as String), {
+            'reason': 'crossChannelCopy',
+            'source': 'notification',
+          });
+        });
+
+        test('T-286 FU-383: a second, real conversion with the same amounts '
+            'on the channel that already gave its copy → two exchanges and '
+            'a possibleDuplicate item, never a merge', () async {
+          final a = await w.run([sms('s', convert)]);
+          final outA = (a.outcomes['s']! as IngestInserted).txnId;
+          final copy = await w.run([notif('n1', convertNotif, rx: t0 + 40000)]);
+          expect(copy.outcomes['n1'], isA<IngestMergedCrossChannel>());
+          final before = await w.txns();
+          final b = await w.run([
+            notif('n2', '$convertNotif ref 2', rx: t0 + 80000),
+          ]);
+          expect(b.outcomes['n2'], isA<IngestInserted>());
+          expect(await txnCount(), 4);
+          expect(await w.count('transfer_pairs'), 2);
+          final open = await w.rows(
+            'SELECT * FROM review_items WHERE resolved_at IS NULL',
+          );
+          final payload = jsonDecode(open.single['payload']! as String) as Map;
+          expect(payload['reason'], 'possibleDuplicate');
+          expect(payload['candidateTxnIds'], [outA]);
+          expect(
+            open.single['txn_id'],
+            (b.outcomes['n2']! as IngestInserted).txnId,
+          );
+          // Exchange A is exactly as it was.
+          final after = {for (final t in await w.txns()) t['id']: t};
+          for (final t in before) {
+            expect(after[t['id']], t);
+          }
+        });
+
+        test('only the sent leg matches → a second pair and a '
+            'possibleDuplicate item (the user decides)', () async {
+          await w.run([sms('s', convert)]);
+          final b = await w.run([
+            notif('n', 'Converted USD 600.00 to EGP 29,000.00', rx: t0 + 40000),
+          ]);
+          expect(b.outcomes['n'], isA<IngestInserted>());
+          expect(await w.count('transfer_pairs'), 2);
+          final item = (await w.reviews()).single;
+          expect(
+            (jsonDecode(item['payload']! as String) as Map)['reason'],
+            'possibleDuplicate',
+          );
+        });
+
+        test('deleting the flagged exchange removes both of its legs '
+            'together; the first exchange is untouched', () async {
+          await w.run([sms('s', convert)]);
+          final firstPair = (await w.rows('SELECT * FROM transfer_pairs'))
+              .single;
+          await w.run([
+            notif('n', 'Converted USD 600.00 to EGP 29,000.00', rx: t0 + 40000),
+          ]);
+          final flagged = (await w.reviews()).single['txn_id']! as String;
+          Future<PaydaySchedule> schedule() async => PaydaySchedule.single(1);
+          final actions = BulkActions(
+            bulk: BulkEditUseCase(w.db, loadSchedule: schedule),
+            pairing: TransferPairingUseCase(w.db, loadSchedule: schedule),
+            refunds: RefundMatching(w.db, loadSchedule: schedule),
+          );
+          final res = await actions.delete({flagged});
+          expect(res.changed, 2);
+          final live = await w.rows(
+            'SELECT id FROM transactions WHERE deleted_at IS NULL',
+          );
+          expect(
+            {for (final r in live) r['id']},
+            {firstPair['out_txn_id'], firstPair['in_txn_id']},
+          );
+          expect(await w.count('transfer_pairs'), 1);
+        });
+      });
+
+      test('Arabic-Indic digits read the same amounts', () async {
+        await w.run([
+          sms('m', 'ZBANK: Converted USD ٦٠٠٫٠٠ to EGP ٢٩٬٧٠٠٫٠٠ acct *5555'),
+        ]);
+        final legs = await w.txns();
+        expect(
+          {for (final t in legs) t['currency']: t['amount_minor']},
+          {'USD': 60000, 'EGP': 2970000},
+        );
+      });
+
+      test('zero received amount → review, nothing stored as money', () async {
+        final r = await w.run([
+          sms('m', 'ZBANK: Converted USD 10.00 to EGP 0.00 acct *5555'),
+        ]);
+        expect(r.outcomes['m'], isA<IngestReview>());
+        expect(await txnCount(), 0);
+        expect(await w.count('transfer_pairs'), 0);
+      });
     });
 
     test('a transfer template without a direction → review', () async {
