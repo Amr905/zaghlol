@@ -2,6 +2,7 @@ using Zaghlol.Application.Catalog;
 using Zaghlol.Application.Config;
 using Zaghlol.Application.Flags;
 using Zaghlol.Application.Llm;
+using Zaghlol.Application.Llm.Categorise.Feedback;
 using Zaghlol.Application.Prices;
 using Zaghlol.Domain;
 
@@ -59,7 +60,10 @@ public sealed class SyncService(
 
         var pricesBlock = await PricesAsync(cancellationToken);
         var configBlock = await ConfigAsync(request.ConfigVersion, cancellationToken);
-        var categoryCodes = request.Contributions.Count == 0
+        // T-353: feedback is looked at only while the install's own llm_categorise flag is on (never from anything the app sent).
+        var feedbackOn = request.LlmCatFeedback is { Count: > 0 }
+            && snapshot.Values.TryGetValue(FlagKeys.LlmCategorise, out var categoriseOn) && categoriseOn;
+        var categoryCodes = request.Contributions.Count == 0 && !feedbackOn
             ? (IReadOnlySet<string>)new HashSet<string>(StringComparer.Ordinal)
             : await RequiredAsync(SyncTags.CatalogBlock, () => catalog.CategoryCodesAsync(cancellationToken));
         var entitlementResult = await RequiredAsync(
@@ -70,10 +74,13 @@ public sealed class SyncService(
         // Nothing is counted until the claim wins (FU-061): a call that turns into the throttle answer, or a retry after a 503,
         // would otherwise count the same items again.
         var intake = SyncIntake.Prepare(request.Contributions, request.BankRequests, categoryCodes);
+        var feedback = feedbackOn ? CategoriseFeedbackIntake.Prepare(request.LlmCatFeedback!, categoryCodes) : PreparedFeedback.Empty;
         var hasherDroppedContributions = 0;
         var hasherDroppedBankRequests = 0;
+        var hasherDroppedConfirmations = 0;
+        var hasherDroppedCorrections = 0;
         byte[]? installHash = null;
-        if (!intake.IsEmpty)
+        if (!intake.IsEmpty || !feedback.IsEmpty)
         {
             installHash = await HashAsync(installId, cancellationToken);
             if (installHash is null)
@@ -81,6 +88,9 @@ public sealed class SyncService(
                 hasherDroppedContributions = intake.Contributions.Count;
                 hasherDroppedBankRequests = intake.BankRequests.Count;
                 intake = intake with { Contributions = [], BankRequests = [] };
+                hasherDroppedConfirmations = feedback.Confirmations.Count;
+                hasherDroppedCorrections = feedback.Corrections.Count;
+                feedback = PreparedFeedback.Empty;
             }
         }
 
@@ -94,7 +104,8 @@ public sealed class SyncService(
                 appVersion,
                 installHash is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(installHash),
                 intake.Contributions,
-                intake.BankRequests),
+                intake.BankRequests,
+                feedback),
             cancellationToken);
         if (!claim.Claimed)
         {
@@ -111,6 +122,14 @@ public sealed class SyncService(
         telemetry.Intake(SyncTags.Contribution, SyncTags.Duplicate, intake.Contributions.Count - claim.ContributionsInserted);
         telemetry.Intake(SyncTags.BankRequest, SyncTags.Accepted, claim.BankRequestsInserted);
         telemetry.Intake(SyncTags.BankRequest, SyncTags.Duplicate, intake.BankRequests.Count - claim.BankRequestsInserted);
+        ReportDrops(SyncTags.LlmCatConfirmation, feedback.ConfirmationDrops);
+        ReportDrops(SyncTags.LlmCatCorrection, feedback.CorrectionDrops);
+        telemetry.Intake(SyncTags.LlmCatConfirmation, SyncTags.Accepted, claim.ConfirmationsInserted);
+        telemetry.Intake(SyncTags.LlmCatConfirmation, SyncTags.Duplicate, feedback.Confirmations.Count - claim.ConfirmationsInserted);
+        telemetry.Intake(SyncTags.LlmCatCorrection, SyncTags.Accepted, claim.CorrectionsInserted);
+        telemetry.Intake(SyncTags.LlmCatCorrection, SyncTags.Duplicate, feedback.Corrections.Count - claim.CorrectionsInserted);
+        telemetry.Intake(SyncTags.LlmCatConfirmation, SyncTags.DroppedHasher, hasherDroppedConfirmations);
+        telemetry.Intake(SyncTags.LlmCatCorrection, SyncTags.DroppedHasher, hasherDroppedCorrections);
         telemetry.Catalog(catalogBlock?.Mode ?? CatalogModes.None);
         telemetry.Request(SyncTags.Ok);
 
@@ -121,7 +140,7 @@ public sealed class SyncService(
             SyncComposer.SendFlags(snapshot, request.FlagsVersion, appVersion, install.AppVersion) ? snapshot : null,
             SyncComposer.SendPrices(pricesBlock, request.PricesAsOf) ? pricesBlock : null,
             entitlementResult,
-            new SyncAcceptedCounts(claim.ContributionsInserted, claim.BankRequestsInserted),
+            new SyncAcceptedCounts(claim.ContributionsInserted, claim.BankRequestsInserted, request.LlmCatFeedback is null ? null : claim.FeedbackInserted),
             configBlock);
     }
 

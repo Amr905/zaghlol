@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Zaghlol.Application.Llm.Categorise.Feedback;
 using Zaghlol.Application.Sync;
 using Zaghlol.Domain;
 using Zaghlol.Infrastructure.Installs;
@@ -78,8 +79,9 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         DateTimeOffset now,
         byte[]? hash = null,
         IReadOnlyList<PreparedContribution>? contributions = null,
-        IReadOnlyList<PreparedBankRequest>? banks = null) =>
-        new(id, now, Window, 7, "android", appVersion, hash is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(hash), contributions ?? [], banks ?? []);
+        IReadOnlyList<PreparedBankRequest>? banks = null,
+        PreparedFeedback? feedback = null) =>
+        new(id, now, Window, 7, "android", appVersion, hash is null ? (ReadOnlyMemory<byte>?)null : new ReadOnlyMemory<byte>(hash), contributions ?? [], banks ?? [], feedback);
 
     // The day is the database's own UTC date (T-128 SEC S3), not the test clock's; every install has its own app version.
     private async Task<long> DailyActiveAsync(string appVersion) =>
@@ -171,6 +173,148 @@ public class SyncStoreTests(SyncStoreFixture fixture) : IClassFixture<SyncStoreF
         // The raw install ID is never stored with the intake; the hash is.
         Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.merchant_contributions WHERE install_hash = $1", id.Value.ToByteArray()));
         Assert.Equal(2L, await CountAsync("SELECT count(*) FROM zaghlol.merchant_contributions WHERE install_hash = $1", hash));
+    }
+
+    // ---- T-353 ----
+
+    private static readonly string[] ForbiddenColumnWords = ["install", "account", "ip", "version", "token"];
+
+    private static string Marker() => "fb" + string.Concat(RandomNumberGenerator.GetBytes(10).Select(b => (char)('a' + (b % 26))));
+
+    private static PreparedFeedback Feedback(IEnumerable<PreparedConfirmation>? right = null, IEnumerable<PreparedCorrection>? wrong = null) =>
+        new([.. right ?? []], new IntakeCounts(0, 0, 0), [.. wrong ?? []], new IntakeCounts(0, 0, 0));
+
+    private async Task<SyncClaimResult> CorrectAsync(string merchant, string aiCategory = "dining", string userCategory = "groceries")
+    {
+        var (id, appVersion) = await NewInstallAsync();
+        return await Store.ClaimAsync(Claim(id, appVersion, Now, Rows.Bytes(), feedback: Feedback(wrong: [new PreparedCorrection(merchant, aiCategory, userCategory, "llm")])), CancellationToken.None);
+    }
+
+    private Task SeedCacheAsync(string merchant, string category) => Db.InsertAsync(
+        fixture.Database.Migrator,
+        "llm_cat_answer_cache",
+        new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["merchant_norm"] = merchant,
+            ["category_code"] = category,
+            ["confidence"] = (short)90,
+            ["provider_id"] = "fake",
+            ["prompt_version"] = "v1",
+            ["created_at"] = Now,
+            ["expires_at"] = Now.AddDays(90),
+        });
+
+    // AC 1: one row per verdict with the keyed hash and the day-cut time; a retry and a second install's same verdict behave per the unique key.
+    [Fact]
+    public async Task RightAndWrongAreStoredOnceWithTheInstallHashAndARetryAddsNothing()
+    {
+        var (id, appVersion) = await NewInstallAsync();
+        var hash = Rows.Bytes();
+        var merchant = Marker();
+        var feedback = Feedback([new PreparedConfirmation(merchant, "dining", "llm")], [new PreparedCorrection(merchant, "dining", "custom", "cache")]);
+
+        var first = await Store.ClaimAsync(Claim(id, appVersion, Now.AddHours(5), hash, feedback: feedback), CancellationToken.None);
+        var retry = await Store.ClaimAsync(Claim(id, appVersion, Now.Add(Window).AddHours(5), hash, feedback: feedback), CancellationToken.None);
+
+        Assert.Equal(new SyncClaimResult(true, 0, 0, 1, 1), first);
+        Assert.Equal(new SyncClaimResult(true, 0, 0, 0, 0), retry);
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_confirmations WHERE merchant_norm = $1 AND install_hash = $2 AND status = 'collecting'", merchant, hash));
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1 AND install_hash = $2 AND user_category = 'custom' AND status = 'open' AND created_at = $3", merchant, hash, new DateTimeOffset(Now.UtcDateTime.Date, TimeSpan.Zero)));
+    }
+
+    // AC 3, abuse: one install, however often it resends, never reaches three.
+    [Fact]
+    public async Task OneInstallCorrectingRepeatedlyNeverDeletesTheCachedAnswer()
+    {
+        var merchant = Marker();
+        await SeedCacheAsync(merchant, "dining");
+        var (id, appVersion) = await NewInstallAsync();
+        var hash = Rows.Bytes();
+        var feedback = Feedback(wrong: [new PreparedCorrection(merchant, "dining", "groceries", "llm")]);
+
+        for (var day = 0; day < 5; day++)
+        {
+            await Store.ClaimAsync(Claim(id, appVersion, Now.Add(Window * day), hash, feedback: feedback), CancellationToken.None);
+        }
+
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1", merchant));
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+    }
+
+    // AC 3 / negative proof 3: two installs leave the cache row, the third deletes it.
+    [Fact]
+    public async Task ThreeCorrectionsFromThreeInstallsDeleteTheMatchingCacheRowAndTwoDoNot()
+    {
+        var merchant = Marker();
+        await SeedCacheAsync(merchant, "dining");
+
+        await CorrectAsync(merchant);
+        await CorrectAsync(merchant);
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+
+        await CorrectAsync(merchant);
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+        Assert.Equal(3L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_corrections WHERE merchant_norm = $1", merchant));
+    }
+
+    [Fact]
+    public async Task CorrectionsOfADifferentCategoryOrARejectedReviewDoNotCountAgainstTheCache()
+    {
+        var other = Marker();
+        await SeedCacheAsync(other, "dining");
+        await CorrectAsync(other, "groceries", "education");
+        await CorrectAsync(other, "groceries", "education");
+        await CorrectAsync(other, "groceries", "education");
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", other));
+
+        var rejected = Marker();
+        await SeedCacheAsync(rejected, "dining");
+        await CorrectAsync(rejected);
+        await CorrectAsync(rejected);
+        await Db.ExecuteAsync(fixture.Database.Superuser, "UPDATE zaghlol.llm_cat_corrections SET status = 'rejected' WHERE merchant_norm = $1", rejected);
+        await CorrectAsync(rejected);
+        Assert.Equal(1L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", rejected));
+    }
+
+    [Fact]
+    public async Task ConcurrentThirdCorrectionsStillDeleteTheCacheRow()
+    {
+        var merchant = Marker();
+        await SeedCacheAsync(merchant, "dining");
+        await CorrectAsync(merchant);
+
+        await Task.WhenAll(CorrectAsync(merchant), CorrectAsync(merchant));
+
+        Assert.Equal(0L, await CountAsync("SELECT count(*) FROM zaghlol.llm_cat_answer_cache WHERE merchant_norm = $1", merchant));
+    }
+
+    // AC 4 / negative proof 1 (data check): marker ids never reach the two tables; a lost claim writes no feedback.
+    [Fact]
+    public async Task ADumpOfBothTablesHoldsNoInstallIdAppVersionOrAccountMarker()
+    {
+        var (id, appVersion) = await NewInstallAsync();
+        var merchant = Marker();
+        var hash = Rows.Bytes();
+        var feedback = Feedback([new PreparedConfirmation(merchant, "dining", "llm")], [new PreparedCorrection(merchant, "dining", "groceries", "llm")]);
+        await Store.ClaimAsync(Claim(id, appVersion, Now, hash, feedback: feedback), CancellationToken.None);
+        var lost = await Store.ClaimAsync(Claim(id, appVersion, Now.AddMinutes(1), hash, feedback: Feedback([new PreparedConfirmation(merchant + "lost", "dining", "llm")])), CancellationToken.None);
+        Assert.Equal(SyncClaimResult.Lost, lost);
+
+        var dump = (string)(await Db.ScalarAsync(
+            fixture.Database.Superuser,
+            "SELECT coalesce((SELECT string_agg(row_to_json(t)::text, E'\\n') FROM zaghlol.llm_cat_confirmations t WHERE merchant_norm LIKE $1), '') || coalesce((SELECT string_agg(row_to_json(t)::text, E'\\n') FROM zaghlol.llm_cat_corrections t WHERE merchant_norm LIKE $1), '')",
+            merchant + "%"))!;
+
+        Assert.Contains(merchant, dump, StringComparison.Ordinal);
+        Assert.DoesNotContain(merchant + "lost", dump, StringComparison.Ordinal);
+        Assert.DoesNotContain(id.Value.ToString("D"), dump, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(appVersion, dump, StringComparison.Ordinal);
+        Assert.DoesNotContain("127.0.0.1", dump, StringComparison.Ordinal);
+
+        var columns = await Db.QueryAsync(
+            fixture.Database.Superuser,
+            "SELECT column_name FROM information_schema.columns WHERE table_schema = 'zaghlol' AND table_name IN ('llm_cat_confirmations', 'llm_cat_corrections')");
+        Assert.DoesNotContain(columns, c => ForbiddenColumnWords.Any(word => ((string)c[0]!).Contains(word, StringComparison.Ordinal) && (string)c[0]! != "install_hash"));
     }
 
     [Fact]

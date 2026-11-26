@@ -2579,8 +2579,10 @@ components:
           maxItems: 50
           description: |
             Right / Wrong verdicts on automatic categories (D-96, `llm-categorise.md` section 5). Accepted only while
-            the install's `llm_categorise` flag is on; each item is re-checked (`ContributionPrivacy`, category
-            codes), duplicates per merchant keep the first. Covered by the `llm_categorise` consent, not by D-16.
+            the install's `llm_categorise` flag is on; each item is re-checked on its own (the categorise name filter,
+            the live system category codes and the verdict: `aiCategory` and `userCategory` must be system codes, or
+            `userCategory` the literal `custom` on a `wrong`), duplicates per merchant and verdict keep the first;
+            a failing item is dropped, never echoed. Covered by the `llm_categorise` consent, not by D-16.
           items:
             $ref: '#/components/schemas/LlmCatFeedbackItem'
     LlmCatFeedbackItem:

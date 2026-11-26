@@ -8,6 +8,7 @@ using Zaghlol.Api.Auth;
 using Zaghlol.Api.Json;
 using Zaghlol.Api.Problems;
 using Zaghlol.Api.Signing;
+using Zaghlol.Application.Llm.Categorise.Feedback;
 using Zaghlol.Application.Prices;
 using Zaghlol.Application.Sync;
 using Zaghlol.Domain;
@@ -159,7 +160,8 @@ internal static partial class SyncEndpoints
         (request.Contributions ?? []).Select(c => new SyncContribution(c.MerchantNorm, c.InstitutionCode, c.CategoryCode)).ToList(),
         (request.BankRequests ?? []).Select(b => new SyncBankRequest(b.InstitutionName, b.Country, b.Channel)).ToList(),
         accountToken,
-        request.ConfigVersion ?? 0);
+        request.ConfigVersion ?? 0,
+        request.LlmCatFeedback?.Select(f => new SyncLlmCatFeedback(f.MerchantNorm, f.Verdict, f.AiCategory, f.UserCategory, f.Source)).ToList());
 
     private static SyncResponse ToResponse(SyncCompleted completed, string? nonce) => new()
     {
@@ -186,7 +188,7 @@ internal static partial class SyncEndpoints
             }
             : null,
         Entitlement = completed.Entitlement.Entitlement is { } token ? new SyncEntitlementDto { Token = token } : null,
-        Accepted = new SyncAcceptedDto { Contributions = completed.Accepted.Contributions, BankRequests = completed.Accepted.BankRequests },
+        Accepted = new SyncAcceptedDto { Contributions = completed.Accepted.Contributions, BankRequests = completed.Accepted.BankRequests, LlmCatFeedback = completed.Accepted.LlmCatFeedback },
         AccountToken = completed.Entitlement.AccountToken,
         SupportNotice = completed.Entitlement.SupportNotice,
         TimeNonce = nonce,
