@@ -206,3 +206,45 @@ B94-M3, B94-M4 and B94-m9 fixed in `llm_eligibility.dart` and `app/assets/data/e
 - m9: with `counterpartyKind == null` and no business word the result is `notBusinessPayment`. Existing positive tests now state `counterpartyKind: merchant`.
 Tests: all reviewer probes (33) as table rows, 47 adversarial strings, 20 new positives, 2 m9 tests; 253 categorize tests pass, 1,000 merchants < 100 ms.
 Known gaps: unlisted nicknames and Coptic spellings, chat alphabet (`A7med`), glued tokens (`mohamedahmed`), digits spelled as words, a person's name containing a business word (`Mohamed Ahmed Store`), single-token unknown names (`Basant`) when the caller gives `merchant`. Callers must derive `kind` and `counterpartyKind` from typed fields (T-358).
+
+## Delta re-review (Opus, 2026-11-26)
+
+Scope: `git diff 71d12a26..f8733cea -- backend packages app/lib app/test app/assets` (golden PNGs ignored).
+Checks: `dotnet build -warnaserror` clean; Application `~Llm` 256 passed; Infrastructure Vertex/CallGuard/GatewayConfiguration 53 passed; `dart test test/categorize` 253 passed; `flutter test test/features/ask test/privacy test/core/llm test/assets` 263 passed, **including `consent_sheet_golden_test`** with the regenerated PNGs.
+
+### T-355 (B94-M3, B94-M4, B94-m9): **APPROVED**
+- **Fails on old code:** with `packages/zaghlol_parsing/lib` and `app/assets/data` taken from `71d12a26`, the new tests fail 66 times. All 33 reviewer probes and the adversarial rows fail (5-part names, `Abd`/`عبد` compounds, `A***`/`A.`/`W.` initials, transfer words, wallet brands, missing honorifics, nicknames). HEAD restored afterwards.
+- **Fresh attack, 77 person strings, real asset lists:** these are refused with `merchant` kind and with no kind: 2–6 part names; hyphenated and glued `El-`/`Abdel-`/`Abo-`/`Al-` forms; `محمد عبدالرحمن`, `عبد العزيز السيد`, `ابو بكر`, `أم أحمد`; tatweel, harakat, Persian `ی` and fullwidth Latin; `M. A. Hassan`, `MA Hassan`, `M A H`, `Mo***d`, `••••`, `xxxx`, `محمد أ. حسن`; feminine and Latin honorifics (`الدكتورة`, `الحاجة`, `Hagga`, `Hajja`, `المهندسة`, `Ostaza`, `Madame`, `Miss`, `الأستاذة`, `Sheikh`, `Capt.`, `Eng.`); `InstaPay`/`IPN`/`VF Cash`/`Vodafone Cash -`/`Transfer to:`/`حوالة`/`لـ`/`إلى:` plus a name.
+- **Still eligible with `merchant` kind** (refused with no kind): unlisted spellings and names (`Mohmed Ahmd`, `Mhmd Hegazy`, `Youstina Wagih`, `Beshoy Boutros`, `Shalaby Hegazy`, `Basant`, `A7med`, `mohamedahmed`). This is the declared residual class "a name not in the list". Not structural, so not major: D94-m1.
+- **Eligible with any kind:** a person name plus a business word (`Mohamed Ahmed Co`, `Mohamed & Sons`, `Wagih Boutros Trading`). This is a declared residual.
+- **Business usefulness, 64 real names:** **48/64 (75 %) eligible with `merchant` kind**, but **15/64 (23 %) with no kind**. With no kind, chains without a business word are refused (Carrefour, Uber, KFC, Talabat, Vodafone, Petrogas …). Refused with any kind: person-named brands (`Abou Shakra`, `Abou Tarek`, `Abu Auf`, `Mo'men`, `Hassan Allam`, `Mahmoud Elfar`, `Gad`, `El Abd`); `Dr. Oetker`, `Mr. Bean`, `صيدلية د. أحمد`, `Dr Hany Clinic`; `B.TECH` (identifier); `Back to Basics Store`, `Coffee to go` (`to` counts as a transfer word). The feature stays useful **only if the caller passes `PartyKind.merchant`** for card/POS/online rows. The parser leaves `counterpartyKind` null for those rows, so T-358 must set it from typed fields (D94-m2). Lowering the eligible-count floor from 500 to 100 matches the stricter rule. Over-refusal is not a blocker.
+
+| # | Sev | File:line | Issue | Required change |
+|---|-----|-----------|-------|-----------------|
+| D94-m1 | minor | `app/assets/data/eg_given_names.txt` | Common names and spellings are missing, so they stay eligible with `merchant` kind: `mohmed`, `mhmd`, `ahmd`, `aly`, `beshoy`/`بيشوي`, `youstina`/`يوستينا`, `wagih`, `boutros`, `hegazy`, `shalaby`, `اسلام`, `رضوان`, `basant`. | Follow-up (T-325 list owner): add Coptic names, common surnames used as payee tokens, and vowel-dropped spellings. |
+| D94-m2 | minor | `packages/zaghlol_parsing/lib/categorize/llm_eligibility.dart:120` | With `counterpartyKind == null`, only text with a business word passes. Card/POS rows have a null counterparty from the parser, so 77 % of real chains would be refused. | T-358: build `CategorizeInput(counterpartyKind: PartyKind.merchant)` for business-payment rows derived from typed fields (source, direction, event category). Add a test that a card POS row for `Carrefour` is eligible. |
+| D94-m3 | nit | `llm_eligibility.dart:367` (`_transferWords`) | `to`/`from`/`من` inside business names refuse them (`Back to Basics Store`). | Optional: refuse only when a name token follows. |
+
+### T-343 (B94-M2): **APPROVED**
+- `mask_sources_drift.dart:139`: every non-deleted row with `merchant_norm` or `merchant_raw` is a source. A NULL norm gets the id `merchantKey(raw)`. A raw that keys to empty (punctuation only, e.g. `***`) is skipped, which is harmless. An Arabic raw keys to a transliteration (`عيادة د. هاني` -> `ayadh d hany`), so it is masked. When a parsed row and a NULL-norm row share a key, their raws merge under one id.
+- `chart_repository.dart:718` `_merchantMatch`: resolves a NULL-norm row by the same key in both `merchantSpend` and `biggestExpense`. The boundary test has manual-entry and edited-merchant fixtures. Tests pass.
+- Remaining unread display strings: `recurring_items.name` (manually added subscriptions, bills, installments, gameya; detected ones reuse a transaction merchant, which is masked) → D94-m4. `split_participants.name`, `transactions.counterparty_value` and `merchant_rules.match_value` (counterparty) are person names under the open PO person-name decision (already recorded). `transactions.note` is free text, not a merchant. `catalog_*` is public.
+
+| # | Sev | File:line | Issue | Required change |
+|---|-----|-----------|-------|-----------------|
+| D94-m4 | minor | `app/lib/features/ask/data/mask_sources_drift.dart:137` | `recurring_items.name` is not a mask source. A question that names a manually added subscription or bill with no transactions yet sends that name in plain text. | Follow-up: add `SELECT name, merchant_norm FROM recurring_items`, id = `merchant_norm ?? merchantKey(name)`. Decide gameya/split names together with the PO person-name question. |
+
+### T-339 (B94-M1, m4–m6): **APPROVED**
+- **Never-sent classification:** `NotSent()` is returned only for an open circuit or half-open circuit, and for `ConnectFailureException`. That exception comes only from `HttpRequestError.NameResolutionError`/`ConnectionError` or an inner `SocketException` of type refused, host-not-found or unreachable, all of which happen before any byte is sent. A reset after the request was written surfaces as `IOException` or another `HttpRequestError`, so it maps to `Failed(Upstream)`/`Timeout` with `NeverSent = false` and settles at the worst case. A proxy-tunnel error is also treated as sent, which overcounts (safe side). Connect failure followed by a timeout on the retry settles at the worst case. I found no way for a sent call to settle at 0.
+- **No production caller yet:** `ReserveAsync`/`SettleAsync` are not wired into the gateway in this diff. The `neverSent` parameter defaults to `false` (overcounts). The wiring task must pass `result.NeverSent`.
+- **Under-reserving:** `SettleAsync` records the real cost. If real input ever exceeds 21,300 tokens, one call costs more than its reservation, and the overshoot can exceed one worst case. The estimate holds today: the 14 KB schema at one token per byte is 14 k tokens, under the 20 k allowance, and 300 four-byte characters fit inside the 1 k overhead. But `TheDefaultInputBoundCoversTheQuestionTheSchemaAndTheProviderOverhead` only re-checks the constants (D94-m5).
+- **Refresh race (m6):** a write that lands between the snapshot and the ledger read is counted twice until the next refresh. That overcounts, so it is safe. Price `<= 0` is rejected at config read, and `ReserveAsync` pauses on it (`no_price`).
+
+| # | Sev | File:line | Issue | Required change |
+|---|-----|-----------|-------|-----------------|
+| D94-m5 | minor | `backend/tests/Zaghlol.Application.Tests/Llm/Spend/SpendGuardTests.cs:358` | The bound test is tautological. If the prompt or schema grows, the guard can under-reserve without any test failing. | Follow-up: assert that the UTF-8 byte length of the real system prompt plus the ask schema is `<= PromptAndSchemaTokens`. |
+
+### T-338 minor (Vertex duplicate properties): verified
+`VertexGeminiProvider.cs:115` parses with `LlmReplyReader.NoDuplicates`. Test `ADuplicatePropertyInTheEnvelopeIsInvalid` passes.
+
+**Delta verdicts:** T-339 **APPROVED**, T-343 **APPROVED**, T-355 **APPROVED**. D94-m1…m5 are follow-ups; D94-m2 binds T-358.
