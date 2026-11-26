@@ -120,7 +120,7 @@ public static class Rows
         },
         "llm_cat_answer_cache" => new(StringComparer.Ordinal)
         {
-            ["merchant_norm"] = "m" + Guid.NewGuid().ToString("N")[..20],
+            ["merchant_norm"] = Letters(21),
             ["category_code"] = "groceries",
             ["confidence"] = (short)80,
             ["provider_id"] = "fake",
@@ -131,7 +131,7 @@ public static class Rows
         "llm_cat_confirmations" => new(StringComparer.Ordinal)
         {
             ["id"] = Guid.CreateVersion7(),
-            ["merchant_norm"] = "m" + Guid.NewGuid().ToString("N")[..20],
+            ["merchant_norm"] = Letters(21),
             ["category_code"] = "groceries",
             ["source"] = "llm",
             ["install_hash"] = Bytes(),
@@ -140,7 +140,7 @@ public static class Rows
         "llm_cat_corrections" => new(StringComparer.Ordinal)
         {
             ["id"] = Guid.CreateVersion7(),
-            ["merchant_norm"] = "m" + Guid.NewGuid().ToString("N")[..20],
+            ["merchant_norm"] = Letters(21),
             ["ai_category"] = "dining",
             ["user_category"] = "groceries",
             ["source"] = "llm",
@@ -296,6 +296,10 @@ public static class Rows
         await Db.InsertAsync(Writer(database, table), table, row);
         return row;
     }
+
+    /// <summary>Random lower-case letters: never trips the digit-run backstop CHECK of a merchant_norm.</summary>
+    private static string Letters(int length) =>
+        string.Concat(Enumerable.Range(0, length).Select(_ => (char)('a' + RandomNumberGenerator.GetInt32(26))));
 
     private static string Ulid()
     {

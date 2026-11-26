@@ -46,7 +46,7 @@ public class LlmTablesTests(SchemaFixture fixture)
             SELECT table_name || '.' || column_name FROM information_schema.columns
             WHERE table_schema = 'zaghlol' AND table_name = ANY($1) AND data_type IN ('double precision', 'real', 'money')
             """,
-            Tables);
+            (object)Tables);
 
         Assert.Empty(floating);
     }
@@ -64,7 +64,7 @@ public class LlmTablesTests(SchemaFixture fixture)
                 SELECT table_name || '.' || column_name FROM information_schema.columns
                 WHERE table_schema = 'zaghlol' AND table_name = ANY($1) AND data_type IN ('text', 'character varying', 'bytea', 'uuid')
                 """,
-                Tables))
+                (object)Tables))
             .Select(r => (string)r[0]!)
             .Order(StringComparer.Ordinal)
             .ToList();
@@ -111,7 +111,7 @@ public class LlmTablesTests(SchemaFixture fixture)
                 WHERE table_schema = 'zaghlol' AND table_name = ANY($1)
                   AND (column_name ~ '(question|prompt_text|(^|_)q$|install_id|account_id|client|(^|_)ip(_|$)|app_version|version_name|body|text)')
                 """,
-                Tables))
+                (object)Tables))
             .Select(r => (string)r[0]!)
             .ToList();
         Assert.Empty(named);
@@ -194,7 +194,7 @@ public class LlmTablesTests(SchemaFixture fixture)
     public async Task OneConfirmationAndOneCorrectionPerMerchantAndInstallHash()
     {
         var hash = Rows.Bytes();
-        var norm = "m" + Guid.NewGuid().ToString("N")[..12];
+        var norm = "dup merchant";
         foreach (var table in new[] { "llm_cat_confirmations", "llm_cat_corrections" })
         {
             var values = new Dictionary<string, object?> { ["merchant_norm"] = norm, ["install_hash"] = hash };

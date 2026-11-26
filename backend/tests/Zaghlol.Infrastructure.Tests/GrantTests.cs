@@ -107,7 +107,7 @@ public class GrantTests(SchemaFixture fixture)
         { "zaghlol_worker", "SELECT * FROM zaghlol.remote_config" },
         { "zaghlol_admin", "UPDATE zaghlol.llm_cat_corrections SET merchant_norm = 'x' WHERE false" },
         { "zaghlol_admin", "UPDATE zaghlol.llm_cat_corrections SET install_hash = NULL WHERE false" },
-        { "zaghlol_admin", "UPDATE zaghlol.llm_cat_confirmations SET operator_id = NULL WHERE false" },
+        { "zaghlol_admin", "UPDATE zaghlol.llm_cat_confirmations SET category_code = 'x' WHERE false" },
         { "zaghlol_admin", "DELETE FROM zaghlol.llm_cat_confirmations WHERE false" },
         { "zaghlol_admin", "SELECT * FROM zaghlol.llm_quota_counters" },
         { "zaghlol_ops_ro", "SELECT * FROM zaghlol.llm_cat_corrections" },
