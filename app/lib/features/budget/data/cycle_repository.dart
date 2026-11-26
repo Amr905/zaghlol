@@ -16,6 +16,15 @@ import 'payday_schedule_store.dart';
 
 const int _dayMs = 86400000;
 
+/// T-272: true for a leg of a complete exchange pair (`fx_conversion` or
+/// `cross_currency`; D-86). The engine counts it as exchanged in/out only
+/// while the row is also internal.
+const String _isExchangeSql =
+    'EXISTS (SELECT 1 FROM transfer_pairs p '
+    'WHERE p.id = transactions.transfer_pair_id '
+    'AND p.in_txn_id IS NOT NULL '
+    "AND p.kind IN ('fx_conversion', 'cross_currency')) AS is_exchange";
+
 /// Stored offsets are within +-18 h (`occurred_tz_offset_min`).
 const int _maxOffsetMs = 18 * 3600000;
 
@@ -45,7 +54,9 @@ class CycleRepository {
     final isCurrent = cycle.contains(today) || cycle.start > today;
     if (cacheable && !isCurrent) {
       final cached = await _cached(cycle, filter);
-      if (cached != null) return cached;
+      if (cached != null) {
+        return _withExchanges(cycle, cached, accounts: accounts);
+      }
     }
     final live = await computeLive(cycle, accounts: accounts);
     if (cacheable) {
@@ -60,11 +71,46 @@ class CycleRepository {
   }
 
   /// The cached totals of [cycle] (cold start: show these first), or null.
-  /// `pendingSpend` is not cached (zero here); it is only live.
+  /// `pendingSpend` is not cached (zero here); it is only live. The
+  /// exchange figures are not cached either: they read as zero here.
   Future<Map<Currency, CycleTotals>?> cachedTotals(
     Cycle cycle, {
     String accountFilter = '*',
   }) => _cached(cycle, accountFilter);
+
+  /// T-272: [cached] with the exchange figures of [cycle] read live from
+  /// the exchange legs only (the cache has no column for them). A currency
+  /// whose only activity is an exchange is added with zero income/spend.
+  Future<Map<Currency, CycleTotals>> _withExchanges(
+    Cycle cycle,
+    Map<Currency, CycleTotals> cached, {
+    required Set<String> accounts,
+  }) async {
+    final (legs, _) = await loadRows(
+      cycle,
+      accounts: accounts,
+      exchangeLegsOnly: true,
+    );
+    if (legs.isEmpty) return cached;
+    final live = aggregateCycle(cycle, legs, const []);
+    final out = Map<Currency, CycleTotals>.of(cached);
+    for (final e in live.entries) {
+      final base =
+          out[e.key] ??
+          CycleTotals(
+            currency: e.key,
+            income: Money.zero(e.key),
+            spend: Money.zero(e.key),
+            pendingSpend: Money.zero(e.key),
+            byCategoryMinor: const {},
+          );
+      out[e.key] = base.withExchanges(
+        exchangedIn: e.value.exchangedIn,
+        exchangedOut: e.value.exchangedOut,
+      );
+    }
+    return out;
+  }
 
   Future<Map<Currency, CycleTotals>?> _cached(
     Cycle cycle,
@@ -102,9 +148,12 @@ class CycleRepository {
   }
 
   /// The rows the engine needs for [cycle] (also for the burn line).
+  /// [exchangeLegsOnly]: only the internal legs of exchange pairs, and no
+  /// offsets (T-272 cache overlay).
   Future<(List<CycleTxn>, List<CycleOffset>)> loadRows(
     Cycle cycle, {
     Set<String> accounts = const {},
+    bool exchangeLegsOnly = false,
   }) async {
     final from = cycle.start.epochDay * _dayMs - _maxOffsetMs;
     final to = (cycle.end.epochDay + 1) * _dayMs + _maxOffsetMs;
@@ -117,15 +166,17 @@ class CycleRepository {
           '$withCashCover'
           'SELECT id, direction, status, amount_minor, currency, category_id, '
           'is_internal, occurred_at, occurred_tz_offset_min, '
-          'coalesce(${cashCoveredOf('transactions')}, 0) AS cash_covered '
+          'coalesce(${cashCoveredOf('transactions')}, 0) AS cash_covered, '
+          '$_isExchangeSql '
           'FROM transactions WHERE deleted_at IS NULL '
-          'AND occurred_at >= ? AND occurred_at < ?$accountSql',
+          'AND occurred_at >= ? AND occurred_at < ?$accountSql'
+          '${exchangeLegsOnly ? ' AND is_internal = 1 AND transfer_pair_id IS NOT NULL' : ''}',
           variables: [
             Variable.withInt(from),
             Variable.withInt(to),
             for (final a in ids) Variable.withString(a),
           ],
-          readsFrom: {_db.transactions, _db.accounts},
+          readsFrom: {_db.transactions, _db.accounts, _db.transferPairs},
         )
         .get();
     final txns = <CycleTxn>[
@@ -143,10 +194,14 @@ class CycleRepository {
             r.read<int>('occurred_tz_offset_min'),
           ),
           isInternal: r.read<int>('is_internal') != 0,
+          isExchange: r.read<int>('is_exchange') != 0,
           categoryId: r.readNullable<String>('category_id'),
           cashCoveredMinor: r.read<int>('cash_covered'),
         ),
     ].where((t) => cycle.contains(t.date)).toList();
+    if (exchangeLegsOnly) {
+      return (txns.where(isExchangeLeg).toList(), const <CycleOffset>[]);
+    }
 
     final links = await _db
         .customSelect(

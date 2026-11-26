@@ -107,7 +107,7 @@ void main() {
       );
       expect(
         dispositionOf(TemplateEvent.fxConversion, TemplateDirection.neutral),
-        isA<DeferredEvent>(),
+        isA<ExchangeEvent>(),
       );
     });
   });

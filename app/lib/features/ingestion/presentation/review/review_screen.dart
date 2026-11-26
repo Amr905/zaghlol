@@ -27,8 +27,11 @@ import '../../../../core/ui/z_button.dart';
 import '../../../../core/ui/z_card.dart';
 import '../../../../core/ui/z_chip.dart';
 import '../../../../core/ui/z_sheet.dart';
+import '../../../budget/application/budget_providers.dart'
+    show localZoneProvider;
 import '../../../capture/presentation/template_builder_screen.dart';
 import '../../../transactions/domain/transaction.dart' show TxnDirection;
+import '../../../transfers/presentation/exchange_entry_screen.dart';
 import '../../data/review_repository.dart' show ReviewException;
 import 'review_models.dart';
 import 'review_providers.dart';
@@ -130,6 +133,25 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
     AppLocalizations.of(context).ingestionReviewDismissed,
     () => _actions.dismiss(itemId),
   );
+
+  /// T-272: opens the exchange entry prefilled with the received side; the
+  /// entry resolves this item when the exchange is saved.
+  Future<void> _recordExchange(ExchangeJumpCardModel card) async {
+    final zone = ProviderScope.containerOf(context).read(localZoneProvider);
+    final ms = card.asOf.millisecondsSinceEpoch;
+    final saved = await showExchangeEntry(
+      context,
+      prefill: ExchangePrefill(
+        toAccountId: card.accountId,
+        received: card.amount,
+        date: CivilDate.fromLocalMs(ms, zone.offsetAtInstant(ms)),
+        reviewItemId: card.itemId,
+      ),
+    );
+    if (saved == true && mounted) {
+      ProviderScope.containerOf(context).invalidate(reviewQueueProvider);
+    }
+  }
 
   Future<void> _requestBank(MessageCardModel card) async {
     final sent = await showZSheet<bool>(
@@ -461,6 +483,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       ),
       onConfirm: () => _now(() => _actions.confirmSubscription(card)),
       onDismiss: () => _dismissCard(card),
+    ),
+    ExchangeJumpCardModel() => _ExchangeJumpCard(
+      card: card,
+      onRecord: () => _now(() => _recordExchange(card)),
+      onNo: () => _dismiss(card.itemId),
     ),
     OldDueCardModel() => _OldDueCard(
       card: card,
@@ -1170,6 +1197,70 @@ class _SuggestionShell extends StatelessWidget {
                 label: l10n.commonActionDismiss,
                 variant: ZButtonVariant.text,
                 onPressed: onDismiss,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// T-272: "Did you exchange money? Your EGP rose by about X."
+class _ExchangeJumpCard extends StatelessWidget {
+  const _ExchangeJumpCard({
+    required this.card,
+    required this.onRecord,
+    required this.onNo,
+  });
+  final ExchangeJumpCardModel card;
+  final VoidCallback onRecord;
+  final VoidCallback onNo;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final lang = Localizations.localeOf(context).languageCode;
+    final container = ProviderScope.containerOf(context);
+    final digits = container.read(digitsModeProvider(lang));
+    final colors = ZColors.of(context);
+    final amount = MoneyFormat.format(
+      card.amount,
+      languageCode: lang,
+      digits: digits,
+      withCurrency: false,
+      dropZeroFraction: true,
+      hidden: container.read(hideAmountsProvider),
+    );
+    return ZCard(
+      key: ValueKey('exchange-jump-${card.itemId}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.ingestionReviewExchangeJumpQuestion(
+              MoneyFormat.currencyLabel(
+                card.amount.currency,
+                languageCode: lang,
+              ),
+              amount,
+            ),
+            style: ZType.body.copyWith(color: colors.text),
+          ),
+          const SizedBox(height: ZSpacing.md),
+          Wrap(
+            spacing: ZSpacing.sm,
+            runSpacing: ZSpacing.sm,
+            children: [
+              ZButton(
+                label: l10n.ingestionReviewExchangeJumpYes,
+                haptic: ZHaptic.medium,
+                onPressed: onRecord,
+              ),
+              ZButton(
+                label: l10n.ingestionReviewExchangeJumpNo,
+                variant: ZButtonVariant.text,
+                onPressed: onNo,
               ),
             ],
           ),

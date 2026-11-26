@@ -1472,6 +1472,92 @@
   "@homeHeroKpiLeft": {
     "description": "C"
   },
+  "homeHeroKpiIncomeFromExchange": "منهم {amount} من تحويل عملة",
+  "@homeHeroKpiIncomeFromExchange": {
+    "description": "C · T-272 (D-86): muted line under the income KPI when part of the month's money in came from exchanging another currency. Never income, never spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroKpiExchangedOut": "وحولت {amount}",
+  "@homeHeroKpiExchangedOut": {
+    "description": "C · T-272 (D-86): muted line under the spent KPI when money of this currency was exchanged to another currency. Not spending.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeHeroOtherCurrencyIncome": "+ {amount} دخل",
+  "@homeHeroOtherCurrencyIncome": {
+    "description": "C · T-272: line under the primary currency's income when another currency had income this month; tap opens that currency's page. Never converted.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeEntryTitle": "حولت فلوس",
+  "@exchangeEntryTitle": {
+    "description": "C · T-272 manual exchange screen title"
+  },
+  "exchangeEntryIntro": "التحويل مش مصروف ولا دخل. كل ناحية بتتحسب بعملتها في الشهر.",
+  "@exchangeEntryIntro": {
+    "description": "C · T-272"
+  },
+  "exchangeEntrySent": "دفعت",
+  "@exchangeEntrySent": {
+    "description": "C · T-272 the amount given"
+  },
+  "exchangeEntryReceived": "وصلني",
+  "@exchangeEntryReceived": {
+    "description": "C · T-272 the amount received"
+  },
+  "exchangeEntryAccount": "الحساب",
+  "@exchangeEntryAccount": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryCurrency": "العملة",
+  "@exchangeEntryCurrency": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryDate": "التاريخ",
+  "@exchangeEntryDate": {
+    "description": "C · T-272"
+  },
+  "exchangeEntryRate": "السعر: ١ {from} = {rate} {to}",
+  "@exchangeEntryRate": {
+    "description": "C · T-272 the rate from the two amounts",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeEntrySameCurrency": "اختار عملتين مختلفتين",
+  "@exchangeEntrySameCurrency": {
+    "description": "C · T-272 validation"
+  },
+  "exchangeEntrySave": "احفظ التحويل",
+  "@exchangeEntrySave": {
+    "description": "C · T-272"
+  },
+  "exchangeEntrySaved": "اتسجل التحويل",
+  "@exchangeEntrySaved": {
+    "description": "C · T-272 snackbar"
+  },
+  "exchangeEntryFailed": "معرفناش نحفظ التحويل. جرب تاني.",
+  "@exchangeEntryFailed": {
+    "description": "C · T-272"
+  },
   "homeHeroApproxTitle": "كله تقريباً بالـ {currency}",
   "@homeHeroApproxTitle": {
     "description": "L · last pager page, only when the ≈ view is on (FR-CUR-04)",
@@ -2641,6 +2727,26 @@
   "ingestionReviewOldDueKept": "تمام، هيفضل زي ما هو",
   "@ingestionReviewOldDueKept": {
     "description": "T-250: snackbar after Keep"
+  },
+  "ingestionReviewExchangeJumpQuestion": "حولت فلوس؟ رصيدك بالـ{currency} زاد حوالي {amount} ومشفناش فلوس داخلة.",
+  "@ingestionReviewExchangeJumpQuestion": {
+    "description": "C · T-272: unexplained balance rise on an account while another currency had income lately. Opens the exchange entry prefilled.",
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ingestionReviewExchangeJumpYes": "أيوه، سجلها",
+  "@ingestionReviewExchangeJumpYes": {
+    "description": "C · T-272"
+  },
+  "ingestionReviewExchangeJumpNo": "لأ",
+  "@ingestionReviewExchangeJumpNo": {
+    "description": "C · T-272"
   },
   "ingestionReviewEmptyTitle": "كله تمام! مفيش حاجة مستنية رأيك ✨",
   "@ingestionReviewEmptyTitle": {
@@ -5957,6 +6063,18 @@
   },
   "@homeQuickAddAssetHint": {
     "description": "S · quick add card subtitle"
+  },
+  "homeQuickAddExchange": "حولت فلوس",
+  "@homeQuickAddExchange": {
+    "description": "C · T-272: Add sheet row for a manual currency exchange (D-86)"
+  },
+  "homeQuickAddExchangeHint": "من عملة لعملة، زي دولار لجنيه",
+  "@homeQuickAddExchangeHint": {
+    "description": "C · T-272"
+  },
+  "homeQuickAddExchangeA11y": "سجل تحويل عملة",
+  "@homeQuickAddExchangeA11y": {
+    "description": "A · T-272"
   },
   "@homeQuickAddAsset": {
     "description": "L · with common_gold_badge; Free opens S-68"

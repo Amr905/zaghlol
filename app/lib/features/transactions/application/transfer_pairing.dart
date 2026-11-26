@@ -220,6 +220,98 @@ class TransferPairingUseCase {
     return result;
   }
 
+  /// T-272 (D-86, WP-4): the user exchanged money ("حولت فلوس"). In one
+  /// database transaction stores the `transfer_out` of [sent] on
+  /// [fromAccountId] and the `transfer_in` of [received] on [toAccountId]
+  /// (source `manual`, user-verified, same instant) and pairs them: kind
+  /// `fx_conversion` inside one account, else `cross_currency`. Both legs
+  /// are internal, so neither is spending or income; amounts stay exactly
+  /// as typed, each in its own currency. [resolveItemId]: an open review
+  /// item that suggested this exchange; it is resolved as `linked` in the
+  /// same transaction.
+  ///
+  /// Throws [TransferPairingException.invalid] for a non-positive amount,
+  /// one currency on both sides or an offset outside the schema range, and
+  /// [TransferPairingException.notFound] for a missing or merged account.
+  Future<PairingResult> recordExchange({
+    required String fromAccountId,
+    required Money sent,
+    required String toAccountId,
+    required Money received,
+    required DateTime occurredAt,
+    required int tzOffsetMin,
+    String? resolveItemId,
+  }) async {
+    if (fromAccountId.isEmpty ||
+        toAccountId.isEmpty ||
+        !sent.isPositive ||
+        !received.isPositive ||
+        sent.currency == received.currency ||
+        tzOffsetMin < -1080 ||
+        tzOffsetMin > 1080) {
+      _invalid();
+    }
+    final schedule = await _loadSchedule();
+    final now = _nowMs();
+    final at = occurredAt.toUtc().millisecondsSinceEpoch;
+    final result = await _txns.inTransaction(() async {
+      for (final id in {fromAccountId, toAccountId}) {
+        final a = await _accounts.byId(id);
+        if (a == null || a.mergedIntoId != null) {
+          throw TransferPairingException(TransferPairingException.notFound);
+        }
+      }
+      final legs = <_Row>[];
+      for (final (accountId, isOut, money) in [
+        (fromAccountId, true, sent),
+        (toAccountId, false, received),
+      ]) {
+        final id = _newId();
+        final stored = money.toStorage();
+        await _txns.insert(
+          TransactionsCompanion.insert(
+            id: id,
+            accountId: accountId,
+            source: 'manual',
+            direction: isOut ? 'transfer_out' : 'transfer_in',
+            amountMinor: stored.minor,
+            currency: stored.currency,
+            occurredAt: at,
+            occurredTzOffsetMin: tzOffsetMin,
+            categorySource: 'none',
+            isUserVerified: const Value(1),
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+        legs.add((
+          id: id,
+          accountId: accountId,
+          isOut: isOut,
+          currency: stored.currency,
+          amountMinor: stored.minor,
+          occurredAt: at,
+          offsetMin: tzOffsetMin,
+        ));
+      }
+      final kind = fromAccountId == toAccountId
+          ? TransferPairKind.fxConversion
+          : TransferPairKind.crossCurrency;
+      final pairId = await _writePair(legs[0], legs[1], kind, now);
+      if (resolveItemId != null) {
+        await _reviews.resolve(resolveItemId, resolution: 'linked', at: now);
+      }
+      return PairingResult(
+        PairingStatus.paired,
+        pairId: pairId,
+        pairKind: kind,
+        event: await _event(schedule, legs),
+      );
+    });
+    _publish(result, mascot: false);
+    return result;
+  }
+
   /// Unpairs the pair that [txnId] is a leg of and clears `is_internal` on
   /// both legs, in one transaction (FR-XFR-02). For a one-sided internal
   /// leg without a pair row it clears the flag. Returns the event, or null
@@ -479,10 +571,15 @@ class TransferPairingUseCase {
     );
     final rates = await _ratesFor(wide.values.map(legOf), leg);
     final no = await _dismissedFx(txnId);
+    // T-272 (D-86, Q4): a cross-bank exchange is offered with a wide band
+    // around the last known rate, or for any amounts when no rate is known;
+    // it is still only a suggestion the user confirms.
     final cross = crossCurrencyCandidates(
       leg,
       wide.values.map(legOf).where((c) => !no.contains(c.id)),
       (from, to) => rates['${from.code}>${to.code}'],
+      toleranceBp: exchangeSuggestionToleranceBp,
+      anyWhenNoRate: true,
     );
     if (cross.isNotEmpty) {
       final opened = await _openReview(

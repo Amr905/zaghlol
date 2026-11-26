@@ -37,6 +37,7 @@ import '../features/settings/presentation/settings_ports.dart';
 import '../features/transactions/presentation/edit/transaction_edit_screen.dart';
 import '../features/transactions/presentation/list/txn_list_providers.dart';
 import '../features/transfers/presentation/assign_sheet.dart';
+import '../features/transfers/presentation/exchange_entry_screen.dart';
 import '../features/transfers/presentation/link_transfer_sheet.dart';
 import '../features/transfers/presentation/split_sheet.dart';
 import 'app_config.dart';
@@ -74,6 +75,11 @@ void wiredAddSelected(BuildContext context, AddAction action) {
   if (action == AddAction.scan) {
     // T-161: Scan opens S-32 over the closed sheet.
     closeAddSheetThen(context, (root) => unawaited(showScanScreen(root)));
+    return;
+  }
+  if (action == AddAction.exchange) {
+    // T-272 (D-86): "I exchanged money" opens the exchange entry.
+    closeAddSheetThen(context, (root) => unawaited(showExchangeEntry(root)));
     return;
   }
   if (action != AddAction.asset) {
