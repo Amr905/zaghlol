@@ -48,3 +48,7 @@ The native launch screen stays up until Flutter draws its first frame. There is 
 2. Native main-thread work at launch: Kotlin receivers or services, or the headless ingestion engine holding the bootstrap lease while the UI engine waits.
 3. Whether the blank cover or the lock cover looks like the logo on that device's theme.
 If none of these turns anything up, then the blank cover from the failed migration (fixed here) is the explanation.
+
+## Lead delta check (reviewer fix cf04f770)
+
+The set-based `_fkViolations()` (about 40 lines) reads each violating row by `rowid`; no table in the schema is `WITHOUT ROWID` (checked `app_schema*.dart`), so the rowid read is always valid. `dart analyze --fatal-infos` on lib and the touched test folders is clean; `migration_dirty_fk_test.dart` (incl. `fkSwap`) and `db_open_gate_test.dart` pass (8). **Hotfix: APPROVED.**
