@@ -157,9 +157,16 @@ final class DbOpenFailed<D> extends DbOpenResult<D> {
     this.restored,
     this.fromVersion,
     required this.toVersion,
+    this.cause,
   });
 
   final DbOpenFailureCode code;
+
+  /// FREEZE-FIX: the constant code of the error behind a failed migration or
+  /// open when it is a [SafeException] (e.g. `DB_MIGRATION_FK_VIOLATION`,
+  /// `DB_MIGRATION_ROW_COUNT`, `DB_SCHEMA_MISMATCH`), else null. Never a
+  /// message, statement or row.
+  final String? cause;
 
   /// [DbOpenFailureCode.unavailable] because the bootstrap lease lapsed
   /// before a create or wipe step (nothing was touched).
@@ -192,10 +199,22 @@ final class DbOpenFailed<D> extends DbOpenResult<D> {
 
 /// [DbOpenFailed] as an exception for `appDatabaseProvider`.
 final class DbOpenFailure extends SafeException {
-  // ignore: safe_exception_required - code is DbOpenFailureCode.code, a closed enum of UPPER_SNAKE constants
-  DbOpenFailure(this.failure) : super(failure.code);
+  DbOpenFailure(this.failure, {this.cause, this.fromVersion, this.toVersion})
+    // ignore: safe_exception_required - code is DbOpenFailureCode.code, a closed enum of UPPER_SNAKE constants
+    : super(failure.code);
 
   final DbOpenFailureCode failure;
+
+  /// [DbOpenFailed.cause]: a constant code or null.
+  final String? cause;
+
+  final int? fromVersion;
+  final int? toVersion;
+
+  /// Codes and versions only, e.g. `DB_MIGRATION_FAILED
+  /// DB_MIGRATION_FK_VIOLATION from=6 to=7`.
+  String get summary =>
+      '${failure.code} ${cause ?? '-'} from=$fromVersion to=$toVersion';
 }
 
 /// Builds the database over [executor].
@@ -327,12 +346,14 @@ final class _Opener<D extends GeneratedDatabase> {
     DbOpenFailureCode code, {
     bool leaseLapsed = false,
     bool? restored,
+    String? cause,
   }) => DbOpenFailed<D>(
     code,
     leaseLapsed: leaseLapsed,
     restored: restored,
     fromVersion: _fromVersion,
     toVersion: guard.targetVersion,
+    cause: cause,
   );
 
   Future<DbOpenResult<D>> run() async {
@@ -648,9 +669,14 @@ final class _Opener<D extends GeneratedDatabase> {
     if (open == null) {
       // Failed after the open sequence: a migration step, the FK check, the
       // schema check, or the create itself.
+      final cause = error is SafeException ? error.code : null;
       return restored == null
-          ? failed(DbOpenFailureCode.unavailable)
-          : failed(DbOpenFailureCode.migrationFailed, restored: restored);
+          ? failed(DbOpenFailureCode.unavailable, cause: cause)
+          : failed(
+              DbOpenFailureCode.migrationFailed,
+              restored: restored,
+              cause: cause,
+            );
     }
     if (restored == false) {
       return failed(DbOpenFailureCode.migrationFailed, restored: false);

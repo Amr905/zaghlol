@@ -56,6 +56,9 @@ const Map<String, String> loggingAllowed = {
   // T-193 AC5 device run: `kDebugMode`-only marker lines (a route type name,
   // a boolean), never data; compiled out of release builds.
   'lib/app/notification_taps_debug.dart': 'debug-only, no data',
+  // FREEZE-FIX: a failed database open, `kDebugMode` only, codes and schema
+  // versions only; compiled out of release builds.
+  'lib/app/db_open_debug.dart': 'debug-only, codes only',
 };
 
 final RegExp loggingCall = RegExp(

@@ -67,8 +67,13 @@ final appDatabaseProvider = FutureProvider<AppDatabase>(
       case DbOpened(:final db):
         ref.onDispose(() => unawaited(disposeAppDatabase(db)));
         return db;
-      case DbOpenFailed(:final code):
-        throw DbOpenFailure(code);
+      case DbOpenFailed(:final code, :final cause, :final fromVersion):
+        throw DbOpenFailure(
+          code,
+          cause: cause,
+          fromVersion: fromVersion,
+          toVersion: result.toVersion,
+        );
     }
   },
   name: 'appDatabaseProvider',
