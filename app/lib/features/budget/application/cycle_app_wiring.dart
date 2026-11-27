@@ -67,6 +67,7 @@ class CycleResumeHandler {
 
   final Ref _ref;
   int? _lastForegroundMs;
+  int? _lastSweepMs;
 
   /// App resume: re-reads the local day, then drops every cycle touched
   /// since the last foreground (the headless engine's writes, edits, links)
@@ -89,5 +90,28 @@ class CycleResumeHandler {
     _lastForegroundMs = now;
     await settings.set(Settings.lastForegroundMs, now);
     _ref.read(cycleDataVersionProvider.notifier).bump();
+  }
+
+  /// B98-B: the headless engine wrote rows while the app is open (the
+  /// capture orchestrator saw a spool change). Drops the cycles touched
+  /// since the last sweep and tells readers to recompute, so Home, Recent
+  /// and the cards follow without a resume. Never throws.
+  Future<void> onBackgroundWrites() async {
+    try {
+      final now = _ref.read(clockProvider)().toUtc().millisecondsSinceEpoch;
+      var since = _lastSweepMs ?? _lastForegroundMs;
+      if (since == null) {
+        final settings = await _ref.read(settingsRepositoryProvider.future);
+        final saved = await settings.get(Settings.lastForegroundMs);
+        since = saved != null && saved <= now ? saved : 0;
+      }
+      final invalidator = await _ref.read(cycleCacheInvalidatorProvider.future);
+      final schedule = await _ref.read(paydayScheduleProvider.future);
+      await invalidator.sweepSince(since, schedule);
+      _lastSweepMs = now;
+      _ref.read(cycleDataVersionProvider.notifier).bump();
+    } on Object {
+      // The next trigger (or the resume sweep) catches up.
+    }
   }
 }

@@ -17,7 +17,10 @@
 //  - `ok` with `stuck > 0` is not retried (T-046 §10).
 // An external trigger resets both schedules. After a cycle that stored or
 // held something, and on every resume, the ingestion tables are marked
-// updated (headless writes are invisible to this engine's Drift streams).
+// updated (headless writes are invisible to this engine's Drift streams). A
+// cycle that follows a spool-changed event or a re-poll marks them too even
+// when it drained nothing: the headless engine may have stored the rows and
+// cleared the spool meanwhile (B98-B).
 
 import 'dart:async';
 
@@ -65,6 +68,10 @@ final class SpoolOrchestrator {
   int _pollIndex = 0;
   int _retryIndex = 0;
 
+  /// The native side signalled a spool change (or a re-poll ran) since the
+  /// last cycle: the headless engine may have written rows.
+  bool _externalWrites = false;
+
   /// The last cycle's result (null before the first).
   CycleResult? lastResult;
 
@@ -73,7 +80,9 @@ final class SpoolOrchestrator {
 
   /// CaptureEventsApi.onSpoolChanged.
   void onSpoolChanged() {
-    if (_disposed || _coalesce != null) return;
+    if (_disposed) return;
+    _externalWrites = true;
+    if (_coalesce != null) return;
     _coalesce = scheduler.after(kSpoolChangedCoalesce, () {
       _coalesce = null;
       unawaited(drainNow());
@@ -123,7 +132,11 @@ final class SpoolOrchestrator {
     }
     _cycles++;
     lastResult = result;
-    if (result.drained > 0 || result.held > 0) onTablesUpdated?.call();
+    final external = _externalWrites;
+    _externalWrites = false;
+    if (external || result.drained > 0 || result.held > 0) {
+      onTablesUpdated?.call();
+    }
     try {
       await afterCycle?.call(result);
     } on Object {
@@ -176,6 +189,7 @@ final class SpoolOrchestrator {
     if (delay == null || _timer != null) return;
     _timer = scheduler.after(delay, () {
       _timer = null;
+      _externalWrites = true;
       if (!_disposed) unawaited(_request());
     });
   }

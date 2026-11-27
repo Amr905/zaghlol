@@ -99,6 +99,22 @@ void main() {
     expect(host.scheduleNowCalls, 0);
   });
 
+  test(
+    'B98-B: an empty cycle after a spool-changed event still marks the '
+    'tables updated (the headless engine may have stored the rows)',
+    () async {
+      await orchestrator.drainNow();
+      expect(tablesUpdated, 0, reason: 'nothing external, nothing drained');
+      orchestrator.onSpoolChanged();
+      sched.fire(kSpoolChangedCoalesce);
+      await pumpEventQueue();
+      expect(cycles, 2);
+      expect(tablesUpdated, 1);
+      await orchestrator.drainNow();
+      expect(tablesUpdated, 1, reason: 'the flag is consumed by one cycle');
+    },
+  );
+
   test('a non-empty drain does not poll', () async {
     script = [ok(drained: 2)];
     host.status = spoolStatus(pending: 3);

@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/db/app_database_providers.dart';
+import '../../budget/application/cycle_app_wiring.dart'
+    show cycleDataVersionProvider;
 import '../../../core/db/daos/llm_cat_queue_dao.dart';
 import '../../../core/flags/feature_flags.dart';
 import '../../../core/flags/flags_providers.dart';
@@ -93,6 +95,8 @@ final catConsentGrantedProvider = FutureProvider.autoDispose<bool>((ref) async {
 
 /// Distinct merchants that would be sent, counted before any consent.
 final catEligibleCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  // B98-B: rows written by the headless engine bump this version.
+  ref.watch(cycleDataVersionProvider);
   final filler = await ref.watch(llmCatQueueFillerProvider.future);
   return filler.countEligible(now: DateTime.now());
 }, name: 'catEligibleCountProvider');

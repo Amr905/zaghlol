@@ -13,6 +13,8 @@ import 'package:flutter/foundation.dart' as f show defaultTargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../categorization/data/event_category_backfill.dart';
+import '../../budget/application/cycle_app_wiring.dart'
+    show cycleResumeHandlerProvider;
 import '../../notifications/application/housekeeping_providers.dart'
     show afterIngestProvider;
 
@@ -187,7 +189,12 @@ final captureCoordinatorProvider = FutureProvider<CaptureCoordinator?>((
           : null,
     ),
     ios: ios,
-    onTablesUpdated: () => markIngestionTablesUpdated(db),
+    onTablesUpdated: () {
+      markIngestionTablesUpdated(db);
+      // B98-B: the Home providers read through the cycle cache and a version
+      // counter, not Drift streams; one central hook refreshes them.
+      unawaited(ref.read(cycleResumeHandlerProvider).onBackgroundWrites());
+    },
     initialToggles: CaptureToggles(
       sms: ref.read(captureSmsEnabledProvider).value ?? true,
       notifications:

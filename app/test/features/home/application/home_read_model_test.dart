@@ -390,6 +390,25 @@ void main() {
       expect(container.read(todayProvider), CivilDate(2026, 11, 11));
     });
 
+    test('B98-B: rows the headless engine wrote while the app is open reach '
+        'Home without a resume', () async {
+      await container.read(cycleAppWiringProvider.future);
+      container.listen(homeModelProvider, (_, _) {});
+      await add('a', amount: 1500, when: at(2026, 11, 10));
+      await container.read(cycleResumeHandlerProvider).onResume();
+      expect((await model()).hero!.spend.minor, 1500);
+      now = DateTime.utc(2026, 11, 10, 11);
+      await add(
+        'sms1',
+        amount: 800,
+        when: at(2026, 11, 10),
+        updatedAt: now.millisecondsSinceEpoch,
+      );
+      expect((await model()).hero!.spend.minor, 1500); // stale: no event
+      await container.read(cycleResumeHandlerProvider).onBackgroundWrites();
+      expect((await model()).hero!.spend.minor, 2300);
+    });
+
     test(
       'FU-126: the first resume sweeps from the persisted foreground time',
       () async {
