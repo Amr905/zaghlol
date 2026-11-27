@@ -9,6 +9,7 @@ import 'package:zaghlol/features/ingestion/data/device_local_zone.dart';
 import 'package:zaghlol/features/insights/data/chart_repository.dart';
 import 'package:zaghlol/features/insights/domain/chart_models.dart';
 import 'package:zaghlol_domain/zaghlol_domain.dart';
+import 'package:zaghlol_parsing/zaghlol_parsing.dart' show merchantKey;
 
 import '../../../core/db/financial_fixtures.dart';
 
@@ -517,6 +518,26 @@ void main() {
       expect(o?.amount.minor, 150);
       expect(o?.count, 2);
       expect(await repo.otherMerchants(period, fEgp, shown: 4), isNull);
+    });
+
+    test('B98-A: hand-entered rows (merchant_norm NULL) count by their '
+        'read-time key and merge with the same scanned merchant', () async {
+      final key = merchantKey('Hassan Barber Shop');
+      await add('man1', amount: 4000, merchantRaw: 'Hassan Barber Shop');
+      await add('man2', amount: 1000, merchantRaw: 'hassan  barber shop');
+      await add('sms', amount: 500, merchant: key, merchantRaw: 'HASSAN');
+      await add('man3', amount: 200, merchantRaw: 'Corner Kiosk');
+      final all = ready(await repo.topMerchants(period, fEgp, limit: 50));
+      expect(
+        [for (final m in all) m.merchantNorm],
+        [key, merchantKey('Corner Kiosk')],
+      );
+      expect(all.first.amount.minor, 5500);
+      expect(all.first.count, 3);
+      expect(all.last.name, 'Corner Kiosk');
+      final o = await repo.otherMerchants(period, fEgp, shown: 1);
+      expect(o?.amount.minor, 200);
+      expect(o?.count, 1);
     });
 
     test('limit is clamped; empty period', () async {

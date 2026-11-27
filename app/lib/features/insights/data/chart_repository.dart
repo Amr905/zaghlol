@@ -898,16 +898,8 @@ class ChartRepository {
   }) {
     final n = limit < 1 ? 1 : (limit > 50 ? 50 : limit);
     return _memoized(_key('merchants', p, f, '$n'), () async {
-      final s = _spend(p, f);
-      final rows = await _select(
-        'SELECT t.merchant_norm AS m, '
-        'max(coalesce(t.merchant_raw, t.merchant_norm)) AS name, '
-        'sum($_netSpend) AS s, count(*) AS n FROM transactions t '
-        'WHERE ${s.where} AND t.merchant_norm IS NOT NULL '
-        'GROUP BY t.merchant_norm HAVING sum($_netSpend) > 0 '
-        'ORDER BY s DESC, m LIMIT ?',
-        [...s.args, Variable.withInt(n)],
-      );
+      final all = await _rankedMerchants(_spend(p, f));
+      final rows = all.take(n).toList();
       if (rows.isEmpty) {
         return const ChartNotEnoughData<List<MerchantSpend>>(
           NotEnoughReason.noData,
@@ -918,13 +910,56 @@ class ChartRepository {
       return ChartReady([
         for (final r in rows)
           MerchantSpend(
-            merchantNorm: r.read<String>('m'),
-            name: r.read<String>('name'),
-            amount: _m(r.read<int>('s'), f),
-            count: r.read<int>('n'),
+            merchantNorm: r.key,
+            name: r.name,
+            amount: _m(r.sum, f),
+            count: r.count,
           ),
       ]);
     });
+  }
+
+  /// Merchants ranked by net spend (> 0), best first. Rows whose
+  /// `merchant_norm` is NULL (manual entries, edited merchants) are grouped
+  /// by [merchantKey] of their `merchant_raw` at read time (B98 bug A, the
+  /// same fallback as [_merchantMatch]); the name shown is the greatest
+  /// `coalesce(merchant_raw, merchant_norm)` of the group.
+  Future<List<({String key, String name, int sum, int count})>>
+  _rankedMerchants(_Sql s) async {
+    final rows = await _select(
+      'SELECT t.merchant_norm AS m, '
+      'CASE WHEN t.merchant_norm IS NULL THEN t.merchant_raw END AS g, '
+      'max(coalesce(t.merchant_raw, t.merchant_norm)) AS name, '
+      'sum($_netSpend) AS s, count(*) AS n FROM transactions t '
+      'WHERE ${s.where} AND (t.merchant_norm IS NOT NULL '
+      'OR t.merchant_raw IS NOT NULL) '
+      'GROUP BY t.merchant_norm, g',
+      s.args,
+    );
+    final by = <String, ({String name, int sum, int count})>{};
+    for (final r in rows) {
+      final norm = r.readNullable<String>('m');
+      final key = norm ?? merchantKey(r.read<String>('g'));
+      if (key.isEmpty) continue;
+      final name = r.read<String>('name');
+      final old = by[key];
+      by[key] = (
+        name: old == null || name.compareTo(old.name) > 0 ? name : old.name,
+        sum: (old?.sum ?? 0) + r.read<int>('s'),
+        count: (old?.count ?? 0) + r.read<int>('n'),
+      );
+    }
+    final out = [
+      for (final e in by.entries)
+        if (e.value.sum > 0)
+          (
+            key: e.key,
+            name: e.value.name,
+            sum: e.value.sum,
+            count: e.value.count,
+          ),
+    ]..sort((a, b) => a.sum != b.sum ? b.sum - a.sum : a.key.compareTo(b.key));
+    return out;
   }
 
   /// T-223: the merchants beyond the top [shown], folded into one "Other"
@@ -937,19 +972,13 @@ class ChartRepository {
   }) {
     final n = shown < 1 ? 1 : (shown > 50 ? 50 : shown);
     return _memoized(_key('merchantsOther', p, f, '$n'), () async {
-      final s = _spend(p, f);
-      final rows = await _select(
-        'SELECT coalesce(sum(s), 0) AS s, coalesce(sum(n), 0) AS n FROM ('
-        'SELECT t.merchant_norm AS m, sum($_netSpend) AS s, count(*) AS n '
-        'FROM transactions t '
-        'WHERE ${s.where} AND t.merchant_norm IS NOT NULL '
-        'GROUP BY t.merchant_norm HAVING sum($_netSpend) > 0 '
-        'ORDER BY s DESC, m LIMIT -1 OFFSET ?)',
-        [...s.args, Variable.withInt(n)],
-      );
-      final minor = rows.single.read<int>('s');
+      final rest = (await _rankedMerchants(_spend(p, f))).skip(n).toList();
+      final minor = rest.fold<int>(0, (a, r) => a + r.sum);
       if (minor <= 0) return null;
-      return (amount: _m(minor, f), count: rows.single.read<int>('n'));
+      return (
+        amount: _m(minor, f),
+        count: rest.fold<int>(0, (a, r) => a + r.count),
+      );
     });
   }
 
