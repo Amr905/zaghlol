@@ -1,0 +1,70 @@
+==== e2e-llm-cat ar
+Success
+grep: /home/runner/work/_temp/device-flows/llm-cat-ar-test.log: No such file or directory
+---- phase p1
+  sent: NBE
+  sent: NBE
+  sent: NBE
+  sent: OrangeCash
+e2e-llm-cat ar exit: 1
+E2ELCAT LANG ar
+E2ELCAT SEEDED settings
+E2ELCAT MAIN_RETURNED
+E2ELCAT SEND p1
+E2ELCAT NOTE card needed a provider refresh after the SMS (stale Home)
+E2ELCAT SHOT ar-01-card
+E2ELCAT SHOT ar-02-consent
+E2ELCAT PROBLEM the user-categorised row of shop A is untouched
+E2ELCAT PROBLEM the manual entry is untouched
+E2ELCAT SHOT ar-03-list-chips
+E2ELCAT SHOT ar-04-tick
+01:40 +0 -1: Some tests failed.
+---- ar first exception
+E2ELCAT SHOT ar-03-list-chips
+E2ELCAT SHOT ar-04-tick
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+could not find row B
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      E2e.scrollAndTap (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:211:25)
+<asynchronous suspension>
+#2      main.<anonymous closure>.<anonymous closure>.crossAndPick (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:475:9)
+<asynchronous suspension>
+#3      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:495:7)
+<asynchronous suspension>
+#4      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:89:5)
+---- ar log tail (no message text is printed)
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      E2e.scrollAndTap (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:211:25)
+<asynchronous suspension>
+#2      main.<anonymous closure>.<anonymous closure>.crossAndPick (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:475:9)
+<asynchronous suspension>
+#3      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:495:7)
+<asynchronous suspension>
+#4      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#5      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:89:5)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  automatic category: consent, send, apply, feedback, off
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:39 +0 -1: automatic category: consent, send, apply, feedback, off [E]
+  Test failed. See exception logs above.
+  The test description was: automatic category: consent, send, apply, feedback, off
+  
+01:40 +0 -1: (tearDownAll)
+01:40 +0 -1: Some tests failed.
+
+Failing tests:
+  /home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart: automatic category: consent, send, apply, feedback, off
