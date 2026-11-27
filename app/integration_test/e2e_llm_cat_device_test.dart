@@ -285,6 +285,8 @@ void main() {
         'the consent sheet shows the provider display name',
       );
       await e.shot(t, '$_lang-02-consent');
+      await t.ensureVisible(find.byKey(const ValueKey('cat-consent-not-now')));
+      await e.settle(t, 500);
       await t.tap(find.byKey(const ValueKey('cat-consent-not-now')));
       await e.settle(t, 3000);
       e.check(
@@ -311,6 +313,8 @@ void main() {
         find.byKey(const ValueKey('cat-consent-allow')),
         what: 'the consent Allow button',
       );
+      await t.ensureVisible(find.byKey(const ValueKey('cat-consent-allow')));
+      await e.settle(t, 500);
       await t.tap(find.byKey(const ValueKey('cat-consent-allow')));
       final sent = await _waitFor(
         t,

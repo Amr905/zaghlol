@@ -54,9 +54,20 @@ final class RemoteConfigService {
     return RemoteConfig.fromValues(_values, providerName: _names);
   }
 
-  Stream<RemoteConfig> watch() async* {
-    yield current;
-    yield* _changes.stream;
+  Stream<RemoteConfig> watch() {
+    // Subscribe before the first value goes out: a block applied between the
+    // two would otherwise be missed (the device run found the provider names
+    // never reaching the UI, which hid the auto-category card).
+    late final StreamController<RemoteConfig> out;
+    StreamSubscription<RemoteConfig>? sub;
+    out = StreamController<RemoteConfig>(
+      onListen: () {
+        sub = _changes.stream.listen(out.add);
+        out.add(current);
+      },
+      onCancel: () => sub?.cancel(),
+    );
+    return out.stream;
   }
 
   Future<void> load() async {
