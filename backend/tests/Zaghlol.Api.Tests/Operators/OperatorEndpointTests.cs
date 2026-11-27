@@ -39,12 +39,19 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
     private const string PutPriceOverride = "PUT /admin/v1/prices/override";
     private const string PromoteContribution = "POST /admin/v1/contributions:promote";
     private const string RejectContribution = "POST /admin/v1/contributions:reject";
+    private const string QueryCorrections = "POST /admin/v1/llm-cat/corrections/query";
+    private const string ResolveCorrection = "POST /admin/v1/llm-cat/corrections/resolve";
+    private const string QueryConfirmed = "POST /admin/v1/llm-cat/confirmed/query";
+    private const string ResolveConfirmed = "POST /admin/v1/llm-cat/confirmed/resolve";
 
     private static readonly string[] AllOperatorRoles =
         [OperatorRoles.CatalogEditor, OperatorRoles.FlagsAdmin, OperatorRoles.PricesAdmin, OperatorRoles.SupportViewer, OperatorRoles.SupportAgent, OperatorRoles.SupportLead];
 
     /// <summary>Every admin operation that changes state or is audited, with a valid call. A new one fails the test below.</summary>
-    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutConfig, PutPriceOverride, PromoteContribution, RejectContribution, LookupKey, MoveKey, DetachKey, UnfreezeKey];
+    private static readonly string[] AuditedOperations = [PutDraft, CreateDraft, DeleteDraft, Publish, PutFlag, PutConfig, PutPriceOverride, PromoteContribution, RejectContribution, ResolveCorrection, ResolveConfirmed, LookupKey, MoveKey, DetachKey, UnfreezeKey];
+
+    /// <summary>POST operations that only read (the page travels in a body): they write nothing and leave no audit row (T-354).</summary>
+    private static readonly string[] ReadOnlyPosts = [QueryCorrections, QueryConfirmed];
 
     [Fact]
     public async Task AValidMfaTokenWithTheRoleIsServed()
@@ -99,7 +106,7 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
     [Fact]
     public async Task EveryAdminWriteLeavesExactlyOneAuditRowNamingTheOperator()
     {
-        var operations = fixture.Endpoints("/admin/v1/").Where(e => e.Method != "GET").Select(e => e.Key).ToHashSet(StringComparer.Ordinal);
+        var operations = fixture.Endpoints("/admin/v1/").Where(e => e.Method != "GET" && !ReadOnlyPosts.Contains(e.Key)).Select(e => e.Key).ToHashSet(StringComparer.Ordinal);
         Assert.Equal(AuditedOperations.Order(StringComparer.Ordinal), operations.Order(StringComparer.Ordinal));
 
         foreach (var operation in operations)
@@ -113,6 +120,22 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
 
             Assert.True(before + 1 == await fixture.AuditCountAsync(id), operation);
         }
+    }
+
+    [Fact]
+    public async Task TheReadOnlyPostsExistAndLeaveNoAuditRow()
+    {
+        var present = fixture.Endpoints("/admin/v1/").Where(e => e.Method == "POST").Select(e => e.Key).ToHashSet(StringComparer.Ordinal);
+        Assert.All(ReadOnlyPosts, key => Assert.Contains(key, present));
+
+        var (id, subject) = await fixture.NewOperatorAsync(OperatorRoles.CatalogEditor);
+        foreach (var key in ReadOnlyPosts)
+        {
+            using var response = await fixture.SendAsync(HttpMethod.Post, key["POST ".Length..], fixture.Token(subject), "{}");
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        Assert.Equal(0L, await fixture.AuditCountAsync(id));
     }
 
     [Fact]
@@ -436,6 +459,24 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
         return norm;
     }
 
+    /// <summary>Three distinct-install rows (the confirmed rule's threshold) for a fresh letters-only merchant text.</summary>
+    private async Task<string> SeedLlmCatAsync(string table, string category)
+    {
+        var norm = "t354 " + string.Concat(Guid.NewGuid().ToByteArray().Take(8).Select(b => (char)('a' + (b % 26))));
+        var columns = table == "corrections" ? "merchant_norm, ai_category, user_category" : "merchant_norm, category_code";
+        var values = table == "corrections" ? "@norm, 'dining', @category" : "@norm, @category";
+        for (var i = 0; i < 3; i++)
+        {
+            await fixture.ExecuteAsync(
+                $"INSERT INTO zaghlol.llm_cat_{table} (id, {columns}, source, install_hash, created_at) "
+                + $"VALUES (gen_random_uuid(), {values}, 'llm', decode(md5(random()::text) || md5(random()::text), 'hex'), date_trunc('day', now()))",
+                ("norm", norm),
+                ("category", category));
+        }
+
+        return norm;
+    }
+
     private async Task<(long Before, HttpResponseMessage Response)> PerformAsync(string operation, Guid operatorId, string subject)
     {
         string Token() => fixture.Token(subject);
@@ -478,6 +519,24 @@ public class OperatorEndpointTests(OperatorHostFixture fixture) : IClassFixture<
                 {
                     var norm = await SeedAggregateAsync("dining");
                     return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/contributions:reject", Token(), ContributionKey(norm)));
+                }
+
+            case ResolveCorrection:
+                {
+                    var code = NewCode();
+                    (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + code, Token(), CategoryBody)).Dispose();
+                    var norm = await SeedLlmCatAsync("corrections", code);
+                    var body = $$"""{"merchantNorm":"{{norm}}","aiCategory":"dining","userCategory":"{{code}}","action":"promote"}""";
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/llm-cat/corrections/resolve", Token(), body));
+                }
+
+            case ResolveConfirmed:
+                {
+                    var code = NewCode();
+                    (await fixture.SendAsync(HttpMethod.Put, "/admin/v1/catalog/draft/categories/" + code, Token(), CategoryBody)).Dispose();
+                    var norm = await SeedLlmCatAsync("confirmations", code);
+                    var body = $$"""{"merchantNorm":"{{norm}}","category":"{{code}}","action":"promote"}""";
+                    return (await fixture.AuditCountAsync(operatorId), await fixture.SendAsync(HttpMethod.Post, "/admin/v1/llm-cat/confirmed/resolve", Token(), body));
                 }
 
             case LookupKey:

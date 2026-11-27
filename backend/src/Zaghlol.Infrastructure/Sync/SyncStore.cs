@@ -61,13 +61,15 @@ internal sealed class SyncStore(IAppDbContextFactory contexts) : ISyncStore
         """;
 
     // FR-LCAT-12: three corrections (distinct installs, by the unique key; one a rejected review doesn't count) of the very category the
-    // cache holds delete that cache row. The next ask for the name goes back to the model.
+    // cache holds delete that cache row. The next ask for the name goes back to the model. A correction's created_at is its UTC day
+    // (midnight), so "after the row" is compared with the day the row was written, not its timestamp (FU-448): a correction made that day
+    // counts; one from an earlier day (the corrections that deleted the row's predecessor) does not.
     private const string ContradictionSql = """
         DELETE FROM zaghlol.llm_cat_answer_cache c
         WHERE c.merchant_norm = ANY(@merchants)
           AND (SELECT count(*) FROM zaghlol.llm_cat_corrections x
                WHERE x.merchant_norm = c.merchant_norm AND x.ai_category = c.category_code AND x.status <> 'rejected'
-                 AND x.created_at > c.created_at) >= @threshold
+                 AND x.created_at >= (date_trunc('day', c.created_at AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')) >= @threshold
         """;
 
     // B97-M1: feedback counts only from an install that has made an attested categorise call (the gate chain verifies the proof before

@@ -42,6 +42,25 @@ public class ConfigAdminEndpointTests(AdminFlagFixture fixture) : IClassFixture<
         Assert.Equal(0, await AuditCountAsync(operatorId));
     }
 
+    // FU-452 (T-366): an `llm.provider` the host cannot serve (no adapter, or not both display names and a key) is refused at the endpoint.
+    [Theory]
+    [InlineData("{\"value\":\"no-such-provider\"}")]
+    [InlineData("{\"value\":\"openai-without-names-or-key\"}")]
+    [InlineData("{\"value\":\"Not A Valid Id\"}")]
+    public async Task AProviderIdTheHostCannotServeIs400AndChangesNothing(string body)
+    {
+        var (operatorId, token) = await fixture.NewOperatorAsync(FlagsAdmin);
+
+        using var before = await fixture.SendAsync(HttpMethod.Get, "/admin/v1/config/llm.provider", token);
+        var stateBefore = await before.Content.ReadAsStringAsync();
+        using var response = await fixture.SendAsync(HttpMethod.Put, "/admin/v1/config/llm.provider", token, body);
+
+        await TestProblems.AssertAsync(response, HttpStatusCode.BadRequest, "VALIDATION_FAILED");
+        Assert.Equal(0, await AuditCountAsync(operatorId));
+        using var after = await fixture.SendAsync(HttpMethod.Get, "/admin/v1/config/llm.provider", token);
+        Assert.Equal(stateBefore, await after.Content.ReadAsStringAsync());
+    }
+
     [Fact]
     public async Task ASuccessfulSetIsAuditedBumpsTheVersionAndRoundTripsThroughGetAndList()
     {

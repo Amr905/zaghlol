@@ -13,6 +13,7 @@ internal static class Registry
         .. ConfigCommands.Specs,
         .. PriceCommands.Specs,
         .. ContributionCommands.Specs,
+        .. LlmCatCommands.Specs,
         .. SupportCommands.Specs,
         .. ReportCommands.Specs,
     ];

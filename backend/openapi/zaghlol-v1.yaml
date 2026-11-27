@@ -1414,6 +1414,185 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /admin/v1/llm-cat/corrections/query:
+    post:
+      tags: [Admin]
+      operationId: adminQueryLlmCatCorrections
+      summary: Groups of user corrections of automatic categories
+      description: |
+        Role `catalog_editor`. A read with a body (POST), not audited. One page of groups
+        `(merchantNorm, aiCategory, userCategory)` with the number of distinct installs that made the correction
+        (`votes`) and the first and last UTC day. Open groups come first, then by votes. Never a row of one
+        install and never a hash. `status` filters one state; `cursor` is the `nextCursor` of the previous page.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LlmCatCorrectionsQueryRequest'
+            example: {status: open, limit: 50}
+      responses:
+        '200':
+          description: One page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LlmCatCorrectionPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/llm-cat/corrections/resolve:
+    post:
+      tags: [Admin]
+      operationId: adminResolveLlmCatCorrection
+      summary: Resolve one group of corrections
+      description: |
+        Role `catalog_editor`. Audited (exactly one row). Moves every `open` correction of the group to the new
+        status. `promote` upserts the merchant (`canonical` = `merchantNorm`) and its `exact` alias into the **draft**
+        catalog in `userCategory`, through the same draft path as a contribution promote; nothing is published. A
+        `userCategory` of `custom` can't be promoted: `400` (use `reject` or `prompt_issue`). `prompt_issue` keeps
+        the case for the eval backlog (`zaghlol-ops llmcat corrections export-prompt-issues`). `404 NOT_FOUND` if no
+        group has the key; `409 ADMIN_CONFLICT` if no row of it is `open` any more, or the draft refuses (the
+        merchant is already in the draft under another category, the text is not a valid alias, the category is not
+        live in the draft).
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LlmCatCorrectionResolveRequest'
+            example: {merchantNorm: zawya coffee, aiCategory: dining, userCategory: education, action: promote}
+      responses:
+        '200':
+          description: Resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LlmCatResolveResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/AdminConflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/llm-cat/confirmed/query:
+    post:
+      tags: [Admin]
+      operationId: adminQueryLlmCatConfirmed
+      summary: AI-confirmed merchants awaiting review
+      description: |
+        Role `catalog_editor`. A read with a body (POST), not audited. Merchants with at least `cat.confirm_n` (3)
+        distinct installs confirming the same category and **no open correction** of that merchant. Groups only,
+        most confirmations first; never a hash.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LlmCatConfirmedQueryRequest'
+            example: {limit: 50}
+      responses:
+        '200':
+          description: One page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LlmCatConfirmedPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin/v1/llm-cat/confirmed/resolve:
+    post:
+      tags: [Admin]
+      operationId: adminResolveLlmCatConfirmed
+      summary: Promote or reject an AI-confirmed merchant
+      description: |
+        Role `catalog_editor`. Audited (exactly one row). Never automatic. `promote` upserts the merchant and its
+        `exact` alias into the **draft** catalog in `category`; nothing is published. The listing rule is checked
+        again under a lock. `404 NOT_FOUND` if no collecting confirmation has the key; `409 ADMIN_CONFLICT` if the
+        merchant has fewer than `cat.confirm_n` confirmations now, has an open correction, or the draft refuses.
+      x-required-roles: [catalog_editor]
+      security:
+        - operatorOidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LlmCatConfirmedResolveRequest'
+            example: {merchantNorm: zawya coffee, category: dining, action: promote}
+      responses:
+        '200':
+          description: Resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LlmCatResolveResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/UnauthorizedGeneric'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/AdminConflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /admin/v1/flags/{key}:
     get:
       tags: [Admin]
@@ -3791,6 +3970,144 @@ components:
           type: [integer, 'null']
           format: int32
           description: The draft merchant the string was attached to (promote only).
+    LlmCatCorrectionsQueryRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum: [open, promoted, rejected, prompt_issue]
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          description: Default 50.
+        cursor:
+          type: string
+          pattern: '^[0-9]{1,9}$'
+    LlmCatConfirmedQueryRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        limit:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+        cursor:
+          type: string
+          pattern: '^[0-9]{1,9}$'
+    LlmCatCorrectionResolveRequest:
+      type: object
+      additionalProperties: false
+      required: [merchantNorm, aiCategory, userCategory, action]
+      properties:
+        merchantNorm:
+          type: string
+          minLength: 2
+          maxLength: 64
+        aiCategory:
+          $ref: '#/components/schemas/CategoryCode'
+        userCategory:
+          type: string
+          description: A system category code, or the literal `custom` (never promotable).
+          pattern: '^[a-z][a-z0-9_]{1,31}$'
+        action:
+          type: string
+          enum: [promote, reject, prompt_issue]
+    LlmCatConfirmedResolveRequest:
+      type: object
+      additionalProperties: false
+      required: [merchantNorm, category, action]
+      properties:
+        merchantNorm:
+          type: string
+          minLength: 2
+          maxLength: 64
+        category:
+          $ref: '#/components/schemas/CategoryCode'
+        action:
+          type: string
+          enum: [promote, reject]
+    LlmCatCorrectionGroup:
+      type: object
+      required: [merchantNorm, aiCategory, userCategory, votes, firstSeen, lastSeen, status]
+      properties:
+        merchantNorm:
+          type: string
+        aiCategory:
+          $ref: '#/components/schemas/CategoryCode'
+        userCategory:
+          type: string
+        votes:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Distinct installs that made this correction.
+        firstSeen:
+          type: string
+          format: date
+        lastSeen:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [open, promoted, rejected, prompt_issue]
+    LlmCatCorrectionPage:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlmCatCorrectionGroup'
+        nextCursor:
+          type: [string, 'null']
+    LlmCatConfirmedGroup:
+      type: object
+      required: [merchantNorm, category, votes, firstSeen, lastSeen]
+      properties:
+        merchantNorm:
+          type: string
+        category:
+          $ref: '#/components/schemas/CategoryCode'
+        votes:
+          type: integer
+          format: int32
+          minimum: 1
+        firstSeen:
+          type: string
+          format: date
+        lastSeen:
+          type: string
+          format: date
+    LlmCatConfirmedPage:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlmCatConfirmedGroup'
+        nextCursor:
+          type: [string, 'null']
+    LlmCatResolveResult:
+      type: object
+      required: [status, rows, merchantId]
+      properties:
+        status:
+          type: string
+          enum: [promoted, rejected, prompt_issue]
+        rows:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Rows whose status moved.
+        merchantId:
+          type: [integer, 'null']
+          format: int32
+          description: The draft merchant a promote attached the name to.
     FlagRules:
       type: object
       description: |

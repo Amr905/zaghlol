@@ -94,6 +94,32 @@ public class CliIntegrationTests(CliApiFixture fixture) : IClassFixture<CliApiFi
         Assert.Equal(1, await fixture.AuditAsync("contribution_promote", operatorId));
         Assert.Equal(1, await fixture.AuditAsync("contribution_reject", operatorId));
 
+        // AI-category review (adminQueryLlmCatCorrections, adminResolveLlmCatCorrection, adminQueryLlmCatConfirmed, adminResolveLlmCatConfirmed).
+        foreach (var (table, columns, values) in new[]
+        {
+            ("corrections", "merchant_norm, ai_category, user_category", "'cli llm issue', 'dining', 'custom'"),
+            ("corrections", "merchant_norm, ai_category, user_category", "'cli llm rejected', 'dining', 'education'"),
+            ("confirmations", "merchant_norm, category_code", "'cli llm confirmed', 'dining'"),
+        })
+        {
+            for (var i = 0; i < 3; i++)
+            {
+                await fixture.ExecuteAsync($"INSERT INTO zaghlol.llm_cat_{table} (id, {columns}, source, install_hash, created_at) VALUES (gen_random_uuid(), {values}, 'llm', decode(md5(random()::text) || md5(random()::text), 'hex'), date_trunc('day', now()))");
+            }
+        }
+
+        var groups = await Json(env, "llmcat", "corrections", "list", "--status", "open");
+        Assert.Contains(groups["items"]!.AsArray(), g => g!["merchantNorm"]!.GetValue<string>() == "cli llm issue" && g["votes"]!.GetValue<int>() == 3);
+        Assert.Equal("prompt_issue", (await Json(env, "llmcat", "corrections", "prompt-issue", "--merchant-norm", "cli llm issue", "--ai-category", "dining", "--user-category", "custom"))["status"]!.GetValue<string>());
+        Assert.Equal("rejected", (await Json(env, "llmcat", "corrections", "reject", "--merchant-norm", "cli llm rejected", "--ai-category", "dining", "--user-category", "education"))["status"]!.GetValue<string>());
+        var confirmedList = await Json(env, "llmcat", "confirmed", "list");
+        Assert.Contains(confirmedList["items"]!.AsArray(), g => g!["merchantNorm"]!.GetValue<string>() == "cli llm confirmed");
+        Assert.Equal("rejected", (await Json(env, "llmcat", "confirmed", "reject", "--merchant-norm", "cli llm confirmed", "--category", "dining"))["status"]!.GetValue<string>());
+        Assert.Equal(1, await fixture.AuditAsync("llmcat_correction_prompt_issue", operatorId));
+        Assert.Equal(1, await fixture.AuditAsync("llmcat_correction_reject", operatorId));
+        Assert.Equal(1, await fixture.AuditAsync("llmcat_confirmed_reject", operatorId));
+        await Ok(env, "llmcat", "corrections", "export-prompt-issues");
+
         // Support lookup by install and by e-mail (adminLookupEntitlement), both audited.
         var (purchase, holder, claimant, email) = await fixture.SeedMovableAsync();
         var byInstall = await Json(env, "support", "lookup", "--install", holder.ToString());
