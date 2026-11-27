@@ -386,6 +386,15 @@ void main() {
         if (at < 0 || at < last) inOrder = false;
         last = at;
       }
+      if (!inOrder) {
+        // Shapes only: letters become x so no merchant name reaches the log.
+        final shapes = [
+          for (final p in shown.split(' | '))
+            if (RegExp('[0-9]').hasMatch(p))
+              p.replaceAll(RegExp('[A-Za-z\u0621-\u064A]'), 'x'),
+        ];
+        e.say('TOPN pieces with digits: ${shapes.take(20).join(' | ')}');
+      }
       e.check(inOrder, 'top three shows the seeded totals, largest first');
       e.check(counterIs(3), 'the counter went down to 3');
       await shot('06-answer-topn');
