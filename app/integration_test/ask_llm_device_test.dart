@@ -47,6 +47,8 @@ import 'package:zaghlol/features/catalog_sync/application/sync_providers.dart'
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
 import 'package:zaghlol/core/ui/shell/app_shell.dart' show ZBottomBar;
+import 'package:zaghlol/features/ask/presentation/ask_screen.dart'
+    show AskScreen;
 import 'package:zaghlol/main.dart' as app;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -146,9 +148,101 @@ void main() {
         for (final w in t.widgetList<Text>(find.byType(Text)))
           w.data ?? w.textSpan?.toPlainText() ?? '',
       ];
-      String screenText() => _normalize(texts().join(' | '));
-      int count(Finder x) => x.evaluate().length;
       Finder key(String k) => find.byKey(ValueKey(k));
+
+      // The chat list is short on a phone screen and builds only what is
+      // near the viewport: go to the newest message, or sweep the whole list.
+      ScrollableState? chatScroll() {
+        final f = find.descendant(
+          of: find.byType(AskScreen),
+          matching: find.byType(Scrollable),
+        );
+        for (final el in f.evaluate()) {
+          final st = (el as StatefulElement).state as ScrollableState;
+          if (st.widget.axis == Axis.vertical) return st;
+        }
+        return null;
+      }
+
+      Future<void> toEnd() async {
+        final s = chatScroll();
+        if (s == null) return;
+        s.position.jumpTo(s.position.maxScrollExtent);
+        await t.pump(const Duration(milliseconds: 100));
+      }
+
+      /// Everything the chat list shows, top to bottom: texts and which of
+      /// the keys of interest were built.
+      Future<({String text, Set<String> keys})> scan() async {
+        const interesting = ['sent-badge', 'ask-see-gold'];
+        final seen = <String>{};
+        final keys = <String>{};
+        void visit() {
+          seen.addAll(texts());
+          for (final k in interesting) {
+            if (e.found(key(k))) keys.add(k);
+          }
+        }
+
+        final s = chatScroll();
+        if (s == null) {
+          visit();
+        } else {
+          final p = s.position;
+          final step = p.viewportDimension < 80
+              ? 40.0
+              : p.viewportDimension * 0.5;
+          p.jumpTo(0);
+          await t.pump(const Duration(milliseconds: 100));
+          var at = 0.0;
+          for (var i = 0; i < 200; i++) {
+            visit();
+            if (at >= p.maxScrollExtent) break;
+            at = at + step > p.maxScrollExtent ? p.maxScrollExtent : at + step;
+            p.jumpTo(at);
+            await t.pump(const Duration(milliseconds: 100));
+          }
+        }
+        await toEnd();
+        return (text: _normalize(seen.join(' | ')), keys: keys);
+      }
+
+      /// Scrolls the chat until [k] is built, brings it on screen, taps it.
+      Future<void> revealTap(String k) async {
+        final s = chatScroll();
+        if (s != null) {
+          final p = s.position;
+          p.jumpTo(p.maxScrollExtent);
+          await t.pump(const Duration(milliseconds: 100));
+          for (var i = 0; i < 80 && !e.found(key(k)) && p.pixels > 0; i++) {
+            final to = p.pixels - p.viewportDimension * 0.5;
+            p.jumpTo(to < 0 ? 0 : to);
+            await t.pump(const Duration(milliseconds: 100));
+          }
+        }
+        if (!e.found(key(k))) fail('could not find $k');
+        await t.ensureVisible(key(k).last);
+        await e.settle(t, 400);
+        await t.tap(key(k).last);
+        await e.settle(t, 400);
+      }
+
+      /// Waits until at least [requests] ask requests were recorded and the
+      /// typing bubble is gone (the answer is on screen).
+      Future<void> waitIdle(int requests) async {
+        final end = DateTime.now().add(const Duration(seconds: 45));
+        var calm = 0;
+        while (DateTime.now().isBefore(end)) {
+          await toEnd();
+          await t.pump(const Duration(milliseconds: 300));
+          final done =
+              fake!.askRequests.length >= requests &&
+              !e.found(key('ask-typing'));
+          calm = done ? calm + 1 : 0;
+          if (calm >= 4) return;
+        }
+        fail('timed out waiting for the answer to $requests request(s)');
+      }
 
       /// True when the counter reads "n questions left" (null: the dash
       /// before the first contact).
@@ -167,15 +261,6 @@ void main() {
             ? l().chatQuotaUnknown
             : l().chatQuotaRemaining(n, n);
         return shown.contains(_normalize(want));
-      }
-
-      Future<void> waitCount(Finder f, int n, String what) async {
-        final end = DateTime.now().add(const Duration(seconds: 40));
-        while (DateTime.now().isBefore(end)) {
-          await t.pump(const Duration(milliseconds: 200));
-          if (count(f) >= n) return;
-        }
-        fail('timed out waiting for $what');
       }
 
       Future<void> ask(String q) async {
@@ -207,7 +292,14 @@ void main() {
         Duration timeout = const Duration(seconds: 30),
       }) async {
         try {
-          await e.waitFor(t, f, timeout: timeout, what: what);
+          final end = DateTime.now().add(timeout);
+          while (!e.found(f)) {
+            if (DateTime.now().isAfter(end)) {
+              fail('timed out waiting for $what');
+            }
+            await toEnd();
+            await t.pump(const Duration(milliseconds: 250));
+          }
         } on TestFailure {
           final shown = [
             for (final x in texts())
@@ -255,25 +347,24 @@ void main() {
       f.script([const AskReply.plan('PL-WHATIF-SAVE')]);
       await ask(_whatIf[_lang]!);
       await allow();
-      await e.waitFor(
-        t,
-        key('sent-badge'),
-        timeout: const Duration(seconds: 40),
-        what: 'the what-if answer',
+      await waitIdle(1);
+      final whatIfScan = await scan();
+      e.check(
+        whatIfScan.keys.contains('sent-badge'),
+        'the answer carries the online badge',
       );
-      await e.settle(t, 800);
       e.check(f.askRequests.length == 1, 'one request after Allow');
       final total = _whatIfMonthly * _whatIfMonths;
       e.check(
         RegExp('(^|[^0-9])${_fmtGroup(total)}(\\.00)?([^0-9]|\$)')
-            .hasMatch(screenText()),
+            .hasMatch(whatIfScan.text),
         'the answer shows the phone-computed total ($total)',
       );
       e.check(counterIs(4), 'the counter went from the dash to 4');
       await shot('04-answer-whatif');
 
       // "What I sent": the toggle, then what the fake recorded.
-      await e.scrollAndTap(t, key('sent-disclosure-toggle').last, 'the toggle');
+      await revealTap('sent-disclosure-toggle');
       await e.settle(t, 600);
       e.check(
         e.found(find.text(l().chatSentTitle)),
@@ -284,11 +375,10 @@ void main() {
 
       // ---- 4. a data question: totals computed here independently ---------
       f.script([const AskReply.plan('PL-TOPN')]);
-      final badges = count(key('sent-badge'));
+      final n0 = f.askRequests.length;
       await ask(_topN[_lang]!);
-      await waitCount(key('sent-badge'), badges + 1, 'the data answer');
-      await e.settle(t, 800);
-      final shown = screenText();
+      await waitIdle(n0 + 1);
+      final shown = (await scan()).text;
       var last = -1;
       var inOrder = true;
       for (final m in _seededMinor) {
@@ -322,9 +412,8 @@ void main() {
         '409: the sheet names the NEW provider from the synced config',
       );
       await shot('07-consent-after-409');
-      final badges2 = count(key('sent-badge'));
       await tapVisible(key('consent-allow'));
-      await waitCount(key('sent-badge'), badges2 + 1, 'the resent answer');
+      await waitIdle(before409 + 2);
       e.check(
         f.askRequests.length == before409 + 2,
         '409: resent once after the new consent',
@@ -340,11 +429,10 @@ void main() {
       // ---- 6. paused -------------------------------------------------------
       f.script([const AskReply.problem('LLM_SERVICE_PAUSED')]);
       await ask(_topN[_lang]!);
-      await e.waitFor(
-        t,
+      await waitShow(
         find.text(l().chatLlmStatusPaused),
+        'the paused bubble',
         timeout: const Duration(seconds: 40),
-        what: 'the paused bubble',
       );
       final atPause = f.askRequests.length;
       await shot('09-paused');
@@ -363,11 +451,10 @@ void main() {
       await f.goOffline();
       final atOffline = f.askRequests.length;
       await ask(_topN[_lang]!);
-      await e.waitFor(
-        t,
+      await waitShow(
         find.text(l().chatLlmStatusOffline),
+        'the needs-internet bubble',
         timeout: const Duration(seconds: 40),
-        what: 'the needs-internet bubble',
       );
       await shot('10-offline');
       await f.goOnline();
@@ -380,11 +467,10 @@ void main() {
       // ---- 8. quota out -> at-limit bubble, See Gold, nothing more sent ----
       f.script([const AskReply.problem('LLM_QUOTA_EXHAUSTED')]);
       await ask(_topN[_lang]!);
-      await e.waitFor(
-        t,
+      await waitShow(
         key('ask-see-gold'),
+        'the at-limit bubble with See Gold',
         timeout: const Duration(seconds: 40),
-        what: 'the at-limit bubble with See Gold',
       );
       final atLimit = f.askRequests.length;
       e.check(counterIs(0), 'the counter shows 0 at the limit');
@@ -396,10 +482,10 @@ void main() {
         'at the limit: asking again sends nothing',
       );
       e.check(
-        count(key('ask-see-gold')) >= 1,
+        (await scan()).keys.contains('ask-see-gold'),
         'the at-limit bubble offers See Gold',
       );
-      await e.scrollAndTap(t, key('ask-see-gold').last, 'See Gold');
+      await revealTap('ask-see-gold');
       await e.settle(t, 2000);
       await shot('12-see-gold');
 
