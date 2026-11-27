@@ -80,7 +80,9 @@ public class LlmCatReviewLiveContractTests(FlagsContractFixture fixture) : IClas
             using var forbidden = await Send(HttpMethod.Post, path, wrongRole, "{}");
 
             await AssertDeclared(operation, ok, HttpStatusCode.OK, "application/json");
-            Assert.Equal("ADMIN_CONFLICT", (await AssertDeclared(operation, again, HttpStatusCode.Conflict, "application/problem+json"))!["code"]!.GetValue<string>());
+            // A decided correction group still exists (409); decided confirmations leave the collecting set, so a repeat finds none (404).
+            var repeat = operation == resolveCorrection ? HttpStatusCode.Conflict : HttpStatusCode.NotFound;
+            await AssertDeclared(operation, again, repeat, "application/problem+json");
             Assert.Equal("NOT_FOUND", (await AssertDeclared(operation, absent, HttpStatusCode.NotFound, "application/problem+json"))!["code"]!.GetValue<string>());
             Assert.Equal("VALIDATION_FAILED", (await AssertDeclared(operation, invalid, HttpStatusCode.BadRequest, "application/problem+json"))!["code"]!.GetValue<string>());
             Assert.Equal("UNKNOWN_FIELD", (await AssertDeclared(operation, unknown, HttpStatusCode.BadRequest, "application/problem+json"))!["code"]!.GetValue<string>());

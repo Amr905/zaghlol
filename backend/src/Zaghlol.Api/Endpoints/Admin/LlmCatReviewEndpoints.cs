@@ -93,6 +93,7 @@ internal static class LlmCatReviewEndpoints
 
         if (!LlmCatReviewWire.IsValidMerchant(request.MerchantNorm)
             || !CatalogKeys.IsCategoryCode(request.AiCategory)
+            || request.AiCategory == LlmCatReviewWire.Custom
             || !(request.UserCategory == LlmCatReviewWire.Custom || CatalogKeys.IsCategoryCode(request.UserCategory))
             || !LlmCatReviewWire.TryParse(request.Action, out CorrectionAction action)
             || (action == CorrectionAction.Promote && request.UserCategory == LlmCatReviewWire.Custom))
@@ -120,6 +121,7 @@ internal static class LlmCatReviewEndpoints
 
         if (!LlmCatReviewWire.IsValidMerchant(request.MerchantNorm)
             || !CatalogKeys.IsCategoryCode(request.Category)
+            || request.Category == LlmCatReviewWire.Custom
             || !LlmCatReviewWire.TryParse(request.Action, out ConfirmedAction action))
         {
             return Invalid();
