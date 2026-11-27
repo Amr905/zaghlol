@@ -19,6 +19,11 @@ enum FakeNextMode {
 
   /// The step leaves a foreign-key violation (caught by the FK check).
   fkViolation,
+
+  /// The step clears one pre-existing dangling category reference and adds
+  /// another in the same tables (`transactions` rows `dc` and `dr` of
+  /// migration_dirty_fk_test.dart): same count, different violation.
+  fkSwap,
 }
 
 /// Schema "next" = the app's current schema plus one `db_meta` row written
@@ -69,6 +74,13 @@ class FakeNextDatabase extends AppDatabase {
           'p INTEGER NOT NULL REFERENCES fake_p (id))',
         );
         await customStatement('INSERT INTO fake_c (id, p) VALUES (1, 99)');
+      case FakeNextMode.fkSwap:
+        await customStatement(
+          "UPDATE transactions SET category_id = NULL WHERE id = 'dc'",
+        );
+        await customStatement(
+          "UPDATE transactions SET category_id = 'gone:new' WHERE id = 'dr'",
+        );
     }
   }
 }

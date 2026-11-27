@@ -140,4 +140,42 @@ void main() {
     expect(failed.restored, isTrue);
     expect(failed.cause, 'DB_MIGRATION_FK_VIOLATION');
   });
+
+  test('a step that clears an old violation and adds a new one in the same '
+      'tables (equal counts) still fails and is restored', () async {
+    await prepareV6(world, extra: _dirty);
+    final db7 = openedDb<AppDatabase>(
+      await world.open(executor: foregroundExecutor),
+    );
+    await db7.close();
+    await settle(world);
+
+    final result = await world.openWith(
+      fakeNextFactory(mode: FakeNextMode.fkSwap),
+      FakeNextDatabase.version,
+      executor: foregroundExecutor,
+    );
+    expect(result, isA<DbOpenFailed<FakeNextDatabase>>());
+    final failed = result as DbOpenFailed;
+    expect(failed.restored, isTrue);
+    expect(failed.cause, 'DB_MIGRATION_FK_VIOLATION');
+
+    final db = openedDb<AppDatabase>(
+      await world.open(executor: foregroundExecutor),
+    );
+    addTearDown(db.close);
+    final rows = await db
+        .customSelect(
+          "SELECT id, category_id FROM transactions WHERE id IN ('dc', 'dr') "
+          'ORDER BY id',
+        )
+        .get();
+    expect(
+      [for (final r in rows) r.data],
+      [
+        {'id': 'dc', 'category_id': 'gone:category'},
+        {'id': 'dr', 'category_id': null},
+      ],
+    );
+  });
 }
