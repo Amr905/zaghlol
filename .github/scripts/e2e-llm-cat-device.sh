@@ -38,6 +38,8 @@ PUB_X=$(echo "${pub:2:64}" | b64u)
 PUB_Y=$(echo "${pub:66:64}" | b64u)
 LLM_KEY=$(openssl rand -base64 32)
 for v in "$SIGN_D" "$PUB_X" "$PUB_Y" "$LLM_KEY"; do echo "::add-mask::$v"; done
+# B98-m5: the leak checks below match these as fixed strings; an empty one would match every line, or hide a leak.
+if [ -z "$SIGN_D" ] || [ -z "$LLM_KEY" ]; then echo "::error::e2e-llm-cat: signing key or LLM key is empty; the key-leak check cannot run"; exit 1; fi
 echo "dev keys generated (masked)"
 
 pull_files() {
@@ -116,7 +118,7 @@ run_one() { # lang
   fi
   adb -s "$DEVICE" logcat -d -b crash 2> /dev/null | tail -10
   # The logs must not hold a key, a message body or a shop name.
-  if grep -qE "$SIGN_D|$LLM_KEY|QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$log"; then
+  if grep -qF -e "$SIGN_D" -e "$LLM_KEY" "$log" || grep -qE "QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$log"; then
     echo "E2ELCAT PROBLEM the log holds a key, a shop name or a payee: matches per needle (key, llm key, names)"
     grep -c -F -e "$SIGN_D" "$log"; grep -c -F -e "$LLM_KEY" "$log"; grep -c -E "QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$log"
     grep -E "QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$log" | sed -E 's/(QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED)/#/g' | cut -c1-160 | head -3
@@ -143,7 +145,7 @@ for lang in ${E2E_LCAT_LANGS:-ar en}; do
   [ "${PIPESTATUS[0]}" -eq 0 ] || rc=1
 done
 adb -s "$DEVICE" logcat -d -s flutter:V > "$OUT/flutter-logcat.txt" 2> /dev/null || true
-if grep -qE "$SIGN_D|$LLM_KEY|QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$OUT/flutter-logcat.txt" 2> /dev/null; then
+if grep -qF -e "$SIGN_D" -e "$LLM_KEY" "$OUT/flutter-logcat.txt" 2> /dev/null || grep -qE "QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$OUT/flutter-logcat.txt" 2> /dev/null; then
   echo "E2ELCAT PROBLEM the device log holds a key, a shop name or a payee"
   rc=1
 fi

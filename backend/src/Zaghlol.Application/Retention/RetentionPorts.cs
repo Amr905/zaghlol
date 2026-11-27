@@ -21,12 +21,13 @@ public static class RetentionRules
     public const string LlmSpendDaily = "llm_spend_daily";
     public const string LlmCatConfirmations = "llm_cat_confirmations";
     public const string LlmCatCorrections = "llm_cat_corrections";
+    public const string LlmCatAnswerCache = "llm_cat_answer_cache";
 
     public static IReadOnlyList<string> All { get; } =
     [
         RegistrationColumns, TombstonedInstalls, InactiveInstalls, StoreNotifications, Contributions, BankRequests,
         AuditSupport, AuditOther, ReplayGuard, SeatClaimants, IdempotencyRecords,
-        LlmQuotaMonths, LlmSpendDaily, LlmCatConfirmations, LlmCatCorrections,
+        LlmQuotaMonths, LlmSpendDaily, LlmCatConfirmations, LlmCatCorrections, LlmCatAnswerCache,
     ];
 }
 

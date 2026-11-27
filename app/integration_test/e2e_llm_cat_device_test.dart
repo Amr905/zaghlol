@@ -212,26 +212,14 @@ void main() {
         return e.found(card);
       }
 
-      var shown = await _waitFor(
+      final shown = await _waitFor(
         t,
         findCardByScrolling,
         const Duration(seconds: 25),
       );
-      if (!shown) {
-        // Found by the device run: the Home providers do not follow rows the
-        // SMS receiver writes while the app is open (Home showed the old
-        // totals too), so the card stayed hidden until they were rebuilt.
-        e.say('NOTE card needed a provider refresh after the SMS (stale Home)');
-        c.invalidate(catEligibleCountProvider);
-        c.invalidate(catCardVisibleProvider);
-        await e.selectTab(t, 1);
-        await e.selectTab(t, 0);
-        shown = await _waitFor(
-          t,
-          findCardByScrolling,
-          const Duration(seconds: 25),
-        );
-      }
+      // B98-m4: no provider refresh here. Home must follow rows the SMS
+      // receiver writes while the app is open (Bug B); a missing card is a
+      // failure (the DIAG block below says why).
       if (!shown) {
         final svc = await c.read(remoteConfigServiceProvider.future);
         final rc = c.read(remoteConfigProvider);

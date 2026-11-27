@@ -64,6 +64,10 @@ internal sealed class RetentionStore(IZaghlolDbContextFactory contexts) : IReten
         // 90 days after the operator resolved it, or 180 days after it was written whichever comes first.
         [RetentionRules.LlmCatConfirmations] = Delete("llm_cat_confirmations", "created_at < @now - interval '365 days' OR status IN ('promoted', 'rejected')"),
         [RetentionRules.LlmCatCorrections] = Delete("llm_cat_corrections", "(resolved_at IS NOT NULL AND resolved_at < @now - interval '90 days') OR created_at < @now - interval '180 days'"),
+
+        // B98-m2 (llm-categorise.md retention): a shared category answer goes at its expires_at (written 90 days after created_at),
+        // so the privacy policy's "kept 90 days" holds.
+        [RetentionRules.LlmCatAnswerCache] = Delete("llm_cat_answer_cache", "expires_at < @now"),
     };
 
     public async Task<int> PurgeBatchAsync(string rule, DateTimeOffset now, int batchSize, CancellationToken cancellationToken)

@@ -484,7 +484,7 @@ CREATE TABLE audit_log (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 | `llm_spend_daily` | 13 months (UTC day; the alert-marker rows share the table) (FR-LLM-62) | `RetentionPurger` (`llm_spend_daily`) |
 | `llm_cat_confirmations` | 365 days, or as soon as the review is settled (`promoted` or `rejected`) (FR-LCAT-34) | `RetentionPurger` (`llm_cat_confirmations`) |
 | `llm_cat_corrections` | 90 days after `resolved_at`, or 180 days after creation, whichever comes first (FR-LCAT-34) | `RetentionPurger` (`llm_cat_corrections`) |
-| `llm_cat_answer_cache` | Lives 90 days (`expires_at`); a read ignores an expired row and a new answer for the name overwrites it. **As built there is no purge rule for expired cache rows**: they stay in the table until overwritten or deleted by the 3-correction rule. Follow-up for the backend lane (the rows hold a shop name and a category only, no install data) | read filter `expires_at > now`; no job |
+| `llm_cat_answer_cache` | Lives 90 days (`expires_at`); a read ignores an expired row and a new answer for the name overwrites it. The rows hold a shop name and a category only, no install data | read filter `expires_at > now`; `RetentionPurger` rule `llm_cat_answer_cache` deletes rows with `expires_at < now` (B98-m2) |
 | `remote_config` | Until changed; no personal data (`updated_by` is an operator id) | — |
 | DB backups (PITR) | 14 days | provider |
 

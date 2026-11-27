@@ -409,6 +409,31 @@ void main() {
       expect((await model()).hero!.spend.minor, 2300);
     });
 
+    test('B98-m6: a row stamped before a sweep but committed after it is '
+        'still swept by the next one', () async {
+      await container.read(cycleAppWiringProvider.future);
+      final repo = await container.read(cycleRepositoryProvider.future);
+      final closed = (await container.read(paydayScheduleProvider.future))
+          .cycleOn(CivilDate(2026, 10, 10));
+      await add('old', amount: 100, when: at(2026, 10, 10));
+      await container.read(cycleResumeHandlerProvider).onResume();
+      final stampedAt = now.add(const Duration(minutes: 30));
+      now = now.add(const Duration(hours: 1));
+      // A sweep runs while the headless engine holds an uncommitted row
+      // stamped 30 minutes earlier.
+      await container.read(cycleResumeHandlerProvider).onBackgroundWrites();
+      expect((await repo.totals(closed))[egp]!.spend.minor, 100);
+      await add(
+        'late-commit',
+        amount: 800,
+        when: at(2026, 10, 10),
+        updatedAt: stampedAt.millisecondsSinceEpoch,
+      );
+      now = now.add(const Duration(minutes: 5));
+      await container.read(cycleResumeHandlerProvider).onBackgroundWrites();
+      expect((await repo.totals(closed))[egp]!.spend.minor, 900);
+    });
+
     test(
       'FU-126: the first resume sweeps from the persisted foreground time',
       () async {

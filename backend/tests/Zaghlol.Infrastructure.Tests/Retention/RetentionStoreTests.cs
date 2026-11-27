@@ -329,4 +329,18 @@ public class RetentionStoreTests(RetentionFixture fixture) : IClassFixture<Reten
         Assert.True(await ExistsAsync("llm_cat_corrections", "id", resolvedRecent["id"]));
         Assert.True(await ExistsAsync("llm_cat_corrections", "id", openRecent["id"]));
     }
+
+    // B98-m2: a cached category answer goes once expires_at has passed; an unexpired one stays.
+    [Fact]
+    public async Task CategoryAnswerCacheGoesAtExpiry()
+    {
+        var expired = await SeedAsync("llm_cat_answer_cache", new() { ["created_at"] = Now.AddDays(-91), ["expires_at"] = Now - Day });
+        var live = await SeedAsync("llm_cat_answer_cache", new() { ["created_at"] = Now.AddDays(-89), ["expires_at"] = Now + Day });
+
+        var result = await RunAsync();
+
+        Assert.True(result.Purged[RetentionRules.LlmCatAnswerCache] >= 1);
+        Assert.False(await ExistsAsync("llm_cat_answer_cache", "merchant_norm", expired["merchant_norm"]));
+        Assert.True(await ExistsAsync("llm_cat_answer_cache", "merchant_norm", live["merchant_norm"]));
+    }
 }

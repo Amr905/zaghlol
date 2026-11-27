@@ -128,3 +128,14 @@ What I checked against the code:
 - **Fix round:** B98-M1 (T-364, two lines of copy). Recommended in the same pass because each is a few lines: B98-m5 (grep) and B98-m6 (sweep start).
 - **Lead check, no code:** B98-m4 (one device run on the batch tip, NOTE line absent).
 - **Follow-ups:** B98-m1, m2 (purge rule, before the policy is published), m3, m7, the benchmark budget, and the nits.
+
+---
+
+## Fix round (task/b98-fix)
+
+- **B98-M1:** `site/privacy/index.html` Arabic (standard Arabic) and English summaries now say that without the two features your financial data never leaves your phone, and that the app still uses our server for non-financial services only (Gold verification, catalog, prices, feature flags; §2). No other "entirely on your phone" / "no server" claims in `site/` or `docs/06-release/` (the two hits there are rules that forbid it).
+- **B98-m2:** new `RetentionPurger` rule `llm_cat_answer_cache` (`expires_at < now`; rows are written with `expires_at` = +90 days, so the policy's "kept 90 days" holds). Test `RetentionStoreTests.CategoryAnswerCacheGoesAtExpiry` (Testcontainers, CI). `backend-schema.md` §4 updated. `worker_rw` already had DELETE.
+- **B98-m5:** `e2e-llm-cat-device.sh` leak checks use `grep -qF -e "$SIGN_D" -e "$LLM_KEY"` plus a separate `-E` check for the fixed names; the script exits with an error if either key is empty. `e2e-ask-llm-device.sh` greps fixed phrases only, so it needs no change.
+- **B98-m6:** `onBackgroundWrites` always sweeps from `_lastForegroundMs` (or the persisted value); `_lastSweepMs` removed. Test `B98-m6: a row stamped before a sweep but committed after it…` fails without the fix.
+- **B98-m4:** the provider-refresh workaround in `e2e_llm_cat_device_test.dart` is gone; a missing card now goes straight to the DIAG + `fail` path.
+- Local checks: dotnet build -warnaserror, format, Application tests (1558); app format, `dart analyze --fatal-infos`, home+capture tests (449), zaghlol_lints 0 issues.
