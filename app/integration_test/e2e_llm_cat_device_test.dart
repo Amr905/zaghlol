@@ -584,7 +584,6 @@ void main() {
         'the Privacy row',
       );
       final sw = find.byKey(const ValueKey('cat-llm-switch'));
-      await e.waitFor(t, sw, what: 'the automatic-category switch');
       await e.scrollAndTap(t, sw, 'the switch');
       await e.settle(t, 2500);
       await e.shot(t, '$_lang-07-switch-off');
