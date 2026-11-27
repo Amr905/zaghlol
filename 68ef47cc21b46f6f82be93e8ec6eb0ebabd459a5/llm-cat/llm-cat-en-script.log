@@ -1,0 +1,66 @@
+==== e2e-llm-cat en
+Success
+---- phase p1
+  sent: NBE
+  sent: NBE
+  sent: NBE
+  sent: OrangeCash
+e2e-llm-cat en exit: 1
+E2ELCAT LANG en
+E2ELCAT SEEDED settings
+E2ELCAT MAIN_RETURNED
+E2ELCAT SEND p1
+E2ELCAT NOTE card needed a Home revisit
+E2ELCAT SCREEN en-00-no-card texts=32: All cards | Good evening 🌙 | Spent this month | ⁨⁨100⁩⁩ EGP | until you tell me your payday | Set a budget to see what's safe to spend each day | Set a budget | Income | ⁨0⁩ | Spent | ⁨100⁩ | Left | ⁨-
+E2ELCAT SHOT en-00-no-card
+01:19 +0 -1: Some tests failed.
+---- en first exception
+E2ELCAT SCREEN en-00-no-card texts=32: All cards | Good evening 🌙 | Spent this month | ⁨⁨100⁩⁩ EGP | until you tell me your payday | Set a budget to see what's safe to spend each day | Set a budget | 
+E2ELCAT SHOT en-00-no-card
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+the discovery card never appeared
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:205:9)
+<asynchronous suspension>
+#2      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:83:5)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+---- en log tail (no message text is printed)
+The following TestFailure was thrown running a test:
+the discovery card never appeared
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:205:9)
+<asynchronous suspension>
+#2      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:83:5)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  automatic category: consent, send, apply, feedback, off
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:19 +0 -1: automatic category: consent, send, apply, feedback, off [E]
+  Test failed. See exception logs above.
+  The test description was: automatic category: consent, send, apply, feedback, off
+  
+01:19 +0 -1: (tearDownAll)
+01:19 +0 -1: Some tests failed.
+
+Failing tests:
+  /home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart: automatic category: consent, send, apply, feedback, off
+E2ELCAT PROBLEM the log holds a key, a shop name or a payee
