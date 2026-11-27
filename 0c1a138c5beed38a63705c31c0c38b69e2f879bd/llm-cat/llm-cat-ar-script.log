@@ -1,0 +1,30 @@
+==== e2e-llm-cat ar
+Success
+---- phase p1
+  sent: NBE
+  sent: NBE
+  sent: NBE
+  sent: OrangeCash
+---- phase p2
+  sent: NBE
+e2e-llm-cat ar exit: 0
+E2ELCAT LANG ar
+E2ELCAT SEEDED settings
+E2ELCAT MAIN_RETURNED
+E2ELCAT SEND p1
+E2ELCAT NOTE card needed a provider refresh after the SMS (stale Home)
+E2ELCAT SHOT ar-01-card
+E2ELCAT SHOT ar-02-consent
+E2ELCAT SHOT ar-03-list-chips
+E2ELCAT SHOT ar-04-tick
+E2ELCAT DIAG list rows=6 rowB=true
+E2ELCAT SHOT ar-05a-list
+E2ELCAT SHOT ar-05-picker
+E2ELCAT SHOT ar-06-undone
+E2ELCAT DIAG list rows=6 rowB=true
+E2ELCAT SHOT ar-05a-list
+E2ELCAT SHOT ar-05-picker
+E2ELCAT SEND p2
+E2ELCAT SHOT ar-07-switch-off
+E2ELCAT SUMMARY problems=0 flutterErrors=0
+02:09 +1: All tests passed!
