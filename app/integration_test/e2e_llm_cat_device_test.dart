@@ -40,6 +40,8 @@ import 'package:zaghlol/core/llm/llm_gateway_client.dart'
     show llmConsentStoreProvider;
 import 'package:zaghlol/core/routing/app_router.dart' show rootNavigatorKey;
 import 'package:zaghlol/core/routing/app_routes.dart';
+import 'package:zaghlol/core/settings/settings_providers.dart';
+import 'package:zaghlol/features/categorization/presentation/llm_cat_ui_providers.dart';
 import 'package:zaghlol/core/settings/settings_keys.dart' show LanguagePref;
 import 'package:zaghlol/core/ui/shell/app_shell.dart' show ZBottomBar;
 import 'package:zaghlol/features/accounts/data/accounts_providers.dart';
@@ -206,8 +208,12 @@ void main() {
         const Duration(seconds: 25),
       );
       if (!shown) {
-        // The card reads the queue count when Home is built: revisit Home.
-        e.say('NOTE card needed a Home revisit');
+        // Found by the device run: the Home providers do not follow rows the
+        // SMS receiver writes while the app is open (Home showed the old
+        // totals too), so the card stayed hidden until they were rebuilt.
+        e.say('NOTE card needed a provider refresh after the SMS (stale Home)');
+        c.invalidate(catEligibleCountProvider);
+        c.invalidate(catCardVisibleProvider);
         await e.selectTab(t, 1);
         await e.selectTab(t, 0);
         shown = await _waitFor(
@@ -232,7 +238,23 @@ void main() {
         )) {
           e.say('DIAG row $r');
         }
-        await e.dumpScreen(t, '$_lang-00-no-card');
+        c.invalidate(catCardVisibleProvider);
+        final vis = await c.read(catCardVisibleProvider.future);
+        final repo = await c.read(settingsRepositoryProvider.future);
+        final sc = find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axis == Axis.vertical,
+            )
+            .evaluate()
+            .map((el) => (el.widget as Scrollable).controller)
+            .length;
+        e.say(
+          'DIAG visible=$vis shown=${await repo.get(CatCardSettings.shown)} '
+          'never=${await repo.get(CatCardSettings.never)} '
+          'consent=${await c.read(catConsentGrantedProvider.future)} '
+          'vertical=$sc',
+        );
+        await e.shot(t, '$_lang-00-no-card');
         fail('the discovery card never appeared');
       }
       await e.shot(t, '$_lang-01-card');
