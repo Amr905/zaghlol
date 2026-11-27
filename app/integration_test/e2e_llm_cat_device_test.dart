@@ -187,9 +187,22 @@ void main() {
       // ---- the discovery card appears on Home.
       final filler0 = await c.read(llmCatQueueFillerProvider.future);
       final card = find.byKey(const ValueKey('cat-discovery-card'));
+      // Home is a long lazy list: the card is built only once scrolled to.
+      Future<bool> findCardByScrolling() async {
+        final list = find.byWidgetPredicate(
+          (w) => w is Scrollable && w.axis == Axis.vertical,
+        );
+        for (var i = 0; i < 12 && !e.found(card); i++) {
+          if (!e.found(list)) break;
+          await t.drag(list.first, const Offset(0, -350), warnIfMissed: false);
+          await e.settle(t, 400);
+        }
+        return e.found(card);
+      }
+
       var shown = await _waitFor(
         t,
-        () => e.found(card),
+        findCardByScrolling,
         const Duration(seconds: 25),
       );
       if (!shown) {
@@ -199,7 +212,7 @@ void main() {
         await e.selectTab(t, 0);
         shown = await _waitFor(
           t,
-          () => e.found(card),
+          findCardByScrolling,
           const Duration(seconds: 25),
         );
       }
