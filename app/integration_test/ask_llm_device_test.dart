@@ -199,6 +199,27 @@ void main() {
         await tapVisible(key('consent-allow'));
       }
 
+      /// A wait that, on timeout, lists the visible UI copy (never the user's
+      /// own question: texts with the merchant name are left out).
+      Future<void> waitShow(
+        Finder f,
+        String what, {
+        Duration timeout = const Duration(seconds: 30),
+      }) async {
+        try {
+          await e.waitFor(t, f, timeout: timeout, what: what);
+        } on TestFailure {
+          final shown = [
+            for (final x in texts())
+              if (!x.contains('Palm') && !x.contains('جنيه') && x.length < 120)
+                x.replaceAll('\n', ' '),
+          ];
+          e.say('TIMEOUT $what; visible: ${shown.take(25).join(' | ')}');
+          await e.shot(t, '$_lang-timeout');
+          rethrow;
+        }
+      }
+
       Future<void> shot(String n) => e.shot(t, '$_lang-$n');
 
       // ---- 1. the Zaghlol tab, the flag and the provider arrive by sync ----
@@ -226,11 +247,7 @@ void main() {
       e.check(e.found(key('consent-preview')), 'the sheet shows the preview');
       await shot('02-consent-sheet');
       await tapVisible(key('consent-not-now'));
-      await e.waitFor(
-        t,
-        find.text(l().chatConsentDeclined),
-        what: 'the declined bubble',
-      );
+      await waitShow(find.text(l().chatConsentDeclined), 'the declined bubble');
       e.check(f.askRequests.isEmpty, 'declined: zero requests were sent');
       await shot('03-declined');
 
