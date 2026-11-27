@@ -1,0 +1,77 @@
+==== e2e-llm-cat ar
+Success
+---- phase p1
+  sent: NBE
+  sent: NBE
+  sent: NBE
+  sent: OrangeCash
+e2e-llm-cat ar exit: 1
+E2ELCAT LANG ar
+E2ELCAT SEEDED settings
+E2ELCAT MAIN_RETURNED
+E2ELCAT SEND p1
+E2ELCAT NOTE card needed a Home revisit
+E2ELCAT DIAG flagOn=true terms=true eligible=3 syncs=1
+E2ELCAT DIAG row {template_id: null, source: manual, direction: expense, counterparty_kind: null, category_source: none, is_internal: 0, is_user_verified: 1, has_norm: 0, len: null}
+E2ELCAT DIAG row {template_id: null, source: manual, direction: expense, counterparty_kind: null, category_source: user, is_internal: 0, is_user_verified: 1, has_norm: 0, len: null}
+E2ELCAT DIAG row {template_id: nbe.card_purchase.en, source: sms, direction: expense, counterparty_kind: null, category_source: none, is_internal: 0, is_user_verified: 0, has_norm: 1, len: 8}
+E2ELCAT DIAG row {template_id: nbe.card_purchase.en, source: sms, direction: expense, counterparty_kind: null, category_source: none, is_internal: 0, is_user_verified: 0, has_norm: 1, len: 8}
+E2ELCAT DIAG row {template_id: nbe.card_purchase.en, source: sms, direction: expense, counterparty_kind: null, category_source: none, is_internal: 0, is_user_verified: 0, has_norm: 1, len: 7}
+E2ELCAT DIAG row {template_id: orange_cash.card_purchase.en, source: sms, direction: expense, counterparty_kind: null, category_source: none, is_internal: 0, is_user_verified: 0, has_norm: 1, len: 14}
+E2ELCAT SCREEN ar-00-no-card texts=30: صرفت الشهر ده | ⁨⁨100⁩⁩ ج.م | لحد ما تقولي ميعاد قبضك | حط ميزانية عشان تعرف تصرف كام في اليوم | حط ميزانية | دخلك | ⁨0⁩ | صرفت | ⁨100⁩ | فاضلك | ⁨-100⁩ | عندك فاتورة ورق؟ صوّرها من زرار الإضافة وأنا أ
+E2ELCAT SHOT ar-00-no-card
+01:40 +0 -1: Some tests failed.
+---- ar first exception
+E2ELCAT SCREEN ar-00-no-card texts=30: صرفت الشهر ده | ⁨⁨100⁩⁩ ج.م | لحد ما تقولي ميعاد قبضك | حط ميزانية عشان تعرف تصرف كام في اليوم | حط ميزانية | دخلك | ⁨0⁩ | صرفت | ⁨100⁩ | فاضلك | ⁨-100⁩ | عندك ف
+E2ELCAT SHOT ar-00-no-card
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+the discovery card never appeared
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:236:9)
+<asynchronous suspension>
+#2      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:85:5)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+---- ar log tail (no message text is printed)
+The following TestFailure was thrown running a test:
+the discovery card never appeared
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      main.<anonymous closure>.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:236:9)
+<asynchronous suspension>
+#2      E2e.guarded (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/support/e2e_settings_common.dart:77:7)
+<asynchronous suspension>
+#3      main.<anonymous closure> (file:///home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart:85:5)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  automatic category: consent, send, apply, feedback, off
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:40 +0 -1: automatic category: consent, send, apply, feedback, off [E]
+  Test failed. See exception logs above.
+  The test description was: automatic category: consent, send, apply, feedback, off
+  
+01:40 +0 -1: (tearDownAll)
+01:40 +0 -1: Some tests failed.
+
+Failing tests:
+  /home/runner/work/zaghlol/zaghlol/app/integration_test/e2e_llm_cat_device_test.dart: automatic category: consent, send, apply, feedback, off
+E2ELCAT PROBLEM the log holds a key, a shop name or a payee: matches per needle (key, llm key, names)
+0
+0
+1
+E2ELCAT SCREEN ar-00-no-card texts=30: صرفت الشهر ده | ⁨⁨100⁩⁩ ج.م | لحد ما تقولي ميعاد قبضك | حط ميزانية عشان تعرف تصرف كام في اليوم | حط ميزانية | دخلك | ⁨0⁩ 
