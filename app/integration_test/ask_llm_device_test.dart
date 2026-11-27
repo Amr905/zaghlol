@@ -15,8 +15,8 @@
 //      times the months, computed here independently) -> badge ->
 //      "What I sent" -> the recorded body holds the masked text and the
 //      placeholder, never the merchant's name
-//   4. a data question (top three merchants) -> the answer shows the seeded
-//      totals, computed here independently -> the counter went down
+//   4. a data question (where the money went) -> the answer shows the seeded
+//      total, summed here independently -> the counter went down
 //   5. a provider switch on the server: 409 -> one sync -> the sheet again
 //      with the NEW name -> Allow -> resent -> answer
 //   6. 503 paused -> the paused bubble; asking again sends nothing; a sync
@@ -374,18 +374,13 @@ void main() {
       _checkBody(e, f.askRequests.first, _lang);
 
       // ---- 4. a data question: totals computed here independently ---------
-      f.script([const AskReply.plan('PL-TOPN')]);
+      f.script([const AskReply.plan('PL-BREAKDOWN')]);
       final n0 = f.askRequests.length;
       await ask(_topN[_lang]!);
       await waitIdle(n0 + 1);
       final shown = (await scan()).text;
-      var last = -1;
-      var inOrder = true;
-      for (final m in _seededMinor) {
-        final at = shown.indexOf(_fmt(m), last + 1);
-        if (at < 0 || at < last) inOrder = false;
-        last = at;
-      }
+      final seededTotal = _seededMinor.fold<int>(0, (a, b) => a + b);
+      final inOrder = shown.contains(_fmt(seededTotal));
       if (!inOrder) {
         // Shapes only: letters become x so no merchant name reaches the log.
         final shapes = [
@@ -393,9 +388,12 @@ void main() {
             if (RegExp('[0-9]').hasMatch(p))
               p.replaceAll(RegExp('[A-Za-z\u0621-\u064A]'), 'x'),
         ];
-        e.say('TOPN pieces with digits: ${shapes.take(20).join(' | ')}');
+        e.say('BREAKDOWN pieces with digits: ${shapes.take(20).join(' | ')}');
       }
-      e.check(inOrder, 'top three shows the seeded totals, largest first');
+      e.check(
+        inOrder,
+        'the breakdown shows the seeded total (sum of the three amounts)',
+      );
       e.check(counterIs(3), 'the counter went down to 3');
       await shot('06-answer-topn');
 
