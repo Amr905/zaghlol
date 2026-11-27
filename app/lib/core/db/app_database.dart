@@ -236,10 +236,17 @@ class AppDatabase extends AppSchema {
       // rebuilds can't cascade; the check below catches what they break.
       await customStatement('PRAGMA foreign_keys = OFF');
       await transaction(() async {
+        // FREEZE-FIX: only violations the steps add fail the upgrade. A row
+        // that already pointed nowhere before the steps (data an older build
+        // left behind) is kept as it is; failing on it would refuse the
+        // upgrade on every launch with no way out.
+        final before = await _fkViolations();
         await upgradeSteps(m, from, to);
-        final broken = await customSelect('PRAGMA foreign_key_check').get();
-        if (broken.isNotEmpty) {
-          throw DbMigrationException(DbMigrationException.fkViolation);
+        final after = await _fkViolations();
+        for (final MapEntry(:key, :value) in after.entries) {
+          if (value > (before[key] ?? 0)) {
+            throw DbMigrationException(DbMigrationException.fkViolation);
+          }
         }
       });
     },
@@ -248,6 +255,48 @@ class AppDatabase extends AppSchema {
       if (validateSchema) await _checkSchema();
     },
   );
+
+  /// `PRAGMA foreign_key_check` as a multiset of violations, each named by
+  /// child table, parent table, the child row's primary key and the values
+  /// of the broken reference. Not by rowid or FK index: a table rebuild may
+  /// renumber either. A step that clears one old violation and adds a new
+  /// one in the same tables still fails.
+  Future<Map<String, int>> _fkViolations() async {
+    final out = <String, int>{};
+    final colsOf = <String, String>{};
+    Future<List<String>> names(String sql, List<Variable> v) async => [
+      for (final r in await customSelect(sql, variables: v).get())
+        '"${r.read<String>('c')}"',
+    ];
+    for (final r in await customSelect('PRAGMA foreign_key_check').get()) {
+      final t = r.read<String>('table');
+      final fkid = r.read<int>('fkid');
+      final cols = colsOf['$t\u0000$fkid'] ??= [
+        ...await names(
+          'SELECT name AS c FROM pragma_table_info(?) WHERE pk > 0 '
+          'ORDER BY pk',
+          [Variable.withString(t)],
+        ),
+        ...await names(
+          'SELECT "from" AS c FROM pragma_foreign_key_list(?) WHERE id = ? '
+          'ORDER BY seq',
+          [Variable.withString(t), Variable.withInt(fkid)],
+        ),
+      ].join(', ');
+      final row = await customSelect(
+        'SELECT $cols FROM "$t" WHERE rowid = ?',
+        variables: [Variable.withInt(r.read<int>('rowid'))],
+      ).getSingle();
+      final key = [
+        t,
+        r.data['parent'],
+        cols,
+        ...row.data.values,
+      ].join('\u0000');
+      out[key] = (out[key] ?? 0) + 1;
+    }
+    return out;
+  }
 
   Future<void> _checkSchema() async {
     final reference = referenceInstance(NativeDatabase.memory());
