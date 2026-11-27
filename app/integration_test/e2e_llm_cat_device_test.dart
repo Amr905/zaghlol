@@ -32,6 +32,8 @@ import 'package:go_router/go_router.dart';
 import 'package:zaghlol/app/app_navigation.dart' show openSettings;
 import 'package:zaghlol/core/db/app_database_providers.dart';
 import 'package:zaghlol/core/db/daos/llm_cat_queue_dao.dart';
+import 'package:zaghlol/core/flags/feature_flags.dart';
+import 'package:zaghlol/core/flags/flags_providers.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/llm/llm_feature.dart';
 import 'package:zaghlol/core/llm/llm_gateway_client.dart'
@@ -183,6 +185,7 @@ void main() {
       await e.settle(t, 3000);
 
       // ---- the discovery card appears on Home.
+      final filler0 = await c.read(llmCatQueueFillerProvider.future);
       final card = find.byKey(const ValueKey('cat-discovery-card'));
       var shown = await _waitFor(
         t,
@@ -201,6 +204,21 @@ void main() {
         );
       }
       if (!shown) {
+        final flags = await c.read(flagsServiceProvider.future);
+        e.say(
+          'DIAG flagOn=${flags.isOn(FeatureFlag.llmCategorise)} '
+          'terms=${c.read(llmCatTermsProvider) != null} '
+          'eligible=${await filler0.countEligible(now: DateTime.now())} '
+          'syncs=${backend.syncs.length}',
+        );
+        for (final r in await rows(
+          'SELECT template_id, source, direction, counterparty_kind, '
+          'category_source, is_internal, is_user_verified, '
+          'merchant_norm IS NOT NULL AS has_norm, '
+          'length(merchant_norm) AS len FROM transactions',
+        )) {
+          e.say('DIAG row $r');
+        }
         await e.dumpScreen(t, '$_lang-00-no-card');
         fail('the discovery card never appeared');
       }

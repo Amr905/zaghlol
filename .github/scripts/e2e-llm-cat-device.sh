@@ -117,7 +117,8 @@ run_one() { # lang
   adb -s "$DEVICE" logcat -d -b crash 2> /dev/null | tail -10
   # The logs must not hold a key, a message body or a shop name.
   if grep -qE "$SIGN_D|$LLM_KEY|QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$log"; then
-    echo "E2ELCAT PROBLEM the log holds a key, a shop name or a payee"
+    echo "E2ELCAT PROBLEM the log holds a key, a shop name or a payee: matches per needle (key, llm key, names)"
+    grep -c -F -e "$SIGN_D" "$log"; grep -c -F -e "$LLM_KEY" "$log"; grep -c -E "QUIBLEXO|ZYMOTRON|BRAVEXO|DELTRAXA|MOHAMED" "$log"
     r=1
   fi
   pull_files
