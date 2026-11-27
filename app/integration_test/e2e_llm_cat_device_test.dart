@@ -133,6 +133,12 @@ void main() {
         'ORDER BY created_at LIMIT 1',
       )).firstOrNull;
       Future<void> go(String route) async {
+        // The detail screen is pushed on the tab's own navigator (the device
+        // run showed `go` leaving it on screen): pop it first.
+        for (var i = 0; i < 3 && !e.found(find.byType(TxnRow)); i++) {
+          await Navigator.of(t.element(find.byType(Scaffold).last)).maybePop();
+          await e.settle(t, 800);
+        }
         rootNavigatorKey.currentState?.popUntil((r) => r.isFirst);
         await e.settle(t, 300);
         GoRouter.of(rootNavigatorKey.currentContext!).go(route);
