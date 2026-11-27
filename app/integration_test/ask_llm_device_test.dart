@@ -186,10 +186,17 @@ void main() {
         await e.settle(t, 400);
       }
 
+      /// The sheet scrolls: bring the button on screen, then tap it.
+      Future<void> tapVisible(Finder f) async {
+        await t.ensureVisible(f);
+        await e.settle(t, 400);
+        await t.tap(f);
+        await e.settle(t, 400);
+      }
+
       Future<void> allow() async {
         await e.waitFor(t, key('consent-allow'), what: 'the consent sheet');
-        await t.tap(key('consent-allow'));
-        await e.settle(t, 400);
+        await tapVisible(key('consent-allow'));
       }
 
       Future<void> shot(String n) => e.shot(t, '$_lang-$n');
@@ -218,7 +225,7 @@ void main() {
       );
       e.check(e.found(key('consent-preview')), 'the sheet shows the preview');
       await shot('02-consent-sheet');
-      await t.tap(key('consent-not-now'));
+      await tapVisible(key('consent-not-now'));
       await e.waitFor(
         t,
         find.text(l().chatConsentDeclined),
@@ -299,8 +306,7 @@ void main() {
       );
       await shot('07-consent-after-409');
       final badges2 = count(key('sent-badge'));
-      await t.tap(key('consent-allow'));
-      await e.settle(t, 400);
+      await tapVisible(key('consent-allow'));
       await waitCount(key('sent-badge'), badges2 + 1, 'the resent answer');
       e.check(
         f.askRequests.length == before409 + 2,
