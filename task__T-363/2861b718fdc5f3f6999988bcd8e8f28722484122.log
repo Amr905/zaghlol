@@ -1,5 +1,14 @@
 ﻿== SUMMARY ==
-RUNNING sha=2861b718fdc5f3f6999988bcd8e8f28722484122
+FAIL sha=2861b718fdc5f3f6999988bcd8e8f28722484122 pipeline=quick docker-not-running=1
+docker-not-running           FAIL  exit=1  0s
+
+== ERRORS: docker-not-running ==
+Docker is not running. Start Docker Desktop (Linux containers) and re-push or queue a job.
 
 == FULL LOG (last 1500 lines) ==
 auto task/T-363 2861b718fdc5f3f6999988bcd8e8f28722484122 2026-11-27T03:03:37.1815615+02:00
+
+
+
+[03:03:44] Docker is not running. Start Docker Desktop (Linux containers) and re-push or queue a job.
+[03:03:44] SUMMARY FAIL sha=2861b718fdc5f3f6999988bcd8e8f28722484122 pipeline=quick docker-not-running=1
