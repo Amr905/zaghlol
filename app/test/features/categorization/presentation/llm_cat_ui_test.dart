@@ -165,6 +165,51 @@ void main() {
         );
       });
 
+      testWidgets(
+        'FU-450: a counted showing records its time and the card stays up '
+        'that day',
+        (tester) async {
+          final before = DateTime.now().toUtc().millisecondsSinceEpoch;
+          await pumpCard(tester, lang: lang);
+          final last = await tester.runAsync(
+            () => h.repo.get(CatCardSettings.lastShown),
+          );
+          expect(last, isNotNull);
+          expect(last, greaterThanOrEqualTo(before));
+          // A fresh build the same day (the provider is re-read): still shown.
+          await pumpCard(tester, lang: lang);
+          expect(
+            find.byKey(const ValueKey('cat-discovery-card')),
+            findsOneWidget,
+          );
+        },
+      );
+
+      for (final (daysAgo, visible) in [(10, false), (31, true)]) {
+        testWidgets(
+          'FU-450: shown $daysAgo days ago: card ${visible ? 'is back' : 'waits'}',
+          (tester) async {
+            final t = DateTime.now().toUtc().subtract(Duration(days: daysAgo));
+            await tester.runAsync(() async {
+              await h.repo.set(CatCardSettings.shown, 1);
+              await h.repo.set(
+                CatCardSettings.lastShown,
+                t.millisecondsSinceEpoch,
+              );
+              await h.repo.set(
+                CatCardSettings.lastCounted,
+                t.millisecondsSinceEpoch ~/ Duration.millisecondsPerDay,
+              );
+            });
+            await pumpCard(tester, lang: lang);
+            expect(
+              find.byKey(const ValueKey('cat-discovery-card')),
+              visible ? findsOneWidget : findsNothing,
+            );
+          },
+        );
+      }
+
       testWidgets("Don't ask again hides it for good", (tester) async {
         await pumpCard(tester, lang: lang);
         await tester.tap(find.byKey(const ValueKey('cat-card-never')));

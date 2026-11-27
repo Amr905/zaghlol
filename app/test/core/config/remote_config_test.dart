@@ -154,6 +154,22 @@ void main() {
       expect(s.current.providerName.en, '');
     });
 
+    test('watch(): the current value first, then a block applied at once '
+        'after listening (none is missed)', () async {
+      final seen = <String>[];
+      final sub = s.watch().listen((c) => seen.add(c.llmProvider));
+      // No await between listen and apply.
+      await s.apply(
+        version: 1,
+        values: {'llm.provider': 'prov-a'},
+        providerName: {'ar': 'أ', 'en': 'A'},
+      );
+      await pumpEventQueue();
+      expect(seen.first, '');
+      expect(seen.last, 'prov-a');
+      await sub.cancel();
+    });
+
     test('confirm() keeps a held version fresh past 14 days', () async {
       await s.apply(version: 3, values: {'ask.quota_free': '9'});
       now = now.add(const Duration(days: 10));
