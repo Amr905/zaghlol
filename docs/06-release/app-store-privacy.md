@@ -14,7 +14,7 @@
 
 Tracking: **No**. Zaghlol does not track users (no ad or analytics SDKs, no data sharing for tracking).
 
-Data **not collected** (stays on the phone): SMS/message content, transactions, amounts, balances, budgets, assets, contacts, location, photos (Share/OCR and PDF stay local), audio and speech recordings. Voice entry (T-120) uses Apple's speech recognizer, on-device first; if on-device Egyptian Arabic recognition isn't available, Apple's server-based recognition may be used **only after the user's explicit consent** (D-42, ADR-010): the audio then goes to Apple under Apple's terms, never to Zaghlol's server, and the app keeps none of it. Draft answer "not collected" (Apple is the processor of its own service; confirm with legal), and the privacy policy and the `NSSpeechRecognitionUsageDescription` text must say it.
+Data **not collected** by Zaghlol from the app's records (stays on the phone; the typed question text of the optional online helper is the one free-text exception, see the table): SMS/message content, transactions, amounts, balances, budgets, assets, contacts, location, photos (Share/OCR and PDF stay local), audio and speech recordings. Voice entry (T-120) uses Apple's speech recognizer, on-device first; if on-device Egyptian Arabic recognition isn't available, Apple's server-based recognition may be used **only after the user's explicit consent** (D-42, ADR-010): the audio then goes to Apple under Apple's terms, never to Zaghlol's server, and the app keeps none of it. Draft answer "not collected" (Apple is the processor of its own service; confirm with legal), and the privacy policy and the `NSSpeechRecognitionUsageDescription` text must say it.
 
 Data collected by Zaghlol's backend:
 
@@ -25,6 +25,8 @@ Data collected by Zaghlol's backend:
 | Contact info > Email address | Optional Sign in with Apple / Google ID-token `email` claim (may be an Apple private relay address); stored in `accounts.email` for support lookup until the account is deleted; audit rows keep a keyed pseudonym 1 year (NFR-PRIV-07) | Linked, optional | No | App functionality (account) |
 | Identifiers > User ID | The provider subject ID from the same optional sign-in; stored until the account is deleted | Linked, optional | No | App functionality (account) |
 | Other data | Opt-in merchant contributions (normalized merchant text, **institution code**, system category; BR-SYNC-04); "Request my bank" (institution, country, channel) | Not linked | No | App functionality |
+| User content > Other user content (**legal to confirm**) | **Online helper (D-88…D-90):** the typed question after the phone's scrub and placeholders, the app language, a random request ID, consent terms (provider id and version). Optional, off until consent. Sent to our backend and forwarded (text and language only) to the named AI provider; not stored or logged by us; the provider may keep requests up to 30 days for abuse monitoring until zero retention is granted. Can contain anything the user types, including person names the phone does not tag (OQ-ASK-11, PENDING PO) | Not linked to identity in the stored data (no text stored); the request carries the random install ID and, for signed-in users, the account token: declare linked for those users (confirm) | No | App functionality |
+| User content > Other user content, or Financial info > Other financial info (**legal to confirm**) | **Automatic categories (D-94…D-96, draft):** the normalised name of an eligible business payee (up to 20 per request), language, request ID, consent terms. Never amount, date, account, card, last-4, institution, message text, transfers, person names, phones, IBANs, handles. Shared answer cache (name, category, confidence) 90 days with no install data. Right/Wrong feedback is not sent today (PENDING PO, FU-412, FU-441) | As above | No | App functionality |
 | Usage / diagnostics | none collected | | | |
 
 ## Disclosures that the privacy notice and the privacy details must state (security-model section 2a, T-137)
@@ -51,5 +53,5 @@ Data collected by Zaghlol's backend:
 
 1. `Runner.entitlements` now carries `com.apple.developer.applesignin` (Default). Enable the Sign in with Apple capability on the App ID so the provisioning profile includes it.
 2. The three provisioning profiles must include App Groups, Keychain sharing and iCloud (CloudDocuments) per the entitlements files.
-3. Fill `NSPrivacyCollectedDataTypes` in the app manifest to match the label above before submission.
+3. Fill `NSPrivacyCollectedDataTypes` in the app manifest to match the label above before submission, including the two optional LLM rows (Other user content; purpose App Functionality; not tracking).
 4. Demo account for review.

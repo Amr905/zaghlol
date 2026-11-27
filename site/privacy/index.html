@@ -39,6 +39,7 @@
 <li>ملف تصدّره أو تشاركه أنت بنفسك (البند ٨).</li>
 </ul>
 <p>لدى زغلول خادم صغير يقدّم خدمات غير مالية فقط: التحقق من مشتريات «زغلول جولد»، وتحديث قائمة التجار والتصنيفات، وأسعار الذهب والعملات، وتشغيل الميزات أو إيقافها. لا يتلقى هذا الخادم أي بيانات مالية.</p>
+<p>وفي ميزتين اختياريتين، متوقفتين حتى توافق عليهما، يرسل الهاتف نصاً محدوداً: السؤال الذي تكتبه أنت للمساعد على الإنترنت بعد تنظيفه، وأسماء بعض المحلات التجارية لاقتراح تصنيفها (البند ٥ مكرراً). لا يرسل التطبيق منهما مبالغك ولا أرصدتك ولا معاملاتك ولا رسائلك ولا حساباتك.</p>
 
 <h2>٣. كيف تُحفظ البيانات على هاتفك</h2>
 <ul>
@@ -78,12 +79,46 @@
 <tr><td>رقم عشوائي لمرة واحدة للتحقق من الوقت</td><td>مع بعض الطلبات</td><td>التحقق من وقت الهاتف لصلاحية جولد</td><td>لا يُخزَّن</td></tr>
 <tr><td>تسجيل الدخول الاختياري بحساب Google أو Apple: رمز الهوية الصادر من المزوّد، وما يشاركه من معرّف الحساب والبريد الإلكتروني</td><td>فقط إذا اخترت تسجيل الدخول</td><td>نقل جولد بين أجهزتك وإتاحة المساعدة عند الطلب</td><td>يُخزَّن معرّف الحساب والبريد الإلكتروني حتى تحذف حسابك؛ وتبقى سجلات تدقيق الدعم (بصمة مشفّرة للبريد ومعرّف الحساب) سنة واحدة ثم تُحذف</td></tr>
 <tr><td>أسماء التجار (اختياري، متوقف افتراضياً): اسم التاجر بعد تنظيفه، ورمز البنك، والتصنيف الذي اخترته</td><td>فقط إذا فعّلت «ساعد في تحسين قائمة التجار»</td><td>تحسين قائمة التجار المشتركة</td><td>إلى أن تُراجَع وتُجمَّع؛ لا ترتبط بك</td></tr>
+<tr><td>المساعد على الإنترنت (اختياري، متوقف افتراضياً): نص سؤالك بعد تنظيفه على هاتفك، ولغة التطبيق، ومعرّف عشوائي للطلب، وبيانات موافقتك (اسم المزوّد ورقم إصدار الموافقة)، وإثبات سلامة التطبيق والجهاز</td><td>فقط عند إرسال سؤال لا يستطيع التطبيق الإجابة عنه بنفسه، وبعد موافقتك</td><td>تحويل السؤال إلى خطة تنفّذها أنت على هاتفك (البند ٥ مكرراً)</td><td>لا نخزّن نص السؤال ولا نسجّله. نحتفظ بعدّاد شهري لعدد الأسئلة لكل تثبيت (ولكل حساب إن سجّلت الدخول)، ويُحذف بعد انتهاء الشهر التالي. <span class="placeholder ltr">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></td></tr>
+<tr><td>التصنيف التلقائي (اختياري، متوقف افتراضياً): أسماء المحلات التجارية المؤهلة بعد تنظيفها، ولغة التطبيق، ومعرّف عشوائي للطلب، وبيانات موافقتك، وإثبات سلامة التطبيق والجهاز</td><td>فقط عند وجود معاملة محل لم يستطع التطبيق تصنيفه، وبعد موافقتك</td><td>اقتراح تصنيف للمحل (البند ٥ مكرراً)</td><td>تُحفظ إجابة التصنيف (اسم المحل والتصنيف فقط، دون أي بيان عنك) في ذاكرة مشتركة ٩٠ يوماً. ويُحتفظ بعدّاد شهري كما سبق. <span class="placeholder ltr">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></td></tr>
 <tr><td>طلب دعم بنك: اسم البنك وبلده ونوع التنبيه</td><td>فقط إذا طلبت ذلك</td><td>إضافة جهات جديدة</td><td><span class="placeholder ltr">{{BANK_REQUEST_RETENTION}}</span></td></tr>
 <tr><td>سجلات الطلبات الفنية (دون محتوى الطلب، ومع عنوان IP مقتطع)</td><td>مع كل طلب</td><td>التشغيل والأمان ومنع إساءة الاستخدام</td><td>٣٠ يوماً على الأكثر</td></tr>
 </tbody>
 </table>
-<p><strong>لا يتلقى الخادم أبداً:</strong> الرسائل، أو المعاملات، أو المبالغ، أو الأرصدة، أو الميزانيات، أو الأصول، أو قواعدك وتصنيفاتك الخاصة، أو جهات الاتصال، أو الموقع، أو كلمة سر النسخة الاحتياطية. ولا يتلقى الخادم رقم طلب المتجر من التطبيق.</p>
+<p><strong>لا يتلقى الخادم أبداً من سجلات التطبيق:</strong> الرسائل، أو المعاملات، أو المبالغ، أو الأرصدة، أو الميزانيات، أو الأصول، أو قواعدك وتصنيفاتك الخاصة، أو جهات الاتصال، أو الموقع، أو كلمة سر النسخة الاحتياطية. والاستثناء الوحيد هو ما تكتبه أنت بنفسك في سؤال للمساعد على الإنترنت (البند ٥ مكرراً). ولا يتلقى الخادم رقم طلب المتجر من التطبيق.</p>
 <p>طلبات الأسعار والميزات لا تحمل أي بيانات عن ممتلكاتك أو معاملاتك. والاتصال بالخادم مشفّر (TLS)، والردود الحساسة موقّعة ويتحقق منها التطبيق.</p>
+
+<h2>٥ مكرراً. المساعد على الإنترنت والتصنيف التلقائي</h2>
+<p class="summary">الميزتان دول اختياريتين ومتوقفتين لحد ما توافق. من غيرهم زغلول بيشتغل كله على موبايلك.</p>
+<p>هاتان الميزتان اختياريتان، ولا يرسل التطبيق شيئاً من خلالهما قبل أن تقرأ شاشة الموافقة وتوافق عليها. ولكل ميزة موافقة مستقلة، ويمكنك سحبها في أي وقت من الإعدادات ← خصوصيتك، فيتوقف الإرسال فوراً وتبقى الاقتراحات والقواعد المحفوظة على هاتفك.</p>
+
+<h3>أ. المساعد على الإنترنت (اسأل زغلول)</h3>
+<ul>
+<li><strong>الغرض:</strong> الإجابة عن سؤال حر لا يستطيع التطبيق الإجابة عنه بنفسه. يعيد المزوّد خطة محددة سلفاً، ويحسب التطبيق الأرقام على هاتفك من بياناتك ويكتب الإجابة. وما يستطيع التطبيق الإجابة عنه بنفسه لا يُرسَل ولا يُحتسب.</li>
+<li><strong>ما يغادر الهاتف:</strong> نص سؤالك بعد التنظيف (البند التالي)، ولغة التطبيق، ومعرّف عشوائي للطلب، وبيانات موافقتك (اسم المزوّد ورقم إصدار الموافقة)، وإثبات سلامة التطبيق والجهاز (Play Integrity أو App Attest)، إضافة إلى ما يرسله التطبيق مع كل طلب: معرّف التثبيت العشوائي ونظام التشغيل وإصدار التطبيق، ورمز الحساب إن كنت مسجّل الدخول.</li>
+<li><strong>التنظيف على الهاتف قبل الإرسال:</strong> تُحذف أرقام الهواتف وعناوين البريد الإلكتروني وعناوين إنستاباي وأرقام البطاقات والحسابات، وتُستبدل حساباتك وبطاقاتك وأسماء البنوك والمحافظ والمحلات التي يعرفها التطبيق من بياناتك برموز محايدة يبقى معناها على هاتفك. وإن تعذّر حسم إشارة إلى حساب أو بطاقة سأل التطبيق عن توضيحها ولم يرسل شيئاً.</li>
+<li><strong>ما لا يمكن تنظيفه:</strong> يرسل التطبيق كما كتبتها أنت أسماء الأشخاص التي لا يعرفها التطبيق من تحويلاتك، وأي اسم يختلف عن المسجّل على هاتفك في الكتابة أو الألقاب، وأسماء الفئات والميزانيات والأهداف، وأي نص تنقله من ملاحظاتك. فلا تكتب في السؤال ما لا تريد إرساله. ولا يرسل التطبيق مبالغك ولا أرصدتك ولا معاملاتك ولا رسائلك ولا حساباتك من سجلاته.</li>
+<li><strong>من يتلقاه:</strong> خادم زغلول، ثم مزوّد الذكاء الاصطناعي المسمّى في شاشة الموافقة (حالياً <span class="placeholder ltr">{{LLM_PROVIDER_NAME}}</span>، ومنطقة المعالجة <span class="placeholder ltr">{{LLM_PROVIDER_REGION}}</span>). يمرّر خادمنا إلى المزوّد نص السؤال ولغته فقط.</li>
+<li><strong>الاحتفاظ:</strong> لا يخزّن خادمنا نص السؤال ولا الخطة ولا ردّ المزوّد ولا يسجّلها. يُحتفظ بعدّاد شهري لعدد الأسئلة لكل تثبيت (ولكل حساب)، ويُحذف بعد انتهاء الشهر التالي، ويُحذف مع حذف التثبيت أو الحساب. أما لدى المزوّد، فإلى أن يُمنح عدم الاحتفاظ بالبيانات، قد يحتفظ بالطلبات مدة تصل إلى ٣٠ يوماً لأغراض رصد إساءة الاستخدام، ولا يستخدمها في تدريب نماذجه. <span class="placeholder ltr">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></li>
+<li><strong>الحدود:</strong> عدد الأسئلة شهرياً محدود ويحدده الخادم، ويظهر في التطبيق.</li>
+</ul>
+<p class="placeholder ltr" style="display:block">{{PENDING_PO}} PENDING PO (OQ-ASK-10) — wording of the sentence the helper shows. Variant A (recommended in the SRS options): "The provider returns only a plan; the sentence you read is written by the app from its own templates. No text written by the provider is shown." Variant B: "The provider may propose a sentence with blanks; the app checks it against fixed rules, fills the numbers on your phone and falls back to its own sentence if it fails any rule." Not decided; do not publish either variant until the PO decides.</p>
+<p class="placeholder ltr" style="display:block">{{PENDING_PO}} PENDING PO (OQ-ASK-11) — person names. The "what cannot be cleaned" bullet above states today's behaviour (names the phone does not tag are sent as typed). If the PO chooses P1, add: "If you ask about someone Zaghlol knows from your transfers or splits, the question is not sent at all." If P0, keep the bullet as written. Not decided; the bullet stays as it is until then.</p>
+
+<h3>ب. التصنيف التلقائي للمحلات</h3>
+<ul>
+<li><strong>الغرض:</strong> اقتراح تصنيف لمحل تجاري لم يستطع التطبيق تصنيفه. يظهر الاقتراح بعلامة «اقتراح زغلول» ويمكنك قبوله أو تغييره.</li>
+<li><strong>ما يغادر الهاتف:</strong> اسم المحل بعد التنظيف فقط، من معاملات البطاقة أو الدفع الإلكتروني إلى جهة تجارية (حتى ٢٠ اسماً في الطلب)، ولغة التطبيق، ومعرّف عشوائي للطلب، وبيانات موافقتك، وإثبات سلامة التطبيق والجهاز، مع معرّف التثبيت ونوع النظام وإصدار التطبيق كما في كل طلب.</li>
+<li><strong>ما لا يُرسل أبداً:</strong> المبلغ والعملة والتاريخ والوقت والبنك والحساب والبطاقة وآخر أربعة أرقام والرصيد ونص الرسالة أو الإشعار وطرف التحويل والملاحظة وقواعدك وفئاتك الخاصة. ولا تُرسَل التحويلات ولا أسماء الأشخاص ولا أي اسم فيه رقم هاتف أو IBAN أو عنوان بريد أو رابط أو معرّف إنستاباي أو تسلسل أرقام من ٦ خانات فأكثر، وتُفحص هذه الشروط على الهاتف ثم على الخادم.</li>
+<li><strong>من يتلقاه:</strong> خادم زغلول ومزوّد الذكاء الاصطناعي المسمّى في شاشة الموافقة (<span class="placeholder ltr">{{LLM_PROVIDER_NAME}}</span>، <span class="placeholder ltr">{{LLM_PROVIDER_REGION}}</span>). يُرسَل اسم المحل في الطلب نفسه الذي يحمل معرّف التثبيت العشوائي، لأن الخادم يحتاجه لإثبات سلامة الطلب وحساب الحد الشهري.</li>
+<li><strong>الاحتفاظ:</strong> تُحفظ إجابة المزوّد (اسم المحل والتصنيف ودرجة الثقة فقط، دون معرّف تثبيت أو حساب) في ذاكرة مشتركة ٩٠ يوماً ليستفيد منها غيرك. ويُحتفظ بعدّاد شهري لكل تثبيت (ولكل حساب)، ويُحذف بعد انتهاء الشهر التالي. <span class="placeholder ltr">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></li>
+<li><strong>الحدود:</strong> عدد المحلات شهرياً محدود ويحدده الخادم ويظهر في التطبيق.</li>
+</ul>
+<p class="placeholder ltr" style="display:block">{{PENDING_PO}} PENDING PO (FU-412, FU-441) — feedback. Today the app does not send Right/Wrong feedback (the sending switch is off), so nothing about it is stated as sent. If the PO approves sending, the policy adds the approved wording (draft in T-359 "For the PO") and must say that Undo only works until the next sync. Not decided.</p>
+<p class="placeholder ltr" style="display:block">{{PENDING_PO}} PENDING PO / legal (FU-421) — the in-app consent copy for automatic categories says "nothing that identifies you"; the request does carry the random install ID next to the shop name. This policy states the facts as above; the consent sheet text needs legal sign-off before the feature is switched on.</p>
+
+<h3>ج. الأساس والحقوق</h3>
+<p>نعالج هذه البيانات بناءً على موافقتك الصريحة، ويمكنك سحبها في أي وقت دون أثر على ما سبق. للاطلاع على حقوقك راجع البند ١٦. <span class="placeholder ltr">[LEGAL] {{LLM_LEGAL_BASIS_REVIEW}}</span></p>
 
 <h2>٦. إفصاحات إضافية</h2>
 <ul>
@@ -131,10 +166,10 @@
 </table>
 
 <h2>١٤. الأساس القانوني</h2>
-<p>نعالج البيانات القليلة الموضحة أعلاه وفق قانون حماية البيانات الشخصية المصري رقم ١٥١ لسنة ٢٠٢٠ ولائحته التنفيذية، استناداً إلى: تنفيذ الخدمة التي طلبتها (التحقق من المشتريات والمزامنة)، وموافقتك (تسجيل الدخول، والمساهمة بأسماء التجار، وطلب دعم بنك، والتعرّف على الكلام عبر الإنترنت)، ومصلحتنا المشروعة في أمان الخدمة ومنع الاحتيال. <span class="placeholder ltr">{{LEGAL_BASIS_REVIEW}}</span></p>
+<p>نعالج البيانات القليلة الموضحة أعلاه وفق قانون حماية البيانات الشخصية المصري رقم ١٥١ لسنة ٢٠٢٠ ولائحته التنفيذية، استناداً إلى: تنفيذ الخدمة التي طلبتها (التحقق من المشتريات والمزامنة)، وموافقتك (تسجيل الدخول، والمساهمة بأسماء التجار، وطلب دعم بنك، والتعرّف على الكلام عبر الإنترنت، والمساعد على الإنترنت، والتصنيف التلقائي)، ومصلحتنا المشروعة في أمان الخدمة ومنع الاحتيال. <span class="placeholder ltr">{{LEGAL_BASIS_REVIEW}}</span></p>
 
 <h2>١٥. مكان التخزين والنقل</h2>
-<p>يُستضاف خادم زغلول في <span class="placeholder ltr">{{HOSTING_LOCATION}}</span>. إذا كان خارج جمهورية مصر العربية، فلا يتم النقل إلا وفق الضوابط والتراخيص التي يتطلبها القانون. تخضع خدمات Google وApple (المتاجر، وتسجيل الدخول، وDrive وiCloud) لسياسات الخصوصية الخاصة بكل منهما.</p>
+<p>يُستضاف خادم زغلول في <span class="placeholder ltr">{{HOSTING_LOCATION}}</span>. إذا كان خارج جمهورية مصر العربية، فلا يتم النقل إلا وفق الضوابط والتراخيص التي يتطلبها القانون. تخضع خدمات Google وApple (المتاجر، وتسجيل الدخول، وDrive وiCloud) لسياسات الخصوصية الخاصة بكل منهما. ويعالج مزوّد الذكاء الاصطناعي (البند ٥ مكرراً) طلبات المساعد والتصنيف في <span class="placeholder ltr">{{LLM_PROVIDER_REGION}}</span> وفق سياسته وشروط التعاقد معنا. <span class="placeholder ltr">[LEGAL] {{LLM_TRANSFER_REVIEW}}</span></p>
 
 <h2>١٦. حقوقك</h2>
 <p>وفق القانون رقم ١٥١ لسنة ٢٠٢٠، لك الحق في: العلم بالبيانات الشخصية التي نحتفظ بها عنك والاطلاع عليها والحصول عليها؛ وتصحيحها أو تحديثها أو حذفها؛ والعدول عن موافقتك؛ وتقييد المعالجة أو الاعتراض عليها؛ والعلم بأي خرق لبياناتك؛ وتقديم شكوى إلى مركز حماية البيانات الشخصية.</p>
@@ -172,6 +207,7 @@
 <li>a file you export or share yourself (section 8).</li>
 </ul>
 <p>Zaghlol has a small server that provides non-financial services only: verifying Zaghlol Gold purchases, updating the merchant and category list, gold and exchange-rate prices, and turning features on or off. It never receives financial data.</p>
+<p>Two optional features, both off until you agree to them, send limited text from your phone: the question you type to the online helper, after it is cleaned, and the names of some businesses so that a category can be suggested (section 5a). The app does not send your amounts, balances, transactions, messages or accounts with either of them.</p>
 
 <h2>3. How data is kept on your phone</h2>
 <ul>
@@ -210,12 +246,46 @@
 <tr><td>A random one-time number for checking the time</td><td>With some requests</td><td>Checking the phone's time for Gold validity</td><td>Not stored</td></tr>
 <tr><td>Optional sign-in with Google or Apple: the provider's ID token and the account identifier and e-mail it shares</td><td>Only if you choose to sign in</td><td>Carrying Gold between your phones and helping you when you ask for support</td><td>The account identifier and e-mail are stored until you delete your account; support audit rows (an encrypted e-mail fingerprint and the account ID) are kept one year, then deleted</td></tr>
 <tr><td>Merchant names (optional, off by default): the cleaned-up merchant name, the bank code and the category you chose</td><td>Only if you turn on "Help improve the merchant list"</td><td>Improving the shared merchant list</td><td>Until reviewed and aggregated; not linked to you</td></tr>
+<tr><td>Online helper (optional, off by default): the text of your question after your phone has cleaned it, the app language, a random request ID, your consent details (provider name and consent version) and an app and device integrity proof</td><td>Only when you send a question the app cannot answer itself, and only after you agree</td><td>Turning the question into a plan that runs on your phone (section 5a)</td><td>We do not store or log the question text. We keep a monthly question counter per install (and per account if you are signed in), deleted after the following month ends. <span class="placeholder">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></td></tr>
+<tr><td>Automatic categories (optional, off by default): the cleaned names of eligible businesses, the app language, a random request ID, your consent details and an app and device integrity proof</td><td>Only when a business transaction could not be categorised by the app, and only after you agree</td><td>Suggesting a category for the business (section 5a)</td><td>The category answer (the business name and the category only, nothing about you) is kept in a shared cache for 90 days. The monthly counter is kept as above. <span class="placeholder">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></td></tr>
 <tr><td>A bank-support request: the bank's name, country and alert type</td><td>Only if you ask</td><td>Adding new institutions</td><td><span class="placeholder">{{BANK_REQUEST_RETENTION}}</span></td></tr>
 <tr><td>Technical request logs (no request content, truncated IP address)</td><td>Each request</td><td>Operation, security and abuse prevention</td><td>30 days at most</td></tr>
 </tbody>
 </table>
-<p><strong>The server never receives:</strong> messages, transactions, amounts, balances, budgets, assets, your own rules or categories, contacts, location, or your backup passphrase. The app never sends the store order ID.</p>
+<p><strong>The server never receives from the app's records:</strong> messages, transactions, amounts, balances, budgets, assets, your own rules or categories, contacts, location, or your backup passphrase. The only exception is what you yourself type into a question to the online helper (section 5a). The app never sends the store order ID.</p>
 <p>Price and feature requests carry no data about your holdings or transactions. Connections to the server are encrypted (TLS), and sensitive responses are signed and checked by the app.</p>
+
+<h2>5a. The online helper and automatic categories</h2>
+<p class="summary"><strong>In short:</strong> both features are optional and off until you agree. Without them, Zaghlol works entirely on your phone.</p>
+<p>Both features are optional, and the app sends nothing through them until you have read the consent screen and agreed. Each feature has its own consent, which you can withdraw at any time in Settings &gt; Privacy: sending stops at once, and the suggestions and rules already saved on your phone stay.</p>
+
+<h3>A. The online helper (Ask Zaghlol)</h3>
+<ul>
+<li><strong>Purpose:</strong> answering a free-form question the app cannot answer by itself. The provider returns a fixed-format plan; the app calculates the numbers on your phone from your data and writes the answer. A question the app can answer itself is not sent and does not count.</li>
+<li><strong>What leaves the phone:</strong> the text of your question after cleaning (next item), the app language, a random request ID, your consent details (provider name and consent version) and an app and device integrity proof (Play Integrity or App Attest), plus what the app sends with every request: the random install ID, platform and app version, and the account token if you are signed in.</li>
+<li><strong>Cleaning on the phone before sending:</strong> phone numbers, e-mail addresses, InstaPay addresses and card and account numbers are removed, and your accounts, cards, bank and wallet names and merchants that the app knows from your data are replaced by neutral placeholders whose meaning stays on your phone. If a reference to an account or card cannot be resolved, the app asks you to clarify and sends nothing.</li>
+<li><strong>What cannot be cleaned:</strong> the app sends as you typed them the names of people that the app does not know from your transfers, any name spelled differently from the one stored on your phone or given as a nickname, the names of categories, budgets and goals, and any text you copy from your notes. Do not type in a question what you do not want sent. The app does not send your amounts, balances, transactions, messages or accounts from its records.</li>
+<li><strong>Who receives it:</strong> Zaghlol's server, and then the AI provider named on the consent screen (currently <span class="placeholder">{{LLM_PROVIDER_NAME}}</span>, processing region <span class="placeholder">{{LLM_PROVIDER_REGION}}</span>). Our server forwards only the question text and its language to the provider.</li>
+<li><strong>Retention:</strong> our server does not store or log the question text, the plan or the provider's reply. A monthly question counter is kept per install (and per account), deleted after the following month ends and deleted with the install or account. At the provider, until zero data retention is granted, the provider may keep requests for up to 30 days for abuse monitoring, and does not use them to train its models. <span class="placeholder">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></li>
+<li><strong>Limits:</strong> the number of questions per month is limited, set by the server and shown in the app.</li>
+</ul>
+<p class="placeholder" style="display:block">{{PENDING_PO}} PENDING PO (OQ-ASK-10) — wording of the sentence the helper shows. Variant A (recommended in the SRS options): "The provider returns only a plan; the sentence you read is written by the app from its own templates. No text written by the provider is shown." Variant B: "The provider may propose a sentence with blanks; the app checks it against fixed rules, fills the numbers on your phone and falls back to its own sentence if it fails any rule." Not decided; do not publish either variant until the PO decides.</p>
+<p class="placeholder" style="display:block">{{PENDING_PO}} PENDING PO (OQ-ASK-11) — person names. The "what cannot be cleaned" bullet above states today's behaviour (names the phone does not tag are sent as typed). If the PO chooses P1, add: "If you ask about someone Zaghlol knows from your transfers or splits, the question is not sent at all." If P0, keep the bullet as written. Not decided; the bullet stays as it is until then.</p>
+
+<h3>B. Automatic categories for businesses</h3>
+<ul>
+<li><strong>Purpose:</strong> suggesting a category for a business the app could not categorise. The suggestion is shown with a "Zaghlol's guess" label and you can accept or change it.</li>
+<li><strong>What leaves the phone:</strong> only the cleaned business name, from card or online payments to a business (up to 20 names in a request), the app language, a random request ID, your consent details and an app and device integrity proof, together with the install ID, platform and app version as with every request.</li>
+<li><strong>What never leaves:</strong> amount, currency, date and time, bank, account, card, last four digits, balance, message or notification text, the other party of a transfer, notes, your own rules and your custom categories. Transfers, people's names and any name containing a phone number, IBAN, e-mail address, link, InstaPay handle or a run of 6 or more digits are not sent; these conditions are checked on the phone and again on the server.</li>
+<li><strong>Who receives it:</strong> Zaghlol's server and the AI provider named on the consent screen (<span class="placeholder">{{LLM_PROVIDER_NAME}}</span>, <span class="placeholder">{{LLM_PROVIDER_REGION}}</span>). The business name travels in the same request as the random install ID, because the server needs it to verify the request and count the monthly limit.</li>
+<li><strong>Retention:</strong> the provider's answer (the business name, the category and a confidence score only, with no install or account ID) is kept in a shared cache for 90 days so that it can help other users. A monthly counter is kept per install (and per account), deleted after the following month ends. <span class="placeholder">[LEGAL] {{LLM_PROVIDER_RETENTION_REVIEW}}</span></li>
+<li><strong>Limits:</strong> the number of businesses per month is limited, set by the server and shown in the app.</li>
+</ul>
+<p class="placeholder" style="display:block">{{PENDING_PO}} PENDING PO (FU-412, FU-441) — feedback. Today the app does not send Right/Wrong feedback (the sending switch is off), so nothing about it is stated as sent. If the PO approves sending, the policy adds the approved wording (draft in T-359 "For the PO") and must say that Undo only works until the next sync. Not decided.</p>
+<p class="placeholder" style="display:block">{{PENDING_PO}} PENDING PO / legal (FU-421) — the in-app consent copy for automatic categories says "nothing that identifies you"; the request does carry the random install ID next to the business name. This policy states the facts as above; the consent sheet text needs legal sign-off before the feature is switched on.</p>
+
+<h3>C. Basis and your rights</h3>
+<p>We process this data on your explicit consent, which you can withdraw at any time without affecting what happened before. See section 16 for your rights. <span class="placeholder">[LEGAL] {{LLM_LEGAL_BASIS_REVIEW}}</span></p>
 
 <h2>6. Additional disclosures</h2>
 <ul>
@@ -263,10 +333,10 @@
 </table>
 
 <h2>14. Legal basis</h2>
-<p>We process the small amount of data above under Egypt's Personal Data Protection Law No. 151 of 2020 and its Executive Regulations, on the basis of: performing the service you asked for (purchase verification and sync); your consent (sign-in, merchant contributions, bank requests, online speech recognition); and our legitimate interest in keeping the service secure and preventing fraud. <span class="placeholder">{{LEGAL_BASIS_REVIEW}}</span></p>
+<p>We process the small amount of data above under Egypt's Personal Data Protection Law No. 151 of 2020 and its Executive Regulations, on the basis of: performing the service you asked for (purchase verification and sync); your consent (sign-in, merchant contributions, bank requests, online speech recognition, the online helper, automatic categories); and our legitimate interest in keeping the service secure and preventing fraud. <span class="placeholder">{{LEGAL_BASIS_REVIEW}}</span></p>
 
 <h2>15. Where data is stored</h2>
-<p>Zaghlol's server is hosted in <span class="placeholder">{{HOSTING_LOCATION}}</span>. If that is outside the Arab Republic of Egypt, data is transferred only under the safeguards and licences the law requires. Google and Apple services (stores, sign-in, Drive and iCloud) follow their own privacy policies.</p>
+<p>Zaghlol's server is hosted in <span class="placeholder">{{HOSTING_LOCATION}}</span>. If that is outside the Arab Republic of Egypt, data is transferred only under the safeguards and licences the law requires. Google and Apple services (stores, sign-in, Drive and iCloud) follow their own privacy policies. The AI provider (section 5a) processes helper and category requests in <span class="placeholder">{{LLM_PROVIDER_REGION}}</span> under its own terms and its contract with us. <span class="placeholder">[LEGAL] {{LLM_TRANSFER_REVIEW}}</span></p>
 
 <h2>16. Your rights</h2>
 <p>Under Law No. 151 of 2020 you have the right to: know about, access and obtain the personal data we hold about you; have it corrected, updated or erased; withdraw your consent; restrict or object to processing; be told about a breach affecting your data; and complain to the Personal Data Protection Center.</p>
