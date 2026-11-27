@@ -53,6 +53,8 @@ import 'package:zaghlol/features/categorization/data/llm_cat_providers.dart';
 import 'package:zaghlol/features/categorization/presentation/ai_category_chip.dart';
 import 'package:zaghlol/features/transactions/data/transactions_providers.dart';
 import 'package:zaghlol/features/transactions/domain/transaction.dart';
+import 'package:zaghlol/features/transactions/presentation/list/txn_row.dart'
+    show TxnRow;
 import 'package:zaghlol/main.dart' as app;
 import 'package:zaghlol_domain/zaghlol_domain.dart';
 
@@ -399,7 +401,11 @@ void main() {
         cRow?['category_id'] == null && cRow?['category_source'] == 'none',
         'the no-answer shop stays unclassified',
       );
-      final userRow = await txnOf(_shopA.toLowerCase(), source: 'manual');
+      Future<Map<String, Object?>?> manualOf(String raw) async => (await rows(
+        'SELECT category_id, category_source FROM transactions '
+        "WHERE source = 'manual' AND merchant_raw = '$raw' LIMIT 1",
+      )).firstOrNull;
+      final userRow = await manualOf(_shopA);
       e.check(
         userRow?['category_id'] == 'sys:groceries' &&
             userRow?['category_source'] == 'user',
@@ -410,7 +416,7 @@ void main() {
         person?['category_source'] == 'none',
         'the person payment is untouched',
       );
-      final manualRow = await txnOf('test shop a');
+      final manualRow = await manualOf('TEST SHOP A');
       e.check(
         manualRow?['category_source'] == 'none',
         'the manual entry is untouched',
@@ -472,9 +478,14 @@ void main() {
               as String;
       Future<void> crossAndPick() async {
         await go(AppRoutes.transactions);
+        e.say(
+          'DIAG list rows=${find.byType(TxnRow).evaluate().length} '
+          'rowB=${e.found(find.byKey(ValueKey(b!['id']! as String)))}',
+        );
+        await e.shot(t, '$_lang-05a-list');
         await e.scrollAndTap(
           t,
-          find.byKey(ValueKey(b!['id']! as String)),
+          find.byKey(ValueKey(b['id']! as String)),
           'row B',
         );
         await e.scrollAndTap(
