@@ -30,7 +30,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zaghlol/app/app_navigation.dart' show openSettings;
+import 'package:zaghlol/core/config/remote_config_providers.dart';
 import 'package:zaghlol/core/db/app_database_providers.dart';
+import 'package:zaghlol/core/llm/llm_provider_terms.dart';
 import 'package:zaghlol/core/db/daos/llm_cat_queue_dao.dart';
 import 'package:zaghlol/core/flags/feature_flags.dart';
 import 'package:zaghlol/core/flags/flags_providers.dart';
@@ -223,6 +225,14 @@ void main() {
         );
       }
       if (!shown) {
+        final svc = await c.read(remoteConfigServiceProvider.future);
+        final rc = c.read(remoteConfigProvider);
+        e.say(
+          'DIAG config svc=${svc.current.llmProvider.isNotEmpty} '
+          'version=${svc.version} provider=${(rc.value != null) ? rc.value!.llmProvider.isNotEmpty : 'novalue'} '
+          'names=${(rc.value != null) && rc.value!.providerName.en.isNotEmpty} '
+          'termsProv=${c.read(llmProviderTermsProvider) != null}',
+        );
         final flags = await c.read(flagsServiceProvider.future);
         e.say(
           'DIAG flagOn=${flags.isOn(FeatureFlag.llmCategorise)} '
