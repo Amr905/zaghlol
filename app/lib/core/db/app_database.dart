@@ -236,10 +236,17 @@ class AppDatabase extends AppSchema {
       // rebuilds can't cascade; the check below catches what they break.
       await customStatement('PRAGMA foreign_keys = OFF');
       await transaction(() async {
+        // FREEZE-FIX: only violations the steps add fail the upgrade. A row
+        // that already pointed nowhere before the steps (data an older build
+        // left behind) is kept as it is; failing on it would refuse the
+        // upgrade on every launch with no way out.
+        final before = await _fkViolationCounts();
         await upgradeSteps(m, from, to);
-        final broken = await customSelect('PRAGMA foreign_key_check').get();
-        if (broken.isNotEmpty) {
-          throw DbMigrationException(DbMigrationException.fkViolation);
+        final after = await _fkViolationCounts();
+        for (final MapEntry(:key, :value) in after.entries) {
+          if (value > (before[key] ?? 0)) {
+            throw DbMigrationException(DbMigrationException.fkViolation);
+          }
         }
       });
     },
@@ -248,6 +255,17 @@ class AppDatabase extends AppSchema {
       if (validateSchema) await _checkSchema();
     },
   );
+
+  /// `PRAGMA foreign_key_check` as a count per (child table, parent table).
+  /// Not per rowid or FK index: a table rebuild may renumber either.
+  Future<Map<String, int>> _fkViolationCounts() async {
+    final counts = <String, int>{};
+    for (final r in await customSelect('PRAGMA foreign_key_check').get()) {
+      final key = '${r.data['table']}\u0000${r.data['parent']}';
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    return counts;
+  }
 
   Future<void> _checkSchema() async {
     final reference = referenceInstance(NativeDatabase.memory());

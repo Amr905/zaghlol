@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app_navigation.dart';
 import 'app/app_restart.dart';
+import 'app/db_open_gate.dart';
 import 'app/notification_taps.dart';
 import 'app/onboarding_gate.dart';
 import 'app/url_launcher_opener.dart';
@@ -163,8 +164,11 @@ class ZaghlolApp extends ConsumerWidget {
       themeMode: themeMode,
       routerConfig: ref.watch(appRouterProvider),
       // T-103: app lock, privacy cover and secure window over the whole app.
-      builder: (context, child) => AppLockGate(
-        child: OnboardingGate(child: child ?? const SizedBox.shrink()),
+      // FREEZE-FIX: a failed database open is shown, not a blank cover.
+      builder: (context, child) => DbOpenGate(
+        child: AppLockGate(
+          child: OnboardingGate(child: child ?? const SizedBox.shrink()),
+        ),
       ),
     );
   }

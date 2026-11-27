@@ -56,9 +56,10 @@ final class DbOpenException extends SafeException {
 /// The opener restores the pre-migration copy.
 ///
 /// Codes: `DB_NO_MIGRATION_PATH` (no step for the version pair),
-/// `DB_MIGRATION_FK_VIOLATION` (`PRAGMA foreign_key_check` found rows after
-/// the steps), `DB_SCHEMA_MISMATCH` (debug/test: the live schema differs from
-/// a freshly created one).
+/// `DB_MIGRATION_FK_VIOLATION` (`PRAGMA foreign_key_check` found more rows
+/// after the steps than before them, per child and parent table),
+/// `DB_SCHEMA_MISMATCH` (debug/test: the live schema differs from a freshly
+/// created one).
 final class DbMigrationException extends SafeException {
   DbMigrationException(super.code);
 
