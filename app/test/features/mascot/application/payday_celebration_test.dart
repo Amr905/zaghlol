@@ -56,6 +56,16 @@ class _Txns implements TransactionRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _ThrowingTxns extends _Txns {
+  _ThrowingTxns() : super({});
+
+  @override
+  Future<TransactionRecord?> byId(
+    String id, {
+    bool includeDeleted = false,
+  }) async => throw StateError('db busy');
+}
+
 class _Today extends TodayNotifier {
   @override
   CivilDate build() => _today;
@@ -106,6 +116,27 @@ void main() {
     expect((await start(state, txns))?.txnId, 's1');
     await markPaydayCelebrated(repo, 's1');
     expect(await start(state, txns), isNull);
+  });
+
+  test('a lookup that throws is not marked, so a later run retries', () async {
+    final state = SalaryState(entries: [_e('s1', _today)]);
+    final c = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWith((ref) async => db),
+        settingsRepositoryProvider.overrideWith((ref) async => repo),
+        salaryStateProvider.overrideWith((ref) => Stream.value(state)),
+        todayProvider.overrideWith(_Today.new),
+        transactionRepositoryProvider.overrideWith(
+          (ref) async => _ThrowingTxns(),
+        ),
+      ],
+    );
+    addTearDown(c.dispose);
+    c.listen(salaryStateProvider, (_, _) {});
+    c.listen(paydayCelebrationProvider, (_, _) {});
+    await c.read(salaryStateProvider.future);
+    expect(await c.read(paydayCelebrationProvider.future), isNull);
+    expect(await repo.get(Settings.mascotPaydayCelebratedTxns), isEmpty);
   });
 
   test('old salary found by the first scan: silent, never later', () async {

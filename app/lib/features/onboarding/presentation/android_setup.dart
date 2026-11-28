@@ -5,8 +5,6 @@
 // variant. Skip hands the step slug to the caller (FR-ONB-11).
 // Counts only: nothing here shows or logs a message body, sender or amount.
 
-import '../../mascot/presentation/working_bird.dart';
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -25,6 +23,7 @@ import '../../accounts/presentation/edit_card/edit_card_providers.dart'
 import '../../capture/application/capture_providers.dart';
 import '../../capture/application/inbox_scan_service.dart';
 import '../../capture/domain/scan_plan.dart';
+import '../../mascot/presentation/working_bird.dart';
 import '../../mascot/presentation/zaghlol_avatar.dart';
 
 /// Setup step slugs recorded when the user skips (FR-ONB-11).
@@ -325,6 +324,7 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
     final running =
         _progress.phase == ScanPhase.running ||
         _progress.phase == ScanPhase.idle;
+    final failed = _progress.phase == ScanPhase.failed;
     final summary = l.onboardingAndroidSetupScanCount(count, _digits('$count'));
     return Semantics(
       liveRegion: true,
@@ -341,6 +341,8 @@ class _AndroidSetupState extends ConsumerState<AndroidSetupScreen>
                     dimension: 40,
                     child: running
                         ? const WorkingBird(busy: true, size: 40)
+                        : failed
+                        ? const WorkingBird(busy: false, failed: true, size: 40)
                         : Icon(Icons.check_circle, color: c.primary, size: 28),
                   ),
                 ),

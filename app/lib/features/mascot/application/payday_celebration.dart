@@ -88,10 +88,18 @@ final paydayCelebrationProvider = StreamProvider<PaydayCelebration?>((
     return;
   }
   PaydayCelebration? pick;
+  final unreadable = <String>{};
   if (d.fresh.isNotEmpty) {
     final txns = await ref.read(transactionRepositoryProvider.future);
     for (final e in d.fresh) {
-      final t = await txns.byId(e.txnId);
+      final TransactionRecord? t;
+      try {
+        t = await txns.byId(e.txnId);
+      } on Object {
+        // Lookup failed: leave it unmarked so a later run retries it.
+        unreadable.add(e.txnId);
+        continue;
+      }
       if (t != null && t.direction == TxnDirection.income) {
         pick = PaydayCelebration(t.id, t.amount);
         break;
@@ -103,7 +111,7 @@ final paydayCelebrationProvider = StreamProvider<PaydayCelebration?>((
   final next = [
     ...done,
     for (final e in d.all)
-      if (e.txnId != pick?.txnId) e.txnId,
+      if (e.txnId != pick?.txnId && !unreadable.contains(e.txnId)) e.txnId,
   ];
   await _storeMarks(repo, next);
   yield pick;

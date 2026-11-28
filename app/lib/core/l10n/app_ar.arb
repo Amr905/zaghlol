@@ -1770,15 +1770,6 @@
   "@homeMascotProudGoal": {
     "description": "M · Rive proud · BR-MAS-02 goal met"
   },
-  "homeMascotPayday": "المرتب نزل! {amount} 🎉 يلا نخطط له من أوله",
-  "@homeMascotPayday": {
-    "description": "M · Rive payday · salary detected (D-35), once per payday. domain-algorithms.md §7 treats payday as motion-only, and the C-14 priority list has no payday slot. Proposed slot: above proud, below detective. See Q-18",
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
   "homeApproxLine": "≈ {amount} دخلك كله تقريباً",
   "@homeApproxLine": {
     "description": "L · T-280, home.approx.line",

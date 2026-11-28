@@ -50,8 +50,10 @@ final setupProgressProvider = settingProvider(Settings.setupProgress);
 
 final moneyGroupByTypeProvider = settingProvider(Settings.moneyGroupByType);
 
-/// The raw `hide_amounts.app` setting (D-67).
+/// The vibration setting (T-298); on by default.
 final hapticsEnabledProvider = settingProvider(Settings.hapticsEnabled);
+
+/// The raw `hide_amounts.app` setting (D-67).
 final hideAmountsAppProvider = settingProvider(Settings.hideAmountsApp);
 
 /// Whether amounts are hidden now. Fails closed: while the setting loads or
