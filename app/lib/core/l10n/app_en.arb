@@ -9468,6 +9468,83 @@
   "@devMoodsReduceNote": {
     "description": "Dev only: shown when the OS or app reduce-motion setting is on"
   },
+  "devTryPaydayTitle": "Payday preview",
+  "@devTryPaydayTitle": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryPaydayEgp": "Payday EGP 29,700",
+  "@devTryPaydayEgp": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryPaydayUsd": "Payday USD 1,000",
+  "@devTryPaydayUsd": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryPaydayNote": "Preview only: nothing is marked as celebrated and no transaction is written.",
+  "@devTryPaydayNote": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastTitle": "Saved toast",
+  "@devTryToastTitle": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastPlain": "Saved",
+  "@devTryToastPlain": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastBudget": "Saved with budget line",
+  "@devTryToastBudget": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastBudgetLine": "200 EGP left in Food",
+  "@devTryToastBudgetLine": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibTitle": "Vibration",
+  "@devTryVibTitle": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibPayday": "Payday buzz",
+  "@devTryVibPayday": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibSaved": "Saved buzz",
+  "@devTryVibSaved": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibOops": "Oops buzz",
+  "@devTryVibOops": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibBirdTap": "Bird tap buzz",
+  "@devTryVibBirdTap": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibOff": "Vibration is off in Settings, so you will feel nothing.",
+  "@devTryVibOff": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibReduce": "Reduce motion is on, so you will feel one light tick only.",
+  "@devTryVibReduce": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryAvatarKind": "Bird: {kind}",
+  "@devTryAvatarKind": {
+    "description": "Dev only: T-303 try screen",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "devTryRive": "Rive",
+  "@devTryRive": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryStill": "still image",
+  "@devTryStill": {
+    "description": "Dev only: T-303 try screen"
+  },
   "devMoodTourGuide": "Hello",
   "@devMoodTourGuide": {
     "description": "Dev only: mood button"

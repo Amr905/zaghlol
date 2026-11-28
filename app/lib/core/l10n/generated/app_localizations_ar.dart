@@ -9515,6 +9515,64 @@ class AppLocalizationsAr extends AppLocalizations {
       'تقليل الحركة شغال، فزغلول واقف ثابت. اقفله علشان تشوف الحالات.';
 
   @override
+  String get devTryPaydayTitle => 'معاينة يوم القبض';
+
+  @override
+  String get devTryPaydayEgp => 'قبض 29,700 ج.م';
+
+  @override
+  String get devTryPaydayUsd => 'قبض 1,000 دولار';
+
+  @override
+  String get devTryPaydayNote =>
+      'معاينة بس: مفيش قبض بيتعلّم ولا معاملة بتتسجل.';
+
+  @override
+  String get devTryToastTitle => 'رسالة اتحفظ';
+
+  @override
+  String get devTryToastPlain => 'اتحفظ عادي';
+
+  @override
+  String get devTryToastBudget => 'اتحفظ مع سطر الميزانية';
+
+  @override
+  String get devTryToastBudgetLine => 'فاضل ٢٠٠ ج.م في الأكل';
+
+  @override
+  String get devTryVibTitle => 'الاهتزاز';
+
+  @override
+  String get devTryVibPayday => 'اهتزاز القبض';
+
+  @override
+  String get devTryVibSaved => 'اهتزاز اتحفظ';
+
+  @override
+  String get devTryVibOops => 'اهتزاز أوبس';
+
+  @override
+  String get devTryVibBirdTap => 'اهتزاز لمسة الطير';
+
+  @override
+  String get devTryVibOff => 'الاهتزاز مقفول من الإعدادات، فمش هتحس بحاجة.';
+
+  @override
+  String get devTryVibReduce =>
+      'تقليل الحركة شغال، فهتحس بنقرة واحدة خفيفة بس.';
+
+  @override
+  String devTryAvatarKind(String kind) {
+    return 'الطير: $kind';
+  }
+
+  @override
+  String get devTryRive => 'Rive';
+
+  @override
+  String get devTryStill => 'صورة ثابتة';
+
+  @override
   String get devMoodTourGuide => 'أهلاً';
 
   @override
