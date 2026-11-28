@@ -15,6 +15,16 @@ object HapticsPlan {
     const val PRIMITIVE_THUD = 2
     const val PRIMITIVE_TICK = 7
 
+    // VibrationEffect.EFFECT_* (API 29), inlined for the same reason.
+    const val EFFECT_CLICK = 0
+    const val EFFECT_HEAVY_CLICK = 5
+
+    /** T-300: below this scale a primitive is barely felt on most phones. */
+    const val MIN_SCALE = 0.7f
+
+    /** T-300: waveform pulses shorter than ~30 ms do not spin up ERM motors. */
+    const val MIN_AMPLITUDE = 180
+
     private const val MAX_HITS = 32
     private const val MAX_OFFSET_MS = 5000
 
@@ -51,16 +61,16 @@ object HapticsPlan {
                 CLICK -> PRIMITIVE_CLICK
                 else -> PRIMITIVE_THUD
             }
-            val p = Primitive(id, h.pct / 100f, h.atMs - prev)
+            val p = Primitive(id, maxOf(MIN_SCALE, h.pct / 100f), h.atMs - prev)
             prev = h.atMs
             p
         }
     }
 
     private fun pulseMs(strength: Int): Long = when (strength) {
-        TICK -> 15L
-        CLICK -> 25L
-        else -> 45L
+        TICK -> 30L
+        CLICK -> 45L
+        else -> 80L
     }
 
     /** Fallback waveform: alternating off / on timings with amplitudes 0..255. */
@@ -74,9 +84,24 @@ object HapticsPlan {
             timings.add(off)
             amps.add(0)
             timings.add(on)
-            amps.add(maxOf(1, minOf(255, h.pct * 255 / 100)))
+            amps.add(maxOf(MIN_AMPLITUDE, minOf(255, h.pct * 255 / 100)))
             cursor = maxOf(cursor + off, h.atMs.toLong()) + on
         }
         return Waveform(timings.toLongArray(), amps.toIntArray())
+    }
+
+    /**
+     * Phones without amplitude control: on/off timings only (amplitude is
+     * ignored by the motor, so the pulse length carries the strength).
+     */
+    fun onOffTimings(hits: List<Hit>): LongArray = waveform(hits).timings
+
+    /**
+     * API 29+ predefined effect for a one-beat pattern on phones without
+     * amplitude control; null for longer patterns (use [onOffTimings]).
+     */
+    fun predefinedEffect(hits: List<Hit>): Int? {
+        if (hits.size != 1) return null
+        return if (hits[0].strength == TICK) EFFECT_CLICK else EFFECT_HEAVY_CLICK
     }
 }

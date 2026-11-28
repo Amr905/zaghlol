@@ -13,7 +13,7 @@ enum ZHapticPattern { payday, saved, oops, birdTap }
 
 /// How hard one hit of a pattern is. Native maps it to TICK / CLICK / THUD
 /// (Android) or sharpness (iOS); the Dart fallback maps it to
-/// light / medium / heavy impact.
+/// medium / heavy / heavy impact.
 enum ZHapticStrength { tick, click, thud }
 
 /// One beat of a pattern: when it fires and how strong it is.
@@ -40,24 +40,24 @@ abstract final class ZHaptics {
 
   static const Map<ZHapticPattern, List<ZHapticHit>> _table = {
     ZHapticPattern.payday: [
-      ZHapticHit(0, ZHapticStrength.tick, 40),
-      ZHapticHit(140, ZHapticStrength.tick, 50),
-      ZHapticHit(260, ZHapticStrength.tick, 60),
-      ZHapticHit(360, ZHapticStrength.tick, 75),
-      ZHapticHit(450, ZHapticStrength.tick, 90),
+      ZHapticHit(0, ZHapticStrength.click, 70),
+      ZHapticHit(140, ZHapticStrength.click, 76),
+      ZHapticHit(260, ZHapticStrength.click, 82),
+      ZHapticHit(360, ZHapticStrength.click, 90),
+      ZHapticHit(450, ZHapticStrength.click, 96),
       ZHapticHit(700, ZHapticStrength.thud, 100),
-      ZHapticHit(1300, ZHapticStrength.tick, 40),
-      ZHapticHit(1420, ZHapticStrength.tick, 30),
+      ZHapticHit(1300, ZHapticStrength.click, 75),
+      ZHapticHit(1420, ZHapticStrength.tick, 70),
     ],
     ZHapticPattern.saved: [
-      ZHapticHit(0, ZHapticStrength.click, 80),
+      ZHapticHit(0, ZHapticStrength.click, 90),
       ZHapticHit(90, ZHapticStrength.click, 100),
     ],
     ZHapticPattern.oops: [
-      ZHapticHit(0, ZHapticStrength.thud, 60),
-      ZHapticHit(140, ZHapticStrength.thud, 60),
+      ZHapticHit(0, ZHapticStrength.thud, 100),
+      ZHapticHit(140, ZHapticStrength.thud, 100),
     ],
-    ZHapticPattern.birdTap: [ZHapticHit(0, ZHapticStrength.tick, 60)],
+    ZHapticPattern.birdTap: [ZHapticHit(0, ZHapticStrength.click, 80)],
   };
 
   /// The beats of [p].
@@ -111,10 +111,11 @@ abstract final class ZHaptics {
       if (wait > 0) await Future<void>.delayed(Duration(milliseconds: wait));
       last = h.atMs;
       switch (h.strength) {
+        // Light impacts are too weak to feel (T-300), so tick starts at medium.
         case ZHapticStrength.tick:
-          unawaited(HapticFeedback.lightImpact());
-        case ZHapticStrength.click:
           unawaited(HapticFeedback.mediumImpact());
+        case ZHapticStrength.click:
+          unawaited(HapticFeedback.heavyImpact());
         case ZHapticStrength.thud:
           unawaited(HapticFeedback.heavyImpact());
       }

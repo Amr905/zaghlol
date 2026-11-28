@@ -32,14 +32,14 @@ Interactive preview: `motion/zaghlol-motion.html`, also published as the "Zaghlo
 - **Reduce motion:** with the OS setting or the app toggle (FR-MAS-03), every moment shows a still pose plus its line, with no confetti.
 - **Copy:** all lines come from the copy deck (FR-MAS-02).
 
-**Haptics (T-293, D-87).** Each of four moments has a haptic pattern synced to its animation; code: `ZHaptics.play(ZHapticPattern)` in `app/lib/core/ui/z_haptics.dart`, which is the single source of the table below (`ZHaptics.timelineMs` returns the offsets so the animation can line up).
+**Haptics (T-293, D-87; raised by T-300 because the first table was not felt, every beat is at least 70 %).** Each of four moments has a haptic pattern synced to its animation; code: `ZHaptics.play(ZHapticPattern)` in `app/lib/core/ui/z_haptics.dart`, which is the single source of the table below (`ZHaptics.timelineMs` returns the offsets so the animation can line up).
 
 | Pattern | Used by | Beats: ms (strength, intensity %) |
 |---|---|---|
-| payday (~1.6 s) | Payday: coins land, bird pops at ~700 ms, soft double tap to finish | 0 (tick 40), 140 (tick 50), 260 (tick 60), 360 (tick 75), 450 (tick 90), 700 (thud 100), 1300 (tick 40), 1420 (tick 30) |
-| saved | Saved! | 0 (click 80), 90 (click 100) |
-| oops | Oops | 0 (thud 60), 140 (thud 60) |
-| birdTap | Tap the bird | 0 (tick 60) |
+| payday (~1.6 s) | Payday: coins land, bird pops at ~700 ms, soft double tap to finish | 0 (click 70), 140 (click 76), 260 (click 82), 360 (click 90), 450 (click 96), 700 (thud 100), 1300 (click 75), 1420 (tick 70) |
+| saved | Saved! | 0 (click 90), 90 (click 100) |
+| oops | Oops | 0 (thud 100), 140 (thud 100) |
+| birdTap | Tap the bird | 0 (click 80) |
 
 Rules: the app haptics setting silences everything; with reduce motion (OS or app toggle) only one light tick plays; Android honours the system touch-feedback switch; phones without a rich haptic motor fall back to plain impacts on the same beats.
 

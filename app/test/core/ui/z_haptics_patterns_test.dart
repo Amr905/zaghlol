@@ -59,7 +59,7 @@ void main() {
     await ZHaptics.play(ZHapticPattern.saved, reduceMotion: false);
     expect(native.single.method, 'play');
     expect((native.single.arguments as Map)['hits'], [
-      [0, ZHapticStrength.click.index, 80],
+      [0, ZHapticStrength.click.index, 90],
       [90, ZHapticStrength.click.index, 100],
     ]);
     expect(system, isEmpty);
@@ -86,18 +86,45 @@ void main() {
     messenger.setMockMethodCallHandler(ZHaptics.channel, null);
     await ZHaptics.play(ZHapticPattern.saved, reduceMotion: false);
     expect(system, [
-      'HapticFeedbackType.mediumImpact',
-      'HapticFeedbackType.mediumImpact',
+      'HapticFeedbackType.heavyImpact',
+      'HapticFeedbackType.heavyImpact',
+    ]);
+  });
+
+  test('every beat is at least 70 percent', () {
+    for (final p in ZHapticPattern.values) {
+      for (final h in ZHaptics.hits(p)) {
+        expect(h.intensityPct, inInclusiveRange(70, 100), reason: '$p');
+        if (h.strength == ZHapticStrength.click) {
+          expect(h.intensityPct, greaterThanOrEqualTo(70));
+        }
+        if (h.strength == ZHapticStrength.thud) {
+          expect(h.intensityPct, 100);
+        }
+      }
+    }
+    expect(ZHaptics.hits(ZHapticPattern.birdTap).single.intensityPct, 80);
+  });
+
+  test('fallback maps tick to medium and click/thud to heavy', () async {
+    messenger.setMockMethodCallHandler(ZHaptics.channel, null);
+    await ZHaptics.play(ZHapticPattern.payday, reduceMotion: false);
+    final hits = ZHaptics.hits(ZHapticPattern.payday);
+    expect(system, [
+      for (final h in hits)
+        h.strength == ZHapticStrength.tick
+            ? 'HapticFeedbackType.mediumImpact'
+            : 'HapticFeedbackType.heavyImpact',
     ]);
   });
 
   test('native says unsupported or throws: falls back', () async {
     nativeHandler = (c) => false;
     await ZHaptics.play(ZHapticPattern.birdTap, reduceMotion: false);
-    expect(system, ['HapticFeedbackType.lightImpact']);
+    expect(system, ['HapticFeedbackType.heavyImpact']);
     system.clear();
     nativeHandler = (c) => throw PlatformException(code: 'x');
     await ZHaptics.play(ZHapticPattern.birdTap, reduceMotion: false);
-    expect(system, ['HapticFeedbackType.lightImpact']);
+    expect(system, ['HapticFeedbackType.heavyImpact']);
   });
 }
