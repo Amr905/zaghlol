@@ -132,12 +132,12 @@ class _MascotMoodsScreenState extends ConsumerState<MascotMoodsScreen> {
               _TryButton(
                 id: 'try-payday-egp',
                 label: t.devTryPaydayEgp,
-                onTap: () => _payday(context, 'EGP', 2970000),
+                onTap: () => _payday(context, _egp, 2970000),
               ),
               _TryButton(
                 id: 'try-payday-usd',
                 label: t.devTryPaydayUsd,
-                onTap: () => _payday(context, 'USD', 100000),
+                onTap: () => _payday(context, _usd, 100000),
               ),
             ],
           ),
@@ -173,7 +173,7 @@ class _MascotMoodsScreenState extends ConsumerState<MascotMoodsScreen> {
                 ZHapticPattern.birdTap: t.devTryVibBirdTap,
               }.entries)
                 _TryButton(
-                  id: 'try-vib-${e.key.name}',
+                  id: _vibId(e.key),
                   label: e.value,
                   onTap: () => ZHaptics.play(e.key, reduceMotion: reduce),
                 ),
@@ -194,10 +194,10 @@ class _MascotMoodsScreenState extends ConsumerState<MascotMoodsScreen> {
   }
 
   /// Preview only: opens the sheet; nothing is marked or written.
-  void _payday(BuildContext context, String code, int minor) {
+  void _payday(BuildContext context, Currency cur, int minor) {
     showPaydaySheet(
       context,
-      PaydayCelebration('dev-preview', Money(Currency.of(code), minor)),
+      PaydayCelebration('dev-preview', Money(cur, minor)),
     );
   }
 }
@@ -259,3 +259,9 @@ class _TryButton extends StatelessWidget {
     ),
   );
 }
+
+final Currency _egp = Currency.of('EGP');
+final Currency _usd = Currency.of('USD');
+
+/// Test key of a vibration button.
+String _vibId(ZHapticPattern p) => 'try-vib-${p.name}';
