@@ -13817,6 +13817,12 @@ abstract class AppLocalizations {
   /// **'Rive'**
   String get devTryRive;
 
+  /// Dev only: T-301/T-303 Rive load counters
+  ///
+  /// In ar, this message translates to:
+  /// **'Rive اتحمّل {loaded} · فشل {failed} · أخطاء رسم {paint}'**
+  String devTryRiveProbe(int loaded, int failed, int paint);
+
   /// Dev only: T-303 try screen
   ///
   /// In ar, this message translates to:

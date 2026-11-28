@@ -9565,6 +9565,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get devTryRive => 'Rive';
 
   @override
+  String devTryRiveProbe(int loaded, int failed, int paint) {
+    return 'Rive اتحمّل $loaded · فشل $failed · أخطاء رسم $paint';
+  }
+
+  @override
   String get devTryStill => 'صورة ثابتة';
 
   @override

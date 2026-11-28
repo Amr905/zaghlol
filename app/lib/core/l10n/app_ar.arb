@@ -13030,6 +13030,21 @@
   "@devTryRive": {
     "description": "Dev only: T-303 try screen"
   },
+  "devTryRiveProbe": "Rive اتحمّل {loaded} · فشل {failed} · أخطاء رسم {paint}",
+  "@devTryRiveProbe": {
+    "description": "Dev only: T-301/T-303 Rive load counters",
+    "placeholders": {
+      "loaded": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "paint": {
+        "type": "int"
+      }
+    }
+  },
   "devTryStill": "صورة ثابتة",
   "@devTryStill": {
     "description": "Dev only: T-303 try screen"

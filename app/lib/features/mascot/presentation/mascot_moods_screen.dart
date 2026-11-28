@@ -13,6 +13,7 @@ import '../../../core/ui/z_haptics.dart';
 import '../../../core/ui/z_saved_toast.dart';
 import '../application/payday_celebration.dart';
 import 'payday_sheet.dart';
+import 'rive_mascot.dart' show RiveMascotProbe;
 import '../../../ingestion/ingestion_config.dart' show kIsDevBuild;
 import 'zaghlol_avatar.dart';
 
@@ -182,7 +183,8 @@ class _MascotMoodsScreenState extends ConsumerState<MascotMoodsScreen> {
           Padding(
             padding: const EdgeInsetsDirectional.only(top: ZSpacing.md),
             child: Text(
-              t.devTryAvatarKind(reduce ? t.devTryStill : t.devTryRive),
+              '${t.devTryAvatarKind(_usesRive(reduce) ? t.devTryRive : t.devTryStill)}\n'
+              '${t.devTryRiveProbe(RiveMascotProbe.loaded, RiveMascotProbe.failedToLoad, RiveMascotProbe.paintFailed)}',
               key: const Key('try-avatar-kind'),
               textAlign: TextAlign.center,
               style: ZType.bodySmall.copyWith(color: c.textMuted),
@@ -265,3 +267,9 @@ final Currency _usd = Currency.of('USD');
 
 /// Test key of a vibration button.
 String _vibId(ZHapticPattern p) => 'try-vib-${p.name}';
+
+/// T-301/T-303: the bird is Rive only when motion is allowed and a load has
+/// succeeded (the probe counters come from the real loads on this phone).
+bool _usesRive(bool reduce) =>
+    !reduce &&
+    !(RiveMascotProbe.loaded == 0 && RiveMascotProbe.failedToLoad > 0);
