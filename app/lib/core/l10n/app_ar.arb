@@ -12957,6 +12957,83 @@
   "@devMoodsReduceNote": {
     "description": "Dev only: shown when the OS or app reduce-motion setting is on"
   },
+  "devTryPaydayTitle": "معاينة يوم القبض",
+  "@devTryPaydayTitle": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryPaydayEgp": "قبض 29,700 ج.م",
+  "@devTryPaydayEgp": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryPaydayUsd": "قبض 1,000 دولار",
+  "@devTryPaydayUsd": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryPaydayNote": "معاينة بس: مفيش قبض بيتعلّم ولا معاملة بتتسجل.",
+  "@devTryPaydayNote": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastTitle": "رسالة اتحفظ",
+  "@devTryToastTitle": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastPlain": "اتحفظ عادي",
+  "@devTryToastPlain": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastBudget": "اتحفظ مع سطر الميزانية",
+  "@devTryToastBudget": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryToastBudgetLine": "فاضل ٢٠٠ ج.م في الأكل",
+  "@devTryToastBudgetLine": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibTitle": "الاهتزاز",
+  "@devTryVibTitle": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibPayday": "اهتزاز القبض",
+  "@devTryVibPayday": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibSaved": "اهتزاز اتحفظ",
+  "@devTryVibSaved": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibOops": "اهتزاز أوبس",
+  "@devTryVibOops": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibBirdTap": "اهتزاز لمسة الطير",
+  "@devTryVibBirdTap": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibOff": "الاهتزاز مقفول من الإعدادات، فمش هتحس بحاجة.",
+  "@devTryVibOff": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryVibReduce": "تقليل الحركة شغال، فهتحس بنقرة واحدة خفيفة بس.",
+  "@devTryVibReduce": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryAvatarKind": "الطير: {kind}",
+  "@devTryAvatarKind": {
+    "description": "Dev only: T-303 try screen",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "devTryRive": "Rive",
+  "@devTryRive": {
+    "description": "Dev only: T-303 try screen"
+  },
+  "devTryStill": "صورة ثابتة",
+  "@devTryStill": {
+    "description": "Dev only: T-303 try screen"
+  },
   "devMoodTourGuide": "أهلاً",
   "@devMoodTourGuide": {
     "description": "Dev only: mood button"

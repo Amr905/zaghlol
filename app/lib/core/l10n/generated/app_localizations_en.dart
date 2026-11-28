@@ -9350,6 +9350,65 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reduce motion is on, so the bird stays still. Turn it off to see the moods.';
 
   @override
+  String get devTryPaydayTitle => 'Payday preview';
+
+  @override
+  String get devTryPaydayEgp => 'Payday EGP 29,700';
+
+  @override
+  String get devTryPaydayUsd => 'Payday USD 1,000';
+
+  @override
+  String get devTryPaydayNote =>
+      'Preview only: nothing is marked as celebrated and no transaction is written.';
+
+  @override
+  String get devTryToastTitle => 'Saved toast';
+
+  @override
+  String get devTryToastPlain => 'Saved';
+
+  @override
+  String get devTryToastBudget => 'Saved with budget line';
+
+  @override
+  String get devTryToastBudgetLine => '200 EGP left in Food';
+
+  @override
+  String get devTryVibTitle => 'Vibration';
+
+  @override
+  String get devTryVibPayday => 'Payday buzz';
+
+  @override
+  String get devTryVibSaved => 'Saved buzz';
+
+  @override
+  String get devTryVibOops => 'Oops buzz';
+
+  @override
+  String get devTryVibBirdTap => 'Bird tap buzz';
+
+  @override
+  String get devTryVibOff =>
+      'Vibration is off in Settings, so you will feel nothing.';
+
+  @override
+  String get devTryVibReduce =>
+      'Reduce motion is on, so you will feel one light tick only.';
+
+  @override
+  String devTryAvatarKind(String kind) {
+    return 'Bird: $kind';
+  }
+
+  @override
+  String get devTryRive => 'Rive';
+
+  @override
+  String get devTryStill => 'still image';
+
+  @override
   String get devMoodTourGuide => 'Hello';
 
   @override
