@@ -36,3 +36,7 @@ None.
 
 ## Unverified
 Kotlin/Swift compile, goldens (not run, per brief), device behaviour of vibrations and Rive.
+
+### Lead delta check (CI)
+
+- Android lint `NewApi` error: `VibrationEffect.createPredefined` (API 29) was guarded only through a nullable `effect` computed under an SDK check, which lint can't follow. The call is now inside `if (effect != null && SDK_INT >= Q)` (2 lines); the unreachable `return false` after the try/catch (FU-404 nit) is removed. Behaviour unchanged. Re-run in CI.

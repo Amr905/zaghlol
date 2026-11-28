@@ -106,7 +106,7 @@ object HapticsRegistration {
             } else {
                 null
             }
-            if (effect != null) {
+            if (effect != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 v.vibrate(VibrationEffect.createPredefined(effect))
             } else {
                 v.vibrate(VibrationEffect.createWaveform(HapticsPlan.onOffTimings(hits), -1))
@@ -115,6 +115,5 @@ object HapticsRegistration {
         } catch (_: RuntimeException) {
             return false
         }
-        return false
     }
 }
