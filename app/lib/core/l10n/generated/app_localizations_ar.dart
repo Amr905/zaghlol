@@ -1415,11 +1415,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeMascotProudGoal => 'هدف الشهر اتحقق! 🎯 إنت قدها';
 
   @override
-  String homeMascotPayday(String amount) {
-    return 'المرتب نزل! $amount 🎉 يلا نخطط له من أوله';
-  }
-
-  @override
   String homeApproxLine(String amount) {
     return '≈ $amount دخلك كله تقريباً';
   }

@@ -385,7 +385,6 @@
   "homeMascotProudOnTrack": "Nice one! You're spending under plan so far 👏",
   "homeMascotProudSavedMore": "Look at you! {amount} more saved than last month 👏",
   "homeMascotProudGoal": "Goal hit this month! 🎯 You've got this",
-  "homeMascotPayday": "Payday! {amount} just landed 🎉 Let's plan it from day one",
   "homeApproxLine": "≈ {amount} in, all currencies",
   "@homeApproxLine": {
     "description": "L · T-280, home.approx.line",

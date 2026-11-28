@@ -153,7 +153,7 @@ double? _measuredBarHeight(BuildContext context) {
       context,
       listen: false,
     ).read(shellBarHeightProvider);
-  } on Object {
+  } on StateError {
     return null; // no ProviderScope above: use the token fallback
   }
 }

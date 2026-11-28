@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zaghlol/core/l10n/generated/app_localizations.dart';
 import 'package:zaghlol/core/ui/z_components.dart';
+import 'package:zaghlol/features/mascot/presentation/working_bird.dart';
 import 'package:zaghlol/features/export_import/application/import_statement_pdf.dart';
 import 'package:zaghlol/features/export_import/application/statement_image_reader.dart'
     show StatementImageReader;
@@ -436,6 +437,10 @@ void main() {
           final l = await pump(t, extractor: x);
           await pickPdf(t);
           expect(find.text(l.exportsImportFailed), findsOneWidget);
+          final bird = t.widget<WorkingBird>(
+            find.byKey(const ValueKey('stmt-failure-bird')),
+          );
+          expect(bird.failed, isTrue);
         });
 
         testWidgets('photos with no OCR', (t) async {

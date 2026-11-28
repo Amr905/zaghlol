@@ -2241,12 +2241,6 @@ abstract class AppLocalizations {
   /// **'هدف الشهر اتحقق! 🎯 إنت قدها'**
   String get homeMascotProudGoal;
 
-  /// M · Rive payday · salary detected (D-35), once per payday. domain-algorithms.md §7 treats payday as motion-only, and the C-14 priority list has no payday slot. Proposed slot: above proud, below detective. See Q-18
-  ///
-  /// In ar, this message translates to:
-  /// **'المرتب نزل! {amount} 🎉 يلا نخطط له من أوله'**
-  String homeMascotPayday(String amount);
-
   /// L · T-280, home.approx.line
   ///
   /// In ar, this message translates to:

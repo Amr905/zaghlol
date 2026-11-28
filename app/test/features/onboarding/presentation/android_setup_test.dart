@@ -13,6 +13,7 @@ import 'package:zaghlol_domain/zaghlol_domain.dart' show Currency;
 import 'package:zaghlol/features/capture/application/capture_providers.dart';
 import 'package:zaghlol/features/capture/data/capture_host_port.dart';
 import 'package:zaghlol/features/capture/domain/scan_plan.dart';
+import 'package:zaghlol/features/mascot/presentation/working_bird.dart';
 import 'package:zaghlol/features/onboarding/presentation/android_setup.dart';
 
 class FakeHost implements CaptureHostPort {
@@ -141,6 +142,28 @@ void main() {
         expect(find.text('CIB'), findsOneWidget);
         expect(find.byKey(const ValueKey('setup-scan')), findsOneWidget);
         expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('scan failed: the scan card shows the oops bird', (
+        tester,
+      ) async {
+        final h = FakeHost();
+        final s = FakeScan();
+        await tester.binding.setSurfaceSize(const Size(360, 640));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await tester.pumpWidget(host(h, s, lang));
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('setup-sms-allow')),
+        );
+        await tester.tap(find.byKey(const ValueKey('setup-sms-allow')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        s.ctl.add(const ScanProgress(phase: ScanPhase.failed, imported: 3));
+        await tester.pump();
+        final bird = tester.widget<WorkingBird>(find.byType(WorkingBird));
+        expect(bird.failed, isTrue);
+        expect(bird.busy, isFalse);
       });
 
       testWidgets('notification access: opens OS, rechecks on resume', (
