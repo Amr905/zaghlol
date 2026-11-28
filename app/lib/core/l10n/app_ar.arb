@@ -12961,11 +12961,11 @@
   "@devTryPaydayTitle": {
     "description": "Dev only: T-303 try screen"
   },
-  "devTryPaydayEgp": "قبض 29,700 ج.م",
+  "devTryPaydayEgp": "قبض بالجنيه",
   "@devTryPaydayEgp": {
     "description": "Dev only: T-303 try screen"
   },
-  "devTryPaydayUsd": "قبض 1,000 دولار",
+  "devTryPaydayUsd": "قبض بالدولار",
   "@devTryPaydayUsd": {
     "description": "Dev only: T-303 try screen"
   },

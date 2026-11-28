@@ -111,6 +111,8 @@ void main() {
     expect(users, [
       'lib/core/ui/z_saved_toast.dart',
       'lib/features/ingestion/presentation/review/review_screen.dart',
+      // T-303: dev-only try-out screen (preview, no data).
+      'lib/features/mascot/presentation/mascot_moods_screen.dart',
       'lib/features/transactions/presentation/edit/transaction_edit_screen.dart',
       'lib/features/voice/presentation/voice_logger_screen.dart',
     ]);

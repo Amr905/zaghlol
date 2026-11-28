@@ -13724,13 +13724,13 @@ abstract class AppLocalizations {
   /// Dev only: T-303 try screen
   ///
   /// In ar, this message translates to:
-  /// **'قبض 29,700 ج.م'**
+  /// **'قبض بالجنيه'**
   String get devTryPaydayEgp;
 
   /// Dev only: T-303 try screen
   ///
   /// In ar, this message translates to:
-  /// **'قبض 1,000 دولار'**
+  /// **'قبض بالدولار'**
   String get devTryPaydayUsd;
 
   /// Dev only: T-303 try screen

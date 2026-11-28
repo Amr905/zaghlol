@@ -9513,10 +9513,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get devTryPaydayTitle => 'معاينة يوم القبض';
 
   @override
-  String get devTryPaydayEgp => 'قبض 29,700 ج.م';
+  String get devTryPaydayEgp => 'قبض بالجنيه';
 
   @override
-  String get devTryPaydayUsd => 'قبض 1,000 دولار';
+  String get devTryPaydayUsd => 'قبض بالدولار';
 
   @override
   String get devTryPaydayNote =>
