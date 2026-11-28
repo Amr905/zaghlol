@@ -1415,11 +1415,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeMascotProudGoal => 'هدف الشهر اتحقق! 🎯 إنت قدها';
 
   @override
-  String homeMascotPayday(String amount) {
-    return 'المرتب نزل! $amount 🎉 يلا نخطط له من أوله';
-  }
-
-  @override
   String homeApproxLine(String amount) {
     return '≈ $amount دخلك كله تقريباً';
   }
@@ -9513,6 +9508,69 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get devMoodsReduceNote =>
       'تقليل الحركة شغال، فزغلول واقف ثابت. اقفله علشان تشوف الحالات.';
+
+  @override
+  String get devTryPaydayTitle => 'معاينة يوم القبض';
+
+  @override
+  String get devTryPaydayEgp => 'قبض بالجنيه';
+
+  @override
+  String get devTryPaydayUsd => 'قبض بالدولار';
+
+  @override
+  String get devTryPaydayNote =>
+      'معاينة بس: مفيش قبض بيتعلّم ولا معاملة بتتسجل.';
+
+  @override
+  String get devTryToastTitle => 'رسالة اتحفظ';
+
+  @override
+  String get devTryToastPlain => 'اتحفظ عادي';
+
+  @override
+  String get devTryToastBudget => 'اتحفظ مع سطر الميزانية';
+
+  @override
+  String get devTryToastBudgetLine => 'فاضل ٢٠٠ ج.م في الأكل';
+
+  @override
+  String get devTryVibTitle => 'الاهتزاز';
+
+  @override
+  String get devTryVibPayday => 'اهتزاز القبض';
+
+  @override
+  String get devTryVibSaved => 'اهتزاز اتحفظ';
+
+  @override
+  String get devTryVibOops => 'اهتزاز أوبس';
+
+  @override
+  String get devTryVibBirdTap => 'اهتزاز لمسة الطير';
+
+  @override
+  String get devTryVibOff => 'الاهتزاز مقفول من الإعدادات، فمش هتحس بحاجة.';
+
+  @override
+  String get devTryVibReduce =>
+      'تقليل الحركة شغال، فهتحس بنقرة واحدة خفيفة بس.';
+
+  @override
+  String devTryAvatarKind(String kind) {
+    return 'الطير: $kind';
+  }
+
+  @override
+  String get devTryRive => 'Rive';
+
+  @override
+  String devTryRiveProbe(int loaded, int failed, int paint) {
+    return 'Rive اتحمّل $loaded · فشل $failed · أخطاء رسم $paint';
+  }
+
+  @override
+  String get devTryStill => 'صورة ثابتة';
 
   @override
   String get devMoodTourGuide => 'أهلاً';

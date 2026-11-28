@@ -2241,12 +2241,6 @@ abstract class AppLocalizations {
   /// **'هدف الشهر اتحقق! 🎯 إنت قدها'**
   String get homeMascotProudGoal;
 
-  /// M · Rive payday · salary detected (D-35), once per payday. domain-algorithms.md §7 treats payday as motion-only, and the C-14 priority list has no payday slot. Proposed slot: above proud, below detective. See Q-18
-  ///
-  /// In ar, this message translates to:
-  /// **'المرتب نزل! {amount} 🎉 يلا نخطط له من أوله'**
-  String homeMascotPayday(String amount);
-
   /// L · T-280, home.approx.line
   ///
   /// In ar, this message translates to:
@@ -13720,6 +13714,120 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تقليل الحركة شغال، فزغلول واقف ثابت. اقفله علشان تشوف الحالات.'**
   String get devMoodsReduceNote;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'معاينة يوم القبض'**
+  String get devTryPaydayTitle;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'قبض بالجنيه'**
+  String get devTryPaydayEgp;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'قبض بالدولار'**
+  String get devTryPaydayUsd;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'معاينة بس: مفيش قبض بيتعلّم ولا معاملة بتتسجل.'**
+  String get devTryPaydayNote;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'رسالة اتحفظ'**
+  String get devTryToastTitle;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'اتحفظ عادي'**
+  String get devTryToastPlain;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'اتحفظ مع سطر الميزانية'**
+  String get devTryToastBudget;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'فاضل ٢٠٠ ج.م في الأكل'**
+  String get devTryToastBudgetLine;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'الاهتزاز'**
+  String get devTryVibTitle;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'اهتزاز القبض'**
+  String get devTryVibPayday;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'اهتزاز اتحفظ'**
+  String get devTryVibSaved;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'اهتزاز أوبس'**
+  String get devTryVibOops;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'اهتزاز لمسة الطير'**
+  String get devTryVibBirdTap;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'الاهتزاز مقفول من الإعدادات، فمش هتحس بحاجة.'**
+  String get devTryVibOff;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'تقليل الحركة شغال، فهتحس بنقرة واحدة خفيفة بس.'**
+  String get devTryVibReduce;
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'الطير: {kind}'**
+  String devTryAvatarKind(String kind);
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'Rive'**
+  String get devTryRive;
+
+  /// Dev only: T-301/T-303 Rive load counters
+  ///
+  /// In ar, this message translates to:
+  /// **'Rive اتحمّل {loaded} · فشل {failed} · أخطاء رسم {paint}'**
+  String devTryRiveProbe(int loaded, int failed, int paint);
+
+  /// Dev only: T-303 try screen
+  ///
+  /// In ar, this message translates to:
+  /// **'صورة ثابتة'**
+  String get devTryStill;
 
   /// Dev only: mood button
   ///

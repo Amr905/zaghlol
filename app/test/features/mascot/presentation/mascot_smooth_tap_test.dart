@@ -115,6 +115,80 @@ void main() {
     expect(loader.handle.applied.where((a) => a.$3), isNotEmpty);
   });
 
+  testWidgets('T-301: a failed first load is retried on the next tap and the '
+      'tap replays on the live handle', (tester) async {
+    final handle = _FakeHandle();
+    var calls = 0;
+    Future<RiveMascotHandle> flaky() async {
+      calls++;
+      if (calls == 1) throw StateError('native busy');
+      return handle;
+    }
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          zaghlolRivePresentProvider.overrideWith((ref) async => true),
+          riveMascotLoaderProvider.overrideWithValue(flaky),
+        ],
+        child: MaterialApp(
+          theme: ZaghlolTheme.light,
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const Scaffold(
+            body: Center(child: ZaghlolTapBubble(message: 'm')),
+          ),
+        ),
+      ),
+    );
+    await _settle(tester);
+    expect(_stillShown(tester), isTrue, reason: 'first load failed');
+
+    await tester.tap(find.byType(ZaghlolTapBubble));
+    await _settle(tester);
+    expect(calls, 2);
+    expect(find.byKey(const ValueKey('fake-artboard')), findsOneWidget);
+
+    await tester.tap(find.byType(ZaghlolTapBubble));
+    await _settle(tester);
+    expect(
+      handle.applied.any((a) => a.$1 == ZaghlolMoment.tap && a.$3),
+      isTrue,
+      reason: 'tap replays on the live handle',
+    );
+    await tester.pump(const Duration(seconds: 3));
+  });
+
+  testWidgets('T-301: a failed load retries by itself after a wait', (
+    tester,
+  ) async {
+    final handle = _FakeHandle();
+    var calls = 0;
+    Future<RiveMascotHandle> flaky() async {
+      if (++calls == 1) throw StateError('native busy');
+      return handle;
+    }
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          zaghlolRivePresentProvider.overrideWith((ref) async => true),
+          riveMascotLoaderProvider.overrideWithValue(flaky),
+        ],
+        child: MaterialApp(
+          theme: ZaghlolTheme.light,
+          home: const Scaffold(body: ZaghlolAvatar()),
+        ),
+      ),
+    );
+    await _settle(tester);
+    expect(_stillShown(tester), isTrue);
+    await tester.pump(const Duration(seconds: 3));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('fake-artboard')), findsOneWidget);
+  });
+
   testWidgets('moods lab: switching moods does not reload the file', (
     tester,
   ) async {

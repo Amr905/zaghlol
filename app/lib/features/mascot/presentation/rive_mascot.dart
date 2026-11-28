@@ -291,6 +291,16 @@ class RiveMascot extends ZaghlolMascot {
 class _RiveMascotState extends State<RiveMascot> {
   RiveMascotHandle? _handle;
   bool _failed = false;
+  bool _loading = false;
+  Timer? _retry;
+
+  /// T-301: one failed load (e.g. the native runtime busy during start-up)
+  /// must not leave the bird on the still for the whole session. The
+  /// loader's failure is not cached, so the mascot tries again after a short
+  /// wait and on the next tap / moment change.
+  static const _retryAfter = Duration(seconds: 2);
+  static const _maxAutoRetries = 3;
+  int _autoRetries = 0;
 
   @override
   void initState() {
@@ -299,6 +309,8 @@ class _RiveMascotState extends State<RiveMascot> {
   }
 
   Future<void> _load() async {
+    if (_loading || _handle != null) return;
+    _loading = true;
     try {
       final handle = await widget.loader();
       if (!mounted) {
@@ -307,10 +319,21 @@ class _RiveMascotState extends State<RiveMascot> {
       }
       RiveMascotProbe.loaded++;
       handle.apply(widget.moment, widget.talk);
-      setState(() => _handle = handle);
+      setState(() {
+        _handle = handle;
+        _failed = false;
+      });
     } catch (_) {
       RiveMascotProbe.failedToLoad++;
-      if (mounted) setState(() => _failed = true);
+      if (mounted) {
+        setState(() => _failed = true);
+        if (_autoRetries++ < _maxAutoRetries) {
+          _retry?.cancel();
+          _retry = Timer(_retryAfter, _load);
+        }
+      }
+    } finally {
+      _loading = false;
     }
   }
 
@@ -322,6 +345,7 @@ class _RiveMascotState extends State<RiveMascot> {
     if (old.moment != widget.moment ||
         old.talk != widget.talk ||
         old.replay != widget.replay) {
+      if (_handle == null && _failed) unawaited(_load());
       _handle?.apply(
         widget.moment,
         widget.talk,
@@ -332,6 +356,7 @@ class _RiveMascotState extends State<RiveMascot> {
 
   @override
   void dispose() {
+    _retry?.cancel();
     _handle?.dispose();
     super.dispose();
   }

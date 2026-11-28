@@ -14,9 +14,6 @@
 // Privacy: the file is read into memory, parsed on the phone and dropped (the
 // use case zeroes the bytes); the PDF password lives in a local variable only.
 
-import '../../mascot/presentation/working_bird.dart';
-import '../../mascot/presentation/zaghlol_avatar.dart';
-
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -32,6 +29,8 @@ import '../../../core/l10n/money_format.dart';
 import '../../../core/settings/settings_providers.dart';
 import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
+import '../../mascot/presentation/working_bird.dart';
+import '../../mascot/presentation/zaghlol_avatar.dart';
 import '../application/import_statement_pdf.dart';
 import 'import_done_screen.dart';
 import 'import_ports.dart';
@@ -538,12 +537,14 @@ class _State extends ConsumerState<StatementImportScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          WorkingBird(
-                            busy: true,
-                            moment: _phase == _Phase.saving
-                                ? ZaghlolMoment.counting
-                                : ZaghlolMoment.scanning,
-                            size: 72,
+                          ExcludeSemantics(
+                            child: WorkingBird(
+                              busy: true,
+                              moment: _phase == _Phase.saving
+                                  ? ZaghlolMoment.counting
+                                  : ZaghlolMoment.scanning,
+                              size: 72,
+                            ),
                           ),
                           const SizedBox(height: ZSpacing.md),
                           Text(
@@ -563,6 +564,23 @@ class _State extends ConsumerState<StatementImportScreen> {
       ),
     );
   }
+
+  /// FU-401: password prompts are not errors; every other failure shows the
+  /// `oops` bird (with the oops haptic, played by [WorkingBird]).
+  bool _failureShowsBird(_Failure f) =>
+      f != _Failure.password && f != _Failure.wrongPassword;
+
+  Widget _failureBird() => const Padding(
+    padding: EdgeInsetsDirectional.only(bottom: ZSpacing.sm),
+    child: Center(
+      child: WorkingBird(
+        key: ValueKey('stmt-failure-bird'),
+        busy: false,
+        failed: true,
+        size: 72,
+      ),
+    ),
+  );
 
   List<Currency> _currencyChoices() {
     final cur = _mapping?.currency;
@@ -591,6 +609,7 @@ class _State extends ConsumerState<StatementImportScreen> {
       Text(l.stmtImportSub, style: ZType.body.copyWith(color: c.textMuted)),
       const SizedBox(height: ZSpacing.lg),
       if (_failure != null) ...[
+        if (_failureShowsBird(_failure!)) _failureBird(),
         ZBanner(tone: ZBannerTone.error, message: _failureText(l, _failure!)),
         const SizedBox(height: ZSpacing.lg),
       ],
@@ -684,6 +703,7 @@ class _State extends ConsumerState<StatementImportScreen> {
       ),
       const SizedBox(height: ZSpacing.md),
       if (_failure == _Failure.save) ...[
+        _failureBird(),
         ZBanner(
           tone: ZBannerTone.error,
           message: _failureText(l, _Failure.save),

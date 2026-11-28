@@ -263,11 +263,6 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
-    /**
-     * Every resume (F7): announce every pending share. It reads only the
-     * store, so a spoofed intent cannot consume anything; Dart dedupes by id.
-     * On a cold start Dart is not listening yet and polls by itself.
-     */
     override fun onPause() {
         HapticsRegistration.cancel(this)
         super.onPause()
@@ -278,6 +273,11 @@ class MainActivity : FlutterFragmentActivity() {
         super.onStop()
     }
 
+    /**
+     * Every resume (F7): announce every pending share. It reads only the
+     * store, so a spoofed intent cannot consume anything; Dart dedupes by id.
+     * On a cold start Dart is not listening yet and polls by itself.
+     */
     override fun onResume() {
         super.onResume()
         // T-044 (EC-13): a permission or notification access changed while away.

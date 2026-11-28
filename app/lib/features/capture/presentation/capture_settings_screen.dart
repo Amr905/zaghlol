@@ -11,8 +11,6 @@
 // consent line and "scan the last 3 months" opt-in for user-added
 // phone-number senders (FU-109), and the Settings key for it.
 
-import '../../mascot/presentation/working_bird.dart';
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -28,6 +26,7 @@ import '../../../core/theme/z_tokens.dart';
 import '../../../core/ui/z_components.dart';
 import '../../accounts/presentation/edit_card/edit_card_providers.dart'
     show InstitutionOption, institutionOptionsProvider;
+import '../../mascot/presentation/working_bird.dart';
 import '../application/capture_permission_fix.dart';
 import '../application/capture_providers.dart';
 import '../application/ignore_rules.dart';

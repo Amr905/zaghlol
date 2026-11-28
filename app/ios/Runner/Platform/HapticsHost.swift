@@ -36,13 +36,18 @@ final class HapticsHost {
     return out
   }
 
-  /// Sharpness per strength: a thud is dull, a tick is crisp.
+  /// Sharpness per strength, 0.5...0.8 (T-300): a thud is the dullest, a tick the crispest.
   static func sharpness(_ strength: Int) -> Float {
     switch strength {
     case 0: return 0.8
-    case 1: return 0.6
-    default: return 0.2
+    case 1: return 0.65
+    default: return 0.5
     }
+  }
+
+  /// Intensity 0.7...1.0 whatever the table says (T-300: weaker is not felt).
+  static func intensity(_ pct: Int) -> Float {
+    max(0.7, min(1.0, Float(pct) / 100))
   }
 
   static func register(with registry: FlutterPluginRegistry) {
@@ -76,7 +81,7 @@ final class HapticsHost {
         CHHapticEvent(
           eventType: .hapticTransient,
           parameters: [
-            CHHapticEventParameter(parameterID: .hapticIntensity, value: Float(h.pct) / 100),
+            CHHapticEventParameter(parameterID: .hapticIntensity, value: HapticsHost.intensity(h.pct)),
             CHHapticEventParameter(
               parameterID: .hapticSharpness, value: HapticsHost.sharpness(h.strength)),
           ],
@@ -116,10 +121,10 @@ final class HapticsHost {
   private func playImpacts(_ hits: [Hit]) -> Bool {
     for h in hits {
       let style: UIImpactFeedbackGenerator.FeedbackStyle =
-        h.strength == 0 ? .light : (h.strength == 1 ? .medium : .heavy)
+        h.strength == 0 ? .medium : (h.strength == 1 ? .rigid : .heavy)
       let g = UIImpactFeedbackGenerator(style: style)
       g.prepare()
-      let intensity = CGFloat(h.pct) / 100
+      let intensity = CGFloat(HapticsHost.intensity(h.pct))
       DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(h.atMs)) {
         g.impactOccurred(intensity: intensity)
       }
