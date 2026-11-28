@@ -384,6 +384,7 @@ Added 2026-11-19 at the PO's request (SRS v1.9, D-67…D-69). Bottom-bar and dar
 | [T-300](tasks/T-300.md) | Vibrations too weak to feel (PO device report) | D-87 | Medium (C3) | Sonnet | native-platform-engineer | — | N | 85 | TODO |
 | [T-301](tasks/T-301.md) | Tapping the bird changes the tip but doesn't animate (PO device report) | D-87 | Medium (C3) | Sonnet | flutter-ui-engineer | — | U | 85 | TODO |
 | [T-302](tasks/T-302.md) | Batch 83/84 small follow-ups (FU-399/401/402/403) | follow-ups | Standard (C2) | Sonnet | flutter-ui-engineer | — | U2 | 85 | TODO |
+| [T-303](tasks/T-303.md) | Debug screen: try payday sheet, Saved toast, vibrations and bird moments | D-87 | Standard (C2) | Sonnet | flutter-ui-engineer | — | U3 | 85 | TODO |
 | [T-263](tasks/T-263.md) | Sharing an image to Zaghlol opens the scan, never "not implemented" | US-P02 | High | Sonnet | native-platform-engineer | — | — | 77 | DONE (batch 76) |
 | [T-266](tasks/T-266.md) | Link a debit card to its bank account (one balance, set by the user) | US-P05 | High | Sonnet | flutter-core-engineer | — | — | 77 | DONE (batch 77) |
 | [T-268](tasks/T-268.md) | Mascot animation matches the approved art; left hand not cut | US-P07 | Medium | Sonnet | flutter-ui-engineer | — | — | 77 | SUPERSEDED by T-274 (not merged) |
