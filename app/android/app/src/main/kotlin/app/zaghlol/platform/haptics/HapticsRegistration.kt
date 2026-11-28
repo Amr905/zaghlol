@@ -99,6 +99,19 @@ object HapticsRegistration {
                 v.vibrate(VibrationEffect.createWaveform(w.timings, w.amplitudes, -1))
                 return true
             }
+            // No amplitude control: a predefined effect for one beat (Android 10+),
+            // otherwise on/off pulses, instead of giving up and returning false.
+            val effect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                HapticsPlan.predefinedEffect(hits)
+            } else {
+                null
+            }
+            if (effect != null) {
+                v.vibrate(VibrationEffect.createPredefined(effect))
+            } else {
+                v.vibrate(VibrationEffect.createWaveform(HapticsPlan.onOffTimings(hits), -1))
+            }
+            return true
         } catch (_: RuntimeException) {
             return false
         }

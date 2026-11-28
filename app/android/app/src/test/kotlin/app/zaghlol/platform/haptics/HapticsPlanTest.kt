@@ -4,6 +4,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HapticsPlanTest {
@@ -38,7 +39,8 @@ class HapticsPlanTest {
         assertEquals(listOf(7, 1, 2), p.map { it.id })
         assertEquals(listOf(0, 140, 560), p.map { it.delayMs })
         assertEquals(1.0f, p[2].scale, 0.0001f)
-        assertEquals(0.4f, p[0].scale, 0.0001f)
+        assertEquals(0.7f, p[0].scale, 0.0001f) // 40 % is lifted to the 0.7 floor
+        assertEquals(0.7f, p[1].scale, 0.0001f)
     }
 
     @Test
@@ -49,8 +51,8 @@ class HapticsPlanTest {
                 HapticsPlan.Hit(90, HapticsPlan.CLICK, 100),
             ),
         )
-        // off 0, on 25 (ends 25), off 65 (to 90), on 25.
-        assertArrayEquals(longArrayOf(0, 25, 65, 25), w.timings)
+        // off 0, on 45 (ends 45), off 45 (to 90), on 45.
+        assertArrayEquals(longArrayOf(0, 45, 45, 45), w.timings)
         assertArrayEquals(intArrayOf(0, 204, 0, 255), w.amplitudes)
     }
 
@@ -62,6 +64,37 @@ class HapticsPlanTest {
                 HapticsPlan.Hit(10, HapticsPlan.TICK, 100),
             ),
         )
-        assertArrayEquals(longArrayOf(0, 45, 0, 15), w.timings)
+        assertArrayEquals(longArrayOf(0, 80, 0, 30), w.timings)
+    }
+
+    @Test
+    fun pulsesAre30_45_80msAndAmplitudeNeverBelow180() {
+        val w = HapticsPlan.waveform(
+            listOf(
+                HapticsPlan.Hit(0, HapticsPlan.TICK, 70),
+                HapticsPlan.Hit(200, HapticsPlan.CLICK, 80),
+                HapticsPlan.Hit(400, HapticsPlan.THUD, 100),
+                HapticsPlan.Hit(600, HapticsPlan.TICK, 1),
+            ),
+        )
+        assertEquals(listOf(30L, 45L, 80L, 30L), listOf(w.timings[1], w.timings[3], w.timings[5], w.timings[7]))
+        assertTrue(listOf(1, 3, 5, 7).all { w.amplitudes[it] >= 180 })
+    }
+
+    @Test
+    fun noAmplitudePhonesUsePredefinedEffectsForOneBeat() {
+        val one = { s: Int -> listOf(HapticsPlan.Hit(0, s, 80)) }
+        assertEquals(HapticsPlan.EFFECT_CLICK, HapticsPlan.predefinedEffect(one(HapticsPlan.TICK)))
+        assertEquals(HapticsPlan.EFFECT_HEAVY_CLICK, HapticsPlan.predefinedEffect(one(HapticsPlan.CLICK)))
+        assertEquals(HapticsPlan.EFFECT_HEAVY_CLICK, HapticsPlan.predefinedEffect(one(HapticsPlan.THUD)))
+        assertNull(HapticsPlan.predefinedEffect(one(HapticsPlan.CLICK) + one(HapticsPlan.CLICK)))
+    }
+
+    @Test
+    fun noAmplitudeMultiBeatPatternsStillGetOnOffTimings() {
+        val t = HapticsPlan.onOffTimings(
+            listOf(HapticsPlan.Hit(0, HapticsPlan.CLICK, 90), HapticsPlan.Hit(90, HapticsPlan.CLICK, 100)),
+        )
+        assertArrayEquals(longArrayOf(0, 45, 45, 45), t)
     }
 }
